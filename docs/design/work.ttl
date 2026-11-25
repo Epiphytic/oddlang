@@ -231,11 +231,11 @@ w:httpVocabulary a p:Task ; rdfs:label "Specify and load the HTTP vocabulary" ;
     p:dependsOn w:httpPlanReview ;
     p:acceptance "Load a closed stable-IRI HTTP profile with pinned ledger semantics offline and reject invalid declarations and imports." .
 w:httpBundle a p:Task ; rdfs:label "Publish portable obligations, cases and schemas" ;
-    p:milestone w:httpFoundation ; p:status p:active ; p:source w:httpPlan ;
+    p:milestone w:httpFoundation ; p:status p:done ; p:source w:httpPlan ;
     p:dependsOn w:httpVocabulary ;
     p:acceptance "Publish deterministic evidence requirements, portable cases, OpenAPI and JSON Schema and reject missing required witnesses." .
 w:httpProvider a p:Task ; rdfs:label "Prove conformance of a real Rust HTTP provider" ;
-    p:milestone w:httpNative ; p:status p:planned ; p:source w:httpPlan ;
+    p:milestone w:httpNative ; p:status p:active ; p:source w:httpPlan ;
     p:dependsOn w:httpBundle ;
     p:acceptance "Exercise wire validation, ledger errors and isolated state transitions against a live Rust service and catch a state mutation." .
 w:httpConsumers a p:Task ; rdfs:label "Verify TypeScript and independent Go consumers" ;
@@ -280,3 +280,8 @@ w:httpVocabulary p:addresses w:httpPhase1ReviewFinding .
 w:httpImplementationEvidence a p:Artifact ; rdfs:label "HTTP implementation verification and Claude phase reviews" ;
     p:location "docs/design/http-implementation-evidence.md" .
 w:httpVocabulary p:evidence w:httpImplementationEvidence .
+
+w:httpPhase2ReviewFinding a p:Finding ; rdfs:label "Add provider route, decimal and media rejection witnesses" ;
+    p:source w:httpImplementationEvidence .
+w:httpBundle p:addresses w:httpPhase2ReviewFinding .
+w:httpBundle p:evidence w:httpImplementationEvidence .

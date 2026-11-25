@@ -9,3 +9,12 @@ Claude Sonnet CLI reviewed `df5cfcf` in auto permission mode and passed both the
 - Ran the existing workspace and release baseline offline with PostgreSQL 16.6. The database integration test also passed with its connection configured after Claude's unconfigured run reached that prerequisite.
 - The scoped Claude follow-up on `7d4212a` found no blockers. Semantic validation names the first declaration and predicate in IRI order. Syntax and file-loading errors still use file order.
 - `cargo fmt --all --check`, strict Clippy and the configured full offline suite passed. The new phase covers 15 HTTP model tests alongside the 45 existing ledger tests.
+
+## Phase 2 · Published obligations, cases and schemas
+
+Claude Sonnet CLI reviewed `61d114d` in auto permission mode. It found a missing provider obligation for empty and dot-segment path IDs. The fix at `113d12e` adds all three witnesses, malformed-decimal cases, unsupported media parameters and a media-type precedence case. It also adds the checked-in release replay test and uses correctly escaped local schema references.
+
+- The v1 manifest SHA-256 is `e1cf1857145ff54c538de9f14938fae607e1e925a5220dcc9feafb92aa60266a`. There are 134 obligation rows, 117 provider cases and 193 consumer cases.
+- Nine bundle tests and 15 model tests passed offline. Tests exercise independent ledger outcomes and full post-state, witness deletion, invalid or unexecuted evidence, normalization and byte-identical publication.
+- Ajv 8.20.0 checks JSON Schema and the pinned OpenAPI metaschema with its dynamic references resolved to the single effective anchor. A separate validator checked the unchanged OpenAPI metaschema. The release gate uses atomic staged writes through the existing `tempfile` crate.
+- The scoped follow-up found no remaining blockers. The release verifier checks that authored cases refer to valid witness slots. The ledger fixtures also have independent oracle checks for their semantics. New authored scenarios still require equivalent independent review.
