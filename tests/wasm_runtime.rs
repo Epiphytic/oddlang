@@ -56,6 +56,7 @@ fn portable_cases_match_independent_ledger_oracle() {
     for world in ["ledger", "ledger-test"] {
         let corpus = read(&Path::new("contracts/wasm").join(world).join("corpus.json"));
         let mut errors = BTreeSet::new();
+        let mut exact_headroom = false;
         for case in corpus.as_array().unwrap() {
             let mut state = rows(&case["imports"][0]["returns"]);
             let mut pending = BTreeSet::new();
@@ -72,7 +73,11 @@ fn portable_cases_match_independent_ledger_oracle() {
                             text(&args[1]),
                             text(&args[2]).parse().unwrap(),
                         ) {
-                            Ok(()) => json!({"ok":null}),
+                            Ok(()) => {
+                                exact_headroom |=
+                                    args[2] == "1" && state[text(&args[1])].balance == i64::MAX;
+                                json!({"ok":null})
+                            }
                             Err(iri) => {
                                 let name = iri.strip_prefix("urn:oddlang:ledger:error:").unwrap();
                                 let mut tag = String::new();
@@ -108,6 +113,10 @@ fn portable_cases_match_independent_ledger_oracle() {
             assert!(pending.is_empty(), "unobserved accounts {pending:?}");
         }
         assert_eq!(errors.len(), 6);
+        assert!(
+            exact_headroom,
+            "{world} must credit a destination from MAX-1 to MAX"
+        );
     }
 }
 
@@ -276,7 +285,7 @@ fn exercise_released_components_and_reject_counterexamples() {
         &temp.path().join("wrong.json"),
     ));
 
-    for guest in ["trap", "double-import"] {
+    for guest in ["trap", "double-import", "max-exclusive"] {
         let claim = rt.claim("ledger", guest, &roles);
         let report = rt.reports.join(format!("{guest}.json"));
         // Failed runs retain the actual observations for diagnosis.
@@ -300,6 +309,15 @@ fn exercise_released_components_and_reject_counterexamples() {
                         && call.get("trap").is_some()
                         && call.get("result").is_none())
             );
+        } else if guest == "max-exclusive" {
+            let boundary = cases
+                .iter()
+                .find(|case| case["caseId"] == "exact-destination-headroom")
+                .unwrap();
+            assert_eq!(
+                boundary["calls"][0],
+                json!({"function":"transfer","arguments":["a","b","1"],"result":{"err":"destination-overflow"}})
+            );
         } else {
             assert!(cases.iter().any(|case| {
                 case["imports"]
@@ -311,7 +329,16 @@ fn exercise_released_components_and_reject_counterexamples() {
                     == 2
             }));
         }
-        failure(rt.verify("ledger", &claim, &report));
+        let verification = rt.verify("ledger", &claim, &report);
+        if guest == "max-exclusive" {
+            assert!(
+                String::from_utf8_lossy(&verification.stderr)
+                    .contains("exact-destination-headroom"),
+                "{}",
+                String::from_utf8_lossy(&verification.stderr)
+            );
+        }
+        failure(verification);
     }
     let probe_claim = rt.claim("ledger-probe", "probe", &roles);
     let probe_report = rt.reports.join("probe.json");
@@ -319,6 +346,7 @@ fn exercise_released_components_and_reject_counterexamples() {
     success(rt.verify("ledger-probe", &probe_claim, &probe_report));
     reject_invalid_imports(&rt, temp.path(), &claim);
     matrix(&rt);
+    variant_layout_uses_wit(&rt, temp.path());
 }
 
 /// Check the actual observations independently of the CLI evidence verifier.
@@ -467,4 +495,68 @@ fn matrix(rt: &Runtime) {
             );
         }
     }
+}
+
+/// A consumer can publish the same ABI under its own declaration IRIs.
+fn variant_layout_uses_wit(rt: &Runtime, temp: &Path) {
+    let source = temp.join("independent-source");
+    fs::create_dir(&source).unwrap();
+    let swapped = rt.bundle("echo-tags");
+    for (input, output) in [
+        ("model.ttl", "model.ttl"),
+        ("cases.json", "corpus.json"),
+        ("dependencies.json", "dependencies.json"),
+    ] {
+        let data = fs::read_to_string(swapped.join(input))
+            .unwrap()
+            .replace("urn:oddlang:echo:", "urn:independent:echo:");
+        fs::write(source.join(output), data).unwrap();
+    }
+    let independent = temp.join("independent");
+    success(rt.command(
+        "publish",
+        &[
+            &source,
+            Path::new("contracts/wasm/empty.lock.json"),
+            Path::new("contracts/cache"),
+            &independent,
+        ],
+    ));
+    let lock = temp.join("independent.lock");
+    fs::copy(independent.join("workspace.lock.json"), &lock).unwrap();
+    let guest_claim = rt.claim("echo-tags", "echo-tags", &["wasm.exporter"]);
+    let claim = temp.join("independent.claim");
+    let mut pinned = read(&guest_claim);
+    pinned["releaseSha256"] = json!(digest(&independent.join("manifest.json")));
+    write(&claim, &pinned);
+    let observed = temp.join("independent.observations");
+    success(rt.command(
+        "run",
+        &[
+            &independent,
+            &lock,
+            &claim,
+            &rt.component("echo-tags"),
+            &observed,
+        ],
+    ));
+    success(rt.command("verify-evidence", &[&independent, &lock, &claim, &observed]));
+
+    let original = rt.bundle("echo");
+    let original_claim = rt.claim("echo", "echo", &["wasm.exporter"]);
+    let report = temp.join("independent.matrix");
+    success(rt.command(
+        "matrix",
+        &[
+            &independent,
+            &lock,
+            &original,
+            &rt.lock("echo"),
+            &original_claim,
+            &rt.component("echo"),
+            Path::new("new-host-old-guest"),
+            &report,
+        ],
+    ));
+    assert_eq!(read(&report)["verdict"], "type-failure");
 }

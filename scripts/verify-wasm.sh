@@ -69,5 +69,22 @@ report = {name: {"first": digest, "second": second[name], "identical": digest ==
 (root / "reproducibility.json").write_text(json.dumps(report, indent=2))
 if any(not row["identical"] for name, row in report.items() if name.endswith(".rs")):
     sys.exit("generated Rust differs between clean builds")
+hosts = {}
+for receipt in sorted((root / 'hosts').glob('*.json')):
+    data = json.loads(receipt.read_text())
+    hosts[receipt.stem] = {'caseCount': len(data['cases']), **{
+        key: data[key] for key in ('host', 'version', 'componentSha256', 'releaseSha256', 'jcoVersion')
+    }}
+summary = {'hosts': hosts, 'builds': {name: row for name, row in report.items() if name.endswith('.wasm')}}
+def observations(guest):
+    return json.loads((root / 'first' / 'wasmtime-reports' / (guest + '.json')).read_text())['cases']
+summary['trap'] = next({'case': c['caseId'], 'call': call}
+                       for c in observations('trap') for call in c['calls'] if 'trap' in call)
+repeated = observations('double-import')[0]
+summary['doubleImport'] = {'case': repeated['caseId'], 'observedFunctions': [i['function'] for i in repeated['imports']]}
+boundary = next(c for c in observations('max-exclusive') if c['caseId'] == 'exact-destination-headroom')
+summary['upperEndpoint'] = {'case': boundary['caseId'], 'call': boundary['calls'][0]}
+(root / 'runtime-observations.json').write_text(json.dumps(summary, indent=2) + '\n')
+
 PY
 echo "Verified Wasmtime, Node and Chromium evidence in $root"

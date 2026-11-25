@@ -362,5 +362,23 @@
       {"function": "lookup", "arguments": ["c"], "expected": {"some": {"id": "c", "owner": "", "balance": "9007199254740993"}}},
       {"function": "lookup", "arguments": ["missing"], "expected": {"none": true}}
     ]
+  },
+  {
+    "caseId": "exact-destination-headroom",
+    "covers": [{"declaration": "urn:oddlang:ledger:wasm:transfer", "role": "wasm.exporter"}],
+    "imports": [
+      {"function": "initial-state", "arguments": [], "returns": [
+        {"id": "a", "owner": "Ada", "balance": "9"},
+        {"id": "b", "owner": "李", "balance": "9223372036854775806"},
+        {"id": "c", "owner": "", "balance": "42"}
+      ]}
+    ],
+    "calls": [
+      {"function": "transfer", "arguments": ["a", "b", "1"], "expected": {"ok": null}},
+      {"function": "lookup", "arguments": ["a"], "expected": {"some": {"id": "a", "owner": "Ada", "balance": "8"}}},
+      {"function": "lookup", "arguments": ["b"], "expected": {"some": {"id": "b", "owner": "李", "balance": "9223372036854775807"}}},
+      {"function": "lookup", "arguments": ["c"], "expected": {"some": {"id": "c", "owner": "", "balance": "42"}}},
+      {"function": "lookup", "arguments": ["missing"], "expected": {"none": true}}
+    ]
   }
 ]

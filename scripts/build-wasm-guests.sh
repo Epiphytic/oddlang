@@ -52,7 +52,7 @@ for implementation in manual generated; do
     build "$src/ledger" "$implementation-ledger-test" "${features:+$features,}instrumented" \
         "$bundles/ledger-test/wit" ledger-test
 done
-for mutation in trap double-import probe; do
+for mutation in trap double-import max-exclusive probe; do
     build "$src/ledger" "$mutation" "$mutation" "$bundles/ledger/wit" ledger
 done
 for name in echo echo-rename echo-tags echo-import; do

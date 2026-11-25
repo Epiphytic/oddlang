@@ -39,13 +39,9 @@ check_hybrid_tools "$hybrid"
 scratch=$(mktemp -d target/http-verify.XXXXXX)
 trap 'rm -f "$scratch/start" "$scratch/go.lock.json"; rmdir "$scratch"' EXIT
 touch "$scratch/start"
-# Keep the HTTP and ledger gate independently runnable with its own setup.
-cargo test --locked --offline --lib --bins --examples \
-    --test adoption --test contract_release --test database --test evolution \
-    --test http_bundle --test http_consumers --test http_evolution --test http_hybrid \
-    --test http_model --test http_provider --test http_shapes --test impact --test model \
-    --test model_targets --test monorepo --test oracle --test transfer_targets
-cargo test --locked --offline --doc
+# The real component execution test has a separate toolchain and offline gate.
+# Include all other tests automatically, including newly added test targets.
+cargo test --locked --offline -- --skip exercise_released_components_and_reject_counterexamples
 
 bundle_root=contracts/cache/http/485a90a817494ba1aa137cb9777c3d07c338735720df475c1c113b8fe0217dc4
 receipts=target/http-conformance

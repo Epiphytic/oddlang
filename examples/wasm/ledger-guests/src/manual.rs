@@ -46,6 +46,10 @@ impl State {
             .balance
             .checked_add(amount)
             .ok_or(TransferError::DestinationOverflow)?;
+        #[cfg(feature = "max-exclusive")]
+        if credit == i64::MAX {
+            return Err(TransferError::DestinationOverflow);
+        }
         self.0.get_mut(source).unwrap().balance -= amount;
         self.0.get_mut(destination).unwrap().balance = credit;
         Ok(())

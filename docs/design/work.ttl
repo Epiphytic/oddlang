@@ -366,3 +366,5 @@ w:witPublication p:addresses w:witReleaseReview .
 w:componentRuntimeEvidence a p:Artifact ; rdfs:label "Ledger component execution and host evidence" ;
     p:location "docs/design/component-execution-evidence.md" .
 w:componentExecution p:evidence w:componentRuntimeEvidence .
+w:componentUpperEndpoint a p:Finding ; rdfs:label "Detect a guest that rejects a credit exactly at the maximum signed balance" ; p:source w:componentRuntimeEvidence .
+w:componentExecution p:addresses w:componentUpperEndpoint .

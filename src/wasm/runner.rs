@@ -10,7 +10,7 @@ use std::{
     path::{Path, PathBuf},
     process::Command,
 };
-use wit_parser::{Resolve, WorldItem};
+use wit_parser::{Function, Resolve, Type, TypeDefKind, WorldItem};
 
 type Res<T> = Result<T, String>;
 fn err(e: impl std::fmt::Display) -> String {
@@ -181,6 +181,33 @@ struct Surface {
     interfaces: BTreeSet<String>,
     imports: BTreeSet<String>,
     exports: BTreeSet<String>,
+    #[serde(rename = "echoLayouts")]
+    echo_layouts: BTreeMap<String, Vec<String>>,
+}
+
+// World-level uses frequently introduce aliases around the interface record.
+fn definition(resolve: &Resolve, mut ty: Type) -> Option<&TypeDefKind> {
+    while let Type::Id(id) = ty {
+        match &resolve.types[id].kind {
+            TypeDefKind::Type(alias) => ty = *alias,
+            kind => return Some(kind),
+        }
+    }
+    None
+}
+
+fn echo_layout(resolve: &Resolve, function: &Function) -> Option<Vec<String>> {
+    let [input] = function.params.as_slice() else {
+        return None;
+    };
+    let TypeDefKind::Record(message) = definition(resolve, input.ty)? else {
+        return None;
+    };
+    let choice = message.fields.iter().find(|field| field.name == "choice")?;
+    let TypeDefKind::Variant(tags) = definition(resolve, choice.ty)? else {
+        return None;
+    };
+    Some(tags.cases.iter().map(|case| case.name.clone()).collect())
 }
 fn surface(path: &Path, world: Option<&str>) -> Res<Surface> {
     let mut resolve = Resolve::default();
@@ -201,9 +228,16 @@ fn surface(path: &Path, world: Option<&str>) -> Res<Surface> {
             WorldItem::Type { .. } => {}
         }
     }
-    result
-        .exports
-        .extend(world.exports.keys().map(|k| resolve.name_world_key(k)));
+    for (key, item) in &world.exports {
+        let name = resolve.name_world_key(key);
+        if matches!(name.as_str(), "echo" | "mirror")
+            && let WorldItem::Function(function) = item
+            && let Some(tags) = echo_layout(&resolve, function)
+        {
+            result.echo_layouts.insert(name.clone(), tags);
+        }
+        result.exports.insert(name);
+    }
     Ok(result)
 }
 
@@ -289,16 +323,6 @@ impl Execution {
         let mut request =
             serde_json::to_value(stage_wit(&self.temp.path().join("host-wit"), release)?)
                 .map_err(err)?;
-        // This matrix deliberately changes the tag at this stable declaration.
-        request["numberFirst"] = json!(
-            release
-                .bundle
-                .world
-                .nodes
-                .get("urn:oddlang:echo:number")
-                .and_then(|node| node.props.get("ordinal"))
-                .is_some_and(|ordinal| ordinal == "0")
-        );
         let inputs = cases
             .iter()
             .map(|case| {

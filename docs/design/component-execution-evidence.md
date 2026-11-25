@@ -24,4 +24,10 @@ In the final row the new guest requires a host function absent from the old host
 
 The trapping mutant reached a Wasm `unreachable` on the transfer in `ordered-guards-and-wide-transfer`. The duplicate-import mutant called `initial-state` twice in all three production cases. Both failed evidence verification. A handwritten and a generated production component passed those same cases. The independent ledger oracle also checked the expected state and error for every published ledger step.
 
-The [qualification observations](../../examples/wasm/evidence/runtime-observations.json) record eight JavaScript host receipts, digests from both builds of all eleven components and the mutant traces. All eleven component digests were reproducible on this host. The trapping guest executed an unreachable instruction on the overlapping guard case. The double-call guest requested the snapshot twice in each production scenario.
+The [qualification observations](../../examples/wasm/evidence/runtime-observations.json) record eight JavaScript host receipts, digests from both builds of all twelve components and the mutant traces. All twelve component digests were reproducible on this host. The trapping guest executed an unreachable instruction on the overlapping guard case. The double-call guest requested the snapshot twice in each production scenario.
+
+## Claude review
+
+Claude's auto-mode review of `9f37255` reran the offline component gate and all 15 publication tests. It introduced a mutant that rejected a credit taking a destination balance to exactly the maximum signed 64-bit value. The initial corpus accepted that mutant. The reviewer requested an explicit successful transfer at the upper endpoint. The existing HTTP regression suite ran independently with PostgreSQL 16.6 and passed its 85 tests and eight evidence checks.
+
+The revised corpus seeds a destination at `i64::MAX - 1` and credits one unit. Both reference guests succeed and subsequent lookups verify the balances. Replaying Claude's original mutant against that release produced `destination-overflow` on the first call of `exact-destination-headroom`. The qualification script also builds a permanent version of the mutant and verifies the counterexample.

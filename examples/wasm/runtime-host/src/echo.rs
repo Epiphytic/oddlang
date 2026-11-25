@@ -66,13 +66,15 @@ impl Binding {
         store: &mut Store<State>,
         instance: &Instance,
         name: &str,
-        number_first: bool,
+        tags: &[String],
     ) -> Result<Self> {
-        Ok(if number_first {
-            Self::Reordered(instance.get_typed_func(store, name)?)
+        if tags == ["empty", "number", "enabled"] {
+            Ok(Self::Original(instance.get_typed_func(store, name)?))
+        } else if tags == ["number", "empty", "enabled"] {
+            Ok(Self::Reordered(instance.get_typed_func(store, name)?))
         } else {
-            Self::Original(instance.get_typed_func(store, name)?)
-        })
+            bail!("unsupported echo variant order {tags:?}")
+        }
     }
     pub fn call(&self, store: &mut Store<State>, args: &[Value]) -> Result<Value> {
         let [arg] = args else {

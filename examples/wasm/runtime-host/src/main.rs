@@ -13,8 +13,8 @@ struct Request {
     interfaces: Vec<String>,
     imports: Vec<String>,
     exports: Vec<String>,
-    #[serde(rename = "numberFirst")]
-    number_first: bool,
+    #[serde(rename = "echoLayouts")]
+    echo_layouts: BTreeMap<String, Vec<String>>,
     cases: Vec<Case>,
 }
 #[derive(Deserialize)]
@@ -114,8 +114,16 @@ fn main() -> Result<()> {
         for name in &request.exports {
             let binding = match name.as_str() {
                 "echo" | "mirror" => Binding::Echo(
-                    echo::Binding::bind(&mut store, &instance, name, request.number_first)
-                        .context("type-failure")?,
+                    echo::Binding::bind(
+                        &mut store,
+                        &instance,
+                        name,
+                        request
+                            .echo_layouts
+                            .get(name)
+                            .context("unsupported echo parameter shape")?,
+                    )
+                    .context("type-failure")?,
                 ),
                 _ => Binding::Ledger(
                     ledger::Binding::bind(&mut store, &instance, name).context("type-failure")?,

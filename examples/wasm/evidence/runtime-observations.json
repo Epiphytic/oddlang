@@ -1,74 +1,74 @@
 {
   "hosts": {
     "generated-ledger-chromium": {
-      "caseCount": 3,
+      "caseCount": 4,
       "host": "chromium",
       "version": "145.0.7632.6",
       "componentSha256": "045ac8b323be378729eb85200b519a4a0b1eadb072d6748f7fd03832e1a4bfe2",
-      "releaseSha256": "772020eb28cd08f4a2dc35fc6c96852f235e4eb0fef5d8679cefdc9d8b308bb9",
+      "releaseSha256": "0f904daaf6c497b172eafee950cc08faf33cc6316cc872400bac85c8fa5a24b5",
       "jcoVersion": "1.42.0"
     },
     "generated-ledger-node": {
-      "caseCount": 3,
+      "caseCount": 4,
       "host": "node",
       "version": "v22.22.2",
       "componentSha256": "045ac8b323be378729eb85200b519a4a0b1eadb072d6748f7fd03832e1a4bfe2",
-      "releaseSha256": "772020eb28cd08f4a2dc35fc6c96852f235e4eb0fef5d8679cefdc9d8b308bb9",
+      "releaseSha256": "0f904daaf6c497b172eafee950cc08faf33cc6316cc872400bac85c8fa5a24b5",
       "jcoVersion": "1.42.0"
     },
     "generated-ledger-test-chromium": {
-      "caseCount": 4,
+      "caseCount": 5,
       "host": "chromium",
       "version": "145.0.7632.6",
       "componentSha256": "2511bfe18ed5462a20c5217521d2976c577744e145fc07c0ccbd1c2f29a1d55a",
-      "releaseSha256": "d765fdb57069a35b459b9af6d92432d56dd98b160a2716ec7fc55b209af35a3b",
+      "releaseSha256": "cf58efbe237149fe2b901628e973ebd9dea0b8771d39a7eaa338a1c105c5818d",
       "jcoVersion": "1.42.0"
     },
     "generated-ledger-test-node": {
-      "caseCount": 4,
+      "caseCount": 5,
       "host": "node",
       "version": "v22.22.2",
       "componentSha256": "2511bfe18ed5462a20c5217521d2976c577744e145fc07c0ccbd1c2f29a1d55a",
-      "releaseSha256": "d765fdb57069a35b459b9af6d92432d56dd98b160a2716ec7fc55b209af35a3b",
+      "releaseSha256": "cf58efbe237149fe2b901628e973ebd9dea0b8771d39a7eaa338a1c105c5818d",
       "jcoVersion": "1.42.0"
     },
     "manual-ledger-chromium": {
-      "caseCount": 3,
+      "caseCount": 4,
       "host": "chromium",
       "version": "145.0.7632.6",
-      "componentSha256": "ad75a72e2fafdef3713d386fc082d4bee49826e994c3b1d86b67f541a06e5736",
-      "releaseSha256": "772020eb28cd08f4a2dc35fc6c96852f235e4eb0fef5d8679cefdc9d8b308bb9",
+      "componentSha256": "5ccfc0c61fb9bb11fd8d9f3d8f4e1271c8a40f359c66509587f03f8138f3c38d",
+      "releaseSha256": "0f904daaf6c497b172eafee950cc08faf33cc6316cc872400bac85c8fa5a24b5",
       "jcoVersion": "1.42.0"
     },
     "manual-ledger-node": {
-      "caseCount": 3,
+      "caseCount": 4,
       "host": "node",
       "version": "v22.22.2",
-      "componentSha256": "ad75a72e2fafdef3713d386fc082d4bee49826e994c3b1d86b67f541a06e5736",
-      "releaseSha256": "772020eb28cd08f4a2dc35fc6c96852f235e4eb0fef5d8679cefdc9d8b308bb9",
+      "componentSha256": "5ccfc0c61fb9bb11fd8d9f3d8f4e1271c8a40f359c66509587f03f8138f3c38d",
+      "releaseSha256": "0f904daaf6c497b172eafee950cc08faf33cc6316cc872400bac85c8fa5a24b5",
       "jcoVersion": "1.42.0"
     },
     "manual-ledger-test-chromium": {
-      "caseCount": 4,
+      "caseCount": 5,
       "host": "chromium",
       "version": "145.0.7632.6",
-      "componentSha256": "94b3ad419c9e8a31b0c1c0abab9e82755243b0938916d5271b011e77de87e4fc",
-      "releaseSha256": "d765fdb57069a35b459b9af6d92432d56dd98b160a2716ec7fc55b209af35a3b",
+      "componentSha256": "33803972ec143be3bf2727378318df927c9d786da7cb6b6f48775b21761bb398",
+      "releaseSha256": "cf58efbe237149fe2b901628e973ebd9dea0b8771d39a7eaa338a1c105c5818d",
       "jcoVersion": "1.42.0"
     },
     "manual-ledger-test-node": {
-      "caseCount": 4,
+      "caseCount": 5,
       "host": "node",
       "version": "v22.22.2",
-      "componentSha256": "94b3ad419c9e8a31b0c1c0abab9e82755243b0938916d5271b011e77de87e4fc",
-      "releaseSha256": "d765fdb57069a35b459b9af6d92432d56dd98b160a2716ec7fc55b209af35a3b",
+      "componentSha256": "33803972ec143be3bf2727378318df927c9d786da7cb6b6f48775b21761bb398",
+      "releaseSha256": "cf58efbe237149fe2b901628e973ebd9dea0b8771d39a7eaa338a1c105c5818d",
       "jcoVersion": "1.42.0"
     }
   },
   "builds": {
     "double-import.wasm": {
-      "first": "502391bd7f69d57dea95f85a7a5ae0c6708a4ba909d4f8afb0f712ea68038b85",
-      "second": "502391bd7f69d57dea95f85a7a5ae0c6708a4ba909d4f8afb0f712ea68038b85",
+      "first": "5685df1daa741076baf249c3b86386bd7a6a05984feb21a8b6de14a97b3a3035",
+      "second": "5685df1daa741076baf249c3b86386bd7a6a05984feb21a8b6de14a97b3a3035",
       "identical": true
     },
     "echo-import.wasm": {
@@ -102,13 +102,18 @@
       "identical": true
     },
     "manual-ledger-test.wasm": {
-      "first": "94b3ad419c9e8a31b0c1c0abab9e82755243b0938916d5271b011e77de87e4fc",
-      "second": "94b3ad419c9e8a31b0c1c0abab9e82755243b0938916d5271b011e77de87e4fc",
+      "first": "33803972ec143be3bf2727378318df927c9d786da7cb6b6f48775b21761bb398",
+      "second": "33803972ec143be3bf2727378318df927c9d786da7cb6b6f48775b21761bb398",
       "identical": true
     },
     "manual-ledger.wasm": {
-      "first": "ad75a72e2fafdef3713d386fc082d4bee49826e994c3b1d86b67f541a06e5736",
-      "second": "ad75a72e2fafdef3713d386fc082d4bee49826e994c3b1d86b67f541a06e5736",
+      "first": "5ccfc0c61fb9bb11fd8d9f3d8f4e1271c8a40f359c66509587f03f8138f3c38d",
+      "second": "5ccfc0c61fb9bb11fd8d9f3d8f4e1271c8a40f359c66509587f03f8138f3c38d",
+      "identical": true
+    },
+    "max-exclusive.wasm": {
+      "first": "a425863918eda82e615fa86e8dfc6d6a7c19036b7ddecd68ccceb94c702d7c99",
+      "second": "a425863918eda82e615fa86e8dfc6d6a7c19036b7ddecd68ccceb94c702d7c99",
       "identical": true
     },
     "probe.wasm": {
@@ -117,8 +122,8 @@
       "identical": true
     },
     "trap.wasm": {
-      "first": "0fbad2bf6401b16727ecc6f6537320c42e4096f961ffbfb3cdb322f261d093cb",
-      "second": "0fbad2bf6401b16727ecc6f6537320c42e4096f961ffbfb3cdb322f261d093cb",
+      "first": "377cdbdd80c0b49a98a990787f508fe6e7714df0500b62558710f44bcab4de91",
+      "second": "377cdbdd80c0b49a98a990787f508fe6e7714df0500b62558710f44bcab4de91",
       "identical": true
     }
   },
@@ -140,5 +145,19 @@
       "initial-state",
       "initial-state"
     ]
+  },
+  "upperEndpoint": {
+    "case": "exact-destination-headroom",
+    "call": {
+      "arguments": [
+        "a",
+        "b",
+        "1"
+      ],
+      "function": "transfer",
+      "result": {
+        "err": "destination-overflow"
+      }
+    }
   }
 }
