@@ -239,11 +239,11 @@ w:httpProvider a p:Task ; rdfs:label "Prove conformance of a real Rust HTTP prov
     p:dependsOn w:httpBundle ;
     p:acceptance "Exercise wire validation, ledger errors and isolated state transitions against a live Rust service and catch a state mutation." .
 w:httpConsumers a p:Task ; rdfs:label "Verify TypeScript and independent Go consumers" ;
-    p:milestone w:httpNative ; p:status p:active ; p:source w:httpPlan ;
+    p:milestone w:httpNative ; p:status p:done ; p:source w:httpPlan ;
     p:dependsOn w:httpProvider ;
     p:acceptance "Run native client checks against a scripted peer and detect mutated codecs using shared cases and evidence." .
 w:httpEvolution a p:Task ; rdfs:label "Expand the JSON profile and verify release evolution" ;
-    p:milestone w:httpAdoption ; p:status p:planned ; p:source w:httpPlan ;
+    p:milestone w:httpAdoption ; p:status p:active ; p:source w:httpPlan ;
     p:dependsOn w:httpConsumers ;
     p:acceptance "Verify expanded codecs, both directions of version skew, reproducible pins, and impact tracking by declaration IRI." .
 w:httpHybrid a p:Task ; rdfs:label "Exercise Node SSR and browser React against Rust" ;
@@ -290,3 +290,8 @@ w:httpPhase3ReviewFinding a p:Finding ; rdfs:label "Bound the example provider r
     p:source w:httpImplementationEvidence .
 w:httpProvider p:addresses w:httpPhase3ReviewFinding .
 w:httpProvider p:evidence w:httpImplementationEvidence .
+
+w:httpPhase4ReviewFinding a p:Finding ; rdfs:label "Verify Fetch in Chromium and align native URL, peer and media handling" ;
+    p:source w:httpImplementationEvidence .
+w:httpConsumers p:addresses w:httpPhase4ReviewFinding .
+w:httpConsumers p:evidence w:httpImplementationEvidence .

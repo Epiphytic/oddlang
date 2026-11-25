@@ -28,3 +28,12 @@ Claude Sonnet CLI reviewed `3ca48e3` in auto permission mode, passed the spec an
 - The stock provider passed all 117 released provider cases over 378 HTTP exchanges, with a fresh process and fixture state per case.
 - Three test-only providers failed the expected observations for write-on-error, changed guard order and noncanonical amount handling. The stock provider evidence passed standalone CLI verification.
 - The scoped Claude follow-up on `a1fd6fd` approved the body cap. The live regression failed before the fix with 200 and passed afterward with 400, alongside all provider checks.
+
+## Phase 4 · TypeScript and Go client adoption
+
+Claude Sonnet CLI reviewed `721aa35` in auto permission mode. It found a detached browser Fetch receiver, inconsistent base URL and request-target handling, and missing peer bounds. The patch at `d60e179` fixes those behaviours and tests actual Chromium and the matching Go prefix resolution. It also aligns the provider and grader with the clients' handling of quoted UTF-8 charset values.
+
+- Each client passed all 193 pinned consumer cases over independently scripted native HTTP peers. The shared verifier accepted each report. Each client also retrieved the exact balance 9007199254740993 from the live Rust provider.
+- Each encoder mutant failed exactly two cases. Each decoder mutant failed exactly 28 cases. Unaffected observations still passed. The native runners rejected altered payload and manifest bytes.
+- The standalone Go fixture ran from a temporary directory with module downloads disabled. The TypeScript client imports no Node APIs and uses a bounded Node test runner and a real Chromium test. The provider, consumer and bundle suites all passed after review fixes.
+- The scoped Claude follow-up approved `d60e179` with no remaining blockers.
