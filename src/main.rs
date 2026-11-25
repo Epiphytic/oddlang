@@ -6,7 +6,13 @@ fn run(args: &[String]) -> Result<(), String> {
             load_model(dir)?;
             Ok(())
         }
-        _ => Err("usage: oddlang check PROJECT".into()),
+        [cmd, dir, iri] if cmd == "impact" => {
+            for result in oddlang::impact::impact(&load_model(dir)?, iri)? {
+                println!("{result}")
+            }
+            Ok(())
+        }
+        _ => Err("usage: oddlang check PROJECT | impact PROJECT IRI".into()),
     }
 }
 fn main() -> ExitCode {
