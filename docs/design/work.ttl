@@ -173,3 +173,37 @@ w:milestone2Evidence a p:Artifact ; p:location "docs/design/implementation-evide
 w:milestone3Evidence a p:Artifact ; p:location "docs/design/implementation-evidence.md" .
 
 w:interoperabilityEvidence a p:Artifact ; p:location "docs/design/implementation-evidence.md" .
+
+w:conformanceDiscussion a p:Artifact ;
+    rdfs:label "Project author direction on built-in conformance, HTTP first and continuous ontology maintenance" .
+
+w:portableConformance a p:Goal ;
+    rdfs:label "Make deterministic conformance testing intrinsic to each published contract" ;
+    p:source w:conformanceDiscussion .
+
+w:roleConformance a p:Decision ;
+    rdfs:label "Derive conformance obligations from normative declarations and declared implementation roles" ;
+    p:reason "The pinned contract and conformance rules determine each role's obligations. Publish language-neutral cases with expectations grounded in the contract or an independent oracle. When a case cannot be derived, use an author-supplied portable scenario or report the obligation as uncovered. Report results by release, stable declaration IRI and role so changes can trigger the affected checks." ;
+    p:source w:conformanceDiscussion .
+
+w:httpFirst a p:Decision ;
+    rdfs:label "Exercise the shared conformance model over HTTP first" ;
+    p:reason "HTTP is the first practical binding for native services and web clients. Further protocol bindings use the same obligation model with their own ways to exercise and observe cases." ;
+    p:source w:conformanceDiscussion .
+
+w:libraryHints a p:Decision ;
+    rdfs:label "Keep language, framework and library hints in project-owned target overlays" ;
+    p:reason "Target overlays guide native adapter generation and authoring. Independent Rust, TypeScript and Go implementations can use their own libraries and test runners against the same contract cases and expected outcomes for the roles they declare." ;
+    p:source w:conformanceDiscussion .
+
+w:continuousOntologyMaintenance a p:Decision ;
+    rdfs:label "Require LLMs and other coding agents to update the work ontology with every project change" ;
+    p:reason "Recording features, fixes, refactors, documentation, tests, configuration and status changes alongside their work keeps decisions, dependencies and evidence current." ;
+    p:source w:conformanceDiscussion .
+
+w:recordConformanceDesign a p:Task ;
+    rdfs:label "Record conformance-first design and the agent ontology maintenance requirement" ;
+    p:milestone w:design ; p:advances w:portableConformance ; p:status p:done ;
+    p:source w:conformanceDiscussion ; p:dependsOn w:interopDesign ;
+    p:acceptance "AGENTS.md and the work graph record deterministic role-based conformance, HTTP as the first protocol and the requirement to update the work ontology with every project change." ;
+    p:evidence w:guide, w:workGraph .

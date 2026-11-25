@@ -8,7 +8,15 @@ Portability means sharing versioned data and API contracts among native backends
 
 - Read the [ledger design](docs/superpowers/specs/2026-11-25-ledger.md) for the current semantics, scope and success criteria. The original chat is available in the author's local PDF export named in the work graph. The design captures the agreed prototype for anyone working from a fresh clone.
 - Follow the [implementation plan](docs/superpowers/plans/2026-11-25-ledger.md) for task details, fixtures and verification commands.
-- Consult the [process vocabulary](docs/design/process.ttl) and [work graph](docs/design/work.ttl) for decisions, review findings, dependencies, progress and evidence. These describe work on Oddlang. The ledger's executable vocabulary has its own planned specification.
+- Consult the [process vocabulary](docs/design/process.ttl) and [work graph](docs/design/work.ttl) for decisions, review findings, dependencies, progress and evidence. These describe work on Oddlang. The [ledger core contract](docs/language/ledger-core.md) defines the prototype's executable vocabulary.
+
+## Build conformance into every contract
+
+Every normative ontology declaration creates a conformance obligation for each implementation role it applies to. When an application declares support for a feature and role, derive its required checks deterministically from the pinned contract and its conformance rules. Derive cases such as numeric boundaries, omitted required fields, named errors and observable state changes. When a check cannot be derived, require an author-supplied portable scenario or report the obligation as uncovered.
+
+Publish language-neutral cases and expected outcomes with the contract. Derive expectations from specified semantics or an independent oracle so implementations that share a generator can still expose the same wrong result. Let each consumer run the cases with native tools, including languages for which Oddlang has no generator. Report evidence and gaps by contract release, stable declaration IRI and role so impact queries can identify which checks to rerun.
+
+Start with HTTP and use the same obligation model for additional protocols. Protocol bindings specify how to exercise and observe a case. Project-owned target overlays can select libraries or guide native adapter authoring. Verify each adapter against the shared expected outcomes. A Rust backend and TypeScript and Go clients can each prove conformance for the roles they declare.
 
 ## What the prototype must demonstrate
 
@@ -19,6 +27,8 @@ Portability means sharing versioned data and API contracts among native backends
 Use Rust for the compiler, CLI, interpreter, generated execution target, tests and demo. Preserve deterministic bytes and diagnostics across equivalent graphs. Follow the plan's locked offline build and PostgreSQL setup when implementing the ledger.
 
 ## Maintain the design record
+
+**Required for LLMs and other coding agents.** Whenever you add a feature or make any project change, update the Oddlang work ontology in the same change. This includes fixes, refactors, documentation, tests, configuration and changes to plans or status. Update the relevant facts in `docs/design/work.ttl` before handing off the work. Reuse existing records where they fit and link verification evidence for completed work. Update `docs/design/process.ttl` when the shared vocabulary itself changes.
 
 Use stable identifiers under `urn:oddlang:work:`. Keep the reusable classes and predicates in process.ttl and project facts in work.ttl. The plan owns detailed acceptance steps. The graph owns task relationships and status. Git preserves earlier revisions.
 
