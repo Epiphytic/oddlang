@@ -207,3 +207,68 @@ w:recordConformanceDesign a p:Task ;
     p:source w:conformanceDiscussion ; p:dependsOn w:interopDesign ;
     p:acceptance "AGENTS.md and the work graph record deterministic role-based conformance, HTTP as the first protocol and the requirement to update the work ontology with every project change." ;
     p:evidence w:guide, w:workGraph .
+
+w:httpSpec a p:Artifact ; rdfs:label "Portable HTTP conformance design" ;
+    p:location "docs/superpowers/specs/2026-11-25-http-conformance.md" .
+w:httpPlan a p:Artifact ; rdfs:label "Portable HTTP conformance implementation plan" ;
+    p:location "docs/superpowers/plans/2026-11-25-http-conformance.md" .
+
+w:httpFoundation a p:Milestone ; rdfs:label "Publish portable HTTP contracts and conformance cases" ;
+    p:advances w:portableConformance .
+w:httpNative a p:Milestone ; rdfs:label "Verify native HTTP providers and consumers" ;
+    p:advances w:portableConformance .
+w:httpAdoption a p:Milestone ; rdfs:label "Exercise mixed-stack HTTP adoption and pin changes" ;
+    p:advances w:portableConformance, w:interop .
+
+w:httpPlanReview a p:Task ; rdfs:label "Write and independently review the HTTP implementation plan" ;
+    p:milestone w:httpFoundation ; p:status p:done ; p:source w:conformanceDiscussion ;
+    p:evidence w:httpPlan, w:httpSpec, w:httpClaudeReview ;
+    p:dependsOn w:recordConformanceDesign, w:externalClient ;
+    p:acceptance "Review a phased plan with Claude CLI and record the disposition of material findings." .
+
+w:httpVocabulary a p:Task ; rdfs:label "Specify and load the HTTP vocabulary" ;
+    p:milestone w:httpFoundation ; p:status p:planned ; p:source w:httpPlan ;
+    p:dependsOn w:httpPlanReview ;
+    p:acceptance "Load a closed stable-IRI HTTP profile with pinned ledger semantics offline and reject invalid declarations and imports." .
+w:httpBundle a p:Task ; rdfs:label "Publish portable obligations, cases and schemas" ;
+    p:milestone w:httpFoundation ; p:status p:planned ; p:source w:httpPlan ;
+    p:dependsOn w:httpVocabulary ;
+    p:acceptance "Publish deterministic evidence requirements, portable cases, OpenAPI and JSON Schema and reject missing required witnesses." .
+w:httpProvider a p:Task ; rdfs:label "Prove conformance of a real Rust HTTP provider" ;
+    p:milestone w:httpNative ; p:status p:planned ; p:source w:httpPlan ;
+    p:dependsOn w:httpBundle ;
+    p:acceptance "Exercise wire validation, ledger errors and isolated state transitions against a live Rust service and catch a state mutation." .
+w:httpConsumers a p:Task ; rdfs:label "Verify TypeScript and independent Go consumers" ;
+    p:milestone w:httpNative ; p:status p:planned ; p:source w:httpPlan ;
+    p:dependsOn w:httpProvider ;
+    p:acceptance "Run native client checks against a scripted peer and detect mutated codecs using shared cases and evidence." .
+w:httpEvolution a p:Task ; rdfs:label "Expand the JSON profile and verify release evolution" ;
+    p:milestone w:httpAdoption ; p:status p:planned ; p:source w:httpPlan ;
+    p:dependsOn w:httpConsumers ;
+    p:acceptance "Verify expanded codecs, both directions of version skew, reproducible pins, and impact tracking by declaration IRI." .
+w:httpHybrid a p:Task ; rdfs:label "Exercise Node SSR and browser React against Rust" ;
+    p:milestone w:httpAdoption ; p:status p:planned ; p:source w:httpPlan ;
+    p:dependsOn w:httpEvolution ;
+    p:acceptance "Change one workspace pin to update both apps and preserve independent Go adoption in the offline verification matrix." .
+
+w:httpClaudeReview a p:Artifact ; rdfs:label "Claude CLI HTTP implementation plan review and dispositions" ;
+    p:location "docs/design/http-plan-review.md" .
+w:httpReviewBindings a p:Finding ; rdfs:label "Missing overlay and target lock interfaces" ; p:source w:httpClaudeReview .
+w:httpReviewEvidence a p:Finding ; rdfs:label "Missing claim and evidence interfaces" ; p:source w:httpClaudeReview .
+w:httpReviewRuleIdentity a p:Finding ; rdfs:label "Incomplete obligation identity and rule versioning" ; p:source w:httpClaudeReview .
+w:httpReviewEvolution a p:Finding ; rdfs:label "Unpinned request semantics and overlapping evolution fixtures" ; p:source w:httpClaudeReview .
+w:httpReviewPublish a p:Finding ; rdfs:label "Ambiguous source and release loading inputs" ; p:source w:httpClaudeReview .
+
+w:httpPlanReview p:addresses w:httpReviewBindings, w:httpReviewEvidence, w:httpReviewRuleIdentity, w:httpReviewEvolution, w:httpReviewPublish .
+
+w:httpReviewWitnesses a p:Finding ; rdfs:label "Coverage gate lacked a test seam and complete guard witnesses" ; p:source w:httpClaudeReview .
+w:httpReviewReproducibility a p:Finding ; rdfs:label "New rules could invalidate evidence for published v1" ; p:source w:httpClaudeReview .
+w:httpReviewWire a p:Finding ; rdfs:label "Native parser and URL behavior diverged and harness setup was implicit" ; p:source w:httpClaudeReview .
+w:httpReviewSkew a p:Finding ; rdfs:label "A mixed-version transfer can commit before response decoding fails" ; p:source w:httpClaudeReview .
+w:httpReviewPhases a p:Finding ; rdfs:label "Richer codecs need a review gate independent of wire migration" ; p:source w:httpClaudeReview .
+
+w:httpPlanReview p:addresses w:httpReviewWitnesses, w:httpReviewReproducibility, w:httpReviewWire, w:httpReviewSkew, w:httpReviewPhases .
+
+w:httpReviewInputs a p:Finding ; rdfs:label "Authored scenario source, stable field names and client overlays needed explicit ownership" ;
+    p:source w:httpClaudeReview .
+w:httpPlanReview p:addresses w:httpReviewInputs .
