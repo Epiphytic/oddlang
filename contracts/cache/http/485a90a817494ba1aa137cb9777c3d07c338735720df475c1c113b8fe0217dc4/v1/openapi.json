@@ -1,0 +1,295 @@
+{
+  "components": {
+    "schemas": {
+      "Record75726e3a6f64646c616e673a6c65646765722d687474703a4163636f756e74": {
+        "additionalProperties": false,
+        "properties": {
+          "balance": {
+            "pattern": "^(0|-?[1-9][0-9]*)$",
+            "type": "string",
+            "x-decimal-range": [
+              "0",
+              "9223372036854775807"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "balance",
+          "id",
+          "owner"
+        ],
+        "type": "object"
+      },
+      "Record75726e3a6f64646c616e673a6c65646765722d687474703a4c6f6f6b7570": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "Record75726e3a6f64646c616e673a6c65646765722d687474703a50616972": {
+        "additionalProperties": false,
+        "properties": {
+          "destination": {
+            "$ref": "#/components/schemas/Record75726e3a6f64646c616e673a6c65646765722d687474703a4163636f756e74"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Record75726e3a6f64646c616e673a6c65646765722d687474703a4163636f756e74"
+          }
+        },
+        "required": [
+          "destination",
+          "source"
+        ],
+        "type": "object"
+      },
+      "Record75726e3a6f64646c616e673a6c65646765722d687474703a5472616e73666572": {
+        "additionalProperties": false,
+        "properties": {
+          "amount": {
+            "pattern": "^(0|-?[1-9][0-9]*)$",
+            "type": "string",
+            "x-decimal-range": [
+              "-9223372036854775808",
+              "9223372036854775807"
+            ]
+          },
+          "destination": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "amount",
+          "destination",
+          "source"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "urn:oddlang:contract:ledger-http",
+    "version": "v1"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/accounts/{id}": {
+      "get": {
+        "operationId": "urn:oddlang:ledger-http:LookupAccount",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Record75726e3a6f64646c616e673a6c65646765722d687474703a4163636f756e74"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "error": {
+                      "enum": [
+                        "urn:oddlang:http:error:InvalidRequest"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Named operation error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "error": {
+                      "enum": [
+                        "urn:oddlang:http:error:AccountMissing"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Named operation error"
+          }
+        }
+      }
+    },
+    "/transfers": {
+      "post": {
+        "operationId": "urn:oddlang:ledger-http:TransferFunds",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Record75726e3a6f64646c616e673a6c65646765722d687474703a5472616e73666572"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Record75726e3a6f64646c616e673a6c65646765722d687474703a50616972"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "error": {
+                      "enum": [
+                        "urn:oddlang:http:error:InvalidRequest"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Named operation error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "error": {
+                      "enum": [
+                        "urn:oddlang:ledger:error:DestinationMissing",
+                        "urn:oddlang:ledger:error:SourceMissing"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Named operation error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "error": {
+                      "enum": [
+                        "urn:oddlang:ledger:error:DestinationOverflow",
+                        "urn:oddlang:ledger:error:InsufficientFunds"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Named operation error"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "error": {
+                      "enum": [
+                        "urn:oddlang:http:error:UnsupportedMediaType"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Named operation error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "error": {
+                      "enum": [
+                        "urn:oddlang:ledger:error:NonPositiveAmount",
+                        "urn:oddlang:ledger:error:SameAccount"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Named operation error"
+          }
+        }
+      }
+    }
+  }
+}

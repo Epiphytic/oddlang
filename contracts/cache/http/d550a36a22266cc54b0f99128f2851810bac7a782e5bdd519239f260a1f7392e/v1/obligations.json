@@ -1,0 +1,854 @@
+[
+  {
+    "declaration": "urn:oddlang:shapes:Closed",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:closed",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/982eb3c6e53d69aed310c159f41fbebcba1c9f79d940a7d25644580c12f0800a"
+        ],
+        "kind": "valid"
+      },
+      {
+        "caseIds": [
+          "codec/f3ca95fdc465d063c260ea30880bf83c57ceaf8331e790fa85873a1514db3905"
+        ],
+        "kind": "unknown-member"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:Envelope",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:record",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/d4f4adee49edc18c0dd5519b58cdbba998ba8811c570296c2a06a99151686ad2"
+        ],
+        "kind": "valid"
+      },
+      {
+        "caseIds": [
+          "codec/18d0ce327796c222233e57b4d6ddbc9b37b346418b88fa1f8e92c28203c87257"
+        ],
+        "kind": "sequence"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:RoundTrip",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:codec",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/dd3822ddebc6bd70a844db46c8c4b557d23c48a5737cfc0805e871dc2ba4304a"
+        ],
+        "kind": "round-trip"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:RoundTrip",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:json-bytes",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/9a6f3304dc74333563a87f783ff713dc7dd38fd98d3dbe83d335d4b118d6ebe2"
+        ],
+        "kind": "bom"
+      },
+      {
+        "caseIds": [
+          "codec/01de016f75da9fa28a9f1656d88bfd6dea8fbab3f8807ba92b29415c85c30d81"
+        ],
+        "kind": "duplicate-decoded-member"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:Choice",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/choice",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:tagged-union",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/6a555735f013c7b37e721e44af3603e50aaad8b0573ae4cf242234cb7bb7758d"
+        ],
+        "kind": "valid"
+      },
+      {
+        "caseIds": [
+          "codec/2fcf28ba45b34fd6bfc2533302b5eb507745195f3bc6912cb8361b6fcab2d7d6"
+        ],
+        "kind": "unknown-tag"
+      },
+      {
+        "caseIds": [
+          "codec/2a8084605be29b6885e4a03b65a2918fafc8ca1e9f2921a4424fcdbde72ffdcd"
+        ],
+        "kind": "missing-tag"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:ChoiceField",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/choice",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:field",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/c7d9bfd610aa79c776119a93e7f1b9056c96d7bdf365b3d83104dc52bec374ca"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "codec/b250fefa6de5c246492e0e0b3144de032d86f451e1e0490b131808d8abfea90e"
+        ],
+        "kind": "omitted"
+      },
+      {
+        "caseIds": [
+          "codec/7a74cc993f012b08a21e3cf529387a502bbbc3f617520df63813446a0efd215d"
+        ],
+        "kind": "null"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:Required",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/choice",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:required",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/995ee19c324b25649c3fc47d081784ce7990857d6ac163c5bd503b9f85dde8e9"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:Closed",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/choice/@flagged",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:closed",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/337f30e267424c44f61d0c96705102f1576a7f0a99450770c673963435b9f537"
+        ],
+        "kind": "valid"
+      },
+      {
+        "caseIds": [
+          "codec/8824a7e1a6cb51ace0eb0ee4ba54f40b0af5be760747db594ce786cb7a8ab42e"
+        ],
+        "kind": "unknown-member"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:FlagPayload",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/choice/@flagged",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:record",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/dd5efe55e0bf272ff334310757c8cbbe02854c6bf0f199b062655a130e57f003"
+        ],
+        "kind": "valid"
+      },
+      {
+        "caseIds": [
+          "codec/7745544a9a77e3d97716288b4cc5f09dd524de9265ee6dbacb513210bf2a245e"
+        ],
+        "kind": "sequence"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:Flagged",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/choice/@flagged",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:variant",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/18cffd3b18e26c72dca9b92dceda223b2119c3564b9bcb6d056261f24439ba94"
+        ],
+        "kind": "selected"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:http:Boolean",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/choice/@flagged/flag",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:scalar",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/b04636d2493845422e56348d73df03bd3febec9bd71286b9cafa7cac8fee5f1d"
+        ],
+        "kind": "valid"
+      },
+      {
+        "caseIds": [
+          "codec/0afdb9b1429b43d7b414c24b40d342d4b7b00b35b6719a619c805e1bcfccf567"
+        ],
+        "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:FlagField",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/choice/@flagged/flag",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:field",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/51dfeb93f725b76b22e912fbb86c02e42615a453bcda46fe5245694a06033d6a"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "codec/976023d158744e59a4265e9adf82fd2b17c138ca6356773e881fd7329e59d50a"
+        ],
+        "kind": "omitted"
+      },
+      {
+        "caseIds": [
+          "codec/ddbb7735e072a314ea8fe0b3b1b7382b485433d1b759b07caa1529181fce653a"
+        ],
+        "kind": "null"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:Required",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/choice/@flagged/flag",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:required",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/5325e3028fb99b22db6a55343c32f9b671f227da1607d9c27e74dbbdf889da5b"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:Closed",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/choice/@named",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:closed",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/1b0756caf12a86f75695f32aa66b9aee863b3759bb603b03d36ff5c36212e2b9"
+        ],
+        "kind": "valid"
+      },
+      {
+        "caseIds": [
+          "codec/038371d1a1bd4e1c96cb4337665cdc2067af3e95c13191bbe5aed25e590057a5"
+        ],
+        "kind": "unknown-member"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:NamePayload",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/choice/@named",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:record",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/c79c17b38fccaa8b2fe165ad2bad81db9f2a5109f02223c90d24e4a00a56e482"
+        ],
+        "kind": "valid"
+      },
+      {
+        "caseIds": [
+          "codec/fae67c8b8aecd2ee11dcefa684bcf76271aaf9599966b805412d0f784b80f2a3"
+        ],
+        "kind": "sequence"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:Named",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/choice/@named",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:variant",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/8f5609e7129643bdbbf31214c18556066ae23f238dd000587b395fa0d46f19b9"
+        ],
+        "kind": "selected"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:http:Text",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/choice/@named/name",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:scalar",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/c664264945e0af4f15b6d1691d5d7527593e473def353b7ba9487afedee5014b"
+        ],
+        "kind": "valid"
+      },
+      {
+        "caseIds": [
+          "codec/c938bf48a056a9b086f0a74cea540e19b6e5c5ac0f80c316f48537c941789047"
+        ],
+        "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:http:Text",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/choice/@named/name",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:unicode",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/cca1bdb17af3a2e85fca6f57a72b8635ce1fac74cbd6bcadffc80fd6f118be0f"
+        ],
+        "kind": "isolated-surrogate"
+      },
+      {
+        "caseIds": [
+          "codec/ae2d201b4c45090a7b8ae9f185c77eea3606b2e158c33e8914d5ade9ff95edfe"
+        ],
+        "kind": "invalid-utf8"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:NameField",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/choice/@named/name",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:field",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/74ae2d27bc65c8c8da3c74cfb9bb1d5bcda2c65c268bb9719e1dd36d8609d121"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "codec/9e60f10298efaef31ce47ef7d911564602170bcdedbff47dd8d7838786bb1d43"
+        ],
+        "kind": "omitted"
+      },
+      {
+        "caseIds": [
+          "codec/7834b24574d3b2099f462c1eb0031dd2b9cacc89b1456ef08d92396e0d54f60b"
+        ],
+        "kind": "null"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:Required",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/choice/@named/name",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:required",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/232e5b950b19ac596dabef842363d0342406c5f5b92e23d4883961dd7b417589"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:Items",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/items",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:list",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/6b9fe04d14d9abcfdfa6fa651225386655f78e1ebb77fc36ad364693053bfa1a"
+        ],
+        "kind": "populated"
+      },
+      {
+        "caseIds": [
+          "codec/1b0bc2aa10e8e180edcab42713309f09c5143ea23e3e7dc0b1fde2ee0d25da13"
+        ],
+        "kind": "empty"
+      },
+      {
+        "caseIds": [
+          "codec/797fbb71c727c84c941cb09ac37825a84335d691dd6bfda8218af5a690b2deb1"
+        ],
+        "kind": "wrong-type"
+      },
+      {
+        "caseIds": [
+          "codec/12dd495aaaca27c9cea17dc004ed815f8557cffd1f67a581855c9bb98c8bec47"
+        ],
+        "kind": "invalid-element"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:ItemsField",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/items",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:field",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/97015e07983259eb6dc188dbe8d8656c3feb0d9f03578236f5af887df6c02998"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "codec/66cf104efb3e50a6a0e6758981a6cec9367dfbc86b0507271357e4c962e81207"
+        ],
+        "kind": "omitted"
+      },
+      {
+        "caseIds": [
+          "codec/944332331580e63c978f5c24065911b8bc342671e94e09bac83407bf3b616389"
+        ],
+        "kind": "null"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:Required",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/items",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:required",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/74ce7c21a6776a33def0f0f18312228990f1ebc5f6b31befed169413a92069a8"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:http:I64",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/items/0",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:decimal",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/3244a909cf203b29cb7c2a94c4ba0f4dc021b84ce3c4ad6aa1d4ba79a9059bd8"
+        ],
+        "kind": "min"
+      },
+      {
+        "caseIds": [
+          "codec/e7ba69a685563176720f05a236b678fada7b245acb2022c588c95594582cfad3"
+        ],
+        "kind": "max"
+      },
+      {
+        "caseIds": [
+          "codec/016abff6c855017cf62a43c6d4f9da5d2b0dbcbd2b5d7d0427b6dd16f8e2174d"
+        ],
+        "kind": "outside"
+      },
+      {
+        "caseIds": [
+          "codec/b2b90fed90b77a6e5b6a627685f31af96e7290243247f1213b72e50fad3c1196"
+        ],
+        "kind": "noncanonical"
+      },
+      {
+        "caseIds": [
+          "codec/17549d0c5218e14233e2de954d760aa2999c10c954586c04bc4b37d50552bd9d"
+        ],
+        "kind": "number-token"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:http:Text",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/memo",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:scalar",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/e2dac4ae35936c8bd480805bb1ef30d5d190888b04c09f2712b023d57aa40a50"
+        ],
+        "kind": "valid"
+      },
+      {
+        "caseIds": [
+          "codec/a66e66caeddebd3b26b6a76abc2cdd77fb999040998044ae7c05af7f6b668a16"
+        ],
+        "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:http:Text",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/memo",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:unicode",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/e5fc1e420eccf1b04e2940ab4797edf63453687b4dacbdb7a2da3b8195080cee"
+        ],
+        "kind": "isolated-surrogate"
+      },
+      {
+        "caseIds": [
+          "codec/e6ef22cd2a552e1f423feb8881934806bfbfe8c27c600b6d4f2a0cfcd7667f88"
+        ],
+        "kind": "invalid-utf8"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:MemoField",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/memo",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:field",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/4d50a8227d18323ceda7819b51d05d50e700f755e1036d1d7e152691074bf072"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "codec/d6848b33841fecc2d7ee9078fe2f70a758f99394ed0c9774205317da53bee811"
+        ],
+        "kind": "omitted"
+      },
+      {
+        "caseIds": [
+          "codec/a1c2b7a3474e777844f947a5651429239067621d1e642d9a7fc35638f05644b2"
+        ],
+        "kind": "null"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:Optional",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/memo",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:optional",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/40e943a08453b02b44ff035cfabb225986314ea34d9058243d5ec9cfb73bb32e"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:Closed",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/metadata",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:closed",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/69ced5f899736ee9588f7e99a574bed3cb19f9c61f43973048d02d17c4595791"
+        ],
+        "kind": "valid"
+      },
+      {
+        "caseIds": [
+          "codec/7bd295c52014e4738475085f24d488620a3bf301552e4f23b8f2e254b7a82795"
+        ],
+        "kind": "unknown-member"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:Metadata",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/metadata",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:record",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/35c9fe9935206e70504421bbd068f1a53969c85251dbfc2cc0bfb9f8733770b7"
+        ],
+        "kind": "valid"
+      },
+      {
+        "caseIds": [
+          "codec/b9c34a3d5d95e517adb44dd76061f9b528fe0d05a7f26a8c75ef0f4ebf04f203"
+        ],
+        "kind": "sequence"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:MetadataField",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/metadata",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:field",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/d4f3800714fcdd4eb0d13e5c17cd3a48ca32ae973b4e77b54f3654c22ab990f3"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "codec/5f32035b71778154f50563d44ef3001dd6a0897914faacaafb9d9543ee5b695e"
+        ],
+        "kind": "omitted"
+      },
+      {
+        "caseIds": [
+          "codec/d448be9315092056cd138d06113d50f74a8a9fb1eb30470e32d37e95e515fc7c"
+        ],
+        "kind": "null"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:Required",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/metadata",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:required",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/5d19b0a2383da8d2bb63ab4fd47bb7b383906322c247b8a29aba337d2615004c"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:http:Boolean",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/metadata/enabled",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:scalar",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/671b196d51726094a02d56f69f53111a31e2e68a258de65c794a3ffe4cadc6ae"
+        ],
+        "kind": "valid"
+      },
+      {
+        "caseIds": [
+          "codec/7b1876eb0b06d52d9dc8d804357d4c1641d2c898186c854859de77f22fb32b5e"
+        ],
+        "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:EnabledField",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/metadata/enabled",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:field",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/9b526f4c8fb75c4fc025160d65228f5b55083e5ae6985ee62a79cce930056440"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "codec/d8c1e53db2a6a24d18086615bfc22d8f3789ae4459253bd190780cb5f526e50c"
+        ],
+        "kind": "omitted"
+      },
+      {
+        "caseIds": [
+          "codec/d959708b7a962af748b1e8ab26a712fbf9198f5d792620471c84e10acdb7e010"
+        ],
+        "kind": "null"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:Required",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/metadata/enabled",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:required",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/3010aa8fba8d44167e19a08b3758aeea2e72bcaf666526854cbaf9b84afdf7fb"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:http:Text",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/note",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:scalar",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/c9359f582c1d323f360726858c2685a2573d5dde8a14ed3dc91c2466281b746f"
+        ],
+        "kind": "valid"
+      },
+      {
+        "caseIds": [
+          "codec/391c8a823725baee18cb5d203a311c1d149de3ff128376712e990d51fdd66ba0"
+        ],
+        "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:http:Text",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/note",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:unicode",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/d87df5ae475fbaccfe50eadde641c3ab8ef286874395a62faf7955cfe32cc23f"
+        ],
+        "kind": "isolated-surrogate"
+      },
+      {
+        "caseIds": [
+          "codec/70c6c07b5a2bb14fb30128496244c52c0a1c673574cf9792242d13b5f4241bfe"
+        ],
+        "kind": "invalid-utf8"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:NoteField",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/note",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:field",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/5b286f2f8708977c6bd2e0ceedf51974e7359278e24ec0f9ab0640c60c71b840"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "codec/814b7cc2cb34db624afea05c92a1ac8c3285816610359822defa07e44f7f370d"
+        ],
+        "kind": "omitted"
+      },
+      {
+        "caseIds": [
+          "codec/a6e1096fee1853bfd7ebec81b7fedf67604818b0a45851f77467e4cfbe4d5813"
+        ],
+        "kind": "null"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:Nullable",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/note",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:nullable",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/b99a52e02060aab38006b3fe4d7d840bf926032219c4512484aca80c326cdf33"
+        ],
+        "kind": "null"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:shapes:Required",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/note",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:required",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/49fc81d74718af328bc1b0e56a3d799eb052a3ad605bfede08513bd911c25239"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  }
+]

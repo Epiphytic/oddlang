@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "bindings": [
+    {"role": "json.codec", "target": "rust", "binding": "serde"},
+    {"role": "json.codec", "target": "typescript", "binding": "json"}
+  ]
+}

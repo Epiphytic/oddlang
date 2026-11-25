@@ -1,0 +1,9 @@
+{
+  "pins": [
+    {
+      "identity": "urn:oddlang:contract:ledger-http",
+      "manifestSha256": "0922d46293a8bb9f8a5221dffa1fd5a87850299efdc99efe14ad659163276b0e",
+      "version": "v2"
+    }
+  ]
+}

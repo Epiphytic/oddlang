@@ -1,0 +1,9 @@
+{
+  "pins": [
+    {
+      "identity": "urn:oddlang:contract:shapes-http",
+      "manifestSha256": "867e93132a34eb3d446b7faef2cf36af89fd25767abaded84975c9adbe5fbff3",
+      "version": "v1"
+    }
+  ]
+}

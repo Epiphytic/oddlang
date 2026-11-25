@@ -1,0 +1,129 @@
+{
+  "components": {
+    "schemas": {
+      "Record75726e3a6f64646c616e673a7368617065733a43686f696365": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "flag": {
+                "type": "boolean"
+              },
+              "kind": {
+                "const": "flagged"
+              }
+            },
+            "required": [
+              "flag",
+              "kind"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "const": "named"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "kind"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "Record75726e3a6f64646c616e673a7368617065733a456e76656c6f7065": {
+        "additionalProperties": false,
+        "properties": {
+          "choice": {
+            "$ref": "#/components/schemas/Record75726e3a6f64646c616e673a7368617065733a43686f696365"
+          },
+          "items": {
+            "$ref": "#/components/schemas/Record75726e3a6f64646c616e673a7368617065733a4974656d73"
+          },
+          "memo": {
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Record75726e3a6f64646c616e673a7368617065733a4d65746164617461"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "choice",
+          "items",
+          "metadata",
+          "note"
+        ],
+        "type": "object"
+      },
+      "Record75726e3a6f64646c616e673a7368617065733a466c61675061796c6f6164": {
+        "additionalProperties": false,
+        "properties": {
+          "flag": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "flag"
+        ],
+        "type": "object"
+      },
+      "Record75726e3a6f64646c616e673a7368617065733a4974656d73": {
+        "items": {
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string",
+          "x-decimal-range": [
+            "-9223372036854775808",
+            "9223372036854775807"
+          ]
+        },
+        "type": "array"
+      },
+      "Record75726e3a6f64646c616e673a7368617065733a4d65746164617461": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "type": "object"
+      },
+      "Record75726e3a6f64646c616e673a7368617065733a4e616d655061796c6f6164": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "urn:oddlang:contract:shapes-http",
+    "version": "v1"
+  },
+  "openapi": "3.1.0",
+  "paths": {}
+}

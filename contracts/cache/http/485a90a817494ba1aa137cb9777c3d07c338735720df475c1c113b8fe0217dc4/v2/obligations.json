@@ -1,0 +1,3160 @@
+[
+  {
+    "declaration": "urn:oddlang:ledger-http:ReadAccount",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "behavior",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:lookup",
+    "slots": [
+      {
+        "caseIds": [
+          "scenario/LookupAccount/http.consumer/maximum"
+        ],
+        "kind": "maximum"
+      },
+      {
+        "caseIds": [
+          "scenario/LookupAccount/http.consumer/missing"
+        ],
+        "kind": "missing"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Closed",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "request",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3AClosed/record/request/closed"
+        ],
+        "kind": "closed"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Lookup",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "request",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookup/record/request/object"
+        ],
+        "kind": "object"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:LookupAccount",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "request",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:route",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/exact"
+        ],
+        "kind": "exact"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/escaped"
+        ],
+        "kind": "escaped"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/plus"
+        ],
+        "kind": "plus"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/empty"
+        ],
+        "kind": "empty"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/dot"
+        ],
+        "kind": "dot"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/dot-dot"
+        ],
+        "kind": "dot-dot"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "request/id",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/request%2Fid/present"
+        ],
+        "kind": "present"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:id",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "request/id",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:text",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Aid/text/request%2Fid/unicode"
+        ],
+        "kind": "unicode"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:http:error:AccountMissing",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:error",
+    "slots": [
+      {
+        "caseIds": [
+          "scenario/LookupAccount/http.consumer/missing"
+        ],
+        "kind": "named"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Ahttp%3Aerror%3AAccountMissing/error/response/unknown"
+        ],
+        "kind": "unknown"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Ahttp%3Aerror%3AAccountMissing/error/response/malformed"
+        ],
+        "kind": "malformed"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:http:error:InvalidRequest",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:error",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Ahttp%3Aerror%3AInvalidRequest/error/response/named"
+        ],
+        "kind": "named"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Ahttp%3Aerror%3AInvalidRequest/error/response/unknown"
+        ],
+        "kind": "unknown"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Ahttp%3Aerror%3AInvalidRequest/error/response/malformed"
+        ],
+        "kind": "malformed"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Account",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3AAccount/record/response/object"
+        ],
+        "kind": "object"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3AAccount/record/response/wrong-type"
+        ],
+        "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Closed",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3AClosed/record/response/closed"
+        ],
+        "kind": "closed"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3AClosed/record/response/unknown-member"
+        ],
+        "kind": "unknown-member"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:LookupAccount",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:json",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/json/response/valid"
+        ],
+        "kind": "valid"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/json/response/escaped"
+        ],
+        "kind": "escaped"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/json/response/empty"
+        ],
+        "kind": "empty"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/json/response/bom"
+        ],
+        "kind": "bom"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/json/response/utf8"
+        ],
+        "kind": "utf8"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/json/response/surrogate"
+        ],
+        "kind": "surrogate"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/json/response/malformed"
+        ],
+        "kind": "malformed"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/json/response/duplicate"
+        ],
+        "kind": "duplicate"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/json/response/trailing"
+        ],
+        "kind": "trailing"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:LookupAccount",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:media",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/media/response/json"
+        ],
+        "kind": "json"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/media/response/charset"
+        ],
+        "kind": "charset"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/media/response/missing"
+        ],
+        "kind": "missing"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/media/response/unsupported"
+        ],
+        "kind": "unsupported"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/media/response/wrong-charset"
+        ],
+        "kind": "wrong-charset"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/media/response/extra-parameter"
+        ],
+        "kind": "extra-parameter"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:LookupAccount",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:response",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/response/response/success"
+        ],
+        "kind": "success"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/response/response/transport"
+        ],
+        "kind": "transport"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/response/response/unexpected-status"
+        ],
+        "kind": "unexpected-status"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:BalanceBounds",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response/balanceMinor",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:bounds",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ABalanceBounds/bounds/response%2FbalanceMinor/min"
+        ],
+        "kind": "min"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ABalanceBounds/bounds/response%2FbalanceMinor/max"
+        ],
+        "kind": "max"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ABalanceBounds/bounds/response%2FbalanceMinor/below"
+        ],
+        "kind": "below"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ABalanceBounds/bounds/response%2FbalanceMinor/above"
+        ],
+        "kind": "above"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response/balanceMinor",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2FbalanceMinor/present"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2FbalanceMinor/omitted"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:balance",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response/balanceMinor",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:i64",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2FbalanceMinor/zero"
+        ],
+        "kind": "zero"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2FbalanceMinor/large"
+        ],
+        "kind": "large"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2FbalanceMinor/max"
+        ],
+        "kind": "max"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2FbalanceMinor/noncanonical"
+        ],
+        "kind": "noncanonical"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2FbalanceMinor/negative-zero"
+        ],
+        "kind": "negative-zero"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2FbalanceMinor/leading-plus"
+        ],
+        "kind": "leading-plus"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2FbalanceMinor/exponent"
+        ],
+        "kind": "exponent"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2FbalanceMinor/whitespace"
+        ],
+        "kind": "whitespace"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2FbalanceMinor/overflow"
+        ],
+        "kind": "overflow"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2FbalanceMinor/numeric"
+        ],
+        "kind": "numeric"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response/id",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fid/present"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fid/omitted"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:id",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response/id",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:text",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Aid/text/response%2Fid/unicode"
+        ],
+        "kind": "unicode"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Aid/text/response%2Fid/wrong-type"
+        ],
+        "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response/owner",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fowner/present"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fowner/omitted"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:owner",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response/owner",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:text",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Aowner/text/response%2Fowner/unicode"
+        ],
+        "kind": "unicode"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Aowner/text/response%2Fowner/wrong-type"
+        ],
+        "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:ReadAccount",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "behavior",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:lookup",
+    "slots": [
+      {
+        "caseIds": [
+          "scenario/LookupAccount/http.provider/maximum"
+        ],
+        "kind": "maximum"
+      },
+      {
+        "caseIds": [
+          "scenario/LookupAccount/http.provider/missing"
+        ],
+        "kind": "missing"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Closed",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "request",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3AClosed/record/request/closed"
+        ],
+        "kind": "closed"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Lookup",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "request",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ALookup/record/request/object"
+        ],
+        "kind": "object"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:LookupAccount",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "request",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:route",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/exact"
+        ],
+        "kind": "exact"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/escaped"
+        ],
+        "kind": "escaped"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/plus"
+        ],
+        "kind": "plus"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/empty"
+        ],
+        "kind": "empty"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/dot"
+        ],
+        "kind": "dot"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/dot-dot"
+        ],
+        "kind": "dot-dot"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/bad-percent"
+        ],
+        "kind": "bad-percent"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/bad-utf8"
+        ],
+        "kind": "bad-utf8"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "request/id",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ARequired/required/request%2Fid/present"
+        ],
+        "kind": "present"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:id",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "request/id",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:text",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3Aid/text/request%2Fid/unicode"
+        ],
+        "kind": "unicode"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:http:error:AccountMissing",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:error",
+    "slots": [
+      {
+        "caseIds": [
+          "scenario/LookupAccount/http.provider/missing"
+        ],
+        "kind": "named"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:http:error:InvalidRequest",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:error",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Ahttp%3Aerror%3AInvalidRequest/error/response/named"
+        ],
+        "kind": "named"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Account",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3AAccount/record/response/object"
+        ],
+        "kind": "object"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Closed",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3AClosed/record/response/closed"
+        ],
+        "kind": "closed"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:LookupAccount",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:json",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ALookupAccount/json/response/valid"
+        ],
+        "kind": "valid"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:LookupAccount",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:media",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ALookupAccount/media/response/json"
+        ],
+        "kind": "json"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:LookupAccount",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:response",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ALookupAccount/response/response/success"
+        ],
+        "kind": "success"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:BalanceBounds",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response/balanceMinor",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:bounds",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ABalanceBounds/bounds/response%2FbalanceMinor/min"
+        ],
+        "kind": "min"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ABalanceBounds/bounds/response%2FbalanceMinor/max"
+        ],
+        "kind": "max"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response/balanceMinor",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2FbalanceMinor/present"
+        ],
+        "kind": "present"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:balance",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response/balanceMinor",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:i64",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2FbalanceMinor/zero"
+        ],
+        "kind": "zero"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2FbalanceMinor/large"
+        ],
+        "kind": "large"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2FbalanceMinor/max"
+        ],
+        "kind": "max"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response/id",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fid/present"
+        ],
+        "kind": "present"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:id",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response/id",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:text",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3Aid/text/response%2Fid/unicode"
+        ],
+        "kind": "unicode"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response/owner",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fowner/present"
+        ],
+        "kind": "present"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:owner",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "position": "response/owner",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:text",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3Aowner/text/response%2Fowner/unicode"
+        ],
+        "kind": "unicode"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "behavior",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:transfer",
+    "slots": [
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.consumer/success"
+        ],
+        "kind": "success"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.consumer/capacity"
+        ],
+        "kind": "capacity"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.consumer/source-missing"
+        ],
+        "kind": "source-missing"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.consumer/destination-missing"
+        ],
+        "kind": "destination-missing"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.consumer/same-account"
+        ],
+        "kind": "same-account"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.consumer/non-positive"
+        ],
+        "kind": "non-positive"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.consumer/insufficient"
+        ],
+        "kind": "insufficient"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.consumer/overflow"
+        ],
+        "kind": "overflow"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.consumer/missing-both"
+        ],
+        "kind": "missing-both"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.consumer/destination-and-amount"
+        ],
+        "kind": "destination-and-amount"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.consumer/same-and-amount"
+        ],
+        "kind": "same-and-amount"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.consumer/funds-and-capacity"
+        ],
+        "kind": "funds-and-capacity"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Closed",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3AClosed/record/request/closed"
+        ],
+        "kind": "closed"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Transfer",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransfer/record/request/object"
+        ],
+        "kind": "object"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:TransferFunds",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:json",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/json/request/valid"
+        ],
+        "kind": "valid"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:TransferFunds",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:media",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/request/json"
+        ],
+        "kind": "json"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:TransferFunds",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:route",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/route/request/exact"
+        ],
+        "kind": "exact"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request/amount",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/request%2Famount/present"
+        ],
+        "kind": "present"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:amount",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request/amount",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:i64",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/zero"
+        ],
+        "kind": "zero"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/large"
+        ],
+        "kind": "large"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/min"
+        ],
+        "kind": "min"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/max"
+        ],
+        "kind": "max"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request/destination",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/request%2Fdestination/present"
+        ],
+        "kind": "present"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:destination",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request/destination",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:text",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Adestination/text/request%2Fdestination/unicode"
+        ],
+        "kind": "unicode"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request/source",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/request%2Fsource/present"
+        ],
+        "kind": "present"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:source",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request/source",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:text",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Asource/text/request%2Fsource/unicode"
+        ],
+        "kind": "unicode"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:http:error:InvalidRequest",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:error",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Ahttp%3Aerror%3AInvalidRequest/error/response/named"
+        ],
+        "kind": "named"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Ahttp%3Aerror%3AInvalidRequest/error/response/unknown"
+        ],
+        "kind": "unknown"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Ahttp%3Aerror%3AInvalidRequest/error/response/malformed"
+        ],
+        "kind": "malformed"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:http:error:UnsupportedMediaType",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:error",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Ahttp%3Aerror%3AUnsupportedMediaType/error/response/named"
+        ],
+        "kind": "named"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Ahttp%3Aerror%3AUnsupportedMediaType/error/response/unknown"
+        ],
+        "kind": "unknown"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Ahttp%3Aerror%3AUnsupportedMediaType/error/response/malformed"
+        ],
+        "kind": "malformed"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Closed",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3AClosed/record/response/closed"
+        ],
+        "kind": "closed"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3AClosed/record/response/unknown-member"
+        ],
+        "kind": "unknown-member"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Pair",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3APair/record/response/object"
+        ],
+        "kind": "object"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3APair/record/response/wrong-type"
+        ],
+        "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:TransferFunds",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:json",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/json/response/valid"
+        ],
+        "kind": "valid"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/json/response/escaped"
+        ],
+        "kind": "escaped"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/json/response/empty"
+        ],
+        "kind": "empty"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/json/response/bom"
+        ],
+        "kind": "bom"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/json/response/utf8"
+        ],
+        "kind": "utf8"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/json/response/surrogate"
+        ],
+        "kind": "surrogate"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/json/response/malformed"
+        ],
+        "kind": "malformed"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/json/response/duplicate"
+        ],
+        "kind": "duplicate"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/json/response/trailing"
+        ],
+        "kind": "trailing"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:TransferFunds",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:media",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/response/json"
+        ],
+        "kind": "json"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/response/charset"
+        ],
+        "kind": "charset"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/response/missing"
+        ],
+        "kind": "missing"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/response/unsupported"
+        ],
+        "kind": "unsupported"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/response/wrong-charset"
+        ],
+        "kind": "wrong-charset"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/response/extra-parameter"
+        ],
+        "kind": "extra-parameter"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:TransferFunds",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:response",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/response/response/success"
+        ],
+        "kind": "success"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/response/response/transport"
+        ],
+        "kind": "transport"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/response/response/unexpected-status"
+        ],
+        "kind": "unexpected-status"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger:error:DestinationMissing",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:error",
+    "slots": [
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.consumer/destination-and-amount",
+          "scenario/TransferFunds/http.consumer/destination-missing"
+        ],
+        "kind": "named"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger%3Aerror%3ADestinationMissing/error/response/unknown"
+        ],
+        "kind": "unknown"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger%3Aerror%3ADestinationMissing/error/response/malformed"
+        ],
+        "kind": "malformed"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger:error:DestinationOverflow",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:error",
+    "slots": [
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.consumer/overflow"
+        ],
+        "kind": "named"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger%3Aerror%3ADestinationOverflow/error/response/unknown"
+        ],
+        "kind": "unknown"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger%3Aerror%3ADestinationOverflow/error/response/malformed"
+        ],
+        "kind": "malformed"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger:error:InsufficientFunds",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:error",
+    "slots": [
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.consumer/funds-and-capacity",
+          "scenario/TransferFunds/http.consumer/insufficient"
+        ],
+        "kind": "named"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger%3Aerror%3AInsufficientFunds/error/response/unknown"
+        ],
+        "kind": "unknown"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger%3Aerror%3AInsufficientFunds/error/response/malformed"
+        ],
+        "kind": "malformed"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger:error:NonPositiveAmount",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:error",
+    "slots": [
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.consumer/non-positive"
+        ],
+        "kind": "named"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger%3Aerror%3ANonPositiveAmount/error/response/unknown"
+        ],
+        "kind": "unknown"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger%3Aerror%3ANonPositiveAmount/error/response/malformed"
+        ],
+        "kind": "malformed"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger:error:SameAccount",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:error",
+    "slots": [
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.consumer/same-account",
+          "scenario/TransferFunds/http.consumer/same-and-amount"
+        ],
+        "kind": "named"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger%3Aerror%3ASameAccount/error/response/unknown"
+        ],
+        "kind": "unknown"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger%3Aerror%3ASameAccount/error/response/malformed"
+        ],
+        "kind": "malformed"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger:error:SourceMissing",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:error",
+    "slots": [
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.consumer/missing-both",
+          "scenario/TransferFunds/http.consumer/source-missing"
+        ],
+        "kind": "named"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger%3Aerror%3ASourceMissing/error/response/unknown"
+        ],
+        "kind": "unknown"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger%3Aerror%3ASourceMissing/error/response/malformed"
+        ],
+        "kind": "malformed"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Account",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3AAccount/record/response%2Fdestination/object"
+        ],
+        "kind": "object"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3AAccount/record/response%2Fdestination/wrong-type"
+        ],
+        "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Closed",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3AClosed/record/response%2Fdestination/closed"
+        ],
+        "kind": "closed"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3AClosed/record/response%2Fdestination/unknown-member"
+        ],
+        "kind": "unknown-member"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fdestination/present"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fdestination/omitted"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:destinationAccount",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3AdestinationAccount/record/response%2Fdestination/object"
+        ],
+        "kind": "object"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3AdestinationAccount/record/response%2Fdestination/wrong-type"
+        ],
+        "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:BalanceBounds",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination/balanceMinor",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:bounds",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ABalanceBounds/bounds/response%2Fdestination%2FbalanceMinor/min"
+        ],
+        "kind": "min"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ABalanceBounds/bounds/response%2Fdestination%2FbalanceMinor/max"
+        ],
+        "kind": "max"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ABalanceBounds/bounds/response%2Fdestination%2FbalanceMinor/below"
+        ],
+        "kind": "below"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ABalanceBounds/bounds/response%2Fdestination%2FbalanceMinor/above"
+        ],
+        "kind": "above"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination/balanceMinor",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fdestination%2FbalanceMinor/present"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fdestination%2FbalanceMinor/omitted"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:balance",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination/balanceMinor",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:i64",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2FbalanceMinor/zero"
+        ],
+        "kind": "zero"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2FbalanceMinor/large"
+        ],
+        "kind": "large"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2FbalanceMinor/max"
+        ],
+        "kind": "max"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2FbalanceMinor/noncanonical"
+        ],
+        "kind": "noncanonical"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2FbalanceMinor/negative-zero"
+        ],
+        "kind": "negative-zero"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2FbalanceMinor/leading-plus"
+        ],
+        "kind": "leading-plus"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2FbalanceMinor/exponent"
+        ],
+        "kind": "exponent"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2FbalanceMinor/whitespace"
+        ],
+        "kind": "whitespace"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2FbalanceMinor/overflow"
+        ],
+        "kind": "overflow"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2FbalanceMinor/numeric"
+        ],
+        "kind": "numeric"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination/id",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fdestination%2Fid/present"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fdestination%2Fid/omitted"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:id",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination/id",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:text",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Aid/text/response%2Fdestination%2Fid/unicode"
+        ],
+        "kind": "unicode"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Aid/text/response%2Fdestination%2Fid/wrong-type"
+        ],
+        "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination/owner",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fdestination%2Fowner/present"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fdestination%2Fowner/omitted"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:owner",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination/owner",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:text",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Aowner/text/response%2Fdestination%2Fowner/unicode"
+        ],
+        "kind": "unicode"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Aowner/text/response%2Fdestination%2Fowner/wrong-type"
+        ],
+        "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Account",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3AAccount/record/response%2Fsource/object"
+        ],
+        "kind": "object"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3AAccount/record/response%2Fsource/wrong-type"
+        ],
+        "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Closed",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3AClosed/record/response%2Fsource/closed"
+        ],
+        "kind": "closed"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3AClosed/record/response%2Fsource/unknown-member"
+        ],
+        "kind": "unknown-member"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fsource/present"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fsource/omitted"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:sourceAccount",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3AsourceAccount/record/response%2Fsource/object"
+        ],
+        "kind": "object"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3AsourceAccount/record/response%2Fsource/wrong-type"
+        ],
+        "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:BalanceBounds",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source/balanceMinor",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:bounds",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ABalanceBounds/bounds/response%2Fsource%2FbalanceMinor/min"
+        ],
+        "kind": "min"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ABalanceBounds/bounds/response%2Fsource%2FbalanceMinor/max"
+        ],
+        "kind": "max"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ABalanceBounds/bounds/response%2Fsource%2FbalanceMinor/below"
+        ],
+        "kind": "below"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ABalanceBounds/bounds/response%2Fsource%2FbalanceMinor/above"
+        ],
+        "kind": "above"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source/balanceMinor",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fsource%2FbalanceMinor/present"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fsource%2FbalanceMinor/omitted"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:balance",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source/balanceMinor",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:i64",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2FbalanceMinor/zero"
+        ],
+        "kind": "zero"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2FbalanceMinor/large"
+        ],
+        "kind": "large"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2FbalanceMinor/max"
+        ],
+        "kind": "max"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2FbalanceMinor/noncanonical"
+        ],
+        "kind": "noncanonical"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2FbalanceMinor/negative-zero"
+        ],
+        "kind": "negative-zero"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2FbalanceMinor/leading-plus"
+        ],
+        "kind": "leading-plus"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2FbalanceMinor/exponent"
+        ],
+        "kind": "exponent"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2FbalanceMinor/whitespace"
+        ],
+        "kind": "whitespace"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2FbalanceMinor/overflow"
+        ],
+        "kind": "overflow"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2FbalanceMinor/numeric"
+        ],
+        "kind": "numeric"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source/id",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fsource%2Fid/present"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fsource%2Fid/omitted"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:id",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source/id",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:text",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Aid/text/response%2Fsource%2Fid/unicode"
+        ],
+        "kind": "unicode"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Aid/text/response%2Fsource%2Fid/wrong-type"
+        ],
+        "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source/owner",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fsource%2Fowner/present"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fsource%2Fowner/omitted"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:owner",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source/owner",
+    "role": "http.consumer",
+    "rule": "urn:oddlang:http:rule:1:text",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Aowner/text/response%2Fsource%2Fowner/unicode"
+        ],
+        "kind": "unicode"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Aowner/text/response%2Fsource%2Fowner/wrong-type"
+        ],
+        "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "behavior",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:transfer",
+    "slots": [
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.provider/success"
+        ],
+        "kind": "success"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.provider/capacity"
+        ],
+        "kind": "capacity"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.provider/source-missing"
+        ],
+        "kind": "source-missing"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.provider/destination-missing"
+        ],
+        "kind": "destination-missing"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.provider/same-account"
+        ],
+        "kind": "same-account"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.provider/non-positive"
+        ],
+        "kind": "non-positive"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.provider/insufficient"
+        ],
+        "kind": "insufficient"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.provider/overflow"
+        ],
+        "kind": "overflow"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.provider/missing-both"
+        ],
+        "kind": "missing-both"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.provider/destination-and-amount"
+        ],
+        "kind": "destination-and-amount"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.provider/same-and-amount"
+        ],
+        "kind": "same-and-amount"
+      },
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.provider/funds-and-capacity"
+        ],
+        "kind": "funds-and-capacity"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Closed",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3AClosed/record/request/closed"
+        ],
+        "kind": "closed"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3AClosed/record/request/unknown-member"
+        ],
+        "kind": "unknown-member"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Transfer",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransfer/record/request/object"
+        ],
+        "kind": "object"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransfer/record/request/wrong-type"
+        ],
+        "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:TransferFunds",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:json",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/json/request/valid"
+        ],
+        "kind": "valid"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/json/request/escaped"
+        ],
+        "kind": "escaped"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/json/request/empty"
+        ],
+        "kind": "empty"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/json/request/bom"
+        ],
+        "kind": "bom"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/json/request/utf8"
+        ],
+        "kind": "utf8"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/json/request/surrogate"
+        ],
+        "kind": "surrogate"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/json/request/malformed"
+        ],
+        "kind": "malformed"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/json/request/duplicate"
+        ],
+        "kind": "duplicate"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/json/request/trailing"
+        ],
+        "kind": "trailing"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:TransferFunds",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:media",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/request/json"
+        ],
+        "kind": "json"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/request/charset"
+        ],
+        "kind": "charset"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/request/missing"
+        ],
+        "kind": "missing"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/request/unsupported"
+        ],
+        "kind": "unsupported"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/request/wrong-charset"
+        ],
+        "kind": "wrong-charset"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/request/extra-parameter"
+        ],
+        "kind": "extra-parameter"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/request/media-before-body"
+        ],
+        "kind": "media-before-body"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:TransferFunds",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:route",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/route/request/exact"
+        ],
+        "kind": "exact"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request/amount",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ARequired/required/request%2Famount/present"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ARequired/required/request%2Famount/omitted"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:amount",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request/amount",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:i64",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/zero"
+        ],
+        "kind": "zero"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/large"
+        ],
+        "kind": "large"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/min"
+        ],
+        "kind": "min"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/max"
+        ],
+        "kind": "max"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/noncanonical"
+        ],
+        "kind": "noncanonical"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/negative-zero"
+        ],
+        "kind": "negative-zero"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/leading-plus"
+        ],
+        "kind": "leading-plus"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/exponent"
+        ],
+        "kind": "exponent"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/whitespace"
+        ],
+        "kind": "whitespace"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/overflow"
+        ],
+        "kind": "overflow"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/numeric"
+        ],
+        "kind": "numeric"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request/destination",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ARequired/required/request%2Fdestination/present"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ARequired/required/request%2Fdestination/omitted"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:destination",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request/destination",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:text",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Adestination/text/request%2Fdestination/unicode"
+        ],
+        "kind": "unicode"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Adestination/text/request%2Fdestination/wrong-type"
+        ],
+        "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request/source",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ARequired/required/request%2Fsource/present"
+        ],
+        "kind": "present"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ARequired/required/request%2Fsource/omitted"
+        ],
+        "kind": "omitted"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:source",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "request/source",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:text",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Asource/text/request%2Fsource/unicode"
+        ],
+        "kind": "unicode"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Asource/text/request%2Fsource/wrong-type"
+        ],
+        "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:http:error:InvalidRequest",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:error",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Ahttp%3Aerror%3AInvalidRequest/error/response/named"
+        ],
+        "kind": "named"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:http:error:UnsupportedMediaType",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:error",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Ahttp%3Aerror%3AUnsupportedMediaType/error/response/named"
+        ],
+        "kind": "named"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Closed",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3AClosed/record/response/closed"
+        ],
+        "kind": "closed"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Pair",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3APair/record/response/object"
+        ],
+        "kind": "object"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:TransferFunds",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:json",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/json/response/valid"
+        ],
+        "kind": "valid"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:TransferFunds",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:media",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/response/json"
+        ],
+        "kind": "json"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:TransferFunds",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:response",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/response/response/success"
+        ],
+        "kind": "success"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger:error:DestinationMissing",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:error",
+    "slots": [
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.provider/destination-and-amount",
+          "scenario/TransferFunds/http.provider/destination-missing"
+        ],
+        "kind": "named"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger:error:DestinationOverflow",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:error",
+    "slots": [
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.provider/overflow"
+        ],
+        "kind": "named"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger:error:InsufficientFunds",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:error",
+    "slots": [
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.provider/funds-and-capacity",
+          "scenario/TransferFunds/http.provider/insufficient"
+        ],
+        "kind": "named"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger:error:NonPositiveAmount",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:error",
+    "slots": [
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.provider/non-positive"
+        ],
+        "kind": "named"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger:error:SameAccount",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:error",
+    "slots": [
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.provider/same-account",
+          "scenario/TransferFunds/http.provider/same-and-amount"
+        ],
+        "kind": "named"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger:error:SourceMissing",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:error",
+    "slots": [
+      {
+        "caseIds": [
+          "scenario/TransferFunds/http.provider/missing-both",
+          "scenario/TransferFunds/http.provider/source-missing"
+        ],
+        "kind": "named"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Account",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3AAccount/record/response%2Fdestination/object"
+        ],
+        "kind": "object"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Closed",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3AClosed/record/response%2Fdestination/closed"
+        ],
+        "kind": "closed"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fdestination/present"
+        ],
+        "kind": "present"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:destinationAccount",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3AdestinationAccount/record/response%2Fdestination/object"
+        ],
+        "kind": "object"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:BalanceBounds",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination/balanceMinor",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:bounds",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ABalanceBounds/bounds/response%2Fdestination%2FbalanceMinor/min-attainable"
+        ],
+        "kind": "min-attainable"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ABalanceBounds/bounds/response%2Fdestination%2FbalanceMinor/max"
+        ],
+        "kind": "max"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination/balanceMinor",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fdestination%2FbalanceMinor/present"
+        ],
+        "kind": "present"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:balance",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination/balanceMinor",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:i64",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2FbalanceMinor/large"
+        ],
+        "kind": "large"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2FbalanceMinor/max"
+        ],
+        "kind": "max"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination/id",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fdestination%2Fid/present"
+        ],
+        "kind": "present"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:id",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination/id",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:text",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aid/text/response%2Fdestination%2Fid/unicode"
+        ],
+        "kind": "unicode"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination/owner",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fdestination%2Fowner/present"
+        ],
+        "kind": "present"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:owner",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/destination/owner",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:text",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aowner/text/response%2Fdestination%2Fowner/unicode"
+        ],
+        "kind": "unicode"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Account",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3AAccount/record/response%2Fsource/object"
+        ],
+        "kind": "object"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Closed",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3AClosed/record/response%2Fsource/closed"
+        ],
+        "kind": "closed"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fsource/present"
+        ],
+        "kind": "present"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:sourceAccount",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:record",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3AsourceAccount/record/response%2Fsource/object"
+        ],
+        "kind": "object"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:BalanceBounds",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source/balanceMinor",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:bounds",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ABalanceBounds/bounds/response%2Fsource%2FbalanceMinor/min"
+        ],
+        "kind": "min"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ABalanceBounds/bounds/response%2Fsource%2FbalanceMinor/max-attainable"
+        ],
+        "kind": "max-attainable"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source/balanceMinor",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fsource%2FbalanceMinor/present"
+        ],
+        "kind": "present"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:balance",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source/balanceMinor",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:i64",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2FbalanceMinor/zero"
+        ],
+        "kind": "zero"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2FbalanceMinor/large"
+        ],
+        "kind": "large"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source/id",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fsource%2Fid/present"
+        ],
+        "kind": "present"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:id",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source/id",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:text",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aid/text/response%2Fsource%2Fid/unicode"
+        ],
+        "kind": "unicode"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:Required",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source/owner",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:required",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ARequired/required/response%2Fsource%2Fowner/present"
+        ],
+        "kind": "present"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:ledger-http:owner",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "position": "response/source/owner",
+    "role": "http.provider",
+    "rule": "urn:oddlang:http:rule:1:text",
+    "slots": [
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aowner/text/response%2Fsource%2Fowner/unicode"
+        ],
+        "kind": "unicode"
+      }
+    ]
+  }
+]

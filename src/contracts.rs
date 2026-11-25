@@ -5,7 +5,7 @@ use oxigraph::{
     io::{RdfFormat, RdfParser},
     model::{Graph, Term, TripleRef, vocab::xsd},
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -13,12 +13,12 @@ use std::{
     path::{Component, Path, PathBuf},
 };
 
-#[derive(Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct Lock {
-    identity: String,
-    version: String,
-    manifest_sha256: String,
+pub struct Pin {
+    pub identity: String,
+    pub version: String,
+    pub manifest_sha256: String,
 }
 
 #[derive(Deserialize)]
@@ -43,16 +43,34 @@ impl Release {
     }
 }
 
-fn verified(root: &Path, name: &str, digest: &str) -> Result<Vec<u8>, String> {
-    if name.is_empty()
-        || !Path::new(name)
+pub(crate) fn normal(name: &str) -> bool {
+    !name.is_empty()
+        && !name.contains('\\')
+        && name.split('/').all(|part| !matches!(part, "" | "." | ".."))
+        && Path::new(name)
             .components()
-            .all(|c| matches!(c, Component::Normal(_)))
-    {
+            .all(|component| matches!(component, Component::Normal(_)))
+}
+
+pub(crate) fn contained(root: &Path, name: &str) -> Result<PathBuf, String> {
+    if !normal(name) {
         return Err(format!("invalid cache path {name}"));
     }
-    let bytes = fs::read(root.join(name))
+    let root = root
+        .canonicalize()
+        .map_err(|e| format!("cache root: {e}"))?;
+    let path = root
+        .join(name)
+        .canonicalize()
         .map_err(|e| format!("missing or unreadable cached {name}: {e}"))?;
+    if !path.starts_with(&root) {
+        return Err(format!("cache path escapes root: {name}"));
+    }
+    Ok(path)
+}
+
+pub(crate) fn verified(root: &Path, name: &str, digest: &str) -> Result<Vec<u8>, String> {
+    let bytes = fs::read(contained(root, name)?).map_err(|e| format!("{name}: {e}"))?;
     let actual: String = Sha256::digest(&bytes)
         .iter()
         .map(|b| format!("{b:02x}"))
@@ -66,18 +84,10 @@ fn verified(root: &Path, name: &str, digest: &str) -> Result<Vec<u8>, String> {
 /// Load the release selected by a project's import IRI and its workspace lock.
 /// The project is a Turtle file. The cache is the directory containing ledger/v1, ledger/v2, etc.
 pub fn resolve(project: &Path, lock: &Path, cache: &Path) -> Result<Release, String> {
-    let pin: Lock =
+    let pin: Pin =
         serde_json::from_slice(&fs::read(lock).map_err(|e| format!("workspace lock: {e}"))?)
             .map_err(|e| format!("workspace lock: {e}"))?;
-    if pin.identity != "urn:oddlang:contract:ledger"
-        || pin.version.is_empty()
-        || !pin
-            .version
-            .bytes()
-            .all(|c| c.is_ascii_alphanumeric() || c == b'-')
-    {
-        return Err("unsupported release identity or invalid version".into());
-    }
+    validate_ledger_pin(&pin)?;
     let expected = format!("{}:{}", pin.identity, pin.version);
     let project_bytes = fs::read(project).map_err(|e| format!("project ontology: {e}"))?;
     let mut imports = BTreeSet::new();
@@ -95,7 +105,25 @@ pub fn resolve(project: &Path, lock: &Path, cache: &Path) -> Result<Release, Str
             "project imports {imports:?}, workspace pins {expected}"
         ));
     }
-    let root = cache.join("ledger").join(&pin.version);
+    resolve_pin(&pin, cache)
+}
+
+fn validate_ledger_pin(pin: &Pin) -> Result<(), String> {
+    if pin.identity != "urn:oddlang:contract:ledger"
+        || pin.version.is_empty()
+        || !pin
+            .version
+            .bytes()
+            .all(|c| c.is_ascii_alphanumeric() || c == b'-')
+    {
+        return Err("unsupported release identity or invalid version".into());
+    }
+    Ok(())
+}
+
+pub fn resolve_pin(pin: &Pin, cache: &Path) -> Result<Release, String> {
+    validate_ledger_pin(pin)?;
+    let root = contained(cache, &format!("ledger/{}", pin.version))?;
     let bytes = verified(&root, "manifest.json", &pin.manifest_sha256)?;
     let manifest: Manifest =
         serde_json::from_slice(&bytes).map_err(|e| format!("manifest.json: {e}"))?;
@@ -111,6 +139,9 @@ pub fn resolve(project: &Path, lock: &Path, cache: &Path) -> Result<Release, Str
         if !files.contains_key(required) {
             return Err(format!("unlisted payload {required}"));
         }
+    }
+    if !normal(&manifest.entry) {
+        return Err(format!("invalid entry {}", manifest.entry));
     }
     let mut graph = Graph::new();
     let mut loaded = BTreeSet::new();
@@ -132,11 +163,7 @@ pub fn resolve(project: &Path, lock: &Path, cache: &Path) -> Result<Release, Str
                 let Term::Literal(value) = &quad.object else {
                     return Err("expected relative ontology import".into());
                 };
-                if value.datatype() != xsd::STRING
-                    || !Path::new(value.value())
-                        .components()
-                        .all(|c| matches!(c, Component::Normal(_)))
-                {
+                if value.datatype() != xsd::STRING || !normal(value.value()) {
                     return Err(format!(
                         "invalid relative ontology import {}",
                         value.value()
@@ -163,7 +190,7 @@ pub fn resolve(project: &Path, lock: &Path, cache: &Path) -> Result<Release, Str
         &files["vectors.json"],
     )?;
     Ok(Release {
-        version: pin.version,
+        version: pin.version.clone(),
         graph,
         model,
         files,

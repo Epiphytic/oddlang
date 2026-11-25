@@ -1,0 +1,42 @@
+@prefix h: <urn:oddlang:http:> .
+@prefix d: <urn:oddlang:ledger-http:> .
+@prefix e: <urn:oddlang:ledger:error:> .
+@prefix he: <urn:oddlang:http:error:> .
+
+d:Contract a h:Contract ; h:identity <urn:oddlang:contract:ledger-http> ; h:version "v2" ;
+    h:ruleSetVersion 1 ; h:scenarioFile "scenarios.json" ; h:dependency <urn:oddlang:contract:ledger:v1> .
+d:LookupAccount a h:Operation ; h:method "GET" ; h:path "/accounts/{id}" ;
+    h:request d:Lookup ; h:response d:Account ; h:status 200 ; h:role h:provider, h:consumer ;
+    h:error he:AccountMissing, he:InvalidRequest ; h:observation d:ReadAccount .
+d:TransferFunds a h:Operation ; h:method "POST" ; h:path "/transfers" ;
+    h:request d:Transfer ; h:response d:Pair ; h:status 200 ; h:role h:provider, h:consumer ;
+    h:behavior <urn:oddlang:ledger:TransferFunds> ; h:observation d:AtomicTransfer ;
+    h:error he:InvalidRequest, he:UnsupportedMediaType, e:SourceMissing, e:DestinationMissing,
+        e:SameAccount, e:NonPositiveAmount, e:InsufficientFunds, e:DestinationOverflow .
+d:ReadAccount a h:LookupObservation .
+d:AtomicTransfer a h:TransferObservation .
+d:Required a h:Required .
+d:Closed a h:Closed .
+d:BalanceBounds a h:Bounds ; h:min 0 ; h:max 9223372036854775807 .
+
+d:Lookup a h:Record ; h:field d:id ; h:constraint d:Closed .
+d:Account a h:Record ; h:field d:id, d:owner, d:balance ; h:constraint d:Closed .
+d:Transfer a h:Record ; h:field d:source, d:destination, d:amount ; h:constraint d:Closed .
+d:Pair a h:Record ; h:field d:sourceAccount, d:destinationAccount ; h:constraint d:Closed .
+d:id a h:Field ; h:nativeName "id" ; h:wireName "id" ; h:shape h:Text ; h:constraint d:Required .
+d:owner a h:Field ; h:nativeName "owner" ; h:wireName "owner" ; h:shape h:Text ; h:constraint d:Required .
+d:balance a h:Field ; h:nativeName "balance" ; h:wireName "balanceMinor" ; h:shape h:I64 ; h:constraint d:Required, d:BalanceBounds .
+d:source a h:Field ; h:nativeName "source" ; h:wireName "source" ; h:shape h:Text ; h:constraint d:Required .
+d:destination a h:Field ; h:nativeName "destination" ; h:wireName "destination" ; h:shape h:Text ; h:constraint d:Required .
+d:amount a h:Field ; h:nativeName "amount" ; h:wireName "amount" ; h:shape h:I64 ; h:constraint d:Required .
+d:sourceAccount a h:Field ; h:nativeName "source" ; h:wireName "source" ; h:shape d:Account ; h:constraint d:Required .
+d:destinationAccount a h:Field ; h:nativeName "destination" ; h:wireName "destination" ; h:shape d:Account ; h:constraint d:Required .
+he:InvalidRequest a h:Error ; h:status 400 .
+he:UnsupportedMediaType a h:Error ; h:status 415 .
+he:AccountMissing a h:Error ; h:status 404 .
+e:SourceMissing a h:Error ; h:status 404 .
+e:DestinationMissing a h:Error ; h:status 404 .
+e:SameAccount a h:Error ; h:status 422 .
+e:NonPositiveAmount a h:Error ; h:status 422 .
+e:InsufficientFunds a h:Error ; h:status 409 .
+e:DestinationOverflow a h:Error ; h:status 409 .

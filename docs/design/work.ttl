@@ -227,27 +227,27 @@ w:httpPlanReview a p:Task ; rdfs:label "Write and independently review the HTTP 
     p:acceptance "Review a phased plan with Claude CLI and record the disposition of material findings." .
 
 w:httpVocabulary a p:Task ; rdfs:label "Specify and load the HTTP vocabulary" ;
-    p:milestone w:httpFoundation ; p:status p:planned ; p:source w:httpPlan ;
+    p:milestone w:httpFoundation ; p:status p:done ; p:source w:httpPlan ;
     p:dependsOn w:httpPlanReview ;
     p:acceptance "Load a closed stable-IRI HTTP profile with pinned ledger semantics offline and reject invalid declarations and imports." .
 w:httpBundle a p:Task ; rdfs:label "Publish portable obligations, cases and schemas" ;
-    p:milestone w:httpFoundation ; p:status p:planned ; p:source w:httpPlan ;
+    p:milestone w:httpFoundation ; p:status p:done ; p:source w:httpPlan ;
     p:dependsOn w:httpVocabulary ;
     p:acceptance "Publish deterministic evidence requirements, portable cases, OpenAPI and JSON Schema and reject missing required witnesses." .
 w:httpProvider a p:Task ; rdfs:label "Prove conformance of a real Rust HTTP provider" ;
-    p:milestone w:httpNative ; p:status p:planned ; p:source w:httpPlan ;
+    p:milestone w:httpNative ; p:status p:done ; p:source w:httpPlan ;
     p:dependsOn w:httpBundle ;
     p:acceptance "Exercise wire validation, ledger errors and isolated state transitions against a live Rust service and catch a state mutation." .
 w:httpConsumers a p:Task ; rdfs:label "Verify TypeScript and independent Go consumers" ;
-    p:milestone w:httpNative ; p:status p:planned ; p:source w:httpPlan ;
+    p:milestone w:httpNative ; p:status p:done ; p:source w:httpPlan ;
     p:dependsOn w:httpProvider ;
     p:acceptance "Run native client checks against a scripted peer and detect mutated codecs using shared cases and evidence." .
 w:httpEvolution a p:Task ; rdfs:label "Expand the JSON profile and verify release evolution" ;
-    p:milestone w:httpAdoption ; p:status p:planned ; p:source w:httpPlan ;
+    p:milestone w:httpAdoption ; p:status p:done ; p:source w:httpPlan ;
     p:dependsOn w:httpConsumers ;
     p:acceptance "Verify expanded codecs, both directions of version skew, reproducible pins, and impact tracking by declaration IRI." .
 w:httpHybrid a p:Task ; rdfs:label "Exercise Node SSR and browser React against Rust" ;
-    p:milestone w:httpAdoption ; p:status p:planned ; p:source w:httpPlan ;
+    p:milestone w:httpAdoption ; p:status p:done ; p:source w:httpPlan ;
     p:dependsOn w:httpEvolution ;
     p:acceptance "Change one workspace pin to update both apps and preserve independent Go adoption in the offline verification matrix." .
 
@@ -272,3 +272,36 @@ w:httpPlanReview p:addresses w:httpReviewWitnesses, w:httpReviewReproducibility,
 w:httpReviewInputs a p:Finding ; rdfs:label "Authored scenario source, stable field names and client overlays needed explicit ownership" ;
     p:source w:httpClaudeReview .
 w:httpPlanReview p:addresses w:httpReviewInputs .
+
+w:httpPhase1ReviewFinding a p:Finding ; rdfs:label "Strengthen HTTP loader diagnostics, negative tests and tool pin verification" ;
+    p:source w:httpImplementationEvidence .
+w:httpVocabulary p:addresses w:httpPhase1ReviewFinding .
+
+w:httpImplementationEvidence a p:Artifact ; rdfs:label "HTTP implementation verification and Claude phase reviews" ;
+    p:location "docs/design/http-implementation-evidence.md" .
+w:httpVocabulary p:evidence w:httpImplementationEvidence .
+
+w:httpPhase2ReviewFinding a p:Finding ; rdfs:label "Add provider route, decimal and media rejection witnesses" ;
+    p:source w:httpImplementationEvidence .
+w:httpBundle p:addresses w:httpPhase2ReviewFinding .
+w:httpBundle p:evidence w:httpImplementationEvidence .
+
+w:httpPhase3ReviewFinding a p:Finding ; rdfs:label "Bound the example provider request-body buffer" ;
+    p:source w:httpImplementationEvidence .
+w:httpProvider p:addresses w:httpPhase3ReviewFinding .
+w:httpProvider p:evidence w:httpImplementationEvidence .
+
+w:httpPhase4ReviewFinding a p:Finding ; rdfs:label "Verify Fetch in Chromium and align native URL, peer and media handling" ;
+    p:source w:httpImplementationEvidence .
+w:httpConsumers p:addresses w:httpPhase4ReviewFinding .
+w:httpConsumers p:evidence w:httpImplementationEvidence .
+
+w:httpPhase5ReviewFinding a p:Finding ; rdfs:label "Complete codec raw-byte witnesses and pin closed-record validation" ;
+    p:source w:httpImplementationEvidence .
+w:httpEvolution p:addresses w:httpPhase5ReviewFinding .
+
+w:httpPhase6ReviewFinding a p:Finding ; rdfs:label "Document hybrid roles and check prerequisites and evidence freshness" ;
+    p:source w:httpImplementationEvidence .
+w:httpHybrid p:addresses w:httpPhase6ReviewFinding .
+w:httpEvolution p:evidence w:httpImplementationEvidence .
+w:httpHybrid p:evidence w:httpImplementationEvidence .
