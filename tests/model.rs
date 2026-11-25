@@ -28,8 +28,8 @@ fn structural_errors_are_stable_across_equivalent_graphs() {
             "balance/range/min: invalid integer",
         ),
         (
-            "operations.ttl",
-            "o:dependsOn l:balance",
+            "rust.ttl",
+            "o:dependsOn l:owner",
             "o:dependsOn l:Domain",
             "dependsOn: unresolved urn:oddlang:ledger:Domain",
         ),
@@ -127,50 +127,169 @@ fn transfer_lowering_matches_reviewed_operand_order() {
 #[test]
 fn invalid_transfer_nodes_have_stable_diagnostics() {
     for (from, to, diagnostic) in [
-        ("l:g1", "_:anonymousGuard", "expected named IRI"),
-        ("o:priority 1 ; ", "", "expected one priority"),
-        ("o:priority 2", "o:priority 1", "duplicate priority"),
+        (
+            "e:SourceMissing",
+            "l:Oops",
+            "g1/error: invalid guard error IRI urn:oddlang:ledger:Oops",
+        ),
+        (
+            "e:SourceMissing",
+            "e:AssignmentConflict",
+            "g1/error: reserved commit error urn:oddlang:ledger:error:AssignmentConflict",
+        ),
+        (
+            "e:SourceMissing",
+            "e:FieldOutOfRange",
+            "g1/error: reserved commit error urn:oddlang:ledger:error:FieldOutOfRange",
+        ),
+        (
+            "o:left l:amount ; o:right _:zero",
+            "o:left l:amount, _:zero ; o:right _:zero",
+            "g4/condition: expected one left",
+        ),
+        (
+            "o:left l:amount ; o:right _:zero",
+            "o:left 1 ; o:right _:zero",
+            "g4/condition/left: expected node",
+        ),
+        (
+            "l:g1, l:g2, l:g3, l:g4, l:g5, l:g6",
+            "l:g1, l:g2, l:g4, l:g5, l:g6",
+            "g3: unowned declaration",
+        ),
+        (
+            "l:g1",
+            "_:anonymousGuard",
+            "TransferFunds/guard: expected named IRI",
+        ),
+        ("o:priority 1 ; ", "", "g1: expected one priority"),
+        (
+            "o:priority 2",
+            "o:priority 1",
+            "TransferFunds: duplicate priority 1",
+        ),
         (
             "o:assign _:debit, _:credit",
             "o:assign _:debit, _:credit, [ a o:Assign ; o:account l:source ; o:field l:balance ; o:value l:amount ]",
-            "duplicate assignment target",
+            "TransferFunds: duplicate assignment target urn:oddlang:ledger:source urn:oddlang:ledger:balance",
         ),
-        ("o:priority 5", "o:priority 1", "duplicate priority"),
-        ("o:priority 1 ;", "o:priority 7 ;", "existence guard"),
-        ("a o:Subtract", "a o:Multiply", "unsupported expression"),
+        (
+            "o:priority 5",
+            "o:priority 1",
+            "TransferFunds: duplicate priority 1",
+        ),
+        (
+            "o:priority 1 ;",
+            "o:priority 7 ;",
+            "g5/condition/left/account: missing earlier existence guard for urn:oddlang:ledger:source",
+        ),
+        (
+            "a o:Subtract",
+            "a o:Multiply",
+            "TransferFunds/assign/urn:oddlang:ledger:source/urn:oddlang:ledger:balance/value: unsupported expression urn:oddlang:core:Multiply",
+        ),
         (
             "_:debitValue a o:Subtract ; o:left _:sourceBalance",
             "_:debitValue a o:Subtract ; o:left _:debitValue",
-            "cyclic expression",
+            "TransferFunds/assign/urn:oddlang:ledger:source/urn:oddlang:ledger:balance/value/left: cyclic expression",
         ),
         (
             "o:left _:destinationBalance ; o:right l:amount",
             "o:left [ a o:Constant ; o:integer 170141183460469231731687303715884105727 ] ; o:right l:amount",
-            "interval exceeds i128",
+            "g6/condition/left: interval exceeds i128",
         ),
-        ("o:right _:zero", "o:right l:source", "operand type"),
+        (
+            "o:right _:zero",
+            "o:right l:source",
+            "g4/condition: invalid operand type",
+        ),
         (
             "o:integer 0",
             "o:integer 0 ; o:typo 0",
-            "/right: unknown property",
+            "g4/condition/right: unknown property urn:oddlang:core:typo",
         ),
         (
             "o:field l:balance ; o:value _:debitValue",
             "o:field l:missing ; o:value _:debitValue",
-            "unknown field",
+            "TransferFunds/assign/field: unknown field urn:oddlang:ledger:missing",
         ),
         (
             "o:argument l:source, l:destination, l:amount",
             "o:argument l:source, l:destination",
-            "arguments",
+            "TransferFunds: expected source, destination and amount arguments",
         ),
     ] {
         let project = fixture();
         replace(project.path(), "transfer.ttl", from, to);
         let error = load_model(project.path()).unwrap_err();
-        assert!(error.contains(diagnostic), "{from}: {error}");
+        assert_eq!(error, format!("urn:oddlang:ledger:{diagnostic}"), "{from}");
         rewrite(project.path());
         replace(project.path(), "transfer.ttl", "_:zero", "_:renamed");
         assert_eq!(load_model(project.path()).unwrap_err(), error);
+    }
+}
+
+#[test]
+fn expression_depth_limit_includes_leaves_and_guard_root() {
+    use std::fmt::Write;
+    for depth in [24, 25] {
+        let p = fixture();
+        let path = p.path().join("transfer.ttl");
+        let mut ttl = std::fs::read_to_string(&path)
+            .unwrap()
+            .replace("o:right _:zero", "o:right _:level2");
+        for level in 2..depth {
+            writeln!(
+                ttl,
+                "_:level{level} a o:Add ; o:left _:level{} ; o:right _:zero .",
+                level + 1
+            )
+            .unwrap();
+        }
+        writeln!(ttl, "_:level{depth} a o:Constant ; o:integer 0 .").unwrap();
+        std::fs::write(path, ttl).unwrap();
+        let model = load_model(p.path());
+        if depth == 24 {
+            model.unwrap();
+        } else {
+            let expected = format!(
+                "urn:oddlang:ledger:g4/condition/right{}: expression exceeds depth 24",
+                "/left".repeat(23)
+            );
+            assert_eq!(model.unwrap_err(), expected);
+            rewrite(p.path());
+            assert_eq!(load_model(p.path()).unwrap_err(), expected);
+        }
+    }
+}
+
+#[test]
+fn operation_budget_counts_reused_expressions_for_each_guard() {
+    use std::fmt::Write;
+    for extra_guards in [78, 79] {
+        let p = fixture();
+        let path = p.path().join("transfer.ttl");
+        let mut ttl = std::fs::read_to_string(&path).unwrap().replace(
+            "[ a o:Greater ; o:left l:amount ; o:right _:zero ]",
+            "_:positive",
+        );
+        writeln!(
+            ttl,
+            "_:positive a o:Greater ; o:left l:amount ; o:right _:zero ."
+        )
+        .unwrap();
+        for n in 7..7 + extra_guards {
+            writeln!(ttl,"l:TransferFunds o:guard l:g{n} .\nl:g{n} a o:Guard ; o:priority {n} ; o:condition _:positive ; o:error e:NonPositiveAmount .").unwrap();
+        }
+        std::fs::write(path, ttl).unwrap();
+        let model = load_model(p.path());
+        if extra_guards == 78 {
+            model.unwrap();
+        } else {
+            let expected = "urn:oddlang:ledger:TransferFunds/assign/urn:oddlang:ledger:source/urn:oddlang:ledger:balance/value: operation exceeds 256 expanded expression nodes";
+            assert_eq!(model.unwrap_err(), expected);
+            rewrite(p.path());
+            assert_eq!(load_model(p.path()).unwrap_err(), expected);
+        }
     }
 }

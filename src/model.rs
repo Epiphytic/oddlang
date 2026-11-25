@@ -222,6 +222,9 @@ fn validate_declarations(g: &Graph, behavior: Option<&HashSet<NamedOrBlankNode>>
                         .iter()
                         .any(|t| core(t).as_str() == ty)
                     {
+                        if crate::language::behavior_class(&ty) {
+                            return Err(format!("{owner}: unowned declaration"));
+                        }
                         return Err(format!("{owner}: unknown declaration type {ty}"));
                     }
                     if !matches!(s, NamedOrBlankNode::NamedNode(_)) {
@@ -241,10 +244,16 @@ fn validate_declarations(g: &Graph, behavior: Option<&HashSet<NamedOrBlankNode>>
             }
         };
         if let Err(error) = validate() {
-            errors.insert(error);
+            // Prefer a named root over its detached descendants.
+            let anonymous = matches!(s, NamedOrBlankNode::BlankNode(_));
+            let referenced = g
+                .triples_for_object(&Term::from(s.clone()))
+                .next()
+                .is_some();
+            errors.insert((anonymous, referenced, error));
         }
     }
-    errors.into_iter().next().map_or(Ok(()), Err)
+    errors.into_iter().next().map_or(Ok(()), |(_, _, e)| Err(e))
 }
 pub fn load_model(project_dir: impl AsRef<Path>) -> Result<Model> {
     let (g, imports) = load_graph(project_dir.as_ref())?;

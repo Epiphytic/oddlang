@@ -79,9 +79,34 @@ fn integer<T: std::str::FromStr>(g: &Graph, s: &NamedOrBlankNode, p: &str, at: &
         .map_err(|_| format!("{path}: invalid integer or outside supported range"))
 }
 
+pub(crate) fn behavior_class(iri: &str) -> bool {
+    matches!(
+        iri.strip_prefix(CORE),
+        Some(
+            "Argument"
+                | "Guard"
+                | "Error"
+                | "Assign"
+                | "Exists"
+                | "Read"
+                | "Constant"
+                | "NotEqual"
+                | "Greater"
+                | "GreaterEqual"
+                | "LessEqual"
+                | "Add"
+                | "Subtract"
+        )
+    )
+}
+
+const MAX_DEPTH: usize = 24;
+const MAX_EXPANDED_NODES: usize = 256;
+
 struct Scope<'a> {
     owned: &'a mut HashSet<NamedOrBlankNode>,
     graph: &'a Graph,
+    expanded: usize,
     fields: &'a BTreeMap<String, Field>,
     exists: BTreeSet<String>,
 }
@@ -116,6 +141,15 @@ impl Scope<'_> {
         path: &str,
         stack: &mut HashSet<NamedOrBlankNode>,
     ) -> Result<(Expr, Type)> {
+        if stack.len() == MAX_DEPTH {
+            return Err(format!("{path}: expression exceeds depth {MAX_DEPTH}"));
+        }
+        if self.expanded == MAX_EXPANDED_NODES {
+            return Err(format!(
+                "{path}: operation exceeds {MAX_EXPANDED_NODES} expanded expression nodes"
+            ));
+        }
+        self.expanded += 1;
         let s = node(term, path)?;
         self.owned.insert(s.clone());
         let at = match &s {
@@ -239,6 +273,7 @@ pub(crate) fn lower(
         let mut scope = Scope {
             owned,
             graph: g,
+            expanded: 0,
             fields,
             exists: BTreeSet::new(),
         };
@@ -246,6 +281,15 @@ pub(crate) fn lower(
         for (priority, id) in order {
             let guard = named(&id);
             let error = reference(g, &guard, "error", &id)?;
+            if error
+                .strip_prefix("urn:oddlang:ledger:error:")
+                .is_none_or(str::is_empty)
+            {
+                return Err(format!("{id}/error: invalid guard error IRI {error}"));
+            }
+            if matches!(error.as_str(), ASSIGNMENT_CONFLICT | FIELD_OUT_OF_RANGE) {
+                return Err(format!("{id}/error: reserved commit error {error}"));
+            }
             scope.owned.insert(named(&error));
             check_class(g, &named(&error), "Error", &error)?;
             allowed(g, &named(&error), &[], &error)?;
@@ -267,16 +311,18 @@ pub(crate) fn lower(
                 condition,
             });
         }
-        let mut assignments = BTreeMap::new();
+        // Resolve targets first so anonymous assignments are lowered in stable
+        // target order, including when an operation reaches its expansion limit.
+        let mut targets = BTreeMap::new();
         let mut errors = BTreeSet::new();
         for t in g.objects_for_subject_predicate(&s, &core("assign")) {
-            let at = format!("{op}/assign");
-            let mut parse = || -> Result<Assignment> {
-                let s = node(t, &at)?;
+            let path = format!("{op}/assign");
+            let mut parse = || -> Result<_> {
+                let s = node(t, &path)?;
                 scope.owned.insert(s.clone());
                 let at = match &s {
                     NamedOrBlankNode::NamedNode(n) => n.as_str(),
-                    _ => &at,
+                    _ => &path,
                 };
                 check_class(g, &s, "Assign", at)?;
                 allowed(g, &s, &["account", "field", "value"], at)?;
@@ -285,22 +331,13 @@ pub(crate) fn lower(
                 if field == crate::model::ID {
                     return Err(format!("{at}: cannot assign account key"));
                 }
+                let term = one(g, &s, "value", at)?;
                 let path = format!("{at}/{account}/{field}/value");
-                let (value, vt) =
-                    scope.expr(one(g, &s, "value", at)?, &path, &mut HashSet::new())?;
-                if std::mem::discriminant(&vt) != std::mem::discriminant(&ty) {
-                    return Err(format!("{path}: assignment type mismatch"));
-                }
-                Ok(Assignment {
-                    account,
-                    field,
-                    value,
-                })
+                Ok(((account, field), (term, ty, path)))
             };
             match parse() {
-                Ok(a) => {
-                    let key = (a.account.clone(), a.field.clone());
-                    if assignments.insert(key.clone(), a).is_some() {
+                Ok((key, rhs)) => {
+                    if targets.insert(key.clone(), rhs).is_some() {
                         errors.insert(format!(
                             "{op}: duplicate assignment target {} {}",
                             key.0, key.1
@@ -315,14 +352,26 @@ pub(crate) fn lower(
         if let Some(e) = errors.pop_first() {
             return Err(e);
         }
-        if assignments.is_empty() {
+        if targets.is_empty() {
             return Err(format!("{op}: expected at least one assignment"));
+        }
+        let mut assignments = Vec::new();
+        for ((account, field), (term, ty, path)) in targets {
+            let (value, vt) = scope.expr(term, &path, &mut HashSet::new())?;
+            if std::mem::discriminant(&vt) != std::mem::discriminant(&ty) {
+                return Err(format!("{path}: assignment type mismatch"));
+            }
+            assignments.push(Assignment {
+                account,
+                field,
+                value,
+            });
         }
         operations.insert(
             op,
             Operation {
                 guards,
-                assignments: assignments.into_values().collect(),
+                assignments,
             },
         );
     }

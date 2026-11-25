@@ -98,3 +98,36 @@ fn impact_distinguishes_an_unknown_iri_from_a_known_leaf() {
     let err = oddlang::impact::impact(&model, unknown).unwrap_err();
     assert!(err.contains(unknown), "{err}");
 }
+
+#[test]
+fn read_and_write_dependencies_follow_operation_operands() {
+    let p = fixture();
+    let impact = |name: &str| {
+        let m = oddlang::model::load_model(p.path()).unwrap();
+        oddlang::impact::impact(&m, &format!("urn:oddlang:ledger:{name}"))
+            .unwrap()
+            .contains(&"urn:oddlang:ledger:TransferFunds".into())
+    };
+    assert!(!impact("owner"));
+    replace(
+        p.path(),
+        "transfer.ttl",
+        "o:left l:source ; o:right l:destination",
+        "o:left [ a o:Read ; o:account l:source ; o:field l:owner ] ; o:right l:destination",
+    );
+    assert!(impact("owner"));
+    replace(
+        p.path(),
+        "transfer.ttl",
+        "o:field l:owner ]",
+        "o:field l:id ]",
+    );
+    assert!(!impact("owner"));
+    replace(
+        p.path(),
+        "transfer.ttl",
+        "o:assign _:debit, _:credit",
+        "o:assign _:debit, _:credit, [ a o:Assign ; o:account l:source ; o:field l:owner ; o:value l:destination ]",
+    );
+    assert!(impact("owner"));
+}

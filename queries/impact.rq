@@ -2,7 +2,8 @@ PREFIX o: <urn:oddlang:core:>
 SELECT DISTINCT ?affected ?start WHERE {
   VALUES ?kind { o:Projection o:Operation }
   ?affected a ?kind ;
-            (o:dependsOn|o:projects|o:field)+ ?start .
+            (o:dependsOn|o:projects|o:field|o:assign/o:field|
+             (o:guard/o:condition|o:assign/o:value)/(o:left|o:right)*/o:field)+ ?start .
   FILTER(isIRI(?affected) && ?affected != ?start)
 }
 ORDER BY STR(?affected)
