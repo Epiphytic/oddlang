@@ -27,3 +27,4 @@ Claude Sonnet CLI reviewed `3ca48e3` in auto permission mode, passed the spec an
 - The provider uses pinned Axum 0.8.9 and Tokio 1.54.1 plus generated native Rust ledger behavior. Regeneration reproduces the checked-in provider source. Advisory overlays did not change the generated binding.
 - The stock provider passed all 117 released provider cases over 378 HTTP exchanges, with a fresh process and fixture state per case.
 - Three test-only providers failed the expected observations for write-on-error, changed guard order and noncanonical amount handling. The stock provider evidence passed standalone CLI verification.
+- The scoped Claude follow-up on `a1fd6fd` approved the body cap. The live regression failed before the fix with 200 and passed afterward with 400, alongside all provider checks.
