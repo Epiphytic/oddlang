@@ -16,6 +16,21 @@ fn fixture(name: &str) -> PathBuf {
     Path::new("contracts/wasm").join(name)
 }
 fn clean_publish(name: &str, out: &Path) {
+    if name == "ledger-test" {
+        let cache = tempdir().unwrap();
+        clean_publish(
+            "ledger",
+            &cache_dir(cache.path(), "urn:oddlang:ledger:wasm:package"),
+        );
+        publish(
+            &fixture(name),
+            &fixture("ledger-test/dependencies.lock.json"),
+            cache.path(),
+            out,
+        )
+        .unwrap();
+        return;
+    }
     publish(
         &fixture(name),
         &fixture("empty.lock.json"),
@@ -73,6 +88,29 @@ fn two_clean_releases_and_roundtrip_all_selected_worlds() {
             release.world.behavior_roles().unwrap(),
             recovered.behavior_roles().unwrap()
         );
+        if name == "ledger-test" {
+            let mut resolved = wit_parser::Resolve::default();
+            let (pkg, _) = resolved.push_dir(first.join("wit")).unwrap();
+            let selected = resolved.select_world(&[pkg], Some(world_name)).unwrap();
+            let packages: Vec<_> = resolved.worlds[selected]
+                .imports
+                .values()
+                .filter_map(|item| {
+                    let wit_parser::WorldItem::Interface { id, .. } = item else {
+                        return None;
+                    };
+                    let iface = &resolved.interfaces[*id];
+                    Some((
+                        resolved.packages[iface.package.unwrap()].name.to_string(),
+                        iface.name.clone().unwrap(),
+                    ))
+                })
+                .collect();
+            assert_eq!(
+                packages,
+                vec![("oddlang:ledger@1.0.0".to_owned(), "ledger-types".to_owned())]
+            );
+        }
         if name.starts_with("ledger") {
             for func in ["fixture-load", "complete-snapshot"] {
                 assert_eq!(
@@ -287,4 +325,83 @@ fn external_types_require_digest_pinned_transitive_packages() {
     verify_bundle(&destination, &destination.join("workspace.lock.json")).unwrap();
     fs::write(echo.join("wit/world.wit"), "corrupt").unwrap();
     assert!(publish(&consumer, &lock, &cache, &temp.path().join("invalid")).is_err());
+}
+
+#[test]
+fn extension_cannot_redefine_a_declaration_of_its_pinned_world() {
+    let temp = tempdir().unwrap();
+    let base = cache_dir(temp.path(), "urn:oddlang:ledger:wasm:package");
+    clean_publish("ledger", &base);
+    let source = temp.path().join("extension");
+    copy_source("ledger-test", &source);
+    let path = source.join("model.ttl");
+    let mut model = fs::read_to_string(&path).unwrap();
+    model.push_str("\nl:transfer w:name \"different\" .\n");
+    fs::write(path, model).unwrap();
+    let failure = publish(
+        &source,
+        &base.join("workspace.lock.json"),
+        temp.path(),
+        &temp.path().join("out"),
+    )
+    .unwrap_err();
+    assert!(
+        failure.contains("redefines pinned declaration"),
+        "{failure}"
+    );
+}
+
+#[test]
+fn transitive_world_inclusion_preserves_type_provenance() {
+    let temp = tempdir().unwrap();
+    let cache = temp.path().join("cache");
+    let ledger = cache_dir(&cache, "urn:oddlang:ledger:wasm:package");
+    clean_publish("ledger", &ledger);
+    let test_id = "urn:oddlang:ledger:wasm:test-package";
+    let test_world = cache_dir(&cache, test_id);
+    publish(
+        &fixture("ledger-test"),
+        &ledger.join("workspace.lock.json"),
+        &cache,
+        &test_world,
+    )
+    .unwrap();
+
+    let source = temp.path().join("leaf");
+    copy_source("ledger-test", &source);
+    fs::write(source.join("model.ttl"),r#"
+@prefix w: <urn:oddlang:wasm:> .
+<urn:test:package> a w:Package ; w:name "test:leaf@1.0.0" .
+<urn:test:world> a w:World ; w:name "leaf" ; w:entry true ; w:include <urn:oddlang:ledger:wasm:test-world> .
+"#).unwrap();
+    write(
+        source.join("dependencies.json"),
+        &json!([{"identity":test_id,"includeWorld":"urn:oddlang:ledger:wasm:test-world"}]),
+    );
+    let leaf = temp.path().join("release");
+    publish(
+        &source,
+        &test_world.join("workspace.lock.json"),
+        &cache,
+        &leaf,
+    )
+    .unwrap();
+    let mut resolve = wit_parser::Resolve::default();
+    let (pkg, _) = resolve.push_dir(leaf.join("wit")).unwrap();
+    let world = resolve.select_world(&[pkg], Some("leaf")).unwrap();
+    let origins: Vec<_> = resolve.worlds[world]
+        .imports
+        .values()
+        .filter_map(|item| {
+            let wit_parser::WorldItem::Interface { id, .. } = item else {
+                return None;
+            };
+            Some(
+                resolve.packages[resolve.interfaces[*id].package.unwrap()]
+                    .name
+                    .to_string(),
+            )
+        })
+        .collect();
+    assert_eq!(origins, ["oddlang:ledger@1.0.0"]);
 }

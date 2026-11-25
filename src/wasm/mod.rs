@@ -12,6 +12,9 @@ pub fn command(args: &[String]) -> Result<(), String> {
         [cmd, wit, world, identities, out] if cmd == "import-wit" => {
             wit::recover(wit.as_ref(), world, identities, out.as_ref())
         }
+        [cmd, wit, world, identities, out, flag, lock] if cmd == "import-wit" && flag == "--lock" => {
+            wit::recover_locked(wit.as_ref(), world, identities, out.as_ref(), Some(lock.as_ref()))
+        }
         [cmd, old, old_lock, new, new_lock, direction, format] if cmd == "diff" => {
             let direction = match direction.as_str() {
                 "old-host-new-guest" => diff::Direction::OldHostNewGuest,
@@ -28,6 +31,6 @@ pub fn command(args: &[String]) -> Result<(), String> {
             }
             Ok(())
         }
-        _ => Err("usage: oddlang wasm publish SOURCE DEPENDENCY_LOCK CACHE OUT | import-wit WIT_DIR WORLD ID_MAP_OR_NAMESPACE OUT | diff OLD OLD_LOCK NEW NEW_LOCK DIRECTION json|text".into()),
+        _ => Err("usage: oddlang wasm publish SOURCE DEPENDENCY_LOCK CACHE OUT | import-wit WIT_DIR WORLD ID_MAP_OR_NAMESPACE OUT [--lock WORKSPACE_LOCK] | diff OLD OLD_LOCK NEW NEW_LOCK DIRECTION json|text".into()),
     }
 }

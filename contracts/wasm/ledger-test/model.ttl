@@ -2,28 +2,6 @@
 @prefix l: <urn:oddlang:ledger:wasm:> .
 
 l:test-package a w:Package ; w:name "oddlang:ledger-test@1.0.0" .
-l:types a w:Interface ; w:name "ledger-types" ; w:type l:account, l:error .
-l:account a w:Record ; w:name "account" ; w:field l:id, l:owner, l:balance .
-l:id a w:Field ; w:name "id" ; w:ordinal 0 ; w:valueType "string" .
-l:owner a w:Field ; w:name "owner" ; w:ordinal 1 ; w:valueType "string" .
-l:balance a w:Field ; w:name "balance" ; w:ordinal 2 ; w:valueType "s64" ; w:min 0 .
-l:error a w:Enum ; w:name "transfer-error" ; w:case l:source-missing, l:destination-missing, l:same-account, l:non-positive-amount, l:insufficient-funds, l:destination-overflow .
-l:source-missing a w:Case ; w:name "source-missing" ; w:ordinal 0 .
-l:destination-missing a w:Case ; w:name "destination-missing" ; w:ordinal 1 .
-l:same-account a w:Case ; w:name "same-account" ; w:ordinal 2 .
-l:non-positive-amount a w:Case ; w:name "non-positive-amount" ; w:ordinal 3 .
-l:insufficient-funds a w:Case ; w:name "insufficient-funds" ; w:ordinal 4 .
-l:destination-overflow a w:Case ; w:name "destination-overflow" ; w:ordinal 5 .
-
-l:world a w:World ; w:name "ledger" ; w:use l:account, l:error ; w:import l:initial-state ; w:export l:lookup, l:transfer .
-l:initial-state a w:Function ; w:name "initial-state" ; w:result "list<account>" .
-l:lookup a w:Function ; w:name "lookup" ; w:param l:lookup-id ; w:result "option<account>" .
-l:lookup-id a w:Param ; w:name "id" ; w:ordinal 0 ; w:valueType "string" .
-l:transfer a w:Function ; w:name "transfer" ; w:param l:source, l:destination, l:amount ; w:result "result<_, transfer-error>" .
-l:source a w:Param ; w:name "source" ; w:ordinal 0 ; w:valueType "string" .
-l:destination a w:Param ; w:name "destination" ; w:ordinal 1 ; w:valueType "string" .
-l:amount a w:Param ; w:name "amount" ; w:ordinal 2 ; w:valueType "s64" .
-
 l:test-world a w:World ; w:name "ledger-test" ; w:entry true ; w:include l:world ; w:export l:fixture-load, l:complete-snapshot .
 l:fixture-load a w:Function ; w:name "fixture-load" ; w:param l:accounts .
 l:accounts a w:Param ; w:name "accounts" ; w:ordinal 0 ; w:valueType "list<account>" .

@@ -17,6 +17,12 @@ pub(crate) struct Node {
     pub links: BTreeMap<String, BTreeSet<String>>,
 }
 impl Node {
+    pub(crate) fn interface_path(&self) -> &str {
+        self.props
+            .get("from")
+            .map(String::as_str)
+            .unwrap_or(&self.name)
+    }
     pub fn targets(&self, key: &str) -> impl Iterator<Item = &String> {
         self.links.get(key).into_iter().flatten()
     }
@@ -36,7 +42,7 @@ fn allowed(kind: &str, key: &str) -> bool {
     key == "label"
         || match kind {
             "World" => matches!(key, "entry" | "import" | "export" | "include" | "use"),
-            "Interface" => matches!(key, "type" | "function" | "use"),
+            "Interface" => matches!(key, "type" | "function" | "use" | "from"),
             "Function" => matches!(key, "param" | "result"),
             "Record" => key == "field",
             "Variant" | "Enum" => key == "case",
@@ -287,12 +293,21 @@ impl World {
             {
                 return Err("enum case cannot carry a payload".into());
             }
-            if n.kind == "ForeignType" {
+            if n.kind == "ForeignType" || n.kind == "Interface" && n.props.contains_key("from") {
                 let path = n
                     .props
                     .get("from")
                     .ok_or("missing foreign interface path")?;
                 super::wit::external(path)?;
+                if n.kind == "Interface"
+                    && path
+                        .split_once('/')
+                        .and_then(|(_, p)| p.split_once('@'))
+                        .map(|(name, _)| name)
+                        != Some(n.name.as_str())
+                {
+                    return Err(format!("foreign interface name disagrees with {path}"));
+                }
             }
             let mut bounds = [None, None];
             for (i, k) in ["min", "max"].into_iter().enumerate() {
@@ -387,7 +402,12 @@ impl World {
         ]);
         for (id, n) in &self.nodes {
             if n.kind == "Interface" {
-                visit(self, id, format!("interface/{}", n.name), &mut out)?
+                visit(
+                    self,
+                    id,
+                    format!("interface/{}", n.interface_path()),
+                    &mut out,
+                )?
             }
         }
         for (k, ids) in self.effective()? {

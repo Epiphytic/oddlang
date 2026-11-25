@@ -138,7 +138,11 @@ impl World {
                 if owners.next().is_some() {
                     return Err("ambiguous type owner".into());
                 }
-                ident(&first.name)
+                first
+                    .props
+                    .get("from")
+                    .cloned()
+                    .unwrap_or_else(|| ident(&first.name))
             };
             out += &format!("  use {owner}.{{{}}};\n", ident(&t.name));
         }
@@ -148,7 +152,11 @@ impl World {
         self.identities()?;
         let package = self.package_name();
         let mut out = format!("package {package};\n");
-        for n in self.nodes.values().filter(|n| n.kind == "Interface") {
+        for n in self
+            .nodes
+            .values()
+            .filter(|n| n.kind == "Interface" && !n.props.contains_key("from"))
+        {
             out += &format!("\ninterface {} {{\n", ident(&n.name));
             out += &self.uses(n)?;
             for id in n.targets("type") {
@@ -186,7 +194,13 @@ impl World {
                     let sig = if item.kind == "Function" {
                         self.signature(item)?
                     } else {
-                        format!("{};", self.named(id))
+                        format!(
+                            "{};",
+                            item.props
+                                .get("from")
+                                .cloned()
+                                .unwrap_or_else(|| self.named(id))
+                        )
                     };
                     out += &format!("  {k} {sig}\n");
                 }
@@ -344,17 +358,19 @@ impl Recover<'_> {
             return Err(unsupported("type owner"));
         };
         let i = &self.resolve.interfaces[owner];
-        if i.package == Some(pkg) {
-            let resolved = self.datatype(
-                &format!(
-                    "interface/{}/type/{name}",
-                    i.name
-                        .as_deref()
-                        .ok_or_else(|| unsupported("inline interface"))?
-                ),
-                name,
-                target,
-            )?;
+        let local = i.package == Some(pkg);
+        let owner_name = if local {
+            i.name
+                .clone()
+                .ok_or_else(|| unsupported("inline interface"))?
+        } else {
+            self.resolve
+                .id_of(owner)
+                .ok_or("missing foreign package name")?
+        };
+        let owner_path = format!("interface/{owner_name}");
+        if local || self.ids.contains_key(&owner_path) {
+            let resolved = self.datatype(&format!("{owner_path}/type/{name}"), name, target)?;
             // Alias paths name the same semantic declaration, including its members.
             self.alias_tree(path, &resolved)?;
             Ok(resolved)
@@ -399,6 +415,9 @@ pub fn import_dir(dir: &Path, world: &str, ids: &Map, namespace: Option<&str>) -
         .select_world(&[pkg], Some(world))
         .map_err(|e| format!("invalid WIT world: {e:#}"))?;
     let w = &r.worlds[w_id];
+    if w.package != Some(pkg) {
+        return Err("selected world belongs to a dependency".into());
+    }
     let mut c = Recover {
         resolve: &r,
         ids,
@@ -410,11 +429,26 @@ pub fn import_dir(dir: &Path, world: &str, ids: &Map, namespace: Option<&str>) -
     let package = c.declare("package", "Package", &r.packages[pkg].name.to_string())?;
     let selected = c.declare("world", "World", &w.name)?;
     let mut interfaces = BTreeMap::new();
-    for (name, i_id) in &r.packages[pkg].interfaces {
-        let path = format!("interface/{name}");
+    for (i_id, iface) in r.interfaces.iter() {
+        let Some(name) = iface.name.as_ref() else {
+            continue;
+        };
+        let local = iface.package == Some(pkg);
+        let owner = if local {
+            name.clone()
+        } else {
+            r.id_of(i_id).ok_or("missing foreign WIT interface")?
+        };
+        let path = format!("interface/{owner}");
+        if !local && !ids.contains_key(&path) {
+            continue;
+        }
         let parent = c.declare(&path, "Interface", name)?;
-        interfaces.insert(*i_id, parent.clone());
-        let iface = &r.interfaces[*i_id];
+        if !local {
+            external(&owner)?;
+            c.prop(&parent, "from", owner);
+        }
+        interfaces.insert(i_id, parent.clone());
         for (n, t) in &iface.types {
             let (key, id) = if matches!(r.types[*t].kind, TypeDefKind::Type(Type::Id(_))) {
                 ("use", c.use_type(&format!("{path}/use/{n}"), n, *t, pkg)?)
@@ -428,7 +462,7 @@ pub fn import_dir(dir: &Path, world: &str, ids: &Map, namespace: Option<&str>) -
             c.edge(&parent, "function", &id)
         }
     }
-    let implicit: BTreeSet<_> = w
+    let mut implicit: BTreeSet<_> = w
         .imports
         .values()
         .filter_map(|v| {
@@ -445,6 +479,11 @@ pub fn import_dir(dir: &Path, world: &str, ids: &Map, namespace: Option<&str>) -
             }
         })
         .collect();
+    for item in w.imports.values().chain(w.exports.values()) {
+        if let WorldItem::Interface { id, .. } = item {
+            implicit.extend(r.interface_direct_deps(*id));
+        }
+    }
     for (direction, items) in [("import", &w.imports), ("export", &w.exports)] {
         for (key, item) in items {
             let (k, id) = match item {
@@ -463,7 +502,11 @@ pub fn import_dir(dir: &Path, world: &str, ids: &Map, namespace: Option<&str>) -
                         .as_deref()
                         .ok_or_else(|| unsupported("inline interface"))?;
                     let path = format!("world/{direction}/{name}");
-                    if direction == "import" && implicit.contains(id) && !ids.contains_key(&path) {
+                    if direction == "import"
+                        && implicit.contains(id)
+                        && i.functions.is_empty()
+                        && !ids.contains_key(&path)
+                    {
                         continue;
                     }
                     if !matches!(key, WorldKey::Interface(_)) {
@@ -491,6 +534,16 @@ pub fn import_dir(dir: &Path, world: &str, ids: &Map, namespace: Option<&str>) -
 }
 
 pub fn recover(dir: &Path, world: &str, identity_source: &str, out: &Path) -> Res<()> {
+    recover_locked(dir, world, identity_source, out, None)
+}
+
+pub(super) fn recover_locked(
+    dir: &Path,
+    world: &str,
+    identity_source: &str,
+    out: &Path,
+    lock: Option<&Path>,
+) -> Res<()> {
     let (ids, namespace) =
         if identity_source.starts_with("urn:") || identity_source.starts_with("https://") {
             (Map::new(), Some(identity_source))
@@ -501,10 +554,38 @@ pub fn recover(dir: &Path, world: &str, identity_source: &str, out: &Path) -> Re
                 None,
             )
         };
-    let w = import_dir(dir, world, &ids, namespace)?;
-    if w.nodes.values().any(|n| n.kind == "ForeignType") {
-        return Err("foreign WIT recovery requires a verified dependency pin".into());
-    }
+    let w = if let Some(lock) = lock {
+        let wit_dir = fs::canonicalize(dir).map_err(|e| e.to_string())?;
+        if wit_dir.file_name() != Some("wit".as_ref()) {
+            return Err("expected published release WIT directory".into());
+        }
+        let root = wit_dir.parent().ok_or("missing release directory")?;
+        let external = fs::canonicalize(lock).map_err(|e| e.to_string())?;
+        if external.starts_with(root) {
+            return Err("supply an independently pinned workspace lock outside the release".into());
+        }
+        let (published, files) = super::bundle::verified_wit(root, &external)?;
+        if published.name() != world {
+            return Err("selected world disagrees with release pin".into());
+        }
+        if namespace.is_none() && ids != published.identities()? {
+            return Err("identity map disagrees with pinned release".into());
+        }
+        let stage = tempfile::tempdir().map_err(|e| e.to_string())?;
+        for (name, bytes) in files {
+            let path = stage.path().join(name);
+            fs::create_dir_all(path.parent().unwrap())
+                .and_then(|_| fs::write(path, bytes))
+                .map_err(|e| e.to_string())?;
+        }
+        import_dir(stage.path(), world, &ids, namespace)?
+    } else {
+        let w = import_dir(dir, world, &ids, namespace)?;
+        if w.nodes.values().any(|n| n.props.contains_key("from")) {
+            return Err("foreign WIT recovery requires an external workspace --lock".into());
+        }
+        w
+    };
     if out.exists()
         && fs::read_dir(out)
             .map_err(|e| e.to_string())?

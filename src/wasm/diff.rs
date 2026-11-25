@@ -53,12 +53,17 @@ fn surfaces(w: &World) -> Res<BTreeMap<String, BTreeSet<String>>> {
         .iter()
         .filter_map(|id| {
             let n = &w.nodes[id];
-            (n.kind == "Interface").then_some(n.name.as_str())
+            (n.kind == "Interface").then_some(n.interface_path())
         })
         .collect();
     for (path, id) in w.identities()? {
         if let Some(tail) = path.strip_prefix("interface/")
-            && !interfaces.contains(tail.split('/').next().unwrap())
+            && !interfaces.iter().any(|p| {
+                tail == *p
+                    || tail
+                        .strip_prefix(*p)
+                        .is_some_and(|suffix| suffix.starts_with('/'))
+            })
         {
             continue;
         }

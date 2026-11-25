@@ -27,11 +27,19 @@ cargo +"$rust_version" build --locked --offline --manifest-path "$manifest" --ta
 } | tee "$out/observations.txt"
 # Compile non-executing structural probes for each published world's canonical ABI.
 cargo +"$rust_version" build --locked --offline --bin oddlang --target-dir target/wasm-publisher
+release_cache="$out/cache"
+ledger_key=$(printf %s 'urn:oddlang:ledger:wasm:package' | shasum -a 256 | cut -d ' ' -f 1)
 for fixture in ledger ledger-test echo; do
     world=$fixture
     if [[ $fixture == echo ]]; then world=echo-world; fi
-    target/wasm-publisher/debug/oddlang wasm publish "contracts/wasm/$fixture" contracts/wasm/empty.lock.json \
-        contracts/cache "$out/$fixture"
+    lock=contracts/wasm/empty.lock.json
+    if [[ $fixture == ledger-test ]]; then
+        lock=contracts/wasm/ledger-test/dependencies.lock.json
+        mkdir -p "$release_cache/wasm/$ledger_key"
+        cp -R "$out/ledger" "$release_cache/wasm/$ledger_key/1.0.0"
+    fi
+    target/wasm-publisher/debug/oddlang wasm publish "contracts/wasm/$fixture" "$lock" \
+        "$release_cache" "$out/$fixture"
     "$wasm_tools" component embed --dummy --world "$world" "$out/$fixture/wit" -o "$out/$fixture-core.wasm"
     "$wasm_tools" component new "$out/$fixture-core.wasm" -o "$out/$fixture.wasm"
     "$wasm_tools" validate "$out/$fixture.wasm"

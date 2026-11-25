@@ -244,3 +244,123 @@ fn explicit_map_cannot_collapse_distinct_parameters_with_different_types() {
     rejected(import(&wit, bad.to_str().unwrap(), &out));
     verify_no_artifacts(&out);
 }
+
+#[test]
+fn foreign_types_recover_only_against_an_independent_release_pin() {
+    use sha2::{Digest, Sha256};
+    let tmp = tempfile::tempdir().unwrap();
+    let root = tmp.path();
+    let echo_id = "urn:oddlang:echo:package";
+    let key: String = Sha256::digest(echo_id)
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect();
+    let cache = root.join("cache");
+    let echo = cache.join("wasm").join(key).join("1.0.0");
+    let publish = |source: &Path, lock: &Path, dest: &Path| {
+        success(
+            Command::new(env!("CARGO_BIN_EXE_oddlang"))
+                .args(["wasm", "publish"])
+                .arg(source)
+                .arg(lock)
+                .arg(&cache)
+                .arg(dest)
+                .output()
+                .unwrap(),
+        );
+    };
+    publish(
+        Path::new("contracts/wasm/echo"),
+        Path::new("contracts/wasm/empty.lock.json"),
+        &echo,
+    );
+    let source = root.join("consumer");
+    fs::create_dir(&source).unwrap();
+    fs::write(
+        source.join("model.ttl"),
+        r#"
+@prefix w: <urn:oddlang:wasm:> .
+@prefix e: <urn:foreign:> .
+e:p a w:Package ; w:name "probe:client@1.0.0" .
+e:w a w:World ; w:name "demo" ; w:use e:m .
+e:m a w:ForeignType ; w:name "message" ; w:from "sample:echo/shapes@1.0.0" .
+"#,
+    )
+    .unwrap();
+    fs::write(source.join("corpus.json"), "[]").unwrap();
+    fs::write(
+        source.join("dependencies.json"),
+        serde_json::to_vec(&[echo_id]).unwrap(),
+    )
+    .unwrap();
+    let release = root.join("bundle");
+    publish(&source, &echo.join("workspace.lock.json"), &release);
+    let independent = root.join("workspace.lock.json");
+    fs::copy(release.join("workspace.lock.json"), &independent).unwrap();
+
+    let wit = release.join("wit");
+    let ids = release.join("identities.json");
+    let out = root.join("recovered");
+    let locked = |pin: &Path, map: &Path| {
+        Command::new(env!("CARGO_BIN_EXE_oddlang"))
+            .args(["wasm", "import-wit"])
+            .arg(&wit)
+            .arg("demo")
+            .arg(map)
+            .arg(&out)
+            .arg("--lock")
+            .arg(pin)
+            .output()
+            .unwrap()
+    };
+    rejected(import(&wit, ids.to_str().unwrap(), &out));
+    rejected(locked(&release.join("workspace.lock.json"), &ids));
+    rejected(locked(&echo.join("workspace.lock.json"), &ids));
+    let alternative = root.join("map.json");
+    let mut map = read_json(&ids);
+    map["world/use/message"] = Value::from("urn:other:message");
+    fs::write(&alternative, serde_json::to_vec(&map).unwrap()).unwrap();
+    rejected(locked(&independent, &alternative));
+    success(locked(&independent, &ids));
+    assert!(
+        fs::read_to_string(out.join("model.ttl"))
+            .unwrap()
+            .contains("sample:echo/shapes@1.0.0")
+    );
+    fs::remove_dir_all(&out).unwrap();
+    // Unlisted WIT never participates in resolution. A listed dependency must
+    // match the externally pinned release even if its package identifier survives.
+    fs::write(wit.join("decoy.wit"), "invalid WIT").unwrap();
+    success(locked(&independent, &ids));
+    fs::remove_dir_all(&out).unwrap();
+    let dependency = fs::read_dir(wit.join("deps"))
+        .unwrap()
+        .next()
+        .unwrap()
+        .unwrap()
+        .path();
+    fs::write(dependency, "package sample:echo@1.0.0; interface shapes {}").unwrap();
+    rejected(locked(&independent, &ids));
+    verify_no_artifacts(&out);
+}
+
+#[test]
+fn type_use_preserves_the_resolved_interfaces_callable_host_imports() {
+    let tmp = tempfile::tempdir().unwrap();
+    let wit = input(
+        tmp.path(),
+        r#"
+package probe:uses@1.0.0;
+interface data { record row { key: string } probe: func(); }
+world demo { use data.{row}; export ping: func() -> row; }
+"#,
+    );
+    let out = tmp.path().join("recovered");
+    success(import(&wit, NAMESPACE, &out));
+    let map = read_json(&out.join("identities.json"));
+    let declaration = map["world/import/data/function/probe"].as_str().unwrap();
+    assert_eq!(
+        declaration,
+        map["interface/data/function/probe"].as_str().unwrap()
+    );
+}

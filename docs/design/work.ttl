@@ -359,3 +359,6 @@ w:marmishQualification p:addresses w:roundTripClaims .
 w:witPublicationEvidence a p:Artifact ; rdfs:label "Component publication and empty-linker execution evidence" ;
     p:location "docs/design/component-publication-evidence.md" .
 w:witPublication p:evidence w:witPublicationEvidence .
+w:witReleaseReview a p:Finding ; rdfs:label "Specify the closed profile and pin the production interface used by the instrumented world" ;
+    p:source w:witPublicationEvidence .
+w:witPublication p:addresses w:witReleaseReview .

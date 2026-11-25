@@ -1,6 +1,10 @@
 //! Deterministic, offline WIT releases and their declaration witnesses.
 use super::model::World;
 use crate::contracts::{Pin, contained, verified};
+use oxigraph::{
+    io::{RdfFormat, RdfParser},
+    model::NamedOrBlankNode,
+};
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
@@ -29,6 +33,99 @@ struct Manifest {
     world: String,
     dependencies: Vec<Pin>,
     files: BTreeMap<String, String>,
+}
+
+#[derive(Deserialize, Serialize, Ord, PartialOrd, Eq, PartialEq)]
+#[serde(untagged, deny_unknown_fields)]
+enum Dependency {
+    Package(String),
+    Include {
+        identity: String,
+        #[serde(rename = "includeWorld")]
+        world: String,
+    },
+}
+impl Dependency {
+    fn identity(&self) -> &str {
+        match self {
+            Self::Package(id) | Self::Include { identity: id, .. } => id,
+        }
+    }
+}
+
+// Strip only the dependency's package header and entry-world marker. The
+// extension can reference inherited IRIs but cannot change their definitions.
+fn compose(source: &[u8], direct: &[Dependency], files: &Files) -> Result<Vec<u8>, String> {
+    let mut model = source.to_vec();
+    let mut owned = BTreeSet::new();
+    let mut inherited = BTreeSet::new();
+    let mut expected = BTreeSet::new();
+    for dep in direct {
+        let Dependency::Include { identity, world } = dep else {
+            continue;
+        };
+        let bytes = required(
+            files,
+            &format!("dependencies/{}.ttl", digest(identity.as_bytes())),
+        )?;
+        let parent = World::from_turtle(bytes)?;
+        if parent.identity() != identity || parent.selected != *world {
+            return Err(format!(
+                "included world {world} disagrees with pinned {identity}"
+            ));
+        }
+        expected.insert(world);
+        let (package, version) = parent
+            .package_name()
+            .rsplit_once('@')
+            .ok_or("unversioned included WIT package")?;
+        for (id, node) in &parent.nodes {
+            if node.kind == "Interface" && !node.props.contains_key("from") {
+                let from = oxigraph::model::Literal::new_simple_literal(format!(
+                    "{package}/{}@{version}",
+                    node.name
+                ));
+                inherited.insert(format!("<{id}> <urn:oddlang:wasm:from> {from} .\n"));
+            }
+        }
+        for quad in RdfParser::from_format(RdfFormat::Turtle).for_reader(bytes) {
+            let q = quad.map_err(|e| e.to_string())?;
+            let NamedOrBlankNode::NamedNode(id) = &q.subject else {
+                return Err("expected named inherited declaration".into());
+            };
+            if id.as_str() == parent.identity() || q.predicate.as_str() == "urn:oddlang:wasm:entry"
+            {
+                continue;
+            }
+            owned.insert(id.as_str().to_owned());
+            inherited.insert(format!("{} {} {} .\n", q.subject, q.predicate, q.object));
+        }
+    }
+    if expected.is_empty() {
+        return Ok(model);
+    }
+    for quad in RdfParser::from_format(RdfFormat::Turtle).for_reader(source) {
+        let q = quad.map_err(|e| e.to_string())?;
+        if let NamedOrBlankNode::NamedNode(id) = q.subject
+            && owned.contains(id.as_str())
+        {
+            return Err(format!("extension redefines pinned declaration {id}"));
+        }
+    }
+    model.push(b'\n');
+    for triple in inherited {
+        model.extend(triple.as_bytes())
+    }
+    let merged = World::from_turtle(&model)?;
+    for world in expected {
+        if !merged.nodes[&merged.selected]
+            .targets("include")
+            .any(|target| target == world)
+        {
+            return Err(format!("missing include edge to pinned world {world}"));
+        }
+    }
+    Ok(model)
 }
 
 pub struct VerifiedBundle {
@@ -268,7 +365,15 @@ fn validate_world(files: &Files, world: &World) -> Result<(), String> {
         .collect();
     write_files(dir.path(), &wit_files)?;
     // Resolve only verified bytes. Unlisted files beside the bundle cannot satisfy imports.
-    super::wit::import_dir(dir.path(), world.name(), &identities, None)?;
+    let recovered = super::wit::import_dir(dir.path(), world.name(), &identities, None)
+        .map_err(|message| message.replace(dir.path().to_string_lossy().as_ref(), "wit"))?;
+    let report = super::diff::compare(world, &recovered, super::diff::Direction::OldHostNewGuest)?;
+    if report.verdict != "surface-equal" {
+        return Err(format!(
+            "resolved WIT disagrees with declared surface: {}",
+            report
+        ));
+    }
     Ok(())
 }
 
@@ -339,10 +444,43 @@ fn verify_release(root: &Path, pin: &Pin, workspace: &Pins) -> Result<(Manifest,
     {
         return Err("unexpected WIT file outside dependency closure".into());
     }
+    let direct: Vec<Dependency> =
+        decode(required(&files, "dependencies.json")?, "dependencies.json")?;
+    for dep in &direct {
+        let pin = pins
+            .get(&dep.identity().to_owned())
+            .ok_or_else(|| format!("missing dependency pin {}", dep.identity()))?;
+        if let Dependency::Include { .. } = dep {
+            let key = digest(pin.identity.as_bytes());
+            let original: Manifest = decode(
+                required(&files, &format!("dependencies/{key}.json"))?,
+                "dependency manifest",
+            )?;
+            if original.files.get("model.ttl")
+                != Some(&digest(required(
+                    &files,
+                    &format!("dependencies/{key}.ttl"),
+                )?))
+            {
+                return Err(format!(
+                    "included ontology disagrees with pin {}",
+                    pin.identity
+                ));
+            }
+        }
+    }
+    if direct
+        .iter()
+        .any(|dep| matches!(dep, Dependency::Include { .. }))
+        && compose(required(&files, "source.ttl")?, &direct, &files)?
+            != required(&files, "model.ttl")?
+    {
+        return Err("included ontology disagrees with selected release".into());
+    }
     Ok((manifest, files))
 }
 
-pub fn verify_bundle(root: &Path, lock_file: &Path) -> Result<VerifiedBundle, String> {
+fn checked(root: &Path, lock_file: &Path) -> Result<(VerifiedBundle, Files), String> {
     let workspace = lock(lock_file)?;
     let header: Manifest = decode(&read(&contained(root, "manifest.json")?)?, "manifest.json")?;
     let pin = workspace
@@ -367,10 +505,28 @@ pub fn verify_bundle(root: &Path, lock_file: &Path) -> Result<VerifiedBundle, St
     {
         return Err("invalid obligation inventory".into());
     }
-    Ok(VerifiedBundle {
-        pin: pin.clone(),
-        world,
-    })
+    Ok((
+        VerifiedBundle {
+            pin: pin.clone(),
+            world,
+        },
+        files,
+    ))
+}
+
+pub fn verify_bundle(root: &Path, lock: &Path) -> Result<VerifiedBundle, String> {
+    Ok(checked(root, lock)?.0)
+}
+pub(crate) fn verified_wit(root: &Path, lock: &Path) -> Result<(World, Files), String> {
+    let (release, files) = checked(root, lock)?;
+    let wit = files
+        .into_iter()
+        .filter_map(|(path, bytes)| {
+            path.strip_prefix("wit/")
+                .map(|name| (name.to_owned(), bytes))
+        })
+        .collect();
+    Ok((release.world, wit))
 }
 
 pub fn publish(
@@ -380,8 +536,7 @@ pub fn publish(
     out: &Path,
 ) -> Result<(), String> {
     let workspace = lock(dependency_lock)?;
-    let model = read(&contained(source, "model.ttl")?)?;
-    let world = World::from_turtle(&model)?;
+    let authored = read(&contained(source, "model.ttl")?)?;
     let mut cases: Vec<Scenario> =
         decode(&read(&contained(source, "corpus.json")?)?, "corpus.json")?;
     cases.sort_by(|a, b| a.case_id.cmp(&b.case_id));
@@ -389,19 +544,28 @@ pub fn publish(
         case.covers.sort();
         case.constraints.sort();
     }
-    let direct: BTreeSet<String> = decode(
+    let mut direct: Vec<Dependency> = decode(
         &read(&contained(source, "dependencies.json")?)?,
         "dependencies.json",
     )?;
-    let mut pending = direct;
+    direct.sort();
+    let mut pending: BTreeSet<String> =
+        direct.iter().map(|dep| dep.identity().to_owned()).collect();
+    if pending.len() != direct.len() {
+        return Err("duplicate direct package dependency".into());
+    }
+    let includes: BTreeSet<_> = direct
+        .iter()
+        .filter_map(|dep| match dep {
+            Dependency::Include { identity, .. } => Some(identity.clone()),
+            _ => None,
+        })
+        .collect();
     let mut closure = Pins::new();
     let mut files = Files::new();
     while let Some(id) = pending.pop_first() {
         if closure.contains_key(&id) {
             continue;
-        }
-        if id == world.identity() {
-            return Err(format!("dependency cycle at {id}"));
         }
         let pin = workspace
             .get(&id)
@@ -411,6 +575,12 @@ pub fn publish(
             &format!("wasm/{}/{}", digest(id.as_bytes()), pin.version),
         )?;
         let (manifest, payloads) = verify_release(&root, pin, &workspace)?;
+        if includes.contains(&id) {
+            files.insert(
+                format!("dependencies/{}.ttl", digest(id.as_bytes())),
+                required(&payloads, "model.ttl")?.to_vec(),
+            );
+        }
         for dep in manifest.dependencies {
             if workspace.get(&dep.identity) != Some(&dep) {
                 return Err(format!(
@@ -430,6 +600,15 @@ pub fn publish(
         );
         insert_pin(&mut closure, pin.clone())?;
     }
+    let model = compose(&authored, &direct, &files)?;
+    let world = World::from_turtle(&model)?;
+    if closure.contains_key(world.identity()) {
+        return Err(format!("dependency cycle at {}", world.identity()));
+    }
+    if !includes.is_empty() {
+        files.insert("source.ttl".into(), authored);
+    }
+    files.insert("dependencies.json".into(), encode(&direct)?);
     let wit = world.render()?.into_bytes();
     files.insert(
         "obligations.json".into(),
