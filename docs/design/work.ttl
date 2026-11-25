@@ -1,0 +1,158 @@
+@prefix w: <urn:oddlang:work:> .
+@prefix p: <urn:oddlang:process:> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+w:chat a p:Artifact ; rdfs:label "Ontology-Driven Programming Language Concept, original Gemini conversation (local export)" ;
+    p:location "Ontology-Driven Programming L…uage Concept - Google Gemini.pdf" .
+w:spec a p:Artifact ; p:location "docs/superpowers/specs/2026-11-25-ledger.md" .
+w:plan a p:Artifact ; p:location "docs/superpowers/plans/2026-11-25-ledger.md" .
+w:review a p:Artifact ; rdfs:label "Fable design review, fourteen findings supplied in the design conversation" .
+w:initialCommit a p:Artifact ; p:location <https://github.com/Epiphytic/oddlang/commit/91cb2f3> .
+w:rustCommit a p:Artifact ; p:location <https://github.com/Epiphytic/oddlang/commit/31b41cb> .
+w:reviewCommit a p:Artifact ; p:location <https://github.com/Epiphytic/oddlang/commit/27ebf94> .
+w:guide a p:Artifact ; p:location "AGENTS.md" .
+w:processSchema a p:Artifact ; p:location "docs/design/process.ttl" .
+w:workGraph a p:Artifact ; p:location "docs/design/work.ttl" .
+
+w:vision a p:Goal ; rdfs:label "Compile a hierarchy of domain, behavior and target ontologies into deterministic native code and data contracts" ; p:source w:chat .
+w:structure a p:Goal ; rdfs:label "Generate matching checked Rust and SQL representations and measure graph impact analysis" ; p:source w:spec .
+w:behavior a p:Goal ; rdfs:label "Preserve executable transfer semantics across interpretation and Rust generation" ; p:source w:spec .
+w:evolution a p:Goal ; rdfs:label "Evolve stored rows and binary events while preserving identity and checked values" ; p:source w:spec .
+
+w:design a p:Milestone ; rdfs:label "Concept, design and review" ; p:advances w:vision .
+w:m1 a p:Milestone ; rdfs:label "Compile and inspect the domain" ; p:advances w:structure .
+w:contract a p:Milestone ; rdfs:label "Language contract before execution" ; p:advances w:behavior .
+w:m2 a p:Milestone ; rdfs:label "Interpret and compile the transfer" ; p:advances w:behavior .
+w:m3 a p:Milestone ; rdfs:label "Evolve the table and wire format" ; p:advances w:evolution .
+
+w:rust a p:Decision ; rdfs:label "Use Rust throughout the implementation" ; p:reason "The project author selected Rust." ; p:source w:rustCommit .
+w:loader a p:Decision ; rdfs:label "Defer SHACL and validate the closed vocabulary in the typed loader" ; p:reason "One structural validator suffices for the prototype." ; p:source w:reviewCommit .
+w:rdfTrial a p:Decision ; rdfs:label "Evaluate Turtle against stable-ID TOML" ; p:reason "Retain Turtle if the import-impact workload removes duplicate declarations or bespoke traversal." ; p:source w:spec .
+w:future a p:Decision ; rdfs:label "Revisit surface syntax, additional execution targets and AI-assisted authoring after the ledger experiments" ; p:reason "First establish deterministic execution and evolution across real targets." ; p:source w:chat, w:spec .
+
+w:scope a p:Task ; rdfs:label "Evaluate the concept and select three demonstrations" ; p:milestone w:design ; p:status p:done ; p:source w:chat ; p:evidence w:initialCommit .
+w:selectRust a p:Task ; rdfs:label "Record the Rust implementation choice" ; p:milestone w:design ; p:status p:done ; p:dependsOn w:scope ; p:evidence w:rustCommit .
+w:revise a p:Task ; rdfs:label "Revise the design and plan after review" ; p:milestone w:design ; p:status p:done ; p:dependsOn w:selectRust ; p:source w:review ; p:evidence w:reviewCommit .
+w:track a p:Task ; rdfs:label "Establish the design ontology and contributor guide" ; p:milestone w:design ; p:status p:done ; p:dependsOn w:revise ; p:evidence w:guide, w:processSchema, w:workGraph .
+
+w:review1 a p:Finding ; rdfs:label "Missing normative language contract" ; p:source w:review .
+
+w:review2 a p:Finding ; rdfs:label "Shared loader can hide common errors" ; p:source w:review .
+
+w:review3 a p:Finding ; rdfs:label "Value of RDF untested" ; p:source w:review .
+
+w:review4 a p:Finding ; rdfs:label "Incomplete SQL migration" ; p:source w:review .
+
+w:review5 a p:Finding ; rdfs:label "Scope of CAD default" ; p:source w:review .
+
+w:review6 a p:Finding ; rdfs:label "Undefined transfer state and arguments" ; p:source w:review .
+
+w:review7 a p:Finding ; rdfs:label "Blank-node identity and guard ordering" ; p:source w:review .
+
+w:review8 a p:Finding ; rdfs:label "Avro can carry invalid balances" ; p:source w:review .
+
+w:review9 a p:Finding ; rdfs:label "No cross-target round trip" ; p:source w:review .
+
+w:review10 a p:Finding ; rdfs:label "Unrepresentable boundary inputs" ; p:source w:review .
+
+w:review11 a p:Finding ; rdfs:label "Duplicated validation and uncertain SHACL dependency" ; p:source w:review .
+
+w:review12 a p:Finding ; rdfs:label "Unspecified database provisioning" ; p:source w:review .
+
+w:review13 a p:Finding ; rdfs:label "Schema verdict conflated with one event read" ; p:source w:review .
+
+w:review14 a p:Finding ; rdfs:label "Wire rename and aliases untested" ; p:source w:review .
+
+w:db a p:Task ; rdfs:label "Provision the integration environment" ;
+    p:milestone w:m1 ; p:status p:planned ; p:source w:plan ;
+    p:dependsOn w:revise ; p:addresses w:review12 ;
+    p:acceptance "Pinned PostgreSQL works offline and missing configuration fails loudly." .
+
+w:load a p:Task ; rdfs:label "Load and validate" ;
+    p:milestone w:m1 ; p:status p:planned ; p:source w:plan ;
+    p:dependsOn w:revise ; p:addresses w:review7, w:review11 ;
+    p:acceptance "Invalid declarations fail and equivalent graphs yield identical models and diagnostics." .
+
+w:impact a p:Task ; rdfs:label "Measure the graph's contribution" ;
+    p:milestone w:m1 ; p:status p:planned ; p:source w:plan ;
+    p:dependsOn w:load ; p:addresses w:review3 ;
+    p:acceptance "Query the affected IRIs across imports and record the TOML comparison." .
+
+w:emit a p:Task ; rdfs:label "Emit Rust and SQL" ;
+    p:milestone w:m1 ; p:status p:planned ; p:source w:plan ;
+    p:dependsOn w:db, w:load ; p:addresses w:review10 ;
+    p:acceptance "Rust and SQL agree at both bounds and one step beyond each bound." .
+
+w:rules a p:Task ; rdfs:label "Publish the closed vocabulary and evaluation rules" ;
+    p:milestone w:contract ; p:status p:planned ; p:source w:plan ;
+    p:dependsOn w:load ; p:addresses w:review1, w:review6, w:review7 ;
+    p:acceptance "Publish the vocabulary, lowering fixture, guard order and state transition rules." .
+
+w:oracle a p:Task ; rdfs:label "Build the oracle first" ;
+    p:milestone w:m2 ; p:status p:planned ; p:source w:plan ;
+    p:dependsOn w:rules ; p:addresses w:review2, w:review6 ;
+    p:acceptance "Derive whole-state results and first errors from the design without production code." .
+
+w:execute a p:Task ; rdfs:label "Build the two execution paths" ;
+    p:milestone w:m2 ; p:status p:planned ; p:source w:plan ;
+    p:dependsOn w:oracle, w:emit ; p:addresses w:review1, w:review2 ;
+    p:acceptance "Both engines match the oracle and a mutated program exposes shared errors." .
+
+w:differential a p:Task ; rdfs:label "Run boundary-weighted differential tests" ;
+    p:milestone w:m2 ; p:status p:planned ; p:source w:plan ;
+    p:dependsOn w:execute ; p:addresses w:review2 ;
+    p:acceptance "Run at least 10,000 reproducible boundary-weighted cases." .
+
+w:roundTrip a p:Task ; rdfs:label "Prove the v1 round trip" ;
+    p:milestone w:m3 ; p:status p:planned ; p:source w:plan ;
+    p:dependsOn w:emit ; p:addresses w:review8, w:review9 ;
+    p:acceptance "Round-trip the persisted Rust account through Avro and reject a negative balance." .
+
+w:migrate a p:Task ; rdfs:label "Migrate the populated table" ;
+    p:milestone w:m3 ; p:status p:planned ; p:source w:plan ;
+    p:dependsOn w:roundTrip ; p:addresses w:review4, w:review5 ;
+    p:acceptance "Preserve existing rows, backfill CAD and match fresh v2 DDL with no retained default." .
+
+w:wire a p:Task ; rdfs:label "Derive and verify wire compatibility" ;
+    p:milestone w:m3 ; p:status p:planned ; p:source w:plan ;
+    p:dependsOn w:migrate ; p:addresses w:review5, w:review8, w:review13, w:review14 ;
+    p:acceptance "Derive the verdict from the diff and confirm field alias and default handling with binary data." .
+
+w:demo a p:Task ; rdfs:label "Run the demo" ;
+    p:milestone w:m3 ; p:status p:planned ; p:source w:plan ;
+    p:dependsOn w:impact, w:differential, w:wire ; p:addresses w:review9 ;
+    p:acceptance "Run the offline suite and demo against the pinned database." .
+
+w:priorArt a p:Task ; rdfs:label "Survey active ontology compilers before implementing the ledger" ;
+    p:milestone w:design ; p:status p:done ; p:dependsOn w:track ;
+    p:acceptance "Identify dated upstream activity and compare its scope with the ledger experiments." ;
+    p:evidence w:hydraResearch, w:ggenResearch, w:linkmlResearch ;
+    rdfs:comment "2026-11-25. A last30days scan surfaced adjacent ontology platforms. Direct repository checks found active overlap in graph programming, RDF-driven generation and schema compilation. The combined transfer-oracle and SQL/Avro migration witness remains unverified in these projects." .
+
+w:hydraResearch a p:Artifact ; rdfs:label "Hydra graph programming and cross-host bootstrap matrix, November 25" ;
+    p:location <https://github.com/CategoricalData/hydra/commit/46e6b4c1db791ff2a360c1da50571c9659825c84> .
+w:ggenResearch a p:Artifact ; rdfs:label "ggen RDF-driven generator, November 20 repository snapshot" ;
+    p:location <https://github.com/seanchatmangpt/ggen/tree/d173cad5792e837bd4fec730d120c582b9bc5d4c> .
+w:linkmlResearch a p:Artifact ; rdfs:label "LinkML Rust generator update, November 23" ;
+    p:location <https://github.com/linkml/linkml/commit/638684016db14546a3028b78c29e987264502026> .
+
+w:interop a p:Goal ; rdfs:label "Share versioned schemas and API contracts across languages, repositories and organizations" ; p:source w:spec .
+w:adoption a p:Milestone ; rdfs:label "Verify coordinated and independent adoption" ; p:advances w:interop .
+w:contractPortability a p:Decision ; rdfs:label "Publish immutable contracts and keep each implementation native" ;
+    p:reason "A client, CLI, database and service can implement different roles and verify their obligations with portable vectors." ; p:source w:spec .
+w:projectionCredit a p:Decision ; rdfs:label "Use reusable target mappings for routine projections, inspired by ggen" ;
+    p:reason "A change to a shared declaration should propagate to every affected structural artifact." ; p:source w:ggenResearch, w:spec .
+w:lockPolicy a p:Decision ; rdfs:label "Pin contracts per workspace and optionally lock reviewed native adapters" ;
+    p:reason "Independent consumers control upgrades and can reproduce accepted source offline." ; p:source w:spec .
+w:interopDesign a p:Task ; rdfs:label "Record the contract interoperability design and ggen attribution" ;
+    p:milestone w:design ; p:status p:done ; p:dependsOn w:priorArt ; p:source w:ggenResearch ;
+    p:acceptance "Align the plan, design and work graph on the two ownership models." ; p:evidence w:plan, w:spec, w:workGraph .
+w:release a p:Task ; rdfs:label "Package and pin contract releases" ;
+    p:milestone w:adoption ; p:status p:planned ; p:source w:plan ; p:dependsOn w:interopDesign, w:oracle, w:wire ;
+    p:acceptance "Resolve a release and transitive imports offline, verify content digests and publish portable wire vectors." .
+w:monorepo a p:Task ; rdfs:label "Verify one coordinated monorepo upgrade" ;
+    p:milestone w:adoption ; p:status p:planned ; p:source w:plan ; p:dependsOn w:release ;
+    p:acceptance "One pin upgrades Rust, TypeScript, SQL and Avro projections and their integration checks pass." .
+w:externalClient a p:Task ; rdfs:label "Verify independent contract adoption" ;
+    p:milestone w:adoption ; p:status p:planned ; p:source w:plan ; p:dependsOn w:release ;
+    p:acceptance "A standalone Go client verifies two separately pinned releases with published vectors and replays a reviewed adapter offline." .

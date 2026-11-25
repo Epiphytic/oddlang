@@ -1,0 +1,33 @@
+@prefix p: <urn:oddlang:process:> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<urn:oddlang:process> a owl:Ontology ;
+    rdfs:label "Oddlang design and delivery process" .
+
+p:Goal a rdfs:Class .
+p:Milestone a rdfs:Class .
+p:Decision a rdfs:Class ; rdfs:comment "A design choice with its rationale and source." .
+p:Finding a rdfs:Class ; rdfs:comment "A review observation linked to the work that will test or address it." .
+p:Artifact a rdfs:Class ; rdfs:comment "A source, deliverable or verification record." .
+p:Task a rdfs:Class ; rdfs:comment "A unit of design, implementation, review or verification work." .
+p:Status a rdfs:Class .
+p:planned a p:Status .
+p:active a p:Status .
+p:blocked a p:Status .
+p:done a p:Status .
+p:deferred a p:Status .
+p:status a rdf:Property ; rdfs:domain p:Task ; rdfs:range p:Status .
+p:milestone a rdf:Property ; rdfs:domain p:Task ; rdfs:range p:Milestone .
+p:advances a rdf:Property ; rdfs:range p:Goal .
+p:source a rdf:Property ; rdfs:range p:Artifact .
+p:dependsOn a rdf:Property ; rdfs:domain p:Task ; rdfs:range p:Task ;
+    rdfs:comment "The subject requires completion of the object." .
+p:addresses a rdf:Property ; rdfs:domain p:Task ; rdfs:range p:Finding .
+p:acceptance a rdf:Property ; rdfs:domain p:Task ; rdfs:range rdfs:Literal .
+p:evidence a rdf:Property ; rdfs:domain p:Task ; rdfs:range p:Artifact .
+p:location a rdf:Property ; rdfs:domain p:Artifact ;
+    rdfs:comment "Repository-relative path or external URL." .
+p:reason a rdf:Property ; rdfs:range rdfs:Literal .
+p:supersedes a rdf:Property ; rdfs:domain p:Decision ; rdfs:range p:Decision .
