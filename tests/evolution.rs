@@ -239,3 +239,18 @@ fn rollback_restores_original_columns_after_mid_migration_failure() {
     db.client.batch_execute("ROLLBACK").unwrap();
     db.client.query("SELECT owner FROM accounts", &[]).unwrap();
 }
+
+#[test]
+fn rejects_backfill_on_existing_writer_field() {
+    let writer = load_model("examples/ledger/v1").unwrap();
+    let mut reader = load_model("examples/ledger/v2").unwrap();
+    reader
+        .fields
+        .get_mut(oddlang::model::OWNER)
+        .unwrap()
+        .historical_value = Some("Alice".into());
+    assert_eq!(
+        oddlang::evolution::migration(&writer, &reader).unwrap_err(),
+        "urn:oddlang:ledger:owner: historical backfill targets existing writer field"
+    );
+}

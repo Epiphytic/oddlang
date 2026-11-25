@@ -14,3 +14,8 @@ export function decimal(value: unknown, pattern: RegExp, min: bigint, max: bigin
   if (n.toString() !== s || n < min || n > max) throw new Error("decimal outside range");
   return n;
 }
+export function currency(value: unknown): string {
+  const code = text(value);
+  if (!code.length) throw new Error("empty currency");
+  return code;
+}

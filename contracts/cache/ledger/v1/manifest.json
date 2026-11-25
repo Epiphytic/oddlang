@@ -3,7 +3,7 @@
   "version": "v1",
   "entry": "ontology/domain.ttl",
   "files": {
-    "compatibility.md": "1d62956e2e3fa7bf7031f569eded83dbcefeeea242832b53681efdcb9764de8d",
+    "compatibility.md": "ba87811beca655ce970945c4558f6f4178f063e009b37c49b9d2d58e53b61429",
     "ontology/avro.ttl": "802acc674c78aeef80ccb08d9288608d4276f7a235e0ac5b356cc3db50c8ccd2",
     "ontology/domain.ttl": "1b7a6dc1c76b5b70d27c58097128c5735812118b55d9ca8921b0ac73786d50cc",
     "ontology/fields.ttl": "e79db9be74e00e05206509b741ac48d323a381300e985d09c2f57556d741192a",

@@ -4,4 +4,4 @@ A v1 JSON reader accepts a v2 account by ignoring unknown fields. A v2 JSON read
 
 A v2 Avro reader accepts v1 snapshots using the owner alias on ownerName and historical CAD default. In the reverse direction the Avro specification gives aliases to the reader: a v1 reader has no alias or default for its required owner field, so a v2 writer is incompatible. The pinned Arrow Avro reader also accepts writer-side aliases. Its success on this reverse case is an implementation extension and does not establish portable compatibility.
 
-The transfer examples exercise v1 behavior in both bundles. Each request starts with the published initial state. Failed requests preserve that state. The v2 account schema adds currency. Executing transfers between v2 currencies is outside this release.
+The v1 release defines single-currency transfers. Each v1 request starts with the published initial state and failed requests preserve that state. The v2 release publishes account structure only. Its wire payloads and ontology define no transfer operation.

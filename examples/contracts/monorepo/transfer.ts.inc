@@ -1,6 +1,3 @@
-import {balance, minAmount, maxAmount, errors} from "./generated/contract";
-import {object} from "./wire";
-
 type ErrorIRI = typeof errors[number];
 type Reply = {error: ErrorIRI} | {ok: true, balances: Record<string, bigint>};
 type Transport = (request: {source: string, destination: string, amount: string}) => unknown;

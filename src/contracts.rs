@@ -1,4 +1,5 @@
 //! Offline resolution of immutable ledger contract releases.
+mod payloads;
 use crate::model::{Model, core, model_from_graph};
 use oxigraph::{
     io::{RdfFormat, RdfParser},
@@ -146,7 +147,21 @@ pub fn resolve(project: &Path, lock: &Path, cache: &Path) -> Result<Release, Str
             graph.insert(TripleRef::new(&quad.subject, &quad.predicate, &quad.object));
         }
     }
+    for name in files
+        .keys()
+        .filter(|p| p.starts_with("ontology/") || p.ends_with(".ttl"))
+    {
+        if !loaded.contains(Path::new(name)) {
+            return Err(format!("unreachable ontology payload {name}"));
+        }
+    }
     let model = model_from_graph(graph.clone(), loaded)?;
+    payloads::validate(
+        &pin.version,
+        &model,
+        &files["wire.json"],
+        &files["vectors.json"],
+    )?;
     Ok(Release {
         version: pin.version,
         graph,

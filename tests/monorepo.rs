@@ -62,7 +62,6 @@ fn compile(work: &Path) -> BTreeMap<&'static str, Vec<u8>> {
     [
         "native/target/debug/service",
         "native/target/debug/ledger-cli",
-        "dist/client.js",
         "dist/wire.js",
         "dist/generated/contract.js",
     ]
@@ -92,11 +91,21 @@ fn coordinated_workspace_pin_only_upgrade() {
     let ontology = fs::read(work.join("project.ttl")).unwrap();
     let generated = work.join("generated");
     let mut releases = Vec::new();
+    let mut snapshots = Vec::new();
     let native = work.join("native");
     for version in ["v1", "v2"] {
         let release = pin(root, work, version);
         project::generate(&release, &generated).unwrap();
         let bytes = snapshot(&generated);
+        // The migration witness executes these generators on the same resolved models.
+        assert_eq!(
+            bytes[Path::new("schema.sql")],
+            oddlang::targets::postgres::generate(&release.model).as_bytes()
+        );
+        assert_eq!(
+            bytes[Path::new("account.avsc")],
+            oddlang::targets::avro::generate(&release.model).as_bytes()
+        );
         let compiled = compile(work);
         fs::remove_dir_all(native.join("target")).unwrap();
         fs::remove_dir_all(work.join("dist")).unwrap();
@@ -113,19 +122,32 @@ fn coordinated_workspace_pin_only_upgrade() {
         assert_eq!(rebuilt, compiled, "offline compiled artifacts changed");
         let service = native.join("target/debug/service");
         let cli = native.join("target/debug/ledger-cli");
-        let endpoint = work.join("transfer-v1");
-        if version == "v1" {
-            fs::copy(&service, &endpoint).unwrap();
-        }
         run(Command::new("node")
             .current_dir(work)
             .arg("verify.cjs")
             .arg(service)
-            .arg(cli)
-            .arg(endpoint));
+            .arg(cli));
         assert_eq!(fs::read(work.join("project.ttl")).unwrap(), ontology);
+        snapshots.push(bytes);
         releases.push(release);
     }
+    let changed: Vec<_> = snapshots[0]
+        .keys()
+        .filter(|name| snapshots[0][*name] != snapshots[1][*name])
+        .filter_map(|p| p.to_str())
+        .collect();
+    assert_eq!(
+        changed,
+        [
+            "account.avsc",
+            "account.rs",
+            "adapter.rs",
+            "contract.ts",
+            "schema.sql",
+            "vectors.json"
+        ]
+    );
+    assert!(snapshots[0].keys().eq(snapshots[1].keys()));
     let mut database = db::TestDatabase::connect().unwrap();
     let evidence =
         events::evolution_witness(&mut database.client, &releases[0].model, &releases[1].model);

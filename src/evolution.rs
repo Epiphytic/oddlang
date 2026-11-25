@@ -15,6 +15,11 @@ pub fn migration(writer: &Model, reader: &Model) -> Result<String, String> {
             .fields
             .get(iri)
             .ok_or_else(|| format!("{iri}: unsupported field removal"))?;
+        if new.historical_value.is_some() {
+            return Err(format!(
+                "{iri}: historical backfill targets existing writer field"
+            ));
+        }
         if old.range != new.range {
             return Err(format!("{iri}: unsupported range change"));
         }

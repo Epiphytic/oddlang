@@ -11,6 +11,6 @@ npm exec --yes --package=typescript@5.9.3 -- tsc --version
 cargo test --locked --offline --test monorepo
 ```
 
-Each version builds a Rust service and CLI with checked account constructors and compiles the TypeScript client. The client reads the maximum signed 64-bit balance from the native account payload and checks both transfer outcomes against a running v1 executable. Transfers retain their v1 single-currency semantics. The v2 service and CLI carry currencyCode on current accounts. Historical rows and v1 Avro events acquire CAD through the named transition.
+Each version builds a Rust service and CLI with checked account constructors and compiles the TypeScript client. Each client reads the maximum signed 64-bit balance from its native account payload. The v1 client sends requests to the v1 service and checks successful balances and the named backend error. The v2 release defines account structure only. Its client, service and CLI decode the required nonempty currencyCode on current accounts. Historical rows and v1 Avro events acquire CAD through the named transition.
 
 The test deletes generated sources and build output, rebuilds from the same pin offline, and compares the generated Rust, TypeScript, SQL, Avro, JSON, compiled JavaScript and native executables within the same build directory and toolchain.

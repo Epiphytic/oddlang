@@ -32,52 +32,56 @@ func checkedFile(path, want string) ([]byte, error) {
 	return b, nil
 }
 
-func verifiedVectors() (string, []byte, error) {
+func verifiedInputs() (string, Wire, []byte, error) {
+	var wire Wire
 	var pin contractPin
 	var target targetPin
 	if err := readJSON("client.lock.json", &pin); err != nil {
-		return "", nil, err
+		return "", wire, nil, err
 	}
 	if err := readJSON("target.lock.json", &target); err != nil {
-		return "", nil, err
+		return "", wire, nil, err
 	}
 	if target.ManifestSha256 != pin.ManifestSha256 || pin.Identity != "urn:oddlang:contract:ledger" {
-		return "", nil, fmt.Errorf("target contract mismatch")
+		return "", wire, nil, fmt.Errorf("target contract mismatch")
 	}
 	if !filepath.IsLocal(target.Revision) {
-		return "", nil, fmt.Errorf("invalid revision")
+		return "", wire, nil, fmt.Errorf("invalid revision")
 	}
-	for _, file := range []string{filepath.Join("revisions", target.Revision, "client.go"), "client.go"} {
-		if _, err := checkedFile(file, target.SourceSha256); err != nil {
-			return "", nil, err
-		}
+	if _, err := checkedFile("client.go", target.SourceSha256); err != nil {
+		return "", wire, nil, err
 	}
 	manifest, err := checkedFile("bundle/manifest.json", pin.ManifestSha256)
 	if err != nil {
-		return "", nil, err
+		return "", wire, nil, err
 	}
 	var m struct {
 		Identity, Version string
 		Files             map[string]string
 	}
 	if err = json.Unmarshal(manifest, &m); err != nil {
-		return "", nil, err
+		return "", wire, nil, err
 	}
 	if m.Identity != pin.Identity || m.Version != pin.Version || m.Files["wire.json"] != target.OverlaySha256 || m.Files["vectors.json"] != target.VectorsSha256 || target.OverlaySha256 == "" || target.VectorsSha256 == "" {
-		return "", nil, fmt.Errorf("target inputs mismatch")
+		return "", wire, nil, fmt.Errorf("target inputs mismatch")
 	}
 	var vectors []byte
 	for path, digest := range m.Files {
 		if !filepath.IsLocal(path) {
-			return "", nil, fmt.Errorf("invalid bundle path %q", path)
+			return "", wire, nil, fmt.Errorf("invalid bundle path %q", path)
 		}
 		data, err := checkedFile(filepath.Join("bundle", path), digest)
 		if err != nil {
-			return "", nil, err
+			return "", wire, nil, err
+		}
+		if path == "wire.json" {
+			if err = json.Unmarshal(data, &wire); err != nil {
+				return "", wire, nil, err
+			}
 		}
 		if path == "vectors.json" {
 			vectors = data
 		}
 	}
-	return pin.Version, vectors, nil
+	return pin.Version, wire, vectors, nil
 }

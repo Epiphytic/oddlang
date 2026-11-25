@@ -6,5 +6,5 @@
     "noEmitOnError": true,
     "outDir": "dist"
   },
-  "include": ["client.ts", "generated/contract.ts"]
+  "include": ["generated/contract.ts"]
 }

@@ -46,4 +46,3 @@ impl Account {
         &self.currency_code
     }
 }
-

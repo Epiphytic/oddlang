@@ -40,4 +40,3 @@ impl Account {
         self.balance.0
     }
 }
-

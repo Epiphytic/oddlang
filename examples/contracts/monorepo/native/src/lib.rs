@@ -16,6 +16,15 @@ fn text(value: &Value) -> Result<&str, String> {
     value.as_str().ok_or_else(|| "expected JSON string".into())
 }
 
+pub type Endpoint = fn(&Value) -> Result<Value, String>;
+pub fn currency(value: &Value) -> Result<String, String> {
+    let code = text(value)?;
+    if code.is_empty() {
+        return Err("empty currency".into());
+    }
+    Ok(code.to_owned())
+}
+
 fn decimal(value: &Value) -> Result<i128, String> {
     let s = text(value)?;
     let n = s.parse::<i64>().map_err(|_| "invalid i64 decimal")?;

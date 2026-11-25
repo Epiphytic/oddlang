@@ -26,6 +26,8 @@ pub fn generate(release: &Release, out: &Path) -> Result<(), Box<dyn Error>> {
         let key = serde_json::to_string(name)?;
         let (ty, decoder, constructor) = if field.iri == BALANCE {
             ("bigint", "balance", format!("decimal(&row[{key}])?"))
+        } else if field.iri == "urn:oddlang:ledger:currencyCode" {
+            ("string", "currency", format!("currency(&row[{key}])?"))
         } else {
             ("string", "text", format!("text(&row[{key}])?.to_owned()"))
         };
@@ -46,26 +48,26 @@ pub fn generate(release: &Release, out: &Path) -> Result<(), Box<dyn Error>> {
         "export const balancePattern = new RegExp({});",
         enc["pattern"]
     )?;
-    writeln!(
-        types,
-        "export const errors = {} as const;",
-        wire["transfer"]["errorsByPriority"]
-    )?;
     types.push_str("export function balance(input: unknown): bigint {\n  return decimal(input, balancePattern, minBalance, maxBalance);\n}\n");
-    let amount = &wire["encoding"]["amount"];
-    writeln!(types, "export const minAmount = BigInt({});", amount["min"])?;
-    writeln!(types, "export const maxAmount = BigInt({});", amount["max"])?;
-    types.insert_str(0, "import { object, text, decimal } from '../wire';\n");
+    types.insert_str(
+        0,
+        "import { object, text, decimal, currency } from '../wire';\n",
+    );
     rust_decode.push_str("    ).map_err(str::to_owned)\n}\n");
     rust_encode.push_str("    })\n}\n");
-    let transfer = if release
-        .model
-        .operations
-        .contains_key("urn:oddlang:ledger:TransferFunds")
-    {
-        "include!(concat!(env!(\"CARGO_MANIFEST_DIR\"), \"/src/transfer_v1.rs\"));\n"
+    let transfer = if let Some(rules) = wire.get("transfer") {
+        writeln!(
+            types,
+            "export const errors = {} as const;",
+            rules["errorsByPriority"]
+        )?;
+        let amount = &wire["encoding"]["amount"];
+        writeln!(types, "export const minAmount = BigInt({});", amount["min"])?;
+        writeln!(types, "export const maxAmount = BigInt({});", amount["max"])?;
+        types.push_str(include_str!("transfer.ts.inc"));
+        "include!(concat!(env!(\"CARGO_MANIFEST_DIR\"), \"/src/transfer_v1.rs\"));\npub const TRANSFER: Option<Endpoint> = Some(transfer);\n"
     } else {
-        "pub fn transfer(_: &Value) -> Result<Value, String> { Err(\"transfer unavailable in this structural release\".into()) }\n"
+        "pub const TRANSFER: Option<Endpoint> = None;\n"
     };
     fs::write(out.join("contract.ts"), types)?;
     fs::write(

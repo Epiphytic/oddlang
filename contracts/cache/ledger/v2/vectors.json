@@ -5,40 +5,5 @@
     "owner": "Alice",
     "balance": "9223372036854775807",
     "currencyCode": "CAD"
-  },
-  "transfer": {
-    "behaviorVersion": "v1",
-    "state": [
-      {
-        "id": "A",
-        "owner": "Alice",
-        "balance": "9"
-      },
-      {
-        "id": "B",
-        "owner": "Bob",
-        "balance": "1"
-      }
-    ],
-    "request": {
-      "source": "A",
-      "destination": "B",
-      "amount": "4"
-    },
-    "success": {
-      "ok": true,
-      "balances": {
-        "A": "5",
-        "B": "5"
-      }
-    },
-    "errorRequest": {
-      "source": "A",
-      "destination": "B",
-      "amount": "10"
-    },
-    "error": {
-      "error": "urn:oddlang:ledger:error:InsufficientFunds"
-    }
   }
 }
