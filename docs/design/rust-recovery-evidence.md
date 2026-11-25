@@ -15,3 +15,5 @@ On macOS Apple Silicon, the initial fixture's semantic graph had SHA-256 `ded566
 Claude reviewed `86e1f1d` in auto mode, ran the 12 initial acceptance tests and tried roughly 60 source, mapping and overlay mutations. It found a false baseline claim. A self-consistent cleanup archive could name a changed original as its own baseline. The corrected workflow requires a digest frozen independently before cleanup, supplied again during import and replay. The reviewer also requested normalization of reversed equivalent comparisons and more precise diagnostics for mapping errors.
 
 The [ledger baseline pin](../../examples/rust-import/ledger.baseline) is stored outside the source fixture and cleanup archives. It covers the crate, mapping and structural overlays together.
+
+Claude approved `44c9cd9` after running all 15 focused tests offline and checking the false-baseline regression, equivalent comparison normalization and diagnostic locations. The complete HTTP and component execution gates also passed during integration.
