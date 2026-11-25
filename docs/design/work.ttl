@@ -64,22 +64,22 @@ w:review13 a p:Finding ; rdfs:label "Schema verdict conflated with one event rea
 w:review14 a p:Finding ; rdfs:label "Wire rename and aliases untested" ; p:source w:review .
 
 w:db a p:Task ; rdfs:label "Provision the integration environment" ;
-    p:milestone w:m1 ; p:status p:planned ; p:source w:plan ;
+    p:milestone w:m1 ; p:status p:done ; p:source w:plan ;
     p:dependsOn w:revise ; p:addresses w:review12 ;
-    p:acceptance "Pinned PostgreSQL works offline and missing configuration fails loudly." .
+    p:acceptance "Pinned PostgreSQL works offline and missing configuration fails loudly." ; p:evidence w:databaseEvidence .
 
 w:load a p:Task ; rdfs:label "Load and validate" ;
-    p:milestone w:m1 ; p:status p:planned ; p:source w:plan ;
+    p:milestone w:m1 ; p:status p:active ; p:source w:plan ;
     p:dependsOn w:revise ; p:addresses w:review7, w:review11 ;
     p:acceptance "Invalid declarations fail and equivalent graphs yield identical models and diagnostics." .
 
 w:impact a p:Task ; rdfs:label "Measure the graph's contribution" ;
-    p:milestone w:m1 ; p:status p:planned ; p:source w:plan ;
+    p:milestone w:m1 ; p:status p:active ; p:source w:plan ;
     p:dependsOn w:load ; p:addresses w:review3 ;
     p:acceptance "Query the affected IRIs across imports and record the TOML comparison." .
 
 w:emit a p:Task ; rdfs:label "Emit Rust and SQL" ;
-    p:milestone w:m1 ; p:status p:planned ; p:source w:plan ;
+    p:milestone w:m1 ; p:status p:active ; p:source w:plan ;
     p:dependsOn w:db, w:load ; p:addresses w:review10 ;
     p:acceptance "Rust and SQL agree at both bounds and one step beyond each bound." .
 
@@ -156,3 +156,5 @@ w:monorepo a p:Task ; rdfs:label "Verify one coordinated monorepo upgrade" ;
 w:externalClient a p:Task ; rdfs:label "Verify independent contract adoption" ;
     p:milestone w:adoption ; p:status p:planned ; p:source w:plan ; p:dependsOn w:release ;
     p:acceptance "A standalone Go client verifies two separately pinned releases with published vectors and replays a reviewed adapter offline." .
+
+w:databaseEvidence a p:Artifact ; p:location "docs/design/implementation-evidence.md" .
