@@ -59,3 +59,11 @@ curl --fail --silent --show-error --location https://spec.openapis.org/oas/3.1/s
 cargo fetch --locked
 cargo fetch --locked --manifest-path examples/contracts/monorepo/native/Cargo.toml
 cargo fetch --locked --manifest-path examples/http/provider/Cargo.toml
+cargo fetch --locked --manifest-path examples/http/contract/shapes/v1/rust-runner/Cargo.toml
+
+# The legacy monorepo test resolves the exact compiler through npm exec.
+npm exec --yes --package=typescript@5.9.3 -- tsc --version
+hybrid="$root/target/http-hybrid-deps"
+mkdir -p "$hybrid"
+cp examples/http/hybrid/package.json examples/http/hybrid/package-lock.json "$hybrid/"
+npm --prefix "$hybrid" ci --ignore-scripts

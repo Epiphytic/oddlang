@@ -158,6 +158,11 @@ fn standalone_clients_against_scripted_peers_and_provider() {
         let claim: Claim = read_json(&runner.claim).unwrap();
         assert_eq!(stock.results.len(), 193);
         verify_evidence(&verified, &claim, &stock).unwrap();
+        if language == "typescript" {
+            let path = Path::new("target/http-conformance/typescript-v1.json");
+            fs::create_dir_all(path.parent().unwrap()).unwrap();
+            fs::write(path, serde_json::to_vec_pretty(&stock).unwrap()).unwrap();
+        }
         success(&mut runner.command(Some(&format!("http://{}", server.addr))));
         let smoke: Value = read_json(&runner.evidence).unwrap();
         assert_eq!(

@@ -4,6 +4,14 @@ Oddlang explores compiling a ledger's domain, behavior and target mappings
 from versioned ontologies. See the [ledger design](docs/superpowers/specs/2026-11-25-ledger.md)
 and [implementation plan](docs/superpowers/plans/2026-11-25-ledger.md).
 
+## HTTP conformance
+
+Publish a pinned HTTP contract with portable test cases, OpenAPI and JSON
+Schema. Generate a native Rust provider and a shared browser-safe TypeScript
+client. A standalone Go client adopts the same cases with its own release pin.
+The [hybrid example](examples/http/hybrid/README.md) shows setup, offline
+verification and a Rust backend with Node SSR and React.
+
 ## Integration tests
 
 The full suite uses a Rust toolchain with edition 2024 support, PostgreSQL 16.6, Node.js and npm for the TypeScript client, and Go 1.22 or newer for the independent client. The client builds were exercised with Node.js 22 and npm 10. While online, cache the database image, both locked Rust dependency sets and the pinned TypeScript compiler.

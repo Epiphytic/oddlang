@@ -1,0 +1,12 @@
+{
+  "name": "oddlang-http-hybrid",
+  "private": true,
+  "dependencies": {
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "vite": "8.3.8",
+    "playwright": "1.58.2",
+    "typescript": "5.9.3"
+  },
+  "type": "module"
+}
