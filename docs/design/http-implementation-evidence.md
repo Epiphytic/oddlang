@@ -37,3 +37,21 @@ Claude Sonnet CLI reviewed `721aa35` in auto permission mode. It found a detache
 - Each encoder mutant failed exactly two cases. Each decoder mutant failed exactly 28 cases. Unaffected observations still passed. The native runners rejected altered payload and manifest bytes.
 - The standalone Go fixture ran from a temporary directory with module downloads disabled. The TypeScript client imports no Node APIs and uses a bounded Node test runner and a real Chromium test. The provider, consumer and bundle suites all passed after review fixes.
 - The scoped Claude follow-up approved `d60e179` with no remaining blockers.
+
+## Phase 5 · Version skew and expanded JSON codecs
+
+Claude Sonnet CLI reviewed the wire-evolution commit `b1bed28` in auto permission mode and passed both gates. It noted that the ledger scenario derivation relies on a stable balance declaration. The separate codec fixture has its own portable rules and checks.
+
+- The v2 manifest SHA-256 is `0922d46293a8bb9f8a5221dffa1fd5a87850299efdc99efe14ad659163276b0e`. The published compatibility report names the unchanged v1 digest and the renamed field IRI. Unchanged authors' behavior fixtures project through the new wire name. Native Rust and TypeScript names remain stable.
+- Same-version live lookup pairs pass. Both mixed pairs return an HTTP 200 payload that fails the client's expected field decode. A mixed transfer returns a client protocol error and independent reads confirm the provider committed balances A=7 and B=10.
+- All 117 v2 provider cases and all 193 v2 TypeScript cases passed. The external Go v1 target lock reproduced its 193 cases and rejected a changed native source file. V1 republication preserved every pinned byte and accepted the saved provider and client evidence.
+- Impact selection walks reverse dependencies. A changed named ledger balance constraint affects reader, writer and authored operation checks. An unrelated IRI selects none. Multiple contract identities resolve together and conflicting pins fail.
+- Claude Sonnet CLI reviewed the separate codec commit `797cedd` in auto permission mode. It built all three codecs and compared additional raw wire inputs. The follow-up adds portable raw-byte witnesses and a regression proving that the shared model requires a closed record. Rust, TypeScript and Go each pass the same 82-case corpus with 40 obligation rows. The manifest SHA-256 is `867e93132a34eb3d446b7faef2cf36af89fd25767abaded84975c9adbe5fbff3`. The separate `json.codec` role checks nested records, lists, optional and required nullable fields, and closed tagged unions independently of transport. Both original ledger HTTP bundle digests are unchanged.
+
+## Phase 6 · Node SSR and React against live Rust
+
+Claude Sonnet CLI reviewed `9b50441` in auto permission mode. It verified the two-version hybrid flow by inspection and requested explicit runtime, role, receipt and scope documentation plus prerequisite pin checks. Commit `933bd3d` shares prerequisite checks between setup and offline verification, requires fresh receipts, and verifies Go's evidence using its independently owned target pin. Claude Opus CLI also reviewed the whole branch in auto mode and found no release-blocking cross-phase issues.
+
+- The same Node TypeScript SSR and React sources build with each workspace pin. Node renders the opening balances from the live Rust provider. Chromium submits a transfer of 3, observes the release-specific wire field, renders balances 7/10 and sees the named insufficient-funds error on a transfer of 8. Independent provider reads confirm the failed transfer leaves balances unchanged.
+- The v1 Rust provider remains live for independently pinned Go while the workspace exercises v2. Both retained deployments under `target/http/v1` and `target/http/v2` also started and served the pages from their built artifacts.
+- Claude's scoped auto-mode follow-up approved both the codec and hybrid revisions. The full pinned offline gate passed 85 tests with PostgreSQL 16.6, and the CLI verified eight fresh native evidence files. Strict Clippy, Rust formatting, the Turtle files and the ready-work query also passed.
