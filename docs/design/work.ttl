@@ -148,14 +148,14 @@ w:interopDesign a p:Task ; rdfs:label "Record the contract interoperability desi
     p:milestone w:design ; p:status p:done ; p:dependsOn w:priorArt ; p:source w:ggenResearch ;
     p:acceptance "Align the plan, design and work graph on the two ownership models." ; p:evidence w:plan, w:spec, w:workGraph .
 w:release a p:Task ; rdfs:label "Package and pin contract releases" ;
-    p:milestone w:adoption ; p:status p:active ; p:source w:plan ; p:dependsOn w:interopDesign, w:oracle, w:wire ;
-    p:acceptance "Resolve a release and transitive imports offline, verify content digests and publish portable wire vectors." .
+    p:milestone w:adoption ; p:status p:done ; p:source w:plan ; p:dependsOn w:interopDesign, w:oracle, w:wire ;
+    p:acceptance "Resolve a release and transitive imports offline, verify content digests and publish portable wire vectors." ; p:evidence w:interoperabilityEvidence .
 w:monorepo a p:Task ; rdfs:label "Verify one coordinated monorepo upgrade" ;
-    p:milestone w:adoption ; p:status p:active ; p:source w:plan ; p:dependsOn w:release ;
-    p:acceptance "One pin upgrades Rust, TypeScript, SQL and Avro projections and their integration checks pass." .
+    p:milestone w:adoption ; p:status p:done ; p:source w:plan ; p:dependsOn w:release ;
+    p:acceptance "One pin upgrades Rust, TypeScript, SQL and Avro projections and their integration checks pass." ; p:evidence w:interoperabilityEvidence .
 w:externalClient a p:Task ; rdfs:label "Verify independent contract adoption" ;
-    p:milestone w:adoption ; p:status p:active ; p:source w:plan ; p:dependsOn w:release ;
-    p:acceptance "A standalone Go client verifies two separately pinned releases with published vectors and replays a reviewed adapter offline." .
+    p:milestone w:adoption ; p:status p:done ; p:source w:plan ; p:dependsOn w:release ;
+    p:acceptance "A standalone Go client verifies two separately pinned releases with published vectors and replays a reviewed adapter offline." ; p:evidence w:interoperabilityEvidence .
 
 w:databaseEvidence a p:Artifact ; p:location "docs/design/implementation-evidence.md" .
 
@@ -171,3 +171,5 @@ w:languageEvidence a p:Artifact ; p:location "docs/design/implementation-evidenc
 w:milestone2Evidence a p:Artifact ; p:location "docs/design/implementation-evidence.md" .
 
 w:milestone3Evidence a p:Artifact ; p:location "docs/design/implementation-evidence.md" .
+
+w:interoperabilityEvidence a p:Artifact ; p:location "docs/design/implementation-evidence.md" .
