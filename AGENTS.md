@@ -2,6 +2,8 @@
 
 Oddlang explores whether a program can live in a hierarchy of ontologies. A domain model describes entities and invariants, a behavior model defines executable operations, and target overlays map stable concepts to native code, storage and wire formats. The long-term aim is to change one semantic model, query what depends on it, and deterministically rebuild the affected artifacts. The original Gemini conversation also explored portable ownership semantics, a concise authoring language and reviewed, locked LLM-assisted lowering. These are research directions. The first experiment is a two-version ledger written in Rust.
 
+Portability means sharing versioned data and API contracts among native backends, frontends, CLIs and databases. Use one workspace contract lock for a coordinated monorepo and independent pins for external consumers. Keep conformance examples usable with the consumer’s own tools. Oddlang credits [ggen](https://github.com/seanchatmangpt/ggen) for inspiring its approach to routine schema and code projections.
+
 ## Start here
 
 - Read the [ledger design](docs/superpowers/specs/2026-11-25-ledger.md) for the current semantics, scope and success criteria. The original chat is available in the author's local PDF export named in the work graph. The design captures the agreed prototype for anyone working from a fresh clone.
