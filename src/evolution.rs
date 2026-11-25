@@ -3,6 +3,7 @@ use crate::model::{ACCOUNT, Model};
 use std::fmt::Write;
 
 /// Generate the supported rename and required-text addition in one transaction.
+/// On a PostgreSQL execution error, issue ROLLBACK before reusing the connection.
 pub fn migration(writer: &Model, reader: &Model) -> Result<String, String> {
     if writer.sql_name != reader.sql_name || writer.key != reader.key {
         return Err(format!("{ACCOUNT}: unsupported table or key change"));

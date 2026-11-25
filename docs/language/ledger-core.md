@@ -41,3 +41,22 @@ Bind source ID, destination ID and amount at call entry. The entry snapshot maps
 For the released TransferFunds, guards 1–6 require source existence, destination existence, distinct IDs, positive amount, sufficient source balance and destination capacity. Their errors in order are e:SourceMissing, e:DestinationMissing, e:SameAccount, e:NonPositiveAmount, e:InsufficientFunds and e:DestinationOverflow. The hand-authored [expected lowering](../../tests/fixtures/transfer.lowered) gives full IRIs and operand order.
 
 With balances A=10, B=7 and amount 3, both accounts exist, their keys differ, 3 > 0, 10 ≥ 3 and 7 + 3 fits. The two buffered results are A=7 and B=10. With source A, destination A, no account A in the snapshot, and amount −1, source existence already fails at priority 1. Return `urn:oddlang:ledger:error:SourceMissing` without evaluating destination existence, ID equality, amount or balance reads. The map remains identical to the snapshot.
+
+## V1-to-v2 transition
+
+The v2 root imports a named `o:Transition`. Its `o:sourceVersion` and
+`o:destinationVersion` are the version IRIs `urn:oddlang:ledger:v1` and
+`urn:oddlang:ledger:v2`. Each declaration identifies one required text field
+by its stable `o:field` IRI and supplies one text `o:historicalValue`. A
+field can receive one backfill in this transition. The SQL migration fills
+existing rows with this value and commits its DDL and data changes in one
+transaction. On execution failure the caller must issue `ROLLBACK` before
+reusing that connection. Future inserts supply their own values.
+
+The v2 Avro reader uses the same historical value as its field default.
+A reader field's aliases follow the target identifier grammar. Physical
+field names and aliases must be unique within the record. The compatibility
+evidence covers the v1 writer to v2 reader direction. In the reverse
+direction the pinned Arrow resolver also accepts aliases attached to the
+writer, so its results cannot independently establish a reader-side alias
+verdict for that direction.

@@ -125,6 +125,15 @@ pub fn load_graph(dir: &Path) -> Result<(Graph, BTreeSet<PathBuf>)> {
     }
     Ok((graph, loaded))
 }
+fn validate_identifier(value: &str, at: &str) -> Result<()> {
+    let mut bytes = value.bytes();
+    if !bytes.next().is_some_and(|c| c.is_ascii_alphabetic())
+        || !bytes.all(|c| c.is_ascii_alphanumeric() || c == b'_')
+    {
+        return Err(format!("{at}: invalid identifier {value}"));
+    }
+    Ok(())
+}
 fn checked_name(
     g: &Graph,
     s: &NamedOrBlankNode,
@@ -133,12 +142,7 @@ fn checked_name(
     field: bool,
 ) -> Result<String> {
     let value = literal(one(g, s, "name", at)?, xsd::STRING, at)?;
-    let mut bytes = value.bytes();
-    if !bytes.next().is_some_and(|c| c.is_ascii_alphabetic())
-        || !bytes.all(|c| c.is_ascii_alphanumeric() || c == b'_')
-    {
-        return Err(format!("{at}: invalid identifier {value}"));
-    }
+    validate_identifier(&value, at)?;
     const KEYWORDS: &str = "as async await break const continue crate dyn else enum extern false fn for if impl in let loop match mod move mut pub ref return self Self static struct super trait true type unsafe use where while abstract become box do final gen macro override priv try typeof unsized virtual yield";
     let invalid = match target {
         "Rust" => {
@@ -188,7 +192,7 @@ fn validate_declarations(g: &Graph, behavior: Option<&HashSet<NamedOrBlankNode>>
         let classes: Vec<_> = g.objects_for_subject_predicate(&s, rdf::TYPE).collect();
         if behavior.is_none()
             && !classes.iter().any(|t| {
-                ["Entity", "Field", "Operation", "Projection"]
+                ["Entity", "Field", "Operation", "Projection", "Transition"]
                     .iter()
                     .any(|c| t == &TermRef::NamedNode(core(c).as_ref()))
             })
@@ -219,7 +223,7 @@ fn validate_declarations(g: &Graph, behavior: Option<&HashSet<NamedOrBlankNode>>
                 }
                 [ty] => {
                     let ty = iri(*ty, owner)?;
-                    if !["Entity", "Field", "Projection", "Operation"]
+                    if !["Entity", "Field", "Projection", "Operation", "Transition"]
                         .iter()
                         .any(|t| core(t).as_str() == ty)
                     {
@@ -289,7 +293,7 @@ pub(crate) fn model_from_graph(g: Graph, imports: BTreeSet<PathBuf>) -> Result<M
     let mut fields = BTreeMap::new();
     for id in refs {
         let s = named(&id);
-        allowed(&g, &s, &["type", "range", "historicalValue"], &id)?;
+        allowed(&g, &s, &["type", "range"], &id)?;
         let ty = iri(one(&g, &s, "type", &id)?, &id)?;
         let range = if id == BALANCE {
             if ty != core("Integer").as_str() {
@@ -326,22 +330,6 @@ pub(crate) fn model_from_graph(g: Graph, imports: BTreeSet<PathBuf>) -> Result<M
             }
             None
         };
-        let historical_value = if g
-            .objects_for_subject_predicate(&s, &core("historicalValue"))
-            .next()
-            .is_some()
-        {
-            if range.is_some() {
-                return Err(format!("{id}: historical value requires a text field"));
-            }
-            Some(literal(
-                one(&g, &s, "historicalValue", &id)?,
-                xsd::STRING,
-                &id,
-            )?)
-        } else {
-            None
-        };
         fields.insert(
             id.clone(),
             Field {
@@ -351,9 +339,49 @@ pub(crate) fn model_from_graph(g: Graph, imports: BTreeSet<PathBuf>) -> Result<M
                 sql_name: String::new(),
                 avro_name: String::new(),
                 aliases: vec![],
-                historical_value,
+                historical_value: None,
             },
         );
+    }
+    for id in instances(&g, "Transition")? {
+        let transition = named(&id);
+        allowed(
+            &g,
+            &transition,
+            &[
+                "sourceVersion",
+                "destinationVersion",
+                "field",
+                "historicalValue",
+            ],
+            &id,
+        )?;
+        for (property, expected) in [
+            ("sourceVersion", "urn:oddlang:ledger:v1"),
+            ("destinationVersion", "urn:oddlang:ledger:v2"),
+        ] {
+            let version = iri(one(&g, &transition, property, &id)?, &id)?;
+            if version != expected {
+                return Err(format!("{id}: expected {property} {expected}"));
+            }
+        }
+        let field_id = iri(one(&g, &transition, "field", &id)?, &id)?;
+        let field = fields
+            .get_mut(&field_id)
+            .ok_or_else(|| format!("{id}: unknown field {field_id}"))?;
+        if field.range.is_some() {
+            return Err(format!(
+                "{field_id}: historical value requires a text field"
+            ));
+        }
+        let value = literal(
+            one(&g, &transition, "historicalValue", &id)?,
+            xsd::STRING,
+            &id,
+        )?;
+        if field.historical_value.replace(value).is_some() {
+            return Err(format!("{field_id}: duplicate transition backfill"));
+        }
     }
     let mut names = BTreeMap::new();
     for id in instances(&g, "Projection")? {
@@ -413,7 +441,11 @@ pub(crate) fn model_from_graph(g: Graph, imports: BTreeSet<PathBuf>) -> Result<M
                 let name = checked_name(&g, &m, &at, target, true)?;
                 let aliases = g
                     .objects_for_subject_predicate(&m, &core("alias"))
-                    .map(|t| literal(t, xsd::STRING, &at))
+                    .map(|t| {
+                        let value = literal(t, xsd::STRING, &at)?;
+                        validate_identifier(&value, &at)?;
+                        Ok(value)
+                    })
                     .collect::<Result<BTreeSet<_>>>()?;
                 Ok((field, name, aliases))
             };
@@ -434,6 +466,11 @@ pub(crate) fn model_from_graph(g: Graph, imports: BTreeSet<PathBuf>) -> Result<M
         for (field, (name, aliases)) in mappings {
             if !physical.insert(name.clone()) {
                 return Err(format!("{id}: conflicting physical name {name}"));
+            }
+            for alias in &aliases {
+                if !physical.insert(alias.clone()) {
+                    return Err(format!("{id}: conflicting physical name {alias}"));
+                }
             }
             let f = fields
                 .get_mut(&field)

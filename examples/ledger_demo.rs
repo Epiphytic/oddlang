@@ -48,6 +48,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(error, "urn:oddlang:ledger:error:SourceMissing");
     assert_eq!(&before, state.rows());
     println!("Two missing accounts and a negative amount produce {error}");
+    let error = state.execute(transfer, "a", "a", 0).unwrap_err();
+    assert_eq!(error, "urn:oddlang:ledger:error:SameAccount");
+    assert_eq!(&before, state.rows());
+    println!("Same account and zero amount produce {error}");
     let mut db = db::TestDatabase::connect()?;
     let result = events::evolution_witness(&mut db.client, &writer, &reader);
     println!(

@@ -71,7 +71,7 @@ fn equivalent_graphs_emit_identical_bytes() {
     let before = build(project.path());
     rewrite(project.path());
     let after = build(project.path());
-    for file in ["account.rs", "schema.sql"] {
+    for file in ["account.rs", "schema.sql", "account.avsc"] {
         assert_eq!(
             fs::read(before.path().join(file)).unwrap(),
             fs::read(after.path().join(file)).unwrap()
