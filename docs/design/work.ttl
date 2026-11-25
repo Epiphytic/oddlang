@@ -227,11 +227,11 @@ w:httpPlanReview a p:Task ; rdfs:label "Write and independently review the HTTP 
     p:acceptance "Review a phased plan with Claude CLI and record the disposition of material findings." .
 
 w:httpVocabulary a p:Task ; rdfs:label "Specify and load the HTTP vocabulary" ;
-    p:milestone w:httpFoundation ; p:status p:active ; p:source w:httpPlan ;
+    p:milestone w:httpFoundation ; p:status p:done ; p:source w:httpPlan ;
     p:dependsOn w:httpPlanReview ;
     p:acceptance "Load a closed stable-IRI HTTP profile with pinned ledger semantics offline and reject invalid declarations and imports." .
 w:httpBundle a p:Task ; rdfs:label "Publish portable obligations, cases and schemas" ;
-    p:milestone w:httpFoundation ; p:status p:planned ; p:source w:httpPlan ;
+    p:milestone w:httpFoundation ; p:status p:active ; p:source w:httpPlan ;
     p:dependsOn w:httpVocabulary ;
     p:acceptance "Publish deterministic evidence requirements, portable cases, OpenAPI and JSON Schema and reject missing required witnesses." .
 w:httpProvider a p:Task ; rdfs:label "Prove conformance of a real Rust HTTP provider" ;
@@ -276,3 +276,7 @@ w:httpPlanReview p:addresses w:httpReviewInputs .
 w:httpPhase1ReviewFinding a p:Finding ; rdfs:label "Strengthen HTTP loader diagnostics, negative tests and tool pin verification" ;
     p:source w:httpImplementationEvidence .
 w:httpVocabulary p:addresses w:httpPhase1ReviewFinding .
+
+w:httpImplementationEvidence a p:Artifact ; rdfs:label "HTTP implementation verification and Claude phase reviews" ;
+    p:location "docs/design/http-implementation-evidence.md" .
+w:httpVocabulary p:evidence w:httpImplementationEvidence .
