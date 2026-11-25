@@ -1,0 +1,8 @@
+@prefix l: <urn:oddlang:ledger:> .
+@prefix o: <urn:oddlang:core:> .
+l:Rust o:imports "fields.ttl" .
+l:Rust a o:Projection ; o:target o:Rust ; o:projects l:Account ; o:name "Account" .
+l:Rust o:mapping [ o:field l:id ; o:name "id" ] .
+l:Rust o:mapping [ o:field l:owner ; o:name "owner" ] .
+l:Rust o:mapping [ o:field l:balance ; o:name "balance" ] .
+l:Rust o:mapping [ o:field l:currencyCode ; o:name "currency_code" ] .

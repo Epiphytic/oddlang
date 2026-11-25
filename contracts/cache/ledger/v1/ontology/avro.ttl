@@ -1,0 +1,7 @@
+@prefix l: <urn:oddlang:ledger:> .
+@prefix o: <urn:oddlang:core:> .
+l:Avro o:imports "fields.ttl" .
+l:Avro a o:Projection ; o:target o:Avro ; o:projects l:Account ; o:name "Account" .
+l:Avro o:mapping [ o:field l:id ; o:name "id" ] .
+l:Avro o:mapping [ o:field l:owner ; o:name "owner" ] .
+l:Avro o:mapping [ o:field l:balance ; o:name "balance" ] .

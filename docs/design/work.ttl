@@ -64,64 +64,64 @@ w:review13 a p:Finding ; rdfs:label "Schema verdict conflated with one event rea
 w:review14 a p:Finding ; rdfs:label "Wire rename and aliases untested" ; p:source w:review .
 
 w:db a p:Task ; rdfs:label "Provision the integration environment" ;
-    p:milestone w:m1 ; p:status p:planned ; p:source w:plan ;
+    p:milestone w:m1 ; p:status p:done ; p:source w:plan ;
     p:dependsOn w:revise ; p:addresses w:review12 ;
-    p:acceptance "Pinned PostgreSQL works offline and missing configuration fails loudly." .
+    p:acceptance "Pinned PostgreSQL works offline and missing configuration fails loudly." ; p:evidence w:databaseEvidence .
 
 w:load a p:Task ; rdfs:label "Load and validate" ;
-    p:milestone w:m1 ; p:status p:planned ; p:source w:plan ;
+    p:milestone w:m1 ; p:status p:done ; p:source w:plan ;
     p:dependsOn w:revise ; p:addresses w:review7, w:review11 ;
-    p:acceptance "Invalid declarations fail and equivalent graphs yield identical models and diagnostics." .
+    p:acceptance "Invalid declarations fail and equivalent graphs yield identical models and diagnostics." ; p:evidence w:milestone1Evidence .
 
 w:impact a p:Task ; rdfs:label "Measure the graph's contribution" ;
-    p:milestone w:m1 ; p:status p:planned ; p:source w:plan ;
+    p:milestone w:m1 ; p:status p:done ; p:source w:plan ;
     p:dependsOn w:load ; p:addresses w:review3 ;
-    p:acceptance "Query the affected IRIs across imports and record the TOML comparison." .
+    p:acceptance "Query the affected IRIs across imports and record the TOML comparison." ; p:evidence w:milestone1Evidence .
 
 w:emit a p:Task ; rdfs:label "Emit Rust and SQL" ;
-    p:milestone w:m1 ; p:status p:planned ; p:source w:plan ;
+    p:milestone w:m1 ; p:status p:done ; p:source w:plan ;
     p:dependsOn w:db, w:load ; p:addresses w:review10 ;
-    p:acceptance "Rust and SQL agree at both bounds and one step beyond each bound." .
+    p:acceptance "Rust and SQL agree at both bounds and one step beyond each bound." ; p:evidence w:milestone1Evidence .
 
 w:rules a p:Task ; rdfs:label "Publish the closed vocabulary and evaluation rules" ;
-    p:milestone w:contract ; p:status p:planned ; p:source w:plan ;
+    p:milestone w:contract ; p:status p:done ; p:source w:plan ;
     p:dependsOn w:load ; p:addresses w:review1, w:review6, w:review7 ;
-    p:acceptance "Publish the vocabulary, lowering fixture, guard order and state transition rules." .
+    p:acceptance "Publish the vocabulary, lowering fixture, guard order and state transition rules." ; p:evidence w:languageEvidence .
 
 w:oracle a p:Task ; rdfs:label "Build the oracle first" ;
-    p:milestone w:m2 ; p:status p:planned ; p:source w:plan ;
+    p:milestone w:m2 ; p:status p:done ; p:source w:plan ;
     p:dependsOn w:rules ; p:addresses w:review2, w:review6 ;
-    p:acceptance "Derive whole-state results and first errors from the design without production code." .
+    p:acceptance "Derive whole-state results and first errors from the design without production code." ; p:evidence w:milestone2Evidence .
 
 w:execute a p:Task ; rdfs:label "Build the two execution paths" ;
-    p:milestone w:m2 ; p:status p:planned ; p:source w:plan ;
+    p:milestone w:m2 ; p:status p:done ; p:source w:plan ;
     p:dependsOn w:oracle, w:emit ; p:addresses w:review1, w:review2 ;
-    p:acceptance "Both engines match the oracle and a mutated program exposes shared errors." .
+    p:acceptance "Both engines match the oracle and a mutated program exposes shared errors." ; p:evidence w:milestone2Evidence .
 
 w:differential a p:Task ; rdfs:label "Run boundary-weighted differential tests" ;
-    p:milestone w:m2 ; p:status p:planned ; p:source w:plan ;
+    p:milestone w:m2 ; p:status p:done ; p:source w:plan ;
     p:dependsOn w:execute ; p:addresses w:review2 ;
-    p:acceptance "Run at least 10,000 reproducible boundary-weighted cases." .
+    p:acceptance "Run at least 10,000 reproducible boundary-weighted cases." ; p:evidence w:milestone2Evidence .
 
 w:roundTrip a p:Task ; rdfs:label "Prove the v1 round trip" ;
-    p:milestone w:m3 ; p:status p:planned ; p:source w:plan ;
+    p:milestone w:m3 ; p:status p:done ; p:source w:plan ;
     p:dependsOn w:emit ; p:addresses w:review8, w:review9 ;
-    p:acceptance "Round-trip the persisted Rust account through Avro and reject a negative balance." .
+    p:acceptance "Round-trip the persisted Rust account through Avro and reject a negative balance." ; p:evidence w:milestone3Evidence .
 
 w:migrate a p:Task ; rdfs:label "Migrate the populated table" ;
-    p:milestone w:m3 ; p:status p:planned ; p:source w:plan ;
+    p:milestone w:m3 ; p:status p:done ; p:source w:plan ;
     p:dependsOn w:roundTrip ; p:addresses w:review4, w:review5 ;
-    p:acceptance "Preserve existing rows, backfill CAD and match fresh v2 DDL with no retained default." .
+    p:acceptance "Preserve existing rows, backfill CAD and match fresh v2 DDL with no retained default." ; p:evidence w:milestone3Evidence .
 
 w:wire a p:Task ; rdfs:label "Derive and verify wire compatibility" ;
-    p:milestone w:m3 ; p:status p:planned ; p:source w:plan ;
+    p:milestone w:m3 ; p:status p:done ; p:source w:plan ;
     p:dependsOn w:migrate ; p:addresses w:review5, w:review8, w:review13, w:review14 ;
-    p:acceptance "Derive the verdict from the diff and confirm field alias and default handling with binary data." .
+    p:acceptance "Derive the verdict from the diff and confirm field alias and default handling with binary data." ; p:evidence w:milestone3Evidence .
 
 w:demo a p:Task ; rdfs:label "Run the demo" ;
-    p:milestone w:m3 ; p:status p:planned ; p:source w:plan ;
+    p:milestone w:m3 ; p:status p:done ; p:source w:plan ;
     p:dependsOn w:impact, w:differential, w:wire ; p:addresses w:review9 ;
-    p:acceptance "Run the offline suite and demo against the pinned database." .
+    p:acceptance "Run the offline suite and demo against the pinned database." ; p:evidence w:milestone3Evidence .
 
 w:priorArt a p:Task ; rdfs:label "Survey active ontology compilers before implementing the ledger" ;
     p:milestone w:design ; p:status p:done ; p:dependsOn w:track ;
@@ -148,11 +148,28 @@ w:interopDesign a p:Task ; rdfs:label "Record the contract interoperability desi
     p:milestone w:design ; p:status p:done ; p:dependsOn w:priorArt ; p:source w:ggenResearch ;
     p:acceptance "Align the plan, design and work graph on the two ownership models." ; p:evidence w:plan, w:spec, w:workGraph .
 w:release a p:Task ; rdfs:label "Package and pin contract releases" ;
-    p:milestone w:adoption ; p:status p:planned ; p:source w:plan ; p:dependsOn w:interopDesign, w:oracle, w:wire ;
-    p:acceptance "Resolve a release and transitive imports offline, verify content digests and publish portable wire vectors." .
+    p:milestone w:adoption ; p:status p:done ; p:source w:plan ; p:dependsOn w:interopDesign, w:oracle, w:wire ;
+    p:acceptance "Resolve a release and transitive imports offline, verify content digests and publish portable wire vectors." ; p:evidence w:interoperabilityEvidence .
 w:monorepo a p:Task ; rdfs:label "Verify one coordinated monorepo upgrade" ;
-    p:milestone w:adoption ; p:status p:planned ; p:source w:plan ; p:dependsOn w:release ;
-    p:acceptance "One pin upgrades Rust, TypeScript, SQL and Avro projections and their integration checks pass." .
+    p:milestone w:adoption ; p:status p:done ; p:source w:plan ; p:dependsOn w:release ;
+    p:acceptance "One pin upgrades Rust, TypeScript, SQL and Avro projections and their integration checks pass." ; p:evidence w:interoperabilityEvidence .
 w:externalClient a p:Task ; rdfs:label "Verify independent contract adoption" ;
-    p:milestone w:adoption ; p:status p:planned ; p:source w:plan ; p:dependsOn w:release ;
-    p:acceptance "A standalone Go client verifies two separately pinned releases with published vectors and replays a reviewed adapter offline." .
+    p:milestone w:adoption ; p:status p:done ; p:source w:plan ; p:dependsOn w:release ;
+    p:acceptance "A standalone Go client verifies two separately pinned releases with published vectors and replays a reviewed adapter offline." ; p:evidence w:interoperabilityEvidence .
+
+w:databaseEvidence a p:Artifact ; p:location "docs/design/implementation-evidence.md" .
+
+w:milestone1Evidence a p:Artifact ; p:location "docs/design/implementation-evidence.md" .
+
+w:impactComparison a p:Artifact ; p:location "docs/design/impact-comparison.md" .
+w:retainTurtle a p:Decision ; rdfs:label "Retain Turtle for the ledger prototype following the impact experiment" ;
+    p:reason "Both fixtures avoid duplicate edges. The SPARQL property path replaces the application-maintained traversal loop for the workload." ;
+    p:source w:impactComparison .
+
+w:languageEvidence a p:Artifact ; p:location "docs/design/implementation-evidence.md" .
+
+w:milestone2Evidence a p:Artifact ; p:location "docs/design/implementation-evidence.md" .
+
+w:milestone3Evidence a p:Artifact ; p:location "docs/design/implementation-evidence.md" .
+
+w:interoperabilityEvidence a p:Artifact ; p:location "docs/design/implementation-evidence.md" .

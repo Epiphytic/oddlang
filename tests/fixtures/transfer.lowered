@@ -1,0 +1,9 @@
+urn:oddlang:ledger:TransferFunds
+1 urn:oddlang:ledger:g1 Exists(urn:oddlang:ledger:source) urn:oddlang:ledger:error:SourceMissing
+2 urn:oddlang:ledger:g2 Exists(urn:oddlang:ledger:destination) urn:oddlang:ledger:error:DestinationMissing
+3 urn:oddlang:ledger:g3 NotEqual(urn:oddlang:ledger:source, urn:oddlang:ledger:destination) urn:oddlang:ledger:error:SameAccount
+4 urn:oddlang:ledger:g4 Greater(urn:oddlang:ledger:amount, 0) urn:oddlang:ledger:error:NonPositiveAmount
+5 urn:oddlang:ledger:g5 GreaterEqual(Read(urn:oddlang:ledger:source, urn:oddlang:ledger:balance), urn:oddlang:ledger:amount) urn:oddlang:ledger:error:InsufficientFunds
+6 urn:oddlang:ledger:g6 LessEqual(Add(Read(urn:oddlang:ledger:destination, urn:oddlang:ledger:balance), urn:oddlang:ledger:amount), 9223372036854775807) urn:oddlang:ledger:error:DestinationOverflow
+urn:oddlang:ledger:destination urn:oddlang:ledger:balance <- Add(Read(urn:oddlang:ledger:destination, urn:oddlang:ledger:balance), urn:oddlang:ledger:amount)
+urn:oddlang:ledger:source urn:oddlang:ledger:balance <- Subtract(Read(urn:oddlang:ledger:source, urn:oddlang:ledger:balance), urn:oddlang:ledger:amount)

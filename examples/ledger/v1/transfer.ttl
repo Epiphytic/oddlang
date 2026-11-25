@@ -1,0 +1,27 @@
+@prefix l: <urn:oddlang:ledger:> .
+@prefix o: <urn:oddlang:core:> .
+@prefix e: <urn:oddlang:ledger:error:> .
+l:TransferFunds o:argument l:source, l:destination, l:amount ; o:guard l:g1, l:g2, l:g3, l:g4, l:g5, l:g6 ; o:assign _:debit, _:credit .
+l:source a o:Argument ; o:type o:Text .
+l:destination a o:Argument ; o:type o:Text .
+l:amount a o:Argument ; o:type o:I64 .
+l:g1 a o:Guard ; o:priority 1 ; o:condition [ a o:Exists ; o:account l:source ] ; o:error e:SourceMissing .
+l:g2 a o:Guard ; o:priority 2 ; o:condition [ a o:Exists ; o:account l:destination ] ; o:error e:DestinationMissing .
+l:g3 a o:Guard ; o:priority 3 ; o:condition [ a o:NotEqual ; o:left l:source ; o:right l:destination ] ; o:error e:SameAccount .
+l:g4 a o:Guard ; o:priority 4 ; o:condition [ a o:Greater ; o:left l:amount ; o:right _:zero ] ; o:error e:NonPositiveAmount .
+l:g5 a o:Guard ; o:priority 5 ; o:condition [ a o:GreaterEqual ; o:left _:sourceBalance ; o:right l:amount ] ; o:error e:InsufficientFunds .
+l:g6 a o:Guard ; o:priority 6 ; o:condition [ a o:LessEqual ; o:left _:creditValue ; o:right _:max ] ; o:error e:DestinationOverflow .
+e:SourceMissing a o:Error .
+e:DestinationMissing a o:Error .
+e:SameAccount a o:Error .
+e:NonPositiveAmount a o:Error .
+e:InsufficientFunds a o:Error .
+e:DestinationOverflow a o:Error .
+_:sourceBalance a o:Read ; o:account l:source ; o:field l:balance .
+_:destinationBalance a o:Read ; o:account l:destination ; o:field l:balance .
+_:zero a o:Constant ; o:integer 0 .
+_:max a o:Constant ; o:integer 9223372036854775807 .
+_:debitValue a o:Subtract ; o:left _:sourceBalance ; o:right l:amount .
+_:creditValue a o:Add ; o:left _:destinationBalance ; o:right l:amount .
+_:debit a o:Assign ; o:account l:source ; o:field l:balance ; o:value _:debitValue .
+_:credit a o:Assign ; o:account l:destination ; o:field l:balance ; o:value _:creditValue .

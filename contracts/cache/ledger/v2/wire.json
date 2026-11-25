@@ -1,0 +1,27 @@
+{
+  "accountFields": {
+    "urn:oddlang:ledger:id": "id",
+    "urn:oddlang:ledger:owner": "owner",
+    "urn:oddlang:ledger:balance": "balance",
+    "urn:oddlang:ledger:currencyCode": "currencyCode"
+  },
+  "requiredAccountFields": [
+    "id",
+    "owner",
+    "balance",
+    "currencyCode"
+  ],
+  "encoding": {
+    "balance": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "min": "0",
+      "max": "9223372036854775807"
+    },
+    "textFields": "JSON strings",
+    "currencyCode": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

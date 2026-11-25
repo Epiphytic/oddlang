@@ -1,0 +1,9 @@
+report = ["urn:oddlang:ledger:Avro", "urn:oddlang:ledger:Rust", "urn:oddlang:ledger:Sql", "urn:oddlang:ledger:TransferFunds", "urn:oddlang:ledger:Unrelated"]
+
+[dependencies]
+"urn:oddlang:ledger:Account" = ["urn:oddlang:ledger:id", "urn:oddlang:ledger:owner", "urn:oddlang:ledger:balance"]
+"urn:oddlang:ledger:TransferFunds" = ["urn:oddlang:ledger:balance"]
+"urn:oddlang:ledger:Rust" = ["urn:oddlang:ledger:Account"]
+"urn:oddlang:ledger:Sql" = ["urn:oddlang:ledger:Account"]
+"urn:oddlang:ledger:Avro" = ["urn:oddlang:ledger:Account"]
+"urn:oddlang:ledger:Unrelated" = ["urn:oddlang:ledger:owner"]

@@ -1,0 +1,9 @@
+{
+  "version": "v2",
+  "account": {
+    "id": "max",
+    "owner": "Alice",
+    "balance": "9223372036854775807",
+    "currencyCode": "CAD"
+  }
+}

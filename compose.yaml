@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16.6
+    environment:
+      POSTGRES_DB: oddlang
+      POSTGRES_USER: oddlang
+      POSTGRES_PASSWORD: oddlang
+    ports:
+      - "127.0.0.1:55436:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "oddlang", "-d", "oddlang"]
+      interval: 2s
+      timeout: 3s
+      retries: 30

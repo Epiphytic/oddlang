@@ -1,0 +1,7 @@
+# Independent Go ledger client
+
+Run `sh examples/contracts/go-client/verify.sh` from the repository root with Go 1.22 or newer. The driver copies the client, its own pins and one release bundle into a temporary module. Its Go tests use only the standard library and run with module downloads and toolchain downloads disabled.
+
+The driver loads the publisher's workspace lock, verifies its manifest and runs its native account checks at v1 and v2. The independent client continues to use its v1 pins and vectors while the publisher decodes v2 currency. The driver then upgrades the client separately. At v1 the Go adapter marshals each native request, sends it to a test transport that checks the wire payload, and validates the published success or error response. At v2 the adapter decodes structural account vectors, including the required nonempty currency code. Balances and amounts cross the JSON boundary as decimal strings.
+
+Each target lock identifies a recoverable source revision in `revisions/` and pins the source, release manifest, wire overlay (`wire.json`) and published vectors by SHA-256. Both target locks accept the same Go source. Before compiling the client, a standard-library Go replay tool selects the revision from the target lock, verifies its source digest, and installs only that adapter in the scratch module. The driver checks rejection of a changed source file and an additional unreviewed Go file, then restores the locked revision and replays the vectors offline.
