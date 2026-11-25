@@ -333,7 +333,7 @@ w:rustRecovery a p:Task ; rdfs:label "Import supported Rust into editable Oddlan
     p:acceptance "Compile a regenerated ledger from a deterministic import with explicit identities and fail-closed diagnostics." .
 
 w:rustValidation a p:Task ; rdfs:label "Validate original and regenerated ledger behavior" ;
-    p:milestone w:rustImportMilestone ; p:status p:planned ; p:source w:roundTripPlan ; p:dependsOn w:rustRecovery ;
+    p:milestone w:rustImportMilestone ; p:status p:active ; p:source w:roundTripPlan ; p:dependsOn w:rustRecovery ;
     p:acceptance "Record proof scope, independent differential results and a concrete mutant counterexample." .
 
 w:marmishInventory a p:Task ; rdfs:label "Freeze Marmish baseline and inventory" ;
@@ -374,3 +374,13 @@ w:rustRecoveryEvidence a p:Artifact ; rdfs:label "Source recovery and native reg
 w:rustRecovery p:evidence w:rustRecoveryEvidence .
 w:rustCleanupBaseline a p:Finding ; rdfs:label "Bind cleanup acceptance to a separately frozen original tree" ; p:source w:rustRecoveryEvidence .
 w:rustRecovery p:addresses w:rustCleanupBaseline .
+
+w:rustValidationEvidence a p:Artifact ; rdfs:label "Rust ledger translation verification and claim domains" ;
+    p:location "docs/design/rust-translation-evidence.md" .
+w:rustValidation p:evidence w:rustValidationEvidence .
+
+w:rustUnboundedMapProof a p:Task ; rdfs:label "Prove ledger transfer equivalence for arbitrary maps and keys" ;
+    p:milestone w:rustImportMilestone ; p:status p:blocked ; p:source w:roundTripPlan ;
+    p:dependsOn w:rustRecovery ; p:evidence w:rustValidationEvidence ;
+    p:reason "The verifier harness fixes keys and map size. Neither an arbitrary key-renaming lemma nor a bystander-extension lemma has been discharged." ;
+    p:acceptance "Discharge lookup invariance under key renaming and map extension with arbitrary unrelated accounts for both production bodies, and establish safety and reachability in that execution model." .
