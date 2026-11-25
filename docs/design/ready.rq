@@ -1,0 +1,11 @@
+PREFIX p: <urn:oddlang:process:>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?task ?label ?acceptance WHERE {
+  ?task a p:Task ; p:status p:planned ; rdfs:label ?label ; p:acceptance ?acceptance .
+  FILTER NOT EXISTS {
+    ?task p:dependsOn+ ?prerequisite .
+    FILTER NOT EXISTS { ?prerequisite p:status p:done }
+  }
+}
+ORDER BY ?task
