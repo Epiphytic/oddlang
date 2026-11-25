@@ -1,0 +1,7 @@
+{
+  "revision": "ledger-1",
+  "sourceSha256": "ce84687f849e3c2aa103b9ce055a14fd9f21bbfe9feda2f1c439c92c6474fcae",
+  "manifestSha256": "055f14f80393ea8f68c27dfbd8897e501f123ba140bfe698ba2e1647f8d14667",
+  "overlaySha256": "ff6f9b7bd47d18dcc6cd24de07441419133276c9fb6debdb752b807b8112ee85",
+  "vectorsSha256": "8ac4fc083edb6fbcc0344f0e09622dc029548b2b564225f0a0e3733d3e00004a"
+}
