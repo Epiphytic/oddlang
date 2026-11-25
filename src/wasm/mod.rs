@@ -1,6 +1,7 @@
 pub mod bundle;
 pub mod diff;
 pub mod model;
+pub mod runner;
 pub mod wit;
 
 /// Dispatch the component contract subcommands of the public Oddlang CLI.
@@ -31,6 +32,9 @@ pub fn command(args: &[String]) -> Result<(), String> {
             }
             Ok(())
         }
-        _ => Err("usage: oddlang wasm publish SOURCE DEPENDENCY_LOCK CACHE OUT | import-wit WIT_DIR WORLD ID_MAP_OR_NAMESPACE OUT [--lock WORKSPACE_LOCK] | diff OLD OLD_LOCK NEW NEW_LOCK DIRECTION json|text".into()),
+        [cmd,bundle,lock,claim,component,out] if cmd=="run" => runner::run(bundle.as_ref(),lock.as_ref(),claim.as_ref(),component.as_ref(),out.as_ref()),
+        [cmd,bundle,lock,claim,evidence] if cmd=="verify-evidence" => runner::verify(bundle.as_ref(),lock.as_ref(),claim.as_ref(),evidence.as_ref()),
+        [cmd,host,hl,guest,gl,claim,component,direction,out] if cmd=="matrix" => runner::matrix((host.as_ref(),hl.as_ref()),(guest.as_ref(),gl.as_ref()),claim.as_ref(),component.as_ref(),direction,out.as_ref()),
+        _ => Err("usage: oddlang wasm publish SOURCE DEPENDENCY_LOCK CACHE OUT | import-wit WIT_DIR WORLD ID_MAP_OR_NAMESPACE OUT [--lock WORKSPACE_LOCK] | diff OLD OLD_LOCK NEW NEW_LOCK DIRECTION json|text | run BUNDLE LOCK CLAIM COMPONENT OUT | verify-evidence BUNDLE LOCK CLAIM EVIDENCE | matrix HOST HOST_LOCK GUEST GUEST_LOCK CLAIM COMPONENT DIRECTION OUT".into()),
     }
 }

@@ -1,0 +1,27 @@
+[workspace]
+resolver = "3"
+
+[package]
+name = "ledger-guest"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[features]
+generated = []
+instrumented = []
+trap = []
+double-import = []
+probe = []
+seed = []
+rename = []
+
+[dependencies]
+wit-bindgen = "=0.57.1"
+
+[profile.release]
+panic = "abort"
+strip = "debuginfo"

@@ -1,0 +1,20 @@
+[
+  {
+    "caseId": "probe-host-binding",
+    "covers": [
+      {"declaration": "urn:oddlang:ledger:wasm:initial-state", "role": "wasm.importer"},
+      {"declaration": "urn:oddlang:ledger:wasm:lookup", "role": "wasm.exporter"},
+      {"declaration": "urn:oddlang:ledger:wasm:transfer", "role": "wasm.exporter"}
+    ],
+    "constraints": ["urn:oddlang:ledger:wasm:balance"],
+    "imports": [
+      {"function": "initial-state", "arguments": [], "returns": [{"id": "probe", "owner": "🦋", "balance": "9007199254740993"}, {"id": "floor", "owner": "", "balance": "0"}]}
+    ],
+    "calls": [
+      {"function": "lookup", "arguments": ["floor"], "expected": {"some": {"id": "floor", "owner": "", "balance": "0"}}},
+      {"function": "lookup", "arguments": ["probe"], "expected": {"some": {"id": "probe", "owner": "🦋", "balance": "9007199254740993"}}},
+      {"function": "lookup", "arguments": ["absent"], "expected": {"none": true}},
+      {"function": "transfer", "arguments": ["absent", "probe", "-9223372036854775808"], "expected": {"err": "source-missing"}}
+    ]
+  }
+]

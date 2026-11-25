@@ -1,0 +1,144 @@
+{
+  "hosts": {
+    "generated-ledger-chromium": {
+      "caseCount": 3,
+      "host": "chromium",
+      "version": "145.0.7632.6",
+      "componentSha256": "045ac8b323be378729eb85200b519a4a0b1eadb072d6748f7fd03832e1a4bfe2",
+      "releaseSha256": "772020eb28cd08f4a2dc35fc6c96852f235e4eb0fef5d8679cefdc9d8b308bb9",
+      "jcoVersion": "1.42.0"
+    },
+    "generated-ledger-node": {
+      "caseCount": 3,
+      "host": "node",
+      "version": "v22.22.2",
+      "componentSha256": "045ac8b323be378729eb85200b519a4a0b1eadb072d6748f7fd03832e1a4bfe2",
+      "releaseSha256": "772020eb28cd08f4a2dc35fc6c96852f235e4eb0fef5d8679cefdc9d8b308bb9",
+      "jcoVersion": "1.42.0"
+    },
+    "generated-ledger-test-chromium": {
+      "caseCount": 4,
+      "host": "chromium",
+      "version": "145.0.7632.6",
+      "componentSha256": "2511bfe18ed5462a20c5217521d2976c577744e145fc07c0ccbd1c2f29a1d55a",
+      "releaseSha256": "d765fdb57069a35b459b9af6d92432d56dd98b160a2716ec7fc55b209af35a3b",
+      "jcoVersion": "1.42.0"
+    },
+    "generated-ledger-test-node": {
+      "caseCount": 4,
+      "host": "node",
+      "version": "v22.22.2",
+      "componentSha256": "2511bfe18ed5462a20c5217521d2976c577744e145fc07c0ccbd1c2f29a1d55a",
+      "releaseSha256": "d765fdb57069a35b459b9af6d92432d56dd98b160a2716ec7fc55b209af35a3b",
+      "jcoVersion": "1.42.0"
+    },
+    "manual-ledger-chromium": {
+      "caseCount": 3,
+      "host": "chromium",
+      "version": "145.0.7632.6",
+      "componentSha256": "ad75a72e2fafdef3713d386fc082d4bee49826e994c3b1d86b67f541a06e5736",
+      "releaseSha256": "772020eb28cd08f4a2dc35fc6c96852f235e4eb0fef5d8679cefdc9d8b308bb9",
+      "jcoVersion": "1.42.0"
+    },
+    "manual-ledger-node": {
+      "caseCount": 3,
+      "host": "node",
+      "version": "v22.22.2",
+      "componentSha256": "ad75a72e2fafdef3713d386fc082d4bee49826e994c3b1d86b67f541a06e5736",
+      "releaseSha256": "772020eb28cd08f4a2dc35fc6c96852f235e4eb0fef5d8679cefdc9d8b308bb9",
+      "jcoVersion": "1.42.0"
+    },
+    "manual-ledger-test-chromium": {
+      "caseCount": 4,
+      "host": "chromium",
+      "version": "145.0.7632.6",
+      "componentSha256": "94b3ad419c9e8a31b0c1c0abab9e82755243b0938916d5271b011e77de87e4fc",
+      "releaseSha256": "d765fdb57069a35b459b9af6d92432d56dd98b160a2716ec7fc55b209af35a3b",
+      "jcoVersion": "1.42.0"
+    },
+    "manual-ledger-test-node": {
+      "caseCount": 4,
+      "host": "node",
+      "version": "v22.22.2",
+      "componentSha256": "94b3ad419c9e8a31b0c1c0abab9e82755243b0938916d5271b011e77de87e4fc",
+      "releaseSha256": "d765fdb57069a35b459b9af6d92432d56dd98b160a2716ec7fc55b209af35a3b",
+      "jcoVersion": "1.42.0"
+    }
+  },
+  "builds": {
+    "double-import.wasm": {
+      "first": "502391bd7f69d57dea95f85a7a5ae0c6708a4ba909d4f8afb0f712ea68038b85",
+      "second": "502391bd7f69d57dea95f85a7a5ae0c6708a4ba909d4f8afb0f712ea68038b85",
+      "identical": true
+    },
+    "echo-import.wasm": {
+      "first": "fb1f63dbb5548c5f76111aa4bb7011e07ba1ff4a5fde617e3ff53b7ba89b9e85",
+      "second": "fb1f63dbb5548c5f76111aa4bb7011e07ba1ff4a5fde617e3ff53b7ba89b9e85",
+      "identical": true
+    },
+    "echo-rename.wasm": {
+      "first": "18d367e6e1ac297449233fff092c458e78ac00b7bca8c844fc427467795850bc",
+      "second": "18d367e6e1ac297449233fff092c458e78ac00b7bca8c844fc427467795850bc",
+      "identical": true
+    },
+    "echo-tags.wasm": {
+      "first": "73827af54ac2d8314c9603f7b024713187e89c81f249d251a6b2051303f64167",
+      "second": "73827af54ac2d8314c9603f7b024713187e89c81f249d251a6b2051303f64167",
+      "identical": true
+    },
+    "echo.wasm": {
+      "first": "aaac6937047319b56feafbf0a09e64cab1f2cc85efa08021c3922abd633c05c9",
+      "second": "aaac6937047319b56feafbf0a09e64cab1f2cc85efa08021c3922abd633c05c9",
+      "identical": true
+    },
+    "generated-ledger-test.wasm": {
+      "first": "2511bfe18ed5462a20c5217521d2976c577744e145fc07c0ccbd1c2f29a1d55a",
+      "second": "2511bfe18ed5462a20c5217521d2976c577744e145fc07c0ccbd1c2f29a1d55a",
+      "identical": true
+    },
+    "generated-ledger.wasm": {
+      "first": "045ac8b323be378729eb85200b519a4a0b1eadb072d6748f7fd03832e1a4bfe2",
+      "second": "045ac8b323be378729eb85200b519a4a0b1eadb072d6748f7fd03832e1a4bfe2",
+      "identical": true
+    },
+    "manual-ledger-test.wasm": {
+      "first": "94b3ad419c9e8a31b0c1c0abab9e82755243b0938916d5271b011e77de87e4fc",
+      "second": "94b3ad419c9e8a31b0c1c0abab9e82755243b0938916d5271b011e77de87e4fc",
+      "identical": true
+    },
+    "manual-ledger.wasm": {
+      "first": "ad75a72e2fafdef3713d386fc082d4bee49826e994c3b1d86b67f541a06e5736",
+      "second": "ad75a72e2fafdef3713d386fc082d4bee49826e994c3b1d86b67f541a06e5736",
+      "identical": true
+    },
+    "probe.wasm": {
+      "first": "3ce378b8c86feb095e2e7ab72d0f4dbe69b8808831a64e0070a634bdac299aee",
+      "second": "3ce378b8c86feb095e2e7ab72d0f4dbe69b8808831a64e0070a634bdac299aee",
+      "identical": true
+    },
+    "trap.wasm": {
+      "first": "0fbad2bf6401b16727ecc6f6537320c42e4096f961ffbfb3cdb322f261d093cb",
+      "second": "0fbad2bf6401b16727ecc6f6537320c42e4096f961ffbfb3cdb322f261d093cb",
+      "identical": true
+    }
+  },
+  "trap": {
+    "case": "ordered-guards-and-wide-transfer",
+    "call": {
+      "arguments": [
+        "missing",
+        "missing",
+        "-1"
+      ],
+      "function": "transfer",
+      "trap": "error while executing at wasm backtrace:\n    0:   0x2165 - ledger_guest.wasm!transfer: wasm trap: wasm `unreachable` instruction executed"
+    }
+  },
+  "doubleImport": {
+    "case": "balance-lower-bound",
+    "observedFunctions": [
+      "initial-state",
+      "initial-state"
+    ]
+  }
+}
