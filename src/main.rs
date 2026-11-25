@@ -2,6 +2,15 @@ use oddlang::model::load_model;
 use std::{env, process::ExitCode};
 fn run(args: &[String]) -> Result<(), String> {
     match args {
+        [group, cmd, input, lock, cache] if group == "http" => {
+            let load = match cmd.as_str() {
+                "check-source" => oddlang::http::load_source,
+                "check" => oddlang::http::load,
+                _ => return Err(format!("unknown HTTP command {cmd}")),
+            };
+            load(input.as_ref(), lock.as_ref(), cache.as_ref())?;
+            Ok(())
+        }
         [cmd, dir] if cmd == "check" => {
             load_model(dir)?;
             Ok(())

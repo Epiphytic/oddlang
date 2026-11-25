@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "identity": "urn:oddlang:contract:ledger-http",
+  "version": "v1",
+  "entry": "domain.ttl",
+  "ruleSetVersion": 1,
+  "dependencies": [
+    {
+      "identity": "urn:oddlang:contract:ledger",
+      "version": "v1",
+      "manifestSha256": "db3255efa77bfc475db7cadd0643c0c675693499de5221e116962c4c1741d90a"
+    }
+  ],
+  "files": {
+    "domain.ttl": "2ca759559ef80369a357dfc94811deb07f007080fa46f552661c7cb0a936cf90",
+    "scenarios.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+  }
+}

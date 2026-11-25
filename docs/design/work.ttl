@@ -227,7 +227,7 @@ w:httpPlanReview a p:Task ; rdfs:label "Write and independently review the HTTP 
     p:acceptance "Review a phased plan with Claude CLI and record the disposition of material findings." .
 
 w:httpVocabulary a p:Task ; rdfs:label "Specify and load the HTTP vocabulary" ;
-    p:milestone w:httpFoundation ; p:status p:planned ; p:source w:httpPlan ;
+    p:milestone w:httpFoundation ; p:status p:active ; p:source w:httpPlan ;
     p:dependsOn w:httpPlanReview ;
     p:acceptance "Load a closed stable-IRI HTTP profile with pinned ledger semantics offline and reject invalid declarations and imports." .
 w:httpBundle a p:Task ; rdfs:label "Publish portable obligations, cases and schemas" ;

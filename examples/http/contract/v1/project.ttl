@@ -1,0 +1,1 @@
+<urn:example> <urn:oddlang:core:imports> <urn:oddlang:contract:ledger-http> .
