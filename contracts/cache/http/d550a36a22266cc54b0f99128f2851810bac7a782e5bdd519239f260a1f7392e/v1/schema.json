@@ -1,0 +1,122 @@
+{
+  "$defs": {
+    "urn:oddlang:shapes:Choice": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "flag": {
+              "type": "boolean"
+            },
+            "kind": {
+              "const": "flagged"
+            }
+          },
+          "required": [
+            "flag",
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "named"
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "kind"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "urn:oddlang:shapes:Envelope": {
+      "additionalProperties": false,
+      "properties": {
+        "choice": {
+          "$ref": "#/$defs/urn:oddlang:shapes:Choice"
+        },
+        "items": {
+          "$ref": "#/$defs/urn:oddlang:shapes:Items"
+        },
+        "memo": {
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/$defs/urn:oddlang:shapes:Metadata"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "choice",
+        "items",
+        "metadata",
+        "note"
+      ],
+      "type": "object"
+    },
+    "urn:oddlang:shapes:FlagPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "flag": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "flag"
+      ],
+      "type": "object"
+    },
+    "urn:oddlang:shapes:Items": {
+      "items": {
+        "pattern": "^(0|-?[1-9][0-9]*)$",
+        "type": "string",
+        "x-decimal-range": [
+          "-9223372036854775808",
+          "9223372036854775807"
+        ]
+      },
+      "type": "array"
+    },
+    "urn:oddlang:shapes:Metadata": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "type": "object"
+    },
+    "urn:oddlang:shapes:NamePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

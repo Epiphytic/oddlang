@@ -181,6 +181,9 @@ impl Rules<'_> {
     }
 }
 pub fn inventory(model: &HttpContract) -> Vec<Obligation> {
+    if model.rule_set_version == 2 {
+        return super::shapes::exercise(model).0;
+    }
     let mut out = vec![];
     for (id, op) in &model.operations {
         for role in &op.roles {

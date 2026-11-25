@@ -1,7 +1,7 @@
 //! Offline loading of authored and pinned HTTP contracts.
 mod model;
 use crate::contracts::{self, Pin, contained, normal, verified};
-pub use model::{Constraint, Field, HttpContract, Iri, Observation, Operation, Record};
+pub use model::{Constraint, Field, HttpContract, Iri, Observation, Operation, Record, Shape};
 use oxigraph::{
     io::{RdfFormat, RdfParser},
     model::{
@@ -155,6 +155,9 @@ fn read_model(
     let mut model = model::parse(nodes, deps.into_values().collect(), &symbols)?;
     model.source_files = files;
     model.entry = entry.to_owned();
+    if model.rule_set_version == 2 && !scenarios.is_empty() {
+        return Err("codec contracts do not import authored scenarios".into());
+    }
     model.scenario_files = scenarios;
     Ok(model)
 }
@@ -241,7 +244,7 @@ fn load_import(
     if manifest.schema_version != 1
         || manifest.identity != pin.identity
         || manifest.version != pin.version
-        || manifest.rule_set_version != 1
+        || !matches!(manifest.rule_set_version, 1 | 2)
     {
         return Err("HTTP manifest disagrees with pin or unsupported schema/rule set".into());
     }
@@ -296,3 +299,6 @@ pub use typescript::emit_typescript;
 
 mod evolution;
 pub use evolution::*;
+
+mod shapes;
+pub use shapes::{emit_codec_rust, emit_codec_typescript};

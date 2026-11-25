@@ -28,3 +28,9 @@ Compare methods, status, segment-wise percent-decoded paths, and media types. A 
 ## Schema projections
 
 Each named record has a JSON Schema definition with a stable IRI key. The OpenAPI document embeds its own schemas and uses local fragment references. `x-decimal-range` records inclusive lower and upper endpoints as canonical decimal strings. Standard validators enforce the decimal lexeme and object structure. Native codecs and the portable cases enforce the numeric range.
+
+### Standalone codec cases
+
+Rule set 2 uses the `json.codec` role. A case supplies one wire body in `action.bodyBase64` (standard base64), an empty fixture array, and one expected native observation. A successful decoder reports `{"native":{"kind":"success","value":…}}` with the re-encoded JSON value. A decoder rejection reports `{"native":{"kind":"localRejection"}}`. The verifier compares decoded JSON values, so member ordering and escape spelling are immaterial. Shape positions use JSON Pointer segments following `body`. The obligation position for a union branch appends its tag with an `@` prefix. List item witnesses use sample index `0`.
+
+The shape profile derives shape, closed-object, presence, nullable, element, and tag witnesses from the model. Native Rust, TypeScript, and Go runners execute the same bytes. Running these witnesses makes a codec claim. HTTP route and transport coverage continues to use provider and consumer claims under rule set 1.

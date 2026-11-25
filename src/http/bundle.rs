@@ -211,7 +211,7 @@ pub(super) fn verify_pins(
     if pin.manifest_sha256 != digest(&bytes)
         || m.version != pin.version
         || m.schema_version != 1
-        || m.rule_set_version != 1
+        || !matches!(m.rule_set_version, 1 | 2)
     {
         return Err("manifest disagrees with pin or unsupported version".into());
     }

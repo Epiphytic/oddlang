@@ -9,6 +9,8 @@ fn run(args: &[String]) -> Result<(), String> {
             let overlay = oddlang::http::load_overlay(overlay.as_ref())?;
             for binding in overlay.bindings {
                 match binding.binding.as_str() {
+                    "serde" => oddlang::http::emit_codec_rust(&contract, output.as_ref())?,
+                    "json" => oddlang::http::emit_codec_typescript(&contract, output.as_ref())?,
                     "fetch" => oddlang::http::emit_typescript(&contract, output.as_ref())?,
                     "axum" => {
                         let pin = contract

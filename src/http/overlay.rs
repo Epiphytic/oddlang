@@ -40,7 +40,10 @@ pub fn load_overlay(path: &Path) -> Result<TargetOverlay, HttpError> {
                 item.target.as_str(),
                 item.binding.as_str(),
             ),
-            ("http.provider", "rust", "axum") | ("http.consumer", "typescript", "fetch")
+            ("http.provider", "rust", "axum")
+                | ("http.consumer", "typescript", "fetch")
+                | ("json.codec", "rust", "serde")
+                | ("json.codec", "typescript", "json")
         ) {
             return Err(format!(
                 "unsupported required binding {}/{}/{}",

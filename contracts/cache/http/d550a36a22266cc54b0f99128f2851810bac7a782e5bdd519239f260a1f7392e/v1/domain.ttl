@@ -1,0 +1,51 @@
+@prefix h: <urn:oddlang:http:> .
+@prefix s: <urn:oddlang:shapes:> .
+
+s:Contract a h:Contract ;
+  h:identity <urn:oddlang:contract:shapes-http> ;
+  h:version "v1" ;
+  h:ruleSetVersion 2 .
+s:RoundTrip a h:Operation ;
+  h:method "POST" ; h:path "/shapes" ; h:status 200 ;
+  h:role h:codec ; h:request s:Envelope ; h:response s:Envelope .
+
+s:Required a h:Required .
+s:Optional a h:Optional .
+s:Nullable a h:Nullable .
+s:Closed a h:Closed .
+
+s:Envelope a h:Record ;
+  h:field s:MetadataField, s:ItemsField, s:MemoField, s:NoteField, s:ChoiceField ;
+  h:constraint s:Closed .
+s:MetadataField a h:Field ;
+  h:nativeName "metadata" ; h:wireName "metadata" ;
+  h:shape s:Metadata ; h:constraint s:Required .
+s:Metadata a h:Record ; h:field s:EnabledField ; h:constraint s:Closed .
+s:EnabledField a h:Field ;
+  h:nativeName "enabled" ; h:wireName "enabled" ;
+  h:shape h:Boolean ; h:constraint s:Required .
+s:ItemsField a h:Field ;
+  h:nativeName "items" ; h:wireName "items" ;
+  h:shape s:Items ; h:constraint s:Required .
+s:Items a h:List ; h:item h:I64 .
+s:MemoField a h:Field ;
+  h:nativeName "memo" ; h:wireName "memo" ;
+  h:shape h:Text ; h:constraint s:Optional .
+s:NoteField a h:Field ;
+  h:nativeName "note" ; h:wireName "note" ;
+  h:shape h:Text ; h:constraint s:Required, s:Nullable .
+s:ChoiceField a h:Field ;
+  h:nativeName "choice" ; h:wireName "choice" ;
+  h:shape s:Choice ; h:constraint s:Required .
+s:Choice a h:TaggedUnion ;
+  h:discriminator "kind" ; h:variant s:Named, s:Flagged .
+s:Named a h:Variant ; h:tag "named" ; h:record s:NamePayload .
+s:NamePayload a h:Record ; h:field s:NameField ; h:constraint s:Closed .
+s:NameField a h:Field ;
+  h:nativeName "name" ; h:wireName "name" ;
+  h:shape h:Text ; h:constraint s:Required .
+s:Flagged a h:Variant ; h:tag "flagged" ; h:record s:FlagPayload .
+s:FlagPayload a h:Record ; h:field s:FlagField ; h:constraint s:Closed .
+s:FlagField a h:Field ;
+  h:nativeName "flag" ; h:wireName "flag" ;
+  h:shape h:Boolean ; h:constraint s:Required .

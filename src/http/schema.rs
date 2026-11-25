@@ -20,8 +20,19 @@ fn records(c: &HttpContract, reference: impl Fn(&Iri) -> Value) -> Map<String, V
     let mut defs = Map::new();
     for (id, r) in &c.records {
         let mut props = Map::new();
+        let mut required = BTreeSet::new();
         for fid in &r.fields {
             let f = &c.fields[fid];
+            if super::shapes::required(c, f) {
+                required.insert(f.wire_name.clone());
+            }
+            if c.rule_set_version == 2 {
+                props.insert(
+                    f.wire_name.clone(),
+                    super::shapes::field_schema(c, f, &reference),
+                );
+                continue;
+            }
             let mut shape = match f.shape.as_str() {
                 "urn:oddlang:http:Text" => json!({"type":"string"}),
                 "urn:oddlang:http:Boolean" => json!({"type":"boolean"}),
@@ -37,9 +48,9 @@ fn records(c: &HttpContract, reference: impl Fn(&Iri) -> Value) -> Map<String, V
             }
             props.insert(f.wire_name.clone(), shape);
         }
-        let required = props.keys().cloned().collect::<Vec<_>>();
         defs.insert(id.to_string(),json!({"type":"object","additionalProperties":false,"properties":props,"required":required}));
     }
+    super::shapes::schema_defs(c, &mut defs, &reference);
     defs
 }
 pub(super) fn schema(c: &HttpContract) -> Value {
@@ -58,7 +69,7 @@ pub(super) fn openapi(c: &HttpContract) -> Value {
         .into_iter()
         .map(|(iri, record)| (key(&iri), record))
         .collect();
-    for (id, op) in &c.operations {
+    for (id, op) in c.operations.iter().filter(|_| c.rule_set_version == 1) {
         let mut operation = json!({"operationId":id.as_str(),"responses":{op.status.to_string():{"description":"Success","content":{"application/json":{"schema":reference(&op.response)}}}}});
         let mut errors = BTreeMap::<u16, Vec<&str>>::new();
         for e in &op.errors {

@@ -1,0 +1,15 @@
+{
+  "dependencies": [],
+  "entry": "domain.ttl",
+  "files": {
+    "cases.json": "343a7639268654d10659ed04db7510b840160b737c28518440743c5115966e3b",
+    "domain.ttl": "68172f26f1760fad4a96aafc7a7a41d11720f59ab78a570a912e4511c6cd105d",
+    "obligations.json": "5f2c89fd28d71240bc010965eea1acfe2039b757cef3a911eb84ef6e562ac802",
+    "openapi.json": "0e1ca11d16b8858c6dd6ac1e8f9ba290dae416e6e1f2a3b4e06fe75e9e9df62e",
+    "schema.json": "9e65fc8075f7f8274a0eba438012315bead2d192fe7dacb18fe734d8ea7e59a9"
+  },
+  "identity": "urn:oddlang:contract:shapes-http",
+  "ruleSetVersion": 2,
+  "schemaVersion": 1,
+  "version": "v1"
+}

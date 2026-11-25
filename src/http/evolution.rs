@@ -34,6 +34,9 @@ fn declarations(c: &HttpContract) -> BTreeMap<(String, String), Value> {
         add(id, "wireName", json!(f.wire_name));
         add(id, "field", json!([f.native_name, f.shape, f.constraints]));
     }
+    for (id, v) in &c.shapes {
+        add(id, "shape", json!(v));
+    }
     for (id, v) in &c.records {
         add(id, "record", json!(v));
     }
@@ -98,6 +101,16 @@ pub fn affected(c: &HttpContract, changed: &[Iri]) -> Vec<Obligation> {
     let mut reverse: BTreeMap<&Iri, Vec<&Iri>> = BTreeMap::new();
     for (id, f) in &c.fields {
         for used in f.constraints.iter().chain([&f.shape]) {
+            reverse.entry(used).or_default().push(id);
+        }
+    }
+    for (id, shape) in &c.shapes {
+        let children: Vec<_> = match shape {
+            Shape::List(item) => vec![item],
+            Shape::Union { variants, .. } => variants.iter().collect(),
+            Shape::Variant { record, .. } => vec![record],
+        };
+        for used in children {
             reverse.entry(used).or_default().push(id);
         }
     }

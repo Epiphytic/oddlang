@@ -158,6 +158,21 @@ pub(super) fn valid_case(c: &super::Case) -> bool {
     {
         return false;
     }
+    if c.role == "json.codec" {
+        return c.expected.len() == 1
+            && c.fixture == json!([])
+            && c.action.as_object().is_some_and(|a| a.len() == 1)
+            && c.action["bodyBase64"]
+                .as_str()
+                .is_some_and(|s| STANDARD.decode(s).is_ok())
+            && matches!(
+                c.expected[0]["native"]["kind"].as_str(),
+                Some("success" | "localRejection")
+            );
+    }
+    if c.role != "http.provider" && c.role != "http.consumer" {
+        return false;
+    }
     let exchanges: Vec<_> = c
         .expected
         .iter()

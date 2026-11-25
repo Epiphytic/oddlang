@@ -1,0 +1,121 @@
+type Field = { type: string; optional: boolean; nullable: boolean; min: string; max: string };
+type Shape =
+  | { kind: "record"; fields: Record<string, Field> }
+  | { kind: "list"; item: string }
+  | { kind: "union"; tag: string; variants: [string, string][] };
+
+function invalid(): never { throw new Error("invalid codec input"); }
+
+function parse(bytes: Uint8Array): unknown {
+  const text = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(bytes);
+  let pos = 0;
+  const ws = () => { while (pos < text.length && /[ \r\t\n]/.test(text[pos])) pos++; };
+  function string() {
+    const start = pos++;
+    while (pos < text.length) {
+      const ch = text[pos++];
+      if (ch === "\\") { pos++; continue; }
+      if (ch === '"') {
+        const result: string = JSON.parse(text.slice(start, pos));
+        if (/[\uD800-\uDFFF]/u.test(result)) invalid();
+        return result;
+      }
+    }
+    return invalid();
+  }
+  function value(): unknown {
+    ws();
+    if (text[pos] === '"') return string();
+    for (const [token, val] of [["true", true], ["false", false], ["null", null]] as const) {
+      if (text.startsWith(token, pos)) { pos += token.length; return val; }
+    }
+
+    if (text[pos] === "[") {
+      pos++;
+      const result: unknown[] = [];
+      ws();
+      if (text[pos] === "]") { pos++; return result; }
+      while (true) {
+        result.push(value());
+        ws();
+        const next = text[pos++];
+        if (next === "]") return result;
+        if (next !== ",") invalid();
+      }
+    }
+    if (text[pos++] !== "{") invalid();
+    const result: Record<string, unknown> = Object.create(null);
+    ws();
+    if (text[pos] === "}") { pos++; return result; }
+    while (true) {
+      ws();
+      if (text[pos] !== '"') invalid();
+      const name = string();
+      if (Object.hasOwn(result, name)) invalid();
+      ws();
+      if (text[pos++] !== ":") invalid();
+      result[name] = value();
+      ws();
+      const next = text[pos++];
+      if (next === "}") return result;
+      if (next !== ",") invalid();
+    }
+  }
+  const result = value();
+  ws();
+  if (pos !== text.length) invalid();
+  return result;
+}
+
+function object(value: unknown): Record<string, unknown> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) invalid();
+  return value as Record<string, unknown>;
+}
+
+function check(value: unknown, key: string, min = "-9223372036854775808", max = "9223372036854775807"): void {
+  switch (key) {
+    case "urn:oddlang:http:Text":
+      if (typeof value !== "string") invalid();
+      return;
+    case "urn:oddlang:http:Boolean":
+      if (typeof value !== "boolean") invalid();
+      return;
+    case "urn:oddlang:http:I64": {
+      if (typeof value !== "string" || !/^(?:0|-?[1-9][0-9]*)$/.test(value) || value.trim() !== value) invalid();
+      const n = BigInt(value);
+      if (n < BigInt(min) || n > BigInt(max)) invalid();
+      return;
+    }
+  }
+  if (!Object.hasOwn(shapes, key)) invalid();
+  const shape = shapes[key];
+  if (shape.kind === "list") {
+    if (!Array.isArray(value)) invalid();
+    for (const item of value) check(item, shape.item);
+    return;
+  }
+  const obj = object(value);
+  if (shape.kind === "union") {
+    const variant = shape.variants.find(([tag]) => tag === obj[shape.tag]);
+    if (!variant) invalid();
+    const payload = { ...obj };
+    delete payload[shape.tag];
+    check(payload, variant[1]);
+    return;
+  }
+  for (const name of Object.keys(obj)) if (!Object.hasOwn(shape.fields, name)) invalid();
+  for (const [name, field] of Object.entries(shape.fields)) {
+    if (!Object.hasOwn(obj, name)) {
+      if (!field.optional) invalid();
+    } else if (!(obj[name] === null && field.nullable)) {
+      check(obj[name], field.type, field.min, field.max);
+    }
+  }
+}
+
+export function roundTrip(operation: string, bytes: Uint8Array): unknown {
+  if (!Object.hasOwn(roots, operation)) invalid();
+  const value = parse(bytes);
+  check(value, roots[operation]);
+  return value;
+}

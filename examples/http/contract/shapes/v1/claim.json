@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "claims": [
+    {"operation": "urn:oddlang:shapes:RoundTrip", "role": "json.codec"}
+  ]
+}

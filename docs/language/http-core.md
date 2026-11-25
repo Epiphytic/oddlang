@@ -58,3 +58,15 @@ The pinned ledger operation evaluates guards in priority order. SourceMissing an
 ## Toolchain
 
 Run `scripts/setup-http-conformance.sh` for pinned tooling. The baseline uses Rust 1.96.1, Go 1.26.3, Node 22.22.2, npm 10.9.7, TypeScript 5.9.3, Ajv 8.20.0 (JSON Schema 2020-12), the 2022-10-07 OpenAPI 3.1 schema, and Playwright 1.58.2 with its Chromium build. The hand-authored v1 cache fixture supports offline phase-one checks.
+
+## Standalone JSON codecs (rule set 2)
+
+Rule set `2` profiles a JSON codec operation with role `h:codec` and the same record shape on `h:request` and `h:response`. A codec operation has a POST path and status 200 for identification in the source. It has no behavior, mapped errors, observations, or external dependencies. Its schemas describe the wire objects and its OpenAPI projection has an empty path map. The codec fixture packages its own cases and independently pinned release.
+
+A field has exactly one presence constraint, `h:Required` or `h:Optional`. `h:Nullable` independently permits a present null. A required nullable member must occur. An optional non-nullable member can be absent and rejects explicit null. Every record uses `h:Closed` and admits only its declared wire member names.
+
+- An `h:List` shape has one `h:item` type. Items can use a scalar, record, list, or tagged union. Arrays preserve order and permit zero items.
+- An `h:TaggedUnion` shape has one string `h:discriminator` member name and at least two `h:variant` nodes. Each named `h:Variant` has a unique string `h:tag` and one `h:record` payload. The encoded object has the tag and the selected record's fields at the same level. The discriminator cannot collide with a member of a variant record.
+- Record, list, and variant references must be acyclic. This gives every reachable shape a finite fixture and supports bounded recursion in the generated types.
+
+The shape overlay selects `json.codec/rust/serde` or `json.codec/typescript/json`. `http generate` writes `codec.rs` or `codec.ts` for the selected targets. The independent Go example implements the same pinned case protocol with its standard library. The Axum provider and Fetch client use rule set 1 for the ledger service.

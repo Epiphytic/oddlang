@@ -45,6 +45,7 @@ pub struct HttpContract {
     pub operations: BTreeMap<Iri, Operation>,
     pub records: BTreeMap<Iri, Record>,
     pub fields: BTreeMap<Iri, Field>,
+    pub shapes: BTreeMap<Iri, Shape>,
     pub errors: BTreeMap<Iri, u16>,
     pub observations: BTreeMap<Iri, Observation>,
     pub constraints: BTreeMap<Iri, Constraint>,
@@ -76,8 +77,22 @@ pub struct Field {
 #[derive(serde::Serialize, Clone, Debug, Eq, PartialEq)]
 pub enum Constraint {
     Required,
+    Optional,
+    Nullable,
     Closed,
     Bounds { min: i64, max: i64 },
+}
+#[derive(serde::Serialize, Clone, Debug, Eq, PartialEq)]
+pub enum Shape {
+    List(Iri),
+    Union {
+        discriminator: String,
+        variants: BTreeSet<Iri>,
+    },
+    Variant {
+        tag: String,
+        record: Iri,
+    },
 }
 #[derive(serde::Serialize, Clone, Debug, Eq, PartialEq)]
 pub enum Observation {
@@ -153,6 +168,7 @@ pub(super) fn parse(
     ledger_symbols: &BTreeMap<Iri, crate::language::Operation>,
 ) -> Result<HttpContract, String> {
     let mut header = None;
+    let mut shapes = BTreeMap::new();
     let (mut operations, mut records, mut fields, mut constraints, mut errors, mut observations) = (
         BTreeMap::new(),
         BTreeMap::new(),
@@ -184,7 +200,8 @@ pub(super) fn parse(
                 ])?;
                 let identity = d.iri("identity")?;
                 let version = d.string("version")?;
-                if !super::version_ok(&version) || d.integer("ruleSetVersion")? != 1 {
+                let rule_set = d.integer("ruleSetVersion")?;
+                if !super::version_ok(&version) || !matches!(rule_set, 1 | 2) {
                     return Err(format!("{id}: unsupported version or rule set"));
                 }
                 let expected = dependencies
@@ -194,7 +211,10 @@ pub(super) fn parse(
                 if expected != d.refs("dependency")? {
                     return Err(d.error("dependency", "source and pins disagree"));
                 }
-                if header.replace((identity, version)).is_some() {
+                if header
+                    .replace((identity, version, rule_set as u32))
+                    .is_some()
+                {
                     return Err(format!("{id}: duplicate contract"));
                 }
             }
@@ -231,11 +251,11 @@ pub(super) fn parse(
                     || op.roles.iter().any(|r| {
                         !matches!(
                             r.as_str(),
-                            "urn:oddlang:http:provider" | "urn:oddlang:http:consumer"
+                            "urn:oddlang:http:provider"
+                                | "urn:oddlang:http:consumer"
+                                | "urn:oddlang:http:codec"
                         )
                     })
-                    || op.errors.is_empty()
-                    || op.observations.is_empty()
                 {
                     return Err(format!("{id}: invalid operation signature"));
                 }
@@ -274,14 +294,39 @@ pub(super) fn parse(
                 }
                 fields.insert(id.clone(), f);
             }
-            "Required" | "Closed" => {
+            "Required" | "Optional" | "Nullable" | "Closed" => {
                 d.keys(&[])?;
                 constraints.insert(
                     id.clone(),
-                    if kind == "Required" {
-                        Constraint::Required
-                    } else {
-                        Constraint::Closed
+                    match kind {
+                        "Required" => Constraint::Required,
+                        "Optional" => Constraint::Optional,
+                        "Nullable" => Constraint::Nullable,
+                        _ => Constraint::Closed,
+                    },
+                );
+            }
+            "List" => {
+                d.keys(&["item"])?;
+                shapes.insert(id.clone(), Shape::List(d.iri("item")?));
+            }
+            "TaggedUnion" => {
+                d.keys(&["discriminator", "variant"])?;
+                shapes.insert(
+                    id.clone(),
+                    Shape::Union {
+                        discriminator: d.string("discriminator")?,
+                        variants: d.refs("variant")?,
+                    },
+                );
+            }
+            "Variant" => {
+                d.keys(&["tag", "record"])?;
+                shapes.insert(
+                    id.clone(),
+                    Shape::Variant {
+                        tag: d.string("tag")?,
+                        record: d.iri("record")?,
                     },
                 );
             }
@@ -315,18 +360,19 @@ pub(super) fn parse(
             _ => return Err(format!("{id} rdf:type: unsupported {kind}")),
         }
     }
-    let (identity, version) = header.ok_or("missing Contract")?;
+    let (identity, version, rule_set_version) = header.ok_or("missing Contract")?;
     let contract = HttpContract {
         entry: String::new(),
         source_files: BTreeMap::new(),
         scenario_files: BTreeSet::new(),
         identity,
         version,
-        rule_set_version: 1,
+        rule_set_version,
         dependencies,
         operations,
         records,
         fields,
+        shapes,
         constraints,
         errors,
         observations,
@@ -343,9 +389,38 @@ impl HttpContract {
         if self.operations.is_empty() {
             return Err("missing Operation".into());
         }
+        let codec = self.rule_set_version == 2;
+        if !codec
+            && (!self.shapes.is_empty()
+                || self
+                    .constraints
+                    .values()
+                    .any(|c| matches!(c, Constraint::Optional | Constraint::Nullable)))
+        {
+            return Err("richer shapes require codec rule set 2".into());
+        }
+        if codec && (!self.dependencies.is_empty() || !self.scenario_files.is_empty()) {
+            return Err("codec contracts do not import external behavior or scenarios".into());
+        }
         let mut problems = BTreeSet::new();
         let mut routes = BTreeSet::new();
         for (id, op) in &self.operations {
+            let role = format!("{H}codec");
+            if if codec {
+                op.method != "POST"
+                    || op.roles.len() != 1
+                    || !op.roles.contains(role.as_str())
+                    || op.request != op.response
+                    || op.behavior.is_some()
+                    || !op.errors.is_empty()
+                    || !op.observations.is_empty()
+            } else {
+                op.roles.contains(role.as_str())
+                    || op.errors.is_empty()
+                    || op.observations.is_empty()
+            } {
+                problems.insert(format!("{id}: invalid operation signature"));
+            }
             let request = self.records.get(&op.request);
             if request.is_none() {
                 problems.insert(format!("{id} {H}request: unresolved {}", op.request));
@@ -429,13 +504,18 @@ impl HttpContract {
                 f.shape.as_str(),
                 "urn:oddlang:http:Text" | "urn:oddlang:http:Boolean" | "urn:oddlang:http:I64"
             ) && !self.records.contains_key(&f.shape)
+                && !matches!(
+                    self.shapes.get(&f.shape),
+                    Some(Shape::List(_) | Shape::Union { .. })
+                )
             {
                 problems.insert(format!("{id} {H}shape: unresolved {}", f.shape));
             }
-            let (mut required, mut bounds) = (0, 0);
+            let (mut presence, mut nullable, mut bounds) = (0, 0, 0);
             for c in &f.constraints {
                 match self.constraints.get(c) {
-                    Some(Constraint::Required) => required += 1,
+                    Some(Constraint::Required | Constraint::Optional) => presence += 1,
+                    Some(Constraint::Nullable) => nullable += 1,
                     Some(Constraint::Bounds { .. })
                         if f.shape.as_str() == "urn:oddlang:http:I64" =>
                     {
@@ -446,14 +526,17 @@ impl HttpContract {
                     }
                 }
             }
-            if required != 1 || bounds > 1 {
+            if presence != 1 || nullable > 1 || bounds > 1 {
                 problems.insert(format!(
-                    "{id} {H}constraint: expected one Required and at most one Bounds"
+                    "{id} {H}constraint: expected one presence constraint and at most one Nullable or Bounds"
                 ));
             }
         }
         if let Some(error) = problems.pop_first() {
             return Err(error);
+        }
+        if codec {
+            super::shapes::validate(self)?;
         }
         self.check_reachability()
     }
@@ -482,6 +565,13 @@ impl HttpContract {
             if let Some(r) = self.records.get(id) {
                 todo.extend(r.fields.iter().chain(&r.constraints));
             }
+            if let Some(shape) = self.shapes.get(id) {
+                match shape {
+                    Shape::List(item) => todo.push(item),
+                    Shape::Union { variants, .. } => todo.extend(variants),
+                    Shape::Variant { record, .. } => todo.push(record),
+                }
+            }
             if let Some(f) = self.fields.get(id) {
                 todo.push(&f.shape);
                 todo.extend(&f.constraints);
@@ -491,6 +581,7 @@ impl HttpContract {
             .records
             .keys()
             .chain(self.fields.keys())
+            .chain(self.shapes.keys())
             .chain(self.constraints.keys())
             .chain(self.errors.keys())
             .chain(self.observations.keys());

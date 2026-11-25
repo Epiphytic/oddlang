@@ -564,6 +564,9 @@ fn derive(model: &HttpContract, s: &Slot, sources: &[Case]) -> Result<Case, Stri
     Ok(c)
 }
 pub fn cases(model: &HttpContract) -> Result<Vec<Case>, String> {
+    if model.rule_set_version == 2 {
+        return Ok(super::shapes::exercise(model).1);
+    }
     let required = inventory(model);
     let slots: BTreeSet<_> = required
         .iter()
