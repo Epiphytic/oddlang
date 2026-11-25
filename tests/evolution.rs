@@ -128,3 +128,14 @@ fn requires_historical_value_before_migration() {
         format!("{iri}: missing historical value")
     );
 }
+
+#[test]
+fn independent_resolver_confirms_compatibility_verdicts() {
+    let writer = load_model("examples/ledger/v1").unwrap();
+    let reader = load_model("examples/ledger/v2").unwrap();
+    let mut db = db::TestDatabase::connect().unwrap();
+    let witness = events::evolution_witness(&mut db.client, &writer, &reader);
+    assert_eq!(witness.current.currency_code(), "JPY");
+    assert_eq!(witness.historical.currency_code(), "CAD");
+    assert!(witness.missing_default.ends_with("missing reader default"));
+}

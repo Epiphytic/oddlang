@@ -11,6 +11,9 @@ pub fn generate(model: &Model) -> String {
             if !f.aliases.is_empty() {
                 field["aliases"] = json!(f.aliases);
             }
+            if let Some(value) = &f.historical_value {
+                field["default"] = json!(value);
+            }
             field
         })
         .collect();

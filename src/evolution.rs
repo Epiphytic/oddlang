@@ -47,3 +47,35 @@ pub fn migration(writer: &Model, reader: &Model) -> Result<String, String> {
     sql.push_str("COMMIT;\n");
     Ok(sql)
 }
+
+/// Check stable identities against Avro's reader-side name, alias and default rules.
+/// Removed writer fields can be skipped; added reader fields need a default.
+pub fn wire_compatibility(writer: &Model, reader: &Model) -> Result<(), String> {
+    if writer.avro_name != reader.avro_name {
+        return Err(format!("{ACCOUNT}: record name changed"));
+    }
+    for (iri, field) in &reader.fields {
+        let matches =
+            |name: &str| field.avro_name == name || field.aliases.iter().any(|a| a == name);
+        if writer
+            .fields
+            .iter()
+            .any(|(id, old)| id != iri && matches(&old.avro_name))
+        {
+            return Err(format!(
+                "{iri}: wire name resolves to a different field identity"
+            ));
+        }
+        if let Some(old) = writer.fields.get(iri) {
+            if !matches(&old.avro_name) {
+                return Err(format!("{iri}: missing reader alias {}", old.avro_name));
+            }
+            if old.range.is_some() != field.range.is_some() {
+                return Err(format!("{iri}: incompatible wire type"));
+            }
+        } else if field.historical_value.is_none() {
+            return Err(format!("{iri}: missing reader default"));
+        }
+    }
+    Ok(())
+}
