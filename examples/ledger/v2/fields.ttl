@@ -1,0 +1,10 @@
+@prefix l: <urn:oddlang:ledger:> .
+@prefix o: <urn:oddlang:core:> .
+l:Account a o:Entity .
+l:Account o:field l:id, l:owner, l:balance, l:currencyCode .
+l:id a o:Field ; o:type o:Text .
+l:owner a o:Field ; o:type o:Text .
+l:balance a o:Field ; o:type o:Integer ; o:range _:bounds .
+_:bounds o:min 0 ; o:max 9223372036854775807 .
+l:Account o:key l:id .
+l:currencyCode a o:Field ; o:type o:Text .

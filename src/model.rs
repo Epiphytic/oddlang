@@ -28,6 +28,7 @@ pub struct Field {
     pub sql_name: String,
     pub avro_name: String,
     pub aliases: Vec<String>,
+    pub historical_value: Option<String>,
     pub range: Option<(i64, i64)>,
 }
 #[derive(Debug, Clone)]
@@ -285,7 +286,7 @@ pub fn load_model(project_dir: impl AsRef<Path>) -> Result<Model> {
     let mut fields = BTreeMap::new();
     for id in refs {
         let s = named(&id);
-        allowed(&g, &s, &["type", "range"], &id)?;
+        allowed(&g, &s, &["type", "range", "historicalValue"], &id)?;
         let ty = iri(one(&g, &s, "type", &id)?, &id)?;
         let range = if id == BALANCE {
             if ty != core("Integer").as_str() {
@@ -322,6 +323,22 @@ pub fn load_model(project_dir: impl AsRef<Path>) -> Result<Model> {
             }
             None
         };
+        let historical_value = if g
+            .objects_for_subject_predicate(&s, &core("historicalValue"))
+            .next()
+            .is_some()
+        {
+            if range.is_some() {
+                return Err(format!("{id}: historical value requires a text field"));
+            }
+            Some(literal(
+                one(&g, &s, "historicalValue", &id)?,
+                xsd::STRING,
+                &id,
+            )?)
+        } else {
+            None
+        };
         fields.insert(
             id.clone(),
             Field {
@@ -331,6 +348,7 @@ pub fn load_model(project_dir: impl AsRef<Path>) -> Result<Model> {
                 sql_name: String::new(),
                 avro_name: String::new(),
                 aliases: vec![],
+                historical_value,
             },
         );
     }
