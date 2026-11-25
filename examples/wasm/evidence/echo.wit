@@ -1,0 +1,23 @@
+package root:component;
+
+world root {
+  import sample:echo/shapes@1.0.0;
+  use sample:echo/shapes@1.0.0.{message};
+
+  export echo: func(input: message) -> message;
+}
+package sample:echo@1.0.0 {
+  interface shapes {
+    variant choice {
+      empty,
+      number(s64),
+      enabled(bool),
+    }
+
+    record message {
+      text: string,
+      items: option<list<string>>,
+      choice: choice,
+    }
+  }
+}

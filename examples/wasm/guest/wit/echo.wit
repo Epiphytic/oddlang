@@ -1,0 +1,5 @@
+package oddlang:spike@1.0.0;
+
+world pure-echo {
+    export echo: func(value: s64) -> s64;
+}

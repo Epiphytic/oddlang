@@ -2,6 +2,7 @@ use oddlang::model::load_model;
 use std::{env, process::ExitCode};
 fn run(args: &[String]) -> Result<(), String> {
     match args {
+        [group, rest @ ..] if group == "wasm" => oddlang::wasm::command(rest),
         [group, cmd, project, lock, cache, overlay, output]
             if group == "http" && cmd == "generate" =>
         {

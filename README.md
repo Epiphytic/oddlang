@@ -12,6 +12,19 @@ client. A standalone Go client adopts the same cases with its own release pin.
 The [hybrid example](examples/http/hybrid/README.md) shows setup, offline
 verification and a Rust backend with Node SSR and React.
 
+## WebAssembly component contracts
+
+Publish the ledger world and recover its interface into editable Turtle with the release's stable identity map.
+
+```sh
+cargo run --locked --offline -- wasm publish contracts/wasm/ledger contracts/wasm/empty.lock.json contracts/cache target/wasm-ledger
+cargo run --locked --offline -- wasm import-wit target/wasm-ledger/wit ledger target/wasm-ledger/identities.json target/wasm-recovered
+```
+
+Each publication includes WIT, a manifest, a workspace lock and conformance cases. Pin the workspace lock independently when consuming a release. A WIT import recovers the interface. The release ontology carries additional behavior and constraints.
+
+Run `scripts/setup-wasm.sh` once with network access. Then run `scripts/verify-wasm-spike.sh` to compile the pure echo guest, inspect its imports and call it from an empty Wasmtime linker offline.
+
 ## Integration tests
 
 The full suite uses a Rust toolchain with edition 2024 support, PostgreSQL 16.6, Node.js and npm for the TypeScript client, and Go 1.22 or newer for the independent client. The client builds were exercised with Node.js 22 and npm 10. While online, cache the database image, both locked Rust dependency sets and the pinned TypeScript compiler.

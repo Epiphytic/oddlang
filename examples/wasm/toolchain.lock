@@ -1,0 +1,16 @@
+# Sourced by setup and verification from the repository root.
+rust_version=1.97.1
+rust_commit=8bab26f4f68e0e26f0bb7960be334d5b520ea452
+rust_manifest_sha256=03569b1886ceb5c05276b50c8431ab111de944cd6140fe1fa7d821dd8e0f29cf
+guest_target=wasm32-wasip2
+guest_profile=release
+wasm_tools_version=1.250.0
+case "$(uname -sm)" in
+    "Darwin arm64") platform=aarch64-macos; archive_sha256=1efe40e1923a80947db3a9a8b84c64442c539988a25cfd4ebe516d00bb5c4ba3 ;;
+    "Darwin x86_64") platform=x86_64-macos; archive_sha256=491edeb43ba81154b44da5f8da7dba64a4a3fed5ab4985c58e9a48d1b75ad41b ;;
+    "Linux aarch64") platform=aarch64-linux; archive_sha256=a6f7684f4bc618068cf9ae09cf3c1ccfe72a97061324c8f7a15f409f6a4c18c3 ;;
+    "Linux x86_64") platform=x86_64-linux; archive_sha256=b746c34e7c4162b8812eb29397ebe076834e496a8c46fe68d793379a2741eb50 ;;
+    *) echo "Unsupported wasm-tools host: $(uname -sm)" >&2; exit 1 ;;
+esac
+archive_name="wasm-tools-$wasm_tools_version-$platform"
+cache="$PWD/target/wasm-tools"

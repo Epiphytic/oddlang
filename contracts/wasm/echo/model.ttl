@@ -1,0 +1,16 @@
+@prefix w: <urn:oddlang:wasm:> .
+@prefix e: <urn:oddlang:echo:> .
+
+e:package a w:Package ; w:name "sample:echo@1.0.0" .
+e:shapes a w:Interface ; w:name "shapes" ; w:type e:message, e:choice .
+e:message a w:Record ; w:name "message" ; w:field e:text, e:items, e:choice-field .
+e:text a w:Field ; w:name "text" ; w:ordinal 0 ; w:valueType "string" .
+e:items a w:Field ; w:name "items" ; w:ordinal 1 ; w:valueType "option<list<string>>" .
+e:choice-field a w:Field ; w:name "choice" ; w:ordinal 2 ; w:valueType "choice" .
+e:choice a w:Variant ; w:name "choice" ; w:case e:empty, e:number, e:enabled .
+e:empty a w:Case ; w:name "empty" ; w:ordinal 0 .
+e:number a w:Case ; w:name "number" ; w:ordinal 1 ; w:valueType "s64" .
+e:enabled a w:Case ; w:name "enabled" ; w:ordinal 2 ; w:valueType "bool" .
+e:world a w:World ; w:name "echo-world" ; w:use e:message ; w:export e:echo .
+e:echo a w:Function ; w:name "echo" ; w:param e:input ; w:result "message" .
+e:input a w:Param ; w:name "input" ; w:ordinal 0 ; w:valueType "message" .

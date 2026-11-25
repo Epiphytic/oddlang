@@ -1,0 +1,7 @@
+[workspace]
+resolver = "3"
+members = ["guest", "host"]
+
+[profile.release]
+panic = "abort"
+strip = "debuginfo"
