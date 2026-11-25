@@ -1,0 +1,2 @@
+@prefix o: <urn:oddlang:core:> .
+<urn:shop:ledger> o:imports <urn:oddlang:contract:ledger> .

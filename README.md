@@ -6,11 +6,13 @@ and [implementation plan](docs/superpowers/plans/2026-11-25-ledger.md).
 
 ## Integration tests
 
-While online, cache the pinned PostgreSQL image and locked Rust dependencies.
+The full suite uses a Rust toolchain with edition 2024 support, PostgreSQL 16.6, Node.js and npm for the TypeScript client, and Go 1.22 or newer for the independent client. The client builds were exercised with Node.js 22 and npm 10. While online, cache the database image, both locked Rust dependency sets and the pinned TypeScript compiler.
 
 ```sh
 docker compose pull
 cargo fetch --locked
+cargo fetch --locked --manifest-path examples/contracts/monorepo/native/Cargo.toml
+npm exec --yes --package=typescript@5.9.3 -- tsc --version
 ```
 
 Start the disposable database, set its connection URL and run the suite
@@ -30,6 +32,18 @@ whose user may create schemas. The ledger demo uses the same URL.
 
 When finished with the Compose database, remove its containers and data
 with `docker compose down -v`.
+
+## Contract tests
+
+Run the contract checks separately with the same offline caches. The monorepo test uses the configured PostgreSQL database.
+
+```sh
+cargo test --locked --offline --test contract_release
+cargo test --locked --offline --test monorepo
+cargo test --locked --offline --test adoption
+```
+
+The [monorepo fixture](examples/contracts/monorepo/README.md) changes one workspace pin, builds the Rust and TypeScript consumers, and verifies the SQL migration and Avro reader. The [standalone Go client](examples/contracts/go-client/README.md) adopts the releases with its own pins and replays a digest-checked adapter.
 
 ## Ledger demo
 
