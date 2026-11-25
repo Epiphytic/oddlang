@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -193,10 +194,27 @@ func runCase(t *testing.T, c script) object {
 func TestConformance(t *testing.T) {
 	bundle := os.Getenv("BUNDLE")
 	if bundle == "" {
-		t.Fatal("set BUNDLE, PIN, CLAIM and EVIDENCE")
+		t.Fatal("set BUNDLE, CLAIM and EVIDENCE")
 	}
 	var lock struct{ Pins []map[string]string }
-	decode(t, read(t, os.Getenv("PIN")), &lock)
+	var corpusDigest string
+	if pinFile := os.Getenv("PIN"); pinFile != "" {
+		decode(t, read(t, pinFile), &lock)
+	} else {
+		var target struct {
+			SchemaVersion    int
+			Contract         map[string]string
+			CaseCorpusSHA256 string
+			Source           struct{ Path, SHA256 string }
+			Toolchains       map[string]string
+		}
+		decode(t, read(t, "target.lock.json"), &target)
+		if target.SchemaVersion != 1 || target.Toolchains["go"] != runtime.Version() || len(target.CaseCorpusSHA256) != 64 || target.Source.Path != "client.go" || digest(read(t, "client.go")) != target.Source.SHA256 {
+			t.Fatal("target lock disagrees with reviewed source or toolchain")
+		}
+		lock.Pins = []map[string]string{target.Contract}
+		corpusDigest = target.CaseCorpusSHA256
+	}
 	root, e := os.OpenRoot(bundle)
 	if e != nil {
 		t.Fatal(e)
@@ -240,6 +258,9 @@ func TestConformance(t *testing.T) {
 		if path == "cases.json" {
 			cases = data
 		}
+	}
+	if corpusDigest != "" && digest(cases) != corpusDigest {
+		t.Fatal("target lock case corpus digest mismatch")
 	}
 	var corpus []script
 	decode(t, cases, &corpus)

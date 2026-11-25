@@ -172,6 +172,18 @@ pub fn load(
     workspace_lock: &Path,
     cache: &Path,
 ) -> Result<HttpContract, HttpError> {
+    let mut models = load_workspace(project, workspace_lock, cache)?;
+    if models.len() != 1 {
+        return Err("expected one HTTP project import".into());
+    }
+    Ok(models.pop_first().unwrap().1)
+}
+
+pub fn load_workspace(
+    project: &Path,
+    workspace_lock: &Path,
+    cache: &Path,
+) -> Result<BTreeMap<Iri, HttpContract>, HttpError> {
     let workspace = lock(workspace_lock)?;
     let bytes = fs::read(project).map_err(|e| format!("project: {e}"))?;
     let mut imports = BTreeSet::new();
@@ -184,10 +196,31 @@ pub fn load(
             imports.insert(node.into_string());
         }
     }
-    if imports.len() != 1 {
-        return Err("expected one HTTP project import".into());
+    if imports.is_empty() {
+        return Err("expected HTTP project imports".into());
     }
-    let import = imports.pop_first().unwrap();
+    let mut result = BTreeMap::new();
+    let mut dependencies = workspace.clone();
+    for import in imports {
+        let model = load_import(&import, &workspace, cache)?;
+        for dep in &model.dependencies {
+            if dependencies
+                .insert(dep.identity.clone(), dep.clone())
+                .is_some_and(|existing| existing != *dep)
+            {
+                return Err(format!("conflicting dependency pin for {}", dep.identity));
+            }
+        }
+        result.insert(model.identity.clone(), model);
+    }
+    Ok(result)
+}
+
+fn load_import(
+    import: &str,
+    workspace: &BTreeMap<String, Pin>,
+    cache: &Path,
+) -> Result<HttpContract, HttpError> {
     let mut candidates = workspace
         .values()
         .filter(|p| p.identity == import || format!("{}:{}", p.identity, p.version) == import);
@@ -260,3 +293,6 @@ pub use overlay::{TargetOverlay, load_overlay};
 pub use rust::emit_rust;
 mod typescript;
 pub use typescript::emit_typescript;
+
+mod evolution;
+pub use evolution::*;

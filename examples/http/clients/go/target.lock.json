@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "contract": {
+    "identity": "urn:oddlang:contract:ledger-http",
+    "manifestSha256": "e1cf1857145ff54c538de9f14938fae607e1e925a5220dcc9feafb92aa60266a",
+    "version": "v1"
+  },
+  "caseCorpusSha256": "a323315391f2cdc8508f7db3a5d6fec9ae7aea40cda94f6227889af83cd3af01",
+  "source": {
+    "path": "client.go",
+    "sha256": "0f531a917252f6fcf4de36652548637534c47fa8d719f9e19903de34e412ffdc"
+  },
+  "toolchains": {
+    "go": "go1.26.3"
+  }
+}

@@ -10,7 +10,7 @@ use std::{
     fmt,
 };
 
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(serde::Serialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Iri(String);
 impl Iri {
     pub fn new(value: impl Into<String>) -> Result<Self, HttpError> {
@@ -33,7 +33,7 @@ impl std::borrow::Borrow<str> for Iri {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, Clone, Debug, Eq, PartialEq)]
 pub struct HttpContract {
     pub entry: String,
     pub source_files: BTreeMap<String, Vec<u8>>,
@@ -49,7 +49,7 @@ pub struct HttpContract {
     pub observations: BTreeMap<Iri, Observation>,
     pub constraints: BTreeMap<Iri, Constraint>,
 }
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, Clone, Debug, Eq, PartialEq)]
 pub struct Operation {
     pub method: String,
     pub path: String,
@@ -61,25 +61,25 @@ pub struct Operation {
     pub observations: BTreeSet<Iri>,
     pub behavior: Option<Iri>,
 }
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, Clone, Debug, Eq, PartialEq)]
 pub struct Record {
     pub fields: BTreeSet<Iri>,
     pub constraints: BTreeSet<Iri>,
 }
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, Clone, Debug, Eq, PartialEq)]
 pub struct Field {
     pub native_name: String,
     pub wire_name: String,
     pub shape: Iri,
     pub constraints: BTreeSet<Iri>,
 }
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, Clone, Debug, Eq, PartialEq)]
 pub enum Constraint {
     Required,
     Closed,
     Bounds { min: i64, max: i64 },
 }
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, Clone, Debug, Eq, PartialEq)]
 pub enum Observation {
     Lookup,
     Transfer,

@@ -116,8 +116,57 @@ fn set_account_text(
     }
     Ok(())
 }
+pub(super) const BALANCE: &str = "urn:oddlang:ledger-http:balance";
+
+fn rename_balance(value: &mut Value, from: &str, to: &str) {
+    if from == to {
+        return;
+    }
+    if let Some(record) = value.as_object_mut() {
+        if let Some(balance) = record.remove(from) {
+            record.insert(to.to_owned(), balance);
+        }
+        for nested in record.values_mut() {
+            rename_balance(nested, from, to);
+        }
+    }
+}
+
+fn project_scenario(model: &HttpContract, c: &mut Case) -> Result<(), String> {
+    let Some(field) = model.fields.get(BALANCE) else {
+        return Ok(());
+    };
+    if field.native_name == field.wire_name {
+        return Ok(());
+    }
+    let responses = c
+        .expected
+        .iter_mut()
+        .filter_map(|e| e.get_mut("response"))
+        .chain(
+            c.action
+                .get_mut("replies")
+                .and_then(Value::as_array_mut)
+                .into_iter()
+                .flatten(),
+        );
+    for raw in responses {
+        if raw["status"] == 200 {
+            let mut value = body(raw)?;
+            rename_balance(&mut value, &field.native_name, &field.wire_name);
+            put(raw, &value);
+        }
+    }
+    Ok(())
+}
+
 fn derive(model: &HttpContract, s: &Slot, sources: &[Case]) -> Result<Case, String> {
     let op = &model.operations[s.operation.as_str()];
+    let balance = &model
+        .fields
+        .get(BALANCE)
+        .ok_or("expected ledger balance")?
+        .wire_name;
     let get = op.method == "GET";
     let provider = s.role == "http.provider";
     let incoming = if provider { "request" } else { "response" };
@@ -403,12 +452,14 @@ fn derive(model: &HttpContract, s: &Slot, sources: &[Case]) -> Result<Case, Stri
                         } else {
                             c.fixture[0]["balance"] = json!(n.to_string());
                             c.fixture[1]["balance"] = json!("0");
-                            output["source"]["balance"] = json!("0");
-                            output["destination"]["balance"] = new;
+                            output["source"][balance] = json!("0");
+                            output["destination"][balance] = new;
                         }
                     } else if get {
                         c.fixture[0]["balance"] = new;
-                    } else if pos == "response" && pointer.ends_with("/balance") {
+                    } else if pos == "response"
+                        && pointer.rsplit('/').next() == Some(balance.as_str())
+                    {
                         let source = pointer.starts_with("/source/");
                         let n = new
                             .as_str()
@@ -425,7 +476,7 @@ fn derive(model: &HttpContract, s: &Slot, sources: &[Case]) -> Result<Case, Stri
                                 json!(initial.to_string());
                             input["amount"] = json!("1");
                             let other = if source { "destination" } else { "source" };
-                            output[other]["balance"] =
+                            output[other][balance] =
                                 json!((if source { 8 } else { 9 }).to_string());
                         } else {
                             return Err(format!("unreachable transfer output at {pointer}: {n}"));
@@ -483,7 +534,7 @@ fn derive(model: &HttpContract, s: &Slot, sources: &[Case]) -> Result<Case, Stri
     if provider {
         if !get {
             for initial in c.fixture.as_array().ok_or("fixture must be array")? {
-                let acct = if reply["status"] == 200 {
+                let mut acct = if reply["status"] == 200 {
                     ["source", "destination"]
                         .iter()
                         .find_map(|k| {
@@ -493,6 +544,7 @@ fn derive(model: &HttpContract, s: &Slot, sources: &[Case]) -> Result<Case, Stri
                 } else {
                     initial.clone()
                 };
+                rename_balance(&mut acct, "balance", balance);
                 let lookup = model
                     .operations
                     .values()
@@ -505,6 +557,7 @@ fn derive(model: &HttpContract, s: &Slot, sources: &[Case]) -> Result<Case, Stri
         c.action = json!({"requests":exchanges.iter().map(|e|&e["request"]).collect::<Vec<_>>()});
     } else {
         c.action = json!({"input":input,"replies":if local{vec![]}else{vec![reply]}});
+        rename_balance(&mut output, balance, "balance");
         exchanges.push(json!({"native":match native{"success"=>json!({"kind":native,"value":output}),"namedError"=>json!({"kind":native,"error":output["error"]}),_=>json!({"kind":native})}}));
     }
     c.expected = exchanges;
@@ -525,7 +578,8 @@ pub fn cases(model: &HttpContract) -> Result<Vec<Case>, String> {
                 .ok_or_else(|| format!("missing scenario file {file}"))?,
         )
         .map_err(|e| format!("{file}: {e}"))?;
-        for c in authored {
+        for mut c in authored {
+            project_scenario(model, &mut c)?;
             if !super::wire::valid_case(&c) {
                 return Err(format!("invalid authored exchanges {}", c.case_id));
             }

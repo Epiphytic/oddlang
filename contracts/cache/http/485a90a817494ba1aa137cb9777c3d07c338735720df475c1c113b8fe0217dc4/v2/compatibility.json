@@ -1,0 +1,19 @@
+{
+  "compatibility": {
+    "changes": [
+      {
+        "after": "balanceMinor",
+        "before": "balance",
+        "declaration": "urn:oddlang:ledger-http:balance",
+        "kind": "wireName"
+      }
+    ],
+    "newClientOldProvider": "incompatible",
+    "oldClientNewProvider": "incompatible"
+  },
+  "predecessor": {
+    "identity": "urn:oddlang:contract:ledger-http",
+    "manifestSha256": "e1cf1857145ff54c538de9f14938fae607e1e925a5220dcc9feafb92aa60266a",
+    "version": "v1"
+  }
+}

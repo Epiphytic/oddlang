@@ -80,8 +80,11 @@ impl Rules<'_> {
             let transfer_out = self.role == "http.provider"
                 && self.model.operations[self.op].behavior.is_some()
                 && pos.starts_with("response/");
-            let source_balance = transfer_out && pos == "response/source/balance";
-            let destination_balance = transfer_out && pos == "response/destination/balance";
+            let source_balance =
+                transfer_out && path == "response/source" && fid.as_str() == super::corpus::BALANCE;
+            let destination_balance = transfer_out
+                && path == "response/destination"
+                && fid.as_str() == super::corpus::BALANCE;
             let attainable =
                 |v: i64| (!source_balance || v < i64::MAX) && (!destination_balance || v > 0);
             let range = f

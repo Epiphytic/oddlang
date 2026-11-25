@@ -60,3 +60,50 @@ pub fn load_overlay(path: &Path) -> Result<TargetOverlay, HttpError> {
     }
     Ok(overlay)
 }
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct TargetLock {
+    schema_version: u32,
+    contract: crate::contracts::Pin,
+    case_corpus_sha256: String,
+    source: ReviewedFile,
+    overlay: Option<ReviewedFile>,
+    toolchains: std::collections::BTreeMap<String, String>,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ReviewedFile {
+    path: String,
+    sha256: String,
+}
+
+/// Replay the independent Go adapter's release, reviewed files and executable toolchain pins.
+pub fn verify_target_lock(
+    adapter: &Path,
+    path: &Path,
+    bundle: &Path,
+) -> Result<super::VerifiedBundle, HttpError> {
+    let lock: TargetLock = super::read_json(path)?;
+    if lock.schema_version != 1 || lock.toolchains.len() != 1 {
+        return Err("unsupported target lock schema or toolchains".into());
+    }
+    let expected = lock
+        .toolchains
+        .get("go")
+        .ok_or("missing Go toolchain pin")?;
+    let go = std::process::Command::new("go")
+        .args(["env", "GOVERSION"])
+        .env("GOTOOLCHAIN", "local")
+        .output()
+        .map_err(|e| format!("go version: {e}"))?;
+    if !go.status.success() || String::from_utf8_lossy(&go.stdout).trim() != expected {
+        return Err(format!("expected Go toolchain {expected}"));
+    }
+    for file in std::iter::once(&lock.source).chain(lock.overlay.as_ref()) {
+        crate::contracts::verified(adapter, &file.path, &file.sha256)?;
+    }
+    let release = super::bundle::verify_pins(bundle, &super::pins(vec![lock.contract])?)?;
+    crate::contracts::verified(bundle, "cases.json", &lock.case_corpus_sha256)?;
+    Ok(release)
+}

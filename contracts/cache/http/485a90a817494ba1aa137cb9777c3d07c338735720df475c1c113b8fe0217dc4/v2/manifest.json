@@ -1,0 +1,23 @@
+{
+  "dependencies": [
+    {
+      "identity": "urn:oddlang:contract:ledger",
+      "manifestSha256": "db3255efa77bfc475db7cadd0643c0c675693499de5221e116962c4c1741d90a",
+      "version": "v1"
+    }
+  ],
+  "entry": "domain.ttl",
+  "files": {
+    "cases.json": "c39d252575eb20923a2f04d19bd0a1e51f4a6f40882a4cd27971a80ad4c36694",
+    "compatibility.json": "f42ef792f233eaf11dd2def9cd9952ce46769cbb6a59155fc258c7d0e2bce119",
+    "domain.ttl": "6f20affc16648f8e8d99ca55f5853966696d40a0ebbd35052c08de9a5e87f44e",
+    "obligations.json": "a0867f54a55ea55f56fa5f2f9d7e50b060e89ff3ba1df74300cec9943708db39",
+    "openapi.json": "fe3289b28210c2be5cc35060ffedcc3a003d5392b9262a31a211ae04332411a9",
+    "scenarios.json": "534320993c41565b62f17e6e9885a99f240ab3b3a054a908be211ff574fbaf7f",
+    "schema.json": "eac34460154c89c6dcd8c228258ad1750e20ee8703ab701760b69432308270d0"
+  },
+  "identity": "urn:oddlang:contract:ledger-http",
+  "ruleSetVersion": 1,
+  "schemaVersion": 1,
+  "version": "v2"
+}

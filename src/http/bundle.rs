@@ -95,12 +95,45 @@ pub fn validate_coverage(inventory: &[Obligation], corpus: &[Case]) -> Result<()
     associations(inventory, corpus).map(|_| ())
 }
 pub fn publish(c: &HttpContract, out: &Path) -> Result<(), HttpError> {
+    publish_payloads(c, out, None)
+}
+
+pub fn publish_successor(
+    c: &HttpContract,
+    predecessor_lock: &Path,
+    cache: &Path,
+    out: &Path,
+) -> Result<(), HttpError> {
+    let workspace = lock(predecessor_lock)?;
+    let pin = workspace
+        .get(c.identity.as_str())
+        .ok_or("missing predecessor identity")?;
+    if pin.version == c.version {
+        return Err("predecessor must be a different release".into());
+    }
+    let before = load_import(c.identity.as_str(), &workspace, cache)?;
+    let report = compatibility(&before, c);
+    let bytes = payload(&json!({"predecessor":pin,"compatibility":report}))?;
+    publish_payloads(c, out, Some(bytes))
+}
+
+fn publish_payloads(
+    c: &HttpContract,
+    out: &Path,
+    compatibility: Option<Vec<u8>>,
+) -> Result<(), HttpError> {
     if let Some(name) = c.source_files.keys().find(|p| !normal(p)) {
         return Err(format!("invalid payload path {name}"));
     }
     let corpus = cases(c)?;
     let required = inventory(c);
     let mut files = c.source_files.clone();
+    if files.contains_key("compatibility.json") {
+        return Err("reserved compatibility path".into());
+    }
+    if let Some(bytes) = compatibility {
+        files.insert("compatibility.json".into(), bytes);
+    }
     for (path, bytes) in [
         ("cases.json", payload(&corpus)?),
         (
@@ -164,7 +197,13 @@ pub fn read_json<T: serde::de::DeserializeOwned>(path: &Path) -> Result<T, Strin
         .map_err(|e| format!("{}: {e}", path.display()))
 }
 pub fn verify_bundle(root: &Path, pin_file: &Path) -> Result<VerifiedBundle, String> {
-    let lock = lock(pin_file)?;
+    verify_pins(root, &lock(pin_file)?)
+}
+
+pub(super) fn verify_pins(
+    root: &Path,
+    lock: &BTreeMap<String, Pin>,
+) -> Result<VerifiedBundle, String> {
     let path = contained(root, "manifest.json")?;
     let bytes = fs::read(path).map_err(|e| e.to_string())?;
     let m: Manifest = serde_json::from_slice(&bytes).map_err(|e| e.to_string())?;

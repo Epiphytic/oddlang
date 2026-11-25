@@ -1,0 +1,83 @@
+{
+  "$defs": {
+    "urn:oddlang:ledger-http:Account": {
+      "additionalProperties": false,
+      "properties": {
+        "balanceMinor": {
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string",
+          "x-decimal-range": [
+            "0",
+            "9223372036854775807"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "balanceMinor",
+        "id",
+        "owner"
+      ],
+      "type": "object"
+    },
+    "urn:oddlang:ledger-http:Lookup": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    },
+    "urn:oddlang:ledger-http:Pair": {
+      "additionalProperties": false,
+      "properties": {
+        "destination": {
+          "$ref": "#/$defs/urn:oddlang:ledger-http:Account"
+        },
+        "source": {
+          "$ref": "#/$defs/urn:oddlang:ledger-http:Account"
+        }
+      },
+      "required": [
+        "destination",
+        "source"
+      ],
+      "type": "object"
+    },
+    "urn:oddlang:ledger-http:Transfer": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string",
+          "x-decimal-range": [
+            "-9223372036854775808",
+            "9223372036854775807"
+          ]
+        },
+        "destination": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "amount",
+        "destination",
+        "source"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}
