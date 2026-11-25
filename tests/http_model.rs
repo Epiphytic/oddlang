@@ -117,34 +117,12 @@ fn conflicting_pins_fail_before_resolution() {
 
 #[test]
 fn changed_pinned_file_rejected_before_parse() {
-    let dir = tempdir().unwrap();
-    let hash = fs::read_dir(cache().join("http"))
-        .unwrap()
-        .map(|p| p.unwrap())
-        .find(|entry| {
-            let file = entry.path().join("v1/manifest.json");
-            fs::read_to_string(file).is_ok_and(|s| s.contains("urn:oddlang:contract:ledger-http"))
-        })
-        .unwrap()
-        .file_name();
-    let rel = PathBuf::from("http").join(hash).join("v1");
-    let root = dir.path().join(&rel);
-    fs::create_dir_all(&root).unwrap();
-    for f in ["domain.ttl", "scenarios.json", "manifest.json"] {
-        fs::copy(cache().join(&rel).join(f), root.join(f)).unwrap();
-    }
-    let mut payload = fs::read(root.join("domain.ttl")).unwrap();
-    payload[0] ^= 1;
-    fs::write(root.join("domain.ttl"), payload).unwrap();
-    assert!(
-        load(
-            &demo().join("project.ttl"),
-            &demo().join("workspace.lock.json"),
-            dir.path()
-        )
-        .unwrap_err()
-        .contains("digest mismatch for domain.ttl")
-    );
+    let f = Published::copy();
+    let file = f.release.join("domain.ttl");
+    let mut bytes = fs::read(&file).unwrap();
+    bytes[0] ^= 1;
+    fs::write(file, bytes).unwrap();
+    assert!(f.error().contains("digest mismatch for domain.ttl"));
 }
 
 #[test]
@@ -187,4 +165,157 @@ fn source_paths_are_normal_and_contained() {
             .unwrap_err()
             .contains("escapes root")
     );
+}
+
+#[test]
+fn reference_errors_sort_by_subject_then_predicate() {
+    let broken = source()
+        .replace(
+            "d:Account a h:Record ; h:field d:id",
+            "d:Account a h:Record ; h:field d:Absent",
+        )
+        .replace("h:response d:Account", "h:response d:Unknown");
+    assert!(
+        check(&broken)
+            .unwrap_err()
+            .starts_with("urn:oddlang:ledger-http:Account urn:oddlang:http:field")
+    );
+    let broken = source()
+        .replace("h:response d:Account", "h:response d:Unknown")
+        .replace("h:error he:AccountMissing", "h:error he:Unknown");
+    assert!(
+        check(&broken)
+            .unwrap_err()
+            .starts_with("urn:oddlang:ledger-http:LookupAccount urn:oddlang:http:error")
+    );
+}
+
+#[test]
+fn all_guard_errors_need_http_mappings() {
+    assert!(
+        check(&source().replace(", e:DestinationOverflow .", " ."))
+            .unwrap_err()
+            .contains("missing mapping for urn:oddlang:ledger:error:DestinationOverflow")
+    );
+}
+
+#[test]
+fn invalid_legacy_pin_precedes_project_import_check() {
+    let dir = tempdir().unwrap();
+    let lock = dir.path().join("lock.json");
+    fs::write(
+        &lock,
+        r#"{"identity":"urn:invalid","version":"v1","manifestSha256":"unused"}"#,
+    )
+    .unwrap();
+    assert_eq!(
+        oddlang::contracts::resolve(&demo().join("project.ttl"), &lock, cache())
+            .err()
+            .unwrap(),
+        "unsupported release identity or invalid version"
+    );
+}
+
+struct Published {
+    dir: tempfile::TempDir,
+    release: PathBuf,
+    lock: PathBuf,
+}
+
+fn digest(bytes: &[u8]) -> String {
+    use sha2::{Digest, Sha256};
+    Sha256::digest(bytes)
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect()
+}
+
+impl Published {
+    fn copy() -> Self {
+        fn copy_dir(from: &Path, to: &Path) {
+            fs::create_dir_all(to).unwrap();
+            for entry in fs::read_dir(from).unwrap() {
+                let entry = entry.unwrap();
+                let dest = to.join(entry.file_name());
+                if entry.file_type().unwrap().is_dir() {
+                    copy_dir(&entry.path(), &dest)
+                } else {
+                    fs::copy(entry.path(), dest).unwrap();
+                }
+            }
+        }
+        let dir = tempdir().unwrap();
+        let rel = PathBuf::from("http")
+            .join(digest(b"urn:oddlang:contract:ledger-http"))
+            .join("v1");
+        let release = dir.path().join(&rel);
+        copy_dir(&cache().join(rel), &release);
+        copy_dir(&cache().join("ledger/v1"), &dir.path().join("ledger/v1"));
+        let lock = dir.path().join("workspace.json");
+        fs::copy(demo().join("workspace.lock.json"), &lock).unwrap();
+        Self { dir, release, lock }
+    }
+
+    fn modify_manifest(&self, edit: impl FnOnce(&mut serde_json::Value)) {
+        let manifest = self.release.join("manifest.json");
+        let mut data = read_json(&manifest);
+        edit(&mut data);
+        let bytes = serde_json::to_vec(&data).unwrap();
+        let mut lock = read_json(&self.lock);
+        lock["pins"][0]["manifestSha256"] = digest(&bytes).into();
+        fs::write(manifest, bytes).unwrap();
+        fs::write(&self.lock, lock.to_string()).unwrap();
+    }
+
+    fn error(&self) -> String {
+        load(&demo().join("project.ttl"), &self.lock, self.dir.path()).unwrap_err()
+    }
+}
+
+fn read_json(path: &Path) -> serde_json::Value {
+    serde_json::from_slice(&fs::read(path).unwrap()).unwrap()
+}
+
+#[test]
+fn workspace_cannot_override_release_dependency() {
+    let f = Published::copy();
+    let mut lock = read_json(&f.lock);
+    lock["pins"]
+        .as_array_mut()
+        .unwrap()
+        .push(read_json(Path::new("contracts/workspace-v2.lock.json")));
+    fs::write(&f.lock, lock.to_string()).unwrap();
+    assert!(f.error().contains("conflicting dependency pin"));
+}
+
+#[test]
+fn manifest_bytes_and_declared_identity_match_pin() {
+    let f = Published::copy();
+    let path = f.release.join("manifest.json");
+    let mut bytes = fs::read(&path).unwrap();
+    bytes.push(b' ');
+    fs::write(&path, bytes).unwrap();
+    assert!(f.error().contains("digest mismatch for manifest.json"));
+    f.modify_manifest(|manifest| manifest["identity"] = "urn:different".into());
+    assert!(f.error().contains("manifest disagrees with pin"));
+}
+
+#[test]
+fn published_ontology_must_be_reachable() {
+    let f = Published::copy();
+    fs::write(f.release.join("extra.ttl"), b"").unwrap();
+    f.modify_manifest(|manifest| manifest["files"]["extra.ttl"] = digest(b"").into());
+    assert!(f.error().contains("unreachable ontology payload extra.ttl"));
+}
+
+#[cfg(unix)]
+#[test]
+fn published_payload_symlink_must_remain_in_release() {
+    let f = Published::copy();
+    let outside = tempdir().unwrap();
+    let path = f.release.join("scenarios.json");
+    let target = outside.path().join("scenarios.json");
+    fs::rename(&path, &target).unwrap();
+    std::os::unix::fs::symlink(target, path).unwrap();
+    assert!(f.error().contains("cache path escapes root"));
 }

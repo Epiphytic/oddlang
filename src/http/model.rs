@@ -343,14 +343,15 @@ impl HttpContract {
         if self.operations.is_empty() {
             return Err("missing Operation".into());
         }
+        let mut problems = BTreeSet::new();
         let mut routes = BTreeSet::new();
         for (id, op) in &self.operations {
-            let request = self
-                .records
-                .get(&op.request)
-                .ok_or_else(|| format!("{id} {H}request: unresolved {}", op.request))?;
+            let request = self.records.get(&op.request);
+            if request.is_none() {
+                problems.insert(format!("{id} {H}request: unresolved {}", op.request));
+            }
             if !self.records.contains_key(&op.response) {
-                return Err(format!("{id} {H}response: unresolved {}", op.response));
+                problems.insert(format!("{id} {H}response: unresolved {}", op.response));
             }
             if !op.path.starts_with('/')
                 || op.path.split('/').skip(1).any(|s| {
@@ -359,39 +360,43 @@ impl HttpContract {
                             || (op.method == "GET" && s == "{id}"))
                 })
             {
-                return Err(format!("{id} {H}path: invalid route"));
+                problems.insert(format!("{id} {H}path: invalid route"));
             }
             if op.method == "GET"
                 && (op.path.matches("{id}").count() != 1
-                    || request.fields.len() != 1
-                    || !request.fields.iter().any(|f| {
-                        self.fields.get(f).is_some_and(|f| {
-                            f.wire_name == "id" && f.shape.as_str() == "urn:oddlang:http:Text"
-                        })
+                    || request.is_some_and(|r| {
+                        r.fields.len() != 1
+                            || !r.fields.iter().any(|f| {
+                                self.fields.get(f).is_some_and(|f| {
+                                    f.wire_name == "id"
+                                        && f.shape.as_str() == "urn:oddlang:http:Text"
+                                })
+                            })
                     }))
             {
-                return Err(format!("{id} {H}path: expected one text id binding"));
+                problems.insert(format!("{id} {H}path: expected one text id binding"));
             }
             if !routes.insert((&op.method, &op.path)) {
-                return Err(format!("{id} {H}path: duplicate route"));
+                problems.insert(format!("{id} {H}path: duplicate route"));
             }
             for e in &op.errors {
                 if !self.errors.contains_key(e) {
-                    return Err(format!("{id} {H}error: unresolved {e}"));
+                    problems.insert(format!("{id} {H}error: unresolved {e}"));
                 }
             }
             for o in &op.observations {
                 if !self.observations.contains_key(o) {
-                    return Err(format!("{id} {H}observation: unresolved {o}"));
+                    problems.insert(format!("{id} {H}observation: unresolved {o}"));
                 }
             }
             if let Some(b) = &op.behavior {
-                let behavior = ledger_symbols
-                    .get(b)
-                    .ok_or_else(|| format!("{id} {H}behavior: unresolved {b}"))?;
+                let Some(behavior) = ledger_symbols.get(b) else {
+                    problems.insert(format!("{id} {H}behavior: unresolved {b}"));
+                    continue;
+                };
                 for guard in &behavior.guards {
                     if !op.errors.contains(guard.error.as_str()) {
-                        return Err(format!(
+                        problems.insert(format!(
                             "{id} {H}error: missing mapping for {}",
                             guard.error
                         ));
@@ -406,16 +411,16 @@ impl HttpContract {
                     .iter()
                     .all(|c| self.constraints.get(c) == Some(&Constraint::Closed))
             {
-                return Err(format!("{id} {H}constraint: expected Closed"));
+                problems.insert(format!("{id} {H}constraint: expected Closed"));
             }
             let (mut native, mut wire) = (BTreeSet::new(), BTreeSet::new());
             for field in &r.fields {
-                let f = self
-                    .fields
-                    .get(field)
-                    .ok_or_else(|| format!("{id} {H}field: unresolved {field}"))?;
+                let Some(f) = self.fields.get(field) else {
+                    problems.insert(format!("{id} {H}field: unresolved {field}"));
+                    continue;
+                };
                 if !native.insert(&f.native_name) || !wire.insert(&f.wire_name) {
-                    return Err(format!("{id} {H}field: name collision at {field}"));
+                    problems.insert(format!("{id} {H}field: name collision at {field}"));
                 }
             }
         }
@@ -425,7 +430,7 @@ impl HttpContract {
                 "urn:oddlang:http:Text" | "urn:oddlang:http:Boolean" | "urn:oddlang:http:I64"
             ) && !self.records.contains_key(&f.shape)
             {
-                return Err(format!("{id} {H}shape: unresolved {}", f.shape));
+                problems.insert(format!("{id} {H}shape: unresolved {}", f.shape));
             }
             let (mut required, mut bounds) = (0, 0);
             for c in &f.constraints {
@@ -436,14 +441,19 @@ impl HttpContract {
                     {
                         bounds += 1
                     }
-                    _ => return Err(format!("{id} {H}constraint: invalid {c}")),
+                    _ => {
+                        problems.insert(format!("{id} {H}constraint: invalid {c}"));
+                    }
                 }
             }
             if required != 1 || bounds > 1 {
-                return Err(format!(
+                problems.insert(format!(
                     "{id} {H}constraint: expected one Required and at most one Bounds"
                 ));
             }
+        }
+        if let Some(error) = problems.pop_first() {
+            return Err(error);
         }
         self.check_reachability()
     }

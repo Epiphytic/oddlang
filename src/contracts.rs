@@ -87,6 +87,7 @@ pub fn resolve(project: &Path, lock: &Path, cache: &Path) -> Result<Release, Str
     let pin: Pin =
         serde_json::from_slice(&fs::read(lock).map_err(|e| format!("workspace lock: {e}"))?)
             .map_err(|e| format!("workspace lock: {e}"))?;
+    validate_ledger_pin(&pin)?;
     let expected = format!("{}:{}", pin.identity, pin.version);
     let project_bytes = fs::read(project).map_err(|e| format!("project ontology: {e}"))?;
     let mut imports = BTreeSet::new();
@@ -107,7 +108,7 @@ pub fn resolve(project: &Path, lock: &Path, cache: &Path) -> Result<Release, Str
     resolve_pin(&pin, cache)
 }
 
-pub fn resolve_pin(pin: &Pin, cache: &Path) -> Result<Release, String> {
+fn validate_ledger_pin(pin: &Pin) -> Result<(), String> {
     if pin.identity != "urn:oddlang:contract:ledger"
         || pin.version.is_empty()
         || !pin
@@ -117,6 +118,11 @@ pub fn resolve_pin(pin: &Pin, cache: &Path) -> Result<Release, String> {
     {
         return Err("unsupported release identity or invalid version".into());
     }
+    Ok(())
+}
+
+pub fn resolve_pin(pin: &Pin, cache: &Path) -> Result<Release, String> {
+    validate_ledger_pin(pin)?;
     let root = contained(cache, &format!("ledger/{}", pin.version))?;
     let bytes = verified(&root, "manifest.json", &pin.manifest_sha256)?;
     let manifest: Manifest =

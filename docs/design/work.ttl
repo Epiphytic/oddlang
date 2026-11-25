@@ -272,3 +272,7 @@ w:httpPlanReview p:addresses w:httpReviewWitnesses, w:httpReviewReproducibility,
 w:httpReviewInputs a p:Finding ; rdfs:label "Authored scenario source, stable field names and client overlays needed explicit ownership" ;
     p:source w:httpClaudeReview .
 w:httpPlanReview p:addresses w:httpReviewInputs .
+
+w:httpPhase1ReviewFinding a p:Finding ; rdfs:label "Strengthen HTTP loader diagnostics, negative tests and tool pin verification" ;
+    p:source w:httpImplementationEvidence .
+w:httpVocabulary p:addresses w:httpPhase1ReviewFinding .
