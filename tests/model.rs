@@ -38,3 +38,21 @@ fn equivalent_graphs_produce_the_same_typed_fields() {
     rewrite(p.path());
     assert_eq!(load_model(p.path()).unwrap().fields, before.fields);
 }
+
+#[test]
+fn closed_graph_rejects_unrecognized_declarations_and_unowned_terms() {
+    for triple in [
+        "l:Typo a o:Enttiy .",
+        "l:Account a o:Field .",
+        "l:Unused o:name \"unowned\" .",
+        "l:TransferFunds o:typo l:balance .",
+    ] {
+        let p = fixture();
+        let path = p.path().join("fields.ttl");
+        let s = std::fs::read_to_string(&path).unwrap();
+        std::fs::write(path, format!("{s}\n{triple}")).unwrap();
+        let err = load_model(p.path()).unwrap_err();
+        rewrite(p.path());
+        assert_eq!(load_model(p.path()).unwrap_err(), err);
+    }
+}

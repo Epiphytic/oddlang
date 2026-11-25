@@ -12,7 +12,11 @@ fn run(args: &[String]) -> Result<(), String> {
             }
             Ok(())
         }
-        _ => Err("usage: oddlang check PROJECT | impact PROJECT IRI".into()),
+        [cmd, dir, out] if cmd == "build" => {
+            oddlang::targets::build(&load_model(dir)?, std::path::Path::new(out))
+                .map_err(|e| e.to_string())
+        }
+        _ => Err("usage: oddlang check PROJECT | impact PROJECT IRI | build PROJECT OUTPUT".into()),
     }
 }
 fn main() -> ExitCode {

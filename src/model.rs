@@ -60,7 +60,12 @@ pub(crate) fn node(t: TermRef<'_>, at: &str) -> Result<NamedOrBlankNode> {
         _ => Err(format!("{at}: expected node")),
     }
 }
-pub(crate) fn one<'a>(g: &'a Graph, s: &NamedOrBlankNode, p: &str, at: &str) -> Result<TermRef<'a>> {
+pub(crate) fn one<'a>(
+    g: &'a Graph,
+    s: &NamedOrBlankNode,
+    p: &str,
+    at: &str,
+) -> Result<TermRef<'a>> {
     let mut v = g.objects_for_subject_predicate(s, &core(p));
     match (v.next(), v.next()) {
         (Some(t), None) => Ok(t),
@@ -118,7 +123,13 @@ pub fn load_graph(dir: &Path) -> Result<(Graph, BTreeSet<PathBuf>)> {
     }
     Ok((graph, loaded))
 }
-fn checked_name(g: &Graph, s: &NamedOrBlankNode, at: &str) -> Result<String> {
+fn checked_name(
+    g: &Graph,
+    s: &NamedOrBlankNode,
+    at: &str,
+    target: &str,
+    field: bool,
+) -> Result<String> {
     let value = literal(one(g, s, "name", at)?, xsd::STRING, at)?;
     let mut bytes = value.bytes();
     if !bytes.next().is_some_and(|c| c.is_ascii_alphabetic())
@@ -126,7 +137,92 @@ fn checked_name(g: &Graph, s: &NamedOrBlankNode, at: &str) -> Result<String> {
     {
         return Err(format!("{at}: invalid identifier {value}"));
     }
+    const KEYWORDS: &str = "as async await break const continue crate dyn else enum extern false fn for if impl in let loop match mod move mut pub ref return self Self static struct super trait true type unsafe use where while abstract become box do final gen macro override priv try typeof unsized virtual yield";
+    let invalid = match target {
+        "Rust" => {
+            KEYWORDS.split_whitespace().any(|kw| kw == value)
+                || if field {
+                    value == "new"
+                } else {
+                    matches!(
+                        value.as_str(),
+                        "Balance"
+                            | "String"
+                            | "Result"
+                            | "TryFrom"
+                            | "Ok"
+                            | "Err"
+                            | "i64"
+                            | "i128"
+                            | "str"
+                    )
+                }
+        }
+        "Sql" => value.len() > 63,
+        _ => false,
+    };
+    if invalid {
+        return Err(format!("{at}: unsupported {target} identifier {value}"));
+    }
     Ok(value)
+}
+/// Check declarations and reject detached RDF that no structural reader consumes.
+fn validate_declarations(g: &Graph) -> Result<()> {
+    let mut errors = BTreeSet::new();
+    // Visit each subject once. Errors identify named declarations, never parser-assigned labels.
+    let mut visited = std::collections::HashSet::new();
+    for t in g {
+        let s = t.subject.into_owned();
+        if !visited.insert(s.clone()) {
+            continue;
+        }
+        let owner = match &s {
+            NamedOrBlankNode::NamedNode(n) => n.as_str(),
+            _ => "anonymous declaration",
+        };
+        let classes: Vec<_> = g.objects_for_subject_predicate(&s, rdf::TYPE).collect();
+        let validate = || -> Result<()> {
+            match classes.as_slice() {
+                [] => {
+                    if g.triples_for_subject(&s)
+                        .all(|t| t.predicate == core("imports"))
+                    {
+                        return Ok(());
+                    }
+                    let subject_term: Term = s.clone().into();
+                    if ["range", "mapping"].iter().any(|p| {
+                        g.subjects_for_predicate_object(&core(p), &subject_term)
+                            .next()
+                            .is_some()
+                    }) {
+                        return Ok(());
+                    }
+                    Err(format!("{owner}: unowned declaration"))
+                }
+                [ty] => {
+                    let ty = iri(*ty, owner)?;
+                    if !["Entity", "Field", "Projection", "Operation"]
+                        .iter()
+                        .any(|t| core(t).as_str() == ty)
+                    {
+                        return Err(format!("{owner}: unknown declaration type {ty}"));
+                    }
+                    if !matches!(s, NamedOrBlankNode::NamedNode(_)) {
+                        return Err(format!("{ty}: declaration requires an IRI"));
+                    }
+                    if ty == core("Operation").as_str() {
+                        allowed(g, &s, &["dependsOn", "imports"], owner)?
+                    }
+                    Ok(())
+                }
+                _ => Err(format!("{owner}: expected exactly one declaration type")),
+            }
+        };
+        if let Err(error) = validate() {
+            errors.insert(error);
+        }
+    }
+    errors.into_iter().next().map_or(Ok(()), Err)
 }
 pub fn load_model(project_dir: impl AsRef<Path>) -> Result<Model> {
     let (g, imports) = load_graph(project_dir.as_ref())?;
@@ -229,7 +325,7 @@ pub fn load_model(project_dir: impl AsRef<Path>) -> Result<Model> {
             return Err(format!("{id}: unknown target"));
         }
         if names
-            .insert(target.to_owned(), checked_name(&g, &s, &id)?)
+            .insert(target.to_owned(), checked_name(&g, &s, &id, target, false)?)
             .is_some()
         {
             return Err(format!("{id}: duplicate {target} projection"));
@@ -252,7 +348,7 @@ pub fn load_model(project_dir: impl AsRef<Path>) -> Result<Model> {
                     },
                     &at,
                 )?;
-                let name = checked_name(&g, &m, &at)?;
+                let name = checked_name(&g, &m, &at, target, true)?;
                 let aliases = g
                     .objects_for_subject_predicate(&m, &core("alias"))
                     .map(|t| literal(t, xsd::STRING, &at))
@@ -304,12 +400,16 @@ pub fn load_model(project_dir: impl AsRef<Path>) -> Result<Model> {
         }
     }
     instances(&g, "Operation")?;
-    for t in g.triples_for_predicate(&core("dependsOn")) {
-        let dep = iri(t.object, "dependsOn")?;
+    let dependencies = g
+        .triples_for_predicate(&core("dependsOn"))
+        .map(|t| iri(t.object, "dependsOn"))
+        .collect::<Result<BTreeSet<_>>>()?;
+    for dep in dependencies {
         if g.triples_for_subject(&named(&dep)).next().is_none() {
             return Err(format!("dependsOn: unresolved {dep}"));
         }
     }
+    validate_declarations(&g)?;
     Ok(Model {
         graph: g,
         imports,
