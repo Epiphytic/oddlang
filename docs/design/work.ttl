@@ -305,3 +305,53 @@ w:httpPhase6ReviewFinding a p:Finding ; rdfs:label "Document hybrid roles and ch
 w:httpHybrid p:addresses w:httpPhase6ReviewFinding .
 w:httpEvolution p:evidence w:httpImplementationEvidence .
 w:httpHybrid p:evidence w:httpImplementationEvidence .
+
+w:roundTripPlan a p:Artifact ; rdfs:label "WebAssembly, Rust import and Marmish implementation plan" ;
+    p:location "docs/superpowers/plans/2026-11-25-wasm-rust-marmish.md" .
+w:roundTripReview a p:Artifact ; rdfs:label "Claude plan review and dispositions" ;
+    p:location "docs/design/wasm-rust-marmish-plan-review.md" .
+w:marmishSource a p:Artifact ; rdfs:label "Pinned Marmish source and qualification history" ;
+    p:location "https://github.com/Epiphytic/marmish/tree/49fc705408a230bd0ad896248d08dbdd2faad05a" .
+w:roundTripGoal a p:Goal ; rdfs:label "Recover editable contracts and validate native and component implementations" .
+w:componentMilestone a p:Milestone ; rdfs:label "Publish and exercise WebAssembly component contracts" ; p:advances w:roundTripGoal, w:portableConformance .
+w:rustImportMilestone a p:Milestone ; rdfs:label "Validate deterministic Rust translation" ; p:advances w:roundTripGoal .
+w:marmishMilestone a p:Milestone ; rdfs:label "Quantify regeneration and compatibility on pinned Marmish" ; p:advances w:roundTripGoal .
+w:roundTripPlanning a p:Task ; rdfs:label "Write and review the seven-phase implementation plan" ;
+    p:status p:done ; p:evidence w:roundTripReview, w:roundTripPlan ; p:source w:roundTripPlan ; p:milestone w:componentMilestone ; p:dependsOn w:httpHybrid ;
+    p:acceptance "Analyze pinned Marmish, specify executable phase gates and resolve material Claude plan findings." .
+
+w:witPublication a p:Task ; rdfs:label "Publish locked component contracts" ;
+    p:milestone w:componentMilestone ; p:status p:planned ; p:source w:roundTripPlan ; p:dependsOn w:roundTripPlanning ;
+    p:acceptance "Validate canonical WIT projections, pinning and typed rejection cases." .
+
+w:componentExecution a p:Task ; rdfs:label "Exercise guest and host roles" ;
+    p:milestone w:componentMilestone ; p:status p:planned ; p:source w:roundTripPlan ; p:dependsOn w:witPublication ;
+    p:acceptance "Verify real component calls, independent cases, directional evolution and mutation detection." .
+
+w:rustRecovery a p:Task ; rdfs:label "Import supported Rust into editable Oddlang" ;
+    p:milestone w:rustImportMilestone ; p:status p:planned ; p:source w:roundTripPlan ; p:dependsOn w:componentExecution ;
+    p:acceptance "Compile a regenerated ledger from a deterministic import with explicit identities and fail-closed diagnostics." .
+
+w:rustValidation a p:Task ; rdfs:label "Validate original and regenerated ledger behavior" ;
+    p:milestone w:rustImportMilestone ; p:status p:planned ; p:source w:roundTripPlan ; p:dependsOn w:rustRecovery ;
+    p:acceptance "Record proof scope, independent differential results and a concrete mutant counterexample." .
+
+w:marmishInventory a p:Task ; rdfs:label "Freeze Marmish baseline and inventory" ;
+    p:milestone w:marmishMilestone ; p:status p:planned ; p:source w:roundTripPlan, w:marmishSource ; p:dependsOn w:rustValidation ;
+    p:acceptance "Inventory every upstream target and native boundary with a reproducible baseline and gap register." .
+
+w:marmishFeatures a p:Task ; rdfs:label "Implement reusable Oddlang features required by Marmish" ;
+    p:milestone w:marmishMilestone ; p:status p:planned ; p:source w:roundTripPlan, w:marmishSource ; p:dependsOn w:marmishInventory ;
+    p:acceptance "Exercise inventory-driven compiler and conformance extensions with independent positive and negative fixtures." .
+
+w:marmishQualification a p:Task ; rdfs:label "Rebuild and qualify pinned Marmish" ;
+    p:milestone w:marmishMilestone ; p:status p:planned ; p:source w:roundTripPlan, w:marmishSource ; p:dependsOn w:marmishFeatures ;
+    p:acceptance "Report fresh native and regenerated build comparisons, preserved native code, coverage, proof scope and remaining gaps." .
+
+w:roundTripBoundaries a p:Finding ; rdfs:label "Separate toolchains, production worlds and independent runtime evidence" ; p:source w:roundTripReview .
+w:roundTripAssembly a p:Finding ; rdfs:label "Specify grammar extensions, workspace assembly and generated-source provenance" ; p:source w:roundTripReview .
+w:roundTripClaims a p:Finding ; rdfs:label "Require directional witnesses and target-specific qualification evidence" ; p:source w:roundTripReview .
+w:roundTripPlanning p:addresses w:roundTripBoundaries, w:roundTripAssembly, w:roundTripClaims .
+w:componentExecution p:addresses w:roundTripBoundaries .
+w:marmishFeatures p:addresses w:roundTripAssembly .
+w:marmishQualification p:addresses w:roundTripClaims .
