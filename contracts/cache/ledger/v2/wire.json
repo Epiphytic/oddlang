@@ -1,0 +1,54 @@
+{
+  "accountFields": {
+    "urn:oddlang:ledger:id": "id",
+    "urn:oddlang:ledger:owner": "owner",
+    "urn:oddlang:ledger:balance": "balance",
+    "urn:oddlang:ledger:currencyCode": "currencyCode"
+  },
+  "requiredAccountFields": [
+    "id",
+    "owner",
+    "balance",
+    "currencyCode"
+  ],
+  "encoding": {
+    "balance": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "min": "0",
+      "max": "9223372036854775807"
+    },
+    "amount": {
+      "type": "string",
+      "pattern": "^(0|-?[1-9][0-9]*)$",
+      "min": "-9223372036854775808",
+      "max": "9223372036854775807"
+    },
+    "textFields": "JSON strings"
+  },
+  "transfer": {
+    "operation": "urn:oddlang:ledger:TransferFunds",
+    "behaviorVersion": "v1",
+    "request": {
+      "source": "text",
+      "destination": "text",
+      "amount": "amount"
+    },
+    "success": {
+      "ok": true,
+      "balances": "object mapping the affected account IDs to resulting balance strings"
+    },
+    "error": {
+      "error": "one of errorsByPriority"
+    },
+    "errorsByPriority": [
+      "urn:oddlang:ledger:error:SourceMissing",
+      "urn:oddlang:ledger:error:DestinationMissing",
+      "urn:oddlang:ledger:error:SameAccount",
+      "urn:oddlang:ledger:error:NonPositiveAmount",
+      "urn:oddlang:ledger:error:InsufficientFunds",
+      "urn:oddlang:ledger:error:DestinationOverflow"
+    ],
+    "failureState": "unchanged"
+  }
+}

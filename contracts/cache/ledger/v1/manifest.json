@@ -1,0 +1,17 @@
+{
+  "identity": "urn:oddlang:contract:ledger",
+  "version": "v1",
+  "entry": "ontology/domain.ttl",
+  "files": {
+    "compatibility.md": "664e0dc94b660900197378321156188e091f8428ebd297c5780870b672bf3b09",
+    "ontology/avro.ttl": "802acc674c78aeef80ccb08d9288608d4276f7a235e0ac5b356cc3db50c8ccd2",
+    "ontology/domain.ttl": "1b7a6dc1c76b5b70d27c58097128c5735812118b55d9ca8921b0ac73786d50cc",
+    "ontology/fields.ttl": "e79db9be74e00e05206509b741ac48d323a381300e985d09c2f57556d741192a",
+    "ontology/operations.ttl": "6e83379014bd1b0d0cbb9e7cc0b12ad89a34a1dad792b9c5ffc6fb1f4d4cf29d",
+    "ontology/rust.ttl": "a59edd084424cb52a3d8451886b47138cb8ede9b28efe902a45a104b868c2aa0",
+    "ontology/sql.ttl": "6227d1a324191644a61b20fe6d82fadb37b68c4fc6742b5c41d3d7d819c8110a",
+    "ontology/transfer.ttl": "5597a2776488167c495c14bfc3df0dc7a7c9c032073e8892e14beb9b94b5fa8c",
+    "vectors.json": "6ac218cd0fe6cd266250ea6c6d67993fe1554dcea6c17bfdbae3d71ec65469fb",
+    "wire.json": "d60c0c4f8b65ec1655ed71d0a503bd6f105f57f3a02e20ee2fd574584a9c7e4a"
+  }
+}

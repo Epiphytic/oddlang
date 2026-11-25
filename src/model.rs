@@ -258,6 +258,9 @@ fn validate_declarations(g: &Graph, behavior: Option<&HashSet<NamedOrBlankNode>>
 }
 pub fn load_model(project_dir: impl AsRef<Path>) -> Result<Model> {
     let (g, imports) = load_graph(project_dir.as_ref())?;
+    model_from_graph(g, imports)
+}
+pub(crate) fn model_from_graph(g: Graph, imports: BTreeSet<PathBuf>) -> Result<Model> {
     validate_declarations(&g, None)?;
     if instances(&g, "Entity")? != BTreeSet::from([ACCOUNT.to_owned()]) {
         return Err(format!("expected entity {ACCOUNT}"));

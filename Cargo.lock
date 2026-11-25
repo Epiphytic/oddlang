@@ -782,7 +782,9 @@ dependencies = [
  "arrow-avro",
  "oxigraph",
  "postgres",
+ "serde",
  "serde_json",
+ "sha2",
  "tempfile",
  "toml",
 ]
