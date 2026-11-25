@@ -321,7 +321,7 @@ w:roundTripPlanning a p:Task ; rdfs:label "Write and review the seven-phase impl
     p:acceptance "Analyze pinned Marmish, specify executable phase gates and resolve material Claude plan findings." .
 
 w:witPublication a p:Task ; rdfs:label "Publish locked component contracts" ;
-    p:milestone w:componentMilestone ; p:status p:active ; p:source w:roundTripPlan ; p:dependsOn w:roundTripPlanning ;
+    p:milestone w:componentMilestone ; p:status p:done ; p:source w:roundTripPlan ; p:dependsOn w:roundTripPlanning ;
     p:acceptance "Validate canonical WIT projections, pinning and typed rejection cases." .
 
 w:componentExecution a p:Task ; rdfs:label "Exercise guest and host roles" ;
