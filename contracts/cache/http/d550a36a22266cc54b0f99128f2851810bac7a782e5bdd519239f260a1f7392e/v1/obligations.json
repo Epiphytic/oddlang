@@ -57,6 +57,27 @@
     ]
   },
   {
+    "declaration": "urn:oddlang:shapes:RoundTrip",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:json-bytes",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/9a6f3304dc74333563a87f783ff713dc7dd38fd98d3dbe83d335d4b118d6ebe2"
+        ],
+        "kind": "bom"
+      },
+      {
+        "caseIds": [
+          "codec/01de016f75da9fa28a9f1656d88bfd6dea8fbab3f8807ba92b29415c85c30d81"
+        ],
+        "kind": "duplicate-decoded-member"
+      }
+    ]
+  },
+  {
     "declaration": "urn:oddlang:shapes:Choice",
     "operation": "urn:oddlang:shapes:RoundTrip",
     "position": "body/choice",
@@ -324,6 +345,27 @@
     ]
   },
   {
+    "declaration": "urn:oddlang:http:Text",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/choice/@named/name",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:unicode",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/cca1bdb17af3a2e85fca6f57a72b8635ce1fac74cbd6bcadffc80fd6f118be0f"
+        ],
+        "kind": "isolated-surrogate"
+      },
+      {
+        "caseIds": [
+          "codec/ae2d201b4c45090a7b8ae9f185c77eea3606b2e158c33e8914d5ade9ff95edfe"
+        ],
+        "kind": "invalid-utf8"
+      }
+    ]
+  },
+  {
     "declaration": "urn:oddlang:shapes:NameField",
     "operation": "urn:oddlang:shapes:RoundTrip",
     "position": "body/choice/@named/name",
@@ -470,6 +512,12 @@
           "codec/b2b90fed90b77a6e5b6a627685f31af96e7290243247f1213b72e50fad3c1196"
         ],
         "kind": "noncanonical"
+      },
+      {
+        "caseIds": [
+          "codec/17549d0c5218e14233e2de954d760aa2999c10c954586c04bc4b37d50552bd9d"
+        ],
+        "kind": "number-token"
       }
     ]
   },
@@ -491,6 +539,27 @@
           "codec/a66e66caeddebd3b26b6a76abc2cdd77fb999040998044ae7c05af7f6b668a16"
         ],
         "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:http:Text",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/memo",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:unicode",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/e5fc1e420eccf1b04e2940ab4797edf63453687b4dacbdb7a2da3b8195080cee"
+        ],
+        "kind": "isolated-surrogate"
+      },
+      {
+        "caseIds": [
+          "codec/e6ef22cd2a552e1f423feb8881934806bfbfe8c27c600b6d4f2a0cfcd7667f88"
+        ],
+        "kind": "invalid-utf8"
       }
     ]
   },
@@ -701,6 +770,27 @@
           "codec/391c8a823725baee18cb5d203a311c1d149de3ff128376712e990d51fdd66ba0"
         ],
         "kind": "wrong-type"
+      }
+    ]
+  },
+  {
+    "declaration": "urn:oddlang:http:Text",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "position": "body/note",
+    "role": "json.codec",
+    "rule": "urn:oddlang:http:rule:2:unicode",
+    "slots": [
+      {
+        "caseIds": [
+          "codec/d87df5ae475fbaccfe50eadde641c3ab8ef286874395a62faf7955cfe32cc23f"
+        ],
+        "kind": "isolated-surrogate"
+      },
+      {
+        "caseIds": [
+          "codec/70c6c07b5a2bb14fb30128496244c52c0a1c673574cf9792242d13b5f4241bfe"
+        ],
+        "kind": "invalid-utf8"
       }
     ]
   },

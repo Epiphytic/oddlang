@@ -2,7 +2,7 @@
   "pins": [
     {
       "identity": "urn:oddlang:contract:shapes-http",
-      "manifestSha256": "90b040dcd9b8b9662390a633f1cd05d3290f0e07c85f8ad653b948b1ff07f315",
+      "manifestSha256": "867e93132a34eb3d446b7faef2cf36af89fd25767abaded84975c9adbe5fbff3",
       "version": "v1"
     }
   ]

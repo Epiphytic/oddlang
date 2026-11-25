@@ -47,6 +47,27 @@ fn source(r: &Path) -> oddlang::http::HttpContract {
 }
 
 #[test]
+fn codec_record_requires_closed_declaration() {
+    let temp = tempfile::tempdir().unwrap();
+    let domain = fs::read_to_string(Path::new(FIXTURE).join("domain.ttl")).unwrap();
+    let record = "s:Metadata a h:Record ; h:field s:EnabledField ; h:constraint s:Closed .";
+    assert!(domain.contains(record));
+    let invalid = domain.replace(record, "s:Metadata a h:Record ; h:field s:EnabledField .");
+    fs::write(temp.path().join("domain.ttl"), invalid).unwrap();
+    fs::write(temp.path().join("dependencies.lock.json"), r#"{"pins":[]}"#).unwrap();
+    let error = load_source(
+        temp.path(),
+        &temp.path().join("dependencies.lock.json"),
+        Path::new(CACHE),
+    )
+    .unwrap_err();
+    assert!(
+        error.contains("urn:oddlang:shapes:Metadata urn:oddlang:http:constraint: expected Closed"),
+        "{error}"
+    );
+}
+
+#[test]
 fn three_native_codecs_round_trip_the_same_pinned_cases() {
     let root = Path::new(FIXTURE);
     let pin = root.join("workspace.lock.json");
@@ -71,6 +92,11 @@ fn three_native_codecs_round_trip_the_same_pinned_cases() {
         ("body/note", "null", "success"),
         ("body/memo", "omitted", "success"),
         ("body/items", "empty", "success"),
+        ("body", "bom", "localRejection"),
+        ("body", "duplicate-decoded-member", "localRejection"),
+        ("body/note", "isolated-surrogate", "localRejection"),
+        ("body/note", "invalid-utf8", "localRejection"),
+        ("body/items/0", "number-token", "localRejection"),
     ] {
         let witnesses: Vec<_> = b
             .cases

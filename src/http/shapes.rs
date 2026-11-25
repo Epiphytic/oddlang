@@ -220,6 +220,35 @@ fn omit(root: &Value, parent: &str, key: &str) -> Value {
     result
 }
 
+// Keep the surrounding valid document so the raw string alone determines rejection.
+fn raw_text(root: &Value, path: &str, token: &[u8]) -> Vec<u8> {
+    let original = root.to_string();
+    let mut marker = "codec-witness".to_owned();
+    while original.contains(&marker) {
+        marker.push('_');
+    }
+    let marked = set(root, path, json!(marker)).to_string();
+    let quoted = format!("\"{marker}\"");
+    let (before, after) = marked.split_once(&quoted).unwrap();
+    [before.as_bytes(), token, after.as_bytes()].concat()
+}
+
+fn duplicate_decoded_member(root: &Value) -> Option<Vec<u8>> {
+    let (key, member) = root.as_object()?.iter().next()?;
+    // Escape the first scalar so the duplicate has a distinct raw spelling.
+    let ch = key.chars().next()?;
+    let mut units = [0u16; 2];
+    let first = ch
+        .encode_utf16(&mut units)
+        .iter()
+        .map(|unit| format!("\\u{unit:04x}"))
+        .collect::<String>();
+    let rest = json!(&key[ch.len_utf8()..]).to_string();
+    let body = root.to_string();
+    let escaped_key = format!("\"{first}{}", &rest[1..]);
+    Some(format!("{},{escaped_key}:{member}}}", &body[..body.len() - 1]).into_bytes())
+}
+
 struct Exercise<'a> {
     contract: &'a HttpContract,
     operation: &'a Iri,
@@ -228,6 +257,39 @@ struct Exercise<'a> {
 }
 impl Exercise<'_> {
     fn record_case(&mut self, id: &Iri, pos: &str, rule: &str, tests: Vec<(&str, Value, bool)>) {
+        self.add_cases(
+            id,
+            pos,
+            rule,
+            tests.into_iter().map(|(kind, input, accepts)| {
+                let bytes = serde_json::to_vec(&input).unwrap();
+                let native = if accepts {
+                    json!({"kind":"success","value":input})
+                } else {
+                    json!({"kind":"localRejection"})
+                };
+                (kind, bytes, native)
+            }),
+        );
+    }
+    fn raw_rejections(&mut self, id: &Iri, pos: &str, rule: &str, tests: Vec<(&str, Vec<u8>)>) {
+        self.add_cases(
+            id,
+            pos,
+            rule,
+            tests
+                .into_iter()
+                .map(|(kind, body)| (kind, body, json!({"kind":"localRejection"}))),
+        );
+    }
+    fn add_cases<'a>(
+        &mut self,
+        id: &Iri,
+        pos: &str,
+        rule: &str,
+        cases: impl IntoIterator<Item = (&'a str, Vec<u8>, Value)>,
+    ) {
+        let tests: Vec<_> = cases.into_iter().collect();
         let obligation = Obligation {
             operation: self.operation.to_string(),
             role: ROLE.into(),
@@ -236,18 +298,13 @@ impl Exercise<'_> {
             rule: format!("{H}rule:2:{rule}"),
             slots: tests.iter().map(|(kind, _, _)| (*kind).into()).collect(),
         };
-        for (kind, input, accepts) in tests {
+        for (kind, bytes, native) in tests {
             let witness = obligation.witness(kind);
             let name: String = Sha256::digest(serde_json::to_vec(&witness).unwrap())
                 .iter()
                 .map(|b| format!("{b:02x}"))
                 .collect();
-            let body = STANDARD.encode(serde_json::to_vec(&input).unwrap());
-            let native = if accepts {
-                json!({"kind":"success","value":input})
-            } else {
-                json!({"kind":"localRejection"})
-            };
+            let body = STANDARD.encode(bytes);
             self.cases.push(Case {
                 case_id: format!("codec/{name}"),
                 operation: self.operation.to_string(),
@@ -264,15 +321,28 @@ impl Exercise<'_> {
         let c = self.contract;
         let value = root.pointer(path).unwrap();
         match id.as_str() {
-            TEXT | BOOLEAN => self.record_case(
-                id,
-                pos,
-                "scalar",
-                vec![
-                    ("valid", root.clone(), true),
-                    ("wrong-type", set(root, path, json!(17)), false),
-                ],
-            ),
+            TEXT | BOOLEAN => {
+                self.record_case(
+                    id,
+                    pos,
+                    "scalar",
+                    vec![
+                        ("valid", root.clone(), true),
+                        ("wrong-type", set(root, path, json!(17)), false),
+                    ],
+                );
+                if id.as_str() == TEXT {
+                    self.raw_rejections(
+                        id,
+                        pos,
+                        "unicode",
+                        vec![
+                            ("isolated-surrogate", raw_text(root, path, br#""\uD800""#)),
+                            ("invalid-utf8", raw_text(root, path, &[b'"', 0xff, b'"'])),
+                        ],
+                    );
+                }
+            }
             I64 => self.record_case(
                 id,
                 pos,
@@ -286,6 +356,7 @@ impl Exercise<'_> {
                         false,
                     ),
                     ("noncanonical", set(root, path, json!("01")), false),
+                    ("number-token", set(root, path, json!(bounds.0)), false),
                 ],
             ),
             _ => match c.shapes.get(id) {
@@ -461,6 +532,13 @@ pub(super) fn exercise(c: &HttpContract) -> (Vec<Obligation>, Vec<Case>) {
             "codec",
             vec![("round-trip", root.clone(), true)],
         );
+        let mut bom = vec![0xef, 0xbb, 0xbf];
+        bom.extend(serde_json::to_vec(&root).unwrap());
+        let mut wire = vec![("bom", bom)];
+        if let Some(duplicate) = duplicate_decoded_member(&root) {
+            wire.push(("duplicate-decoded-member", duplicate));
+        }
+        e.raw_rejections(operation, "", "json-bytes", wire);
         e.walk(&op.request, "", "", &root, (i64::MIN, i64::MAX));
         rows.extend(e.rows);
         cases.extend(e.cases);
@@ -502,7 +580,7 @@ fn rust_type(c: &HttpContract, id: &Iri, (min, max): (i64, i64)) -> Result<Strin
     Ok(match id.as_str() {
         TEXT => "String".into(),
         BOOLEAN => "bool".into(),
-        I64 => format!("CodecDecimal<{{{min}i64}},{{{max}i64}}>"),
+        I64 => format!("CodecDecimal<{min}i64,{max}i64>"),
         _ if c.records.contains_key(id)
             || matches!(c.shapes.get(id), Some(Shape::Union { .. })) =>
         {

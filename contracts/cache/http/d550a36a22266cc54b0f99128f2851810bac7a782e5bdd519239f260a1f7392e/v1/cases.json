@@ -26,6 +26,32 @@
     ]
   },
   {
+    "caseId": "codec/01de016f75da9fa28a9f1656d88bfd6dea8fbab3f8807ba92b29415c85c30d81",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "role": "json.codec",
+    "slots": [
+      {
+        "operation": "urn:oddlang:shapes:RoundTrip",
+        "role": "json.codec",
+        "declaration": "urn:oddlang:shapes:RoundTrip",
+        "rule": "urn:oddlang:http:rule:2:json-bytes",
+        "position": "body",
+        "kind": "duplicate-decoded-member"
+      }
+    ],
+    "fixture": [],
+    "action": {
+      "bodyBase64": "eyJjaG9pY2UiOnsiZmxhZyI6dHJ1ZSwia2luZCI6ImZsYWdnZWQifSwiaXRlbXMiOlsiMCJdLCJtZW1vIjoiY2Fmw6kiLCJtZXRhZGF0YSI6eyJlbmFibGVkIjp0cnVlfSwibm90ZSI6ImNhZsOpIiwiXHUwMDYzaG9pY2UiOnsiZmxhZyI6dHJ1ZSwia2luZCI6ImZsYWdnZWQifX0="
+    },
+    "expected": [
+      {
+        "native": {
+          "kind": "localRejection"
+        }
+      }
+    ]
+  },
+  {
     "caseId": "codec/038371d1a1bd4e1c96cb4337665cdc2067af3e95c13191bbe5aed25e590057a5",
     "operation": "urn:oddlang:shapes:RoundTrip",
     "role": "json.codec",
@@ -94,6 +120,32 @@
     "fixture": [],
     "action": {
       "bodyBase64": "eyJjaG9pY2UiOnsiZmxhZyI6dHJ1ZSwia2luZCI6ImZsYWdnZWQifSwiaXRlbXMiOltudWxsXSwibWVtbyI6ImNhZsOpIiwibWV0YWRhdGEiOnsiZW5hYmxlZCI6dHJ1ZX0sIm5vdGUiOiJjYWbDqSJ9"
+    },
+    "expected": [
+      {
+        "native": {
+          "kind": "localRejection"
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "codec/17549d0c5218e14233e2de954d760aa2999c10c954586c04bc4b37d50552bd9d",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "role": "json.codec",
+    "slots": [
+      {
+        "operation": "urn:oddlang:shapes:RoundTrip",
+        "role": "json.codec",
+        "declaration": "urn:oddlang:http:I64",
+        "rule": "urn:oddlang:http:rule:2:decimal",
+        "position": "body/items/0",
+        "kind": "number-token"
+      }
+    ],
+    "fixture": [],
+    "action": {
+      "bodyBase64": "eyJjaG9pY2UiOnsiZmxhZyI6dHJ1ZSwia2luZCI6ImZsYWdnZWQifSwiaXRlbXMiOlstOTIyMzM3MjAzNjg1NDc3NTgwOF0sIm1lbW8iOiJjYWbDqSIsIm1ldGFkYXRhIjp7ImVuYWJsZWQiOnRydWV9LCJub3RlIjoiY2Fmw6kifQ=="
     },
     "expected": [
       {
@@ -947,6 +999,32 @@
     ]
   },
   {
+    "caseId": "codec/70c6c07b5a2bb14fb30128496244c52c0a1c673574cf9792242d13b5f4241bfe",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "role": "json.codec",
+    "slots": [
+      {
+        "operation": "urn:oddlang:shapes:RoundTrip",
+        "role": "json.codec",
+        "declaration": "urn:oddlang:http:Text",
+        "rule": "urn:oddlang:http:rule:2:unicode",
+        "position": "body/note",
+        "kind": "invalid-utf8"
+      }
+    ],
+    "fixture": [],
+    "action": {
+      "bodyBase64": "eyJjaG9pY2UiOnsiZmxhZyI6dHJ1ZSwia2luZCI6ImZsYWdnZWQifSwiaXRlbXMiOlsiMCJdLCJtZW1vIjoiY2Fmw6kiLCJtZXRhZGF0YSI6eyJlbmFibGVkIjp0cnVlfSwibm90ZSI6Iv8ifQ=="
+    },
+    "expected": [
+      {
+        "native": {
+          "kind": "localRejection"
+        }
+      }
+    ]
+  },
+  {
     "caseId": "codec/74ae2d27bc65c8c8da3c74cfb9bb1d5bcda2c65c268bb9719e1dd36d8609d121",
     "operation": "urn:oddlang:shapes:RoundTrip",
     "role": "json.codec",
@@ -1419,6 +1497,32 @@
     ]
   },
   {
+    "caseId": "codec/9a6f3304dc74333563a87f783ff713dc7dd38fd98d3dbe83d335d4b118d6ebe2",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "role": "json.codec",
+    "slots": [
+      {
+        "operation": "urn:oddlang:shapes:RoundTrip",
+        "role": "json.codec",
+        "declaration": "urn:oddlang:shapes:RoundTrip",
+        "rule": "urn:oddlang:http:rule:2:json-bytes",
+        "position": "body",
+        "kind": "bom"
+      }
+    ],
+    "fixture": [],
+    "action": {
+      "bodyBase64": "77u/eyJjaG9pY2UiOnsiZmxhZyI6dHJ1ZSwia2luZCI6ImZsYWdnZWQifSwiaXRlbXMiOlsiMCJdLCJtZW1vIjoiY2Fmw6kiLCJtZXRhZGF0YSI6eyJlbmFibGVkIjp0cnVlfSwibm90ZSI6ImNhZsOpIn0="
+    },
+    "expected": [
+      {
+        "native": {
+          "kind": "localRejection"
+        }
+      }
+    ]
+  },
+  {
     "caseId": "codec/9b526f4c8fb75c4fc025160d65228f5b55083e5ae6985ee62a79cce930056440",
     "operation": "urn:oddlang:shapes:RoundTrip",
     "role": "json.codec",
@@ -1572,6 +1676,32 @@
             },
             "note": null
           }
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "codec/ae2d201b4c45090a7b8ae9f185c77eea3606b2e158c33e8914d5ade9ff95edfe",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "role": "json.codec",
+    "slots": [
+      {
+        "operation": "urn:oddlang:shapes:RoundTrip",
+        "role": "json.codec",
+        "declaration": "urn:oddlang:http:Text",
+        "rule": "urn:oddlang:http:rule:2:unicode",
+        "position": "body/choice/@named/name",
+        "kind": "invalid-utf8"
+      }
+    ],
+    "fixture": [],
+    "action": {
+      "bodyBase64": "eyJjaG9pY2UiOnsia2luZCI6Im5hbWVkIiwibmFtZSI6Iv8ifSwiaXRlbXMiOlsiMCJdLCJtZW1vIjoiY2Fmw6kiLCJtZXRhZGF0YSI6eyJlbmFibGVkIjp0cnVlfSwibm90ZSI6ImNhZsOpIn0="
+    },
+    "expected": [
+      {
+        "native": {
+          "kind": "localRejection"
         }
       }
     ]
@@ -1921,6 +2051,32 @@
     ]
   },
   {
+    "caseId": "codec/cca1bdb17af3a2e85fca6f57a72b8635ce1fac74cbd6bcadffc80fd6f118be0f",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "role": "json.codec",
+    "slots": [
+      {
+        "operation": "urn:oddlang:shapes:RoundTrip",
+        "role": "json.codec",
+        "declaration": "urn:oddlang:http:Text",
+        "rule": "urn:oddlang:http:rule:2:unicode",
+        "position": "body/choice/@named/name",
+        "kind": "isolated-surrogate"
+      }
+    ],
+    "fixture": [],
+    "action": {
+      "bodyBase64": "eyJjaG9pY2UiOnsia2luZCI6Im5hbWVkIiwibmFtZSI6Ilx1RDgwMCJ9LCJpdGVtcyI6WyIwIl0sIm1lbW8iOiJjYWbDqSIsIm1ldGFkYXRhIjp7ImVuYWJsZWQiOnRydWV9LCJub3RlIjoiY2Fmw6kifQ=="
+    },
+    "expected": [
+      {
+        "native": {
+          "kind": "localRejection"
+        }
+      }
+    ]
+  },
+  {
     "caseId": "codec/d448be9315092056cd138d06113d50f74a8a9fb1eb30470e32d37e95e515fc7c",
     "operation": "urn:oddlang:shapes:RoundTrip",
     "role": "json.codec",
@@ -2061,6 +2217,32 @@
             },
             "note": "café"
           }
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "codec/d87df5ae475fbaccfe50eadde641c3ab8ef286874395a62faf7955cfe32cc23f",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "role": "json.codec",
+    "slots": [
+      {
+        "operation": "urn:oddlang:shapes:RoundTrip",
+        "role": "json.codec",
+        "declaration": "urn:oddlang:http:Text",
+        "rule": "urn:oddlang:http:rule:2:unicode",
+        "position": "body/note",
+        "kind": "isolated-surrogate"
+      }
+    ],
+    "fixture": [],
+    "action": {
+      "bodyBase64": "eyJjaG9pY2UiOnsiZmxhZyI6dHJ1ZSwia2luZCI6ImZsYWdnZWQifSwiaXRlbXMiOlsiMCJdLCJtZW1vIjoiY2Fmw6kiLCJtZXRhZGF0YSI6eyJlbmFibGVkIjp0cnVlfSwibm90ZSI6Ilx1RDgwMCJ9"
+    },
+    "expected": [
+      {
+        "native": {
+          "kind": "localRejection"
         }
       }
     ]
@@ -2259,6 +2441,58 @@
             },
             "note": "café"
           }
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "codec/e5fc1e420eccf1b04e2940ab4797edf63453687b4dacbdb7a2da3b8195080cee",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "role": "json.codec",
+    "slots": [
+      {
+        "operation": "urn:oddlang:shapes:RoundTrip",
+        "role": "json.codec",
+        "declaration": "urn:oddlang:http:Text",
+        "rule": "urn:oddlang:http:rule:2:unicode",
+        "position": "body/memo",
+        "kind": "isolated-surrogate"
+      }
+    ],
+    "fixture": [],
+    "action": {
+      "bodyBase64": "eyJjaG9pY2UiOnsiZmxhZyI6dHJ1ZSwia2luZCI6ImZsYWdnZWQifSwiaXRlbXMiOlsiMCJdLCJtZW1vIjoiXHVEODAwIiwibWV0YWRhdGEiOnsiZW5hYmxlZCI6dHJ1ZX0sIm5vdGUiOiJjYWbDqSJ9"
+    },
+    "expected": [
+      {
+        "native": {
+          "kind": "localRejection"
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "codec/e6ef22cd2a552e1f423feb8881934806bfbfe8c27c600b6d4f2a0cfcd7667f88",
+    "operation": "urn:oddlang:shapes:RoundTrip",
+    "role": "json.codec",
+    "slots": [
+      {
+        "operation": "urn:oddlang:shapes:RoundTrip",
+        "role": "json.codec",
+        "declaration": "urn:oddlang:http:Text",
+        "rule": "urn:oddlang:http:rule:2:unicode",
+        "position": "body/memo",
+        "kind": "invalid-utf8"
+      }
+    ],
+    "fixture": [],
+    "action": {
+      "bodyBase64": "eyJjaG9pY2UiOnsiZmxhZyI6dHJ1ZSwia2luZCI6ImZsYWdnZWQifSwiaXRlbXMiOlsiMCJdLCJtZW1vIjoi/yIsIm1ldGFkYXRhIjp7ImVuYWJsZWQiOnRydWV9LCJub3RlIjoiY2Fmw6kifQ=="
+    },
+    "expected": [
+      {
+        "native": {
+          "kind": "localRejection"
         }
       }
     ]
