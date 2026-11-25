@@ -122,3 +122,37 @@ w:demo a p:Task ; rdfs:label "Run the demo" ;
     p:milestone w:m3 ; p:status p:planned ; p:source w:plan ;
     p:dependsOn w:impact, w:differential, w:wire ; p:addresses w:review9 ;
     p:acceptance "Run the offline suite and demo against the pinned database." .
+
+w:priorArt a p:Task ; rdfs:label "Survey active ontology compilers before implementing the ledger" ;
+    p:milestone w:design ; p:status p:done ; p:dependsOn w:track ;
+    p:acceptance "Identify dated upstream activity and compare its scope with the ledger experiments." ;
+    p:evidence w:hydraResearch, w:ggenResearch, w:linkmlResearch ;
+    rdfs:comment "2026-11-25. A last30days scan surfaced adjacent ontology platforms. Direct repository checks found active overlap in graph programming, RDF-driven generation and schema compilation. The combined transfer-oracle and SQL/Avro migration witness remains unverified in these projects." .
+
+w:hydraResearch a p:Artifact ; rdfs:label "Hydra graph programming and cross-host bootstrap matrix, November 25" ;
+    p:location <https://github.com/CategoricalData/hydra/commit/46e6b4c1db791ff2a360c1da50571c9659825c84> .
+w:ggenResearch a p:Artifact ; rdfs:label "ggen RDF-driven generator, November 20 repository snapshot" ;
+    p:location <https://github.com/seanchatmangpt/ggen/tree/d173cad5792e837bd4fec730d120c582b9bc5d4c> .
+w:linkmlResearch a p:Artifact ; rdfs:label "LinkML Rust generator update, November 23" ;
+    p:location <https://github.com/linkml/linkml/commit/638684016db14546a3028b78c29e987264502026> .
+
+w:interop a p:Goal ; rdfs:label "Share versioned schemas and API contracts across languages, repositories and organizations" ; p:source w:spec .
+w:adoption a p:Milestone ; rdfs:label "Verify coordinated and independent adoption" ; p:advances w:interop .
+w:contractPortability a p:Decision ; rdfs:label "Publish immutable contracts and keep each implementation native" ;
+    p:reason "A client, CLI, database and service can implement different roles and verify their obligations with portable vectors." ; p:source w:spec .
+w:projectionCredit a p:Decision ; rdfs:label "Use reusable target mappings for routine projections, inspired by ggen" ;
+    p:reason "A change to a shared declaration should propagate to every affected structural artifact." ; p:source w:ggenResearch, w:spec .
+w:lockPolicy a p:Decision ; rdfs:label "Pin contracts per workspace and optionally lock reviewed native adapters" ;
+    p:reason "Independent consumers control upgrades and can reproduce accepted source offline." ; p:source w:spec .
+w:interopDesign a p:Task ; rdfs:label "Record the contract interoperability design and ggen attribution" ;
+    p:milestone w:design ; p:status p:done ; p:dependsOn w:priorArt ; p:source w:ggenResearch ;
+    p:acceptance "Align the plan, design and work graph on the two ownership models." ; p:evidence w:plan, w:spec, w:workGraph .
+w:release a p:Task ; rdfs:label "Package and pin contract releases" ;
+    p:milestone w:adoption ; p:status p:planned ; p:source w:plan ; p:dependsOn w:interopDesign, w:oracle, w:wire ;
+    p:acceptance "Resolve a release and transitive imports offline, verify content digests and publish portable wire vectors." .
+w:monorepo a p:Task ; rdfs:label "Verify one coordinated monorepo upgrade" ;
+    p:milestone w:adoption ; p:status p:planned ; p:source w:plan ; p:dependsOn w:release ;
+    p:acceptance "One pin upgrades Rust, TypeScript, SQL and Avro projections and their integration checks pass." .
+w:externalClient a p:Task ; rdfs:label "Verify independent contract adoption" ;
+    p:milestone w:adoption ; p:status p:planned ; p:source w:plan ; p:dependsOn w:release ;
+    p:acceptance "A standalone Go client verifies two separately pinned releases with published vectors and replays a reviewed adapter offline." .
