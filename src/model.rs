@@ -4,7 +4,7 @@ use oxigraph::model::{
     *,
 };
 use std::{
-    collections::{BTreeMap, BTreeSet},
+    collections::{BTreeMap, BTreeSet, HashSet},
     fs,
     path::{Path, PathBuf},
 };
@@ -32,6 +32,7 @@ pub struct Field {
 }
 #[derive(Debug, Clone)]
 pub struct Model {
+    pub operations: BTreeMap<String, crate::language::Operation>,
     pub graph: Graph,
     pub imports: BTreeSet<PathBuf>,
     pub fields: BTreeMap<String, Field>,
@@ -170,13 +171,13 @@ fn checked_name(
     Ok(value)
 }
 /// Check declarations and reject detached RDF that no structural reader consumes.
-fn validate_declarations(g: &Graph) -> Result<()> {
+fn validate_declarations(g: &Graph, behavior: Option<&HashSet<NamedOrBlankNode>>) -> Result<()> {
     let mut errors = BTreeSet::new();
     // Visit each subject once. Errors identify named declarations, never parser-assigned labels.
     let mut visited = std::collections::HashSet::new();
     for t in g {
         let s = t.subject.into_owned();
-        if !visited.insert(s.clone()) {
+        if behavior.is_some_and(|nodes| nodes.contains(&s)) || !visited.insert(s.clone()) {
             continue;
         }
         let owner = match &s {
@@ -184,6 +185,15 @@ fn validate_declarations(g: &Graph) -> Result<()> {
             _ => "anonymous declaration",
         };
         let classes: Vec<_> = g.objects_for_subject_predicate(&s, rdf::TYPE).collect();
+        if behavior.is_none()
+            && !classes.iter().any(|t| {
+                ["Entity", "Field", "Operation", "Projection"]
+                    .iter()
+                    .any(|c| t == &TermRef::NamedNode(core(c).as_ref()))
+            })
+        {
+            continue;
+        }
         let validate = || -> Result<()> {
             match classes.as_slice() {
                 [] => {
@@ -218,7 +228,12 @@ fn validate_declarations(g: &Graph) -> Result<()> {
                         return Err(format!("{ty}: declaration requires an IRI"));
                     }
                     if ty == core("Operation").as_str() {
-                        allowed(g, &s, &["dependsOn", "imports"], owner)?
+                        allowed(
+                            g,
+                            &s,
+                            &["dependsOn", "imports", "argument", "guard", "assign"],
+                            owner,
+                        )?
                     }
                     Ok(())
                 }
@@ -233,7 +248,7 @@ fn validate_declarations(g: &Graph) -> Result<()> {
 }
 pub fn load_model(project_dir: impl AsRef<Path>) -> Result<Model> {
     let (g, imports) = load_graph(project_dir.as_ref())?;
-    validate_declarations(&g)?;
+    validate_declarations(&g, None)?;
     if instances(&g, "Entity")? != BTreeSet::from([ACCOUNT.to_owned()]) {
         return Err(format!("expected entity {ACCOUNT}"));
     }
@@ -429,7 +444,11 @@ pub fn load_model(project_dir: impl AsRef<Path>) -> Result<Model> {
             return Err(format!("dependsOn: unresolved {dep}"));
         }
     }
+    let mut behavior = HashSet::new();
+    let operations = crate::language::lower(&g, &fields, &mut behavior)?;
+    validate_declarations(&g, Some(&behavior))?;
     Ok(Model {
+        operations,
         graph: g,
         imports,
         fields,

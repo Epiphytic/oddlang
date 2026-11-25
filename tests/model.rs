@@ -85,3 +85,92 @@ fn closed_graph_rejects_unrecognized_declarations_and_unowned_terms() {
         assert_eq!(load_model(p.path()).unwrap_err(), err);
     }
 }
+
+#[test]
+fn transfer_lowering_matches_reviewed_operand_order() {
+    use oddlang::language::Expr;
+    use std::fmt::Write;
+    fn term(e: &Expr) -> String {
+        match e {
+            Expr::Argument(id) => id.clone(),
+            Expr::Exists(id) => format!("Exists({id})"),
+            Expr::Constant(value) => value.to_string(),
+            Expr::Read { account, field } => format!("Read({account}, {field})"),
+            Expr::Binary(op, l, r) => format!("{op:?}({}, {})", term(l), term(r)),
+        }
+    }
+    let p = fixture();
+    let norm = load_model(p.path()).unwrap().operations;
+    rewrite(p.path());
+    assert_eq!(load_model(p.path()).unwrap().operations, norm);
+    let mut out = String::new();
+    for (id, op) in norm {
+        writeln!(out, "{id}").unwrap();
+        for g in op.guards {
+            writeln!(
+                out,
+                "{} {} {} {}",
+                g.priority,
+                g.iri,
+                term(&g.condition),
+                g.error
+            )
+            .unwrap();
+        }
+        for a in op.assignments {
+            writeln!(out, "{} {} <- {}", a.account, a.field, term(&a.value)).unwrap();
+        }
+    }
+    assert_eq!(out, include_str!("fixtures/transfer.lowered"));
+}
+
+#[test]
+fn invalid_transfer_nodes_have_stable_diagnostics() {
+    for (from, to, diagnostic) in [
+        ("l:g1", "_:anonymousGuard", "expected named IRI"),
+        ("o:priority 1 ; ", "", "expected one priority"),
+        ("o:priority 2", "o:priority 1", "duplicate priority"),
+        (
+            "o:assign _:debit, _:credit",
+            "o:assign _:debit, _:credit, [ a o:Assign ; o:account l:source ; o:field l:balance ; o:value l:amount ]",
+            "duplicate assignment target",
+        ),
+        ("o:priority 5", "o:priority 1", "duplicate priority"),
+        ("o:priority 1 ;", "o:priority 7 ;", "existence guard"),
+        ("a o:Subtract", "a o:Multiply", "unsupported expression"),
+        (
+            "_:debitValue a o:Subtract ; o:left _:sourceBalance",
+            "_:debitValue a o:Subtract ; o:left _:debitValue",
+            "cyclic expression",
+        ),
+        (
+            "o:left _:destinationBalance ; o:right l:amount",
+            "o:left [ a o:Constant ; o:integer 170141183460469231731687303715884105727 ] ; o:right l:amount",
+            "interval exceeds i128",
+        ),
+        ("o:right _:zero", "o:right l:source", "operand type"),
+        (
+            "o:integer 0",
+            "o:integer 0 ; o:typo 0",
+            "/right: unknown property",
+        ),
+        (
+            "o:field l:balance ; o:value _:debitValue",
+            "o:field l:missing ; o:value _:debitValue",
+            "unknown field",
+        ),
+        (
+            "o:argument l:source, l:destination, l:amount",
+            "o:argument l:source, l:destination",
+            "arguments",
+        ),
+    ] {
+        let project = fixture();
+        replace(project.path(), "transfer.ttl", from, to);
+        let error = load_model(project.path()).unwrap_err();
+        assert!(error.contains(diagnostic), "{from}: {error}");
+        rewrite(project.path());
+        replace(project.path(), "transfer.ttl", "_:zero", "_:renamed");
+        assert_eq!(load_model(project.path()).unwrap_err(), error);
+    }
+}

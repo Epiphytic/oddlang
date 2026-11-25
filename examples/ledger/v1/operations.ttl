@@ -1,3 +1,4 @@
 @prefix l: <urn:oddlang:ledger:> .
 @prefix o: <urn:oddlang:core:> .
 l:TransferFunds a o:Operation ; o:dependsOn l:balance .
+l:TransferFunds o:imports "transfer.ttl" .
