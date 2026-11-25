@@ -7,6 +7,7 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import tomllib
 
 HERE = Path(__file__).resolve().parent
 CONTRACT = HERE.parents[1] / "examples/marmish/observations.json"
@@ -73,6 +74,12 @@ def collect(upstream, output):
         raise ValueError("expected unique case IDs")
     sources = table["sourceReferences"] + table["release"]["packagingInputs"] + ["Cargo.lock", "rust-toolchain.toml"]
     source_hashes = {k: digest((upstream / k).read_bytes()) for k in sorted(set(sources))}
+    packages = tomllib.loads((upstream / "Cargo.lock").read_text())["package"]
+    core = next(p for p in packages if p["name"] == "marmish-core")
+    codec = next(p for p in packages if p["name"] == "base64" and p["version"] == "0.22.1")
+    if ("base64 0.22.1" not in core["dependencies"] or codec["checksum"] !=
+            "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"):
+        raise ValueError("canonicality argument requires the pinned core base64 implementation")
     env = dict(os.environ, CARGO_NET_OFFLINE="true", RUSTUP_AUTO_INSTALL="0")
     with tempfile.TemporaryDirectory(prefix="marmish-core-observe-") as temp:
         temp = Path(temp)
@@ -91,10 +98,20 @@ def collect(upstream, output):
         run(["rustc", "+1.97.1", "--edition=2024", "--target", host, "--extern",
              f"marmish_core={rlib}", "-L", f"dependency={deps}", "-L", f"dependency={host_deps}", CONSUMER, "-o", consumer], upstream, env=env)
         run([consumer, "api"], upstream, env=env)
+        [codec_artifact] = [m for s in build.splitlines() if (m := json.loads(s))["reason"] == "compiler-artifact"
+                            and m["target"]["name"] == "base64" and m["package_id"].endswith("#base64@0.22.1")]
+        [codec_rlib] = [p for p in codec_artifact["filenames"] if p.endswith(".rlib")]
+        tail_source = HERE / "test_base64_tails.rs"
+        tail_check = temp / "test-base64-tails"
+        run(["rustc", "+1.97.1", "--edition=2021", "--target", host, "--extern", f"base64={codec_rlib}",
+             tail_source, "-o", tail_check], upstream, env=env)
+        run([tail_check], upstream, env=env)
         results = [observe(consumer, case) for case in table["cases"]]
     output.mkdir(parents=True, exist_ok=True)
     result = {"schemaVersion": 1, "sourceRevision": revision, "contractSha256": digest(CONTRACT.read_bytes()),
               "consumerSha256": digest(CONSUMER.read_bytes()), "rustc": rustc, "host": host,
+              "canonicalBase64": {"version": codec["version"], "crateChecksum": codec["checksum"],
+                                  "testSha256": digest(tail_source.read_bytes()), "paddedQuartets": 266240},
               "sourceSha256": source_hashes, "corePublicApi": "tested", "cases": results,
               "platforms": {target: ("core baseline observed" if target == host else "unobserved here")
                             for target in table["release"]["targets"]},

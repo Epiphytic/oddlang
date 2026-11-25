@@ -1,15 +1,17 @@
 import json
 from pathlib import Path
-import subprocess
-import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import receipt
 
 
 class BaselineReceiptTests(unittest.TestCase):
     def setUp(self):
+        cli = patch.object(receipt, "verify_cli")
+        cli.start()
+        self.addCleanup(cli.stop)
         scratch = tempfile.TemporaryDirectory()
         self.addCleanup(scratch.cleanup)
         self.root = Path(scratch.name)
@@ -18,7 +20,8 @@ class BaselineReceiptTests(unittest.TestCase):
         logs = self.root / "native/logs"
         logs.mkdir()
         commands = []
-        for name in ("ontology", "metadata", "workspace", "installed", "release"):
+        for name in ("ontology", "metadata", "installed-metadata", "workspace", "workspace-ignored",
+                     "installed", "installed-ignored", "release", "cfg", "rustc", "cargo"):
             row = {"name": name, "exitCode": 0, "status": "passed"}
             for stream in ("stdout", "stderr"):
                 path = logs / f"{name}.{stream}"
@@ -32,24 +35,28 @@ class BaselineReceiptTests(unittest.TestCase):
         archive.write_bytes(b"inventory")
         summary = {"gitRevision": receipt.REVISION, "inventorySha256": receipt.sha(archive)}
         (self.root / "inventory/inventory-summary.json").write_text(json.dumps(summary))
-        observation = {"sourceRevision": receipt.REVISION}
+        observation = {"sourceRevision": receipt.REVISION, "contractSha256": receipt.sha(receipt.CONTRACT),
+                       "cases": receipt.expected_cases(json.loads(receipt.CONTRACT.read_bytes()))}
         (self.root / "observations/results.json").write_text(json.dumps(observation))
 
-    def run_check(self, *args):
-        return subprocess.run([sys.executable, receipt.__file__, self.root, *args],
-                              text=True, capture_output=True)
-
     def test_replay_detects_edited_observation(self):
-        self.assertEqual(self.run_check("--write").returncode, 0)
-        self.assertEqual(self.run_check().returncode, 0)
-        (self.root / "observations/results.json").write_text(json.dumps({"sourceRevision":receipt.REVISION, "changed":True}))
-        self.assertIn("changed after collection", self.run_check().stderr)
-        self.assertNotEqual(self.run_check("--write").returncode, 0)
+        receipt.check(self.root, write=True)
+        receipt.check(self.root)
+        path = self.root / "observations/results.json"
+        row = json.loads(path.read_text())
+        row["changed"] = True
+        path.write_text(json.dumps(row))
+        with self.assertRaisesRegex(ValueError, "changed after collection"):
+            receipt.check(self.root)
+        with self.assertRaises(FileExistsError):
+            receipt.check(self.root, write=True)
 
     def test_wrong_revision(self):
         (self.root / "native/baseline.json").write_text('{"revision":"wrong","commands":[1]}')
-        self.assertIn("missing pinned native observations", self.run_check("--write").stderr)
+        with self.assertRaisesRegex(ValueError, "missing pinned native observations"):
+            receipt.check(self.root, write=True)
 
     def test_reject_symlink(self):
         (self.root / "native/linked.log").symlink_to(self.root / "native/baseline.json")
-        self.assertIn("unexpected symlink", self.run_check("--write").stderr)
+        with self.assertRaisesRegex(ValueError, "unexpected symlink"):
+            receipt.check(self.root, write=True)

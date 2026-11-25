@@ -12,6 +12,13 @@ import subprocess
 import tempfile
 import tomllib
 
+from inventory_platforms import (
+    denominators,
+    package_inputs,
+    test_inventory as platform_tests,
+    workflow_test_steps,
+)
+
 HERE = Path(__file__).resolve().parent
 PROJECT = HERE.parents[1] / "examples/marmish/project.toml"
 
@@ -415,7 +422,7 @@ def generate(root):
         f.update(language=row["language"], parseStatus=row["parse_status"])
     cargo, members = cargo_inventory(root, project)
     targets = cargo["targets"]
-    syntax = json.loads(
+    syntax_data = json.loads(
         run(
             root,
             "uv",
@@ -434,6 +441,7 @@ def generate(root):
             ),
         )
     )
+    syntax, workflows = syntax_data["rust"], syntax_data["workflows"]
     contexts, missing = module_contexts(files, targets, syntax)
     for path, items in contexts.items():
         files[path]["cargoContexts"] = sorted(items, key=encode)
@@ -481,11 +489,42 @@ def generate(root):
         )
         for t in project["targets"]
     }
+    denominators_report = denominators(
+        symbols, files, project["targets"], project["feature_profiles"]
+    )
+    tests, by_platform = platform_tests(
+        syntax=syntax,
+        files=files,
+        symbols=symbols,
+        targets=targets,
+        cfgs=cfg,
+        profiles=project["feature_profiles"],
+    )
+    packages = {t: package_inputs(t, files, workflows, targets) for t in cfg}
+    test_sets = {t: {r["test"] for r in rows} for t, rows in by_platform.items()}
+    common_tests = set.intersection(*test_sets.values())
+    platform_summary = {
+        t: {
+            "observedTestSites": len(test_sets[t]),
+            "platformRestrictedSites": sorted(test_sets[t] - common_tests),
+            "ignoredSites": sorted({r["test"] for r in rows if r["gate"] == "ignored"}),
+            "unknownConfigurationSites": sorted(
+                {r["test"] for r in rows if r["uncertainProfiles"]}
+            ),
+            "packaging": packages[t],
+        }
+        for t, rows in by_platform.items()
+    }
     archive = {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "gitRevision": project["git_revision"],
         "manifestSha256": digest(PROJECT.read_bytes()),
         "scope": project["inventory"],
+        "denominators": denominators_report,
+        "testSites": tests,
+        "testApplicability": by_platform,
+        "workflowTestSteps": workflow_test_steps(workflows),
+        "platformPackaging": packages,
         "files": files,
         "cargo": cargo,
         "rustcCfg": cfg,
@@ -508,14 +547,19 @@ def generate(root):
         "cargoTargets": len(targets),
         "workspaceMembers": len(members),
         "externalPackages": len(cargo["external"]),
-        "knownRuntimeDefinitions": {
+        "runtimeLexicalSitesByDisposition": {
             k: classes[k] for k in ("imported", "retained-native", "unsupported")
         },
     }
     return archive, {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "gitRevision": project["git_revision"],
         "counts": counts,
+        "denominators": denominators_report,
+        "platformInventory": platform_summary,
+        "sourceInventorySha256": digest(
+            encode({k: v for k, v in archive.items() if k != "framingCompilerCheck"})
+        ),
         "completeness": "open",
         "gaps": gaps,
         "framingCompilerCheck": framing["status"],

@@ -13,11 +13,6 @@
       "tooling": 92
     },
     "files": 1641,
-    "knownRuntimeDefinitions": {
-      "imported": 0,
-      "retained-native": 5849,
-      "unsupported": 0
-    },
     "lexicalReferences": 92724,
     "ontologyFiles": 418,
     "parseStatus": {
@@ -25,6 +20,11 @@
       "parsed": 326,
       "parsed_with_omissions": 16,
       "recovered": 16
+    },
+    "runtimeLexicalSitesByDisposition": {
+      "imported": 0,
+      "retained-native": 5849,
+      "unsupported": 0
     },
     "symbolClasses": {
       "build-input": 2,
@@ -37,6 +37,230 @@
     "symbols": 15797,
     "workspaceMembers": 7
   },
+  "denominators": {
+    "compiledRuntimeUnits": {
+      "aarch64-apple-darwin": {
+        "default": {
+          "count": null,
+          "reason": "no complete compiler item/reachability inventory for this configuration",
+          "status": "unknown",
+          "unit": "compiler-resolved post-cfg, post-expansion first-party runtime declarations for this target/profile"
+        },
+        "marmish-engine/fault-injection": {
+          "count": null,
+          "reason": "no complete compiler item/reachability inventory for this configuration",
+          "status": "unknown",
+          "unit": "compiler-resolved post-cfg, post-expansion first-party runtime declarations for this target/profile"
+        },
+        "marmish-native/installed-checks": {
+          "count": null,
+          "reason": "no complete compiler item/reachability inventory for this configuration",
+          "status": "unknown",
+          "unit": "compiler-resolved post-cfg, post-expansion first-party runtime declarations for this target/profile"
+        }
+      },
+      "aarch64-unknown-linux-gnu": {
+        "default": {
+          "count": null,
+          "reason": "no complete compiler item/reachability inventory for this configuration",
+          "status": "unknown",
+          "unit": "compiler-resolved post-cfg, post-expansion first-party runtime declarations for this target/profile"
+        },
+        "marmish-engine/fault-injection": {
+          "count": null,
+          "reason": "no complete compiler item/reachability inventory for this configuration",
+          "status": "unknown",
+          "unit": "compiler-resolved post-cfg, post-expansion first-party runtime declarations for this target/profile"
+        },
+        "marmish-native/installed-checks": {
+          "count": null,
+          "reason": "no complete compiler item/reachability inventory for this configuration",
+          "status": "unknown",
+          "unit": "compiler-resolved post-cfg, post-expansion first-party runtime declarations for this target/profile"
+        }
+      },
+      "x86_64-unknown-linux-gnu": {
+        "default": {
+          "count": null,
+          "reason": "no complete compiler item/reachability inventory for this configuration",
+          "status": "unknown",
+          "unit": "compiler-resolved post-cfg, post-expansion first-party runtime declarations for this target/profile"
+        },
+        "marmish-engine/fault-injection": {
+          "count": null,
+          "reason": "no complete compiler item/reachability inventory for this configuration",
+          "status": "unknown",
+          "unit": "compiler-resolved post-cfg, post-expansion first-party runtime declarations for this target/profile"
+        },
+        "marmish-native/installed-checks": {
+          "count": null,
+          "reason": "no complete compiler item/reachability inventory for this configuration",
+          "status": "unknown",
+          "unit": "compiler-resolved post-cfg, post-expansion first-party runtime declarations for this target/profile"
+        }
+      }
+    },
+    "lexicalUnion": {
+      "additionalUnknownSites": null,
+      "byCargoTarget": {
+        "marmish-core:lib:marmish_core": {
+          "const_item": 4,
+          "enum_item": 2,
+          "enum_variant": 11,
+          "field_declaration": 2,
+          "function_item": 11,
+          "impl_item": 5,
+          "mod_item": 2,
+          "struct_item": 5
+        },
+        "marmish-engine:bin:marmish-engine-worker": {
+          "function_item": 1
+        },
+        "marmish-engine:lib:marmish_engine": {
+          "const_item": 20,
+          "enum_item": 45,
+          "enum_variant": 221,
+          "field_declaration": 314,
+          "function_item": 431,
+          "function_signature_item": 1,
+          "impl_item": 60,
+          "macro_definition": 1,
+          "mod_item": 21,
+          "static_item": 2,
+          "struct_item": 72,
+          "type_item": 4
+        },
+        "marmish-mdk:lib:marmish_mdk": {
+          "const_item": 2,
+          "enum_item": 2,
+          "enum_variant": 9,
+          "field_declaration": 8,
+          "function_item": 18,
+          "impl_item": 4,
+          "struct_item": 4
+        },
+        "marmish-native:bin:marmish": {
+          "function_item": 1
+        },
+        "marmish-native:bin:marmish-worker": {
+          "function_item": 1
+        },
+        "marmish-native:bin:marmishd": {
+          "function_item": 1
+        },
+        "marmish-native:lib:marmish_native": {
+          "const_item": 77,
+          "enum_item": 76,
+          "enum_variant": 358,
+          "field_declaration": 1446,
+          "function_item": 1297,
+          "function_signature_item": 13,
+          "impl_item": 157,
+          "macro_definition": 2,
+          "mod_item": 59,
+          "static_item": 2,
+          "struct_item": 255,
+          "trait_item": 4,
+          "type_item": 25
+        },
+        "marmish-prototype:bin:marmish-engine-bridge": {
+          "function_item": 1
+        },
+        "marmish-prototype:lib:marmish_prototype": {
+          "const_item": 4,
+          "enum_item": 3,
+          "enum_variant": 17,
+          "field_declaration": 83,
+          "function_item": 23,
+          "impl_item": 9,
+          "struct_item": 10,
+          "type_item": 1
+        },
+        "marmish-stream:lib:marmish_stream": {
+          "const_item": 24,
+          "enum_item": 10,
+          "enum_variant": 59,
+          "field_declaration": 148,
+          "function_item": 105,
+          "impl_item": 11,
+          "macro_definition": 1,
+          "mod_item": 9,
+          "struct_item": 17,
+          "type_item": 4
+        },
+        "marmish-vault:bin:marmish-keychain": {
+          "function_item": 1
+        },
+        "marmish-vault:lib:marmish_vault": {
+          "const_item": 3,
+          "enum_item": 14,
+          "enum_variant": 48,
+          "field_declaration": 57,
+          "function_item": 75,
+          "function_signature_item": 4,
+          "impl_item": 24,
+          "mod_item": 3,
+          "static_item": 9,
+          "struct_item": 16
+        }
+      },
+      "byClassification": {
+        "imported": {},
+        "retained-native": {
+          "const_item": 134,
+          "enum_item": 152,
+          "enum_variant": 723,
+          "field_declaration": 2058,
+          "function_item": 1966,
+          "function_signature_item": 18,
+          "impl_item": 270,
+          "macro_definition": 4,
+          "mod_item": 94,
+          "static_item": 13,
+          "struct_item": 379,
+          "trait_item": 4,
+          "type_item": 34
+        },
+        "unsupported": {}
+      },
+      "byKind": {
+        "const_item": 134,
+        "enum_item": 152,
+        "enum_variant": 723,
+        "field_declaration": 2058,
+        "function_item": 1966,
+        "function_signature_item": 18,
+        "impl_item": 270,
+        "macro_definition": 4,
+        "mod_item": 94,
+        "static_item": 13,
+        "struct_item": 379,
+        "trait_item": 4,
+        "type_item": 34
+      },
+      "configurationCoverage": "static module candidates; inactive branches can be present; no macro expansion",
+      "incompleteParsePaths": [
+        "crates/marmish-engine/src/platform/linux.rs",
+        "crates/marmish-engine/src/platform/macos.rs",
+        "crates/marmish-native/src/cli.rs",
+        "crates/marmish-native/src/command_config.rs",
+        "crates/marmish-native/src/command_limits.rs",
+        "crates/marmish-native/src/copy_cancel_tests.rs",
+        "crates/marmish-native/src/copy_integration_tests.rs",
+        "crates/marmish-native/src/identity.rs",
+        "crates/marmish-native/src/installed_autoexit.rs",
+        "crates/marmish-native/src/installed_policy.rs",
+        "crates/marmish-native/src/journal.rs",
+        "crates/marmish-native/src/rsync_cli.rs",
+        "crates/marmish-stream/src/codec.rs",
+        "crates/marmish-vault/src/macos.rs"
+      ],
+      "observedSites": 5849,
+      "scope": "workspace runtime candidates, including declarations whose production reachability is uncertain",
+      "targetAggregation": "one site can appear under several Cargo targets; sum observedSites only over distinct IDs",
+      "unit": "one distinct upstream lexical declaration ID, including members and containers, across the union of source configurations"
+    }
+  },
   "framingCompilerCheck": "type-checked",
   "gaps": [
     "Lexical callees, generated declarations and workspace-wide symbol reachability remain unresolved.",
@@ -44,8 +268,317 @@
   ],
   "gitRevision": "49fc705408a230bd0ad896248d08dbdd2faad05a",
   "host": "aarch64-apple-darwin",
-  "inventorySha256": "4028143777edfaccec6450739a721a08db882f69ef40badae02af399f6a0fe01",
-  "manifestSha256": "60b2753b1e7b3e2c0f6d50afaffe3ae2e05170653381825747d8e607790af1a3",
-  "schemaVersion": 1,
+  "inventorySha256": "98933a98c3ac1c0d195a0f0e2c82d8cbe1381ab03b866acb2b8b733d156e591d",
+  "manifestSha256": "5ff09d5db0ab31f11996f4a3dd9fb8f62028e7d2671d4a5811056b19a6fdbab7",
+  "platformInventory": {
+    "aarch64-apple-darwin": {
+      "ignoredSites": [
+        "crates/marmish-engine/src/live.rs:339:fd_probe_child",
+        "crates/marmish-native/src/copy_integration_tests.rs:43:helper_child",
+        "crates/marmish-native/src/copy_large_tests.rs:163:large_raw_zlib_actual_helper_four_way",
+        "crates/marmish-native/src/stream_runner.rs:944:large_duplex_integrity_with_slow_consumers_and_bounded_windows",
+        "crates/marmish-vault/tests/support/native_macos.rs:272:disposable_keychain_round_trip_lock_and_restart"
+      ],
+      "observedTestSites": 1199,
+      "packaging": {
+        "finalInputs": [
+          {
+            "byteEvidence": "unobserved-final-package-input",
+            "path": "package-input/marmish",
+            "producer": "marmish-native:bin:marmish",
+            "sha256": null
+          },
+          {
+            "byteEvidence": "unobserved-final-package-input",
+            "path": "package-input/marmishd",
+            "producer": "marmish-native:bin:marmishd",
+            "sha256": null
+          },
+          {
+            "byteEvidence": "unobserved-final-package-input",
+            "path": "package-input/marmish-worker",
+            "producer": "marmish-native:bin:marmish-worker",
+            "sha256": null
+          },
+          {
+            "byteEvidence": "unobserved-final-package-input",
+            "path": "THIRD-PARTY-LICENSES",
+            "producer": "tools/marmish_native_licenses.py",
+            "sha256": null
+          }
+        ],
+        "packager": "marmish-native:bin:marmish-release-tool",
+        "recipes": [
+          {
+            "job": "package",
+            "minimum": "macos=15.0",
+            "runner": "macos-15",
+            "signing": "adhoc",
+            "step": "Package verified immutable candidate assets",
+            "stepRunSha256": "829318f667bdbe5b1debb6ed2590af097d7cedf82fc8ec1341a1d474b05cc481",
+            "target": "aarch64-apple-darwin",
+            "workflow": ".github/workflows/v02-release.yml",
+            "workflowSha256": "d801d7d4044123c686d0753e3db6867c760bd9792dea27b086bb7e178f8d0368"
+          },
+          {
+            "job": "package",
+            "minimum": "macos=15.0",
+            "runner": "macos-15",
+            "signing": "adhoc",
+            "step": "Package verified immutable candidate assets",
+            "stepRunSha256": "829318f667bdbe5b1debb6ed2590af097d7cedf82fc8ec1341a1d474b05cc481",
+            "target": "aarch64-apple-darwin",
+            "workflow": ".github/workflows/streaming-candidate.yml",
+            "workflowSha256": "1d5064a358be0f6b17d793c896d7f9c40b64f3254d52d3beaf7313618944b5ff"
+          }
+        ],
+        "trackedRecipeInputs": {
+          ".github/workflows/streaming-candidate.yml": "1d5064a358be0f6b17d793c896d7f9c40b64f3254d52d3beaf7313618944b5ff",
+          ".github/workflows/v02-release.yml": "d801d7d4044123c686d0753e3db6867c760bd9792dea27b086bb7e178f8d0368",
+          "Cargo.lock": "9c5f7dde5c0f7d340e22dbefaa8a1c6ddb94c119011ba3e49ac8044c9b4cb0b3",
+          "Cargo.toml": "bf726da78321c6f465902f679bbd05557374091458208fe5531be8b3cc2e4f53",
+          "crates/marmish-native/Cargo.toml": "f92cdde82b3e4cf077294a7296117af4dcc28dba55bf1c9d694d7a4b273f539f",
+          "crates/marmish-native/build.rs": "53fb1040a17b74ce41cc2a2e8ad34be1d2e0e7db642a1054c48c414d0d7c9887",
+          "crates/marmish-native/src/bin/marmish-release-tool.rs": "42d8d3148d3fac5571611769db8a2896080a17939a3b58a23c1c44947d018b12",
+          "crates/marmish-native/src/bin/marmish-worker.rs": "e45cc13e105725abee423761bd94079ef90e772e44ed181fcd133e31184dfbbb",
+          "crates/marmish-native/src/bin/marmish.rs": "ba9a7103998ae8b981ca18fcd31da8e022b865d27afbcda3669dcd31f8b232cd",
+          "crates/marmish-native/src/bin/marmishd.rs": "3281ade5af8c2aebed6e44a6b6c99480bea9103111c1bba1bff28b9b44b42901",
+          "crates/marmish-native/src/native_manifest.rs": "e11224fa0dd59f656beb94ee29b07baff9be0698896f450ebf45a40847a2ba70",
+          "crates/marmish-native/src/native_release.rs": "5f9ed73d95c5e9f3fc1d1a870646c3b63f567876bf6744e267a4810d47eced6d",
+          "rust-toolchain.toml": "24a5037a8f0a264369ef37bb46e019ade6c524beaead1c28f77a429f856a066b",
+          "scripts/install-native.sh": "97855bc313d38fe5a5840b5539e8a8e9472fe80d7be8ef37239eee2b8c0c1bd5",
+          "scripts/v02-inspect-native.sh": "c41c7088d8c190096a985df2c94ae2703e9730eb1ab85a7da172926329bf9831",
+          "tools/marmish_native_licenses.py": "7f44c1bc90947df24695d61fd17a3ca129836f145092c3c87edbb4b386be28ad"
+        }
+      },
+      "platformRestrictedSites": [
+        "crates/marmish-engine/src/platform/macos.rs:1067:pending_owned_cleanup_classifier_truth_table",
+        "crates/marmish-engine/src/platform/macos.rs:1135:pending_owned_cleanup_attempt_cap_and_strict_conversion",
+        "crates/marmish-engine/src/platform/macos.rs:1183:zombie_proof_restart_classifier_truth_table",
+        "crates/marmish-engine/src/platform/macos.rs:1246:zombie_proof_restart_context_and_detail_preservation",
+        "crates/marmish-engine/src/platform/macos.rs:1296:zombie_proof_restart_success_first_attempt",
+        "crates/marmish-engine/src/platform/macos.rs:1302:zombie_proof_restart_hard_first_attempt",
+        "crates/marmish-engine/src/platform/macos.rs:1323:zombie_proof_restart_incomplete_then_success",
+        "crates/marmish-engine/src/platform/macos.rs:1334:zombie_proof_restart_incomplete_twice",
+        "crates/marmish-engine/src/platform/macos.rs:1355:zombie_proof_restart_incomplete_then_hard",
+        "crates/marmish-engine/src/platform/macos.rs:1396:zombie_validator_retains_identity_and_rejects_group_or_live_status",
+        "crates/marmish-engine/src/platform/macos.rs:1421:zombie_validator_reports_order_member_group_status_and_exit_flag",
+        "crates/marmish-engine/src/platform/macos.rs:1462:uuid_clock_and_process_bounds",
+        "crates/marmish-engine/src/platform/macos.rs:1475:native_descriptors_and_storage_cloexec",
+        "crates/marmish-engine/src/platform/macos.rs:1493:exclusive_publication_never_clobbers_and_directory_aliases_keep_identity",
+        "crates/marmish-engine/src/platform/macos.rs:1532:cloexec_sweep_closes_unmarked_descriptor_at_exec",
+        "crates/marmish-engine/src/platform/macos.rs:1561:inherited_descriptor_above_lowered_limit_is_rejected",
+        "crates/marmish-engine/src/platform/macos.rs:857:held_status_diagnostics_acceptance",
+        "crates/marmish-engine/src/platform/macos.rs:882:held_status_diagnostics_failure_detail",
+        "crates/marmish-engine/src/platform/macos.rs:924:initial_no_status_classification_truth_table",
+        "crates/marmish-engine/src/platform/macos.rs:958:initial_no_status_proof_attempt_and_tuple",
+        "crates/marmish-engine/src/process.rs:403:initial_no_status_strict_and_kill_remain_hard",
+        "crates/marmish-engine/src/process.rs:474:pending_owned_cleanup_resolver_preserves_failure",
+        "crates/marmish-engine/src/process/diagnostic.rs:460:silent_staged_probes_preserve_errors_and_context",
+        "crates/marmish-engine/src/process/diagnostic.rs:526:member_read_records_discriminate_final_attempt_without_identifiers",
+        "crates/marmish-engine/src/process/diagnostic.rs:561:zombie_records_preserve_context_errors_and_closed_detail",
+        "crates/marmish-engine/src/process/diagnostic.rs:603:held_wait_records_are_closed_and_failure_only",
+        "crates/marmish-engine/src/process_limits_tests.rs:64:normalizes_high_soft_and_preserves_hard",
+        "crates/marmish-engine/src/store/tests.rs:1459:shared_presence_probe_cannot_silently_discard_worker_start",
+        "crates/marmish-engine/src/worker/tests.rs:128:darwin_terminal_group_proof_rejects_a_live_descendant",
+        "crates/marmish-engine/src/worker/tests.rs:138:darwin_fast_exit_spawn_retains_owned_identity_until_reap",
+        "crates/marmish-engine/src/worker/tests.rs:94:darwin_owned_zombie_identity_and_terminal_group_are_exact",
+        "crates/marmish-vault/src/macos.rs:443:namespaces_have_disjoint_service_names",
+        "crates/marmish-vault/src/macos.rs:458:native_errors_are_sanitized",
+        "crates/marmish-vault/src/macos.rs:471:authorization_keeps_native_failures_distinct_without_changing_ordinary_errors",
+        "crates/marmish-vault/src/macos.rs:532:ordinary_ui_lease_disables_ui_and_authorization_restores_exact_prior_policy",
+        "crates/marmish-vault/tests/support/native_macos.rs:272:disposable_keychain_round_trip_lock_and_restart"
+      ],
+      "unknownConfigurationSites": []
+    },
+    "aarch64-unknown-linux-gnu": {
+      "ignoredSites": [
+        "crates/marmish-engine/src/live.rs:339:fd_probe_child",
+        "crates/marmish-native/src/copy_integration_tests.rs:43:helper_child",
+        "crates/marmish-native/src/copy_large_tests.rs:163:large_raw_zlib_actual_helper_four_way",
+        "crates/marmish-native/src/stream_runner.rs:944:large_duplex_integrity_with_slow_consumers_and_bounded_windows",
+        "crates/marmish-vault/tests/support/native_linux.rs:327:isolated_gnome_keyring_round_trip_and_lock"
+      ],
+      "observedTestSites": 1172,
+      "packaging": {
+        "finalInputs": [
+          {
+            "byteEvidence": "unobserved-final-package-input",
+            "path": "package-input/marmish",
+            "producer": "marmish-native:bin:marmish",
+            "sha256": null
+          },
+          {
+            "byteEvidence": "unobserved-final-package-input",
+            "path": "package-input/marmishd",
+            "producer": "marmish-native:bin:marmishd",
+            "sha256": null
+          },
+          {
+            "byteEvidence": "unobserved-final-package-input",
+            "path": "package-input/marmish-worker",
+            "producer": "marmish-native:bin:marmish-worker",
+            "sha256": null
+          },
+          {
+            "byteEvidence": "unobserved-final-package-input",
+            "path": "THIRD-PARTY-LICENSES",
+            "producer": "tools/marmish_native_licenses.py",
+            "sha256": null
+          }
+        ],
+        "packager": "marmish-native:bin:marmish-release-tool",
+        "recipes": [
+          {
+            "job": "package",
+            "minimum": "glibc=2.39",
+            "runner": "ubuntu-24.04-arm",
+            "signing": "none",
+            "step": "Package verified immutable candidate assets",
+            "stepRunSha256": "829318f667bdbe5b1debb6ed2590af097d7cedf82fc8ec1341a1d474b05cc481",
+            "target": "aarch64-unknown-linux-gnu",
+            "workflow": ".github/workflows/v02-release.yml",
+            "workflowSha256": "d801d7d4044123c686d0753e3db6867c760bd9792dea27b086bb7e178f8d0368"
+          },
+          {
+            "job": "package",
+            "minimum": "glibc=2.39",
+            "runner": "ubuntu-24.04-arm",
+            "signing": "none",
+            "step": "Package verified immutable candidate assets",
+            "stepRunSha256": "829318f667bdbe5b1debb6ed2590af097d7cedf82fc8ec1341a1d474b05cc481",
+            "target": "aarch64-unknown-linux-gnu",
+            "workflow": ".github/workflows/streaming-candidate.yml",
+            "workflowSha256": "1d5064a358be0f6b17d793c896d7f9c40b64f3254d52d3beaf7313618944b5ff"
+          }
+        ],
+        "trackedRecipeInputs": {
+          ".github/workflows/streaming-candidate.yml": "1d5064a358be0f6b17d793c896d7f9c40b64f3254d52d3beaf7313618944b5ff",
+          ".github/workflows/v02-release.yml": "d801d7d4044123c686d0753e3db6867c760bd9792dea27b086bb7e178f8d0368",
+          "Cargo.lock": "9c5f7dde5c0f7d340e22dbefaa8a1c6ddb94c119011ba3e49ac8044c9b4cb0b3",
+          "Cargo.toml": "bf726da78321c6f465902f679bbd05557374091458208fe5531be8b3cc2e4f53",
+          "crates/marmish-native/Cargo.toml": "f92cdde82b3e4cf077294a7296117af4dcc28dba55bf1c9d694d7a4b273f539f",
+          "crates/marmish-native/build.rs": "53fb1040a17b74ce41cc2a2e8ad34be1d2e0e7db642a1054c48c414d0d7c9887",
+          "crates/marmish-native/src/bin/marmish-release-tool.rs": "42d8d3148d3fac5571611769db8a2896080a17939a3b58a23c1c44947d018b12",
+          "crates/marmish-native/src/bin/marmish-worker.rs": "e45cc13e105725abee423761bd94079ef90e772e44ed181fcd133e31184dfbbb",
+          "crates/marmish-native/src/bin/marmish.rs": "ba9a7103998ae8b981ca18fcd31da8e022b865d27afbcda3669dcd31f8b232cd",
+          "crates/marmish-native/src/bin/marmishd.rs": "3281ade5af8c2aebed6e44a6b6c99480bea9103111c1bba1bff28b9b44b42901",
+          "crates/marmish-native/src/native_manifest.rs": "e11224fa0dd59f656beb94ee29b07baff9be0698896f450ebf45a40847a2ba70",
+          "crates/marmish-native/src/native_release.rs": "5f9ed73d95c5e9f3fc1d1a870646c3b63f567876bf6744e267a4810d47eced6d",
+          "rust-toolchain.toml": "24a5037a8f0a264369ef37bb46e019ade6c524beaead1c28f77a429f856a066b",
+          "scripts/install-native.sh": "97855bc313d38fe5a5840b5539e8a8e9472fe80d7be8ef37239eee2b8c0c1bd5",
+          "scripts/v02-inspect-native.sh": "c41c7088d8c190096a985df2c94ae2703e9730eb1ab85a7da172926329bf9831",
+          "tools/marmish_native_licenses.py": "7f44c1bc90947df24695d61fd17a3ca129836f145092c3c87edbb4b386be28ad"
+        }
+      },
+      "platformRestrictedSites": [
+        "crates/marmish-engine/src/launcher/tests.rs:113:proc_stat_handles_spaces_and_parentheses_and_rejects_forgery",
+        "crates/marmish-engine/src/process_limits_tests.rs:103:linux_process_limits_are_unchanged",
+        "crates/marmish-engine/src/resolve/tests.rs:114:non_utf8_filesystem_paths_and_argument_bytes_are_preserved",
+        "crates/marmish-native/src/copy_files.rs:1314:linux_raw_non_utf8_destination_commits_without_conversion",
+        "crates/marmish-vault/src/helper.rs:593:authorization_on_other_platforms_never_opens_a_provider",
+        "crates/marmish-vault/src/linux.rs:186:namespaces_use_disjoint_exact_attributes",
+        "crates/marmish-vault/src/linux.rs:195:uncertain_errors_never_mean_unavailable",
+        "crates/marmish-vault/tests/helper.rs:54:provably_absent_bus_is_unavailable_without_fallback",
+        "crates/marmish-vault/tests/support/native_linux.rs:327:isolated_gnome_keyring_round_trip_and_lock"
+      ],
+      "unknownConfigurationSites": []
+    },
+    "x86_64-unknown-linux-gnu": {
+      "ignoredSites": [
+        "crates/marmish-engine/src/live.rs:339:fd_probe_child",
+        "crates/marmish-native/src/copy_integration_tests.rs:43:helper_child",
+        "crates/marmish-native/src/copy_large_tests.rs:163:large_raw_zlib_actual_helper_four_way",
+        "crates/marmish-native/src/stream_runner.rs:944:large_duplex_integrity_with_slow_consumers_and_bounded_windows",
+        "crates/marmish-vault/tests/support/native_linux.rs:327:isolated_gnome_keyring_round_trip_and_lock"
+      ],
+      "observedTestSites": 1172,
+      "packaging": {
+        "finalInputs": [
+          {
+            "byteEvidence": "unobserved-final-package-input",
+            "path": "package-input/marmish",
+            "producer": "marmish-native:bin:marmish",
+            "sha256": null
+          },
+          {
+            "byteEvidence": "unobserved-final-package-input",
+            "path": "package-input/marmishd",
+            "producer": "marmish-native:bin:marmishd",
+            "sha256": null
+          },
+          {
+            "byteEvidence": "unobserved-final-package-input",
+            "path": "package-input/marmish-worker",
+            "producer": "marmish-native:bin:marmish-worker",
+            "sha256": null
+          },
+          {
+            "byteEvidence": "unobserved-final-package-input",
+            "path": "THIRD-PARTY-LICENSES",
+            "producer": "tools/marmish_native_licenses.py",
+            "sha256": null
+          }
+        ],
+        "packager": "marmish-native:bin:marmish-release-tool",
+        "recipes": [
+          {
+            "job": "package",
+            "minimum": "glibc=2.39",
+            "runner": "ubuntu-24.04",
+            "signing": "none",
+            "step": "Package verified immutable candidate assets",
+            "stepRunSha256": "829318f667bdbe5b1debb6ed2590af097d7cedf82fc8ec1341a1d474b05cc481",
+            "target": "x86_64-unknown-linux-gnu",
+            "workflow": ".github/workflows/v02-release.yml",
+            "workflowSha256": "d801d7d4044123c686d0753e3db6867c760bd9792dea27b086bb7e178f8d0368"
+          },
+          {
+            "job": "package",
+            "minimum": "glibc=2.39",
+            "runner": "ubuntu-24.04",
+            "signing": "none",
+            "step": "Package verified immutable candidate assets",
+            "stepRunSha256": "829318f667bdbe5b1debb6ed2590af097d7cedf82fc8ec1341a1d474b05cc481",
+            "target": "x86_64-unknown-linux-gnu",
+            "workflow": ".github/workflows/streaming-candidate.yml",
+            "workflowSha256": "1d5064a358be0f6b17d793c896d7f9c40b64f3254d52d3beaf7313618944b5ff"
+          }
+        ],
+        "trackedRecipeInputs": {
+          ".github/workflows/streaming-candidate.yml": "1d5064a358be0f6b17d793c896d7f9c40b64f3254d52d3beaf7313618944b5ff",
+          ".github/workflows/v02-release.yml": "d801d7d4044123c686d0753e3db6867c760bd9792dea27b086bb7e178f8d0368",
+          "Cargo.lock": "9c5f7dde5c0f7d340e22dbefaa8a1c6ddb94c119011ba3e49ac8044c9b4cb0b3",
+          "Cargo.toml": "bf726da78321c6f465902f679bbd05557374091458208fe5531be8b3cc2e4f53",
+          "crates/marmish-native/Cargo.toml": "f92cdde82b3e4cf077294a7296117af4dcc28dba55bf1c9d694d7a4b273f539f",
+          "crates/marmish-native/build.rs": "53fb1040a17b74ce41cc2a2e8ad34be1d2e0e7db642a1054c48c414d0d7c9887",
+          "crates/marmish-native/src/bin/marmish-release-tool.rs": "42d8d3148d3fac5571611769db8a2896080a17939a3b58a23c1c44947d018b12",
+          "crates/marmish-native/src/bin/marmish-worker.rs": "e45cc13e105725abee423761bd94079ef90e772e44ed181fcd133e31184dfbbb",
+          "crates/marmish-native/src/bin/marmish.rs": "ba9a7103998ae8b981ca18fcd31da8e022b865d27afbcda3669dcd31f8b232cd",
+          "crates/marmish-native/src/bin/marmishd.rs": "3281ade5af8c2aebed6e44a6b6c99480bea9103111c1bba1bff28b9b44b42901",
+          "crates/marmish-native/src/native_manifest.rs": "e11224fa0dd59f656beb94ee29b07baff9be0698896f450ebf45a40847a2ba70",
+          "crates/marmish-native/src/native_release.rs": "5f9ed73d95c5e9f3fc1d1a870646c3b63f567876bf6744e267a4810d47eced6d",
+          "rust-toolchain.toml": "24a5037a8f0a264369ef37bb46e019ade6c524beaead1c28f77a429f856a066b",
+          "scripts/install-native.sh": "97855bc313d38fe5a5840b5539e8a8e9472fe80d7be8ef37239eee2b8c0c1bd5",
+          "scripts/v02-inspect-native.sh": "c41c7088d8c190096a985df2c94ae2703e9730eb1ab85a7da172926329bf9831",
+          "tools/marmish_native_licenses.py": "7f44c1bc90947df24695d61fd17a3ca129836f145092c3c87edbb4b386be28ad"
+        }
+      },
+      "platformRestrictedSites": [
+        "crates/marmish-engine/src/launcher/tests.rs:113:proc_stat_handles_spaces_and_parentheses_and_rejects_forgery",
+        "crates/marmish-engine/src/process_limits_tests.rs:103:linux_process_limits_are_unchanged",
+        "crates/marmish-engine/src/resolve/tests.rs:114:non_utf8_filesystem_paths_and_argument_bytes_are_preserved",
+        "crates/marmish-native/src/copy_files.rs:1314:linux_raw_non_utf8_destination_commits_without_conversion",
+        "crates/marmish-vault/src/helper.rs:593:authorization_on_other_platforms_never_opens_a_provider",
+        "crates/marmish-vault/src/linux.rs:186:namespaces_use_disjoint_exact_attributes",
+        "crates/marmish-vault/src/linux.rs:195:uncertain_errors_never_mean_unavailable",
+        "crates/marmish-vault/tests/helper.rs:54:provably_absent_bus_is_unavailable_without_fallback",
+        "crates/marmish-vault/tests/support/native_linux.rs:327:isolated_gnome_keyring_round_trip_and_lock"
+      ],
+      "unknownConfigurationSites": []
+    }
+  },
+  "schemaVersion": 2,
+  "sourceInventorySha256": "93c06136a939fb9d3c2cd6b5e99b43b5e9f8fb3d2de5329a7d3e9874e575d1fe",
   "unresolvedModuleEdges": 0
 }

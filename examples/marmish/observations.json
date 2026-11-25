@@ -590,15 +590,88 @@
     }
   ],
   "cli": {
-    "marmish": [
-      "--version"
-    ],
-    "marmishd": [
-      "--version"
-    ],
-    "stdoutUtf8": "marmish-native 0.3.1\n",
-    "stderrUtf8": "",
-    "exitCode": 0
+    "scope": "Six offline release-binary probes on the pinned Apple Silicon checkout. Length and SHA-256 identify the complete stdout and stderr byte streams, including final newlines.",
+    "productVersionStdoutUtf8": "marmish-native 0.3.1\n",
+    "cases": [
+      {
+        "binary": "marmish",
+        "argument": "--version",
+        "exitCode": 0,
+        "stdout": {
+          "byteLength": 21,
+          "sha256": "a2419a331774c827a67fcd3581b1a4ad566d33a6a9fb7894941ead3c09500ebf"
+        },
+        "stderr": {
+          "byteLength": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "binary": "marmish",
+        "argument": "--help",
+        "exitCode": 0,
+        "stdout": {
+          "byteLength": 3096,
+          "sha256": "e75900bc8eb98ca52389b8eb94993ee74fb924b305b4bfd0c915306875766585"
+        },
+        "stderr": {
+          "byteLength": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "binary": "marmishd",
+        "argument": "--version",
+        "exitCode": 0,
+        "stdout": {
+          "byteLength": 21,
+          "sha256": "a2419a331774c827a67fcd3581b1a4ad566d33a6a9fb7894941ead3c09500ebf"
+        },
+        "stderr": {
+          "byteLength": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "binary": "marmishd",
+        "argument": "--help",
+        "exitCode": 0,
+        "stdout": {
+          "byteLength": 3097,
+          "sha256": "e0cb2044ab64e5c012b9e0da01d1dd45a0e79cf97c069a50110490d4425e4f1e"
+        },
+        "stderr": {
+          "byteLength": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "binary": "marmish-worker",
+        "argument": "--version",
+        "exitCode": 1,
+        "stdout": {
+          "byteLength": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "byteLength": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "binary": "marmish-worker",
+        "argument": "--help",
+        "exitCode": 1,
+        "stdout": {
+          "byteLength": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "byteLength": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    ]
   },
   "release": {
     "nativeSourceVersion": "0.3.1",
@@ -632,5 +705,6 @@
       "source": "README.md",
       "result": "Interactive macOS Keychain consent unverified; Tor experimental."
     }
-  ]
+  ],
+  "canonicalityArgument": "docs/design/marmish-framing-oracle.md"
 }

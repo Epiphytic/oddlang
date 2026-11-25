@@ -7,6 +7,7 @@ from pathlib import Path
 
 from tree_sitter import Language, Parser
 import tree_sitter_rust
+import yaml
 
 
 def decode(node):
@@ -14,7 +15,7 @@ def decode(node):
 
 
 def inspect(parser, data):
-    edges, ranges = [], []
+    edges, ranges, tests = [], [], []
 
     def walk(node, inline):
         attrs = []
@@ -30,6 +31,16 @@ def inspect(parser, data):
                 if re.match(r"#\[\s*(cfg|cfg_attr|test|ignore)\b", a)
                 or a.startswith("#[tokio::test")
             ]
+            if child.type == "function_item" and any(
+                a == "#[test]" or a.startswith("#[tokio::test") for a in cfg
+            ):
+                tests.append(
+                    {
+                        "line": child.start_point.row + 1,
+                        "name": decode(child.child_by_field_name("name")),
+                        "attributes": cfg,
+                    }
+                )
             if cfg:
                 ranges.append([child.start_point.row + 1, child.end_point.row + 1, cfg])
             inner = inline
@@ -68,13 +79,15 @@ def inspect(parser, data):
             attrs = []
 
     walk(parser.parse(data).root_node, [])
-    return {"edges": edges, "attributes": ranges}
+    return {"edges": edges, "attributes": ranges, "tests": tests}
 
 
 if __name__ == "__main__":
     root = Path(sys.argv[1])
     parser = Parser(Language(tree_sitter_rust.language()))
-    json.dump(
-        {p: inspect(parser, (root / p).read_bytes()) for p in json.load(sys.stdin)},
-        sys.stdout,
-    )
+    rust = {p: inspect(parser, (root / p).read_bytes()) for p in json.load(sys.stdin)}
+    workflows = {
+        p.relative_to(root).as_posix(): yaml.safe_load(p.read_bytes())["jobs"]
+        for p in sorted((root / ".github/workflows").glob("*.yml"))
+    }
+    json.dump({"rust": rust, "workflows": workflows}, sys.stdout)

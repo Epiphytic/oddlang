@@ -24,9 +24,18 @@ revision=49fc705408a230bd0ad896248d08dbdd2faad05a
 git -C "$upstream" diff --quiet HEAD -- || { echo 'Marmish tracked inputs differ from the pinned tree' >&2; exit 1; }
 [[ -z "$(git -C "$upstream" ls-files --others --exclude-standard)" ]] || { echo 'Untracked Marmish inputs present' >&2; exit 1; }
 export CARGO_NET_OFFLINE=true RUSTUP_AUTO_INSTALL=0 UV_OFFLINE=1 PYTHONDONTWRITEBYTECODE=1
-python3 scripts/marmish/inventory.py "$upstream" "$report/inventory"
-cmp examples/marmish/inventory-summary.json "$report/inventory/inventory-summary.json"
-python3 scripts/marmish/observations.py "$upstream" "$report/observations"
+scripts/marmish/offline.sh python3 scripts/marmish/inventory.py "$upstream" "$report/inventory"
+python3 - "$report/inventory/inventory-summary.json" <<'CHECK_INVENTORY'
+import json, sys
+from pathlib import Path
+expected = json.loads(Path("examples/marmish/inventory-summary.json").read_bytes())
+actual = json.loads(Path(sys.argv[1]).read_bytes())
+if expected["sourceInventorySha256"] != actual["sourceInventorySha256"]:
+    raise SystemExit("portable Marmish inventory changed")
+if expected["host"] == actual["host"] and expected != actual:
+    raise SystemExit("host Marmish inventory changed")
+CHECK_INVENTORY
+scripts/marmish/offline.sh python3 scripts/marmish/observations.py "$upstream" "$report/observations"
 python3 scripts/marmish/baseline.py "$upstream" "$report/native"
 python3 scripts/marmish/receipt.py "$report" --write
 python3 scripts/marmish/receipt.py "$report"

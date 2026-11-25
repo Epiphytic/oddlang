@@ -13,3 +13,7 @@ runtime_scope = "Workspace Rust declarations that can belong to a production Car
 classification = "The untouched baseline retains native definitions. A future imported classification requires a verified graph projection supplying that definition."
 symbol_identity = "Use upstream lexical ID (path, named ancestor chain, declaration kind and occurrence); source line is a separate coordinate. File and symbol identity are scoped to Marmish."
 source_reference_scope = "Resolve lexical scope by file and declaration ordinal. Callee spellings do not establish a compiler-resolved call graph."
+lexical_unit = "Count each observed upstream declaration ID once across all known Cargo source contexts. Report functions, fields, variants and other declaration kinds separately."
+compiled_unit = "A selected-profile compiled runtime inventory requires compiler-resolved first-party declarations after cfg selection, expansion and reachability analysis. Its denominator is unknown until independently measured."
+test_inventory = "Static Rust test attributes, Cargo targets and target/profile cfg under debug assertions. Distinguish explicit ignored gates, unresolved selections and native observations."
+package_workflows = [".github/workflows/v02-release.yml", ".github/workflows/streaming-candidate.yml"]
