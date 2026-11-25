@@ -47,7 +47,7 @@ The setup scripts cache each Cargo registry/git closure using `cargo fetch --loc
 - After **each** integrated phase invoke Claude Code CLI with `claude -p --safe-mode --permission-mode auto` in a disposable checkout of the tested candidate, with a read-only review brief and writable scratch space for builds and tests. Supply the base and candidate Git SHAs, chapter, changed files, fixture locations and exact checks. Ask it to run independent commands and try to falsify the acceptance claims. Capture findings, evidence and dispositions under `docs/design/`. Fix material findings, rerun the affected checks, and get Claude to re-review the corrected candidate before advancing. Reproduce disputed findings against the written acceptance criterion. A passing test cannot waive a missing obligation, and a reviewer verdict cannot waive a failing check. Document counterevidence for a dismissed finding. If the reviewer is unavailable, retain the pending review on that phase.
 - Keep the work graph and plan synchronized. Store stable phase identifiers, implementation evidence and review findings in `docs/design/work.ttl`. Open PRs against the relevant base branch. Use an isolated pinned checkout for Marmish and keep upstream acceptance fixtures independently runnable.
 - [x] Phase 1 · component publication
-- [ ] Phase 2 · component execution
+- [x] Phase 2 · component execution
 - [ ] Phase 3 · Rust source import and regeneration
 - [ ] Phase 4 · translation validation
 - [ ] Phase 5 · Marmish baseline and inventory

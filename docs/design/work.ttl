@@ -325,7 +325,7 @@ w:witPublication a p:Task ; rdfs:label "Publish locked component contracts" ;
     p:acceptance "Validate canonical WIT projections, pinning and typed rejection cases." .
 
 w:componentExecution a p:Task ; rdfs:label "Exercise guest and host roles" ;
-    p:milestone w:componentMilestone ; p:status p:active ; p:source w:roundTripPlan ; p:dependsOn w:witPublication ;
+    p:milestone w:componentMilestone ; p:status p:done ; p:source w:roundTripPlan ; p:dependsOn w:witPublication ;
     p:acceptance "Verify real component calls, independent cases, directional evolution and mutation detection." .
 
 w:rustRecovery a p:Task ; rdfs:label "Import supported Rust into editable Oddlang" ;
