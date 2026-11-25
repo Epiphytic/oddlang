@@ -104,24 +104,24 @@ w:differential a p:Task ; rdfs:label "Run boundary-weighted differential tests" 
     p:acceptance "Run at least 10,000 reproducible boundary-weighted cases." ; p:evidence w:milestone2Evidence .
 
 w:roundTrip a p:Task ; rdfs:label "Prove the v1 round trip" ;
-    p:milestone w:m3 ; p:status p:active ; p:source w:plan ;
+    p:milestone w:m3 ; p:status p:done ; p:source w:plan ;
     p:dependsOn w:emit ; p:addresses w:review8, w:review9 ;
-    p:acceptance "Round-trip the persisted Rust account through Avro and reject a negative balance." .
+    p:acceptance "Round-trip the persisted Rust account through Avro and reject a negative balance." ; p:evidence w:milestone3Evidence .
 
 w:migrate a p:Task ; rdfs:label "Migrate the populated table" ;
-    p:milestone w:m3 ; p:status p:active ; p:source w:plan ;
+    p:milestone w:m3 ; p:status p:done ; p:source w:plan ;
     p:dependsOn w:roundTrip ; p:addresses w:review4, w:review5 ;
-    p:acceptance "Preserve existing rows, backfill CAD and match fresh v2 DDL with no retained default." .
+    p:acceptance "Preserve existing rows, backfill CAD and match fresh v2 DDL with no retained default." ; p:evidence w:milestone3Evidence .
 
 w:wire a p:Task ; rdfs:label "Derive and verify wire compatibility" ;
-    p:milestone w:m3 ; p:status p:active ; p:source w:plan ;
+    p:milestone w:m3 ; p:status p:done ; p:source w:plan ;
     p:dependsOn w:migrate ; p:addresses w:review5, w:review8, w:review13, w:review14 ;
-    p:acceptance "Derive the verdict from the diff and confirm field alias and default handling with binary data." .
+    p:acceptance "Derive the verdict from the diff and confirm field alias and default handling with binary data." ; p:evidence w:milestone3Evidence .
 
 w:demo a p:Task ; rdfs:label "Run the demo" ;
-    p:milestone w:m3 ; p:status p:active ; p:source w:plan ;
+    p:milestone w:m3 ; p:status p:done ; p:source w:plan ;
     p:dependsOn w:impact, w:differential, w:wire ; p:addresses w:review9 ;
-    p:acceptance "Run the offline suite and demo against the pinned database." .
+    p:acceptance "Run the offline suite and demo against the pinned database." ; p:evidence w:milestone3Evidence .
 
 w:priorArt a p:Task ; rdfs:label "Survey active ontology compilers before implementing the ledger" ;
     p:milestone w:design ; p:status p:done ; p:dependsOn w:track ;
@@ -148,13 +148,13 @@ w:interopDesign a p:Task ; rdfs:label "Record the contract interoperability desi
     p:milestone w:design ; p:status p:done ; p:dependsOn w:priorArt ; p:source w:ggenResearch ;
     p:acceptance "Align the plan, design and work graph on the two ownership models." ; p:evidence w:plan, w:spec, w:workGraph .
 w:release a p:Task ; rdfs:label "Package and pin contract releases" ;
-    p:milestone w:adoption ; p:status p:planned ; p:source w:plan ; p:dependsOn w:interopDesign, w:oracle, w:wire ;
+    p:milestone w:adoption ; p:status p:active ; p:source w:plan ; p:dependsOn w:interopDesign, w:oracle, w:wire ;
     p:acceptance "Resolve a release and transitive imports offline, verify content digests and publish portable wire vectors." .
 w:monorepo a p:Task ; rdfs:label "Verify one coordinated monorepo upgrade" ;
-    p:milestone w:adoption ; p:status p:planned ; p:source w:plan ; p:dependsOn w:release ;
+    p:milestone w:adoption ; p:status p:active ; p:source w:plan ; p:dependsOn w:release ;
     p:acceptance "One pin upgrades Rust, TypeScript, SQL and Avro projections and their integration checks pass." .
 w:externalClient a p:Task ; rdfs:label "Verify independent contract adoption" ;
-    p:milestone w:adoption ; p:status p:planned ; p:source w:plan ; p:dependsOn w:release ;
+    p:milestone w:adoption ; p:status p:active ; p:source w:plan ; p:dependsOn w:release ;
     p:acceptance "A standalone Go client verifies two separately pinned releases with published vectors and replays a reviewed adapter offline." .
 
 w:databaseEvidence a p:Artifact ; p:location "docs/design/implementation-evidence.md" .
@@ -169,3 +169,5 @@ w:retainTurtle a p:Decision ; rdfs:label "Retain Turtle for the ledger prototype
 w:languageEvidence a p:Artifact ; p:location "docs/design/implementation-evidence.md" .
 
 w:milestone2Evidence a p:Artifact ; p:location "docs/design/implementation-evidence.md" .
+
+w:milestone3Evidence a p:Artifact ; p:location "docs/design/implementation-evidence.md" .
