@@ -9,6 +9,7 @@ fn run(args: &[String]) -> Result<(), String> {
             let overlay = oddlang::http::load_overlay(overlay.as_ref())?;
             for binding in overlay.bindings {
                 match binding.binding.as_str() {
+                    "fetch" => oddlang::http::emit_typescript(&contract, output.as_ref())?,
                     "axum" => {
                         let pin = contract
                             .dependencies

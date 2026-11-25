@@ -258,3 +258,5 @@ pub mod overlay;
 pub mod rust;
 pub use overlay::{TargetOverlay, load_overlay};
 pub use rust::emit_rust;
+mod typescript;
+pub use typescript::emit_typescript;

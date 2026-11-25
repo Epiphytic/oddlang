@@ -34,12 +34,14 @@ pub fn load_overlay(path: &Path) -> Result<TargetOverlay, HttpError> {
     }
     let mut pairs = BTreeSet::new();
     for item in &overlay.bindings {
-        if (
-            item.role.as_str(),
-            item.target.as_str(),
-            item.binding.as_str(),
-        ) != ("http.provider", "rust", "axum")
-        {
+        if !matches!(
+            (
+                item.role.as_str(),
+                item.target.as_str(),
+                item.binding.as_str(),
+            ),
+            ("http.provider", "rust", "axum") | ("http.consumer", "typescript", "fetch")
+        ) {
             return Err(format!(
                 "unsupported required binding {}/{}/{}",
                 item.role, item.target, item.binding
