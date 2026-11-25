@@ -3,13 +3,13 @@
   "version": "v2",
   "entry": "ontology/domain.ttl",
   "files": {
-    "compatibility.md": "664e0dc94b660900197378321156188e091f8428ebd297c5780870b672bf3b09",
+    "compatibility.md": "1d62956e2e3fa7bf7031f569eded83dbcefeeea242832b53681efdcb9764de8d",
     "ontology/avro.ttl": "056a3b935b2782d7bd116b7a05948e8b3b0017a0d7583dca844f023a57252207",
     "ontology/domain.ttl": "76d88564c06e960df8e0e77f4dbd5ff3fbd8e79016d4b01b9095f103ac7cae59",
     "ontology/fields.ttl": "3d93d7680f803cf0f0a4b7cdccfa6a3bc9a0176ea19304d3ec2ad494d7a90fa9",
-    "ontology/rust.ttl": "9b696f6a2622c1c73ba4599aed181b3ac0bbd6ad8effe7c854722dcef4cb5fa9",
+    "ontology/rust.ttl": "38cd81bebd6b15d9230507c7c51679824531774eb5ad54ed8307d967744dc1b9",
     "ontology/sql.ttl": "1fe264efb947b149567f04f6d95079bbea531707cbe10c519b100d654715f03a",
-    "ontology/v1-to-v2.ttl": "4e4096ab478b09d525736105aa59b4232dab4825f7c613c05e6a9b786cbe3a85",
+    "ontology/v1-to-v2.ttl": "bef0917fbcc6a953386d47ae030f65f53a4098faaa4e331141f2b9d36eeec296",
     "vectors.json": "8ac4fc083edb6fbcc0344f0e09622dc029548b2b564225f0a0e3733d3e00004a",
     "wire.json": "ff6f9b7bd47d18dcc6cd24de07441419133276c9fb6debdb752b807b8112ee85"
   }
