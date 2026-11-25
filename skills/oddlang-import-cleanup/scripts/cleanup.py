@@ -30,6 +30,19 @@ def tree_digest(entries):
                            for name, value in sorted(entries.items())))
 
 
+def freeze(args):
+    if args.original.is_symlink() or not args.original.is_dir():
+        raise ValueError("expected original crate directory")
+    if args.pin.resolve().is_relative_to(args.original.resolve()):
+        raise ValueError("write the independent baseline pin outside the input")
+    entries = files(args.original)
+    if not entries:
+        raise ValueError("empty baseline")
+    pin = f"oddlang-rust-cleanup-baseline-v1 {tree_digest(entries)}\n"
+    with args.pin.open("xb") as output:
+        output.write(pin.encode("ascii"))
+
+
 def capture(source, dest):
     dest.mkdir()
     for name in files(source):
@@ -87,6 +100,10 @@ def accept(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(__doc__)
     sub = parser.add_subparsers(required=True)
+    f = sub.add_parser("freeze")
+    f.add_argument("original", type=Path)
+    f.add_argument("pin", type=Path)
+    f.set_defaults(run=freeze)
     p = sub.add_parser("propose")
     for name in ["original", "edited", "output"]:
         p.add_argument(name, type=Path)

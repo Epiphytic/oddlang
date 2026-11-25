@@ -25,6 +25,11 @@ fn proposals_require_digest_acceptance_and_keep_the_original() {
     let effective = "fn guard() { if missing { return; } }\n";
     fs::write(d.join("old/lib.rs"), original).unwrap();
     fs::write(d.join("new/lib.rs"), effective).unwrap();
+    assert!(
+        helper(&["freeze", "old", "baseline.pin"], d)
+            .status
+            .success()
+    );
     let proposal = helper(&["propose", "old", "new", "review"], d);
     assert!(
         proposal.status.success(),
@@ -57,6 +62,7 @@ fn proposals_require_digest_acceptance_and_keep_the_original() {
             &d.join("review/accepted.json"),
             &d.join("review/effective/Cargo.toml"),
             &d.join("review/effective/mapping.toml"),
+            &d.join("baseline.pin"),
         )
     };
     assert!(verify().is_ok(), "{:?}", verify());
@@ -164,17 +170,23 @@ fn review_macro_identity_and_silent_priority_changes_against_original() {
             }
             _ => unreachable!(),
         }
+        let pin = d.join("baseline.pin");
         let import = |root: &Path, out: &str, receipt: Option<&Path>| {
             oddlang::import_rust::import(
                 &root.join("Cargo.toml"),
                 &root.join("mapping.toml"),
                 &d.join(out),
-                receipt,
+                receipt.map(|r| (r, pin.as_path())),
             )
         };
         if issue != "priority" {
             assert!(import(&original, "before", None).is_err());
         }
+        assert!(
+            helper(&["freeze", "old", "baseline.pin"], d)
+                .status
+                .success()
+        );
         let proposal = helper(&["propose", "old", "new", "review"], d);
         assert!(
             proposal.status.success(),
@@ -194,7 +206,7 @@ fn review_macro_identity_and_silent_priority_changes_against_original() {
             &effective.join("Cargo.toml"),
             &effective.join("mapping.toml"),
             &d.join("project"),
-            Some(&receipt),
+            Some((&receipt, &pin)),
         )
         .unwrap();
         let baseline = observation(&d.join("review/original"), &d.join("baseline"));
@@ -209,4 +221,68 @@ fn review_macro_identity_and_silent_priority_changes_against_original() {
             }
         );
     }
+}
+
+#[test]
+fn accepted_replacement_archive_cannot_substitute_the_pre_cleanup_baseline() {
+    let fixture = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/rust-import/ledger");
+    let tmp = tempfile::tempdir().unwrap();
+    let d = tmp.path();
+    copy_fixture(&fixture, &d.join("old"));
+    copy_fixture(&fixture, &d.join("new"));
+    assert!(
+        helper(&["freeze", "old", "trusted.pin"], d)
+            .status
+            .success()
+    );
+    let source = d.join("old/src/lib.rs");
+    let code = fs::read_to_string(&source).unwrap();
+    let a = code.find("    if !state.contains_key(source)").unwrap();
+    let b = code
+        .find("    if !state.contains_key(destination)")
+        .unwrap();
+    let c = code.find("    if source == destination").unwrap();
+    fs::write(
+        &source,
+        format!("{}{}{}{}", &code[..a], &code[b..c], &code[a..b], &code[c..]),
+    )
+    .unwrap();
+
+    let proposed = helper(&["propose", "old", "new", "review"], d);
+    assert!(proposed.status.success());
+    let digest = String::from_utf8(proposed.stdout).unwrap();
+    assert!(
+        helper(&["accept", "review", "--sha256", digest.trim()], d)
+            .status
+            .success()
+    );
+    let import = |pin: &str| {
+        Command::new(env!("CARGO_BIN_EXE_oddlang"))
+            .current_dir(d)
+            .args([
+                "import",
+                "rust",
+                "review/effective/Cargo.toml",
+                "review/effective/mapping.toml",
+                "out",
+                "--accepted-cleanup",
+                "review/accepted.json",
+                "--baseline-pin",
+                pin,
+            ])
+            .output()
+            .unwrap()
+    };
+    let error = |pin: &str| {
+        let result = import(pin);
+        assert!(!result.status.success());
+        assert!(!d.join("out").exists());
+        String::from_utf8(result.stderr).unwrap()
+    };
+    assert!(error("trusted.pin").contains("independently frozen baseline"));
+    assert!(error("missing.pin").contains("missing independent baseline pin"));
+    fs::copy(d.join("trusted.pin"), d.join("review/local.pin")).unwrap();
+    assert!(error("review/local.pin").contains("outside the cleanup archive"));
+    fs::write(d.join("review/accepted.json"), "{}").unwrap();
+    assert!(error("trusted.pin").contains("differs from reviewed proposal"));
 }

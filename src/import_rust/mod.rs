@@ -144,10 +144,12 @@ fn compile(source: &BTreeMap<String, Vec<u8>>) -> Res<(String, String)> {
             "-C",
             "overflow-checks=yes",
         ]);
+    let canonical = root.canonicalize().map_err(|e| e.to_string())?;
     run(&mut cmd).map_err(|e| {
         format!(
             "Rust build failed: {}",
-            e.replace(&root.display().to_string(), "<input>")
+            e.replace(&canonical.display().to_string(), "<input>")
+                .replace(&root.display().to_string(), "<input>")
         )
     })?;
     Ok((compiler, target))
@@ -229,7 +231,7 @@ fn validate_root(root: &Path) -> Res<()> {
     }
     Ok(())
 }
-pub fn import(manifest: &Path, map: &Path, out: &Path, receipt: Option<&Path>) -> Res<()> {
+pub fn import(manifest: &Path, map: &Path, out: &Path, receipt: Option<(&Path, &Path)>) -> Res<()> {
     if manifest.file_name().is_none_or(|n| n != "Cargo.toml") {
         return Err("expected Cargo.toml".into());
     }
@@ -254,7 +256,7 @@ pub fn import(manifest: &Path, map: &Path, out: &Path, receipt: Option<&Path>) -
         return Err(format!("unsupported import profile {}", config.profile));
     }
     let cleanup = receipt
-        .map(|p| cleanup::verify(p, manifest, map))
+        .map(|(receipt, pin)| cleanup::verify(receipt, manifest, map, pin))
         .transpose()?;
     let (operations, spans) = lower::lower(as_utf8(&input["src/lib.rs"])?, &config.mapping)?;
     let (compiler, target) = compile(&input)?;
@@ -324,7 +326,7 @@ pub fn verify(dir: &Path) -> Res<()> {
     load_model(dir).map(|_| ())
 }
 
-pub fn replay(manifest: &Path, map: &Path, dir: &Path, receipt: Option<&Path>) -> Res<()> {
+pub fn replay(manifest: &Path, map: &Path, dir: &Path, receipt: Option<(&Path, &Path)>) -> Res<()> {
     verify(dir)?;
     let temp = tempfile::tempdir().map_err(|e| e.to_string())?;
     let copy = temp.path().join("import");

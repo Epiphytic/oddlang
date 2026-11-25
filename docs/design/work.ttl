@@ -372,3 +372,5 @@ w:componentExecution p:addresses w:componentUpperEndpoint .
 w:rustRecoveryEvidence a p:Artifact ; rdfs:label "Source recovery and native regeneration evidence" ;
     p:location "docs/design/rust-recovery-evidence.md" .
 w:rustRecovery p:evidence w:rustRecoveryEvidence .
+w:rustCleanupBaseline a p:Finding ; rdfs:label "Bind cleanup acceptance to a separately frozen original tree" ; p:source w:rustRecoveryEvidence .
+w:rustRecovery p:addresses w:rustCleanupBaseline .

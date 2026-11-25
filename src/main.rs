@@ -5,14 +5,26 @@ fn run(args: &[String]) -> Result<(), String> {
         [group, cmd, manifest, mapping, out] if group == "import" && cmd == "rust" => {
             oddlang::import_rust::import(manifest.as_ref(), mapping.as_ref(), out.as_ref(), None)
         }
-        [group, cmd, manifest, mapping, out, flag, receipt]
-            if group == "import" && cmd == "rust" && flag == "--accepted-cleanup" =>
+        [
+            group,
+            cmd,
+            manifest,
+            mapping,
+            out,
+            flag,
+            receipt,
+            pin_flag,
+            pin,
+        ] if group == "import"
+            && cmd == "rust"
+            && flag == "--accepted-cleanup"
+            && pin_flag == "--baseline-pin" =>
         {
             oddlang::import_rust::import(
                 manifest.as_ref(),
                 mapping.as_ref(),
                 out.as_ref(),
-                Some(receipt.as_ref()),
+                Some((receipt.as_ref(), pin.as_ref())),
             )
         }
         [group, cmd, dir, output] if group == "import" && cmd == "verify-build" => {
@@ -24,14 +36,26 @@ fn run(args: &[String]) -> Result<(), String> {
         [group, cmd, manifest, mapping, dir] if group == "import" && cmd == "replay" => {
             oddlang::import_rust::replay(manifest.as_ref(), mapping.as_ref(), dir.as_ref(), None)
         }
-        [group, cmd, manifest, mapping, dir, flag, receipt]
-            if group == "import" && cmd == "replay" && flag == "--accepted-cleanup" =>
+        [
+            group,
+            cmd,
+            manifest,
+            mapping,
+            dir,
+            flag,
+            receipt,
+            pin_flag,
+            pin,
+        ] if group == "import"
+            && cmd == "replay"
+            && flag == "--accepted-cleanup"
+            && pin_flag == "--baseline-pin" =>
         {
             oddlang::import_rust::replay(
                 manifest.as_ref(),
                 mapping.as_ref(),
                 dir.as_ref(),
-                Some(receipt.as_ref()),
+                Some((receipt.as_ref(), pin.as_ref())),
             )
         }
         [group, rest @ ..] if group == "wasm" => oddlang::wasm::command(rest),

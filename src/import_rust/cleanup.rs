@@ -59,12 +59,29 @@ fn snapshot(root: &Path, expected: &str) -> Res<BTreeMap<String, String>> {
     Ok(entries_map)
 }
 
-pub fn verify(receipt: &Path, manifest: &Path, mapping: &Path) -> Res<serde_json::Value> {
+pub fn verify(
+    receipt: &Path,
+    manifest: &Path,
+    mapping: &Path,
+    baseline_pin: &Path,
+) -> Res<serde_json::Value> {
     if receipt.file_name().and_then(|n| n.to_str()) != Some("accepted.json") {
         return Err("cleanup requires accepted.json".into());
     }
     let root = receipt.parent().ok_or("missing cleanup archive")?;
-    let record: Receipt = serde_json::from_slice(&read(receipt)?).map_err(|e| e.to_string())?;
+    let archive = receipt.canonicalize().map_err(|e| e.to_string())?;
+    let pin = baseline_pin
+        .canonicalize()
+        .map_err(|e| format!("missing independent baseline pin: {e}"))?;
+    if pin.starts_with(archive.parent().ok_or("missing archive root")?) {
+        return Err("baseline pin must be held outside the cleanup archive".into());
+    }
+    let pin_bytes = read(baseline_pin)?;
+    let receipt_bytes = read(receipt)?;
+    if receipt_bytes != read(&root.join("proposal.json"))? {
+        return Err("accepted cleanup receipt differs from reviewed proposal".into());
+    }
+    let record: Receipt = serde_json::from_slice(&receipt_bytes).map_err(|e| e.to_string())?;
     if record.version != 1 {
         return Err("unknown cleanup format".into());
     }
@@ -80,6 +97,13 @@ pub fn verify(receipt: &Path, manifest: &Path, mapping: &Path) -> Res<serde_json
         {
             return Err("cleanup receipt names different import inputs".into());
         }
+    }
+    let expected_pin = format!(
+        "oddlang-rust-cleanup-baseline-v1 {}\n",
+        record.original_tree_sha256
+    );
+    if pin_bytes != expected_pin.as_bytes() {
+        return Err("cleanup original differs from independently frozen baseline".into());
     }
     let before = snapshot(&original, &record.original_tree_sha256)?;
     let after = snapshot(&effective, &record.effective_tree_sha256)?;
@@ -112,5 +136,7 @@ pub fn verify(receipt: &Path, manifest: &Path, mapping: &Path) -> Res<serde_json
         return Err("cannot replay accepted cleanup patch".into());
     }
     snapshot(replay.path(), &record.effective_tree_sha256)?;
-    serde_json::to_value(record).map_err(|e| e.to_string())
+    let mut facts = serde_json::to_value(record).map_err(|e| e.to_string())?;
+    facts["baselinePinSha256"] = digest(&pin_bytes).into();
+    Ok(facts)
 }

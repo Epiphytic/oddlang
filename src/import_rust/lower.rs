@@ -114,13 +114,18 @@ fn mapped(names: &BTreeMap<String, String>, suffix: &str) -> String {
 }
 impl Mapping {
     fn check(&self) -> R<()> {
-        let s = Span::call_site();
-        need(
+        let require = |ok: bool, reason: &str| {
+            if ok {
+                Ok(())
+            } else {
+                Err(format!("mapping.toml: {reason}"))
+            }
+        };
+        require(
             self.min == 0 && self.max == i64::MAX,
-            s,
             "unsupported constructor bounds",
         )?;
-        need(
+        require(
             [
                 &self.entity,
                 &self.error_type,
@@ -129,32 +134,28 @@ impl Mapping {
             ]
             .iter()
             .all(|n| ordinary(n)),
-            s,
             "unsupported mapped item name",
         )?;
-        need(
+        require(
             self.entity_iri == format!("{LEDGER}Account")
                 && self.operation_iri == format!("{LEDGER}TransferFunds"),
-            s,
             "unsupported entity or operation identity",
         )?;
         for (map, roles) in [
             (&self.fields, ["id", "owner", "balance"]),
             (&self.args, ["source", "destination", "amount"]),
         ] {
-            need(
+            require(
                 map.len() == 3
                     && map.keys().all(|k| ordinary(k))
                     && roles
                         .iter()
                         .all(|n| map.values().any(|v| v == &format!("{LEDGER}{n}"))),
-                s,
                 "missing or ambiguous field or argument identity",
             )?;
         }
-        need(
+        require(
             !self.guards.is_empty() && self.guards.keys().eq(self.errors.keys()),
-            s,
             "missing or stale guard/error identity",
         )?;
         let mut iris = BTreeSet::new();
@@ -166,30 +167,40 @@ impl Mapping {
             .chain(self.guards.values())
             .chain(self.errors.values())
         {
-            need(iris.insert(iri), s, "duplicate mapped identity")?;
+            require(
+                iris.insert(iri),
+                &format!("duplicate mapped identity {iri}"),
+            )?;
         }
         for (variant, iri) in &self.errors {
             let n = iri.strip_prefix(ERROR).unwrap_or("");
-            need(
+            require(
                 ordinary(variant)
                     && ident(n)
                     && !matches!(n, "FieldOutOfRange" | "AssignmentConflict")
                     && self.guards[variant].strip_prefix(LEDGER).is_some_and(ident),
-                s,
                 "unsupported guard/error identity",
             )?;
         }
         Ok(())
     }
 }
-struct Attributes(Option<Span>);
-impl<'a> syn::visit::Visit<'a> for Attributes {
+struct UnsupportedSyntax(Option<(Span, &'static str)>);
+impl<'a> syn::visit::Visit<'a> for UnsupportedSyntax {
     fn visit_attribute(&mut self, a: &'a syn::Attribute) {
-        self.0.get_or_insert(a.span());
+        self.0
+            .get_or_insert((a.span(), "attributes are outside Rust import profile v1"));
+    }
+    fn visit_ident(&mut self, ident: &'a syn::Ident) {
+        if !ident.to_string().is_ascii() {
+            self.0.get_or_insert((
+                ident.span(),
+                "Rust import profile v1 requires ASCII identifiers",
+            ));
+        }
     }
 }
 pub fn lower(source: &str, m: &Mapping) -> R<(String, Locations)> {
-    m.check()?;
     let file = syn::parse_file(source).map_err(|e| {
         format!(
             "src/lib.rs:{}:{}: invalid Rust syntax: {e}",
@@ -197,11 +208,12 @@ pub fn lower(source: &str, m: &Mapping) -> R<(String, Locations)> {
             e.span().start().column + 1
         )
     })?;
-    let mut attrs = Attributes(None);
-    syn::visit::Visit::visit_file(&mut attrs, &file);
-    if let Some(s) = attrs.0 {
-        return fail(s, "attributes are outside Rust import profile v1");
+    let mut unsupported = UnsupportedSyntax(None);
+    syn::visit::Visit::visit_file(&mut unsupported, &file);
+    if let Some((span, reason)) = unsupported.0 {
+        return fail(span, reason);
     }
+    m.check()?;
     let mut loc = Locations::new();
     let mut function_item = None;
     let mut items = BTreeSet::new();
@@ -581,9 +593,9 @@ impl<'a> Transfer<'a> {
                 if let syn::Lit::Int(n) = &l.lit
                     && n.suffix().is_empty() =>
             {
-                let v = n
-                    .base10_parse::<i128>()
-                    .map_err(|_| "integer literal exceeds i128".to_owned())?;
+                let Ok(v) = n.base10_parse::<i128>() else {
+                    return fail(s, "integer literal exceeds i128");
+                };
                 Ok(integer(v))
             }
             _ if path(e, "i64::MAX") => Ok(integer(i64::MAX.into())),
@@ -714,21 +726,34 @@ impl<'a> Transfer<'a> {
                     "distinctness guard must compare different arguments",
                 )?;
                 self.distinct = true;
-                binary("NotEqual", &iri(&self.m.args[&l]), &iri(&self.m.args[&r]))
+                binary(
+                    "NotEqual",
+                    &iri(&self.m.args[&self.source]),
+                    &iri(&self.m.args[&self.dest]),
+                )
             }
             Expr::Binary(b) => {
                 let (l, r) = (self.number(&b.left)?, self.number(&b.right)?);
-                let (class, row) = match b.op {
-                    BinOp::Le(_) => ("Greater", r.linear.at_most(l.linear, true)),
-                    BinOp::Lt(_) => ("GreaterEqual", r.linear.at_most(l.linear, false)),
-                    BinOp::Gt(_) => ("LessEqual", l.linear.at_most(r.linear, false)),
+                // Success requires upper > lower or upper >= lower. Put both
+                // spellings of the failed comparison into this same relation.
+                let (upper, lower, strict) = match b.op {
+                    BinOp::Le(_) => (&l, &r, true),
+                    BinOp::Ge(_) => (&r, &l, true),
+                    BinOp::Lt(_) => (&l, &r, false),
+                    BinOp::Gt(_) => (&r, &l, false),
                     _ => return fail(s, "unsupported guard comparison"),
                 };
-                let Some(row) = row else {
+                let Some(row) = lower.linear.at_most(upper.linear, strict) else {
                     return fail(s, "guard inequality exceeds proof limits");
                 };
                 self.proof.insert(row);
-                binary(class, &l.ttl, &r.ttl)
+                if strict {
+                    binary("Greater", &upper.ttl, &lower.ttl)
+                } else if (upper.nodes, &upper.ttl) >= (lower.nodes, &lower.ttl) {
+                    binary("GreaterEqual", &upper.ttl, &lower.ttl)
+                } else {
+                    binary("LessEqual", &lower.ttl, &upper.ttl)
+                }
             }
             _ => return fail(g.cond.span(), "unsupported guard condition"),
         };
