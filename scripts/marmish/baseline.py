@@ -176,7 +176,9 @@ def main():
     report.mkdir(parents=True, exist_ok=True)
     if any(report.iterdir()):
         raise SystemExit("output directory must be empty")
-    with tempfile.TemporaryDirectory(prefix="m-", dir=Path(output(["getconf", "DARWIN_USER_TEMP_DIR"])).resolve()) as tmp:
+    # macOS sockaddr_un.sun_path is short. Marmish accepts root-owned sticky
+    # directory ancestors and tempfile creates this private child with mode 0700.
+    with tempfile.TemporaryDirectory(prefix="m-", dir="/private/tmp") as tmp:
         run(args.upstream.resolve(), report, Path(tmp))
 
 
