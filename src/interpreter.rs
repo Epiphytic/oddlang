@@ -31,7 +31,7 @@ impl<'m> State<'m> {
         &self.rows
     }
 
-    /// Build the map key from the validated record's own identity.
+    /// Upsert a validated record using its own identity as the map key.
     pub fn insert(&mut self, row: Row) -> Result<(), String> {
         for (iri, field) in &self.model.fields {
             match (row.get(iri), field.range) {
@@ -50,6 +50,8 @@ impl<'m> State<'m> {
         Ok(())
     }
 
+    /// Look up a named operation, then execute it. An unknown name yields a
+    /// lookup diagnostic. For a name in the loaded model, failures are error IRIs.
     pub fn execute(
         &mut self,
         operation: &str,

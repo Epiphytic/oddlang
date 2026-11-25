@@ -23,7 +23,7 @@ struct Case {
     amount: i64,
 }
 
-const IDS: [&str; 4] = ["A", "a", "C", "missing"];
+const IDS: [&str; 5] = ["A", "a", "C", "missing", "also-missing"];
 const OWNERS: [&str; 3] = ["Ada", "", "Cy"];
 
 impl Case {
@@ -91,22 +91,41 @@ impl Harness {
         );
         Self { dir }
     }
-    fn run(&self, cases: &[Case]) -> Vec<Outcome> {
+    fn launch(&self, cases: &[Case]) -> std::process::Output {
         let input = self.dir.path().join("inputs");
         fs::write(
             &input,
             cases.iter().map(Case::line).collect::<Vec<_>>().join("\n"),
         )
         .unwrap();
-        let result = Command::new(self.dir.path().join("runner"))
+        Command::new(self.dir.path().join("runner"))
             .stdin(Stdio::from(fs::File::open(input).unwrap()))
             .output()
-            .unwrap();
-        assert!(
-            result.status.success(),
-            "{}",
-            String::from_utf8_lossy(&result.stderr)
-        );
+            .unwrap()
+    }
+    fn run(&self, cases: &[Case]) -> Vec<Outcome> {
+        let result = self.launch(cases);
+        if !result.status.success() {
+            // Each input starts from a fresh map. Bisect failing prefixes even
+            // if the child terminated before flushing its buffered output.
+            let mut first = 0;
+            let mut last = cases.len() - 1;
+            while first < last {
+                let mid = first + (last - first) / 2;
+                if self.launch(&cases[..=mid]).status.success() {
+                    first = mid + 1;
+                } else {
+                    last = mid;
+                }
+            }
+            panic!(
+                "compiled runner exited {} on seed {}, case {first}\nreplay with ODDLANG_TRANSFER_CASE='{}' cargo test --locked --offline --test transfer_targets seeded_transfer_conformance\n{}",
+                result.status,
+                seed(),
+                cases[first].line(),
+                String::from_utf8_lossy(&result.stderr)
+            );
+        }
         let mut outcomes = Vec::new();
         for line in std::str::from_utf8(&result.stdout).unwrap().lines() {
             let mut fields = line.split('\t');
@@ -137,6 +156,7 @@ fn both_engines_match_complete_fixed_outcomes() {
     let cases: Vec<_> = [
         (0, 1, 4),
         (3, 3, -1),
+        (3, 4, -1),
         (0, 3, 0),
         (0, 0, 0),
         (0, 1, 0),
@@ -329,6 +349,43 @@ fn shrink(mut case: Case, mut fails: impl FnMut(&Case) -> bool) -> Case {
                 }
             }
         }
+        // Reduce amount while retaining exact distance to funds or headroom.
+        // The headroom case can require increasing the destination balance.
+        if case.amount > 1 {
+            for next in [1, case.amount / 2] {
+                let delta = case.amount - next;
+                let mut candidates = Vec::new();
+                if case.source < 3 && case.balances[case.source] >= delta {
+                    let mut candidate = Case {
+                        amount: next,
+                        ..case.clone()
+                    };
+                    candidate.balances[case.source] -= delta;
+                    candidates.push(candidate);
+                }
+                if case.destination < 3
+                    && let Some(balance) = case.balances[case.destination].checked_add(delta)
+                {
+                    let mut candidate = Case {
+                        amount: next,
+                        ..case.clone()
+                    };
+                    candidate.balances[case.destination] = balance;
+                    candidates.push(candidate.clone());
+                    if case.source < 3
+                        && case.source != case.destination
+                        && case.balances[case.source] >= delta
+                    {
+                        candidate.balances[case.source] -= delta;
+                        candidates.push(candidate);
+                    }
+                }
+                if let Some(smaller) = candidates.into_iter().find(|c| fails(c)) {
+                    case = smaller;
+                    break;
+                }
+            }
+        }
         for i in 0..case.source {
             let candidate = Case {
                 source: i,
@@ -375,7 +432,8 @@ impl Random {
         }
     }
     fn id(&mut self) -> usize {
-        match self.next() % 8 {
+        match self.next() % 9 {
+            8 => 4,
             0 => 3,
             1 => 2,
             2..=4 => 0,
@@ -427,13 +485,17 @@ fn replay(line: &str) -> Case {
     }
 }
 
+fn seed() -> u64 {
+    std::env::var("ODDLANG_TRANSFER_SEED")
+        .map(|s| s.parse().unwrap())
+        .unwrap_or(0xc0ff_ee42)
+}
+
 #[test]
 fn seeded_transfer_conformance() {
     let model = load_model(v1()).unwrap();
     let harness = Harness::compile(&model);
-    let seed = std::env::var("ODDLANG_TRANSFER_SEED")
-        .map(|s| s.parse().unwrap())
-        .unwrap_or(0xc0ff_ee42);
+    let seed = seed();
     let mut random = Random(seed);
     let replay_case = std::env::var("ODDLANG_TRANSFER_CASE").ok();
     let cases = replay_case
@@ -482,4 +544,72 @@ fn seeded_transfer_conformance() {
             );
         }
     }
+}
+
+#[test]
+fn swapping_assignment_values_produces_a_successful_wrong_state() {
+    let p = fixture();
+    replace(
+        p.path(),
+        "transfer.ttl",
+        "o:value _:debitValue",
+        "o:value _:temporary",
+    );
+    replace(
+        p.path(),
+        "transfer.ttl",
+        "o:value _:creditValue",
+        "o:value _:debitValue",
+    );
+    replace(
+        p.path(),
+        "transfer.ttl",
+        "o:value _:temporary",
+        "o:value _:creditValue",
+    );
+    let model = load_model(p.path()).unwrap();
+    let case = replay("10 3 7 0 1 4");
+    let mut swapped = case.rows();
+    swapped.get_mut("A").unwrap().balance = 7;
+    swapped.get_mut("a").unwrap().balance = 6;
+    assert_engines(&model, &case, (Ok(()), swapped.clone()));
+    let (result, correct) = case.oracle();
+    assert_eq!(result, Ok(()));
+    assert_eq!((correct["A"].balance, correct["a"].balance), (6, 7));
+    assert_ne!(swapped, correct);
+}
+
+#[test]
+fn shrink_preserves_coupled_amount_boundaries() {
+    let source = shrink(replay("9500 0 0 0 1 9500"), |c| {
+        c.source == 0 && c.amount > 0 && c.balances[0] == c.amount
+    });
+    assert_eq!((source.balances[0], source.amount), (1, 1));
+    let destination = shrink(replay("9500 9223372036854766307 0 0 1 9500"), |c| {
+        c.destination == 1 && c.amount > 0 && i64::MAX - c.balances[1] == c.amount
+    });
+    assert_eq!(
+        (destination.balances[1], destination.amount),
+        (i64::MAX - 1, 1)
+    );
+}
+
+#[test]
+fn batch_crash_reports_seed_and_single_case_replay() {
+    let harness = Harness::compile(&load_model(v1()).unwrap());
+    let cases = [
+        replay("10 3 7 0 1 4"),
+        replay("-1 3 7 0 1 4"),
+        replay("0 0 0 0 1 4"),
+    ];
+    let error = std::panic::catch_unwind(|| harness.run(&cases)).unwrap_err();
+    let message = error.downcast_ref::<String>().unwrap();
+    assert!(
+        message.contains("seed ") && message.contains("case 1"),
+        "{message}"
+    );
+    assert!(
+        message.contains("ODDLANG_TRANSFER_CASE='-1 3 7 0 1 4'"),
+        "{message}"
+    );
 }

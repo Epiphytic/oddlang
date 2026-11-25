@@ -3,7 +3,7 @@ use account::{__operations, Account};
 use std::io::{self, BufRead};
 
 fn main() {
-    let ids = ["A", "a", "C", "missing"];
+    let ids = ["A", "a", "C", "missing", "also-missing"];
     let owners = ["Ada", "", "Cy"];
     let operation = __operations::lookup("urn:oddlang:ledger:TransferFunds").unwrap();
     for line in io::stdin().lock().lines() {

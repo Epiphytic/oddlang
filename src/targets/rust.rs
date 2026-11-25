@@ -133,6 +133,7 @@ pub mod __operations {{
     #[derive(Default)]
     pub struct State(std::collections::BTreeMap<String, super::{account}>);
     impl State {{
+        /// Upsert a checked record using its own identity as the map key.
         pub fn insert(&mut self, account: super::{account}) {{
             self.0.insert(account.{key}().to_owned(), account);
         }}
