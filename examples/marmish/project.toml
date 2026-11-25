@@ -1,0 +1,15 @@
+schema = 1
+name = "marmish"
+repository = "https://github.com/Epiphytic/marmish"
+git_revision = "49fc705408a230bd0ad896248d08dbdd2faad05a"
+rust = "1.97.1"
+workspace_members = ["marmish-core", "marmish-engine", "marmish-mdk", "marmish-native", "marmish-prototype", "marmish-stream", "marmish-vault"]
+targets = ["aarch64-apple-darwin", "aarch64-unknown-linux-gnu", "x86_64-unknown-linux-gnu"]
+feature_profiles = ["default", "marmish-native/installed-checks", "marmish-engine/fault-injection"]
+framing_source = "crates/marmish-core/src/frame.rs"
+
+[inventory]
+runtime_scope = "Workspace Rust declarations that can belong to a production Cargo target. Include uncertain production reachability; list examples, test-only definitions, installed qualification tooling, and packaging roots separately."
+classification = "The untouched baseline retains native definitions. A future imported classification requires a verified graph projection supplying that definition."
+symbol_identity = "Use upstream lexical ID (path, named ancestor chain, declaration kind and occurrence); source line is a separate coordinate. File and symbol identity are scoped to Marmish."
+source_reference_scope = "Resolve lexical scope by file and declaration ordinal. Callee spellings do not establish a compiler-resolved call graph."

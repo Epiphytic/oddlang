@@ -1,0 +1,636 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+  "sourceReferences": [
+    "docs/phases/phase-0.md",
+    "crates/marmish-core/tests/contracts.rs",
+    "crates/marmish-core/src/lib.rs",
+    "crates/marmish-core/src/frame.rs",
+    "crates/marmish-core/src/config.rs",
+    "crates/marmish-native/Cargo.toml",
+    "docs/validation/v0.3.1-c2-validation.md",
+    "docs/validation/v0.3-release.md",
+    "docs/phases/v0.3.1-release.md",
+    "README.md"
+  ],
+  "byteFormat": "Concatenate segments in order. utf8 is literal Unicode encoded as UTF-8, hex is hexadecimal octets, and repeatHex repeats the decoded octets exactly count times.",
+  "api": {
+    "crate": "marmish-core",
+    "exports": [
+      "RelaySet",
+      "Retention",
+      "ConfigError",
+      "FrameError",
+      "Limits",
+      "ProbeEnvelope"
+    ],
+    "methods": [
+      "RelaySet::parse",
+      "RelaySet::as_slice",
+      "Retention::default",
+      "Retention::from_seconds",
+      "Retention::seconds",
+      "ProbeEnvelope::encode",
+      "ProbeEnvelope::decode"
+    ],
+    "constants": {
+      "RAW_BYTES": 16384,
+      "JSON_BYTES": 32768,
+      "NDJSON_BYTES": 65536,
+      "MAX_SECONDS": 31536000
+    },
+    "frameErrors": [
+      "SizeLimit",
+      "InvalidJson",
+      "InvalidVersion",
+      "InvalidEncoding"
+    ],
+    "configErrors": [
+      "EmptyRelaySet",
+      "InvalidUrl",
+      "DisallowedScheme",
+      "DisallowedComponents",
+      "DisallowedHost",
+      "LoopbackDenied",
+      "RetentionOutOfRange"
+    ]
+  },
+  "cases": [
+    {
+      "id": "encode-empty",
+      "operation": "encode",
+      "input": [],
+      "expected": {
+        "bytes": [
+          {
+            "utf8": "{\"version\":1,\"payload\":\""
+          },
+          {
+            "utf8": "\"}"
+          }
+        ]
+      }
+    },
+    {
+      "id": "decode-empty",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":1,\"payload\":\""
+        },
+        {
+          "utf8": "\"}"
+        }
+      ],
+      "expected": {
+        "bytes": []
+      }
+    },
+    {
+      "id": "encode-binary",
+      "operation": "encode",
+      "input": [
+        {
+          "hex": "00ff800a"
+        }
+      ],
+      "expected": {
+        "bytes": [
+          {
+            "utf8": "{\"version\":1,\"payload\":\""
+          },
+          {
+            "utf8": "AP+ACg=="
+          },
+          {
+            "utf8": "\"}"
+          }
+        ]
+      }
+    },
+    {
+      "id": "decode-binary",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":1,\"payload\":\""
+        },
+        {
+          "utf8": "AP+ACg=="
+        },
+        {
+          "utf8": "\"}"
+        }
+      ],
+      "expected": {
+        "bytes": [
+          {
+            "hex": "00ff800a"
+          }
+        ]
+      }
+    },
+    {
+      "id": "encode-raw-limit",
+      "operation": "encode",
+      "input": [
+        {
+          "repeatHex": "ff",
+          "count": 16384
+        }
+      ],
+      "expected": {
+        "bytes": [
+          {
+            "utf8": "{\"version\":1,\"payload\":\""
+          },
+          {
+            "repeatHex": "2f",
+            "count": 21844
+          },
+          {
+            "utf8": "/w=="
+          },
+          {
+            "utf8": "\"}"
+          }
+        ]
+      }
+    },
+    {
+      "id": "decode-raw-limit",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":1,\"payload\":\""
+        },
+        {
+          "repeatHex": "2f",
+          "count": 21844
+        },
+        {
+          "utf8": "/w=="
+        },
+        {
+          "utf8": "\"}"
+        }
+      ],
+      "expected": {
+        "bytes": [
+          {
+            "repeatHex": "ff",
+            "count": 16384
+          }
+        ]
+      }
+    },
+    {
+      "id": "encode-raw-plus-one",
+      "operation": "encode",
+      "input": [
+        {
+          "repeatHex": "ff",
+          "count": 16385
+        }
+      ],
+      "expected": {
+        "error": "SizeLimit"
+      }
+    },
+    {
+      "id": "decode-raw-plus-one",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":1,\"payload\":\""
+        },
+        {
+          "repeatHex": "2f",
+          "count": 21844
+        },
+        {
+          "utf8": "//8="
+        },
+        {
+          "utf8": "\"}"
+        }
+      ],
+      "expected": {
+        "error": "SizeLimit"
+      }
+    },
+    {
+      "id": "json-32768",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":1,\"payload\":\"\"}"
+        },
+        {
+          "repeatHex": "20",
+          "count": 32742
+        }
+      ],
+      "expected": {
+        "bytes": []
+      }
+    },
+    {
+      "id": "json-32769",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":1,\"payload\":\"\"}"
+        },
+        {
+          "repeatHex": "20",
+          "count": 32743
+        }
+      ],
+      "expected": {
+        "error": "SizeLimit"
+      }
+    },
+    {
+      "id": "whitespace-and-reordered",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": " \t{ \"payload\" : \"Zg==\",\n \"version\" : 1 }\r\n"
+        }
+      ],
+      "expected": {
+        "bytes": [
+          {
+            "hex": "66"
+          }
+        ]
+      }
+    },
+    {
+      "id": "unknown",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":1,\"payload\":\"\",\"other\":0}"
+        }
+      ],
+      "expected": {
+        "error": "InvalidJson"
+      }
+    },
+    {
+      "id": "duplicate-version",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":1,\"version\":1,\"payload\":\"\"}"
+        }
+      ],
+      "expected": {
+        "error": "InvalidJson"
+      }
+    },
+    {
+      "id": "duplicate-payload",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":1,\"payload\":\"\",\"payload\":\"\"}"
+        }
+      ],
+      "expected": {
+        "error": "InvalidJson"
+      }
+    },
+    {
+      "id": "missing",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{}"
+        }
+      ],
+      "expected": {
+        "error": "InvalidJson"
+      }
+    },
+    {
+      "id": "wrong-type",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":1,\"payload\":4}"
+        }
+      ],
+      "expected": {
+        "error": "InvalidJson"
+      }
+    },
+    {
+      "id": "trailing",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":1,\"payload\":\"\"} trailing"
+        }
+      ],
+      "expected": {
+        "error": "InvalidJson"
+      }
+    },
+    {
+      "id": "negative-version",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":-1,\"payload\":\"\"}"
+        }
+      ],
+      "expected": {
+        "error": "InvalidJson"
+      }
+    },
+    {
+      "id": "u32-overflow",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":4294967296,\"payload\":\"\"}"
+        }
+      ],
+      "expected": {
+        "error": "InvalidJson"
+      }
+    },
+    {
+      "id": "unpadded",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":1,\"payload\":\""
+        },
+        {
+          "utf8": "Zg"
+        },
+        {
+          "utf8": "\"}"
+        }
+      ],
+      "expected": {
+        "error": "InvalidEncoding"
+      }
+    },
+    {
+      "id": "short-padding",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":1,\"payload\":\""
+        },
+        {
+          "utf8": "Zg="
+        },
+        {
+          "utf8": "\"}"
+        }
+      ],
+      "expected": {
+        "error": "InvalidEncoding"
+      }
+    },
+    {
+      "id": "extra-padding",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":1,\"payload\":\""
+        },
+        {
+          "utf8": "Zg==="
+        },
+        {
+          "utf8": "\"}"
+        }
+      ],
+      "expected": {
+        "error": "InvalidEncoding"
+      }
+    },
+    {
+      "id": "trailing-bits",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":1,\"payload\":\""
+        },
+        {
+          "utf8": "Zh=="
+        },
+        {
+          "utf8": "\"}"
+        }
+      ],
+      "expected": {
+        "error": "InvalidEncoding"
+      }
+    },
+    {
+      "id": "url-alphabet",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":1,\"payload\":\""
+        },
+        {
+          "utf8": "____"
+        },
+        {
+          "utf8": "\"}"
+        }
+      ],
+      "expected": {
+        "error": "InvalidEncoding"
+      }
+    },
+    {
+      "id": "unicode",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":1,\"payload\":\""
+        },
+        {
+          "utf8": "é"
+        },
+        {
+          "utf8": "\"}"
+        }
+      ],
+      "expected": {
+        "error": "InvalidEncoding"
+      }
+    },
+    {
+      "id": "embedded-newline",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":1,\"payload\":\""
+        },
+        {
+          "utf8": "Zg==\\n"
+        },
+        {
+          "utf8": "\"}"
+        }
+      ],
+      "expected": {
+        "error": "InvalidEncoding"
+      }
+    },
+    {
+      "id": "bad-version",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":2,\"payload\":\"\"}"
+        }
+      ],
+      "expected": {
+        "error": "InvalidVersion"
+      }
+    },
+    {
+      "id": "version-before-encoding",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":2,\"payload\":\"Zh==\"}"
+        }
+      ],
+      "expected": {
+        "error": "InvalidVersion"
+      }
+    },
+    {
+      "id": "invalid-json-before-version",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":2,\"payload\":\"Zh==\",\"bad\":1}"
+        }
+      ],
+      "expected": {
+        "error": "InvalidJson"
+      }
+    },
+    {
+      "id": "size-before-json",
+      "operation": "decode",
+      "input": [
+        {
+          "repeatHex": "ff",
+          "count": 32769
+        }
+      ],
+      "expected": {
+        "error": "SizeLimit"
+      }
+    },
+    {
+      "id": "version-before-size",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":2,\"payload\":\""
+        },
+        {
+          "repeatHex": "3f",
+          "count": 21849
+        },
+        {
+          "utf8": "\"}"
+        }
+      ],
+      "expected": {
+        "error": "InvalidVersion"
+      }
+    },
+    {
+      "id": "encoded-size-before-encoding",
+      "operation": "decode",
+      "input": [
+        {
+          "utf8": "{\"version\":1,\"payload\":\""
+        },
+        {
+          "repeatHex": "3f",
+          "count": 21849
+        },
+        {
+          "utf8": "\"}"
+        }
+      ],
+      "expected": {
+        "error": "SizeLimit"
+      }
+    },
+    {
+      "id": "invalid-utf8",
+      "operation": "decode",
+      "input": [
+        {
+          "hex": "ff"
+        }
+      ],
+      "expected": {
+        "error": "InvalidJson"
+      }
+    }
+  ],
+  "cli": {
+    "marmish": [
+      "--version"
+    ],
+    "marmishd": [
+      "--version"
+    ],
+    "stdoutUtf8": "marmish-native 0.3.1\n",
+    "stderrUtf8": "",
+    "exitCode": 0
+  },
+  "release": {
+    "nativeSourceVersion": "0.3.1",
+    "publishedPrereleaseAtPin": "0.3.0",
+    "installerDefaultAtPin": "0.3.0",
+    "nativeSourcePublishedAtPin": false,
+    "targets": {
+      "aarch64-apple-darwin": "macOS 15+",
+      "x86_64-unknown-linux-gnu": "glibc 2.39+",
+      "aarch64-unknown-linux-gnu": "glibc 2.39+"
+    },
+    "packagingInputs": [
+      ".github/workflows/v02-release.yml",
+      "scripts/install.sh",
+      "tools/marmish_native_licenses.py",
+      "tools/marmish_installed_release.py",
+      "docs/phases/v0.3.1-release.md"
+    ]
+  },
+  "historical": [
+    {
+      "source": "docs/validation/v0.3.1-c2-validation.md",
+      "revision": "4e76ec5b6ee21a2437a9a8927a4243459d3b1ca6",
+      "result": "Interrupted-copy cohort failed on the historical C2 candidate."
+    },
+    {
+      "source": "docs/validation/v0.3-release.md",
+      "result": "The earlier source-build copy edge cohort failed across three platforms; the first macOS cleanup TERM attempt reported RecoveryUncertain."
+    },
+    {
+      "source": "README.md",
+      "result": "Interactive macOS Keychain consent unverified; Tor experimental."
+    }
+  ]
+}

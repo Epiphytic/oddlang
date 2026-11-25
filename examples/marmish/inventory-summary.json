@@ -1,0 +1,51 @@
+{
+  "completeness": "open",
+  "counts": {
+    "cargoTargets": 29,
+    "externalPackages": 746,
+    "fileClasses": {
+      "build-input": 49,
+      "cargo-source": 173,
+      "generated-artifact": 6,
+      "static-asset": 1222,
+      "test": 95,
+      "test-fixture": 4,
+      "tooling": 92
+    },
+    "files": 1641,
+    "knownRuntimeDefinitions": {
+      "imported": 0,
+      "retained-native": 5849,
+      "unsupported": 0
+    },
+    "lexicalReferences": 92724,
+    "ontologyFiles": 418,
+    "parseStatus": {
+      "inventory": 60,
+      "parsed": 326,
+      "parsed_with_omissions": 16,
+      "recovered": 16
+    },
+    "symbolClasses": {
+      "build-input": 2,
+      "example": 1,
+      "qualification-tool": 2784,
+      "retained-native": 5849,
+      "test": 5051,
+      "tooling": 2110
+    },
+    "symbols": 15797,
+    "workspaceMembers": 7
+  },
+  "framingCompilerCheck": "type-checked",
+  "gaps": [
+    "Lexical callees, generated declarations and workspace-wide symbol reachability remain unresolved.",
+    "Source parser recovery and omission markers preclude a complete declaration denominator."
+  ],
+  "gitRevision": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+  "host": "aarch64-apple-darwin",
+  "inventorySha256": "4028143777edfaccec6450739a721a08db882f69ef40badae02af399f6a0fe01",
+  "manifestSha256": "60b2753b1e7b3e2c0f6d50afaffe3ae2e05170653381825747d8e607790af1a3",
+  "schemaVersion": 1,
+  "unresolvedModuleEdges": 0
+}

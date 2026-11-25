@@ -1,0 +1,115 @@
+"""Run frozen framing observations against the pinned, offline Marmish core."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+
+HERE = Path(__file__).resolve().parent
+CONTRACT = HERE.parents[1] / "examples/marmish/observations.json"
+CONSUMER = HERE / "observe_core.rs"
+REVISION = "49fc705408a230bd0ad896248d08dbdd2faad05a"
+
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def expand(segments):
+    data = bytearray()
+    for item in segments:
+        if set(item) == {"utf8"}:
+            part = item["utf8"].encode()
+        elif set(item) == {"hex"}:
+            part = bytes.fromhex(item["hex"])
+        elif set(item) == {"repeatHex", "count"} and type(item["count"]) is int and item["count"] >= 0:
+            part = bytes.fromhex(item["repeatHex"]) * item["count"]
+        else:
+            raise ValueError(f"invalid byte segment: {item}")
+        data.extend(part)
+    return bytes(data)
+
+
+def run(args, cwd, **kwargs):
+    return subprocess.run(args, cwd=cwd, capture_output=True, check=True, **kwargs).stdout
+
+
+def observe(binary, case):
+    operation = case["operation"]
+    if operation not in ("encode", "decode"):
+        raise ValueError(f"unknown operation: {operation}")
+    data = expand(case["input"])
+    observed = subprocess.run([binary, operation], input=data, capture_output=True, check=False)
+    if observed.returncode == 0 and observed.stderr == b"":
+        actual = {"bytesHex": observed.stdout.hex()}
+    elif observed.returncode == 2 and observed.stdout == b"" and observed.stderr.endswith(b"\n"):
+        actual = {"error": observed.stderr[:-1].decode("ascii")}
+    else:
+        raise ValueError(f"{case['id']} consumer failure {observed.returncode}: {observed.stderr!r}")
+    expected = case["expected"]
+    if set(expected) == {"bytes"}:
+        expected = {"bytesHex": expand(expected["bytes"]).hex()}
+    if expected != actual:
+        raise ValueError(f"{case['id']}: expected {str(expected)[:150]}, got {str(actual)[:150]}")
+    return {"id": case["id"], "operation": operation, "inputSha256": digest(data), "observed": actual}
+
+
+def collect(upstream, output):
+    upstream, output = upstream.resolve(), output.resolve()
+    table = json.loads(CONTRACT.read_bytes())
+    if output.exists() and any(output.iterdir()):
+        raise ValueError(f"expected empty output directory: {output}")
+    revision = run(["git", "rev-parse", "HEAD"], upstream).decode().strip()
+    if revision != REVISION or revision != table["sourceRevision"]:
+        raise ValueError("baseline observation needs the pinned Marmish revision")
+    status = run(["git", "status", "--porcelain", "--untracked-files=all"], upstream)
+    if status:
+        raise ValueError("observation requires a clean upstream tree")
+    ids = [c["id"] for c in table["cases"]]
+    if not ids or len(ids) != len(set(ids)):
+        raise ValueError("expected unique case IDs")
+    sources = table["sourceReferences"] + table["release"]["packagingInputs"] + ["Cargo.lock", "rust-toolchain.toml"]
+    source_hashes = {k: digest((upstream / k).read_bytes()) for k in sorted(set(sources))}
+    env = dict(os.environ, CARGO_NET_OFFLINE="true", RUSTUP_AUTO_INSTALL="0")
+    with tempfile.TemporaryDirectory(prefix="marmish-core-observe-") as temp:
+        temp = Path(temp)
+        env["CARGO_TARGET_DIR"] = str(temp / "target")
+        rustc = run(["rustc", "+1.97.1", "-Vv"], upstream, env=env).decode().strip()
+        host = next(line.removeprefix("host: ") for line in rustc.splitlines() if line.startswith("host: "))
+        build = run(["cargo", "+1.97.1", "build", "--locked", "--offline", "-p", "marmish-core",
+                     "--lib", "--message-format=json", "--target", host], upstream, env=env)
+        artifacts = [m for s in build.splitlines() if (m := json.loads(s))["reason"] == "compiler-artifact"
+                     and m["target"]["name"] == "marmish_core"]
+        [artifact] = artifacts
+        [rlib] = [Path(p) for p in artifact["filenames"] if p.endswith(".rlib")]
+        deps = temp / "target" / host / "debug/deps"
+        host_deps = temp / "target/debug/deps"
+        consumer = temp / "consumer"
+        run(["rustc", "+1.97.1", "--edition=2024", "--target", host, "--extern",
+             f"marmish_core={rlib}", "-L", f"dependency={deps}", "-L", f"dependency={host_deps}", CONSUMER, "-o", consumer], upstream, env=env)
+        run([consumer, "api"], upstream, env=env)
+        results = [observe(consumer, case) for case in table["cases"]]
+    output.mkdir(parents=True, exist_ok=True)
+    result = {"schemaVersion": 1, "sourceRevision": revision, "contractSha256": digest(CONTRACT.read_bytes()),
+              "consumerSha256": digest(CONSUMER.read_bytes()), "rustc": rustc, "host": host,
+              "sourceSha256": source_hashes, "corePublicApi": "tested", "cases": results,
+              "platforms": {target: ("core baseline observed" if target == host else "unobserved here")
+                            for target in table["release"]["targets"]},
+              "releaseQualification": "unobserved", "cliObservations": "native/baseline.json"}
+    (output / "results.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("upstream", type=Path)
+    parser.add_argument("empty_output", type=Path)
+    args = parser.parse_args()
+    try:
+        collect(args.upstream, args.empty_output)
+    except subprocess.CalledProcessError as error:
+        sys.exit(error.stderr.decode(errors="replace") or str(error))
+    except (OSError, ValueError, KeyError) as error:
+        sys.exit(str(error))
