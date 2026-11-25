@@ -1,0 +1,3 @@
+@prefix l: <urn:oddlang:ledger:> .
+@prefix o: <urn:oddlang:core:> .
+l:Domain o:imports "fields.ttl", "rust.ttl", "sql.ttl", "avro.ttl", "operations.ttl" .
