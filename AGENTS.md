@@ -8,7 +8,8 @@ Portability means sharing versioned data and API contracts among native backends
 
 - Read the [ledger design](docs/superpowers/specs/2026-11-25-ledger.md) for the current semantics, scope and success criteria. The original chat is available in the author's local PDF export named in the work graph. The design captures the agreed prototype for anyone working from a fresh clone.
 - Follow the [implementation plan](docs/superpowers/plans/2026-11-25-ledger.md) for task details, fixtures and verification commands.
-- Read the [HTTP conformance design](docs/superpowers/specs/2026-11-25-http-conformance.md) and [phased plan](docs/superpowers/plans/2026-11-25-http-conformance.md) for the next implementation.
+- Read the [HTTP conformance design](docs/superpowers/specs/2026-11-25-http-conformance.md) and [phased plan](docs/superpowers/plans/2026-11-25-http-conformance.md) for the shipped HTTP implementation.
+- Follow the [WebAssembly, Rust round-trip and Marmish plan](docs/superpowers/plans/2026-11-25-wasm-rust-marmish.md) for the next seven phases, their compatibility claims and independent review gates.
 - Consult the [process vocabulary](docs/design/process.ttl) and [work graph](docs/design/work.ttl) for decisions, review findings, dependencies, progress and evidence. These describe work on Oddlang. The [ledger core contract](docs/language/ledger-core.md) defines the prototype's executable vocabulary.
 
 ## Build conformance into every contract
