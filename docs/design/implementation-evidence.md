@@ -13,3 +13,9 @@
 - `oddlang check`, `build` and `impact` ran against the v1 example. Tests verified byte-identical Rust and SQL output under triple reorder, prefix change and blank-node relabeling. The [impact comparison](impact-comparison.md) records the exact query result, import topology and criterion for retaining Turtle.
 - Claude Code CLI reviewed the milestone in auto mode, ran the offline suite and tested mutated inputs. Review fixes rejected Rust names that cannot compile, invalid graph ownership and dependency edges, and unknown impact IRIs. Tests now verify the precise SQL and typed-loader diagnostics.
 - The complete suite passed after the fixes. Formatting and Clippy with warnings denied also passed. The live setup rejected a separate PostgreSQL 14 server. The ARM64 Compose image was cached as an OCI layout and its manifest digest and 14 layer hashes matched the published image.
+
+## Language contract
+
+- The closed vocabulary and evaluation rules are documented in the [ledger core contract](../language/ledger-core.md). A hand-authored fixture pins the expanded IRIs and operand order. Mutation tests verify rejected cycles, invalid operands, unguarded reads, error identities and stable named-owner diagnostics.
+- Claude Code CLI ran the offline tests and reviewed the language contract in auto mode. Its review found repeated lowering of shared expressions and manually duplicated impact edges. The prototype now bounds expression depth and expanded nodes, and SPARQL derives the affected fields directly from Read and Assign operands.
+- All 21 tests passed offline against PostgreSQL 16.6 after the review fixes, with formatting and strict Clippy clean. The independent oracle was prepared during this review because it consumes the design table directly. Executor work began after the language review fixes passed.

@@ -84,22 +84,22 @@ w:emit a p:Task ; rdfs:label "Emit Rust and SQL" ;
     p:acceptance "Rust and SQL agree at both bounds and one step beyond each bound." ; p:evidence w:milestone1Evidence .
 
 w:rules a p:Task ; rdfs:label "Publish the closed vocabulary and evaluation rules" ;
-    p:milestone w:contract ; p:status p:active ; p:source w:plan ;
+    p:milestone w:contract ; p:status p:done ; p:source w:plan ;
     p:dependsOn w:load ; p:addresses w:review1, w:review6, w:review7 ;
-    p:acceptance "Publish the vocabulary, lowering fixture, guard order and state transition rules." .
+    p:acceptance "Publish the vocabulary, lowering fixture, guard order and state transition rules." ; p:evidence w:languageEvidence .
 
 w:oracle a p:Task ; rdfs:label "Build the oracle first" ;
-    p:milestone w:m2 ; p:status p:planned ; p:source w:plan ;
+    p:milestone w:m2 ; p:status p:active ; p:source w:plan ;
     p:dependsOn w:rules ; p:addresses w:review2, w:review6 ;
     p:acceptance "Derive whole-state results and first errors from the design without production code." .
 
 w:execute a p:Task ; rdfs:label "Build the two execution paths" ;
-    p:milestone w:m2 ; p:status p:planned ; p:source w:plan ;
+    p:milestone w:m2 ; p:status p:active ; p:source w:plan ;
     p:dependsOn w:oracle, w:emit ; p:addresses w:review1, w:review2 ;
     p:acceptance "Both engines match the oracle and a mutated program exposes shared errors." .
 
 w:differential a p:Task ; rdfs:label "Run boundary-weighted differential tests" ;
-    p:milestone w:m2 ; p:status p:planned ; p:source w:plan ;
+    p:milestone w:m2 ; p:status p:active ; p:source w:plan ;
     p:dependsOn w:execute ; p:addresses w:review2 ;
     p:acceptance "Run at least 10,000 reproducible boundary-weighted cases." .
 
@@ -165,3 +165,5 @@ w:impactComparison a p:Artifact ; p:location "docs/design/impact-comparison.md" 
 w:retainTurtle a p:Decision ; rdfs:label "Retain Turtle for the ledger prototype following the impact experiment" ;
     p:reason "Both fixtures avoid duplicate edges. The SPARQL property path replaces the application-maintained traversal loop for the workload." ;
     p:source w:impactComparison .
+
+w:languageEvidence a p:Artifact ; p:location "docs/design/implementation-evidence.md" .
