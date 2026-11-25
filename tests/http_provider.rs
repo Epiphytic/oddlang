@@ -64,6 +64,13 @@ fn provider_conformance_and_mutations() {
         "bodyBase64":base64::Engine::encode(&base64::engine::general_purpose::STANDARD, oversized)
     }));
     assert_eq!(response["response"]["status"], 400);
+    let quoted_charset = service.exchange(&json!({
+        "method":"POST",
+        "path":"/transfers",
+        "contentType":"application/json; charset=\"UTF-8\"",
+        "bodyBase64":base64::Engine::encode(&base64::engine::general_purpose::STANDARD, br#"{"source":"A","destination":"B","amount":"1"}"#)
+    }));
+    assert_eq!(quoted_charset["response"]["status"], 200);
     let bundle = verify_bundle(
         &cache.join("http/485a90a817494ba1aa137cb9777c3d07c338735720df475c1c113b8fe0217dc4/v1"),
         &pin,

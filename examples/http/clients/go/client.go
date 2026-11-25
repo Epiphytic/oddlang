@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"regexp"
 	"strconv"
+	"strings"
 	"unicode/utf8"
 )
 
@@ -148,7 +149,11 @@ var transferErrors = map[string]int{
 }
 
 func (c Client) call(method, path string, body []byte) Result {
-	req, e := http.NewRequest(method, c.BaseURL+path, bytes.NewReader(body))
+	base, e := url.Parse(c.BaseURL)
+	if e != nil || base.RawQuery != "" || base.Fragment != "" {
+		return failure()
+	}
+	req, e := http.NewRequest(method, strings.TrimRight(c.BaseURL, "/")+path, bytes.NewReader(body))
 	if e != nil {
 		return failure()
 	}

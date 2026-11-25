@@ -14,7 +14,9 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
+	"time"
 )
 
 type object = map[string]any
@@ -104,9 +106,16 @@ func comparable(t *testing.T, obs []object) []object {
 	return out
 }
 func runCase(t *testing.T, c script) object {
-	// The handler signals completion through a channel before evidence is read.
-	exchanges := make(chan object, 4)
+	var mu sync.Mutex
+	observations := []object{}
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		defer mu.Unlock()
+		if len(observations) > len(c.Action.Replies) {
+			t.Error("too many outgoing exchanges")
+			http.Error(w, "unexpected request", 400)
+			return
+		}
 		data, e := io.ReadAll(r.Body)
 		if e != nil {
 			t.Error(e)
@@ -116,16 +125,16 @@ func runCase(t *testing.T, c script) object {
 		if h := r.Header.Values("Content-Type"); len(h) > 0 {
 			media = h[0]
 		}
-		request := object{"method": r.Method, "path": r.URL.EscapedPath(), "contentType": media, "bodyBase64": base64.StdEncoding.EncodeToString(data)}
+		request := object{"method": r.Method, "path": r.RequestURI, "contentType": media, "bodyBase64": base64.StdEncoding.EncodeToString(data)}
 		obs := object{"request": request, "response": nil}
-		index := len(exchanges)
+		index := len(observations)
 		if index >= len(c.Action.Replies) || c.Action.Replies[index] == nil {
 			conn, _, e := w.(http.Hijacker).Hijack()
 			if e != nil {
 				t.Error(e)
 				return
 			}
-			exchanges <- obs
+			observations = append(observations, obs)
 			conn.Close()
 			return
 		}
@@ -152,9 +161,11 @@ func runCase(t *testing.T, c script) object {
 			ct = values[0]
 		}
 		obs["response"] = object{"status": status, "contentType": ct, "bodyBase64": base64.StdEncoding.EncodeToString(body[:n])}
-		exchanges <- obs
+		observations = append(observations, obs)
 	}))
-	client := Client{BaseURL: server.URL, HTTP: server.Client()}
+	httpClient := server.Client()
+	httpClient.Timeout = 5 * time.Second
+	client := Client{BaseURL: server.URL, HTTP: httpClient}
 	input := c.Action.Input
 	var result Result
 	switch c.Operation {
@@ -170,11 +181,8 @@ func runCase(t *testing.T, c script) object {
 		t.Fatalf("unsupported operation %s", c.Operation)
 	}
 	server.Close()
-	close(exchanges)
-	observations := []object{}
-	for o := range exchanges {
-		observations = append(observations, o)
-	}
+	mu.Lock()
+	defer mu.Unlock()
 	observations = append(observations, object{"native": native(result)})
 	outcome := "pass"
 	if !reflect.DeepEqual(comparable(t, observations), comparable(t, c.Expected)) {
@@ -268,4 +276,21 @@ func TestConformance(t *testing.T) {
 		}
 	}
 	report(t, object{"schemaVersion": 1, "release": pin, "ruleSetVersion": 1, "claims": claim.Claims, "results": results})
+}
+
+func TestBaseURLPrefix(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.RequestURI != "/api/accounts/A" {
+			t.Errorf("unexpected target %q", r.RequestURI)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"id":"A","owner":"Alice","balance":"7"}`)
+	}))
+	defer server.Close()
+	for _, suffix := range []string{"/api", "/api/"} {
+		result := Client{BaseURL: server.URL + suffix, HTTP: server.Client()}.Lookup("A")
+		if result.Kind != "success" {
+			t.Errorf("base prefix %q: %s", suffix, result.Kind)
+		}
+	}
 }

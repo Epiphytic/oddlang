@@ -291,6 +291,7 @@ fn normalization_requires_observed_wire_bytes_and_segment_boundaries() {
     different[0]["request"]["path"] = json!("/accounts/A/b");
     assert!(!compare_observations(&sample, &different));
     different[0]["request"]["path"] = json!("/accounts/A%2Fb");
+    different[0]["response"]["contentType"] = json!("Application/JSON; Charset = \"UTF-8\"");
     assert!(compare_observations(&sample, &different));
     different[0]["response"]["bodyBase64"] = json!([{}]);
     assert!(!compare_observations(&sample, &different));

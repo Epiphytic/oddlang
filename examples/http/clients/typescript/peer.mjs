@@ -82,6 +82,10 @@ for (const c of JSON.parse(payloads.get("cases.json"))) {
     continue;
   const observations = [];
   const server = createServer(async (req, res) => {
+    if (observations.length > c.action.replies.length) {
+      res.destroy();
+      return;
+    }
     const chunks = [];
     for await (const chunk of req) chunks.push(chunk);
     const request = {
@@ -116,6 +120,7 @@ for (const c of JSON.parse(payloads.get("cases.json"))) {
   try {
     const client = new LedgerClient(
       "http://127.0.0.1:" + server.address().port,
+      (url, init) => fetch(url, { ...init, signal: AbortSignal.timeout(5000) }),
     );
     const input = c.action.input;
     const result = c.operation.endsWith(":LookupAccount")
@@ -123,6 +128,7 @@ for (const c of JSON.parse(payloads.get("cases.json"))) {
       : await client.transfer({ ...input, amount: BigInt(input.amount) });
     observations.push({ native: JSON.parse(stringify(result)) });
   } finally {
+    server.closeAllConnections();
     await new Promise((ok) => server.close(ok));
   }
   const pass = isDeepStrictEqual(

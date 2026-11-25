@@ -146,6 +146,14 @@ fn standalone_clients_against_scripted_peers_and_provider() {
             );
         }
         runner.compile();
+        if language == "typescript" {
+            success(
+                Command::new("node")
+                    .arg("tests/support/http-browser-fetch.cjs")
+                    .arg(fs::canonicalize("target/http-tools/node_modules/playwright").unwrap())
+                    .arg(runner.root.join("client.js")),
+            );
+        }
         let stock = runner.run();
         let claim: Claim = read_json(&runner.claim).unwrap();
         assert_eq!(stock.results.len(), 193);
@@ -226,25 +234,30 @@ fn standalone_clients_against_scripted_peers_and_provider() {
                 if i == 0 { "encoder" } else { "decoder" }
             );
         }
-        let path = bundle.join("cases.json");
-        let original = fs::read(&path).unwrap();
-        let mut tampered = original.clone();
-        tampered.push(b' ');
-        fs::write(&path, tampered).unwrap();
-        let Output {
-            status,
-            stdout,
-            stderr,
-        } = runner.command(None).output().unwrap();
-        assert!(!status.success());
-        assert!(
-            format!(
-                "{}{}",
-                String::from_utf8_lossy(&stdout),
-                String::from_utf8_lossy(&stderr)
-            )
-            .contains("payload digest mismatch")
-        );
-        fs::write(path, original).unwrap();
+        for (name, diagnostic) in [
+            ("cases.json", "payload digest mismatch"),
+            ("manifest.json", "manifest digest mismatch"),
+        ] {
+            let path = bundle.join(name);
+            let original = fs::read(&path).unwrap();
+            let mut tampered = original.clone();
+            tampered.push(b' ');
+            fs::write(&path, tampered).unwrap();
+            let Output {
+                status,
+                stdout,
+                stderr,
+            } = runner.command(None).output().unwrap();
+            assert!(!status.success());
+            assert!(
+                format!(
+                    "{}{}",
+                    String::from_utf8_lossy(&stdout),
+                    String::from_utf8_lossy(&stderr)
+                )
+                .contains(diagnostic)
+            );
+            fs::write(path, original).unwrap();
+        }
     }
 }

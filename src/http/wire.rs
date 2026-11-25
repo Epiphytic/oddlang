@@ -89,9 +89,16 @@ fn normalize(ob: &Value) -> Value {
         if let Some(ct) = raw.get("contentType").and_then(Value::as_str) {
             let value = ct.to_ascii_lowercase();
             let params = value.split(';').map(str::trim).collect::<Vec<_>>();
-            let ct = if params == ["application/json"]
-                || params == ["application/json", "charset=utf-8"]
-            {
+            let json_media = match params.as_slice() {
+                ["application/json"] => true,
+                ["application/json", charset] => {
+                    charset.split_once('=').is_some_and(|(key, value)| {
+                        key.trim() == "charset" && matches!(value.trim(), "utf-8" | "\"utf-8\"")
+                    })
+                }
+                _ => false,
+            };
+            let ct = if json_media {
                 "application/json".into()
             } else {
                 value

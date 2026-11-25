@@ -157,8 +157,10 @@ fn json_media(value: &str) -> bool {
         let Some((key, value)) = param.split_once('=') else {
             return false;
         };
+        let charset = value.trim();
         if !key.trim().eq_ignore_ascii_case("charset")
-            || !value.trim().eq_ignore_ascii_case("utf-8")
+            || !(charset.eq_ignore_ascii_case("utf-8")
+                || charset.eq_ignore_ascii_case("\"utf-8\""))
         {
             return false;
         }
