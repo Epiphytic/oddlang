@@ -58,3 +58,4 @@ curl --fail --silent --show-error --location https://spec.openapis.org/oas/3.1/s
 
 cargo fetch --locked
 cargo fetch --locked --manifest-path examples/contracts/monorepo/native/Cargo.toml
+cargo fetch --locked --manifest-path examples/http/provider/Cargo.toml

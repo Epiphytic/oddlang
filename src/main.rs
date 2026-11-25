@@ -2,6 +2,32 @@ use oddlang::model::load_model;
 use std::{env, process::ExitCode};
 fn run(args: &[String]) -> Result<(), String> {
     match args {
+        [group, cmd, project, lock, cache, overlay, output]
+            if group == "http" && cmd == "generate" =>
+        {
+            let contract = oddlang::http::load(project.as_ref(), lock.as_ref(), cache.as_ref())?;
+            let overlay = oddlang::http::load_overlay(overlay.as_ref())?;
+            for binding in overlay.bindings {
+                match binding.binding.as_str() {
+                    "axum" => {
+                        let pin = contract
+                            .dependencies
+                            .iter()
+                            .find(|pin| pin.identity == "urn:oddlang:contract:ledger")
+                            .ok_or("missing ledger dependency")?;
+                        let ledger = oddlang::contracts::resolve_pin(pin, cache.as_ref())?;
+                        oddlang::http::emit_rust(&contract, output.as_ref())?;
+                        std::fs::write(
+                            std::path::Path::new(output).join("ledger.rs"),
+                            oddlang::targets::rust::generate(&ledger.model),
+                        )
+                        .map_err(|e| e.to_string())?;
+                    }
+                    unknown => return Err(format!("unsupported binding {unknown}")),
+                }
+            }
+            Ok(())
+        }
         [group, cmd, input, lock, cache, output] if group == "http" && cmd == "publish" => {
             let c = oddlang::http::load_source(input.as_ref(), lock.as_ref(), cache.as_ref())?;
             oddlang::http::publish(&c, output.as_ref())

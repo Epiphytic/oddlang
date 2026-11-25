@@ -1,0 +1,4 @@
+{
+  "schemaVersion": 1,
+  "bindings": [{"role":"http.provider","target":"rust","binding":"axum"}]
+}

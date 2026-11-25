@@ -254,3 +254,7 @@ pub use corpus::{Case, cases};
 pub use obligations::*;
 
 pub use wire::compare_observations;
+pub mod overlay;
+pub mod rust;
+pub use overlay::{TargetOverlay, load_overlay};
+pub use rust::emit_rust;
