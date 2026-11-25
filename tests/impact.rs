@@ -85,3 +85,16 @@ fn toml_reverse_closure_matches_sparql() {
         cli(&v1())
     );
 }
+
+#[test]
+fn impact_distinguishes_an_unknown_iri_from_a_known_leaf() {
+    let model = oddlang::model::load_model(v1()).unwrap();
+    assert!(
+        oddlang::impact::impact(&model, "urn:oddlang:ledger:Unrelated")
+            .unwrap()
+            .is_empty()
+    );
+    let unknown = "urn:oddlang:ledger:balanse";
+    let err = oddlang::impact::impact(&model, unknown).unwrap_err();
+    assert!(err.contains(unknown), "{err}");
+}

@@ -7,6 +7,9 @@ use oxigraph::{
 
 pub fn impact(model: &Model, iri: &str) -> Result<Vec<String>, String> {
     let start = NamedNode::new(iri).map_err(|e| e.to_string())?;
+    if model.graph.triples_for_subject(&start).next().is_none() {
+        return Err(format!("unknown impact IRI {iri}"));
+    }
     let store = Store::new().map_err(|e| e.to_string())?;
     for t in &model.graph {
         store

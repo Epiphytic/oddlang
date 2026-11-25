@@ -142,7 +142,10 @@ fn checked_name(
         "Rust" => {
             KEYWORDS.split_whitespace().any(|kw| kw == value)
                 || if field {
-                    value == "new"
+                    matches!(
+                        value.as_str(),
+                        "new" | "Balance" | "Some" | "None" | "Ok" | "Err"
+                    )
                 } else {
                     matches!(
                         value.as_str(),
@@ -190,11 +193,15 @@ fn validate_declarations(g: &Graph) -> Result<()> {
                         return Ok(());
                     }
                     let subject_term: Term = s.clone().into();
-                    if ["range", "mapping"].iter().any(|p| {
-                        g.subjects_for_predicate_object(&core(p), &subject_term)
-                            .next()
-                            .is_some()
-                    }) {
+                    if [("range", "Field"), ("mapping", "Projection")]
+                        .iter()
+                        .any(|(p, class)| {
+                            g.subjects_for_predicate_object(&core(p), &subject_term)
+                                .any(|referrer| {
+                                    g.contains(TripleRef::new(referrer, rdf::TYPE, &core(class)))
+                                })
+                        })
+                    {
                         return Ok(());
                     }
                     Err(format!("{owner}: unowned declaration"))
@@ -226,6 +233,7 @@ fn validate_declarations(g: &Graph) -> Result<()> {
 }
 pub fn load_model(project_dir: impl AsRef<Path>) -> Result<Model> {
     let (g, imports) = load_graph(project_dir.as_ref())?;
+    validate_declarations(&g)?;
     if instances(&g, "Entity")? != BTreeSet::from([ACCOUNT.to_owned()]) {
         return Err(format!("expected entity {ACCOUNT}"));
     }
@@ -263,8 +271,17 @@ pub fn load_model(project_dir: impl AsRef<Path>) -> Result<Model> {
             allowed(&g, &bounds, &["min", "max"], &format!("{id}/range"))?;
             let bound = |p| -> Result<i64> {
                 literal(one(&g, &bounds, p, &id)?, xsd::INTEGER, &id)?
-                    .parse()
-                    .map_err(|_| format!("{id}/range/{p}: outside signed 64-bit range"))
+                    .parse::<i64>()
+                    .map_err(|error| {
+                        use std::num::IntErrorKind;
+                        let reason = match error.kind() {
+                            IntErrorKind::NegOverflow | IntErrorKind::PosOverflow => {
+                                "outside signed 64-bit range"
+                            }
+                            _ => "invalid integer",
+                        };
+                        format!("{id}/range/{p}: {reason}")
+                    })
             };
             let (lo, hi) = (bound("min")?, bound("max")?);
             if lo > hi {
@@ -405,11 +422,13 @@ pub fn load_model(project_dir: impl AsRef<Path>) -> Result<Model> {
         .map(|t| iri(t.object, "dependsOn"))
         .collect::<Result<BTreeSet<_>>>()?;
     for dep in dependencies {
-        if g.triples_for_subject(&named(&dep)).next().is_none() {
+        if !["Entity", "Field", "Projection", "Operation"]
+            .iter()
+            .any(|class| g.contains(TripleRef::new(&named(&dep), rdf::TYPE, &core(class))))
+        {
             return Err(format!("dependsOn: unresolved {dep}"));
         }
     }
-    validate_declarations(&g)?;
     Ok(Model {
         graph: g,
         imports,

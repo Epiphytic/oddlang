@@ -49,17 +49,20 @@ fn main(){
         .batch_execute(&fs::read_to_string(p.join("schema.sql")).unwrap())
         .unwrap();
     for (value, expected) in [
-        (-1, false),
-        (0, true),
-        (i64::MAX as i128, true),
-        (i64::MAX as i128 + 1, false),
+        (-1, Some("23514")),
+        (0, None),
+        (i64::MAX as i128, None),
+        (i64::MAX as i128 + 1, Some("22003")),
     ] {
         let decimal = value.to_string();
         let result = db.client.execute(
             "INSERT INTO accounts (id, owner, balance) VALUES ($1, 'owner', ($1::text)::BIGINT)",
             &[&decimal],
         );
-        assert_eq!(result.is_ok(), expected, "{decimal}: {result:?}");
+        match expected {
+            Some(code) => assert_eq!(result.unwrap_err().code().unwrap().code(), code),
+            None => assert_eq!(result.unwrap(), 1),
+        }
     }
 }
 #[test]
@@ -81,10 +84,31 @@ fn rejects_names_unrepresentable_by_the_target() {
     for (target, name) in [
         ("rust.ttl", "struct"),
         ("rust.ttl", "new"),
+        ("rust.ttl", "None"),
+        ("rust.ttl", "Some"),
+        ("rust.ttl", "Ok"),
+        ("rust.ttl", "Err"),
+        ("rust.ttl", "Balance"),
         ("sql.ttl", oversized.as_str()),
     ] {
         let p = fixture();
         replace(p.path(), target, "\"owner\"", &format!("\"{name}\""));
         assert!(oddlang::model::load_model(p.path()).is_err(), "{name}");
     }
+}
+
+#[test]
+fn postgres_checks_the_declared_upper_bound_even_when_the_value_fits_bigint() {
+    let p = fixture();
+    replace(p.path(), "fields.ttl", "9223372036854775807", "10");
+    let out = build(p.path());
+    let mut db = db::TestDatabase::connect().unwrap();
+    db.client
+        .batch_execute(&fs::read_to_string(out.path().join("schema.sql")).unwrap())
+        .unwrap();
+    let err = db
+        .client
+        .execute("INSERT INTO accounts VALUES ('a','b',11)", &[])
+        .unwrap_err();
+    assert_eq!(err.code().unwrap().code(), "23514");
 }

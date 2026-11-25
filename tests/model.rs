@@ -19,7 +19,19 @@ fn structural_errors_are_stable_across_equivalent_graphs() {
             "fields.ttl",
             "9223372036854775807",
             "9223372036854775808",
-            BALANCE,
+            "balance/range/max: outside signed 64-bit range",
+        ),
+        (
+            "fields.ttl",
+            "o:min 0",
+            r#"o:min "abc"^^<http://www.w3.org/2001/XMLSchema#integer>"#,
+            "balance/range/min: invalid integer",
+        ),
+        (
+            "operations.ttl",
+            "o:dependsOn l:balance",
+            "o:dependsOn l:Domain",
+            "dependsOn: unresolved urn:oddlang:ledger:Domain",
         ),
         ("fields.ttl", "o:max", "o:unknown", BALANCE),
     ] {
@@ -41,17 +53,34 @@ fn equivalent_graphs_produce_the_same_typed_fields() {
 
 #[test]
 fn closed_graph_rejects_unrecognized_declarations_and_unowned_terms() {
-    for triple in [
-        "l:Typo a o:Enttiy .",
-        "l:Account a o:Field .",
-        "l:Unused o:name \"unowned\" .",
-        "l:TransferFunds o:typo l:balance .",
+    for (triple, expected) in [
+        (
+            "l:Typo a o:Enttiy .",
+            "urn:oddlang:ledger:Typo: unknown declaration type",
+        ),
+        (
+            "l:Account a o:Field .",
+            "urn:oddlang:ledger:Account: expected exactly one declaration type",
+        ),
+        (
+            "l:Unused o:name \"unowned\" .",
+            "urn:oddlang:ledger:Unused: unowned declaration",
+        ),
+        (
+            "l:TransferFunds o:typo l:balance .",
+            "urn:oddlang:ledger:TransferFunds: unknown property",
+        ),
+        (
+            "l:Y o:mapping l:Y .",
+            "urn:oddlang:ledger:Y: unowned declaration",
+        ),
     ] {
         let p = fixture();
         let path = p.path().join("fields.ttl");
         let s = std::fs::read_to_string(&path).unwrap();
         std::fs::write(path, format!("{s}\n{triple}")).unwrap();
         let err = load_model(p.path()).unwrap_err();
+        assert!(err.contains(expected), "{err}");
         rewrite(p.path());
         assert_eq!(load_model(p.path()).unwrap_err(), err);
     }
