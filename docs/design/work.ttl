@@ -285,3 +285,7 @@ w:httpPhase2ReviewFinding a p:Finding ; rdfs:label "Add provider route, decimal 
     p:source w:httpImplementationEvidence .
 w:httpBundle p:addresses w:httpPhase2ReviewFinding .
 w:httpBundle p:evidence w:httpImplementationEvidence .
+
+w:httpPhase3ReviewFinding a p:Finding ; rdfs:label "Bound the example provider request-body buffer" ;
+    p:source w:httpImplementationEvidence .
+w:httpProvider p:addresses w:httpPhase3ReviewFinding .

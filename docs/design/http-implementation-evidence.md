@@ -18,3 +18,12 @@ Claude Sonnet CLI reviewed `61d114d` in auto permission mode. It found a missing
 - Nine bundle tests and 15 model tests passed offline. Tests exercise independent ledger outcomes and full post-state, witness deletion, invalid or unexecuted evidence, normalization and byte-identical publication.
 - Ajv 8.20.0 checks JSON Schema and the pinned OpenAPI metaschema with its dynamic references resolved to the single effective anchor. A separate validator checked the unchanged OpenAPI metaschema. The release gate uses atomic staged writes through the existing `tempfile` crate.
 - The scoped follow-up found no remaining blockers. The release verifier checks that authored cases refer to valid witness slots. The ledger fixtures also have independent oracle checks for their semantics. New authored scenarios still require equivalent independent review.
+- A clean source snapshot of the reviewed Phase 2 code passed all 71 offline tests with PostgreSQL 16.6 configured.
+
+## Phase 3 · Live Rust provider
+
+Claude Sonnet CLI reviewed `3ca48e3` in auto permission mode, passed the spec and quality gates, and probed the generated provider on loopback. It flagged the unbounded request read. The follow-up caps the example's buffered JSON request body at 1 MiB and checks the boundary against the live provider. Unmatched routes and method errors remain outside the declared HTTP operations.
+
+- The provider uses pinned Axum 0.8.9 and Tokio 1.54.1 plus generated native Rust ledger behavior. Regeneration reproduces the checked-in provider source. Advisory overlays did not change the generated binding.
+- The stock provider passed all 117 released provider cases over 378 HTTP exchanges, with a fresh process and fixture state per case.
+- Three test-only providers failed the expected observations for write-on-error, changed guard order and noncanonical amount handling. The stock provider evidence passed standalone CLI verification.

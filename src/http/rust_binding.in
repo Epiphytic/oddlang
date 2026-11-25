@@ -51,6 +51,7 @@ pub fn router(service: Arc<dyn Service>) -> Router {
 }
 const INVALID: &str = "urn:oddlang:http:error:InvalidRequest";
 const MEDIA: &str = "urn:oddlang:http:error:UnsupportedMediaType";
+const MAX_REQUEST_BODY: usize = 1024 * 1024;
 fn response<T: serde::Serialize>(status: u16, result: Result<T, &'static str>) -> Response {
     match result {
         Ok(value) => (StatusCode::from_u16(status).unwrap(), Json(value)).into_response(),
@@ -121,7 +122,7 @@ async fn transfer(State(service): State<Arc<dyn Service>>, request: Request) -> 
     {
         return response::<Pair>(POST_STATUS, Err(MEDIA));
     }
-    let result = match axum::body::to_bytes(request.into_body(), usize::MAX).await {
+    let result = match axum::body::to_bytes(request.into_body(), MAX_REQUEST_BODY).await {
         Ok(bytes) if bytes.iter().find(|b| !b.is_ascii_whitespace()) == Some(&b'{') => {
             serde_json::from_slice(&bytes)
                 .map_err(|_| INVALID)
