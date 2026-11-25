@@ -122,3 +122,16 @@ w:demo a p:Task ; rdfs:label "Run the demo" ;
     p:milestone w:m3 ; p:status p:planned ; p:source w:plan ;
     p:dependsOn w:impact, w:differential, w:wire ; p:addresses w:review9 ;
     p:acceptance "Run the offline suite and demo against the pinned database." .
+
+w:priorArt a p:Task ; rdfs:label "Survey active ontology compilers before implementing the ledger" ;
+    p:milestone w:design ; p:status p:done ; p:dependsOn w:track ;
+    p:acceptance "Identify dated upstream activity and compare its scope with the ledger experiments." ;
+    p:evidence w:hydraResearch, w:ggenResearch, w:linkmlResearch ;
+    rdfs:comment "2026-11-25. A last30days scan surfaced adjacent ontology platforms. Direct repository checks found active overlap in graph programming, RDF-driven generation and schema compilation. The combined transfer-oracle and SQL/Avro migration witness remains unverified in these projects." .
+
+w:hydraResearch a p:Artifact ; rdfs:label "Hydra graph programming and cross-host bootstrap matrix, November 25" ;
+    p:location <https://github.com/CategoricalData/hydra/commit/46e6b4c1db791ff2a360c1da50571c9659825c84> .
+w:ggenResearch a p:Artifact ; rdfs:label "ggen RDF-driven generator, November 20 repository snapshot" ;
+    p:location <https://github.com/seanchatmangpt/ggen/tree/d173cad5792e837bd4fec730d120c582b9bc5d4c> .
+w:linkmlResearch a p:Artifact ; rdfs:label "LinkML Rust generator update, November 23" ;
+    p:location <https://github.com/linkml/linkml/commit/638684016db14546a3028b78c29e987264502026> .
