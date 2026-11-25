@@ -19,3 +19,9 @@
 - The closed vocabulary and evaluation rules are documented in the [ledger core contract](../language/ledger-core.md). A hand-authored fixture pins the expanded IRIs and operand order. Mutation tests verify rejected cycles, invalid operands, unguarded reads, error identities and stable named-owner diagnostics.
 - Claude Code CLI ran the offline tests and reviewed the language contract in auto mode. Its review found repeated lowering of shared expressions and manually duplicated impact edges. The prototype now bounds expression depth and expanded nodes, and SPARQL derives the affected fields directly from Read and Assign operands.
 - All 21 tests passed offline against PostgreSQL 16.6 after the review fixes, with formatting and strict Clippy clean. The independent oracle was prepared during this review because it consumes the design table directly. Executor work began after the language review fixes passed.
+
+## Milestone 2
+
+- The independent oracle, interpreter and separately compiled Rust matched on 12,000 seeded cases, including every guard error and complete state on every call. The run included 1,144 successful transfers. The corpus samples amounts at and around zero, source funds and destination headroom.
+- Claude Code CLI reviewed the transfer phase in auto mode. It ran the full locked offline suite against PostgreSQL 16.6, tried five alternate seeds, and verified that intentional changes to the interpreter, emitter and shared lowering caused the oracle comparison to fail.
+- All eight transfer tests passed after review fixes. Two swapped assignment operands now produce an agreed success with the wrong state, which the oracle catches. The test harness now shrinks coupled boundary cases and isolates compiled crashes to a replayable case. It also exercises two distinct missing IDs. The full locked offline suite passed after the fixes.
