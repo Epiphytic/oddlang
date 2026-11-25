@@ -2,6 +2,21 @@ use oddlang::model::load_model;
 use std::{env, process::ExitCode};
 fn run(args: &[String]) -> Result<(), String> {
     match args {
+        [group, cmd, input, lock, cache, output] if group == "http" && cmd == "publish" => {
+            let c = oddlang::http::load_source(input.as_ref(), lock.as_ref(), cache.as_ref())?;
+            oddlang::http::publish(&c, output.as_ref())
+        }
+        [group, cmd, bundle, pin, claim, evidence]
+            if group == "http" && cmd == "verify-evidence" =>
+        {
+            use oddlang::http::{read_json, verify_bundle, verify_evidence};
+            let bundle = verify_bundle(bundle.as_ref(), pin.as_ref())?;
+            verify_evidence(
+                &bundle,
+                &read_json(claim.as_ref())?,
+                &read_json(evidence.as_ref())?,
+            )
+        }
         [group, cmd, input, lock, cache] if group == "http" => {
             let load = match cmd.as_str() {
                 "check-source" => oddlang::http::load_source,

@@ -1,1 +1,2568 @@
-[]
+[
+  {
+    "caseId": "scenario/LookupAccount/http.provider/maximum",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:LookupAccount",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:ReadAccount",
+        "rule": "urn:oddlang:http:rule:1:lookup",
+        "position": "behavior",
+        "kind": "maximum"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "9223372036854775807"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEiLCJiYWxhbmNlIjoiOTIyMzM3MjAzNjg1NDc3NTgwNyJ9"
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/LookupAccount/http.consumer/maximum",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:LookupAccount",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:ReadAccount",
+        "rule": "urn:oddlang:http:rule:1:lookup",
+        "position": "behavior",
+        "kind": "maximum"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "9223372036854775807"
+      }
+    ],
+    "action": {
+      "input": {
+        "id": "A"
+      },
+      "replies": [
+        {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEiLCJiYWxhbmNlIjoiOTIyMzM3MjAzNjg1NDc3NTgwNyJ9"
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEiLCJiYWxhbmNlIjoiOTIyMzM3MjAzNjg1NDc3NTgwNyJ9"
+        }
+      },
+      {
+        "native": {
+          "kind": "success",
+          "value": {
+            "id": "A",
+            "owner": "Owner A",
+            "balance": "9223372036854775807"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/LookupAccount/http.provider/missing",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:LookupAccount",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:ReadAccount",
+        "rule": "urn:oddlang:http:rule:1:lookup",
+        "position": "behavior",
+        "kind": "missing"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:LookupAccount",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:http:error:AccountMissing",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [],
+    "action": {
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 404,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmh0dHA6ZXJyb3I6QWNjb3VudE1pc3NpbmcifQ=="
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/LookupAccount/http.consumer/missing",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:LookupAccount",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:ReadAccount",
+        "rule": "urn:oddlang:http:rule:1:lookup",
+        "position": "behavior",
+        "kind": "missing"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:LookupAccount",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:http:error:AccountMissing",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [],
+    "action": {
+      "input": {
+        "id": "A"
+      },
+      "replies": [
+        {
+          "status": 404,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmh0dHA6ZXJyb3I6QWNjb3VudE1pc3NpbmcifQ=="
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 404,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmh0dHA6ZXJyb3I6QWNjb3VudE1pc3NpbmcifQ=="
+        }
+      },
+      {
+        "native": {
+          "kind": "namedError",
+          "error": "urn:oddlang:http:error:AccountMissing"
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.provider/success",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "success"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "7"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMyJ9"
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMyJ9"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOnsiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIiwiYmFsYW5jZSI6IjcifSwiZGVzdGluYXRpb24iOnsiaWQiOiJCIiwib3duZXIiOiJPd25lciBCIiwiYmFsYW5jZSI6IjEwIn19"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEiLCJiYWxhbmNlIjoiNyJ9"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIiLCJiYWxhbmNlIjoiMTAifQ=="
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkMiLCJvd25lciI6Ik93bmVyIEMiLCJiYWxhbmNlIjoiNTUifQ=="
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.consumer/success",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "success"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "7"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "input": {
+        "source": "A",
+        "destination": "B",
+        "amount": "3"
+      },
+      "replies": [
+        {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOnsiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIiwiYmFsYW5jZSI6IjcifSwiZGVzdGluYXRpb24iOnsiaWQiOiJCIiwib3duZXIiOiJPd25lciBCIiwiYmFsYW5jZSI6IjEwIn19"
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMyJ9"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOnsiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIiwiYmFsYW5jZSI6IjcifSwiZGVzdGluYXRpb24iOnsiaWQiOiJCIiwib3duZXIiOiJPd25lciBCIiwiYmFsYW5jZSI6IjEwIn19"
+        }
+      },
+      {
+        "native": {
+          "kind": "success",
+          "value": {
+            "source": {
+              "id": "A",
+              "owner": "Owner A",
+              "balance": "7"
+            },
+            "destination": {
+              "id": "B",
+              "owner": "Owner B",
+              "balance": "10"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.provider/capacity",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "capacity"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "9223372036854775804"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMyJ9"
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMyJ9"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOnsiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIiwiYmFsYW5jZSI6IjcifSwiZGVzdGluYXRpb24iOnsiaWQiOiJCIiwib3duZXIiOiJPd25lciBCIiwiYmFsYW5jZSI6IjkyMjMzNzIwMzY4NTQ3NzU4MDcifX0="
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEiLCJiYWxhbmNlIjoiNyJ9"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIiLCJiYWxhbmNlIjoiOTIyMzM3MjAzNjg1NDc3NTgwNyJ9"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkMiLCJvd25lciI6Ik93bmVyIEMiLCJiYWxhbmNlIjoiNTUifQ=="
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.consumer/capacity",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "capacity"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "9223372036854775804"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "input": {
+        "source": "A",
+        "destination": "B",
+        "amount": "3"
+      },
+      "replies": [
+        {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOnsiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIiwiYmFsYW5jZSI6IjcifSwiZGVzdGluYXRpb24iOnsiaWQiOiJCIiwib3duZXIiOiJPd25lciBCIiwiYmFsYW5jZSI6IjkyMjMzNzIwMzY4NTQ3NzU4MDcifX0="
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMyJ9"
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOnsiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIiwiYmFsYW5jZSI6IjcifSwiZGVzdGluYXRpb24iOnsiaWQiOiJCIiwib3duZXIiOiJPd25lciBCIiwiYmFsYW5jZSI6IjkyMjMzNzIwMzY4NTQ3NzU4MDcifX0="
+        }
+      },
+      {
+        "native": {
+          "kind": "success",
+          "value": {
+            "source": {
+              "id": "A",
+              "owner": "Owner A",
+              "balance": "7"
+            },
+            "destination": {
+              "id": "B",
+              "owner": "Owner B",
+              "balance": "9223372036854775807"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.provider/source-missing",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "source-missing"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger:error:SourceMissing",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "7"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJYIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMyJ9"
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJYIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMyJ9"
+        },
+        "response": {
+          "status": 404,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpTb3VyY2VNaXNzaW5nIn0="
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEiLCJiYWxhbmNlIjoiMTAifQ=="
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIiLCJiYWxhbmNlIjoiNyJ9"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkMiLCJvd25lciI6Ik93bmVyIEMiLCJiYWxhbmNlIjoiNTUifQ=="
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.consumer/source-missing",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "source-missing"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger:error:SourceMissing",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "7"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "input": {
+        "source": "X",
+        "destination": "B",
+        "amount": "3"
+      },
+      "replies": [
+        {
+          "status": 404,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpTb3VyY2VNaXNzaW5nIn0="
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJYIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMyJ9"
+        },
+        "response": {
+          "status": 404,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpTb3VyY2VNaXNzaW5nIn0="
+        }
+      },
+      {
+        "native": {
+          "kind": "namedError",
+          "error": "urn:oddlang:ledger:error:SourceMissing"
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.provider/destination-missing",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "destination-missing"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger:error:DestinationMissing",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "7"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJYIiwiYW1vdW50IjoiMyJ9"
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJYIiwiYW1vdW50IjoiMyJ9"
+        },
+        "response": {
+          "status": 404,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpEZXN0aW5hdGlvbk1pc3NpbmcifQ=="
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEiLCJiYWxhbmNlIjoiMTAifQ=="
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIiLCJiYWxhbmNlIjoiNyJ9"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkMiLCJvd25lciI6Ik93bmVyIEMiLCJiYWxhbmNlIjoiNTUifQ=="
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.consumer/destination-missing",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "destination-missing"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger:error:DestinationMissing",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "7"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "input": {
+        "source": "A",
+        "destination": "X",
+        "amount": "3"
+      },
+      "replies": [
+        {
+          "status": 404,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpEZXN0aW5hdGlvbk1pc3NpbmcifQ=="
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJYIiwiYW1vdW50IjoiMyJ9"
+        },
+        "response": {
+          "status": 404,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpEZXN0aW5hdGlvbk1pc3NpbmcifQ=="
+        }
+      },
+      {
+        "native": {
+          "kind": "namedError",
+          "error": "urn:oddlang:ledger:error:DestinationMissing"
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.provider/same-account",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "same-account"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger:error:SameAccount",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "7"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJBIiwiYW1vdW50IjoiMyJ9"
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJBIiwiYW1vdW50IjoiMyJ9"
+        },
+        "response": {
+          "status": 422,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpTYW1lQWNjb3VudCJ9"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEiLCJiYWxhbmNlIjoiMTAifQ=="
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIiLCJiYWxhbmNlIjoiNyJ9"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkMiLCJvd25lciI6Ik93bmVyIEMiLCJiYWxhbmNlIjoiNTUifQ=="
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.consumer/same-account",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "same-account"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger:error:SameAccount",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "7"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "input": {
+        "source": "A",
+        "destination": "A",
+        "amount": "3"
+      },
+      "replies": [
+        {
+          "status": 422,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpTYW1lQWNjb3VudCJ9"
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJBIiwiYW1vdW50IjoiMyJ9"
+        },
+        "response": {
+          "status": 422,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpTYW1lQWNjb3VudCJ9"
+        }
+      },
+      {
+        "native": {
+          "kind": "namedError",
+          "error": "urn:oddlang:ledger:error:SameAccount"
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.provider/non-positive",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "non-positive"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger:error:NonPositiveAmount",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "7"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMCJ9"
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMCJ9"
+        },
+        "response": {
+          "status": 422,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpOb25Qb3NpdGl2ZUFtb3VudCJ9"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEiLCJiYWxhbmNlIjoiMTAifQ=="
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIiLCJiYWxhbmNlIjoiNyJ9"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkMiLCJvd25lciI6Ik93bmVyIEMiLCJiYWxhbmNlIjoiNTUifQ=="
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.consumer/non-positive",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "non-positive"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger:error:NonPositiveAmount",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "7"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "input": {
+        "source": "A",
+        "destination": "B",
+        "amount": "0"
+      },
+      "replies": [
+        {
+          "status": 422,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpOb25Qb3NpdGl2ZUFtb3VudCJ9"
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMCJ9"
+        },
+        "response": {
+          "status": 422,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpOb25Qb3NpdGl2ZUFtb3VudCJ9"
+        }
+      },
+      {
+        "native": {
+          "kind": "namedError",
+          "error": "urn:oddlang:ledger:error:NonPositiveAmount"
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.provider/insufficient",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "insufficient"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger:error:InsufficientFunds",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "7"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMTEifQ=="
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMTEifQ=="
+        },
+        "response": {
+          "status": 409,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpJbnN1ZmZpY2llbnRGdW5kcyJ9"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEiLCJiYWxhbmNlIjoiMTAifQ=="
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIiLCJiYWxhbmNlIjoiNyJ9"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkMiLCJvd25lciI6Ik93bmVyIEMiLCJiYWxhbmNlIjoiNTUifQ=="
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.consumer/insufficient",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "insufficient"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger:error:InsufficientFunds",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "7"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "input": {
+        "source": "A",
+        "destination": "B",
+        "amount": "11"
+      },
+      "replies": [
+        {
+          "status": 409,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpJbnN1ZmZpY2llbnRGdW5kcyJ9"
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMTEifQ=="
+        },
+        "response": {
+          "status": 409,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpJbnN1ZmZpY2llbnRGdW5kcyJ9"
+        }
+      },
+      {
+        "native": {
+          "kind": "namedError",
+          "error": "urn:oddlang:ledger:error:InsufficientFunds"
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.provider/overflow",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "overflow"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger:error:DestinationOverflow",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "9223372036854775805"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMyJ9"
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMyJ9"
+        },
+        "response": {
+          "status": 409,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpEZXN0aW5hdGlvbk92ZXJmbG93In0="
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEiLCJiYWxhbmNlIjoiMTAifQ=="
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIiLCJiYWxhbmNlIjoiOTIyMzM3MjAzNjg1NDc3NTgwNSJ9"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkMiLCJvd25lciI6Ik93bmVyIEMiLCJiYWxhbmNlIjoiNTUifQ=="
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.consumer/overflow",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "overflow"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger:error:DestinationOverflow",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "9223372036854775805"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "input": {
+        "source": "A",
+        "destination": "B",
+        "amount": "3"
+      },
+      "replies": [
+        {
+          "status": 409,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpEZXN0aW5hdGlvbk92ZXJmbG93In0="
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMyJ9"
+        },
+        "response": {
+          "status": 409,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpEZXN0aW5hdGlvbk92ZXJmbG93In0="
+        }
+      },
+      {
+        "native": {
+          "kind": "namedError",
+          "error": "urn:oddlang:ledger:error:DestinationOverflow"
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.provider/missing-both",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "missing-both"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger:error:SourceMissing",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "7"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJYIiwiZGVzdGluYXRpb24iOiJYIiwiYW1vdW50IjoiMCJ9"
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJYIiwiZGVzdGluYXRpb24iOiJYIiwiYW1vdW50IjoiMCJ9"
+        },
+        "response": {
+          "status": 404,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpTb3VyY2VNaXNzaW5nIn0="
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEiLCJiYWxhbmNlIjoiMTAifQ=="
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIiLCJiYWxhbmNlIjoiNyJ9"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkMiLCJvd25lciI6Ik93bmVyIEMiLCJiYWxhbmNlIjoiNTUifQ=="
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.consumer/missing-both",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "missing-both"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger:error:SourceMissing",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "7"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "input": {
+        "source": "X",
+        "destination": "X",
+        "amount": "0"
+      },
+      "replies": [
+        {
+          "status": 404,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpTb3VyY2VNaXNzaW5nIn0="
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJYIiwiZGVzdGluYXRpb24iOiJYIiwiYW1vdW50IjoiMCJ9"
+        },
+        "response": {
+          "status": 404,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpTb3VyY2VNaXNzaW5nIn0="
+        }
+      },
+      {
+        "native": {
+          "kind": "namedError",
+          "error": "urn:oddlang:ledger:error:SourceMissing"
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.provider/destination-and-amount",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "destination-and-amount"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger:error:DestinationMissing",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "7"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJYIiwiYW1vdW50IjoiMCJ9"
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJYIiwiYW1vdW50IjoiMCJ9"
+        },
+        "response": {
+          "status": 404,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpEZXN0aW5hdGlvbk1pc3NpbmcifQ=="
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEiLCJiYWxhbmNlIjoiMTAifQ=="
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIiLCJiYWxhbmNlIjoiNyJ9"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkMiLCJvd25lciI6Ik93bmVyIEMiLCJiYWxhbmNlIjoiNTUifQ=="
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.consumer/destination-and-amount",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "destination-and-amount"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger:error:DestinationMissing",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "7"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "input": {
+        "source": "A",
+        "destination": "X",
+        "amount": "0"
+      },
+      "replies": [
+        {
+          "status": 404,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpEZXN0aW5hdGlvbk1pc3NpbmcifQ=="
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJYIiwiYW1vdW50IjoiMCJ9"
+        },
+        "response": {
+          "status": 404,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpEZXN0aW5hdGlvbk1pc3NpbmcifQ=="
+        }
+      },
+      {
+        "native": {
+          "kind": "namedError",
+          "error": "urn:oddlang:ledger:error:DestinationMissing"
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.provider/same-and-amount",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "same-and-amount"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger:error:SameAccount",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "7"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJBIiwiYW1vdW50IjoiMCJ9"
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJBIiwiYW1vdW50IjoiMCJ9"
+        },
+        "response": {
+          "status": 422,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpTYW1lQWNjb3VudCJ9"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEiLCJiYWxhbmNlIjoiMTAifQ=="
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIiLCJiYWxhbmNlIjoiNyJ9"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkMiLCJvd25lciI6Ik93bmVyIEMiLCJiYWxhbmNlIjoiNTUifQ=="
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.consumer/same-and-amount",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "same-and-amount"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger:error:SameAccount",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "10"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "7"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "input": {
+        "source": "A",
+        "destination": "A",
+        "amount": "0"
+      },
+      "replies": [
+        {
+          "status": 422,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpTYW1lQWNjb3VudCJ9"
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJBIiwiYW1vdW50IjoiMCJ9"
+        },
+        "response": {
+          "status": 422,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpTYW1lQWNjb3VudCJ9"
+        }
+      },
+      {
+        "native": {
+          "kind": "namedError",
+          "error": "urn:oddlang:ledger:error:SameAccount"
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.provider/funds-and-capacity",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "funds-and-capacity"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger:error:InsufficientFunds",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "1"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "9223372036854775807"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMiJ9"
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMiJ9"
+        },
+        "response": {
+          "status": 409,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpJbnN1ZmZpY2llbnRGdW5kcyJ9"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/A",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEiLCJiYWxhbmNlIjoiMSJ9"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/B",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIiLCJiYWxhbmNlIjoiOTIyMzM3MjAzNjg1NDc3NTgwNyJ9"
+        }
+      },
+      {
+        "request": {
+          "method": "GET",
+          "path": "/accounts/C",
+          "contentType": null,
+          "bodyBase64": ""
+        },
+        "response": {
+          "status": 200,
+          "contentType": "application/json",
+          "bodyBase64": "eyJpZCI6IkMiLCJvd25lciI6Ik93bmVyIEMiLCJiYWxhbmNlIjoiNTUifQ=="
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "scenario/TransferFunds/http.consumer/funds-and-capacity",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:AtomicTransfer",
+        "rule": "urn:oddlang:http:rule:1:transfer",
+        "position": "behavior",
+        "kind": "funds-and-capacity"
+      },
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger:error:InsufficientFunds",
+        "rule": "urn:oddlang:http:rule:1:error",
+        "position": "response",
+        "kind": "named"
+      }
+    ],
+    "fixture": [
+      {
+        "id": "A",
+        "owner": "Owner A",
+        "balance": "1"
+      },
+      {
+        "id": "B",
+        "owner": "Owner B",
+        "balance": "9223372036854775807"
+      },
+      {
+        "id": "C",
+        "owner": "Owner C",
+        "balance": "55"
+      }
+    ],
+    "action": {
+      "input": {
+        "source": "A",
+        "destination": "B",
+        "amount": "2"
+      },
+      "replies": [
+        {
+          "status": 409,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpJbnN1ZmZpY2llbnRGdW5kcyJ9"
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "method": "POST",
+          "path": "/transfers",
+          "contentType": "application/json",
+          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMiJ9"
+        },
+        "response": {
+          "status": 409,
+          "contentType": "application/json",
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpJbnN1ZmZpY2llbnRGdW5kcyJ9"
+        }
+      },
+      {
+        "native": {
+          "kind": "namedError",
+          "error": "urn:oddlang:ledger:error:InsufficientFunds"
+        }
+      }
+    ]
+  }
+]

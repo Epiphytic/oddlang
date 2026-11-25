@@ -1,0 +1,134 @@
+LookupAccount	consumer	behavior	ReadAccount	lookup	maximum missing
+LookupAccount	consumer	request	Closed	record	closed
+LookupAccount	consumer	request	Lookup	record	object
+LookupAccount	consumer	request	LookupAccount	route	dot dot-dot empty escaped exact plus
+LookupAccount	consumer	request/id	Required	required	present
+LookupAccount	consumer	request/id	id	text	unicode
+LookupAccount	consumer	response	Account	record	object wrong-type
+LookupAccount	consumer	response	Closed	record	closed unknown-member
+LookupAccount	consumer	response	LookupAccount	json	bom duplicate empty escaped malformed surrogate trailing utf8 valid
+LookupAccount	consumer	response	LookupAccount	media	charset json missing unsupported
+LookupAccount	consumer	response	LookupAccount	response	success transport unexpected-status
+LookupAccount	consumer	response	http:error:AccountMissing	error	malformed named unknown
+LookupAccount	consumer	response	http:error:InvalidRequest	error	malformed named unknown
+LookupAccount	consumer	response/balance	BalanceBounds	bounds	above below max min
+LookupAccount	consumer	response/balance	Required	required	omitted present
+LookupAccount	consumer	response/balance	balance	i64	large max noncanonical numeric overflow zero
+LookupAccount	consumer	response/id	Required	required	omitted present
+LookupAccount	consumer	response/id	id	text	unicode wrong-type
+LookupAccount	consumer	response/owner	Required	required	omitted present
+LookupAccount	consumer	response/owner	owner	text	unicode wrong-type
+LookupAccount	provider	behavior	ReadAccount	lookup	maximum missing
+LookupAccount	provider	request	Closed	record	closed
+LookupAccount	provider	request	Lookup	record	object
+LookupAccount	provider	request	LookupAccount	route	bad-percent bad-utf8 escaped exact plus
+LookupAccount	provider	request/id	Required	required	present
+LookupAccount	provider	request/id	id	text	unicode
+LookupAccount	provider	response	Account	record	object
+LookupAccount	provider	response	Closed	record	closed
+LookupAccount	provider	response	LookupAccount	json	valid
+LookupAccount	provider	response	LookupAccount	media	json
+LookupAccount	provider	response	LookupAccount	response	success
+LookupAccount	provider	response	http:error:AccountMissing	error	named
+LookupAccount	provider	response	http:error:InvalidRequest	error	named
+LookupAccount	provider	response/balance	BalanceBounds	bounds	max min
+LookupAccount	provider	response/balance	Required	required	present
+LookupAccount	provider	response/balance	balance	i64	large max zero
+LookupAccount	provider	response/id	Required	required	present
+LookupAccount	provider	response/id	id	text	unicode
+LookupAccount	provider	response/owner	Required	required	present
+LookupAccount	provider	response/owner	owner	text	unicode
+TransferFunds	consumer	behavior	AtomicTransfer	transfer	capacity destination-and-amount destination-missing funds-and-capacity insufficient missing-both non-positive overflow same-account same-and-amount source-missing success
+TransferFunds	consumer	request	Closed	record	closed
+TransferFunds	consumer	request	Transfer	record	object
+TransferFunds	consumer	request	TransferFunds	json	valid
+TransferFunds	consumer	request	TransferFunds	media	json
+TransferFunds	consumer	request	TransferFunds	route	exact
+TransferFunds	consumer	request/amount	Required	required	present
+TransferFunds	consumer	request/amount	amount	i64	large max min zero
+TransferFunds	consumer	request/destination	Required	required	present
+TransferFunds	consumer	request/destination	destination	text	unicode
+TransferFunds	consumer	request/source	Required	required	present
+TransferFunds	consumer	request/source	source	text	unicode
+TransferFunds	consumer	response	Closed	record	closed unknown-member
+TransferFunds	consumer	response	Pair	record	object wrong-type
+TransferFunds	consumer	response	TransferFunds	json	bom duplicate empty escaped malformed surrogate trailing utf8 valid
+TransferFunds	consumer	response	TransferFunds	media	charset json missing unsupported
+TransferFunds	consumer	response	TransferFunds	response	success transport unexpected-status
+TransferFunds	consumer	response	http:error:InvalidRequest	error	malformed named unknown
+TransferFunds	consumer	response	http:error:UnsupportedMediaType	error	malformed named unknown
+TransferFunds	consumer	response	ledger:error:DestinationMissing	error	malformed named unknown
+TransferFunds	consumer	response	ledger:error:DestinationOverflow	error	malformed named unknown
+TransferFunds	consumer	response	ledger:error:InsufficientFunds	error	malformed named unknown
+TransferFunds	consumer	response	ledger:error:NonPositiveAmount	error	malformed named unknown
+TransferFunds	consumer	response	ledger:error:SameAccount	error	malformed named unknown
+TransferFunds	consumer	response	ledger:error:SourceMissing	error	malformed named unknown
+TransferFunds	consumer	response/destination	Account	record	object wrong-type
+TransferFunds	consumer	response/destination	Closed	record	closed unknown-member
+TransferFunds	consumer	response/destination	Required	required	omitted present
+TransferFunds	consumer	response/destination	destinationAccount	record	object wrong-type
+TransferFunds	consumer	response/destination/balance	BalanceBounds	bounds	above below max min
+TransferFunds	consumer	response/destination/balance	Required	required	omitted present
+TransferFunds	consumer	response/destination/balance	balance	i64	large max noncanonical numeric overflow zero
+TransferFunds	consumer	response/destination/id	Required	required	omitted present
+TransferFunds	consumer	response/destination/id	id	text	unicode wrong-type
+TransferFunds	consumer	response/destination/owner	Required	required	omitted present
+TransferFunds	consumer	response/destination/owner	owner	text	unicode wrong-type
+TransferFunds	consumer	response/source	Account	record	object wrong-type
+TransferFunds	consumer	response/source	Closed	record	closed unknown-member
+TransferFunds	consumer	response/source	Required	required	omitted present
+TransferFunds	consumer	response/source	sourceAccount	record	object wrong-type
+TransferFunds	consumer	response/source/balance	BalanceBounds	bounds	above below max min
+TransferFunds	consumer	response/source/balance	Required	required	omitted present
+TransferFunds	consumer	response/source/balance	balance	i64	large max noncanonical numeric overflow zero
+TransferFunds	consumer	response/source/id	Required	required	omitted present
+TransferFunds	consumer	response/source/id	id	text	unicode wrong-type
+TransferFunds	consumer	response/source/owner	Required	required	omitted present
+TransferFunds	consumer	response/source/owner	owner	text	unicode wrong-type
+TransferFunds	provider	behavior	AtomicTransfer	transfer	capacity destination-and-amount destination-missing funds-and-capacity insufficient missing-both non-positive overflow same-account same-and-amount source-missing success
+TransferFunds	provider	request	Closed	record	closed unknown-member
+TransferFunds	provider	request	Transfer	record	object wrong-type
+TransferFunds	provider	request	TransferFunds	json	bom duplicate empty escaped malformed surrogate trailing utf8 valid
+TransferFunds	provider	request	TransferFunds	media	charset json missing unsupported
+TransferFunds	provider	request	TransferFunds	route	exact
+TransferFunds	provider	request/amount	Required	required	omitted present
+TransferFunds	provider	request/amount	amount	i64	large max min noncanonical numeric overflow zero
+TransferFunds	provider	request/destination	Required	required	omitted present
+TransferFunds	provider	request/destination	destination	text	unicode wrong-type
+TransferFunds	provider	request/source	Required	required	omitted present
+TransferFunds	provider	request/source	source	text	unicode wrong-type
+TransferFunds	provider	response	Closed	record	closed
+TransferFunds	provider	response	Pair	record	object
+TransferFunds	provider	response	TransferFunds	json	valid
+TransferFunds	provider	response	TransferFunds	media	json
+TransferFunds	provider	response	TransferFunds	response	success
+TransferFunds	provider	response	http:error:InvalidRequest	error	named
+TransferFunds	provider	response	http:error:UnsupportedMediaType	error	named
+TransferFunds	provider	response	ledger:error:DestinationMissing	error	named
+TransferFunds	provider	response	ledger:error:DestinationOverflow	error	named
+TransferFunds	provider	response	ledger:error:InsufficientFunds	error	named
+TransferFunds	provider	response	ledger:error:NonPositiveAmount	error	named
+TransferFunds	provider	response	ledger:error:SameAccount	error	named
+TransferFunds	provider	response	ledger:error:SourceMissing	error	named
+TransferFunds	provider	response/destination	Account	record	object
+TransferFunds	provider	response/destination	Closed	record	closed
+TransferFunds	provider	response/destination	Required	required	present
+TransferFunds	provider	response/destination	destinationAccount	record	object
+TransferFunds	provider	response/destination/balance	BalanceBounds	bounds	max min-attainable
+TransferFunds	provider	response/destination/balance	Required	required	present
+TransferFunds	provider	response/destination/balance	balance	i64	large max
+TransferFunds	provider	response/destination/id	Required	required	present
+TransferFunds	provider	response/destination/id	id	text	unicode
+TransferFunds	provider	response/destination/owner	Required	required	present
+TransferFunds	provider	response/destination/owner	owner	text	unicode
+TransferFunds	provider	response/source	Account	record	object
+TransferFunds	provider	response/source	Closed	record	closed
+TransferFunds	provider	response/source	Required	required	present
+TransferFunds	provider	response/source	sourceAccount	record	object
+TransferFunds	provider	response/source/balance	BalanceBounds	bounds	max-attainable min
+TransferFunds	provider	response/source/balance	Required	required	present
+TransferFunds	provider	response/source/balance	balance	i64	large zero
+TransferFunds	provider	response/source/id	Required	required	present
+TransferFunds	provider	response/source/id	id	text	unicode
+TransferFunds	provider	response/source/owner	Required	required	present
+TransferFunds	provider	response/source/owner	owner	text	unicode

@@ -780,6 +780,7 @@ dependencies = [
  "apache-avro",
  "arrow-array",
  "arrow-avro",
+ "base64",
  "oxigraph",
  "postgres",
  "serde",

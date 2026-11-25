@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "claims": [
+    {
+      "operation": "urn:oddlang:ledger-http:LookupAccount",
+      "role": "http.consumer"
+    },
+    {
+      "operation": "urn:oddlang:ledger-http:TransferFunds",
+      "role": "http.consumer"
+    }
+  ]
+}
