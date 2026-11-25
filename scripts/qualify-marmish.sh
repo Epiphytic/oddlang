@@ -30,8 +30,11 @@ import json, sys
 from pathlib import Path
 expected = json.loads(Path("examples/marmish/inventory-summary.json").read_bytes())
 actual = json.loads(Path(sys.argv[1]).read_bytes())
-if expected["sourceInventorySha256"] != actual["sourceInventorySha256"]:
-    raise SystemExit("portable Marmish inventory changed")
+host_specific = {"host", "inventorySha256"}
+def portable(summary):
+    return {key: value for key, value in summary.items() if key not in host_specific}
+if portable(expected) != portable(actual):
+    raise SystemExit("portable Marmish inventory or summary changed")
 if expected["host"] == actual["host"] and expected != actual:
     raise SystemExit("host Marmish inventory changed")
 CHECK_INVENTORY

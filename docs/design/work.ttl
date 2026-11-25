@@ -391,3 +391,6 @@ w:rustUnboundedMapProof p:addresses w:rustProofScopeReview .
 w:marmishBaselineEvidence a p:Artifact ; rdfs:label "Pinned original source inventory and native observations" ;
     p:location "docs/design/marmish-baseline.md" .
 w:marmishInventory p:evidence w:marmishBaselineEvidence .
+
+w:marmishBaselineReview a p:Finding ; rdfs:label "Freeze all six CLI observations, distinguish lexical and compiled units, and archive platform evidence" ; p:source w:marmishBaselineEvidence .
+w:marmishInventory p:addresses w:marmishBaselineReview .

@@ -141,3 +141,57 @@ class InventoryTests(unittest.TestCase):
                 },
             )
             self.assertTrue(all(f["sha256"] is None for f in package["finalInputs"]))
+
+    def test_collect_platform_tests_preserves_unknown_and_ignored_gates(self):
+        from inventory_platforms import test_inventory
+
+        path = "crates/fixture/src/lib.rs"
+        target = "fixture:lib:fixture"
+        sites = [
+            (2, "apple", ['#[cfg(target_os = "macos")]']),
+            (4, "linux", ['#[cfg(target_os = "linux")]']),
+            (6, "custom", ["#[cfg(compiler_supplied_switch)]"]),
+            (8, "manual", ['#[ignore = "explicit gate"]']),
+        ]
+        tests = [
+            {"line": line, "name": name, "attributes": ["#[test]", *attrs]}
+            for line, name, attrs in sites
+        ]
+        syntax = {
+            path: {
+                "tests": tests,
+                "attributes": [[line, line, attrs] for line, _, attrs in sites],
+            }
+        }
+        files = {path: {"cargoContexts": [{"target": target, "attributes": []}]}}
+        platforms = {
+            "aarch64-apple-darwin": ['target_os="macos"'],
+            "x86_64-unknown-linux-gnu": ['target_os="linux"'],
+        }
+        catalog, collected = test_inventory(
+            syntax, [], files, {target: {"crate": "fixture"}}, platforms, ["default"]
+        )
+        for platform, selected in [
+            ("aarch64-apple-darwin", "apple"),
+            ("x86_64-unknown-linux-gnu", "linux"),
+        ]:
+            with self.subTest(platform=platform):
+                rows = {
+                    catalog[r["test"]]["name"]: (
+                        r["gate"],
+                        r["profiles"],
+                        r["uncertainProfiles"],
+                    )
+                    for r in collected[platform]
+                }
+                self.assertEqual(
+                    rows,
+                    {
+                        selected: ("ordinary", ["default"], []),
+                        "custom": ("ordinary", [], ["default"]),
+                        "manual": ("ignored", ["default"], []),
+                    },
+                )
+                self.assertTrue(
+                    all(r["cargoTarget"] == target for r in collected[platform])
+                )
