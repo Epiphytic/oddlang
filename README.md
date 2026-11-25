@@ -26,7 +26,7 @@ Compose waits for the `pg_isready` TCP health check. The test harness also
 connects over TCP and verifies `server_version_num = 160006` (PostgreSQL 16.6)
 before creating an isolated schema for each test. An existing PostgreSQL
 16.6 instance can be used by setting the URL to a disposable database
-whose user may create schemas. The ledger demo uses the same URL.
+whose user may create schemas. The planned ledger demo will use the same URL.
 
 When finished with the Compose database, remove its containers and data
 with `docker compose down -v`.

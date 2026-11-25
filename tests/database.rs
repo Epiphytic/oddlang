@@ -27,6 +27,12 @@ fn isolates_and_cleans_up_schemas() {
         .client
         .batch_execute("CREATE TABLE account (id bigint)")
         .unwrap();
+    first.client.batch_execute("BEGIN").unwrap();
+    let error = first.client.batch_execute("SELECT 1 / 0").unwrap_err();
+    assert_eq!(
+        error.code(),
+        Some(&postgres::error::SqlState::DIVISION_BY_ZERO)
+    );
     drop(first);
 
     let schema_exists: bool = second

@@ -1,3 +1,5 @@
+use std::error::Error as _;
+use std::io;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use postgres::{Client, Config, NoTls};
@@ -22,14 +24,22 @@ impl TestDatabase {
             .connect_timeout(Duration::from_secs(5))
             .connect(NoTls)
             .map_err(|error| {
-                format!("database setup: could not connect using {DATABASE_URL_ENV}: {error}")
+                format!(
+                    "database setup: could not connect using {DATABASE_URL_ENV}: {}",
+                    diagnostic(&error)
+                )
             })?;
         let server_info = client
             .query_one(
                 "SELECT current_setting('server_version_num'), pg_backend_pid()",
                 &[],
             )
-            .map_err(|error| format!("database setup: could not inspect PostgreSQL: {error}"))?;
+            .map_err(|error| {
+                format!(
+                    "database setup: could not inspect PostgreSQL: {}",
+                    diagnostic(&error)
+                )
+            })?;
         validate_server_version(server_info.get(0))?;
 
         // The backend PID distinguishes simultaneous sessions. The timestamp also
@@ -44,10 +54,30 @@ impl TestDatabase {
             .batch_execute(&format!(
                 "CREATE SCHEMA {schema}; SET search_path TO {schema};"
             ))
-            .map_err(|error| format!("database setup: could not initialize schema: {error}"))?;
+            .map_err(|error| {
+                format!(
+                    "database setup: could not initialize schema: {}",
+                    diagnostic(&error)
+                )
+            })?;
 
         Ok(Self { client, schema })
     }
+}
+
+fn diagnostic(error: &postgres::Error) -> String {
+    // Structured codes and I/O categories give context without printing
+    // server messages or connection details that may contain credentials.
+    if let Some(code) = error.code() {
+        return format!("{error} (SQLSTATE {})", code.code());
+    }
+    if let Some(cause) = error
+        .source()
+        .and_then(|source| source.downcast_ref::<io::Error>())
+    {
+        return format!("{error} ({})", cause.kind());
+    }
+    error.to_string()
 }
 
 pub(crate) fn validate_server_version(actual: &str) -> Result<(), String> {
