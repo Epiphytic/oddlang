@@ -2,6 +2,38 @@ use oddlang::model::load_model;
 use std::{env, process::ExitCode};
 fn run(args: &[String]) -> Result<(), String> {
     match args {
+        [group, cmd, manifest, mapping, out] if group == "import" && cmd == "rust" => {
+            oddlang::import_rust::import(manifest.as_ref(), mapping.as_ref(), out.as_ref(), None)
+        }
+        [group, cmd, manifest, mapping, out, flag, receipt]
+            if group == "import" && cmd == "rust" && flag == "--accepted-cleanup" =>
+        {
+            oddlang::import_rust::import(
+                manifest.as_ref(),
+                mapping.as_ref(),
+                out.as_ref(),
+                Some(receipt.as_ref()),
+            )
+        }
+        [group, cmd, dir, output] if group == "import" && cmd == "verify-build" => {
+            oddlang::import_rust::verify_build(dir.as_ref(), output.as_ref())
+        }
+        [group, cmd, dir] if group == "import" && cmd == "verify" => {
+            oddlang::import_rust::verify(dir.as_ref())
+        }
+        [group, cmd, manifest, mapping, dir] if group == "import" && cmd == "replay" => {
+            oddlang::import_rust::replay(manifest.as_ref(), mapping.as_ref(), dir.as_ref(), None)
+        }
+        [group, cmd, manifest, mapping, dir, flag, receipt]
+            if group == "import" && cmd == "replay" && flag == "--accepted-cleanup" =>
+        {
+            oddlang::import_rust::replay(
+                manifest.as_ref(),
+                mapping.as_ref(),
+                dir.as_ref(),
+                Some(receipt.as_ref()),
+            )
+        }
         [group, rest @ ..] if group == "wasm" => oddlang::wasm::command(rest),
         [group, cmd, project, lock, cache, overlay, output]
             if group == "http" && cmd == "generate" =>
@@ -118,6 +150,13 @@ fn run(args: &[String]) -> Result<(), String> {
             Ok(())
         }
         [cmd, dir, out] if cmd == "build" => {
+            if std::path::Path::new(dir)
+                .join("import.lock")
+                .symlink_metadata()
+                .is_ok()
+            {
+                oddlang::import_rust::verify(dir.as_ref())?;
+            }
             oddlang::targets::build(&load_model(dir)?, std::path::Path::new(out))
                 .map_err(|e| e.to_string())
         }

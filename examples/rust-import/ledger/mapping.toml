@@ -1,0 +1,37 @@
+profile = "ledger-v1"
+
+[mapping]
+entity = "Account"
+entity_iri = "urn:oddlang:ledger:Account"
+constructor = "new"
+operation = "transfer"
+operation_iri = "urn:oddlang:ledger:TransferFunds"
+error_type = "TransferError"
+min = 0
+max = 9223372036854775807
+
+[mapping.fields]
+id = "urn:oddlang:ledger:id"
+owner = "urn:oddlang:ledger:owner"
+balance = "urn:oddlang:ledger:balance"
+
+[mapping.args]
+source = "urn:oddlang:ledger:source"
+destination = "urn:oddlang:ledger:destination"
+amount = "urn:oddlang:ledger:amount"
+
+[mapping.errors]
+SourceMissing = "urn:oddlang:ledger:error:SourceMissing"
+DestinationMissing = "urn:oddlang:ledger:error:DestinationMissing"
+SameAccount = "urn:oddlang:ledger:error:SameAccount"
+NonPositiveAmount = "urn:oddlang:ledger:error:NonPositiveAmount"
+InsufficientFunds = "urn:oddlang:ledger:error:InsufficientFunds"
+DestinationOverflow = "urn:oddlang:ledger:error:DestinationOverflow"
+
+[mapping.guards]
+SourceMissing = "urn:oddlang:ledger:g1"
+DestinationMissing = "urn:oddlang:ledger:g2"
+SameAccount = "urn:oddlang:ledger:g3"
+NonPositiveAmount = "urn:oddlang:ledger:g4"
+InsufficientFunds = "urn:oddlang:ledger:g5"
+DestinationOverflow = "urn:oddlang:ledger:g6"

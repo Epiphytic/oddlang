@@ -83,3 +83,16 @@ the SQL backfill and Avro reader default. New SQL rows and generated Rust
 accounts require an explicit currency. The v2 model defines no transfer
 operation. To keep the generated artifacts, run
 `cargo run --locked --offline -- build examples/ledger/v2 target/ledger-v2`.
+
+## Recover a Rust ledger contract
+
+The Rust source importer accepts the [ledger-v1 grammar](docs/language/rust-import.md). It validates an independent Cargo library, produces editable Turtle and records the source, mapping, toolchain and graph digests. Run these commands from the repository root with the pinned Rust toolchain.
+
+```sh
+cargo run --locked --offline -- import rust examples/rust-import/ledger/Cargo.toml examples/rust-import/ledger/mapping.toml target/import-ledger
+cargo run --locked --offline -- build target/import-ledger target/import-ledger-native
+cargo run --locked --offline -- import replay examples/rust-import/ledger/Cargo.toml examples/rust-import/ledger/mapping.toml target/import-ledger
+cargo run --locked --offline -- import verify-build target/import-ledger target/import-ledger-native
+```
+
+Replay compares the current inputs and regenerated artifacts with the saved import. To develop a new contract revision, copy the Turtle closure into a new project directory and use the normal build command. The recovered project and its import lock serve as the original translation record.
