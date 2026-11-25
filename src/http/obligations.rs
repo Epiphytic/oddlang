@@ -143,7 +143,15 @@ impl Rules<'_> {
                         }
                     }
                     if inbound {
-                        ks.extend(["noncanonical", "overflow", "numeric"])
+                        ks.extend([
+                            "noncanonical",
+                            "negative-zero",
+                            "leading-plus",
+                            "exponent",
+                            "whitespace",
+                            "overflow",
+                            "numeric",
+                        ])
                     }
                     ("i64", ks)
                 }
@@ -186,11 +194,9 @@ pub fn inventory(model: &HttpContract) -> Vec<Obligation> {
             };
             let mut route = vec!["exact"];
             if op.method == "GET" {
-                route.extend(["escaped", "plus"]);
+                route.extend(["escaped", "plus", "empty", "dot", "dot-dot"]);
                 if provider {
                     route.extend(["bad-percent", "bad-utf8"])
-                } else {
-                    route.extend(["empty", "dot", "dot-dot"])
                 }
             }
             r.add(id, "route", "request", &route);
@@ -202,8 +208,25 @@ pub fn inventory(model: &HttpContract) -> Vec<Obligation> {
                     id,
                     "media",
                     pos,
-                    if inbound {
-                        &["json", "charset", "missing", "unsupported"]
+                    if inbound && pos == "request" {
+                        &[
+                            "json",
+                            "charset",
+                            "missing",
+                            "unsupported",
+                            "wrong-charset",
+                            "extra-parameter",
+                            "media-before-body",
+                        ]
+                    } else if inbound {
+                        &[
+                            "json",
+                            "charset",
+                            "missing",
+                            "unsupported",
+                            "wrong-charset",
+                            "extra-parameter",
+                        ]
                     } else {
                         &["json"]
                     },

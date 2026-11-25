@@ -314,6 +314,18 @@
           "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/media/response/unsupported"
         ],
         "kind": "unsupported"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/media/response/wrong-charset"
+        ],
+        "kind": "wrong-charset"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/media/response/extra-parameter"
+        ],
+        "kind": "extra-parameter"
       }
     ]
   },
@@ -428,6 +440,30 @@
           "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fbalance/noncanonical"
         ],
         "kind": "noncanonical"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fbalance/negative-zero"
+        ],
+        "kind": "negative-zero"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fbalance/leading-plus"
+        ],
+        "kind": "leading-plus"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fbalance/exponent"
+        ],
+        "kind": "exponent"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fbalance/whitespace"
+        ],
+        "kind": "whitespace"
       },
       {
         "caseIds": [
@@ -602,6 +638,24 @@
           "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/plus"
         ],
         "kind": "plus"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/empty"
+        ],
+        "kind": "empty"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/dot"
+        ],
+        "kind": "dot"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/dot-dot"
+        ],
+        "kind": "dot-dot"
       },
       {
         "caseIds": [
@@ -1328,6 +1382,18 @@
           "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/response/unsupported"
         ],
         "kind": "unsupported"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/response/wrong-charset"
+        ],
+        "kind": "wrong-charset"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/response/extra-parameter"
+        ],
+        "kind": "extra-parameter"
       }
     ]
   },
@@ -1695,6 +1761,30 @@
       },
       {
         "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2Fbalance/negative-zero"
+        ],
+        "kind": "negative-zero"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2Fbalance/leading-plus"
+        ],
+        "kind": "leading-plus"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2Fbalance/exponent"
+        ],
+        "kind": "exponent"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2Fbalance/whitespace"
+        ],
+        "kind": "whitespace"
+      },
+      {
+        "caseIds": [
           "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2Fbalance/overflow"
         ],
         "kind": "overflow"
@@ -1959,6 +2049,30 @@
           "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2Fbalance/noncanonical"
         ],
         "kind": "noncanonical"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2Fbalance/negative-zero"
+        ],
+        "kind": "negative-zero"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2Fbalance/leading-plus"
+        ],
+        "kind": "leading-plus"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2Fbalance/exponent"
+        ],
+        "kind": "exponent"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2Fbalance/whitespace"
+        ],
+        "kind": "whitespace"
       },
       {
         "caseIds": [
@@ -2274,6 +2388,24 @@
           "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/request/unsupported"
         ],
         "kind": "unsupported"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/request/wrong-charset"
+        ],
+        "kind": "wrong-charset"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/request/extra-parameter"
+        ],
+        "kind": "extra-parameter"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/request/media-before-body"
+        ],
+        "kind": "media-before-body"
       }
     ]
   },
@@ -2349,6 +2481,30 @@
           "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/noncanonical"
         ],
         "kind": "noncanonical"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/negative-zero"
+        ],
+        "kind": "negative-zero"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/leading-plus"
+        ],
+        "kind": "leading-plus"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/exponent"
+        ],
+        "kind": "exponent"
+      },
+      {
+        "caseIds": [
+          "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/whitespace"
+        ],
+        "kind": "whitespace"
       },
       {
         "caseIds": [

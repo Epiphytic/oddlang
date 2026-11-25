@@ -921,7 +921,7 @@
       },
       "replies": [
         {
-          "bodyBase64": "eyJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEiLCJiYWxhbmNlIjoiOTIyMzM3MjAzNjg1NDc3NTgwNyIsIlx1MDA2MmFsYW5jZSI6IjkyMjMzNzIwMzY4NTQ3NzU4MDcifQ==",
+          "bodyBase64": "eyJiYWxhbmNlIjoiOTIyMzM3MjAzNjg1NDc3NTgwNyIsImlkIjoiQSIsIm93bmVyIjoiT3duZXIgQSIsIlx1MDA2Mlx1MDA2MVx1MDA2Y1x1MDA2MVx1MDA2ZVx1MDA2M1x1MDA2NSI6IjkyMjMzNzIwMzY4NTQ3NzU4MDcifQ==",
           "contentType": "application/json",
           "status": 200
         }
@@ -936,7 +936,7 @@
           "path": "/accounts/A"
         },
         "response": {
-          "bodyBase64": "eyJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEiLCJiYWxhbmNlIjoiOTIyMzM3MjAzNjg1NDc3NTgwNyIsIlx1MDA2MmFsYW5jZSI6IjkyMjMzNzIwMzY4NTQ3NzU4MDcifQ==",
+          "bodyBase64": "eyJiYWxhbmNlIjoiOTIyMzM3MjAzNjg1NDc3NTgwNyIsImlkIjoiQSIsIm93bmVyIjoiT3duZXIgQSIsIlx1MDA2Mlx1MDA2MVx1MDA2Y1x1MDA2MVx1MDA2ZVx1MDA2M1x1MDA2NSI6IjkyMjMzNzIwMzY4NTQ3NzU4MDcifQ==",
           "contentType": "application/json",
           "status": 200
         }
@@ -1396,6 +1396,60 @@
     ]
   },
   {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/media/response/extra-parameter",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:LookupAccount",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:LookupAccount",
+        "rule": "urn:oddlang:http:rule:1:media",
+        "position": "response",
+        "kind": "extra-parameter"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "9223372036854775807",
+        "id": "A",
+        "owner": "Owner A"
+      }
+    ],
+    "action": {
+      "input": {
+        "id": "A"
+      },
+      "replies": [
+        {
+          "bodyBase64": "eyJiYWxhbmNlIjoiOTIyMzM3MjAzNjg1NDc3NTgwNyIsImlkIjoiQSIsIm93bmVyIjoiT3duZXIgQSJ9",
+          "contentType": "application/json; charset=utf-8; extra=one",
+          "status": 200
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/A"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiOTIyMzM3MjAzNjg1NDc3NTgwNyIsImlkIjoiQSIsIm93bmVyIjoiT3duZXIgQSJ9",
+          "contentType": "application/json; charset=utf-8; extra=one",
+          "status": 200
+        }
+      },
+      {
+        "native": {
+          "kind": "protocolError"
+        }
+      }
+    ]
+  },
+  {
     "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/media/response/json",
     "operation": "urn:oddlang:ledger-http:LookupAccount",
     "role": "http.consumer",
@@ -1552,6 +1606,60 @@
         "response": {
           "bodyBase64": "eyJiYWxhbmNlIjoiOTIyMzM3MjAzNjg1NDc3NTgwNyIsImlkIjoiQSIsIm93bmVyIjoiT3duZXIgQSJ9",
           "contentType": "text/plain",
+          "status": 200
+        }
+      },
+      {
+        "native": {
+          "kind": "protocolError"
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3ALookupAccount/media/response/wrong-charset",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:LookupAccount",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:LookupAccount",
+        "rule": "urn:oddlang:http:rule:1:media",
+        "position": "response",
+        "kind": "wrong-charset"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "9223372036854775807",
+        "id": "A",
+        "owner": "Owner A"
+      }
+    ],
+    "action": {
+      "input": {
+        "id": "A"
+      },
+      "replies": [
+        {
+          "bodyBase64": "eyJiYWxhbmNlIjoiOTIyMzM3MjAzNjg1NDc3NTgwNyIsImlkIjoiQSIsIm93bmVyIjoiT3duZXIgQSJ9",
+          "contentType": "application/json; charset=latin1",
+          "status": 200
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/A"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiOTIyMzM3MjAzNjg1NDc3NTgwNyIsImlkIjoiQSIsIm93bmVyIjoiT3duZXIgQSJ9",
+          "contentType": "application/json; charset=latin1",
           "status": 200
         }
       },
@@ -2402,6 +2510,60 @@
     ]
   },
   {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fbalance/exponent",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:LookupAccount",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:balance",
+        "rule": "urn:oddlang:http:rule:1:i64",
+        "position": "response/balance",
+        "kind": "exponent"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "9223372036854775807",
+        "id": "A",
+        "owner": "Owner A"
+      }
+    ],
+    "action": {
+      "input": {
+        "id": "A"
+      },
+      "replies": [
+        {
+          "bodyBase64": "eyJiYWxhbmNlIjoiMWUzIiwiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIn0=",
+          "contentType": "application/json",
+          "status": 200
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/A"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiMWUzIiwiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIn0=",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "native": {
+          "kind": "protocolError"
+        }
+      }
+    ]
+  },
+  {
     "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fbalance/large",
     "operation": "urn:oddlang:ledger-http:LookupAccount",
     "role": "http.consumer",
@@ -2461,6 +2623,60 @@
     ]
   },
   {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fbalance/leading-plus",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:LookupAccount",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:balance",
+        "rule": "urn:oddlang:http:rule:1:i64",
+        "position": "response/balance",
+        "kind": "leading-plus"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "9223372036854775807",
+        "id": "A",
+        "owner": "Owner A"
+      }
+    ],
+    "action": {
+      "input": {
+        "id": "A"
+      },
+      "replies": [
+        {
+          "bodyBase64": "eyJiYWxhbmNlIjoiKzEiLCJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEifQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/A"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiKzEiLCJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEifQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "native": {
+          "kind": "protocolError"
+        }
+      }
+    ]
+  },
+  {
     "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fbalance/max",
     "operation": "urn:oddlang:ledger-http:LookupAccount",
     "role": "http.consumer",
@@ -2515,6 +2731,60 @@
             "id": "A",
             "owner": "Owner A"
           }
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fbalance/negative-zero",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:LookupAccount",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:balance",
+        "rule": "urn:oddlang:http:rule:1:i64",
+        "position": "response/balance",
+        "kind": "negative-zero"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "9223372036854775807",
+        "id": "A",
+        "owner": "Owner A"
+      }
+    ],
+    "action": {
+      "input": {
+        "id": "A"
+      },
+      "replies": [
+        {
+          "bodyBase64": "eyJiYWxhbmNlIjoiLTAiLCJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEifQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/A"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiLTAiLCJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEifQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "native": {
+          "kind": "protocolError"
         }
       }
     ]
@@ -2670,6 +2940,60 @@
         },
         "response": {
           "bodyBase64": "eyJiYWxhbmNlIjoiOTIyMzM3MjAzNjg1NDc3NTgwOCIsImlkIjoiQSIsIm93bmVyIjoiT3duZXIgQSJ9",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "native": {
+          "kind": "protocolError"
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fbalance/whitespace",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:LookupAccount",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:balance",
+        "rule": "urn:oddlang:http:rule:1:i64",
+        "position": "response/balance",
+        "kind": "whitespace"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "9223372036854775807",
+        "id": "A",
+        "owner": "Owner A"
+      }
+    ],
+    "action": {
+      "input": {
+        "id": "A"
+      },
+      "replies": [
+        {
+          "bodyBase64": "eyJiYWxhbmNlIjoiIDEiLCJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEifQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/A"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiIDEiLCJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEifQ==",
           "contentType": "application/json",
           "status": 200
         }
@@ -3580,6 +3904,147 @@
           "contentType": null,
           "method": "GET",
           "path": "/accounts/%FF"
+        },
+        "response": {
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmh0dHA6ZXJyb3I6SW52YWxpZFJlcXVlc3QifQ==",
+          "contentType": "application/json",
+          "status": 400
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/dot",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:LookupAccount",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:LookupAccount",
+        "rule": "urn:oddlang:http:rule:1:route",
+        "position": "request",
+        "kind": "dot"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "9223372036854775807",
+        "id": "A",
+        "owner": "Owner A"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/%2E"
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/%2E"
+        },
+        "response": {
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmh0dHA6ZXJyb3I6SW52YWxpZFJlcXVlc3QifQ==",
+          "contentType": "application/json",
+          "status": 400
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/dot-dot",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:LookupAccount",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:LookupAccount",
+        "rule": "urn:oddlang:http:rule:1:route",
+        "position": "request",
+        "kind": "dot-dot"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "9223372036854775807",
+        "id": "A",
+        "owner": "Owner A"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/%2E%2E"
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/%2E%2E"
+        },
+        "response": {
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmh0dHA6ZXJyb3I6SW52YWxpZFJlcXVlc3QifQ==",
+          "contentType": "application/json",
+          "status": 400
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ALookupAccount/http.provider/urn%3Aoddlang%3Aledger-http%3ALookupAccount/route/request/empty",
+    "operation": "urn:oddlang:ledger-http:LookupAccount",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:LookupAccount",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:LookupAccount",
+        "rule": "urn:oddlang:http:rule:1:route",
+        "position": "request",
+        "kind": "empty"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "9223372036854775807",
+        "id": "A",
+        "owner": "Owner A"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/"
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/"
         },
         "response": {
           "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmh0dHA6ZXJyb3I6SW52YWxpZFJlcXVlc3QifQ==",
@@ -8555,7 +9020,7 @@
       },
       "replies": [
         {
-          "bodyBase64": "eyJzb3VyY2UiOnsiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIiwiYmFsYW5jZSI6IjcifSwiZGVzdGluYXRpb24iOnsiaWQiOiJCIiwib3duZXIiOiJPd25lciBCIiwiYmFsYW5jZSI6IjEwIn0sIlx1MDA2NGVzdGluYXRpb24iOnsiYmFsYW5jZSI6IjEwIiwiaWQiOiJCIiwib3duZXIiOiJPd25lciBCIn19",
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiI3IiwiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIn0sIlx1MDA2NFx1MDA2NVx1MDA3M1x1MDA3NFx1MDA2OVx1MDA2ZVx1MDA2MVx1MDA3NFx1MDA2OVx1MDA2Zlx1MDA2ZSI6eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifX0=",
           "contentType": "application/json",
           "status": 200
         }
@@ -8570,7 +9035,7 @@
           "path": "/transfers"
         },
         "response": {
-          "bodyBase64": "eyJzb3VyY2UiOnsiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIiwiYmFsYW5jZSI6IjcifSwiZGVzdGluYXRpb24iOnsiaWQiOiJCIiwib3duZXIiOiJPd25lciBCIiwiYmFsYW5jZSI6IjEwIn0sIlx1MDA2NGVzdGluYXRpb24iOnsiYmFsYW5jZSI6IjEwIiwiaWQiOiJCIiwib3duZXIiOiJPd25lciBCIn19",
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiI3IiwiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIn0sIlx1MDA2NFx1MDA2NVx1MDA3M1x1MDA3NFx1MDA2OVx1MDA2ZVx1MDA2MVx1MDA3NFx1MDA2OVx1MDA2Zlx1MDA2ZSI6eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifX0=",
           "contentType": "application/json",
           "status": 200
         }
@@ -9225,6 +9690,72 @@
     ]
   },
   {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/response/extra-parameter",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:TransferFunds",
+        "rule": "urn:oddlang:http:rule:1:media",
+        "position": "response",
+        "kind": "extra-parameter"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "10",
+        "id": "A",
+        "owner": "Owner A"
+      },
+      {
+        "balance": "7",
+        "id": "B",
+        "owner": "Owner B"
+      },
+      {
+        "balance": "55",
+        "id": "C",
+        "owner": "Owner C"
+      }
+    ],
+    "action": {
+      "input": {
+        "amount": "3",
+        "destination": "B",
+        "source": "A"
+      },
+      "replies": [
+        {
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiI3IiwiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIn19",
+          "contentType": "application/json; charset=utf-8; extra=one",
+          "status": 200
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "eyJhbW91bnQiOiIzIiwiZGVzdGluYXRpb24iOiJCIiwic291cmNlIjoiQSJ9",
+          "contentType": "application/json",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        "response": {
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiI3IiwiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIn19",
+          "contentType": "application/json; charset=utf-8; extra=one",
+          "status": 200
+        }
+      },
+      {
+        "native": {
+          "kind": "protocolError"
+        }
+      }
+    ]
+  },
+  {
     "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/response/json",
     "operation": "urn:oddlang:ledger-http:TransferFunds",
     "role": "http.consumer",
@@ -9424,6 +9955,72 @@
         "response": {
           "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiI3IiwiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIn19",
           "contentType": "text/plain",
+          "status": 200
+        }
+      },
+      {
+        "native": {
+          "kind": "protocolError"
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/response/wrong-charset",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:TransferFunds",
+        "rule": "urn:oddlang:http:rule:1:media",
+        "position": "response",
+        "kind": "wrong-charset"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "10",
+        "id": "A",
+        "owner": "Owner A"
+      },
+      {
+        "balance": "7",
+        "id": "B",
+        "owner": "Owner B"
+      },
+      {
+        "balance": "55",
+        "id": "C",
+        "owner": "Owner C"
+      }
+    ],
+    "action": {
+      "input": {
+        "amount": "3",
+        "destination": "B",
+        "source": "A"
+      },
+      "replies": [
+        {
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiI3IiwiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIn19",
+          "contentType": "application/json; charset=latin1",
+          "status": 200
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "eyJhbW91bnQiOiIzIiwiZGVzdGluYXRpb24iOiJCIiwic291cmNlIjoiQSJ9",
+          "contentType": "application/json",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        "response": {
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiI3IiwiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIn19",
+          "contentType": "application/json; charset=latin1",
           "status": 200
         }
       },
@@ -10005,6 +10602,72 @@
     ]
   },
   {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2Fbalance/exponent",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:balance",
+        "rule": "urn:oddlang:http:rule:1:i64",
+        "position": "response/destination/balance",
+        "kind": "exponent"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "10",
+        "id": "A",
+        "owner": "Owner A"
+      },
+      {
+        "balance": "7",
+        "id": "B",
+        "owner": "Owner B"
+      },
+      {
+        "balance": "55",
+        "id": "C",
+        "owner": "Owner C"
+      }
+    ],
+    "action": {
+      "input": {
+        "amount": "3",
+        "destination": "B",
+        "source": "A"
+      },
+      "replies": [
+        {
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiMWUzIiwiaWQiOiJCIiwib3duZXIiOiJPd25lciBCIn0sInNvdXJjZSI6eyJiYWxhbmNlIjoiNyIsImlkIjoiQSIsIm93bmVyIjoiT3duZXIgQSJ9fQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "eyJhbW91bnQiOiIzIiwiZGVzdGluYXRpb24iOiJCIiwic291cmNlIjoiQSJ9",
+          "contentType": "application/json",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        "response": {
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiMWUzIiwiaWQiOiJCIiwib3duZXIiOiJPd25lciBCIn0sInNvdXJjZSI6eyJiYWxhbmNlIjoiNyIsImlkIjoiQSIsIm93bmVyIjoiT3duZXIgQSJ9fQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "native": {
+          "kind": "protocolError"
+        }
+      }
+    ]
+  },
+  {
     "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2Fbalance/large",
     "operation": "urn:oddlang:ledger-http:TransferFunds",
     "role": "http.consumer",
@@ -10083,6 +10746,72 @@
     ]
   },
   {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2Fbalance/leading-plus",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:balance",
+        "rule": "urn:oddlang:http:rule:1:i64",
+        "position": "response/destination/balance",
+        "kind": "leading-plus"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "10",
+        "id": "A",
+        "owner": "Owner A"
+      },
+      {
+        "balance": "7",
+        "id": "B",
+        "owner": "Owner B"
+      },
+      {
+        "balance": "55",
+        "id": "C",
+        "owner": "Owner C"
+      }
+    ],
+    "action": {
+      "input": {
+        "amount": "3",
+        "destination": "B",
+        "source": "A"
+      },
+      "replies": [
+        {
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiKzEiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiI3IiwiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIn19",
+          "contentType": "application/json",
+          "status": 200
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "eyJhbW91bnQiOiIzIiwiZGVzdGluYXRpb24iOiJCIiwic291cmNlIjoiQSJ9",
+          "contentType": "application/json",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        "response": {
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiKzEiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiI3IiwiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIn19",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "native": {
+          "kind": "protocolError"
+        }
+      }
+    ]
+  },
+  {
     "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2Fbalance/max",
     "operation": "urn:oddlang:ledger-http:TransferFunds",
     "role": "http.consumer",
@@ -10156,6 +10885,72 @@
               "owner": "Owner A"
             }
           }
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2Fbalance/negative-zero",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:balance",
+        "rule": "urn:oddlang:http:rule:1:i64",
+        "position": "response/destination/balance",
+        "kind": "negative-zero"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "10",
+        "id": "A",
+        "owner": "Owner A"
+      },
+      {
+        "balance": "7",
+        "id": "B",
+        "owner": "Owner B"
+      },
+      {
+        "balance": "55",
+        "id": "C",
+        "owner": "Owner C"
+      }
+    ],
+    "action": {
+      "input": {
+        "amount": "3",
+        "destination": "B",
+        "source": "A"
+      },
+      "replies": [
+        {
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiLTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiI3IiwiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIn19",
+          "contentType": "application/json",
+          "status": 200
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "eyJhbW91bnQiOiIzIiwiZGVzdGluYXRpb24iOiJCIiwic291cmNlIjoiQSJ9",
+          "contentType": "application/json",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        "response": {
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiLTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiI3IiwiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIn19",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "native": {
+          "kind": "protocolError"
         }
       }
     ]
@@ -10359,6 +11154,72 @@
     ]
   },
   {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2Fbalance/whitespace",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:balance",
+        "rule": "urn:oddlang:http:rule:1:i64",
+        "position": "response/destination/balance",
+        "kind": "whitespace"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "10",
+        "id": "A",
+        "owner": "Owner A"
+      },
+      {
+        "balance": "7",
+        "id": "B",
+        "owner": "Owner B"
+      },
+      {
+        "balance": "55",
+        "id": "C",
+        "owner": "Owner C"
+      }
+    ],
+    "action": {
+      "input": {
+        "amount": "3",
+        "destination": "B",
+        "source": "A"
+      },
+      "replies": [
+        {
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiIDEiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiI3IiwiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIn19",
+          "contentType": "application/json",
+          "status": 200
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "eyJhbW91bnQiOiIzIiwiZGVzdGluYXRpb24iOiJCIiwic291cmNlIjoiQSJ9",
+          "contentType": "application/json",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        "response": {
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiIDEiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiI3IiwiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIn19",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "native": {
+          "kind": "protocolError"
+        }
+      }
+    ]
+  },
+  {
     "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fdestination%2Fbalance/zero",
     "operation": "urn:oddlang:ledger-http:TransferFunds",
     "role": "http.consumer",
@@ -10432,6 +11293,72 @@
               "owner": "Owner A"
             }
           }
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2Fbalance/exponent",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:balance",
+        "rule": "urn:oddlang:http:rule:1:i64",
+        "position": "response/source/balance",
+        "kind": "exponent"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "10",
+        "id": "A",
+        "owner": "Owner A"
+      },
+      {
+        "balance": "7",
+        "id": "B",
+        "owner": "Owner B"
+      },
+      {
+        "balance": "55",
+        "id": "C",
+        "owner": "Owner C"
+      }
+    ],
+    "action": {
+      "input": {
+        "amount": "3",
+        "destination": "B",
+        "source": "A"
+      },
+      "replies": [
+        {
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiIxZTMiLCJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEifX0=",
+          "contentType": "application/json",
+          "status": 200
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "eyJhbW91bnQiOiIzIiwiZGVzdGluYXRpb24iOiJCIiwic291cmNlIjoiQSJ9",
+          "contentType": "application/json",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        "response": {
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiIxZTMiLCJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEifX0=",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "native": {
+          "kind": "protocolError"
         }
       }
     ]
@@ -10515,6 +11442,72 @@
     ]
   },
   {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2Fbalance/leading-plus",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:balance",
+        "rule": "urn:oddlang:http:rule:1:i64",
+        "position": "response/source/balance",
+        "kind": "leading-plus"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "10",
+        "id": "A",
+        "owner": "Owner A"
+      },
+      {
+        "balance": "7",
+        "id": "B",
+        "owner": "Owner B"
+      },
+      {
+        "balance": "55",
+        "id": "C",
+        "owner": "Owner C"
+      }
+    ],
+    "action": {
+      "input": {
+        "amount": "3",
+        "destination": "B",
+        "source": "A"
+      },
+      "replies": [
+        {
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiIrMSIsImlkIjoiQSIsIm93bmVyIjoiT3duZXIgQSJ9fQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "eyJhbW91bnQiOiIzIiwiZGVzdGluYXRpb24iOiJCIiwic291cmNlIjoiQSJ9",
+          "contentType": "application/json",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        "response": {
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiIrMSIsImlkIjoiQSIsIm93bmVyIjoiT3duZXIgQSJ9fQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "native": {
+          "kind": "protocolError"
+        }
+      }
+    ]
+  },
+  {
     "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2Fbalance/max",
     "operation": "urn:oddlang:ledger-http:TransferFunds",
     "role": "http.consumer",
@@ -10588,6 +11581,72 @@
               "owner": "Owner A"
             }
           }
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2Fbalance/negative-zero",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:balance",
+        "rule": "urn:oddlang:http:rule:1:i64",
+        "position": "response/source/balance",
+        "kind": "negative-zero"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "10",
+        "id": "A",
+        "owner": "Owner A"
+      },
+      {
+        "balance": "7",
+        "id": "B",
+        "owner": "Owner B"
+      },
+      {
+        "balance": "55",
+        "id": "C",
+        "owner": "Owner C"
+      }
+    ],
+    "action": {
+      "input": {
+        "amount": "3",
+        "destination": "B",
+        "source": "A"
+      },
+      "replies": [
+        {
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiItMCIsImlkIjoiQSIsIm93bmVyIjoiT3duZXIgQSJ9fQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "eyJhbW91bnQiOiIzIiwiZGVzdGluYXRpb24iOiJCIiwic291cmNlIjoiQSJ9",
+          "contentType": "application/json",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        "response": {
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiItMCIsImlkIjoiQSIsIm93bmVyIjoiT3duZXIgQSJ9fQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "native": {
+          "kind": "protocolError"
         }
       }
     ]
@@ -10779,6 +11838,72 @@
         },
         "response": {
           "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiI5MjIzMzcyMDM2ODU0Nzc1ODA4IiwiaWQiOiJBIiwib3duZXIiOiJPd25lciBBIn19",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "native": {
+          "kind": "protocolError"
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.consumer/urn%3Aoddlang%3Aledger-http%3Abalance/i64/response%2Fsource%2Fbalance/whitespace",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.consumer",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.consumer",
+        "declaration": "urn:oddlang:ledger-http:balance",
+        "rule": "urn:oddlang:http:rule:1:i64",
+        "position": "response/source/balance",
+        "kind": "whitespace"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "10",
+        "id": "A",
+        "owner": "Owner A"
+      },
+      {
+        "balance": "7",
+        "id": "B",
+        "owner": "Owner B"
+      },
+      {
+        "balance": "55",
+        "id": "C",
+        "owner": "Owner C"
+      }
+    ],
+    "action": {
+      "input": {
+        "amount": "3",
+        "destination": "B",
+        "source": "A"
+      },
+      "replies": [
+        {
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiIgMSIsImlkIjoiQSIsIm93bmVyIjoiT3duZXIgQSJ9fQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "eyJhbW91bnQiOiIzIiwiZGVzdGluYXRpb24iOiJCIiwic291cmNlIjoiQSJ9",
+          "contentType": "application/json",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        "response": {
+          "bodyBase64": "eyJkZXN0aW5hdGlvbiI6eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifSwic291cmNlIjp7ImJhbGFuY2UiOiIgMSIsImlkIjoiQSIsIm93bmVyIjoiT3duZXIgQSJ9fQ==",
           "contentType": "application/json",
           "status": 200
         }
@@ -15456,7 +16581,7 @@
     "action": {
       "requests": [
         {
-          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMyIsIlx1MDA2MW1vdW50IjoiMyJ9",
+          "bodyBase64": "eyJhbW91bnQiOiIzIiwiZGVzdGluYXRpb24iOiJCIiwic291cmNlIjoiQSIsIlx1MDA2MVx1MDA2ZFx1MDA2Zlx1MDA3NVx1MDA2ZVx1MDA3NCI6IjMifQ==",
           "contentType": "application/json",
           "method": "POST",
           "path": "/transfers"
@@ -15484,7 +16609,7 @@
     "expected": [
       {
         "request": {
-          "bodyBase64": "eyJzb3VyY2UiOiJBIiwiZGVzdGluYXRpb24iOiJCIiwiYW1vdW50IjoiMyIsIlx1MDA2MW1vdW50IjoiMyJ9",
+          "bodyBase64": "eyJhbW91bnQiOiIzIiwiZGVzdGluYXRpb24iOiJCIiwic291cmNlIjoiQSIsIlx1MDA2MVx1MDA2ZFx1MDA2Zlx1MDA3NVx1MDA2ZVx1MDA3NCI6IjMifQ==",
           "contentType": "application/json",
           "method": "POST",
           "path": "/transfers"
@@ -16563,6 +17688,120 @@
     ]
   },
   {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/request/extra-parameter",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:TransferFunds",
+        "rule": "urn:oddlang:http:rule:1:media",
+        "position": "request",
+        "kind": "extra-parameter"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "10",
+        "id": "A",
+        "owner": "Owner A"
+      },
+      {
+        "balance": "7",
+        "id": "B",
+        "owner": "Owner B"
+      },
+      {
+        "balance": "55",
+        "id": "C",
+        "owner": "Owner C"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "bodyBase64": "eyJhbW91bnQiOiIzIiwiZGVzdGluYXRpb24iOiJCIiwic291cmNlIjoiQSJ9",
+          "contentType": "application/json; charset=utf-8; extra=one",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/A"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/B"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/C"
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "eyJhbW91bnQiOiIzIiwiZGVzdGluYXRpb24iOiJCIiwic291cmNlIjoiQSJ9",
+          "contentType": "application/json; charset=utf-8; extra=one",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        "response": {
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmh0dHA6ZXJyb3I6VW5zdXBwb3J0ZWRNZWRpYVR5cGUifQ==",
+          "contentType": "application/json",
+          "status": 415
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/A"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEifQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/B"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiNyIsImlkIjoiQiIsIm93bmVyIjoiT3duZXIgQiJ9",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/C"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiNTUiLCJpZCI6IkMiLCJvd25lciI6Ik93bmVyIEMifQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      }
+    ]
+  },
+  {
     "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/request/json",
     "operation": "urn:oddlang:ledger-http:TransferFunds",
     "role": "http.provider",
@@ -16657,6 +17896,120 @@
         },
         "response": {
           "bodyBase64": "eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkIiLCJvd25lciI6Ik93bmVyIEIifQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/C"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiNTUiLCJpZCI6IkMiLCJvd25lciI6Ik93bmVyIEMifQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/request/media-before-body",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:TransferFunds",
+        "rule": "urn:oddlang:http:rule:1:media",
+        "position": "request",
+        "kind": "media-before-body"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "10",
+        "id": "A",
+        "owner": "Owner A"
+      },
+      {
+        "balance": "7",
+        "id": "B",
+        "owner": "Owner B"
+      },
+      {
+        "balance": "55",
+        "id": "C",
+        "owner": "Owner C"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "bodyBase64": "ew==",
+          "contentType": "text/plain",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/A"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/B"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/C"
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "ew==",
+          "contentType": "text/plain",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        "response": {
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmh0dHA6ZXJyb3I6VW5zdXBwb3J0ZWRNZWRpYVR5cGUifQ==",
+          "contentType": "application/json",
+          "status": 415
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/A"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEifQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/B"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiNyIsImlkIjoiQiIsIm93bmVyIjoiT3duZXIgQiJ9",
           "contentType": "application/json",
           "status": 200
         }
@@ -16854,6 +18207,120 @@
         "request": {
           "bodyBase64": "eyJhbW91bnQiOiIzIiwiZGVzdGluYXRpb24iOiJCIiwic291cmNlIjoiQSJ9",
           "contentType": "text/plain",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        "response": {
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmh0dHA6ZXJyb3I6VW5zdXBwb3J0ZWRNZWRpYVR5cGUifQ==",
+          "contentType": "application/json",
+          "status": 415
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/A"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEifQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/B"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiNyIsImlkIjoiQiIsIm93bmVyIjoiT3duZXIgQiJ9",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/C"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiNTUiLCJpZCI6IkMiLCJvd25lciI6Ik93bmVyIEMifQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3ATransferFunds/media/request/wrong-charset",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:TransferFunds",
+        "rule": "urn:oddlang:http:rule:1:media",
+        "position": "request",
+        "kind": "wrong-charset"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "10",
+        "id": "A",
+        "owner": "Owner A"
+      },
+      {
+        "balance": "7",
+        "id": "B",
+        "owner": "Owner B"
+      },
+      {
+        "balance": "55",
+        "id": "C",
+        "owner": "Owner C"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "bodyBase64": "eyJhbW91bnQiOiIzIiwiZGVzdGluYXRpb24iOiJCIiwic291cmNlIjoiQSJ9",
+          "contentType": "application/json; charset=latin1",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/A"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/B"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/C"
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "eyJhbW91bnQiOiIzIiwiZGVzdGluYXRpb24iOiJCIiwic291cmNlIjoiQSJ9",
+          "contentType": "application/json; charset=latin1",
           "method": "POST",
           "path": "/transfers"
         },
@@ -17247,6 +18714,120 @@
     ]
   },
   {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/exponent",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:amount",
+        "rule": "urn:oddlang:http:rule:1:i64",
+        "position": "request/amount",
+        "kind": "exponent"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "10",
+        "id": "A",
+        "owner": "Owner A"
+      },
+      {
+        "balance": "7",
+        "id": "B",
+        "owner": "Owner B"
+      },
+      {
+        "balance": "55",
+        "id": "C",
+        "owner": "Owner C"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "bodyBase64": "eyJhbW91bnQiOiIxZTMiLCJkZXN0aW5hdGlvbiI6IkIiLCJzb3VyY2UiOiJBIn0=",
+          "contentType": "application/json",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/A"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/B"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/C"
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "eyJhbW91bnQiOiIxZTMiLCJkZXN0aW5hdGlvbiI6IkIiLCJzb3VyY2UiOiJBIn0=",
+          "contentType": "application/json",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        "response": {
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmh0dHA6ZXJyb3I6SW52YWxpZFJlcXVlc3QifQ==",
+          "contentType": "application/json",
+          "status": 400
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/A"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEifQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/B"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiNyIsImlkIjoiQiIsIm93bmVyIjoiT3duZXIgQiJ9",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/C"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiNTUiLCJpZCI6IkMiLCJvd25lciI6Ik93bmVyIEMifQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      }
+    ]
+  },
+  {
     "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/large",
     "operation": "urn:oddlang:ledger-http:TransferFunds",
     "role": "http.provider",
@@ -17341,6 +18922,120 @@
         },
         "response": {
           "bodyBase64": "eyJiYWxhbmNlIjoiOTAwNzE5OTI1NDc0MDk5MyIsImlkIjoiQiIsIm93bmVyIjoiT3duZXIgQiJ9",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/C"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiNTUiLCJpZCI6IkMiLCJvd25lciI6Ik93bmVyIEMifQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/leading-plus",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:amount",
+        "rule": "urn:oddlang:http:rule:1:i64",
+        "position": "request/amount",
+        "kind": "leading-plus"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "10",
+        "id": "A",
+        "owner": "Owner A"
+      },
+      {
+        "balance": "7",
+        "id": "B",
+        "owner": "Owner B"
+      },
+      {
+        "balance": "55",
+        "id": "C",
+        "owner": "Owner C"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "bodyBase64": "eyJhbW91bnQiOiIrMSIsImRlc3RpbmF0aW9uIjoiQiIsInNvdXJjZSI6IkEifQ==",
+          "contentType": "application/json",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/A"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/B"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/C"
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "eyJhbW91bnQiOiIrMSIsImRlc3RpbmF0aW9uIjoiQiIsInNvdXJjZSI6IkEifQ==",
+          "contentType": "application/json",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        "response": {
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmh0dHA6ZXJyb3I6SW52YWxpZFJlcXVlc3QifQ==",
+          "contentType": "application/json",
+          "status": 400
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/A"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEifQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/B"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiNyIsImlkIjoiQiIsIm93bmVyIjoiT3duZXIgQiJ9",
           "contentType": "application/json",
           "status": 200
         }
@@ -17545,6 +19240,120 @@
           "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmxlZGdlcjplcnJvcjpOb25Qb3NpdGl2ZUFtb3VudCJ9",
           "contentType": "application/json",
           "status": 422
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/A"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEifQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/B"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiNyIsImlkIjoiQiIsIm93bmVyIjoiT3duZXIgQiJ9",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/C"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiNTUiLCJpZCI6IkMiLCJvd25lciI6Ik93bmVyIEMifQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/negative-zero",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:amount",
+        "rule": "urn:oddlang:http:rule:1:i64",
+        "position": "request/amount",
+        "kind": "negative-zero"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "10",
+        "id": "A",
+        "owner": "Owner A"
+      },
+      {
+        "balance": "7",
+        "id": "B",
+        "owner": "Owner B"
+      },
+      {
+        "balance": "55",
+        "id": "C",
+        "owner": "Owner C"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "bodyBase64": "eyJhbW91bnQiOiItMCIsImRlc3RpbmF0aW9uIjoiQiIsInNvdXJjZSI6IkEifQ==",
+          "contentType": "application/json",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/A"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/B"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/C"
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "eyJhbW91bnQiOiItMCIsImRlc3RpbmF0aW9uIjoiQiIsInNvdXJjZSI6IkEifQ==",
+          "contentType": "application/json",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        "response": {
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmh0dHA6ZXJyb3I6SW52YWxpZFJlcXVlc3QifQ==",
+          "contentType": "application/json",
+          "status": 400
         }
       },
       {
@@ -17879,6 +19688,120 @@
       {
         "request": {
           "bodyBase64": "eyJhbW91bnQiOiI5MjIzMzcyMDM2ODU0Nzc1ODA4IiwiZGVzdGluYXRpb24iOiJCIiwic291cmNlIjoiQSJ9",
+          "contentType": "application/json",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        "response": {
+          "bodyBase64": "eyJlcnJvciI6InVybjpvZGRsYW5nOmh0dHA6ZXJyb3I6SW52YWxpZFJlcXVlc3QifQ==",
+          "contentType": "application/json",
+          "status": 400
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/A"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiMTAiLCJpZCI6IkEiLCJvd25lciI6Ik93bmVyIEEifQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/B"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiNyIsImlkIjoiQiIsIm93bmVyIjoiT3duZXIgQiJ9",
+          "contentType": "application/json",
+          "status": 200
+        }
+      },
+      {
+        "request": {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/C"
+        },
+        "response": {
+          "bodyBase64": "eyJiYWxhbmNlIjoiNTUiLCJpZCI6IkMiLCJvd25lciI6Ik93bmVyIEMifQ==",
+          "contentType": "application/json",
+          "status": 200
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "rule/urn%3Aoddlang%3Aledger-http%3ATransferFunds/http.provider/urn%3Aoddlang%3Aledger-http%3Aamount/i64/request%2Famount/whitespace",
+    "operation": "urn:oddlang:ledger-http:TransferFunds",
+    "role": "http.provider",
+    "slots": [
+      {
+        "operation": "urn:oddlang:ledger-http:TransferFunds",
+        "role": "http.provider",
+        "declaration": "urn:oddlang:ledger-http:amount",
+        "rule": "urn:oddlang:http:rule:1:i64",
+        "position": "request/amount",
+        "kind": "whitespace"
+      }
+    ],
+    "fixture": [
+      {
+        "balance": "10",
+        "id": "A",
+        "owner": "Owner A"
+      },
+      {
+        "balance": "7",
+        "id": "B",
+        "owner": "Owner B"
+      },
+      {
+        "balance": "55",
+        "id": "C",
+        "owner": "Owner C"
+      }
+    ],
+    "action": {
+      "requests": [
+        {
+          "bodyBase64": "eyJhbW91bnQiOiIgMSIsImRlc3RpbmF0aW9uIjoiQiIsInNvdXJjZSI6IkEifQ==",
+          "contentType": "application/json",
+          "method": "POST",
+          "path": "/transfers"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/A"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/B"
+        },
+        {
+          "bodyBase64": "",
+          "contentType": null,
+          "method": "GET",
+          "path": "/accounts/C"
+        }
+      ]
+    },
+    "expected": [
+      {
+        "request": {
+          "bodyBase64": "eyJhbW91bnQiOiIgMSIsImRlc3RpbmF0aW9uIjoiQiIsInNvdXJjZSI6IkEifQ==",
           "contentType": "application/json",
           "method": "POST",
           "path": "/transfers"

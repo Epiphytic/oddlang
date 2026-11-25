@@ -298,3 +298,86 @@ fn normalization_requires_observed_wire_bytes_and_segment_boundaries() {
     different[0]["request"]["path"] = json!(["", "accounts", "A/b"]);
     assert!(!compare_observations(&sample, &different));
 }
+
+#[test]
+fn rebuilt_release_matches_workspace_pin_and_cached_payloads() {
+    let out = tempfile::tempdir().unwrap();
+    publish(&model(), out.path()).unwrap();
+    let lock = Path::new("examples/http/contract/v1/workspace.lock.json");
+    let expected = verify_bundle(out.path(), lock).unwrap();
+    let cache = Path::new(
+        "contracts/cache/http/485a90a817494ba1aa137cb9777c3d07c338735720df475c1c113b8fe0217dc4/v1",
+    );
+    let cached = verify_bundle(cache, lock).unwrap();
+    assert_eq!(expected.pin, cached.pin);
+    assert_eq!(
+        fs::read(lock).unwrap(),
+        fs::read(out.path().join("workspace.lock.json")).unwrap()
+    );
+    for f in fs::read_dir(cache).unwrap() {
+        let file = f.unwrap();
+        assert_eq!(
+            fs::read(file.path()).unwrap(),
+            fs::read(out.path().join(file.file_name())).unwrap()
+        );
+    }
+}
+
+#[test]
+fn rejected_path_decimal_and_media_witnesses() {
+    let all = cases(&model()).unwrap();
+    for (kind, path) in [
+        ("empty", "/accounts/"),
+        ("dot", "/accounts/%2E"),
+        ("dot-dot", "/accounts/%2E%2E"),
+    ] {
+        let c = all
+            .iter()
+            .find(|c| {
+                c.role == "http.provider"
+                    && c.slots
+                        .iter()
+                        .any(|s| s.rule.ends_with(":route") && s.kind == kind)
+            })
+            .expect("provider rejection witness");
+        assert_eq!(c.action["requests"][0]["path"], path);
+        assert_eq!(c.expected[0]["response"]["status"], 400);
+        assert_eq!(
+            body(&c.expected[0]["response"]),
+            json!({"error":"urn:oddlang:http:error:InvalidRequest"})
+        );
+    }
+    for (kind, lexeme) in [
+        ("negative-zero", "-0"),
+        ("leading-plus", "+1"),
+        ("exponent", "1e3"),
+        ("whitespace", " 1"),
+    ] {
+        let c = all
+            .iter()
+            .find(|c| {
+                c.role == "http.provider"
+                    && c.slots
+                        .iter()
+                        .any(|s| s.position == "request/amount" && s.kind == kind)
+            })
+            .expect("decimal witness");
+        assert_eq!(body(&c.action["requests"][0])["amount"], lexeme);
+        assert_eq!(c.expected[0]["response"]["status"], 400);
+    }
+    for kind in ["wrong-charset", "extra-parameter", "media-before-body"] {
+        let c = all
+            .iter()
+            .find(|c| c.role == "http.provider" && c.slots.iter().any(|s| s.kind == kind))
+            .expect("media witness");
+        assert_eq!(c.expected[0]["response"]["status"], 415);
+        if kind == "media-before-body" {
+            assert_eq!(
+                STANDARD
+                    .decode(c.action["requests"][0]["bodyBase64"].as_str().unwrap())
+                    .unwrap(),
+                b"{"
+            );
+        }
+    }
+}

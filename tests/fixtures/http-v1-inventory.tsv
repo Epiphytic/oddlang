@@ -7,13 +7,13 @@ LookupAccount	consumer	request/id	id	text	unicode
 LookupAccount	consumer	response	Account	record	object wrong-type
 LookupAccount	consumer	response	Closed	record	closed unknown-member
 LookupAccount	consumer	response	LookupAccount	json	bom duplicate empty escaped malformed surrogate trailing utf8 valid
-LookupAccount	consumer	response	LookupAccount	media	charset json missing unsupported
+LookupAccount	consumer	response	LookupAccount	media	charset extra-parameter json missing unsupported wrong-charset
 LookupAccount	consumer	response	LookupAccount	response	success transport unexpected-status
 LookupAccount	consumer	response	http:error:AccountMissing	error	malformed named unknown
 LookupAccount	consumer	response	http:error:InvalidRequest	error	malformed named unknown
 LookupAccount	consumer	response/balance	BalanceBounds	bounds	above below max min
 LookupAccount	consumer	response/balance	Required	required	omitted present
-LookupAccount	consumer	response/balance	balance	i64	large max noncanonical numeric overflow zero
+LookupAccount	consumer	response/balance	balance	i64	exponent large leading-plus max negative-zero noncanonical numeric overflow whitespace zero
 LookupAccount	consumer	response/id	Required	required	omitted present
 LookupAccount	consumer	response/id	id	text	unicode wrong-type
 LookupAccount	consumer	response/owner	Required	required	omitted present
@@ -21,7 +21,7 @@ LookupAccount	consumer	response/owner	owner	text	unicode wrong-type
 LookupAccount	provider	behavior	ReadAccount	lookup	maximum missing
 LookupAccount	provider	request	Closed	record	closed
 LookupAccount	provider	request	Lookup	record	object
-LookupAccount	provider	request	LookupAccount	route	bad-percent bad-utf8 escaped exact plus
+LookupAccount	provider	request	LookupAccount	route	bad-percent bad-utf8 dot dot-dot empty escaped exact plus
 LookupAccount	provider	request/id	Required	required	present
 LookupAccount	provider	request/id	id	text	unicode
 LookupAccount	provider	response	Account	record	object
@@ -53,7 +53,7 @@ TransferFunds	consumer	request/source	source	text	unicode
 TransferFunds	consumer	response	Closed	record	closed unknown-member
 TransferFunds	consumer	response	Pair	record	object wrong-type
 TransferFunds	consumer	response	TransferFunds	json	bom duplicate empty escaped malformed surrogate trailing utf8 valid
-TransferFunds	consumer	response	TransferFunds	media	charset json missing unsupported
+TransferFunds	consumer	response	TransferFunds	media	charset extra-parameter json missing unsupported wrong-charset
 TransferFunds	consumer	response	TransferFunds	response	success transport unexpected-status
 TransferFunds	consumer	response	http:error:InvalidRequest	error	malformed named unknown
 TransferFunds	consumer	response	http:error:UnsupportedMediaType	error	malformed named unknown
@@ -69,7 +69,7 @@ TransferFunds	consumer	response/destination	Required	required	omitted present
 TransferFunds	consumer	response/destination	destinationAccount	record	object wrong-type
 TransferFunds	consumer	response/destination/balance	BalanceBounds	bounds	above below max min
 TransferFunds	consumer	response/destination/balance	Required	required	omitted present
-TransferFunds	consumer	response/destination/balance	balance	i64	large max noncanonical numeric overflow zero
+TransferFunds	consumer	response/destination/balance	balance	i64	exponent large leading-plus max negative-zero noncanonical numeric overflow whitespace zero
 TransferFunds	consumer	response/destination/id	Required	required	omitted present
 TransferFunds	consumer	response/destination/id	id	text	unicode wrong-type
 TransferFunds	consumer	response/destination/owner	Required	required	omitted present
@@ -80,7 +80,7 @@ TransferFunds	consumer	response/source	Required	required	omitted present
 TransferFunds	consumer	response/source	sourceAccount	record	object wrong-type
 TransferFunds	consumer	response/source/balance	BalanceBounds	bounds	above below max min
 TransferFunds	consumer	response/source/balance	Required	required	omitted present
-TransferFunds	consumer	response/source/balance	balance	i64	large max noncanonical numeric overflow zero
+TransferFunds	consumer	response/source/balance	balance	i64	exponent large leading-plus max negative-zero noncanonical numeric overflow whitespace zero
 TransferFunds	consumer	response/source/id	Required	required	omitted present
 TransferFunds	consumer	response/source/id	id	text	unicode wrong-type
 TransferFunds	consumer	response/source/owner	Required	required	omitted present
@@ -89,10 +89,10 @@ TransferFunds	provider	behavior	AtomicTransfer	transfer	capacity destination-and
 TransferFunds	provider	request	Closed	record	closed unknown-member
 TransferFunds	provider	request	Transfer	record	object wrong-type
 TransferFunds	provider	request	TransferFunds	json	bom duplicate empty escaped malformed surrogate trailing utf8 valid
-TransferFunds	provider	request	TransferFunds	media	charset json missing unsupported
+TransferFunds	provider	request	TransferFunds	media	charset extra-parameter json media-before-body missing unsupported wrong-charset
 TransferFunds	provider	request	TransferFunds	route	exact
 TransferFunds	provider	request/amount	Required	required	omitted present
-TransferFunds	provider	request/amount	amount	i64	large max min noncanonical numeric overflow zero
+TransferFunds	provider	request/amount	amount	i64	exponent large leading-plus max min negative-zero noncanonical numeric overflow whitespace zero
 TransferFunds	provider	request/destination	Required	required	omitted present
 TransferFunds	provider	request/destination	destination	text	unicode wrong-type
 TransferFunds	provider	request/source	Required	required	omitted present

@@ -42,6 +42,16 @@ fn component(text: &str) -> String {
         })
         .collect()
 }
+fn duplicate_member(record: &Value, key: &str) -> Result<Vec<u8>, String> {
+    let mut b = serde_json::to_vec(record).map_err(|e| e.to_string())?;
+    b.pop();
+    let escaped = key
+        .encode_utf16()
+        .map(|u| format!("\\u{u:04x}"))
+        .collect::<String>();
+    b.extend(format!(",\"{escaped}\":{}}}", record[key]).bytes());
+    Ok(b)
+}
 fn template<'a>(sources: &'a [Case], s: &Slot, kind: &str) -> Result<&'a Case, String> {
     sources
         .iter()
@@ -54,24 +64,57 @@ fn template<'a>(sources: &'a [Case], s: &Slot, kind: &str) -> Result<&'a Case, S
         })
         .ok_or_else(|| format!("missing authored {kind} scenario for {}", s.operation))
 }
-fn replace(v: &mut Value, old: &Value, new: &Value) {
-    if v == old {
-        *v = new.clone();
-        return;
-    }
-    match v {
-        Value::Array(a) => {
-            for v in a {
-                replace(v, old, new)
+// Keep an account ID coherent across the native input, success output and
+// initial state. Other text fields can have the same value as that ID.
+fn set_account_text(
+    fixture: &mut Value,
+    input: &mut Value,
+    output: &mut Value,
+    position: &str,
+    pointer: &str,
+    old: &Value,
+    new: &Value,
+) -> Result<(), String> {
+    let account_key = if position == "request" {
+        pointer.trim_start_matches('/')
+    } else {
+        pointer.split('/').nth(1).unwrap_or_default()
+    };
+    let pair = output.get("source").is_some();
+    let owner = pointer.ends_with("/owner");
+    let id = if owner {
+        if pair {
+            output[account_key]["id"].clone()
+        } else {
+            output["id"].clone()
+        }
+    } else {
+        old.clone()
+    };
+    let Some(account) = fixture
+        .as_array_mut()
+        .and_then(|a| a.iter_mut().find(|v| v["id"] == id))
+    else {
+        return Err(format!("missing fixture account for {pointer}"));
+    };
+    let member = if owner { "owner" } else { "id" };
+    account[member] = new.clone();
+    if pair {
+        for side in ["source", "destination"] {
+            if output[side]["id"] == id || side == account_key {
+                output[side][member] = new.clone();
+            }
+            if !owner && input[side] == id {
+                input[side] = new.clone();
             }
         }
-        Value::Object(m) => {
-            for v in m.values_mut() {
-                replace(v, old, new)
-            }
+    } else {
+        output[member] = new.clone();
+        if !owner {
+            input["id"] = new.clone();
         }
-        _ => {}
     }
+    Ok(())
 }
 fn derive(model: &HttpContract, s: &Slot, sources: &[Case]) -> Result<Case, String> {
     let op = &model.operations[s.operation.as_str()];
@@ -81,6 +124,16 @@ fn derive(model: &HttpContract, s: &Slot, sources: &[Case]) -> Result<Case, Stri
     let rule = s.rule.rsplit(':').next().unwrap();
     let kind = s.kind.as_str();
     let src = template(sources, s, if get { "maximum" } else { "success" })?;
+    let minimum = if get { 1 } else { 2 };
+    if src.fixture.as_array().is_none_or(|a| {
+        a.len() < minimum
+            || a.iter().any(|v| {
+                !v["id"].is_string() || !v["owner"].is_string() || !v["balance"].is_string()
+            })
+    }) || src.expected[0]["response"]["status"] != 200
+    {
+        return Err(format!("invalid success template {}", src.case_id));
+    }
     let mut c = src.clone();
     c.case_id = format!(
         "rule/{}/{}/{}/{}/{}/{}",
@@ -114,13 +167,14 @@ fn derive(model: &HttpContract, s: &Slot, sources: &[Case]) -> Result<Case, Stri
                 "bad-percent" => ("", "%XY"),
                 "bad-utf8" => ("", "%FF"),
                 "empty" => ("", ""),
-                "dot" => (".", "."),
-                "dot-dot" => ("..", ".."),
+                "dot" => (".", if provider { "%2E" } else { "." }),
+                "dot-dot" => ("..", if provider { "%2E%2E" } else { ".." }),
                 _ => return Err(format!("unknown route kind {kind}")),
             };
             req["path"] = json!(op.path.replace("{id}", wire));
             input["id"] = json!(id);
-            if kind.starts_with("bad-") {
+            if kind.starts_with("bad-") || (provider && ["empty", "dot", "dot-dot"].contains(&kind))
+            {
                 failure = Some("InvalidRequest");
             } else if ["empty", "dot", "dot-dot"].contains(&kind) {
                 local = true;
@@ -139,10 +193,23 @@ fn derive(model: &HttpContract, s: &Slot, sources: &[Case]) -> Result<Case, Stri
             raw["contentType"] = match kind {
                 "charset" => json!("Application/JSON; Charset=UTF-8"),
                 "missing" => Value::Null,
-                "unsupported" => json!("text/plain"),
+                "unsupported" | "media-before-body" => json!("text/plain"),
+                "wrong-charset" => json!("application/json; charset=latin1"),
+                "extra-parameter" => json!("application/json; charset=utf-8; extra=one"),
                 _ => json!("application/json"),
             };
-            if matches!(kind, "missing" | "unsupported") {
+            if kind == "media-before-body" {
+                raw_input = true;
+                bytes(&mut req, b"{");
+            }
+            if matches!(
+                kind,
+                "missing"
+                    | "unsupported"
+                    | "media-before-body"
+                    | "wrong-charset"
+                    | "extra-parameter"
+            ) {
                 if provider {
                     failure = Some("UnsupportedMediaType")
                 } else {
@@ -159,8 +226,8 @@ fn derive(model: &HttpContract, s: &Slot, sources: &[Case]) -> Result<Case, Stri
                 &mut reply
             };
             let original = STANDARD
-                .decode(raw["bodyBase64"].as_str().unwrap())
-                .unwrap();
+                .decode(raw["bodyBase64"].as_str().ok_or("expected base64 body")?)
+                .map_err(|e| e.to_string())?;
             let data = match kind {
                 "escaped" => {
                     let mut b = original.clone();
@@ -180,11 +247,7 @@ fn derive(model: &HttpContract, s: &Slot, sources: &[Case]) -> Result<Case, Stri
                         .as_object()
                         .and_then(|m| m.keys().next())
                         .ok_or("expected record")?;
-                    let mut b = original.clone();
-                    b.pop();
-                    let escaped = format!("\\u{:04x}{}", key.as_bytes()[0], &key[1..]);
-                    b.extend(format!(",\"{escaped}\":{}}}", v[key]).bytes());
-                    b
+                    duplicate_member(&v, key)?
                 }
                 "trailing" => [original.as_slice(), b" true"].concat(),
                 _ => return Err(format!("unknown json kind {kind}")),
@@ -268,6 +331,10 @@ fn derive(model: &HttpContract, s: &Slot, sources: &[Case]) -> Result<Case, Stri
                 }
                 "wrong-type" => Some(Value::Null),
                 "noncanonical" => Some(json!("01")),
+                "negative-zero" => Some(json!("-0")),
+                "leading-plus" => Some(json!("+1")),
+                "exponent" => Some(json!("1e3")),
+                "whitespace" => Some(json!(" 1")),
                 "overflow" => Some(json!("9223372036854775808")),
                 "numeric" => Some(json!(1)),
                 "true" => Some(json!(true)),
@@ -300,6 +367,10 @@ fn derive(model: &HttpContract, s: &Slot, sources: &[Case]) -> Result<Case, Stri
                     | "unknown-member"
                     | "wrong-type"
                     | "noncanonical"
+                    | "negative-zero"
+                    | "leading-plus"
+                    | "exponent"
+                    | "whitespace"
                     | "overflow"
                     | "numeric"
                     | "below"
@@ -309,11 +380,21 @@ fn derive(model: &HttpContract, s: &Slot, sources: &[Case]) -> Result<Case, Stri
                 *value.pointer_mut(&pointer).unwrap() = new.clone();
                 if !invalid && (provider || pos == "request") {
                     if rule == "text" {
-                        replace(&mut c.fixture, &field, &new);
-                        replace(&mut input, &field, &new);
-                        replace(&mut output, &field, &new);
+                        set_account_text(
+                            &mut c.fixture,
+                            &mut input,
+                            &mut output,
+                            pos,
+                            &pointer,
+                            &field,
+                            &new,
+                        )?;
                     } else if !get && pos == "request" && pointer == "/amount" {
-                        let n = new.as_str().unwrap().parse::<i64>().unwrap();
+                        let n = new
+                            .as_str()
+                            .ok_or("expected decimal string")?
+                            .parse::<i64>()
+                            .map_err(|e| e.to_string())?;
                         if n <= 0 {
                             let err = "urn:oddlang:ledger:error:NonPositiveAmount";
                             output = json!({"error":err});
@@ -329,7 +410,11 @@ fn derive(model: &HttpContract, s: &Slot, sources: &[Case]) -> Result<Case, Stri
                         c.fixture[0]["balance"] = new;
                     } else if pos == "response" && pointer.ends_with("/balance") {
                         let source = pointer.starts_with("/source/");
-                        let n = new.as_str().unwrap().parse::<i64>().unwrap();
+                        let n = new
+                            .as_str()
+                            .ok_or("expected decimal string")?
+                            .parse::<i64>()
+                            .map_err(|e| e.to_string())?;
                         let initial = if source {
                             n.checked_add(1)
                         } else {
@@ -356,16 +441,16 @@ fn derive(model: &HttpContract, s: &Slot, sources: &[Case]) -> Result<Case, Stri
                 }
             }
             if get && pos == "request" && !invalid {
-                req["path"] = json!(
-                    op.path
-                        .replace("{id}", &component(input["id"].as_str().unwrap()))
-                )
+                req["path"] = json!(op.path.replace(
+                    "{id}",
+                    &component(input["id"].as_str().ok_or("expected text ID")?)
+                ))
             }
             if get && provider && pos == "response" {
-                req["path"] = json!(
-                    op.path
-                        .replace("{id}", &component(c.fixture[0]["id"].as_str().unwrap()))
-                )
+                req["path"] = json!(op.path.replace(
+                    "{id}",
+                    &component(c.fixture[0]["id"].as_str().ok_or("expected fixture ID")?)
+                ))
             }
         }
         _ => {}
@@ -433,8 +518,13 @@ pub fn cases(model: &HttpContract) -> Result<Vec<Case>, String> {
         .collect();
     let mut all = Vec::new();
     for file in &model.scenario_files {
-        let authored: Vec<Case> = serde_json::from_slice(&model.source_files[file])
-            .map_err(|e| format!("{file}: {e}"))?;
+        let authored: Vec<Case> = serde_json::from_slice(
+            model
+                .source_files
+                .get(file)
+                .ok_or_else(|| format!("missing scenario file {file}"))?,
+        )
+        .map_err(|e| format!("{file}: {e}"))?;
         for c in authored {
             if !super::wire::valid_case(&c) {
                 return Err(format!("invalid authored exchanges {}", c.case_id));
@@ -475,4 +565,20 @@ pub fn cases(model: &HttpContract) -> Result<Vec<Case>, String> {
         return Err("duplicate case ID".into());
     }
     Ok(all)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn duplicate_key_escapes_supplementary_and_quoted_characters() {
+        let record = json!({"🪶é\"":7});
+        let bytes = duplicate_member(&record, "🪶é\"").unwrap();
+        assert_eq!(serde_json::from_slice::<Value>(&bytes).unwrap(), record);
+        assert!(
+            String::from_utf8(bytes)
+                .unwrap()
+                .contains(r"\ud83e\udeb6\u00e9\u0022")
+        );
+    }
 }

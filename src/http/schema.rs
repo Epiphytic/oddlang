@@ -1,12 +1,22 @@
 use super::*;
 use serde_json::{Map, Value, json};
 fn ref_name(i: &Iri) -> String {
-    i.to_string().replace('~', "~0").replace('/', "~1")
+    let pointer = i.to_string().replace('~', "~0").replace('/', "~1");
+    pointer
+        .bytes()
+        .map(|b| {
+            if b.is_ascii_alphanumeric() || b"-._~:".contains(&b) {
+                (b as char).to_string()
+            } else {
+                format!("%{b:02X}")
+            }
+        })
+        .collect()
 }
 fn reference(i: &Iri) -> Value {
     json!({"$ref":format!("#/$defs/{}",ref_name(i))})
 }
-pub(super) fn schema(c: &HttpContract) -> Value {
+fn records(c: &HttpContract, reference: impl Fn(&Iri) -> Value) -> Map<String, Value> {
     let mut defs = Map::new();
     for (id, r) in &c.records {
         let mut props = Map::new();
@@ -30,7 +40,10 @@ pub(super) fn schema(c: &HttpContract) -> Value {
         let required = props.keys().cloned().collect::<Vec<_>>();
         defs.insert(id.to_string(),json!({"type":"object","additionalProperties":false,"properties":props,"required":required}));
     }
-    json!({"$schema":"https://json-schema.org/draft/2020-12/schema","$defs":defs})
+    defs
+}
+pub(super) fn schema(c: &HttpContract) -> Value {
+    json!({"$schema":"https://json-schema.org/draft/2020-12/schema","$defs":records(c,reference)})
 }
 pub(super) fn openapi(c: &HttpContract) -> Value {
     let mut paths = json!({});
@@ -41,19 +54,10 @@ pub(super) fn openapi(c: &HttpContract) -> Value {
         )
     };
     let reference = |i: &Iri| json!({"$ref":format!("#/components/schemas/{}",key(i.as_str()))});
-    let mut schemas = Map::new();
-    for (iri, mut record) in schema(c)["$defs"].as_object().unwrap().clone() {
-        for prop in record["properties"].as_object_mut().unwrap().values_mut() {
-            if let Some(target) = prop["$ref"].as_str() {
-                let iri = target
-                    .trim_start_matches("#/$defs/")
-                    .replace("~1", "/")
-                    .replace("~0", "~");
-                *prop = json!({"$ref":format!("#/components/schemas/{}",key(&iri))});
-            }
-        }
-        schemas.insert(key(&iri), record);
-    }
+    let schemas: Map<_, _> = records(c, reference)
+        .into_iter()
+        .map(|(iri, record)| (key(&iri), record))
+        .collect();
     for (id, op) in &c.operations {
         let mut operation = json!({"operationId":id.as_str(),"responses":{op.status.to_string():{"description":"Success","content":{"application/json":{"schema":reference(&op.response)}}}}});
         let mut errors = BTreeMap::<u16, Vec<&str>>::new();
@@ -72,4 +76,14 @@ pub(super) fn openapi(c: &HttpContract) -> Value {
         paths[&op.path][op.method.to_lowercase()] = operation;
     }
     json!({"openapi":"3.1.0","info":{"title":c.identity.as_str(),"version":c.version},"paths":paths,"components":{"schemas":schemas}})
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn iri_fragments_escape_pointer_and_uri_syntax() {
+        let id = Iri::new("https://example.org/a~b#é%20").unwrap();
+        assert_eq!(ref_name(&id), "https:~1~1example.org~1a~0b%23%C3%A9%2520");
+    }
 }

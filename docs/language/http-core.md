@@ -33,8 +33,8 @@ The rule ID prefix in this table is `urn:oddlang:http:rule:1:`. Roles P and C de
 
 | Rule ID suffix | Roles | Required witness kinds |
 | --- | --- | --- |
-| route | P, C | Exact method and route, decoded ID containing escaped slash, space and non-ASCII text, literal plus, invalid percent escape or UTF-8 (P), empty or dot-segment IDs (C local rejection). |
-| media | P, C | Matching JSON content type, case-insensitive and optional UTF-8 charset, rejected missing or unsupported media type, wrong response media (C). |
+| route | P, C | Exact method and route, decoded ID containing escaped slash, space and non-ASCII text, literal plus, invalid percent escape or UTF-8 (P), empty and dot-segment IDs (P rejection on raw paths, C local rejection). |
+| media | P, C | Matching JSON content type, case-insensitive and optional UTF-8 charset, rejected missing or unsupported media type, invalid charset or extra parameters, media before malformed body (P), wrong response media (C). |
 | json | P, C | Valid UTF-8, valid escapes, rejection of empty body, BOM, invalid UTF-8, isolated surrogate, malformed JSON, duplicate decoded member or trailing non-whitespace on received JSON. |
 | record | P, C | Valid object and rejection of wrong JSON type or unknown member. |
 | required | P, C | Member present and omitted. |
