@@ -34,12 +34,47 @@ file. It must independently establish the enclosing library's public paths,
 trait resolution and missing capabilities.
 
 The separate TypeScript plain-choice target promises copying and ordinal
-conversion. A combined compiler must reject a graph that requires
-clone-only semantics or derived Debug unless that target explicitly
-implements the capability. Run the projection control below after
-combining the targets. It first checks an admitted plain choice, then
+conversion. The TypeScript target rejects a graph that requires
+clone-only semantics or derived Debug. Run the projection control below
+to check the supported subset. It first checks an admitted plain choice, then
 requires both unsupported graph inputs to fail without an output.
 
 ```sh
 python3 verification/plain-value-choices/typescript_subset.py target/release/oddlang
+```
+
+
+## TypeScript plain choices
+
+```sh
+oddlang build checked-values typescript GRAPH.json OVERLAY.json OUTPUT
+```
+
+The TypeScript profile accepts a checked-values graph containing only plain
+choices. Its `oddlang-checked-values-typescript-v1` overlay binds each type
+and case identity to a target name. The order in the graph sets zero-based
+ordinals. Rust bindings and source are outside this build's input.
+
+Each generated TypeScript type brands its finite numeric values with a
+distinct choice identity. An immutable companion object exposes the named
+members, `ordinal`, and `fromOrdinal`. The latter checks an unknown input
+against the finite ordinal set and returns `undefined` for an invalid
+number or other value. These are target ordinal conversions. The profile
+declares no wire representation.
+
+An `equality` literal reports `none`, `partial`, or `total`. A choice
+with partial capability provides `partialEquals`. A choice with total
+capability provides `equals`. Each compares two members of that same
+choice by case identity. The absence of a comparison operation is part
+of the generated module's contract. JavaScript's built-in comparison
+operators remain available to consumers of numeric values.
+
+The projector emits `values.ts`, `obligations.json` and a sealed
+`projection.lock`. The Rust and TypeScript targets emit the same portable
+choice obligations. The independent fixture compares Rust and Node
+observations, including a source-order change, TypeScript type rejections
+and deterministic graph and binding output.
+
+```sh
+python3 verification/plain-value-choices/typescript.py target/release/oddlang
 ```

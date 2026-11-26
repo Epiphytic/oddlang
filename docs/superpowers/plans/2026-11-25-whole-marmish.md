@@ -117,3 +117,5 @@ The principal feasibility risk is recovering intended behavior where only incide
 
 - [ ] When combining the TypeScript and extended fieldless-choice profiles, enforce the TypeScript capability boundary and run the [projection control](../../../verification/plain-value-choices/typescript_subset.py).
 - [x] Document the whole-file recovery pin and the separate staging of exact source spans for native conformance. [Checked values](../../language/checked-values.md#clone-only-choices-and-derived-debug)
+
+- [x] Qualify source-free TypeScript plain choices with exact ordinals, explicit equality capability and a published data-only graph. [Checked values](../../language/checked-values.md#typescript-plain-choices) · [Published choice receipt](https://github.com/Epiphytic/marmish-oddlang/blob/8621f49d40217132c8d3842a54531e066e93dfec/verification/whole/vault-mode-typescript/receipt.json)
