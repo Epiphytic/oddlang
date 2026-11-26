@@ -166,11 +166,11 @@ fn observes_file_bytes_and_bound() {
 
     narrowed = copy.deepcopy(outer)
     narrowed["layout"][1]["encoding"]["maximum"] = 5
-    build("short-cap", outside=narrowed, failure="nested slot maximum")
+    build("short-cap", outside=narrowed, failure="nested codec minimum exceeds slot")
     wider = copy.deepcopy(outer)
     wider["layout"][1]["encoding"]["maximum"] = 7
     build("wide-cap", outside=wider)
-    build("missing", provide=False, failure="missing pinned nested codec")
+    build("missing", provide=False, failure="nested codec identity has no pinned package export")
     build("duplicate", extra=True, failure="ambiguous pinned nested codec")
     renamed = copy.deepcopy(inner_binding)
     renamed["names"][DEPTH] = "position"
@@ -187,7 +187,7 @@ fn observes_file_bytes_and_bound() {
     build("untrusted-pin", stale_pin=True, failure="input digest mismatch")
     wrong_identity = copy.deepcopy(inner)
     wrong_identity["id"] = "urn:geology:other-layer"
-    build("wrong-identity", inside=wrong_identity, failure="missing pinned nested codec")
+    build("wrong-identity", inside=wrong_identity, failure="nested codec identity mismatch")
     missing_member = copy.deepcopy(outer)
     missing_member["externalRecords"][LAYER]["fields"]["urn:geology:unknown"] = (
         missing_member["externalRecords"][LAYER]["fields"].pop(MARK)
@@ -213,10 +213,10 @@ fn observes_file_bytes_and_bound() {
     connects = copy.deepcopy(outer)
     connects["layout"][1]["encoding"]["maximum"] = 12
     build("cycle", inside=circular, inside_binding=circular_binding, outside=connects,
-          failure="cyclic pinned nested codecs")
+          failure="cyclic required nested codec slots")
     wrong_path = copy.deepcopy(outer_binding)
     wrong_path["externalRecords"][LAYER]["path"] = "crate::Layer"
-    build("unexported", outside_binding=wrong_path, failure="nested codec path mismatch")
+    build("unexported", outside_binding=wrong_path, failure="nested codec identity has no pinned package export")
     build("root-export", outside_binding=wrong_path, roots=("Layer",))
 
 print("Pinned nested file-format package, exact bytes, and linkage controls pass.")

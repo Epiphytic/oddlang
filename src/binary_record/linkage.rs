@@ -56,7 +56,11 @@ impl Record {
 
 pub(crate) fn validate(records: &[(Record, Vec<Vec<String>>)], aliases: &Aliases) -> Result<()> {
     let mut by_path = BTreeMap::new();
-    for (index, (_, paths)) in records.iter().enumerate() {
+    let mut providers = BTreeMap::new();
+    for (index, (record, paths)) in records.iter().enumerate() {
+        if record.binding.existing_type.is_none() {
+            *providers.entry(record.graph.id.as_str()).or_insert(0) += 1;
+        }
         for path in paths {
             let path = format!("crate::{}", path.join("::"));
             if by_path.insert(path.clone(), index).is_some() {
@@ -79,6 +83,9 @@ pub(crate) fn validate(records: &[(Record, Vec<Vec<String>>)], aliases: &Aliases
                 record, maximum, ..
             } = &slot.encoding
             {
+                if providers.get(record.as_str()).is_some_and(|count| *count > 1) {
+                    return Err(format!("ambiguous pinned nested codec: {record}"));
+                }
                 let path = &consumer.binding.external_records[record].path;
                 let index = *by_path.get(path).ok_or_else(|| {
                     format!("nested codec identity has no pinned package export: {record} ({path})")

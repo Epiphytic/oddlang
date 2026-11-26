@@ -112,7 +112,7 @@ fn run(args: &[String]) -> Result<(), String> {
         [cmd, kind, target, graph, output]
             if cmd == "build" && kind == "checked-values" && target == "typescript" =>
         {
-            oddlang::checked_values::build_typescript(graph.as_ref(), output.as_ref())
+            oddlang::checked_values::build_fixed_typescript(graph.as_ref(), output.as_ref())
         }
         [cmd, kind, target, graph, overlay, output]
             if cmd == "build" && kind == "checked-values" && target == "rust" =>

@@ -29,6 +29,8 @@ The independent stream comparison including macro expansions left 373 compiler-o
 
 ## Implementation evidence
 
+- [x] Consolidate the 105 reviewed compiler heads. On macOS ARM64, `cargo test --locked --offline --no-fail-fast` with PostgreSQL 16.6 and the pinned HTTP and Wasm tools passed 181 tests with one ignored. Replayed the nested codec, bounded JSON and offline workspace fixtures, parsed both Turtle files and ran the ready-work query.
+
 - [x] Qualify Launch writer recovery and a changed upstream writer on both ARM64 hosts. [Changed source qualification](https://github.com/Epiphytic/marmish-oddlang/pull/29) · [Linux replay](https://github.com/Epiphytic/marmish-oddlang/pull/31)
 - [x] Observe native plaintext and TLS rejection with exact status, exit, shutdown and socket cleanup on both hosts. [Original transport evidence](https://github.com/Epiphytic/marmish-oddlang/pull/34)
 - [x] Build the copy relations and automatic status client in one native workspace. [Two-platform qualification](https://github.com/Epiphytic/marmish-oddlang/pull/36)
@@ -154,7 +156,6 @@ The principal feasibility risk is recovering intended behavior where only incide
 
 - [x] Recover checked encoder delegation and ordered record fragments through compiler evidence. Compare both fragment source mutations and separately retain validator and decoder obligations. [Checked fragment recovery](../../language/binary-frames.md#compiler-backed-checked-record-fragments) · [Native fragment mutation receipt](https://github.com/Epiphytic/marmish-oddlang/pull/59)
 
-- [x] Define finite scalar views, typed checked products, and named error categories. Verify exact native value semantics, borrowed getters, private constructors and UTF-8 boundary behavior in an unrelated standalone package. [Checked value domains](../../language/checked-values.md)
 
 - [x] Qualify the standalone vault metadata and pure value API using original and generated native callers. Compare compiler shapes, private field admission and a UTF-8 byte-limit mutation. [Vault native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/63)
 
