@@ -162,17 +162,23 @@ fn verify_room(
     session: &str, endpoint: &str,
 ) -> Result<(), Failure> {
     let failure = PREPARE_CATEGORIES[2];
-    let record = providers.runtime.session().group_record(group).map_err(|_| failure)?;
+    let record = providers.runtime.group_record(group).map_err(|_| failure)?;
     let name = format!("{ROOM_NAME_PREFIX}{session}");
     if record.name != name || record.description != ROOM_DESCRIPTION || record.removed
         || record.unrecoverable || record.disbanded.is_some()
         || record.protocol_profile != ProtocolProfile::Current
-        || record.members.len() != 2
-        || ![local, remote].into_iter().all(|id| record.members.iter().any(|member| hex::encode(member.id.as_slice()) == id))
     {
         return Err(failure);
     }
-    let component = providers.runtime.session().app_component(group, NOSTR_ROUTING_COMPONENT_ID)
+    let roster = providers.runtime.canonical_group_membership(group).map_err(|_| failure)?;
+    let admins = providers.runtime.admin_pubkeys(group).map_err(|_| failure)?;
+    if !roster.local_leaf_active || roster.member_leaves.len() != 2 || admins.len() != 1
+        || hex::encode(admins[0]) != local
+        || ![local, remote].into_iter().all(|id| roster.member_leaves.iter().any(|leaf| hex::encode(leaf.member.as_slice()) == id))
+    {
+        return Err(failure);
+    }
+    let component = providers.runtime.app_component(group, NOSTR_ROUTING_COMPONENT_ID)
         .map_err(|_| failure)?.ok_or(failure)?;
     let routing = cgka_traits::app_components::decode_nostr_routing_v1(&component).map_err(|_| failure)?;
     if routing.relays.as_slice() != [endpoint] { return Err(failure); }
@@ -201,9 +207,9 @@ async fn prepare_room(
     } else if row.is_some() {
         return Err(uncertain);
     }
-    let count: usize = providers.journal.query_row("SELECT count(*) FROM local_room_prepare_v1", [], |row| row.get(0))
+    let count: i64 = providers.journal.query_row("SELECT count(*) FROM local_room_prepare_v1", [], |row| row.get(0))
         .map_err(|_| uncertain)?;
-    if count >= ROOM_SLOT_LIMIT { return Err(PREPARE_CATEGORIES[3]); }
+    if count >= ROOM_SLOT_LIMIT as i64 { return Err(PREPARE_CATEGORIES[3]); }
     let remote_key = PublicKey::from_hex(remote).map_err(|_| PREPARE_CATEGORIES[0])?;
     let package = room_package(providers, remote_key, &queue.endpoint, deadline).await?;
     queue.authorization(remote)?;
@@ -224,21 +230,25 @@ async fn prepare_room(
         "INSERT INTO local_room_prepare_v1 VALUES (?1, ?2, ?3, ?4, NULL, 0)",
         [&queue.local, remote, &queue.endpoint, &session],
     ).map_err(|_| uncertain)?;
-    let prepared = providers.runtime.session_mut().create_group(request).await.map_err(|_| uncertain)?;
+    let prepared = providers.runtime.prepare_create_group_with_audit_context(request, Default::default()).await.map_err(|_| uncertain)?;
     let group = prepared.group_id;
     verify_room(providers, &queue.local, remote, &group, &session, &queue.endpoint)?;
     let pending = providers.runtime.outstanding_welcome_deliveries().map_err(|_| uncertain)?;
-    let welcome = pending.into_iter().filter(|(candidate, _)| *candidate == group).count();
-    if welcome != 1 { return Err(uncertain); }
+    let mut welcomes = pending.into_iter().filter(|(candidate, _)| *candidate == group);
+    let (_, welcome) = welcomes.next().ok_or(uncertain)?;
+    if welcomes.next().is_some() { return Err(uncertain); }
     let bound = providers.journal.execute(
         "UPDATE local_room_prepare_v1 SET native_group = ?2 WHERE session = ?1 AND ready = 0",
         rusqlite::params![session, group.as_slice()],
     ).map_err(|_| uncertain)?;
     if bound != 1 { return Err(uncertain); }
     queue.authorization(remote)?;
-    let effects = providers.runtime.publish_session_effects(prepared.effects).await.map_err(|_| uncertain)?;
+    let effects = providers.runtime.publish_prepared_session_effects_with_audit_context(prepared.effects, Default::default()).await.map_err(|_| uncertain)?;
     if !effects.failures.is_empty() || !effects.welcome_failures.is_empty()
-        || !effects.unresolved_publishes.is_empty() || !effects.queued.is_empty() || effects.reports.is_empty()
+        || !effects.unresolved_publishes.is_empty() || !effects.queued.is_empty()
+        || !effects.reports.iter().any(|report| report.message_id == welcome.id
+            && report.met_required_acks()
+            && report.accepted.iter().any(|receipt| receipt.endpoint.0 == queue.endpoint))
         || providers.runtime.outstanding_welcome_deliveries().map_err(|_| uncertain)?
             .into_iter().any(|(candidate, _)| candidate == group)
     {
@@ -262,15 +272,16 @@ async fn room_package(providers: &ActiveProviders, peer: PublicKey, endpoint: &s
         ReqTarget::single(endpoint, [Filter::new().author(peer).kind(kind)]),
         AcquisitionLimits::new(1, 17, 1_048_576, deadline.saturating_duration_since(Instant::now())),
     ).await.map_err(|_| unavailable)?;
-    let mut report = request.finish().await.map_err(|_| unavailable)?;
+    let report = request.finish().await.map_err(|_| unavailable)?;
     if report.relays.len() != 1 { return Err(unavailable); }
-    let mut observed = report.relays.pop_first().ok_or(unavailable)?.1;
+    let observed = report.relays.into_values().next().ok_or(unavailable)?;
     if !matches!(observed.end, AcquisitionEnd::Completed) || observed.events.len() > 16 {
         return Err(unavailable);
     }
-    observed.events.sort_by(|first, second| second.created_at.cmp(&first.created_at).then_with(|| first.id.cmp(&second.id)));
+    let mut events: Vec<_> = observed.events.into_iter().collect();
+    events.sort_by(|first, second| second.created_at.cmp(&first.created_at).then_with(|| first.id.cmp(&second.id)));
     let now = epoch_seconds()?;
-    for event in observed.events {
+    for event in events {
         if event.pubkey != peer || event.kind != kind || event.verify().is_err() { continue; }
         let Ok(bytes) = STANDARD.decode(&event.content) else { continue; };
         let package = KeyPackage {
