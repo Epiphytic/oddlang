@@ -1,8 +1,7 @@
 //! SHA-256 and bounded fixed-byte native helper bindings.
 use super::{
-    View,
+    View, preflight,
     rules::{Compiler, Step},
-    rust,
 };
 use crate::wire_schema::{
     Definition, Field, Payload, Result, Shape, iri, render::ty, symbol, type_symbol,
@@ -82,7 +81,12 @@ impl Digest {
     }
 }
 
-pub(super) fn emit(text: &mut String, compiler: &mut Compiler<'_>, view: &View<'_>) -> Result<()> {
+pub(super) fn emit(
+    text: &mut String,
+    compiler: &mut Compiler<'_>,
+    view: &View<'_>,
+    bounds: &preflight::Bounds<'_>,
+) -> Result<()> {
     let graph = compiler.graph;
     let native = compiler.native;
     let binding = compiler.binding;
@@ -242,7 +246,6 @@ pub fn {function}(bytes: &[u8]) -> [u8;32] {{
                 }
                 let args = args.join(", ");
                 let constructed = construction.join(", ");
-                let error = rust::error(graph, native, &graph.admission_error);
                 let role = &binding.names[union];
                 let case = &binding.names[variant];
                 writeln!(
@@ -252,10 +255,11 @@ pub fn {function}({args}) -> ::core::result::Result<[u8;32], __OddlangProtocolEr
                 )
                 .unwrap();
                 text.push_str(&compiler.digest(&mapped, steps)?);
+                preflight::check_fields(text, bounds, &mapped, |field| format!("&{}", field.name));
                 writeln!(
                     text,
                     r#"    let case = {role}::{case} {{ {constructed} }};
-    let bytes = ::serde_json::to_vec(&case).map_err(|_| {error})?;
+    let bytes = __oddlang_serialize_frame(&case)?;
     ::core::result::Result::Ok(__oddlang_protocol_sha256(&bytes))
 }}"#
                 )

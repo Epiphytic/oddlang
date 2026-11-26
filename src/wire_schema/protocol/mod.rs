@@ -12,6 +12,7 @@ use std::{
 };
 
 mod digests;
+mod preflight;
 mod rules;
 mod rust;
 
@@ -497,19 +498,19 @@ impl Protocol {
                     .into(),
             );
         }
-        let mut variants = BTreeMap::new();
+        let mut error_variants = BTreeMap::new();
         for (id, error) in &self.errors {
             iri(id)?;
             iri(&error.variant)?;
             let takes_text = error.argument.is_some();
-            if variants
+            if error_variants
                 .insert(error.variant.as_str(), takes_text)
                 .is_some_and(|previous| previous != takes_text)
             {
                 return Err("one protocol error variant cannot mix unit and text arguments".into());
             }
         }
-        if variants
+        if error_variants
             .keys()
             .copied()
             .ne(native.errors.keys().map(String::as_str))
@@ -578,7 +579,7 @@ pub fn build(
             "selectedCase":endpoint.variant,
             "mappings":endpoint.fields,
             "decodeOrder":["wire-size","closed-parse","literals","canonical-reencode","case","validation"],
-            "encodeOrder":["validation","envelope","serialize","wire-size"],
+            "encodeOrder":["validation","borrowed-shape-bounds","envelope","bounded-serialize"],
             "sizeError":graph.size_error,
             "admissionError":graph.admission_error,
             "qualification":"independent-witness-required",
