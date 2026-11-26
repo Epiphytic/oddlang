@@ -21,8 +21,8 @@ runtime qualification establish the supported observations.
 - [x] Compile an unrelated consumer across a category mutation and check
   rejection of unsupported Rust, malformed graphs and non-exhaustive native
   dependencies.
-- [ ] Compile one unchanged downstream Marmish caller against pinned original
+- [x] Compile one unchanged downstream Marmish caller against pinned original
   and generated v6-based workspaces, exhaustively exercising 10 error
   variants and the 24 nested copy and stream categories.
-- [ ] Qualify a source category mutation and verify public I/O redaction,
+- [x] Qualify a source category mutation and verify public I/O redaction,
   retained native source and the generic result aliases in both lanes.

@@ -1207,8 +1207,10 @@ w:finiteErrorDomainsPlan a p:Artifact ;
 w:finiteErrorDomains a p:Task ;
     rdfs:label "Recover and project finite nested Rust error categories" ;
     p:milestone w:marmishMilestone ; p:source w:finiteErrorDomainsPlan ;
-    p:status p:active ; p:dependsOn w:unifiedProfileWorkspace ;
+    p:status p:done ; p:dependsOn w:unifiedProfileWorkspace ;
     p:acceptance "Recover pinned named diagnostics, exhaustive category tables, and explicit error-source and conversion rules. Compile an independent caller against original and sealed generated native packages, and observe a source mutation through both." .
 w:finiteErrorDomainFixture a p:Artifact ;
     p:location "verification/finite-error-domains/verify.py" .
-w:finiteErrorDomains p:evidence w:finiteErrorDomainFixture .
+w:nativeErrorDomainReceipt a p:Artifact ;
+    p:location "companion:verification/whole/native-error/darwin-arm64/receipt.json" .
+w:finiteErrorDomains p:evidence w:finiteErrorDomainFixture, w:nativeErrorDomainReceipt .
