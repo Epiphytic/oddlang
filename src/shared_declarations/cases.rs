@@ -50,7 +50,16 @@ pub(super) fn derive(graph: &Graph, binding: &Binding) -> Result<Json> {
         }
     }
     for enumeration in &graph.string_enums {
-        cases.insert(&enumeration.id,json!({"kind":"string-enum","nativeVariantOrder":binding.variant_order[&enumeration.id]}));
+        let wires: BTreeSet<_> = enumeration
+            .variants
+            .iter()
+            .map(|v| v.wire.as_str())
+            .collect();
+        let mut unknown = String::new();
+        while wires.contains(unknown.as_str()) {
+            unknown.push('?');
+        }
+        cases.insert(&enumeration.id,json!({"kind":"string-enum","nativeVariantOrder":binding.variant_order[&enumeration.id],"rejectWireString":unknown}));
         for variant in &enumeration.variants {
             cases.insert(&variant.id,json!({"kind":"string-variant","wireString":variant.wire,"encode":true,"decode":true}));
         }

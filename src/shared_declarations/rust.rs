@@ -56,7 +56,7 @@ pub(super) fn render(g: &Graph, b: &Binding) -> Result<String> {
                     }
                     Segment::Payload { .. } => writeln!(
                         out,
-                        "                ::core::fmt::Display::fmt(_payload, __formatter)?;"
+                        "                ::core::write!(__formatter, \"{{}}\", _payload)?;"
                     )
                     .unwrap(),
                 }

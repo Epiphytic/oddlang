@@ -88,11 +88,41 @@ struct WireVariant {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct Binding {
     format: String,
+    #[serde(deserialize_with = "unique_map")]
     names: BTreeMap<String, String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "unique_map")]
     constant_types: BTreeMap<String, Width>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "unique_map")]
     variant_order: BTreeMap<String, Vec<String>>,
+}
+fn unique_map<'de, D, V>(de: D) -> std::result::Result<BTreeMap<String, V>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+    V: Deserialize<'de>,
+{
+    struct Keys<V>(std::marker::PhantomData<V>);
+    impl<'de, V: Deserialize<'de>> serde::de::Visitor<'de> for Keys<V> {
+        type Value = BTreeMap<String, V>;
+        fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            f.write_str("an IRI map with distinct keys")
+        }
+        fn visit_map<M: serde::de::MapAccess<'de>>(
+            self,
+            mut map: M,
+        ) -> std::result::Result<Self::Value, M::Error> {
+            let mut values = BTreeMap::new();
+            while let Some((id, value)) = map.next_entry::<String, V>()? {
+                if values.contains_key(&id) {
+                    return Err(serde::de::Error::custom(format!(
+                        "duplicate binding key: {id}"
+                    )));
+                }
+                values.insert(id, value);
+            }
+            Ok(values)
+        }
+    }
+    de.deserialize_map(Keys(std::marker::PhantomData))
 }
 #[derive(Deserialize, Serialize, Clone, Copy)]
 #[serde(rename_all = "lowercase")]

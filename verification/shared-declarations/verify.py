@@ -60,6 +60,9 @@ fn inspect() {
     assert_eq!(PERIOD, 51u16);
     let a: Reading<u32> = Err(SensorError::Label("probe"));
     assert_eq!(a.unwrap_err().to_string(),"sensor {probe}");
+    assert_eq!(format!("{:>20}", SensorError::Label("probe")), "sensor {probe}");
+    assert_eq!(format!("{:.1}", SensorError::Label("probe")), "sensor {probe}");
+    assert_eq!(format!("{:08}", SensorError::Count(42)), "42 cycles");
     assert_eq!(SensorError::Count(u64::MAX).to_string(), "18446744073709551615 cycles");
     assert_eq!(SensorError::Flag(true).to_string(), "true");
     assert_eq!(SensorError::Paused.to_string(), "paused");
@@ -93,6 +96,7 @@ with tempfile.TemporaryDirectory() as directory:
     assert rows[ref("period")]["unsignedDecimal"] == "51"
     assert rows[ref("label")]["examples"][0] == {"payloadCanonicalText":"", "display":"sensor {}"}
     assert rows[ref("hot")]["wireString"] == "h.ot"
+    assert rows[ref("mode")]["rejectWireString"] not in {"COLD","h.ot"}
     assert rows[ref("mode")]["nativeVariantOrder"] == [ref("cold"),ref("hot")]
     for f in ("shared.rs","projection.lock","obligations.json"):
         assert (good/f).read_bytes()==(replay/f).read_bytes()
@@ -109,6 +113,13 @@ with tempfile.TemporaryDirectory() as directory:
         mutated, overlay=copy.deepcopy(graph),copy.deepcopy(binding)
         update(mutated,overlay)
         project(mutated,overlay,name,error)
+    write(g,graph)
+    for field in ("names","constantTypes","variantOrder"):
+        raw=json.dumps(binding)
+        key, value=next(iter(binding[field].items()))
+        marker='"' + field + '": {'
+        b.write_text(raw.replace(marker,marker+json.dumps(key)+':'+json.dumps(value)+',',1))
+        run(CLI,"build","shared-declarations","rust",g,b,root/("duplicate-"+field),error="duplicate binding key")
     lock=root/"Cargo.lock";lock.write_bytes((FIXTURE/"Cargo.lock").read_bytes())
     component=dict(kind="shared-declarations",module="meter",graph=write(g,graph),overlay=write(b,binding),
                    visibility="public",reexports=["PERIOD","Reading","SensorError","Mode"],

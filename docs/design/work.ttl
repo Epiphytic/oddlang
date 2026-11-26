@@ -729,3 +729,6 @@ w:sharedTypedDeclarations a p:Task ; rdfs:label "Project typed constants, named 
     p:acceptance "Qualify an unrelated native consumer against constant references and bounds, interpolated errors, native ordering, Serde wire values, and public and crate-private paths. Bind every declaration to a portable obligation." ;
     p:evidence w:sharedTypedFixture .
 w:sharedTypedFixture a p:Artifact ; p:location "verification/shared-declarations/verify.py" .
+
+w:sharedFormatterReview a p:Finding ; rdfs:label "Forwarding outer formatter options into an embedded payload changes its observable text" ; p:source w:sharedTypedFixture .
+w:sharedTypedDeclarations p:addresses w:sharedFormatterReview .
