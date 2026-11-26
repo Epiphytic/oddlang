@@ -161,36 +161,58 @@ impl Observer<'_> {
         paths.iter().any(|path| self.known_path(segments, path))
     }
 
+    fn trusted_derive(&self, path: &syn::Path) -> Option<String> {
+        let name = path.segments.last()?.ident.to_string();
+        let verified = match name.as_str() {
+            "Serialize" | "Deserialize" => self.known_path(path, &format!("serde::{name}")),
+            "Clone" | "Copy" | "Debug" | "Eq" | "PartialEq" => self.known_path(path, &name),
+            _ => false,
+        };
+        verified.then_some(name)
+    }
+
+    fn module_items(&mut self, items: &[Item]) -> Result<()> {
+        for item in items {
+            for attr in item_attrs(item) {
+                let name = path_name(attr.path());
+                match name.as_str() {
+                    "derive" => {
+                        for path in derive_paths(attr)? {
+                            if self.trusted_derive(&path).is_none() {
+                                self.gaps.push(format!(
+                                    "source item has unverified native derive {}",
+                                    path_name(&path)
+                                ));
+                            }
+                        }
+                    }
+                    "serde" | "doc" | "allow" | "warn" | "deny" | "forbid" | "deprecated"
+                    | "must_use" | "cfg" => {}
+                    _ => self
+                        .gaps
+                        .push(format!("source item has unvetted Rust attribute {name}")),
+                }
+            }
+        }
+        Ok(())
+    }
+
     fn derives(&mut self, id: &str, attrs: &[Attribute]) -> Result<()> {
         let mut host = BTreeSet::new();
         let mut serde = BTreeSet::new();
         for attr in attrs.iter().filter(|attr| attr.path().is_ident("derive")) {
-            let paths = attr
-                .parse_args_with(
-                    syn::punctuated::Punctuated::<syn::Path, Token![,]>::parse_terminated,
-                )
-                .map_err(|error| error.to_string())?;
-            for path in paths {
-                let name = path
-                    .segments
-                    .last()
-                    .expect("nonempty path")
-                    .ident
-                    .to_string();
-                match name.as_str() {
-                    "Serialize" | "Deserialize"
-                        if self.known_path(&path, &format!("serde::{name}")) =>
-                    {
+            for path in derive_paths(attr)? {
+                match self.trusted_derive(&path) {
+                    Some(name) if matches!(name.as_str(), "Serialize" | "Deserialize") => {
                         serde.insert(name);
                     }
-                    "Clone" | "Copy" | "Debug" | "Eq" | "PartialEq"
-                        if self.known_path(&path, &name) =>
-                    {
+                    Some(name) => {
                         host.insert(name);
                     }
-                    _ => self
-                        .gaps
-                        .push(format!("{id}: unverified native derive {name}")),
+                    None => self.gaps.push(format!(
+                        "{id}: unverified native derive {}",
+                        path_name(&path)
+                    )),
                 }
             }
         }
@@ -420,6 +442,32 @@ impl Observer<'_> {
     }
 }
 
+fn item_attrs(item: &Item) -> &[Attribute] {
+    match item {
+        Item::Const(item) => &item.attrs,
+        Item::Enum(item) => &item.attrs,
+        Item::ExternCrate(item) => &item.attrs,
+        Item::Fn(item) => &item.attrs,
+        Item::ForeignMod(item) => &item.attrs,
+        Item::Impl(item) => &item.attrs,
+        Item::Macro(item) => &item.attrs,
+        Item::Mod(item) => &item.attrs,
+        Item::Static(item) => &item.attrs,
+        Item::Struct(item) => &item.attrs,
+        Item::Trait(item) => &item.attrs,
+        Item::TraitAlias(item) => &item.attrs,
+        Item::Type(item) => &item.attrs,
+        Item::Union(item) => &item.attrs,
+        Item::Use(item) => &item.attrs,
+        _ => &[],
+    }
+}
+
+fn derive_paths(attr: &Attribute) -> Result<syn::punctuated::Punctuated<syn::Path, Token![,]>> {
+    attr.parse_args_with(syn::punctuated::Punctuated::parse_terminated)
+        .map_err(|error| error.to_string())
+}
+
 fn path_name(path: &syn::Path) -> String {
     path.segments
         .iter()
@@ -597,6 +645,7 @@ pub fn from_source(source: &Path, selection: &Path, output: &Path) -> Result<()>
         },
     };
     observer.attributes(&config.id, &parsed.attrs);
+    observer.module_items(&parsed.items)?;
     let mut types = Vec::new();
     for item in &parsed.items {
         let (name, attrs, generics) = match item {

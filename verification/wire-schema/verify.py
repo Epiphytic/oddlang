@@ -74,6 +74,10 @@ with tempfile.TemporaryDirectory(prefix="wire-schema-test-") as directory:
     lexical_controls = [
         ("macro", source.read_text().replace("pub struct Sensor", "#[serde_with::skip_serializing_none]\npub struct Sensor"),
          "unvetted Rust attribute serde_with::skip_serializing_none"),
+        ("item-macro", source.read_text() + "\nmacro_rules! shadow { () => { type u16 = u8; }; } shadow!();\n",
+         "unexpanded source item macro shadow"),
+        ("unselected-macro", source.read_text() + "\n#[other::emit] struct Different;\n",
+         "source item has unvetted Rust attribute other::emit"),
         ("derive", source.read_text().replace("use serde::{Deserialize, Serialize};",
                                                "use another::{Deserialize, Serialize};"),
          "unverified native derive"),
