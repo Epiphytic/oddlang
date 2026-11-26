@@ -167,6 +167,14 @@ fn root_exports(
         .filename
         .as_str();
     let source_imports = recover::imports(root_source);
+    if source_imports.iter().any(|import| {
+        !matches!(import.declaration.vis, Visibility::Public(_))
+            && (import.name == name || import.name == "*")
+    }) {
+        return Err(format!(
+            "private crate-root import can shadow the crate-root export of {name}"
+        ));
+    }
     let checked_use = |entry: &DocumentItem, spelling: &str, path: &[&str]| {
         source_imports.iter().any(|import| {
             import.name == spelling
@@ -181,12 +189,15 @@ fn root_exports(
                 )
         })
     };
-    for entry in root_items
-        .iter()
-        .filter(|entry| entry.visibility == "public")
-    {
+    for entry in root_items {
+        let public = entry.visibility == "public";
         if let Some(use_item) = entry.inner.get("use") {
             if use_item["is_glob"] == true {
+                if !public {
+                    return Err(format!(
+                        "private crate-root glob can shadow the crate-root export of {name}"
+                    ));
+                }
                 let target =
                     document.item(use_item["id"].as_u64().ok_or("missing root glob target")?)?;
                 if target.crate_id != 0 {
@@ -214,6 +225,11 @@ fn root_exports(
                     }
                 }
             } else if use_item["name"] == name {
+                if !public {
+                    return Err(format!(
+                        "private crate-root import shadows the crate-root export of {name}"
+                    ));
+                }
                 let owner_name = document
                     .item(owner)?
                     .name
