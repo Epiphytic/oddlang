@@ -67,7 +67,7 @@ cases leave the state unchanged.
 | `less(A,A)`, `greater(A,A)` | Flag for matching numeric operands |
 | `and(flags...)`, `or(flags...)`, `not(flag)` | Flag |
 | `choose(flag,A,A)` | Common branch type |
-| `slice(cursor,size)` | Owned bytes from the indicated start and length, bounded to the retained interval |
+| `slice(cursor,size)` | Owned bytes starting at the cursor clamped to the retained interval, up to the requested size |
 | `has-receipt(cursor)`, `same-receipt(cursor,optional-cursor,bytes)` | Flag |
 | `front-receipt-evictable()` | Flag, true when the oldest receipt ends at or before the start cursor |
 
