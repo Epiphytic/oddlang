@@ -345,7 +345,7 @@ w:marmishFeatures a p:Task ; rdfs:label "Implement reusable Oddlang features req
     p:acceptance "Exercise inventory-driven compiler and conformance extensions with independent positive and negative fixtures." .
 
 w:marmishQualification a p:Task ; rdfs:label "Rebuild and qualify pinned Marmish" ;
-    p:milestone w:marmishMilestone ; p:status p:active ; p:source w:roundTripPlan, w:marmishSource ; p:dependsOn w:marmishFeatures ;
+    p:milestone w:marmishMilestone ; p:status p:done ; p:source w:roundTripPlan, w:marmishSource ; p:dependsOn w:marmishFeatures ;
     p:acceptance "Report fresh native and regenerated build comparisons, preserved native code, coverage, proof scope and remaining gaps." .
 
 w:roundTripBoundaries a p:Finding ; rdfs:label "Separate toolchains, production worlds and independent runtime evidence" ; p:source w:roundTripReview .
@@ -437,3 +437,7 @@ w:marmishQualification p:addresses w:marmishCandidateIdentityReview .
 w:marmishQualificationArchive a p:Artifact ; rdfs:label "Sealed observations, original and reconstructed Git object witnesses, native logs and residual register" ; p:location "examples/marmish/evidence/qualification.tar.gz" .
 w:marmishQualification p:evidence w:marmishQualificationArchive .
 w:marmish-capability-modules p:evidence w:marmishQualificationArchive .
+
+w:marmishReconstructedRepository a p:Artifact ; rdfs:label "Published Marmish reconstruction at the qualified candidate commit" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/e0d855874ec2348939175dfa6ec5c71488c8ba35" .
+w:marmishQualification p:evidence w:marmishReconstructedRepository .
