@@ -1,0 +1,88 @@
+
+use cgka_traits::{MemberId, MessageId, TransportEndpoint, group::ProtocolProfile,
+    app_components::PRIVATE_USE_APP_COMPONENT_ID_START, maintenance::SignedPublicationArtifact};
+use marmot_session::{KeyPackagePublication, KeyPackagePublishError, KeyPackagePublishReceipt,
+    KeyPackagePublisher, key_package_metadata};
+use nostr::{event::{EventBuilder, FinalizeEvent, Kind, Tag}, key::Keys, types::Timestamp as EventTimestamp};
+use transport_nostr_adapter::{NostrKeyPackagePublication, NostrKeyPackagePublisher, NostrSdkRelayClient};
+use transport_nostr_peeler::NostrTransportEvent;
+
+struct BoundPublisher {
+    keys: Arc<Keys>,
+    relay: Arc<NostrSdkRelayClient>,
+    endpoint: TransportEndpoint,
+}
+
+impl BoundPublisher {
+    fn publication(&self, input: &KeyPackagePublication) -> Result<NostrKeyPackagePublication, KeyPackagePublishError> {
+        let failure = || KeyPackagePublishError::unexposed(PROVIDER_UNAVAILABLE);
+        if input.account_id.as_slice() != self.keys.public_key().to_bytes()
+            || input.endpoints.as_slice() != std::slice::from_ref(&self.endpoint)
+        {
+            return Err(failure());
+        }
+        let metadata = key_package_metadata(&input.key_package).map_err(|_| failure())?;
+        if metadata.protocol_profile != ProtocolProfile::Current
+            || metadata.credential_identity_hex != self.keys.public_key().to_hex()
+        {
+            return Err(failure());
+        }
+        let format_id = |id: &u16| format!("0x{id:04x}");
+        Ok(NostrKeyPackagePublication {
+            client_name: None,
+            account_id: input.account_id.clone(),
+            key_package: input.key_package.clone(),
+            key_package_slot_id: input.slot_id.clone(),
+            key_package_ref: metadata.key_package_ref_hex,
+            mls_ciphersuite: format_id(&metadata.ciphersuite),
+            mls_extensions: metadata.mls_extensions.iter().map(format_id).collect(),
+            mls_proposals: metadata.mls_proposals.iter().map(format_id).collect(),
+            app_components: metadata.app_components.iter()
+                .filter(|id| **id >= PRIVATE_USE_APP_COMPONENT_ID_START).map(format_id).collect(),
+            publish_endpoints: input.endpoints.clone(),
+        })
+    }
+}
+
+#[async_trait::async_trait]
+impl KeyPackagePublisher for BoundPublisher {
+    async fn prepare_key_package(
+        &self, input: KeyPackagePublication,
+    ) -> Result<SignedPublicationArtifact, KeyPackagePublishError> {
+        let failure = || KeyPackagePublishError::unexposed(PROVIDER_UNAVAILABLE);
+        let event = self.publication(&input)?.to_event_at(input.created_at.0).map_err(|_| failure())?;
+        let kind = u16::try_from(event.kind).map_err(|_| failure())?;
+        let tags = event.tags.into_iter().map(Tag::parse).collect::<Result<Vec<_>, _>>()
+            .map_err(|_| failure())?;
+        let signed = EventBuilder::new(Kind::Custom(kind), event.content)
+            .tags(tags).custom_created_at(EventTimestamp::from_secs(input.created_at.0))
+            .finalize(self.keys.as_ref()).map_err(|_| failure())?;
+        let event = NostrTransportEvent::from_nostr_event(&signed).map_err(|_| failure())?;
+        Ok(SignedPublicationArtifact {
+            id: MessageId::new(signed.id.to_bytes().to_vec()),
+            created_at: input.created_at,
+            bytes: serde_json::to_vec(&event).map_err(|_| failure())?,
+        })
+    }
+
+    async fn publish_prepared_key_package(
+        &self, input: &KeyPackagePublication, artifact: &SignedPublicationArtifact,
+    ) -> Result<KeyPackagePublishReceipt, KeyPackagePublishError> {
+        let publication = self.publication(input)?;
+        let invalid = || KeyPackagePublishError::unusable_artifact(PROVIDER_UNAVAILABLE);
+        let event: NostrTransportEvent = serde_json::from_slice(&artifact.bytes).map_err(|_| invalid())?;
+        if event.id != hex::encode(artifact.id.as_slice())
+            || event.created_at != artifact.created_at.0 || event.created_at != input.created_at.0
+            || !publication.matches_prepared_event(&event).map_err(|_| invalid())?
+        {
+            return Err(invalid());
+        }
+        let receipt = NostrKeyPackagePublisher::new(self.relay.clone())
+            .publish_prepared_key_package(&publication, &event).await
+            .map_err(|_| KeyPackagePublishError::exposed(RELAY_FAILED))?;
+        Ok(KeyPackagePublishReceipt {
+            accepted: receipt.accepted.into_iter().map(|relay| relay.endpoint).collect(),
+            failed: receipt.failed.into_iter().map(|relay| relay.endpoint).collect(),
+        })
+    }
+}

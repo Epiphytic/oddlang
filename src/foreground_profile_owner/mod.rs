@@ -137,12 +137,29 @@ struct Activation {
     kind: ActivationKind,
     route_value: String,
     deadline_ms: u64,
+    relay_runtime: Option<RelayRuntime>,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 enum ActivationKind {
     LoopbackWebPkiTls,
+    OnionWebsocket,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct RelayRuntime {
+    state_directory: String,
+    cache_directory: String,
+    maximum_frame_bytes: usize,
+    ready_state: String,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum RelayBackend {
+    ArtiNostrMarmot,
 }
 
 #[derive(Deserialize)]
@@ -179,6 +196,7 @@ struct Binding {
     entry: String,
     status_owner: Vec<String>,
     retained_stores: Option<Vec<String>>,
+    relay_backend: Option<RelayBackend>,
 }
 
 impl Graph {
@@ -190,7 +208,8 @@ impl Graph {
                 let excludes = &lifecycle.excluded_profile_entries;
                 if oxigraph::model::NamedNode::new(&lifecycle.storage_profile).is_err()
                     || !binding_path(path)
-                    || excludes.is_empty()
+                    || (excludes.is_empty()
+                        && matches!(self.activation.kind, ActivationKind::LoopbackWebPkiTls))
                     || !excludes.iter().all(|leaf| filename(leaf))
                     || excludes.iter().collect::<BTreeSet<_>>().len() != excludes.len()
                     || excludes.iter().any(|leaf| {
@@ -226,12 +245,41 @@ impl Graph {
             }
         }
         let Activation {
-            kind: ActivationKind::LoopbackWebPkiTls,
+            kind,
             route_value,
             deadline_ms,
+            relay_runtime,
         } = &self.activation;
         if !plain(route_value) || !(1..=300_000).contains(deadline_ms) {
             return Err("invalid foreground activation provider".into());
+        }
+        match (kind, relay_runtime, &binding.relay_backend) {
+            (ActivationKind::LoopbackWebPkiTls, None, None) => (),
+            (ActivationKind::OnionWebsocket, Some(relay), Some(RelayBackend::ArtiNostrMarmot))
+                if self.lifecycle.is_some()
+                    && filename(&relay.state_directory)
+                    && filename(&relay.cache_directory)
+                    && relay.state_directory != relay.cache_directory
+                    && [&relay.state_directory, &relay.cache_directory]
+                        .into_iter()
+                        .all(|name| {
+                            ![
+                                &self.profile.document,
+                                &self.profile.lock,
+                                &self.provider.directory,
+                            ]
+                            .contains(&name)
+                        })
+                    && (1024..=1_048_576).contains(&relay.maximum_frame_bytes)
+                    && token(&relay.ready_state) =>
+            {
+                ()
+            }
+            _ => {
+                return Err(
+                    "foreground relay runtime requires its matching provider binding".into(),
+                );
+            }
         }
 
         if self.format != "oddlang-foreground-profile-owner-v1"
@@ -486,4 +534,67 @@ pub(crate) fn build_bytes(graph: &[u8], binding: &[u8], output: &Path) -> Result
     fs::write(stage.path().join("projection.lock"), format!("{lock:#}\n"))
         .map_err(|error| error.to_string())?;
     crate::native_package::publish(stage.path(), output)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::{Value, json};
+
+    fn station() -> (Value, Value) {
+        let graph = json!({
+            "format": "oddlang-foreground-profile-owner-v1",
+            "arguments": {"foreground":"attached","state":"data","identity":"station","backend":"storage",
+                          "backend_choices":{"disk":"disk"},"route":"route","relay":"relay"},
+            "profile":{"document":"profile.json","lock":"station.lock","format":1,
+                       "maximum_bytes":1024,"name_limit":32,"short_reference_bytes":16,
+                       "credential_reference_bytes":32,"ready":"ready","backend":"disk",
+                       "fields":{"format":"format","profile_id":"identity","name":"name","transaction":"change",
+                                 "phase":"phase","backend":"backend","signing_ref":"sign","data_ref":"data",
+                                 "device":"device","public_key":"public"}},
+            "runtime":{"prefix":"station","binding":"binding.json","socket":"s","format":1,
+                       "fields":{"format":"format","profile_id":"id","root":"root"},
+                       "maximum_path_bytes_exclusive":104,"reserved_path_bytes":10},
+            "provider":{"kind":"private_file_secp256k1","directory":"keys","signing_prefix":"sign","data_prefix":"data"},
+            "activation":{"kind":"onion_websocket","route_value":"private","deadline_ms":90000,
+                          "relay_runtime":{"state_directory":"network-state","cache_directory":"network-cache",
+                                           "maximum_frame_bytes":4096,"ready_state":"connected"}},
+            "diagnostics": ([
+                "scope","io","invalid_name","unsafe_directory","unsafe_file","already_running",
+                "missing_profile","incompatible_format","invalid_profile","not_ready","backend_mismatch",
+                "missing_credential","invalid_credential","identity_mismatch","runtime_collision","runtime_length",
+                "cleanup","relay_scope","plaintext_relay","relay_failed","activation_deadline","provider_unavailable",
+            ].into_iter().map(|key| (key, json!(key))).collect::<BTreeMap<_,_>>()),
+            "lifecycle":{"storage_profile":"urn:example:station:storage","engine":"absent",
+                         "excluded_profile_entries":["dispatch"],"shutdown_ms":2000,"dial_ms":20000,
+                         "dial_attempts":2,"report_version":1,"provider_open_failure":"provider failure",
+                         "report_fields":{"schema":"schema","engine_quiesced":"quiesced","engine_stop_complete":"engine",
+                                          "provider_stop_complete":"provider","runtime_cleanup_complete":"cleanup"}},
+        });
+        let binding = json!({
+            "format":"oddlang-foreground-profile-owner-rust-v1","entry":"serve",
+            "status_owner":["status","Owner"],"retained_stores":["store","open"],
+            "relay_backend":"arti_nostr_marmot",
+        });
+        (graph, binding)
+    }
+
+    #[test]
+    fn projects_only_a_bound_onion_relay_with_private_state_and_frame_limits() {
+        let (graph, mut binding) = station();
+        let graph_bytes = serde_json::to_vec(&graph).unwrap();
+        let (model, overlay) = load(&graph_bytes, &serde_json::to_vec(&binding).unwrap()).unwrap();
+        let rust = rust::render(&model, &overlay);
+        for expected in [
+            "network-state",
+            "network-cache",
+            "4096",
+            "connected",
+            "republish_key_package",
+        ] {
+            assert!(rust.contains(expected), "{expected}");
+        }
+        binding.as_object_mut().unwrap().remove("relay_backend");
+        assert!(load(&graph_bytes, &serde_json::to_vec(&binding).unwrap()).is_err());
+    }
 }
