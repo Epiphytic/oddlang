@@ -508,13 +508,30 @@ fn initial_inputs(_: &Workflow, _: &ArgMatches) -> Result<BTreeMap<String, Value
     }
     if let Some(discovery) = &selected.discovery {
         discovery.render(&mut source);
-        source.push_str(
-            r#"
+        if let Some(profile) = &selected.profile {
+            let profile_argument = &profile.arguments.profile;
+            writeln!(
+                source,
+                r#"
+fn choose_socket(matches: &ArgMatches, explicit: Option<&PathBuf>) -> Result<PathBuf, Failure> {{
+    let mut selected = matches.clone();
+    if !explicit_argument(matches, {profile_argument:?}) {{
+        selected.try_remove_one::<String>({profile_argument:?}).map_err(|_| BINDING)?;
+    }}
+    discover_endpoint(&selected, explicit)
+}}
+"#
+            )
+            .unwrap();
+        } else {
+            source.push_str(
+                r#"
 fn choose_socket(matches: &ArgMatches, explicit: Option<&PathBuf>) -> Result<PathBuf, Failure> {
     discover_endpoint(matches, explicit)
 }
 "#,
-        );
+            );
+        }
     } else {
         source.push_str(
             r#"
@@ -575,10 +592,16 @@ fn choose_socket(_: &ArgMatches, explicit: Option<&PathBuf>) -> Result<PathBuf, 
     if let Some(catalog) = &profile_obligations {
         lock["profileObligationsSha256"] = digest(catalog.as_bytes()).into();
     }
-    let endpoint_obligations = selected
-        .discovery
-        .as_ref()
-        .map(|discovery| format!("{:#}\n", discovery.obligations()));
+    let endpoint_obligations = selected.discovery.as_ref().map(|discovery| {
+        let mut catalog = discovery.obligations();
+        if selected.profile.is_some() {
+            if let Some(order) = catalog["selectionOrder"].as_array_mut() {
+                order.retain(|source| source != "ordered-environment");
+            }
+            catalog["composedStateSelection"] = "explicitStateRequired".into();
+        }
+        format!("{catalog:#}\n")
+    });
     if let Some(discovery) = &selected.discovery {
         lock["discoverySha256"] =
             digest(&serde_json::to_vec(discovery).map_err(|error| error.to_string())?).into();

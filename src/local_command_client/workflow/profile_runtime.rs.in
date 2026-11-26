@@ -190,8 +190,10 @@ fn load_profile_document(
 ) -> Result<Value, Failure> {
     let doc = &policy.document;
     let args = &policy.arguments;
-    let base = matches.try_get_one::<PathBuf>(&args.state).map_err(|_| BINDING)?.ok_or(PROFILE_PATH)?;
+    let base = matches.try_get_one::<PathBuf>(&args.state).map_err(|_| BINDING)?
+        .filter(|_| explicit_argument(matches, &args.state)).ok_or(PROFILE_PATH)?;
     let profile = matches.try_get_one::<String>(&args.profile).map_err(|_| BINDING)?
+        .filter(|_| explicit_argument(matches, &args.profile))
         .map_or(args.default_profile.as_str(), String::as_str);
     if profile.len() > doc.profile_name_maximum_bytes as usize
         || profile.is_empty() || matches!(profile, "." | "..") || !profile.bytes().all(|b| b.is_ascii_alphanumeric()

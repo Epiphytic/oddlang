@@ -169,6 +169,8 @@ pub(super) fn obligations(policy: &Value) -> Value {
     let mut rows = vec![json!({
         "declaration": policy["id"], "role": "authorized-workflow-inputs",
         "argumentSource": "explicitCommandLine",
+        "stateSelection": "explicitStateRequired",
+        "profileSelection": "explicitProfileOrDeclaredDefault",
         "documentAccess": "readOnlyDescriptorRelativeNoFollow",
         "relayOrder": "canonicalLexicographicUnique",
         "profilePolicy": policy,
