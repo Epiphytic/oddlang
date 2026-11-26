@@ -19,6 +19,9 @@ fn import_has_profile(path: &str, profile: &str) -> bool {
 
 fn run(args: &[String]) -> Result<(), String> {
     match args {
+        [cmd, kind, observation, selection, out] if cmd == "recover" && kind == "bounded-json-input" => {
+            oddlang::bounded_json_input::recover(observation.as_ref(), selection.as_ref(), out.as_ref())
+        }
         [cmd, kind, source, selection, out] if cmd == "recover" && kind == "plain-choice" => {
             oddlang::checked_values::recover(source.as_ref(), selection.as_ref(), out.as_ref())
         }

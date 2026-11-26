@@ -1,0 +1,46 @@
+#[cfg(test)]
+#[allow(dead_code)]
+const @LIMIT@: usize = @BYTES@;
+
+#[cfg(test)]
+#[allow(dead_code)]
+fn @SINGLE@(input: &[u8]) -> Result<::serde_json::Value, crate::@ERROR@> {
+    if input.len() > @LIMIT@ {
+        return Err(crate::@ERROR@::@CAPACITY@);
+    }
+    ::serde_json::from_slice(input).map_err(|_| crate::@ERROR@::@INVALID@)
+}
+
+#[cfg(test)]
+#[allow(dead_code)]
+fn @SEQUENCE@(mut reader: impl ::std::io::BufRead) -> Result<Vec<::serde_json::Value>, crate::@ERROR@> {
+    let mut values = Vec::new();
+    let mut pending = Vec::new();
+    loop {
+        let chunk = reader.fill_buf().map_err(|_| crate::@ERROR@::@INVALID@)?;
+        if chunk.is_empty() {
+            break;
+        }
+        let piece = chunk.split_inclusive(|byte| *byte == b'\n').next()
+            .expect("nonempty chunk");
+        let complete = piece.last() == Some(&b'\n');
+        if piece.len() > @LIMIT@ - pending.len() {
+            return Err(crate::@ERROR@::@CAPACITY@);
+        }
+        pending.extend_from_slice(piece);
+        let consumed = piece.len();
+        reader.consume(consumed);
+        if complete {
+            if values.len() >= @RECORDS@ {
+                return Err(crate::@ERROR@::@CAPACITY@);
+            }
+            values.push(@SINGLE@(&pending)?);
+            pending.clear();
+        }
+    }
+    if pending.is_empty() {
+        Ok(values)
+    } else {
+        Err(crate::@ERROR@::@INVALID@)
+    }
+}

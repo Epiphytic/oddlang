@@ -201,3 +201,17 @@ for the three existing policies. The structural selector supplies
 structure, trace-inferred policies and provider assumptions. The output
 graph and overlay use the existing buffered-input formats.
 See the [trace contract](../superpowers/specs/2026-11-26-observed-buffered-input.md).
+
+### Bounded local JSON test input
+
+A bounded JSON input component declares one maximum byte count, a record
+count, LF termination and guard precedence. The byte limit applies to
+each JSON value or line and includes its delimiter. With duplicate object
+members, the last value wins. Remaining JSON value behavior uses the pinned
+native provider.
+
+The Rust binding names two existing unit errors. The native package checks
+their declaration identities and keeps the parser private under test
+configuration. Recovery accepts pinned boundary observations, including
+observed reader consumption at the limit. Compile the original private case
+only after the sealed library has been assembled.
