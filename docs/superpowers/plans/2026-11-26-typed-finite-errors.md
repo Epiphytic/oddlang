@@ -11,6 +11,15 @@ error profiles, and verify recovery with independent native callers.
 - [x] Emit the exact native error API and discover previously declared unit
   errors by stable identity in the process-limit package. Replay the
   existing local process-limit profile and exercise shared error linkage.
-- [ ] Integrate the pure EngineError family and native BackendChoice
+- [x] Integrate the pure EngineError family and native BackendChoice
   component into the sealed seven-member workspace. Preserve all
   unrelated member inputs and replay independent upstream consumers.
+
+The sealed build passed on native macOS and Linux ARM64 with runtime
+`bbdc69e026ee0ae0c50bd9884fa4b6eaad8040a1`. Both native consumers
+matched all 26 error categories, three reason enums and 38 compile
+negatives. The same verified workspace matched the independent native
+BackendChoice caller. Replay preserves the earlier dependency lock,
+all sibling edges and five unrelated member rows. The macOS source
+mutation changes the diagnostic text, reason ordinals and named product
+Debug order in both compiled original and projection.

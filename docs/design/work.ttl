@@ -1482,10 +1482,20 @@ w:typedFiniteErrors a p:Task ;
     rdfs:label "Recover finite error choices and typed product variants" ;
     p:milestone w:marmishMilestone ; p:source w:typedFiniteErrorsPlan ;
     p:dependsOn w:plainValueChoices, w:sevenMemberBufferedWorkspace ;
-    p:status p:active ;
+    p:status p:done ;
     p:acceptance "Qualify public error and alias, exact reason capability and variant membership, fixed-width named fields and Display/Debug/source through independently compiled original and generated consumers. Share process-limit error identity without changing the older standalone projection. Integrate the published native identity choice." .
 
 w:typedFiniteErrorPrimitiveShadow a p:Finding ;
     rdfs:label "Reject local declarations that shadow a recovered primitive width" ;
     p:source w:typedFiniteErrorsPlan .
 w:typedFiniteErrors p:addresses w:typedFiniteErrorPrimitiveShadow .
+
+w:typedFiniteErrorsFixture a p:Artifact ;
+    p:location "verification/typed-finite-errors/verify.py" .
+w:typedFiniteErrorsDarwin a p:Artifact ;
+    p:location "companion:verification/whole/engine-public-error/aarch64-apple-darwin.json" .
+w:typedFiniteErrorsLinux a p:Artifact ;
+    p:location "companion:verification/whole/engine-public-error/aarch64-unknown-linux-gnu.json" .
+w:typedFiniteErrorsMutation a p:Artifact ;
+    p:location "companion:verification/whole/engine-public-error/source-mutation-aarch64-apple-darwin.json" .
+w:typedFiniteErrors p:evidence w:typedFiniteErrorsFixture, w:typedFiniteErrorsDarwin, w:typedFiniteErrorsLinux, w:typedFiniteErrorsMutation .
