@@ -9,6 +9,13 @@ use std::{
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
+pub(super) struct RecordCheck {
+    pub owner: String,
+    pub steps: Vec<Step>,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
 pub(super) struct Foreign {
     pub id: String,
     pub fields: Vec<Field>,
@@ -156,6 +163,11 @@ pub(super) enum Condition {
 #[derive(Deserialize, Serialize)]
 #[serde(tag = "kind", rename_all = "kebab-case", deny_unknown_fields)]
 pub(super) enum Step {
+    CheckRecord {
+        id: String,
+        value: Path,
+        check: String,
+    },
     Require {
         id: String,
         predicate: Condition,
@@ -248,6 +260,7 @@ pub(super) struct Compiler<'a> {
     pub schema: &'a Schema,
     pub binding: &'a Binding,
     pub native: &'a Native,
+    check_indices: BTreeMap<&'a str, usize>,
     cursor: usize,
 }
 
@@ -263,6 +276,12 @@ impl<'a> Compiler<'a> {
             schema,
             binding,
             native,
+            check_indices: graph
+                .record_checks
+                .keys()
+                .enumerate()
+                .map(|(index, id)| (id.as_str(), index))
+                .collect(),
             cursor: 0,
         }
     }
@@ -312,6 +331,47 @@ impl<'a> Compiler<'a> {
             }
         }
         Ok(())
+    }
+
+    pub fn record_checks(&mut self) -> Result<String> {
+        let graph = self.graph;
+        let dependencies: BTreeMap<_, _> = graph
+            .record_checks
+            .iter()
+            .map(|(id, check)| (id.as_str(), record_calls(&check.steps)))
+            .collect();
+        reachable_checks(&dependencies, dependencies.keys().copied())?;
+        let endpoint_steps = graph
+            .endpoints
+            .iter()
+            .flat_map(|endpoint| endpoint.steps.iter().chain(&endpoint.timed));
+        let digest_steps = graph.digests.iter().flat_map(|digest| match digest {
+            super::digests::Digest::Bytes { .. } => [].iter(),
+            super::digests::Digest::Case { steps, .. } => steps.iter(),
+        });
+        let reachable = reachable_checks(
+            &dependencies,
+            record_calls(endpoint_steps.chain(digest_steps)),
+        )?;
+        let mut functions = String::new();
+        for (id, check) in &graph.record_checks {
+            if !matches!(self.definition(&check.owner)?, Definition::Record { .. }) {
+                return Err("a shared check requires a named record".into());
+            }
+            let value = Provided::Value(Value {
+                rust: "_record".into(),
+                shape: Shape::Ref {
+                    id: check.owner.clone(),
+                },
+            });
+            let body = self.compile(value, &check.steps, false)?;
+            if reachable.contains(id.as_str()) {
+                let index = self.check_indices[id.as_str()];
+                let native = &self.binding.names[&check.owner];
+                writeln!(functions, "\nfn __oddlang_record_check_{index}(_record: &{native}) -> ::core::result::Result<(), {}> {{\n{body}    ::core::result::Result::Ok(())\n}}", rust::ERROR).unwrap();
+            }
+        }
+        Ok(functions)
     }
 
     pub fn endpoint(
@@ -674,6 +734,24 @@ impl<'a> Compiler<'a> {
         let child = format!("{indent}    ");
         for step in steps {
             match step {
+                Step::CheckRecord { value, check, .. } => {
+                    let value = self.path(value, scope)?;
+                    let spec = self
+                        .graph
+                        .record_checks
+                        .get(check)
+                        .ok_or("undeclared record check")?;
+                    let index = self.check_indices[check.as_str()];
+                    if !matches!(&value.shape, Shape::Ref { id } if id == &spec.owner) {
+                        return Err("record check requires its declared type".into());
+                    }
+                    writeln!(
+                        text,
+                        "{indent}__oddlang_record_check_{index}({})?;",
+                        value.rust
+                    )
+                    .unwrap();
+                }
                 Step::Require {
                     predicate, error, ..
                 } => {
@@ -853,6 +931,41 @@ impl<'a> Compiler<'a> {
     }
 }
 
+fn record_calls<'a>(steps: impl IntoIterator<Item = &'a Step>) -> BTreeSet<&'a str> {
+    let mut calls = BTreeSet::new();
+    for step in steps {
+        step.visit(&mut |item| {
+            if let Step::CheckRecord { check, .. } = item {
+                calls.insert(check.as_str());
+            }
+        });
+    }
+    calls
+}
+
+fn reachable_checks<'a>(
+    dependencies: &BTreeMap<&'a str, BTreeSet<&'a str>>,
+    roots: impl IntoIterator<Item = &'a str>,
+) -> Result<BTreeSet<&'a str>> {
+    let mut active = BTreeSet::new();
+    let mut finished = BTreeSet::new();
+    let mut pending: Vec<_> = roots.into_iter().map(|id| (id, false)).collect();
+    while let Some((id, exiting)) = pending.pop() {
+        if exiting {
+            active.remove(id);
+            finished.insert(id);
+        } else if !finished.contains(id) {
+            let calls = dependencies.get(id).ok_or("undeclared record check")?;
+            if !active.insert(id) {
+                return Err("recursive shared record checks".into());
+            }
+            pending.push((id, true));
+            pending.extend(calls.iter().rev().map(|&call| (call, false)));
+        }
+    }
+    Ok(finished)
+}
+
 fn same_equal_shape(left: &Shape, right: &Shape, binding: &Binding) -> bool {
     match (left, right) {
         (Shape::Bool {}, Shape::Bool {}) | (Shape::Text {}, Shape::Text {}) => true,
@@ -868,7 +981,8 @@ fn same_equal_shape(left: &Shape, right: &Shape, binding: &Binding) -> bool {
 impl Step {
     pub fn id(&self) -> &str {
         match self {
-            Self::Require { id, .. }
+            Self::CheckRecord { id, .. }
+            | Self::Require { id, .. }
             | Self::If { id, .. }
             | Self::Some { id, .. }
             | Self::ForEach { id, .. }
@@ -896,7 +1010,7 @@ impl Step {
                     }
                 }
             }
-            Self::Call { .. } | Self::Require { .. } => {}
+            Self::Call { .. } | Self::CheckRecord { .. } | Self::Require { .. } => {}
         }
     }
 
@@ -926,7 +1040,7 @@ impl Step {
                     }
                 }
             }
-            Self::Call { .. } => {}
+            Self::CheckRecord { .. } | Self::Call { .. } => {}
         }
     }
 }
