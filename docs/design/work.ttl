@@ -1347,3 +1347,11 @@ w:upstreamNamedDarwinReceipt a p:Artifact ;
 
 w:upstreamNamedLinuxReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/blob/862203ff9d50229624abaa582701627e156db9be/verification/whole/suite/combined-v7-aarch64-unknown-linux-gnu.json> .
+
+w:releaseVersionTextGrammar a p:Task ;
+    rdfs:label "Recover the pure release-version text grammar" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:wholeMarmishFreeze ;
+    p:status p:active ;
+    p:acceptance "Recover ordered prefix choice, ASCII decimal bounds, optional delimited suffix and entire-input consumption from pinned source. Match released vectors and source mutations against a native witness and an unrelated grammar." .
+w:wholeMarmishDistribution p:dependsOn w:releaseVersionTextGrammar .

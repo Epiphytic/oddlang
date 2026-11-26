@@ -32,6 +32,7 @@ pub mod sequence_journal;
 pub mod shared_declarations;
 pub mod tagged_wire;
 pub mod targets;
+pub mod text_grammar;
 pub mod value_domain;
 pub mod wasm;
 
