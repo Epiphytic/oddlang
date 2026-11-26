@@ -1,7 +1,9 @@
 //! Portable ordered public records with native name and re-export bindings.
 mod recover;
+mod root;
 
 pub use recover::recover;
+pub use root::recover_root;
 
 use crate::shared_declarations::unique_map;
 use crate::wire_schema::{digest, encode, iri, symbol, type_symbol};
@@ -45,6 +47,7 @@ struct Record {
 enum Trait {
     Clone,
     Serialize,
+    Debug,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -87,6 +90,12 @@ struct Alias {
 #[serde(deny_unknown_fields)]
 struct Overlay {
     format: String,
+    #[serde(
+        rename = "flattenModule",
+        default,
+        skip_serializing_if = "std::ops::Not::not"
+    )]
+    flatten_module: bool,
     #[serde(deserialize_with = "unique_map")]
     identifiers: BTreeMap<String, String>,
 }
@@ -108,6 +117,12 @@ fn claim<'a>(id: &'a str, seen: &mut BTreeSet<&'a str>) -> Result<()> {
 fn render(graph: &Graph, overlay: &Overlay, serde_available: bool) -> Result<String> {
     if graph.format != GRAPH || overlay.format != OVERLAY || graph.modules.is_empty() {
         return Err("invalid or empty public record contract".into());
+    }
+    if overlay.flatten_module && (graph.modules.len() != 1 || !graph.modules[0].aliases.is_empty())
+    {
+        return Err(
+            "a flat public record module requires exactly one module and no aliases".into(),
+        );
     }
     let mut identities = BTreeSet::new();
     let mut module_names = BTreeSet::new();
@@ -172,8 +187,11 @@ fn render(graph: &Graph, overlay: &Overlay, serde_available: bool) -> Result<Str
         return Err("unused public record Rust identifier binding".into());
     }
     let mut code = String::from("// Generated from the portable public record contract.\n");
+    let indent = if overlay.flatten_module { "" } else { "    " };
     for module in &graph.modules {
-        writeln!(code, "pub mod {} {{", overlay.name(&module.id)).unwrap();
+        if !overlay.flatten_module {
+            writeln!(code, "pub mod {} {{", overlay.name(&module.id)).unwrap();
+        }
         for record in &module.records {
             let traits = record
                 .traits
@@ -181,16 +199,23 @@ fn render(graph: &Graph, overlay: &Overlay, serde_available: bool) -> Result<Str
                 .map(|capability| match capability {
                     Trait::Clone => "::std::clone::Clone",
                     Trait::Serialize => "::serde::Serialize",
+                    Trait::Debug => "::core::fmt::Debug",
                 })
                 .collect::<Vec<_>>();
             if !traits.is_empty() {
-                writeln!(code, "    #[derive({})]", traits.join(", ")).unwrap();
+                writeln!(code, "{indent}#[derive({})]", traits.join(", ")).unwrap();
             }
-            writeln!(code, "    pub struct {} {{", overlay.name(&record.id)).unwrap();
+            writeln!(code, "{indent}pub struct {} {{", overlay.name(&record.id)).unwrap();
             for field in &record.fields {
-                writeln!(code, "        pub {}: {},", field.wire, field.value.rust()).unwrap();
+                writeln!(
+                    code,
+                    "{indent}    pub {}: {},",
+                    field.wire,
+                    field.value.rust()
+                )
+                .unwrap();
             }
-            code.push_str("    }\n");
+            writeln!(code, "{indent}}}").unwrap();
         }
         for alias in &module.aliases {
             let (owner, type_name) = records
@@ -203,7 +228,9 @@ fn render(graph: &Graph, overlay: &Overlay, serde_available: bool) -> Result<Str
             )
             .unwrap();
         }
-        code.push_str("}\n");
+        if !overlay.flatten_module {
+            code.push_str("}\n");
+        }
     }
     Ok(code)
 }

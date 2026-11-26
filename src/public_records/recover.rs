@@ -27,13 +27,13 @@ struct SelectedModule {
     scope_globs: BTreeMap<String, String>,
 }
 
-struct Import<'a> {
-    name: String,
+pub(super) struct Import<'a> {
+    pub(super) name: String,
     path: Vec<String>,
     declaration: &'a ItemUse,
 }
 
-fn select_source(path: &Path, pin: &str) -> Result<syn::File> {
+pub(super) fn select_source(path: &Path, pin: &str) -> Result<syn::File> {
     let bytes = io(fs::read(path))?;
     if digest(&bytes) != pin {
         return Err(format!(
@@ -120,7 +120,7 @@ fn is_doc(attr: &Attribute) -> bool {
     attr.path().is_ident("doc")
 }
 
-fn imports(file: &syn::File) -> Vec<Import<'_>> {
+pub(super) fn imports(file: &syn::File) -> Vec<Import<'_>> {
     fn flatten<'a>(
         use_item: &'a ItemUse,
         tree: &UseTree,
@@ -179,16 +179,18 @@ fn imports(file: &syn::File) -> Vec<Import<'_>> {
     found
 }
 
-const PRELUDE_NAMES: [&str; 10] = [
+const PRELUDE_NAMES: &[&str] = &[
     "bool",
     "u8",
     "u64",
     "String",
     "Vec",
     "std",
+    "core",
     "serde",
     "Clone",
     "Serialize",
+    "Debug",
     "derive",
 ];
 
@@ -214,7 +216,7 @@ fn reserved(name: &syn::Ident) -> bool {
     PRELUDE_NAMES.iter().any(|n| name == *n)
 }
 
-fn reject_item_expansion(file: &syn::File) -> Result<()> {
+pub(super) fn reject_item_expansion(file: &syn::File) -> Result<()> {
     if file.items.iter().any(|item| {
         matches!(
             item,
@@ -226,7 +228,7 @@ fn reject_item_expansion(file: &syn::File) -> Result<()> {
     Ok(())
 }
 
-fn reject_type_shadows(file: &syn::File, imports: &[Import<'_>]) -> Result<()> {
+pub(super) fn reject_type_shadows(file: &syn::File, imports: &[Import<'_>]) -> Result<()> {
     for item in &file.items {
         if let Some((name, _)) = item_type_binding(item).filter(|(name, _)| reserved(name)) {
             return Err(format!("shadowed public record type or derive: {name}"));
@@ -367,6 +369,11 @@ fn derive_traits(attrs: &[Attribute], imports: &[Import<'_>]) -> Result<Vec<Trai
                 || path_is(path, &["serde", "Serialize"])
             {
                 Trait::Serialize
+            } else if path.is_ident("Debug")
+                || path_is(path, &["std", "fmt", "Debug"])
+                || path_is(path, &["core", "fmt", "Debug"])
+            {
+                Trait::Debug
             } else {
                 return Err("unsupported public record derive".into());
             };
@@ -413,7 +420,7 @@ fn field_type(ty: &Type) -> Result<Value> {
     Err(unsupported())
 }
 
-fn record(item: &ItemStruct, identity: &str, imports: &[Import<'_>]) -> Result<Record> {
+pub(super) fn record(item: &ItemStruct, identity: &str, imports: &[Import<'_>]) -> Result<Record> {
     if !matches!(item.vis, Visibility::Public(_))
         || !item.generics.params.is_empty()
         || item.generics.where_clause.is_some()
@@ -544,6 +551,7 @@ pub fn recover(lib: &Path, selection: &Path, out: &Path) -> Result<()> {
     }
     let overlay = Overlay {
         format: OVERLAY.into(),
+        flatten_module: false,
         identifiers: bindings,
     };
     render(&graph, &overlay, true)?;
