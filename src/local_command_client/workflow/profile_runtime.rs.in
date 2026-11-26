@@ -184,10 +184,10 @@ fn read_command_stdin(maximum: usize, timeout: Duration) -> Result<Vec<u8>, Fail
     }
 }
 
-fn load_profile_document(
-    policy: &ProfileInputs,
-    matches: &ArgMatches,
-) -> Result<Value, Failure> {
+fn load_profile_document<'a>(
+    policy: &'a ProfileInputs,
+    matches: &'a ArgMatches,
+) -> Result<(Value, &'a str), Failure> {
     let doc = &policy.document;
     let args = &policy.arguments;
     let base = matches.try_get_one::<PathBuf>(&args.state).map_err(|_| BINDING)?
@@ -237,7 +237,7 @@ fn load_profile_document(
             return Err(PROFILE_SCHEMA);
         }
     }
-    Ok(value)
+    Ok((value, profile))
 }
 
 fn context_values(policy: &ProfileInputs, matches: &ArgMatches) -> Result<BTreeMap<String, Value>, Failure> {
@@ -259,7 +259,7 @@ fn context_values(policy: &ProfileInputs, matches: &ArgMatches) -> Result<BTreeM
         }
     }
     let doc = &policy.document;
-    let value = load_profile_document(policy, matches)?;
+    let (value, selected_profile) = load_profile_document(policy, matches)?;
     let (principal, external) = matches.subcommand().ok_or(PROFILE_DESTINATION)?;
     if !principal.starts_with("npub1") || principal.len() != 63 {
         return Err(PROFILE_DESTINATION);
@@ -319,12 +319,23 @@ fn context_values(policy: &ProfileInputs, matches: &ArgMatches) -> Result<BTreeM
     }
     use serde_json::json;
     let outputs = &policy.outputs;
-    Ok([
+    let mut values = BTreeMap::from([
         (outputs.remote.clone(), json!(remote)),
         (outputs.relays.clone(), json!(relays)),
         (outputs.argv.clone(), json!(arguments.into_iter().map(|argument| STANDARD.encode(argument)).collect::<Vec<_>>())),
         (outputs.stdin.clone(), json!(STANDARD.encode(input))),
         (outputs.request.clone(), json!(request)),
         (outputs.invocation.clone(), json!(invocation)),
-    ].into_iter().collect())
+    ]);
+    if let Some(name) = &outputs.selected_profile {
+        values.insert(name.clone(), json!(selected_profile));
+    }
+    if let Some(name) = &outputs.followup_request {
+        let next = timestamped_id(payload).ok_or(PROFILE_RANDOM)?;
+        if next == request || next == invocation {
+            return Err(PROFILE_RANDOM);
+        }
+        values.insert(name.clone(), json!(next));
+    }
+    Ok(values)
 }

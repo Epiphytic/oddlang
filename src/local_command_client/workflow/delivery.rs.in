@@ -1,0 +1,61 @@
+fn native_digest(bytes: &[u8]) -> Result<String, Failure> {
+    use sha2::Digest as _;
+    use std::fmt::Write as _;
+    let mut checksum = String::with_capacity(64);
+    for byte in sha2::Sha256::digest(bytes) {
+        write!(checksum, "{byte:02x}").map_err(|_| PROTOCOL)?;
+    }
+    Ok(checksum)
+}
+
+fn decoded_bytes(reply: &Value, path: &[String], maximum: u32) -> Result<Vec<u8>, Failure> {
+    use base64::{Engine as _, engine::general_purpose::STANDARD};
+    let text = field_at(reply, path, true).and_then(Value::as_str).ok_or(PROTOCOL)?;
+    if text.len() > (maximum as usize).div_ceil(3) * 4 {
+        return Err(PROTOCOL);
+    }
+    let bytes = STANDARD.decode(text).map_err(|_| PROTOCOL)?;
+    if bytes.len() > maximum as usize || STANDARD.encode(&bytes) != text {
+        return Err(PROTOCOL);
+    }
+    Ok(bytes)
+}
+
+fn open_embedded(reply: &mut Value, embedded: &EmbeddedReply) -> Result<(), Failure> {
+    if reply.get("$opened").is_some() {
+        return Err(PROTOCOL);
+    }
+    let bytes = decoded_bytes(reply, &embedded.bytes, embedded.maximum_bytes)?;
+    let expected = field_at(reply, &embedded.sha256, true).and_then(Value::as_str).ok_or(PROTOCOL)?;
+    if native_digest(&bytes)? != expected {
+        return Err(PROTOCOL);
+    }
+    let strict_json::Strict(decoded) = serde_json::from_slice(&bytes).map_err(|_| PROTOCOL)?;
+    reply.as_object_mut().ok_or(PROTOCOL)?.insert("$opened".into(), decoded);
+    Ok(())
+}
+
+fn emit_outputs(reply: &Value, outputs: &[BinaryOutput]) -> Result<(), Failure> {
+    let mut prepared = Vec::new();
+    for output in outputs {
+        let bytes = decoded_bytes(reply, &output.bytes, output.maximum_bytes)?;
+        let cursor = field_at(reply, &output.cursor, true).and_then(Value::as_u64).ok_or(PROTOCOL)?;
+        if bytes.len() as u64 != cursor {
+            return Err(PROTOCOL);
+        }
+        prepared.push((output.channel, bytes));
+    }
+    for (channel, bytes) in prepared {
+        match channel {
+            schema::OutputChannel::Stdout => {
+                let mut stdout = std::io::stdout().lock();
+                stdout.write_all(&bytes).and_then(|_| stdout.flush()).map_err(|_| IO)?;
+            }
+            schema::OutputChannel::Stderr => {
+                let mut stderr = std::io::stderr().lock();
+                stderr.write_all(&bytes).and_then(|_| stderr.flush()).map_err(|_| IO)?;
+            }
+        }
+    }
+    Ok(())
+}
