@@ -48,6 +48,7 @@ enum Trait {
     Clone,
     Serialize,
     Debug,
+    Default,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -63,18 +64,22 @@ struct Field {
 #[serde(rename_all = "lowercase")]
 enum Value {
     Bool,
+    U32,
     U64,
     Text,
     Octets,
+    Path,
 }
 
 impl Value {
     fn rust(&self) -> &'static str {
         match self {
             Self::Bool => "bool",
+            Self::U32 => "u32",
             Self::U64 => "u64",
             Self::Text => "::std::string::String",
             Self::Octets => "::std::vec::Vec<u8>",
+            Self::Path => "::std::path::PathBuf",
         }
     }
 }
@@ -163,6 +168,14 @@ fn render(graph: &Graph, overlay: &Overlay, serde_available: bool) -> Result<Str
                     return Err("public record Serialize requires native serde with derive".into());
                 }
             }
+            if traits.contains(&Trait::Serialize)
+                && record
+                    .fields
+                    .iter()
+                    .any(|field| matches!(field.value, Value::Path))
+            {
+                return Err("serialized public path field has no portable wire rule".into());
+            }
             let mut fields = BTreeSet::new();
             for field in &record.fields {
                 claim(&field.id, &mut identities)?;
@@ -200,6 +213,7 @@ fn render(graph: &Graph, overlay: &Overlay, serde_available: bool) -> Result<Str
                     Trait::Clone => "::std::clone::Clone",
                     Trait::Serialize => "::serde::Serialize",
                     Trait::Debug => "::core::fmt::Debug",
+                    Trait::Default => "::core::default::Default",
                 })
                 .collect::<Vec<_>>();
             if !traits.is_empty() {

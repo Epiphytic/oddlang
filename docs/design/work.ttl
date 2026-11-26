@@ -1482,7 +1482,7 @@ w:typedFiniteErrors a p:Task ;
     rdfs:label "Recover finite error choices and typed product variants" ;
     p:milestone w:marmishMilestone ; p:source w:typedFiniteErrorsPlan ;
     p:dependsOn w:plainValueChoices, w:sevenMemberBufferedWorkspace ;
-    p:status p:active ;
+    p:status p:done ;
     p:acceptance "Qualify public error and alias, exact reason capability and variant membership, fixed-width named fields and Display/Debug/source through independently compiled original and generated consumers. Share process-limit error identity without changing the older standalone projection. Integrate the published native identity choice." .
 w:publicConstantPlan a p:Artifact ;
     p:location "docs/superpowers/plans/2026-11-26-public-constant.md" .
@@ -1644,3 +1644,30 @@ w:vaultHelperChoice a p:Task ;
 w:vaultModeDarwinReceipt a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b75be7c/verification/whole/vault-mode/aarch64-apple-darwin.json" .
 
 w:vaultModeLinuxReceipt a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b75be7c/verification/whole/vault-mode/aarch64-unknown-linux-gnu.json" .
+w:typedFiniteErrorsFixture a p:Artifact ;
+    p:location "verification/typed-finite-errors/verify.py" .
+w:typedFiniteErrorsDarwin a p:Artifact ;
+    p:location "companion:verification/whole/engine-public-error/aarch64-apple-darwin.json" .
+w:typedFiniteErrorsLinux a p:Artifact ;
+    p:location "companion:verification/whole/engine-public-error/aarch64-unknown-linux-gnu.json" .
+w:typedFiniteErrorsMutation a p:Artifact ;
+    p:location "companion:verification/whole/engine-public-error/source-mutation-aarch64-apple-darwin.json" .
+w:typedFiniteErrors p:evidence w:typedFiniteErrorsFixture, w:typedFiniteErrorsDarwin, w:typedFiniteErrorsLinux, w:typedFiniteErrorsMutation .
+
+w:observationalRecordDefaultsPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-observational-record-defaults.md" .
+w:observationalRecordDefaults a p:Task ;
+    rdfs:label "Recover public scalar records with fieldwise defaults and owned paths" ;
+    p:milestone w:marmishMilestone ; p:source w:observationalRecordDefaultsPlan ;
+    p:dependsOn w:typedFiniteErrors, w:publicObservationalRecords ;
+    p:status p:active ;
+    p:acceptance "Recover pinned engine and native records within one reusable profile. Compare independent native callers for field widths, exact traits, default values and exported paths. Show a source-only mutation and preserve preceding sealed workspace behavior." .
+
+w:observationalRecordDefaultsFixture a p:Artifact ;
+    p:location "verification/observational-record-defaults/verify.py" .
+w:observationalRecordDefaults p:evidence w:observationalRecordDefaultsFixture .
+
+w:observationalPathWireScope a p:Finding ;
+    rdfs:label "Require a declared wire rule before serializing an owned native path" ;
+    p:source w:observationalRecordDefaultsFixture .
+w:observationalRecordDefaults p:addresses w:observationalPathWireScope .

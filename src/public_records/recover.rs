@@ -182,6 +182,7 @@ pub(super) fn imports(file: &syn::File) -> Vec<Import<'_>> {
 const PRELUDE_NAMES: &[&str] = &[
     "bool",
     "u8",
+    "u32",
     "u64",
     "String",
     "Vec",
@@ -191,6 +192,8 @@ const PRELUDE_NAMES: &[&str] = &[
     "Clone",
     "Serialize",
     "Debug",
+    "Default",
+    "PathBuf",
     "derive",
 ];
 
@@ -230,7 +233,11 @@ pub(super) fn reject_item_expansion(file: &syn::File) -> Result<()> {
 
 pub(super) fn reject_type_shadows(file: &syn::File, imports: &[Import<'_>]) -> Result<()> {
     for item in &file.items {
-        if let Some((name, _)) = item_type_binding(item).filter(|(name, _)| reserved(name)) {
+        let name = match item {
+            Item::Macro(item) => item.ident.as_ref(),
+            _ => item_type_binding(item).map(|(name, _)| name),
+        };
+        if let Some(name) = name.filter(|name| reserved(name)) {
             return Err(format!("shadowed public record type or derive: {name}"));
         }
     }
@@ -242,6 +249,7 @@ pub(super) fn reject_type_shadows(file: &syn::File, imports: &[Import<'_>]) -> R
             "String" => &["std", "string", "String"][..],
             "Vec" => &["std", "vec", "Vec"][..],
             "Clone" => &["std", "clone", "Clone"][..],
+            "PathBuf" => &["std", "path", "PathBuf"][..],
             "Serialize" => &["serde", "Serialize"][..],
             _ => &[],
         };
@@ -374,6 +382,11 @@ fn derive_traits(attrs: &[Attribute], imports: &[Import<'_>]) -> Result<Vec<Trai
                 || path_is(path, &["core", "fmt", "Debug"])
             {
                 Trait::Debug
+            } else if path.is_ident("Default")
+                || path_is(path, &["core", "default", "Default"])
+                || path_is(path, &["std", "default", "Default"])
+            {
+                Trait::Default
             } else {
                 return Err("unsupported public record derive".into());
             };
@@ -383,7 +396,7 @@ fn derive_traits(attrs: &[Attribute], imports: &[Import<'_>]) -> Result<Vec<Trai
     Ok(traits)
 }
 
-fn field_type(ty: &Type) -> Result<Value> {
+fn field_type(ty: &Type, imports: &[Import<'_>]) -> Result<Value> {
     let unsupported = || "unsupported public record field type".to_owned();
     let Type::Path(node) = ty else {
         return Err(unsupported());
@@ -395,11 +408,29 @@ fn field_type(ty: &Type) -> Result<Value> {
     if path.is_ident("bool") {
         return Ok(Value::Bool);
     }
+    if path.is_ident("u32") {
+        return Ok(Value::U32);
+    }
     if path.is_ident("u64") {
         return Ok(Value::U64);
     }
     if path.is_ident("String") || path_is(path, &["std", "string", "String"]) {
         return Ok(Value::Text);
+    }
+    if path_is(path, &["std", "path", "PathBuf"]) {
+        return Ok(Value::Path);
+    }
+    if path.is_ident("PathBuf") {
+        let matching = imports
+            .iter()
+            .filter(|item| item.name == "PathBuf")
+            .collect::<Vec<_>>();
+        if matches!(matching.as_slice(), [item] if item.path == ["std", "path", "PathBuf"]
+                    && item.declaration.attrs.iter().all(is_doc))
+        {
+            return Ok(Value::Path);
+        }
+        return Err("unresolved public path field, expected one std::path::PathBuf binding".into());
     }
     if path.segments.len() == 1 || path_names(path) == ["std", "vec", "Vec"] {
         let last = path.segments.last().ok_or_else(unsupported)?;
@@ -448,7 +479,7 @@ pub(super) fn record(item: &ItemStruct, identity: &str, imports: &[Import<'_>]) 
         recovered.push(Field {
             id: format!("{identity}/field/{wire}"),
             wire,
-            value: field_type(&field.ty)?,
+            value: field_type(&field.ty, imports)?,
         });
     }
     Ok(Record {
