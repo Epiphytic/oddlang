@@ -733,10 +733,21 @@ w:jsonWireStructuralSchema a p:Task ;
 w:jsonWireSchemaPlan a p:Artifact ; p:location "docs/superpowers/plans/2026-11-26-json-wire-schema.md" .
 w:jsonWireSchemaFixture a p:Artifact ; p:location "verification/wire-schema/README.md" .
 w:jsonWireCanonicalOperations a p:Task ;
-    rdfs:label "Recover canonical JSON envelope operations and qualified referenced guards" ;
-    p:milestone w:marmishMilestone ; p:source w:jsonWireSchemaPlan ; p:status p:planned ;
+    rdfs:label "Project canonical JSON envelope operations and typed referenced guards" ;
+    p:milestone w:marmishMilestone ; p:source w:canonicalWirePlan ; p:status p:done ;
     p:dependsOn w:jsonWireStructuralSchema ;
-    p:acceptance "Model direction-sensitive canonical envelope operations and typed cross-object validation. Qualify each operation against independent native peers." .
+    p:acceptance "Model direction-sensitive canonical envelope operations and typed cross-object validation. Exercise projection and errors with an independent native consumer." ;
+    p:evidence w:canonicalWireFixture .
+w:canonicalWirePlan a p:Artifact ; p:location "docs/superpowers/plans/2026-11-26-canonical-wire.md" .
+w:canonicalWireFixture a p:Artifact ; p:location "verification/canonical-wire/README.md" .
+w:canonicalWireReview a p:Finding ;
+    rdfs:label "Reject leaking internal frames and conflicting declaration identities, and verify optional, external, timed, and singleton validation" ;
+    p:source w:canonicalWireFixture .
+w:jsonWireCanonicalOperations p:addresses w:canonicalWireReview .
+w:canonicalWireShapeBoundsReview a p:Finding ;
+    rdfs:label "Apply checked byte shape limits before encoding and namespace generated validation locals" ;
+    p:source w:canonicalWireFixture .
+w:jsonWireCanonicalOperations p:addresses w:canonicalWireShapeBoundsReview .
 w:wholeMarmishProtocols p:dependsOn w:jsonWireCanonicalOperations .
 
 w:jsonWireSchemaReview a p:Finding ;

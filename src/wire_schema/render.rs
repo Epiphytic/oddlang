@@ -9,6 +9,15 @@ enum Adapter<'a> {
 }
 
 pub(super) fn project(schema: &Schema, binding: &Binding) -> String {
+    project_with_options(schema, binding, false, &[])
+}
+
+pub(super) fn project_with_options(
+    schema: &Schema,
+    binding: &Binding,
+    force_hex: bool,
+    private: &[&str],
+) -> String {
     let mut text = String::new();
     let mut adapters = Vec::new();
     for definition in &schema.types {
@@ -17,6 +26,8 @@ pub(super) fn project(schema: &Schema, binding: &Binding) -> String {
             continue;
         }
         let name = &binding.names[id];
+        let public = !private.contains(&id);
+        let visibility = if public { "pub " } else { "" };
         let mut derives: Vec<_> = binding
             .derives
             .get(id)
@@ -28,8 +39,12 @@ pub(super) fn project(schema: &Schema, binding: &Binding) -> String {
         writeln!(text, "#[derive({})]", derives.join(", ")).unwrap();
         match definition {
             Definition::Record { fields, .. } => {
-                writeln!(text, "#[serde(deny_unknown_fields)]\npub struct {name} {{").unwrap();
-                write_fields(&mut text, fields, binding, &mut adapters, "    ", true);
+                writeln!(
+                    text,
+                    "#[serde(deny_unknown_fields)]\n{visibility}struct {name} {{"
+                )
+                .unwrap();
+                write_fields(&mut text, fields, binding, &mut adapters, "    ", public);
                 text.push_str("}\n\n");
                 let guards: Vec<_> = schema.guards.iter().filter(|g| g.owner == id).collect();
                 if !guards.is_empty() {
@@ -54,7 +69,7 @@ pub(super) fn project(schema: &Schema, binding: &Binding) -> String {
                 ..
             } => {
                 writeln!(text,
-                    "#[serde(tag = {tag:?}, content = {content:?}, deny_unknown_fields)]\npub enum {name} {{"
+                    "#[serde(tag = {tag:?}, content = {content:?}, deny_unknown_fields)]\n{visibility}enum {name} {{"
                 ).unwrap();
                 for variant in variants {
                     let rust = &binding.names[&variant.id];
@@ -84,9 +99,10 @@ pub(super) fn project(schema: &Schema, binding: &Binding) -> String {
             Definition::External { .. } => unreachable!("external definitions were skipped"),
         }
     }
-    if adapters
-        .iter()
-        .any(|item| matches!(item, Adapter::Hex { .. }))
+    if force_hex
+        || adapters
+            .iter()
+            .any(|item| matches!(item, Adapter::Hex { .. }))
     {
         text.push_str(include_str!("hex.rs"));
     }
@@ -174,7 +190,7 @@ fn write_fields<'a>(
     }
 }
 
-fn ty(shape: &Shape, binding: &Binding) -> String {
+pub(super) fn ty(shape: &Shape, binding: &Binding) -> String {
     match shape {
         Shape::Bool {} => "::core::primitive::bool".into(),
         Shape::Text {} => "::std::string::String".into(),
@@ -277,7 +293,10 @@ fn references(predicate: &Predicate, id: &str) -> bool {
     }
 }
 
-fn expression(predicate: &Predicate, selectors: &BTreeMap<&str, (String, bool)>) -> String {
+pub(super) fn expression(
+    predicate: &Predicate,
+    selectors: &BTreeMap<&str, (String, bool)>,
+) -> String {
     let select = |id: &str| &selectors[id].0;
     let scalar = |id: &str| {
         let (expr, borrowed) = &selectors[id];
