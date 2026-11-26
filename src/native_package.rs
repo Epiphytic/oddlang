@@ -42,12 +42,45 @@ struct Manifest {
 struct Binary {
     name: String,
     entry: Vec<String>,
+    startup: Option<Startup>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Startup {
+    dependency: String,
+    entry: Vec<String>,
+    exit: u8,
+    stderr: String,
+}
+
+impl Startup {
+    fn render(&self, siblings: Option<&BTreeSet<String>>) -> Result<String> {
+        let name = self.dependency.replace('-', "_");
+        if !ident(&name) || !siblings.is_some_and(|edges| edges.contains(&self.dependency)) {
+            return Err("binary startup dependency must be a declared workspace sibling".into());
+        }
+        if self.entry.is_empty()
+            || !self.entry.iter().all(|s| ident(s))
+            || self.exit == 0
+            || self.stderr.is_empty()
+            || self.stderr.chars().any(char::is_control)
+        {
+            return Err("invalid binary startup binding or rejection".into());
+        }
+        let entry = self.entry.join("::");
+        Ok(format!(
+            "    let start: fn() -> ::std::result::Result<(), _> = ::{name}::{entry};\n    if start().is_err() {{\n        eprintln!(\"{{}}\", {:?});\n        return ::std::process::ExitCode::from({});\n    }}\n",
+            self.stderr, self.exit,
+        ))
+    }
 }
 
 fn entrypoints(
     src: &Path,
     package: &str,
     binaries: &[Binary],
+    siblings: Option<&BTreeSet<String>>,
     files: &mut BTreeMap<String, String>,
 ) -> Result<()> {
     if binaries.is_empty() {
@@ -66,8 +99,14 @@ fn entrypoints(
             return Err("invalid binary target or entry binding".into());
         }
         let entry = binary.entry.join("::");
+        let startup = binary
+            .startup
+            .as_ref()
+            .map(|hook| hook.render(siblings))
+            .transpose()?
+            .unwrap_or_default();
         let source = format!(
-            "fn main() -> ::std::process::ExitCode {{\n    let run: fn() -> ::std::process::ExitCode = ::{library}::{entry};\n    run()\n}}\n"
+            "fn main() -> ::std::process::ExitCode {{\n{startup}    let run: fn() -> ::std::process::ExitCode = ::{library}::{entry};\n    run()\n}}\n"
         );
         let rel = format!("bin/{}.rs", binary.name);
         if files
@@ -156,6 +195,7 @@ impl Pin {
 #[serde(rename_all = "kebab-case")]
 enum Kind {
     BuildReport,
+    ProcessLimit,
     ValueDomain,
     JsonEnvelope,
     EndpointSet,
@@ -224,6 +264,7 @@ fn project(
     component: &Component,
     base: &Path,
     stage: &Path,
+    has_libc: bool,
 ) -> Result<(Vec<u8>, serde_json::Value)> {
     if component.wire_shape.is_some() && !matches!(component.kind, Kind::WireProtocol) {
         return Err("wireShape is only valid for wire-protocol components".into());
@@ -238,6 +279,10 @@ fn project(
         Kind::BuildReport => {
             crate::build_report::build(&graph, &io(fs::read(&overlay))?, &output)?;
             "report.rs"
+        }
+        Kind::ProcessLimit => {
+            crate::process_limit::build(&graph, &io(fs::read(&overlay))?, &output, has_libc)?;
+            "limits.rs"
         }
         Kind::ValueDomain | Kind::JsonEnvelope => {
             io(fs::write(input.join("domain.ttl"), graph))?;
@@ -545,9 +590,14 @@ pub fn build(path: &Path, output: &Path) -> Result<()> {
     let path = io(path.canonicalize())?;
     let base = path.parent().ok_or("missing manifest directory")?;
     let raw = io(fs::read(&path))?;
-    build_pinned(&raw, base, output, true)
+    build_pinned(&raw, base, output, None)
 }
-pub(super) fn build_pinned(raw: &[u8], base: &Path, output: &Path, standalone: bool) -> Result<()> {
+pub(super) fn build_pinned(
+    raw: &[u8],
+    base: &Path,
+    output: &Path,
+    siblings: Option<&BTreeSet<String>>,
+) -> Result<()> {
     let manifest: Manifest =
         serde_json::from_slice(raw).map_err(|e| format!("package manifest: {e}"))?;
     validate_command_callbacks(&manifest.components, base)?;
@@ -638,7 +688,12 @@ pub(super) fn build_pinned(raw: &[u8], base: &Path, output: &Path, standalone: b
         let leaf = format!("__projection_{index}");
         let stage = work.path().join(&leaf);
         io(fs::create_dir(&stage))?;
-        let (source, projection) = project(component, base, &stage)?;
+        let (source, projection) = project(
+            component,
+            base,
+            &stage,
+            manifest.dependencies.contains_key("libc"),
+        )?;
         let directory = &group.directory;
         let module = src.join(directory);
         io(fs::create_dir_all(&module))?;
@@ -711,9 +766,10 @@ pub(super) fn build_pinned(raw: &[u8], base: &Path, output: &Path, standalone: b
         &src,
         &manifest.name,
         &manifest.binaries,
+        siblings,
         &mut generated_files,
     )?;
-    if standalone && !manifest.binaries.is_empty() {
+    if siblings.is_none() && !manifest.binaries.is_empty() {
         let checked = io(Command::new("cargo")
             .args(["check", "--bins", "--locked", "--offline", "--target-dir"])
             .arg(work.path().join("bin-check"))
@@ -781,7 +837,9 @@ mod binary_tests {
             &[Binary {
                 name: "meter-check".into(),
                 entry: vec!["cli".into(), "status".into()],
+                startup: None,
             }],
+            None,
             &mut files,
         )
         .unwrap();

@@ -1223,3 +1223,11 @@ w:buildReportPlanReview a p:Finding ;
     rdfs:label "Separate represented revision from compiled artifact provenance and check widths, formats and native guard precedence" ;
     p:source w:buildReportCommandPlan .
 w:buildReportCommand p:addresses w:buildReportPlanReview .
+
+w:processLimitOperation a p:Task ;
+    rdfs:label "Project and qualify engine process limit initialization" ;
+    p:milestone w:marmishMilestone ;
+    p:source <../superpowers/plans/2026-11-26-process-limits.md> ;
+    p:dependsOn w:buildReportCommand ;
+    p:acceptance "A generated native operation and checked binary startup use reproduce selected upstream host process limits while preserving ownership of existing descriptors." ;
+    p:status p:active .
