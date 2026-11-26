@@ -31,10 +31,11 @@ standard writer and atomic imports, one literal-initialized private atomic
 flag, and ordinary public functions. It recognizes simple assignments, the
 supported flag operations, ignored writes of a literal-format JSON line and
 direct calls. It rejects the unqualified parameter spelling `null`, which the
-JSON macro interprets as a literal. Source expressions outside those shapes are rejected. The
-reviewed input must resolve the supported provider names to the standard
-library and pinned JSON provider in its enclosing crate. Recovery does not
-infer arbitrary name resolution, aliases, expressions, I/O or a broader
+JSON macro interprets as a literal. Source expressions outside those shapes
+are rejected. The reviewed input must resolve the supported provider names to
+the standard library and the pinned JSON provider with lexicographic object
+ordering in its enclosing crate. Recovery does not infer dependency features,
+arbitrary name resolution, aliases, expressions, I/O or a broader
 synchronization contract.
 
 The unrelated fixture builds two versions of an independently written Rust
