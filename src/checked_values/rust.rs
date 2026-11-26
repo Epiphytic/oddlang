@@ -310,12 +310,18 @@ pub(crate) fn render_plain_choice<'a>(
     out: &mut String,
     name: &str,
     cases: impl Iterator<Item = &'a str>,
+    equality: Equality,
     debug: bool,
 ) {
+    let equality = match equality {
+        Equality::None => "",
+        Equality::Partial => ", PartialEq",
+        Equality::Total => ", PartialEq, Eq",
+    };
     let debug = if debug { ", Debug" } else { "" };
     writeln!(
         out,
-        "#[derive(Clone, Copy, PartialEq, Eq{debug})]\npub enum {name} {{"
+        "#[derive(Clone, Copy{equality}{debug})]\npub enum {name} {{"
     )
     .unwrap();
     for case in cases {
@@ -338,10 +344,11 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
             Definition::FixedBytes {
                 length, failure, ..
             } => fixed_bytes(&mut out, *length, &binding.errors[failure], target),
-            Definition::Choice { cases } => render_plain_choice(
+            Definition::Choice { cases, equality } => render_plain_choice(
                 &mut out,
                 &target.name,
                 cases.iter().map(|case| binding.variants[case].as_str()),
+                *equality,
                 false,
             ),
             Definition::Enum { values, failure } => {

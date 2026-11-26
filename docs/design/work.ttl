@@ -1509,3 +1509,15 @@ w:typedFiniteErrorPrimitiveShadow a p:Finding ;
     rdfs:label "Reject local declarations that shadow a recovered primitive width" ;
     p:source w:typedFiniteErrorsPlan .
 w:typedFiniteErrors p:addresses w:typedFiniteErrorPrimitiveShadow .
+
+w:choiceEqualityRecovery a p:Task ;
+    rdfs:label "Recover the comparison capabilities of copyable choices" ;
+    p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;
+    p:dependsOn w:plainValueChoices ; p:status p:done ; p:evidence w:choiceEqualityFixture ;
+    p:acceptance "Original and projected Rust types expose equal Copy, Clone, PartialEq and Eq bounds for unrelated choices with no, partial, or total equality, preserving the older graph and consumer behavior." .
+w:choiceEqualityFixture a p:Artifact ; p:location "verification/plain-value-choices/equality.py" .
+w:vaultHelperChoice a p:Task ;
+    rdfs:label "Qualify the public copy-only vault helper mode type" ;
+    p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;
+    p:dependsOn w:choiceEqualityRecovery ; p:status p:active ;
+    p:acceptance "Build the original and generated external caller on both native ARM64 hosts, qualify variant order and absence of unsupported traits, and distinguish the source-order mutation." .

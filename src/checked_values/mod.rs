@@ -32,11 +32,28 @@ struct Graph {
     types: BTreeMap<String, Definition>,
 }
 
+#[derive(Clone, Copy, Default, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub(crate) enum Equality {
+    None,
+    Partial,
+    #[default]
+    Total,
+}
+
+impl Equality {
+    fn is_total(&self) -> bool {
+        *self == Self::Total
+    }
+}
+
 #[derive(Deserialize, Serialize)]
 #[serde(tag = "kind", rename_all = "lowercase", deny_unknown_fields)]
 enum Definition {
     Choice {
         cases: Vec<String>,
+        #[serde(default, skip_serializing_if = "Equality::is_total")]
+        equality: Equality,
     },
     #[serde(rename = "fixed-bytes")]
     FixedBytes {
@@ -285,7 +302,7 @@ impl Graph {
                     }
                     errors.insert(failure);
                 }
-                Definition::Choice { cases } => {
+                Definition::Choice { cases, .. } => {
                     if cases.is_empty()
                         || native.order != *cases
                         || native.traits != [Derived::Copy]
@@ -508,7 +525,7 @@ pub fn build(graph: &Path, overlay: &Path, output: &Path) -> Result<()> {
             let expected = match definition {
                 Definition::FixedBytes { length, failure, on_drop } =>
                     json!({"length":length,"failure":failure,"onDrop":on_drop,"view":"borrow","input":"exact-bytes"}),
-                Definition::Choice { cases } => json!({
+                Definition::Choice { cases, .. } => json!({
                     "orderedCases":cases,"copy":true,"equality":"case-identity",
                     "externalRepresentation":null, "targetOrdinals":"zero-based-declaration-order"
                 }),
