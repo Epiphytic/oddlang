@@ -73,6 +73,9 @@ with tempfile.TemporaryDirectory() as temp:
     for i, (old, new) in enumerate([
         ("enum Band", "macro_rules! shape { () => { type u64 = u32; } } shape!(); enum Band"),
         ("enum Band", "#[another::inject] enum Band"),
+        ("enum Band", "use another::rewrite as serde; #[serde] enum Band"),
+        ("enum Band", "type r#u64 = u32; enum Band"),
+        ("enum Band", "use another::Bytes as r#Vec; enum Band"),
         ("High = 9", "High = 300"),
         ("to_be_bytes", "to_le_bytes"), ("target.extend(data);", "target.extend(data); target.push(0);"),
         (a, "if row.powered { " + a + " }"), ("fn packet(", "#[cfg(unix)]\nfn packet("),

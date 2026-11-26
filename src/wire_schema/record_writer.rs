@@ -322,12 +322,40 @@ pub fn recover(source: &Path, selection: &Path, out: &Path) -> Result<()> {
     }
     let mut module = syn::parse_file(std::str::from_utf8(&bytes).map_err(|e| e.to_string())?)
         .map_err(|e| e.to_string())?;
+    let compiler_feature: syn::Attribute = parse_quote!(#![feature(prelude_import)]);
+    let expanded = module.attrs.contains(&compiler_feature);
+    if expanded {
+        let preludes: Vec<_> = module
+            .items
+            .iter()
+            .filter(|item| {
+                super::recover::item_attrs(item)
+                    .iter()
+                    .any(|a| a.path().is_ident("prelude_import"))
+            })
+            .collect();
+        let known = ["rust_2015", "rust_2018", "rust_2021", "rust_2024"]
+            .iter()
+            .any(|edition| {
+                let source = format!("#[prelude_import] use std::prelude::{edition}::*;");
+                syn::parse_str::<Item>(&source)
+                    .is_ok_and(|expected| preludes.as_slice() == [&expected])
+            });
+        if !known {
+            return Err("unrecognized compiler prelude".into());
+        }
+    }
     for name in &sel.module {
-        if module.attrs.iter().any(|a| {
-            a.path().is_ident("no_implicit_prelude")
-                || a.path().is_ident("cfg")
-                || a.path().is_ident("cfg_attr")
-        }) {
+        if !module
+            .attrs
+            .iter()
+            .all(|a| plain(std::slice::from_ref(a)) || a == &compiler_feature)
+            || module.items.iter().any(|i| {
+                super::recover::item_attrs(i)
+                    .iter()
+                    .any(|a| a.path().is_ident("macro_use"))
+            })
+        {
             return Err("unsupported enclosing module configuration".into());
         }
         let mut children = module.items.into_iter().filter_map(|item| match item {
@@ -347,8 +375,13 @@ pub fn recover(source: &Path, selection: &Path, out: &Path) -> Result<()> {
         return Err("conditional or nonstandard module attributes".into());
     }
     let (imports, locals, gaps) = super::recover::lexical_scope(&module);
-    for name in ["Vec", "bool", "u8", "u16", "u32", "u64", "u128"] {
-        if imports.contains_key(name) || locals.contains(name) || sel.tag_types.contains_key(name) {
+    for bound in imports
+        .keys()
+        .chain(locals.iter())
+        .chain(sel.tag_types.keys())
+    {
+        let name = bound.trim_start_matches("r#");
+        if ["Vec", "bool", "u8", "u16", "u32", "u64", "u128", "serde"].contains(&name) {
             return Err(format!("shadowed or rebound standard type {name}"));
         }
     }
@@ -360,8 +393,8 @@ pub fn recover(source: &Path, selection: &Path, out: &Path) -> Result<()> {
     for item in &module.items {
         if !super::recover::item_attrs(item).iter().all(|a| {
             plain(std::slice::from_ref(a))
+                || (expanded && a.path().is_ident("serde"))
                 || [
-                    "serde",
                     "repr",
                     "automatically_derived",
                     "must_use",
@@ -386,9 +419,11 @@ pub fn recover(source: &Path, selection: &Path, out: &Path) -> Result<()> {
     let [record] = records.as_slice() else {
         return Err("expected one matching record".into());
     };
-    if !record.attrs.iter().all(|a| {
-        plain(std::slice::from_ref(a)) || a.path().is_ident("serde") || a.path().is_ident("derive")
-    }) || record.generics != syn::Generics::default()
+    if !record
+        .attrs
+        .iter()
+        .all(|a| plain(std::slice::from_ref(a)) || (expanded && a.path().is_ident("serde")))
+        || record.generics != syn::Generics::default()
     {
         return Err("unsupported record attributes or generics".into());
     }
@@ -398,7 +433,7 @@ pub fn recover(source: &Path, selection: &Path, out: &Path) -> Result<()> {
         if !f
             .attrs
             .iter()
-            .all(|a| plain(std::slice::from_ref(a)) || a.path().is_ident("serde"))
+            .all(|a| plain(std::slice::from_ref(a)) || (expanded && a.path().is_ident("serde")))
             || fields.insert(name.unraw().to_string(), &f.ty).is_some()
         {
             return Err(format!("conditional or ambiguous field {name}"));
