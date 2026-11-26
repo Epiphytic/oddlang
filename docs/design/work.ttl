@@ -1193,3 +1193,8 @@ w:unifiedProfileWorkspace a p:Task ;
     p:milestone w:marmishMilestone ; p:source w:unifiedProfileWorkspacePlan ;
     p:status p:active ; p:dependsOn w:provisionedNativeWorkspace, w:nativeConfiguredProfileInit, w:localProviderLifecycle ;
     p:acceptance "Build the same core and stream packages with both local profile roles. Replay their genuine original and generated processes and durable observations on both ARM64 hosts." .
+
+w:retainedReadbackComposition a p:Finding ;
+    rdfs:label "Bind retained journal validation without applying initialization effects" ;
+    p:source w:unifiedProfileWorkspacePlan .
+w:unifiedProfileWorkspace p:addresses w:retainedReadbackComposition .

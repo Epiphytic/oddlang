@@ -38,7 +38,9 @@ pub(crate) fn open_retained_stores(
         {
             return Err(ACCOUNT);
         }
-        journal(&journal_path, &journal_key, identity, false)?;
+        // A retained foreground handle checks the existing journal without
+        // applying the initializer's configurable journal effects.
+        journal(&journal_path, &journal_key, identity, false, |_| Ok(()))?;
         let journal = keyed_database(&journal_path, &journal_key, false, JOURNAL)?;
         Ok((storage, journal))
     };
