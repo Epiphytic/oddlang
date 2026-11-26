@@ -1,4 +1,7 @@
 //! Native projection of a private file-backed credential profile.
+mod complete;
+mod schema;
+
 use crate::local_command_client::{Callback, RequiredArgument};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -13,6 +16,8 @@ struct Policy {
     layout: Layout,
     manifest: Manifest,
     errors: Errors,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    initialize: Option<complete::Initialization>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -104,6 +109,8 @@ struct Binding {
     entry: String,
     random: RandomProvider,
     signing: SigningProvider,
+    #[serde(default)]
+    storage: Option<complete::StorageProvider>,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -244,6 +251,13 @@ fn load(graph: &[u8], binding: &[u8]) -> Result<(Policy, Binding), String> {
             return Err("invalid file profile diagnostic".into());
         }
     }
+    match (&graph.initialize, &binding.storage) {
+        (Some(initialize), Some(_)) => {
+            initialize.validate(&graph)?;
+        }
+        (None, None) => (),
+        _ => return Err("file profile storage mode and native provider must agree".into()),
+    }
     Ok((graph, binding))
 }
 
@@ -273,13 +287,17 @@ impl Errors {
 
 pub(crate) fn callback(graph: &[u8], binding: &[u8]) -> Result<Callback, String> {
     let (policy, native) = load(graph, binding)?;
+    let mut arguments = vec![
+        (policy.arguments.state, RequiredArgument::Path),
+        (policy.arguments.profile, RequiredArgument::String),
+        (policy.arguments.backend, RequiredArgument::String),
+    ];
+    if let Some(initialize) = policy.initialize {
+        arguments.extend(initialize.callback_arguments());
+    }
     Ok(Callback {
         entry: native.entry,
-        arguments: vec![
-            (policy.arguments.state, RequiredArgument::Path),
-            (policy.arguments.profile, RequiredArgument::String),
-            (policy.arguments.backend, RequiredArgument::String),
-        ],
+        arguments,
     })
 }
 
@@ -290,19 +308,47 @@ pub fn build(graph: &Path, binding: &Path, output: &Path) -> Result<(), String> 
 
 pub(crate) fn build_bytes(graph: &[u8], binding: &[u8], output: &Path) -> Result<(), String> {
     let (policy, native) = load(graph, binding)?;
-    let source = render(&policy, &native);
+    let source = render(&policy, &native)?;
     let hash = |bytes: &[u8]| {
         Sha256::digest(bytes)
             .iter()
             .map(|b| format!("{b:02x}"))
             .collect::<String>()
     };
+    let mut order = vec![
+        "explicit-file-provider",
+        "create-private-state",
+        "canonical-private-profile",
+        "exclusive-profile-lease",
+        "closed-bounded-manifest",
+        "pending-manifest",
+        "load-or-create-signing-key",
+        "check-derived-public",
+        "update-pending-public-binding",
+        "load-or-create-storage-key",
+        "private-directories",
+    ];
+    let completion = if policy.initialize.is_some() {
+        order.insert(0, "ordered-cli-and-configuration-guards");
+        order.insert(6, "bounded-runtime-path");
+        order.extend([
+            "private-runtime-binding",
+            "derive-separate-storage-keys",
+            "account-device-provider",
+            "encrypted-journal-schema-and-seeds",
+            "verify-journal-identity-and-counts",
+            "synchronize-stores",
+            "publish-ready-manifest",
+            "clean-runtime",
+            "print-initialization-counts",
+        ]);
+        "encrypted-store-initialization"
+    } else {
+        "credential-preparation-only"
+    };
     let obligations = serde_json::json!({
         "format":"oddlang-file-profile-obligations-v1", "policy":policy,
-        "effectOrder":["explicit-file-provider", "create-private-state", "canonical-private-profile",
-            "exclusive-profile-lease", "closed-bounded-manifest", "pending-manifest", "load-or-create-signing-key",
-            "check-derived-public", "update-pending-public-binding", "load-or-create-storage-key", "private-directories"],
-        "completion":"credential-preparation-only",
+        "effectOrder":order, "completion":completion,
         "qualification":"independent-witness-required",
     });
     let catalog = format!("{obligations:#}\n");
@@ -326,7 +372,7 @@ pub(crate) fn build_bytes(graph: &[u8], binding: &[u8], output: &Path) -> Result
     crate::native_package::publish(stage.path(), output)
 }
 
-fn render(policy: &Policy, binding: &Binding) -> String {
+fn render(policy: &Policy, binding: &Binding) -> Result<String, String> {
     let mut out = String::from(include_str!("runtime.rs.in"));
     for (name, diagnostic) in policy.errors.iter() {
         writeln!(
@@ -377,15 +423,21 @@ fn render(policy: &Policy, binding: &Binding) -> String {
     ] {
         writeln!(out, "    #[serde(rename = {role:?})]\n    {native}: {ty},").unwrap();
     }
+    out.push_str("}\n");
     let arguments = &policy.arguments;
-    writeln!(out, "}}
+    if let Some(initialize) = &policy.initialize {
+        initialize.render(&mut out, policy, binding)?;
+        return Ok(out);
+    }
+    out.push_str(include_str!("pending.rs.in"));
+    writeln!(out, "
 pub fn {}(matches: clap::ArgMatches) -> std::process::ExitCode {{
     let load = || -> Result<(), Failure> {{
         let base = matches.try_get_one::<std::path::PathBuf>({:?}).map_err(|_| BINDING)?.ok_or(STATE_REQUIRED)?;
         let name = matches.try_get_one::<String>({:?}).map_err(|_| BINDING)?.map(String::as_str).unwrap_or({:?});
         let backend = matches.try_get_one::<String>({:?}).map_err(|_| BINDING)?.map(String::as_str);
         if backend != Some({:?}) {{ return Err(BACKEND_REQUIRED); }}
-        let profile = prepare(base, name)?;
+        let profile = prepare(base, name, |_, _| Ok(()), |_, _, _, _| Ok(()))?;
         print_result(&profile)?;
         Ok(())
     }};
@@ -395,5 +447,5 @@ pub fn {}(matches: clap::ArgMatches) -> std::process::ExitCode {{
     }}
 }}
 ", binding.entry, arguments.state, arguments.profile, arguments.default_profile, arguments.backend, arguments.file_backend).unwrap();
-    out
+    Ok(out)
 }

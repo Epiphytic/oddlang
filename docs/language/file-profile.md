@@ -13,3 +13,24 @@ The callback reports credential preparation. The generated profile remains pendi
 ```sh
 python3 -B verification/file-profile/check.py target/debug/oddlang
 ```
+
+An initialization extension declares a private runtime binding, named startup
+diagnostics, a salt and distinct key derivation roles for two encrypted stores.
+The native binding selects SQLCipher for the journal and a pinned account-device
+provider for the account store. No remote transport starts during initialization.
+Opening or binding either store, verifying the profile's stored identity, reading
+declared counts and synchronizing the file and directory must succeed before the
+pending record moves to ready.
+
+The journal declares table and index layouts, column affinity, defaults,
+primary and unique constraints, Boolean predicates, seed rows and filtered
+metrics. An identity seed binds the store to the native signer's derived public
+identity. JSON seed values declare ordered scalar properties. The compiler emits
+parameterized inserts and constructs SQL expressions only from known operators
+and declared identifiers. Current/pristine store reopening is differentiated
+from application transitions that need replay or migrations, and the policy
+identifies which relations must be empty for this target to reopen safely.
+
+Standalone native packages can pin HTTPS Git dependencies to a full revision
+and bind a registry replacement to a full revision. Cargo lock verification uses
+the resulting manifest and the pinned lock, offline.
