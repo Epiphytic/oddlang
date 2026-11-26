@@ -441,3 +441,31 @@ w:marmish-capability-modules p:evidence w:marmishQualificationArchive .
 w:marmishReconstructedRepository a p:Artifact ; rdfs:label "Published Marmish reconstruction at the qualified candidate commit" ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/tree/e0d855874ec2348939175dfa6ec5c71488c8ba35" .
 w:marmishQualification p:evidence w:marmishReconstructedRepository .
+
+w:genericRustRoundTripPlan a p:Artifact ; rdfs:label "Generic Rust round-trip experiment plan" ;
+    p:location "docs/superpowers/plans/2026-11-26-generic-rust-roundtrip.md" .
+
+w:genericRustBaseline a p:Task ; rdfs:label "Freeze the stream crate baseline and unrelated control" ;
+    p:milestone w:marmishMilestone ; p:status p:planned ; p:source w:genericRustRoundTripPlan ; p:dependsOn w:marmishQualification ;
+    p:acceptance "Record the original input inventory and independently freeze expected outcomes for the stream and control crates." .
+
+w:genericRustSyntax a p:Task ; rdfs:label "Round-trip structured Rust without library-specific translation rules" ;
+    p:milestone w:marmishMilestone ; p:status p:planned ; p:source w:genericRustRoundTripPlan ; p:dependsOn w:genericRustBaseline ;
+    p:acceptance "Re-emit the stream and control crates from validated syntax graphs with original source inputs withheld and an observable semantic edit." .
+
+w:genericRustInventory a p:Task ; rdfs:label "Reconcile compiler-observed inputs for regenerated Rust" ;
+    p:milestone w:marmishMilestone ; p:status p:planned ; p:source w:genericRustRoundTripPlan ; p:dependsOn w:genericRustSyntax ;
+    p:acceptance "Reconcile all selected first-party Rust inputs and verify that missing files or undeclared inputs fail qualification." .
+
+w:genericRustStreamQualification a p:Task ; rdfs:label "Qualify the complete stream crate and unrelated control" ;
+    p:milestone w:marmishMilestone ; p:status p:planned ; p:source w:genericRustRoundTripPlan ; p:dependsOn w:genericRustInventory ;
+    p:acceptance "Record named tests, byte-level wire behavior, measured coverage and the amount of project-specific work." .
+
+w:marmishRemainingQualification p:dependsOn w:genericRustStreamQualification .
+
+w:genericRustRoundTripPlanReview a p:Finding ;
+    rdfs:label "Freeze inline test membership, validate token leaves, isolate stable build evidence and bind the tested executable" ;
+    p:source w:genericRustRoundTripPlan .
+w:genericRustBaseline p:addresses w:genericRustRoundTripPlanReview .
+w:genericRustSyntax p:addresses w:genericRustRoundTripPlanReview .
+w:genericRustStreamQualification p:addresses w:genericRustRoundTripPlanReview .
