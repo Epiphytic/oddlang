@@ -112,6 +112,15 @@ impl RequestArgumentKind {
         }
     }
 
+    fn required_argument(self) -> RequiredArgument {
+        match self {
+            Self::Flag => RequiredArgument::Flag,
+            Self::String => RequiredArgument::String,
+            Self::RepeatedString => RequiredArgument::RepeatedString,
+            Self::Unsigned64 => RequiredArgument::Unsigned64,
+        }
+    }
+
     fn representation(self) -> serde_json::Value {
         match self {
             Self::Flag => serde_json::json!({"type": "boolean", "absent": false}),
@@ -129,13 +138,7 @@ impl RequestArgumentKind {
 
 impl RequestArgument {
     fn requirement(&self) -> (String, RequiredArgument) {
-        let kind = match self.kind {
-            RequestArgumentKind::Flag => RequiredArgument::Flag,
-            RequestArgumentKind::String => RequiredArgument::String,
-            RequestArgumentKind::RepeatedString => RequiredArgument::RepeatedString,
-            RequestArgumentKind::Unsigned64 => RequiredArgument::Unsigned64,
-        };
-        (self.id.clone(), kind)
+        (self.id.clone(), self.kind.required_argument())
     }
 }
 
@@ -414,6 +417,7 @@ impl Graph {
 struct Binding {
     format: String,
     entry: String,
+    profile_provider: Option<String>,
 }
 
 #[derive(Clone, Copy)]
@@ -529,6 +533,7 @@ fn load(graph: &[u8], binding: &[u8]) -> Result<(Graph, Binding), String> {
     contract.validate()?;
     let overlay: Binding = serde_json::from_slice(binding).map_err(|error| error.to_string())?;
     if overlay.format != "oddlang-local-command-client-rust-v1"
+        || overlay.profile_provider.is_some()
         || !valid_entry(&overlay.entry)
         || (overlay.entry == "request_body" && contract.request_arguments().next().is_some())
         || (contract.discovery.is_some()
