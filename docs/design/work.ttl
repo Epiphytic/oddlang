@@ -671,11 +671,11 @@ w:wholeMarmishFreeze p:evidence w:wholeReferenceState, w:wholeReferenceCLI, w:wh
 
 w:wholeLinuxArmData a p:Artifact ;
     rdfs:label "Native ARM64 Linux generated Copy Data roles passed 253 public and 112 sealed cases each plus six mixed-peer directions" ;
-    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/57e24f632fe3ec8cb8964897ad97677bb8fb9d48/verification/whole/linux/aarch64-unknown-linux-gnu" .
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/4e19e1c734f45b6f3d92addb2ae8b9cf7683e503/verification/whole/linux/aarch64-unknown-linux-gnu" .
 w:wholeLinuxArmSuite a p:Artifact ;
     rdfs:label "Original default-feature workspace release suite on ARM64 Linux ran 886 passing, one failing and five ignored tests" ;
-    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/57e24f632fe3ec8cb8964897ad97677bb8fb9d48/verification/whole/suite/cargo-release-aarch64-unknown-linux-gnu.json" .
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4e19e1c734f45b6f3d92addb2ae8b9cf7683e503/verification/whole/suite/cargo-release-aarch64-unknown-linux-gnu.json" .
 w:linuxReferencePathFailure a p:Finding ;
     rdfs:label "Engine startup returned UnsafePath with a group-writable executable or current-directory ancestor and passed with both trees private" ;
     p:source w:wholeLinuxArmSuite .
-w:wholeMarmishFreeze p:evidence w:wholeLinuxArmData, w:wholeLinuxArmSuite ; p:addresses w:linuxReferencePathFailure .
+w:wholeMarmishFreeze p:evidence w:wholeLinuxArmData, w:wholeLinuxArmSuite .
