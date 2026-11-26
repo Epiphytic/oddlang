@@ -2773,10 +2773,12 @@ w:mixedReceiverFailureReceipt a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a502b9eba07ff64407655ee170edf381c4f1402f/verification/whole/basic-command-interop/composed-mixed-foreground-upstream-client-generated-server-macos-arm64.json" .
 w:basicServerQualification p:addresses w:mixedReceiverFailure .
 w:referenceHostMetadata a p:Finding ;
-    rdfs:label "Both reference controls and the generated-server attempt have an unresolved host Keychain directory metadata change" ;
-    p:source w:referenceHostMetadataReceipt, w:mixedReceiverFailureReceipt ;
+    rdfs:label "Host preferences metadata changed in both controls and the generated-server attempt; only the latter identified the Keychain directory" ;
+    p:source w:referenceInitialMetadataReceipt, w:referenceHostMetadataReceipt, w:mixedReceiverFailureReceipt ;
     p:reason "The later controls returned attributed results for all 24 observations per control. Host metadata verification remains open." .
 w:referenceHostMetadataReceipt a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a502b9eba07ff64407655ee170edf381c4f1402f/verification/whole/basic-command-interop/upstream-corpus-host-metadata-blocked-repeat-macos-arm64.json" .
 w:basicPeerObservation p:addresses w:referenceHostMetadata .
 w:basicServerQualification p:addresses w:referenceHostMetadata .
+w:referenceInitialMetadataReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a502b9eba07ff64407655ee170edf381c4f1402f/verification/whole/basic-command-interop/upstream-corpus-host-metadata-blocked-macos-arm64.json" .
