@@ -1929,3 +1929,13 @@ w:combinedWorkspaceDataDarwin a p:Artifact ; p:location "https://github.com/Epip
 w:combinedWorkspaceTestsDarwin a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/db13a780b894456be708efdbf1e68593b316c679/verification/whole/suite/canonical-public-data-aarch64-apple-darwin.json" .
 w:combinedWorkspaceDataLinux a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/8f945d725dea3f4d4812eb6ea24bc7a1aff8d75b/verification/whole/canonical-public-data/aarch64-unknown-linux-gnu.json" .
 w:combinedWorkspaceTestsLinux a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/db13a780b894456be708efdbf1e68593b316c679/verification/whole/suite/canonical-public-data-aarch64-unknown-linux-gnu.json" .
+
+w:combinedRangeData a p:Task ;
+    rdfs:label "Qualify the public range record inside the assembled seven-package workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:combinedPublicDataWorkspace, w:publicDataReadPolicyConvergence ;
+    p:acceptance "Build the workspace with the external choice and range record. Verify public and private paths, 35 original value outcomes and the four inherited callers on both ARM64 hosts." ;
+    p:evidence w:combinedRangeDarwin, w:combinedRangeLinux .
+w:combinedRangeDarwin a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4a3d00c49cee5fbafd6e6cfc06110287b43bd384/verification/whole/canonical-range-data/aarch64-apple-darwin.json" .
+w:combinedRangeLinux a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4a3d00c49cee5fbafd6e6cfc06110287b43bd384/verification/whole/canonical-range-data/aarch64-unknown-linux-gnu.json" .
+w:wholeMarmishStructure p:dependsOn w:combinedRangeData .
