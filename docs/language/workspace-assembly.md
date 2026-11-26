@@ -191,3 +191,9 @@ their declaration identities and keeps the parser private under test
 configuration. Recovery accepts pinned boundary observations, including
 observed reader consumption at the limit. Compile the original private case
 only after the sealed library has been assembled.
+
+Native package manifests may bind an offline test-only library through
+`devDependencies`. It uses the same version and source declaration as
+`dependencies` and renders as Cargo's `[dev-dependencies]`. Names cannot
+collide with ordinary dependencies or declared workspace siblings. A bounded
+JSON component can bind its pinned provider as a development dependency.
