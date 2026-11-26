@@ -1,0 +1,16 @@
+# Marmish module recovery
+
+`oddlang import rust` recognizes the closed framing profile in the pinned Rust source. `oddlang build module` reads its graph and import lock, and produces native Rust, the WIT contract and a Rust projection manifest. `oddlang import replay` re-runs source recovery. `oddlang import verify-build` reprojects all three artifacts and compares the bytes. The separate assembly command reconstructs a workspace using the pinned projection and retained inputs.
+
+```sh
+scripts/setup-marmish.sh
+scripts/setup-wasm.sh
+scripts/qualify-marmish.sh frame
+cargo test --locked --offline --test framing_import --test framing_projection --test workspace_assembly
+```
+
+The [recognizer specification](../language/rust-framing-recognizers.md) gives the accepted Rust syntax, crate dependencies and diagnostic boundary. The [assembly format](../language/workspace-assembly.md) defines each file producer and digest. The public-interface test uses a second Rust crate with a seven-byte limit, version seven and different guard order. It deletes the original crate directory before emitting the native module, compiles a new consumer and rejects a stale WIT artifact.
+
+The component exports encode and decode through a pure WIT interface and contains no host imports. The native and Wasm projections reuse the documented Rust crate versions for JSON, derives and base64. The expected bytes and named errors come from the frozen [observation contract](../../examples/marmish/observations.json). They include overlapping invalid conditions and both sides of the resource boundaries.
+
+The [remaining module register](../../examples/marmish/gaps.json) identifies 97 retained files with 5,832 lexical declaration sites. Seventeen sites in the framing module are in the recovered source slice. The denominator for compiled runtime declarations remains unknown. Recreate the register with `python3 scripts/marmish/gaps.py INVENTORY.json.gz gaps.json`. Each module links to a named work-graph task and a proposed fixture with positive and rejection criteria.

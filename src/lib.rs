@@ -1,5 +1,8 @@
+pub mod assemble;
 pub mod contracts;
 pub mod evolution;
+pub mod framing_import;
+pub mod framing_projection;
 pub mod http;
 pub mod impact;
 pub mod import_rust;

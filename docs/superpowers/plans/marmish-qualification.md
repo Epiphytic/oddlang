@@ -37,3 +37,15 @@ The default local report covers only macOS Apple Silicon after its tests run. Re
 - [ ] **Evidence agent** publishes separate counts for regenerated runtime definitions, retained native definitions, unsupported definitions, passed/failed/unobserved obligations, and the exact domains of any exhaustive proofs. Recompute denominators from phase 5. Delete a generated file, change a wire byte, change a retained-file digest and suppress a platform report in separate negative tests. Each must invalidate the associated claim. A passing mixed build establishes a project reconstruction with named generated slices. Full first-party translation requires every in-scope first-party runtime definition regenerated and zero retained or unsupported definitions; keep that outcome open while gaps exist. A universal behavior claim additionally requires exhaustive evidence for every stated domain and effect.
 - [ ] **Coverage agent** drives the remaining project through the same loop after the framing pilot. Sort outstanding first-party units by dependency order, group by shared missing construct, implement and independently test each general capability in phase 6, then replace that native unit, rerun phase 7 and publish the changed counts. Keep a pinned capability boundary for external libraries and OS calls. When a unit cannot yet be expressed, publish its blocking example and keep full project translation open. A new port, behavioral change or scope reduction needs a recorded design decision with its effect on the denominator.
 - [ ] **Integration agent** runs `scripts/qualify-marmish.sh verify` from the locked inputs in a clean checkout, publishes the coverage table and traces, and updates the work graph. Claude CLI auto reviews the complete chain and verifies that each reported claim follows from the artifacts. Fix, repeat the affected matrix, then record final review disposition.
+
+## Open language and target capabilities
+
+The [retained module register](../../../examples/marmish/gaps.json) maps each known module outside the pilot to a blocking capability. The work graph tracks their status.
+
+- [ ] Implement public module and re-export resolution. Extract and test two modules re-export a checked type.
+- [ ] Implement URL normalization and configuration validators. Extract and test a two-entry relay list.
+- [ ] Implement numbered Rust enum tags and checked binary cursors. Extract and test a one-tag record with bounded length.
+- [ ] Implement bounded offsets and ordered window transitions. Extract and test a checkpoint with one byte pending.
+- [ ] Implement bounded external compression primitive. Extract and test a length-limited block codec.
+- [ ] Implement general Rust bodies and native dependency resolution. Extract and test a public function from the listed file isolated with its resolved imports.
+- [ ] Implement platform-specific library calls and observable OS effects. Extract and test a local fixture with a capability supplied by the caller.

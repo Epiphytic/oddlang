@@ -1,0 +1,16 @@
+package oddlang:framing@1.0.0;
+
+interface codec {
+    enum frame-error {
+        size-limit,
+        invalid-json,
+        invalid-version,
+        invalid-encoding,
+    }
+    encode: func(input: list<u8>) -> result<list<u8>, frame-error>;
+    decode: func(input: list<u8>) -> result<list<u8>, frame-error>;
+}
+
+world framing {
+    export codec;
+}

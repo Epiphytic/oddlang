@@ -1,0 +1,930 @@
+{
+  "modules": [
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-config",
+      "lexicalSites": 23,
+      "path": "crates/marmish-core/src/config.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-core:lib:marmish_core"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-modules",
+      "lexicalSites": 2,
+      "path": "crates/marmish-core/src/lib.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-core:lib:marmish_core"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 8,
+      "path": "crates/marmish-engine/src/admission.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 1,
+      "path": "crates/marmish-engine/src/bin/marmish-worker.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:bin:marmish-engine-worker"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 13,
+      "path": "crates/marmish-engine/src/cipher.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 11,
+      "path": "crates/marmish-engine/src/cleanup.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 29,
+      "path": "crates/marmish-engine/src/copy_launch.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 36,
+      "path": "crates/marmish-engine/src/fault.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 118,
+      "path": "crates/marmish-engine/src/launcher.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 11,
+      "path": "crates/marmish-engine/src/launcher/exec_image.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 82,
+      "path": "crates/marmish-engine/src/lib.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 43,
+      "path": "crates/marmish-engine/src/live.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 167,
+      "path": "crates/marmish-engine/src/model.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 14,
+      "path": "crates/marmish-engine/src/platform/linux.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 70,
+      "path": "crates/marmish-engine/src/platform/macos.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 39,
+      "path": "crates/marmish-engine/src/platform/mod.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 39,
+      "path": "crates/marmish-engine/src/policy.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 50,
+      "path": "crates/marmish-engine/src/process.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 119,
+      "path": "crates/marmish-engine/src/process/diagnostic.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 5,
+      "path": "crates/marmish-engine/src/resolve.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 30,
+      "path": "crates/marmish-engine/src/spool.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 27,
+      "path": "crates/marmish-engine/src/storage.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 214,
+      "path": "crates/marmish-engine/src/store.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 67,
+      "path": "crates/marmish-engine/src/worker.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-engine:lib:marmish_engine"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 47,
+      "path": "crates/marmish-mdk/src/lib.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-mdk:lib:marmish_mdk"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 1,
+      "path": "crates/marmish-native/src/bin/marmish-worker.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:bin:marmish-worker"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 1,
+      "path": "crates/marmish-native/src/bin/marmish.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:bin:marmish"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 1,
+      "path": "crates/marmish-native/src/bin/marmishd.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:bin:marmishd"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 146,
+      "path": "crates/marmish-native/src/cli.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 29,
+      "path": "crates/marmish-native/src/command_adapter.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 103,
+      "path": "crates/marmish-native/src/command_check.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 104,
+      "path": "crates/marmish-native/src/command_cli.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 36,
+      "path": "crates/marmish-native/src/command_client.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 110,
+      "path": "crates/marmish-native/src/command_config.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 145,
+      "path": "crates/marmish-native/src/command_engine.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 17,
+      "path": "crates/marmish-native/src/command_evidence.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 7,
+      "path": "crates/marmish-native/src/command_identity.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 34,
+      "path": "crates/marmish-native/src/command_lifecycle.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 33,
+      "path": "crates/marmish-native/src/command_limits.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 86,
+      "path": "crates/marmish-native/src/command_local.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 15,
+      "path": "crates/marmish-native/src/command_preparation.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 17,
+      "path": "crates/marmish-native/src/command_rooms.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 22,
+      "path": "crates/marmish-native/src/command_runtime.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 66,
+      "path": "crates/marmish-native/src/command_service.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 14,
+      "path": "crates/marmish-native/src/command_srv.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 483,
+      "path": "crates/marmish-native/src/command_store.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 18,
+      "path": "crates/marmish-native/src/command_target.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 180,
+      "path": "crates/marmish-native/src/command_wire.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 23,
+      "path": "crates/marmish-native/src/copy_cli.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 10,
+      "path": "crates/marmish-native/src/copy_client.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 106,
+      "path": "crates/marmish-native/src/copy_files.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 62,
+      "path": "crates/marmish-native/src/copy_helper.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 53,
+      "path": "crates/marmish-native/src/copy_io.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 94,
+      "path": "crates/marmish-native/src/copy_local_gc.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 49,
+      "path": "crates/marmish-native/src/copy_local_store.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 27,
+      "path": "crates/marmish-native/src/copy_store.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 45,
+      "path": "crates/marmish-native/src/copy_worker.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 19,
+      "path": "crates/marmish-native/src/daemon.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 36,
+      "path": "crates/marmish-native/src/daemon_launch.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 4,
+      "path": "crates/marmish-native/src/diagnostics.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 14,
+      "path": "crates/marmish-native/src/error.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 54,
+      "path": "crates/marmish-native/src/foundation.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 69,
+      "path": "crates/marmish-native/src/foundation_check.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 148,
+      "path": "crates/marmish-native/src/identity.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 87,
+      "path": "crates/marmish-native/src/ipc.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 73,
+      "path": "crates/marmish-native/src/journal.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 47,
+      "path": "crates/marmish-native/src/lib.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 189,
+      "path": "crates/marmish-native/src/mdk_adapter.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 100,
+      "path": "crates/marmish-native/src/native_install.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 14,
+      "path": "crates/marmish-native/src/native_install_fs.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 29,
+      "path": "crates/marmish-native/src/native_install_legacy.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 7,
+      "path": "crates/marmish-native/src/native_layout.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 38,
+      "path": "crates/marmish-native/src/native_manifest.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 15,
+      "path": "crates/marmish-native/src/native_preflight.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 29,
+      "path": "crates/marmish-native/src/native_release.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 47,
+      "path": "crates/marmish-native/src/native_setup.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 19,
+      "path": "crates/marmish-native/src/rsync_cli.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 69,
+      "path": "crates/marmish-native/src/stream_cli.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 17,
+      "path": "crates/marmish-native/src/stream_inspect_store.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 73,
+      "path": "crates/marmish-native/src/stream_runner.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 45,
+      "path": "crates/marmish-native/src/stream_runtime.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 212,
+      "path": "crates/marmish-native/src/stream_service.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 61,
+      "path": "crates/marmish-native/src/stream_session.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 45,
+      "path": "crates/marmish-native/src/stream_store.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 77,
+      "path": "crates/marmish-native/src/transport.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-native:lib:marmish_native"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 150,
+      "path": "crates/marmish-prototype/src/lib.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-prototype:lib:marmish_prototype"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 1,
+      "path": "crates/marmish-prototype/src/main.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-prototype:bin:marmish-engine-bridge"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-compression",
+      "lexicalSites": 18,
+      "path": "crates/marmish-stream/src/codec.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-stream:lib:marmish_stream"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-wire",
+      "lexicalSites": 170,
+      "path": "crates/marmish-stream/src/copy_protocol.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-stream:lib:marmish_stream"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-native",
+      "lexicalSites": 22,
+      "path": "crates/marmish-stream/src/lib.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-stream:lib:marmish_stream"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-offset",
+      "lexicalSites": 37,
+      "path": "crates/marmish-stream/src/windows.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-stream:lib:marmish_stream"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-wire",
+      "lexicalSites": 141,
+      "path": "crates/marmish-stream/src/wire.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-stream:lib:marmish_stream"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-os",
+      "lexicalSites": 1,
+      "path": "crates/marmish-vault/src/bin/marmish-keychain.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-vault:bin:marmish-keychain"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-os",
+      "lexicalSites": 120,
+      "path": "crates/marmish-vault/src/helper.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-vault:lib:marmish_vault"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-os",
+      "lexicalSites": 63,
+      "path": "crates/marmish-vault/src/lib.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-vault:lib:marmish_vault"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-os",
+      "lexicalSites": 13,
+      "path": "crates/marmish-vault/src/linux.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-vault:lib:marmish_vault"
+      ]
+    },
+    {
+      "blockedOn": "urn:oddlang:work:marmish-capability-os",
+      "lexicalSites": 57,
+      "path": "crates/marmish-vault/src/macos.rs",
+      "status": "retained-native",
+      "targets": [
+        "marmish-vault:lib:marmish_vault"
+      ]
+    }
+  ],
+  "revision": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+  "scope": "Known runtime-source lexical declaration sites outside the framing module. Macro expansions, lexical call targets and per-configuration compiled-item counts remain open.",
+  "tasks": [
+    {
+      "construct": "public module and re-export resolution",
+      "fixtureToExtract": "two modules re-export a checked type",
+      "id": "urn:oddlang:work:marmish-capability-modules",
+      "negative": "reject an ambiguous or cfg-dependent re-export",
+      "positive": "public path and type identity agree"
+    },
+    {
+      "construct": "URL normalization and configuration validators",
+      "fixtureToExtract": "a two-entry relay list",
+      "id": "urn:oddlang:work:marmish-capability-config",
+      "negative": "reject invalid URLs with the same first error",
+      "positive": "valid inputs have the same normalized values"
+    },
+    {
+      "construct": "numbered Rust enum tags and checked binary cursors",
+      "fixtureToExtract": "a one-tag record with bounded length",
+      "id": "urn:oddlang:work:marmish-capability-wire",
+      "negative": "reject unknown tags and truncated input",
+      "positive": "encode and decode exact original bytes"
+    },
+    {
+      "construct": "bounded offsets and ordered window transitions",
+      "fixtureToExtract": "a checkpoint with one byte pending",
+      "id": "urn:oddlang:work:marmish-capability-offset",
+      "negative": "preserve the original error on a gap or overflow",
+      "positive": "resume at the admissible offset"
+    },
+    {
+      "construct": "bounded external compression primitive",
+      "fixtureToExtract": "a length-limited block codec",
+      "id": "urn:oddlang:work:marmish-capability-compression",
+      "negative": "reject an invalid or oversized block",
+      "positive": "match decompressed bytes and output bounds"
+    },
+    {
+      "construct": "general Rust bodies and native dependency resolution",
+      "fixtureToExtract": "a public function from the listed file isolated with its resolved imports",
+      "id": "urn:oddlang:work:marmish-capability-native",
+      "negative": "reject an unresolved import, effect or expansion",
+      "positive": "compare the reduced entry point and all observable state with the pinned original"
+    },
+    {
+      "construct": "platform-specific library calls and observable OS effects",
+      "fixtureToExtract": "a local fixture with a capability supplied by the caller",
+      "id": "urn:oddlang:work:marmish-capability-os",
+      "negative": "reject an undeclared capability",
+      "positive": "replay declared local outcomes on the named platform"
+    }
+  ]
+}

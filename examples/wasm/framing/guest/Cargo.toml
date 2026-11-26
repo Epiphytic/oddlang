@@ -1,0 +1,12 @@
+[package]
+name = "framing-guest"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+marmish-core = { path = "../core" }
+wit-bindgen = "=0.57.1"
