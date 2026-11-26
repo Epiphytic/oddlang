@@ -148,4 +148,11 @@ with tempfile.TemporaryDirectory(prefix="odd-typed-error-") as directory:
     process_link(root / "baseline")
     recover(root / "unsupported", SOURCE.replace("capacity: u32", "capacity: String"),
             expected="unsupported typed error payload field")
+    for index, shadow in enumerate([
+        "pub enum u32 { Case }", "pub union u32 { byte: u8 }",
+        "pub trait u32 {}", "pub enum Debug { Case }",
+    ]):
+        work = root / f"shadow-{index}"
+        work.mkdir()
+        recover(work, SOURCE + "\n" + shadow, expected="shadowing typed error declaration")
     print("Unrelated typed enum, fixed-width product and diagnostic mutation passed.")

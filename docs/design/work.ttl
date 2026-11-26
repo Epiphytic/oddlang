@@ -1504,3 +1504,8 @@ w:publicApiConvergence a p:Task ;
     p:dependsOn w:publicConstantRecovery, w:typedFiniteErrors ;
     p:status p:active ;
     p:acceptance "Qualify the combined compiler commands, preserve independently verified package members, replay public behaviors on both supported ARM64 hosts and rerun all 140 original Darwin imports against the combined workspace lock." .
+
+w:typedFiniteErrorPrimitiveShadow a p:Finding ;
+    rdfs:label "Reject local declarations that shadow a recovered primitive width" ;
+    p:source w:typedFiniteErrorsPlan .
+w:typedFiniteErrors p:addresses w:typedFiniteErrorPrimitiveShadow .

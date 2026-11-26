@@ -395,7 +395,8 @@ pub fn recover(source: &Path, selection: &Path, output: &Path) -> Result<()> {
     {
         return Err("finite error source selection version or digest mismatch".into());
     }
-    let (graph, overlay) = if selection.format == "oddlang-typed-finite-error-selection-v1" {
+    let typed = selection.format == "oddlang-typed-finite-error-selection-v1";
+    let (graph, overlay) = if typed {
         super::typed::extract(&source, selection)?
     } else {
         if !selection.choices.is_empty() || !selection.variant_ids.is_empty() {
@@ -405,14 +406,20 @@ pub fn recover(source: &Path, selection: &Path, output: &Path) -> Result<()> {
     };
     let graph = json(&graph)?;
     let overlay = json(&overlay)?;
+    let mut gaps = vec![
+        "thiserror expansion and caller-visible behavior require independent native replay",
+        "external enum exhaustiveness and crate-root reexports require downstream compilation",
+    ];
+    if typed {
+        gaps.push("sibling item macro expansion and Rust name resolution require native replay");
+    }
     let receipt = json(&serde_json::json!({
         "format": "oddlang-finite-error-observation-v1",
         "sourceSha256": source_sha,
         "selectionSha256": digest(&selection_bytes),
         "graphSha256": digest(&graph),
         "overlaySha256": digest(&overlay),
-        "gaps": ["thiserror expansion and caller-visible behavior require independent native replay",
-                 "external enum exhaustiveness and crate-root reexports require downstream compilation"],
+        "gaps": gaps,
     }))?;
     publish(
         output,
