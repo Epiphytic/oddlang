@@ -2816,3 +2816,18 @@ w:collectionWireGuardsPlan a p:Artifact ;
 w:basicCommandInterop p:dependsOn w:collectionWireGuards .
 w:collectionWireGuardsVerification a p:Artifact ;
     p:location "verification/canonical-wire/README.md" .
+
+w:wholeCommandReplyAdmission a p:Task ;
+    rdfs:label "Compare generated response wire admission and canonical output to pinned mainline" ;
+    p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
+    p:dependsOn w:collectionWireGuards, w:sharedWireRecordChecks ;
+    p:status p:done ;
+    p:acceptance "Compile the response codec from portable inputs, compare 117 mainline packet observations by case ID and exact bytes, and preserve the existing 108 structural comparisons." ;
+    p:evidence w:wholeReplyGeneratedReceipt, w:wholeReplyMainlineReceipt, w:wholeReplyStructureReceipt .
+w:basicClientQualification p:dependsOn w:wholeCommandReplyAdmission .
+w:wholeReplyGeneratedReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/edafba6a026b8aefd6ae1015b5dd23b6278b44c9/verification/whole/command-responses/generated-envelope-aarch64-apple-darwin.json" .
+w:wholeReplyMainlineReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/edafba6a026b8aefd6ae1015b5dd23b6278b44c9/verification/whole/command-responses/reference-envelope-aarch64-apple-darwin.json" .
+w:wholeReplyStructureReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/edafba6a026b8aefd6ae1015b5dd23b6278b44c9/verification/whole/command-responses/aarch64-apple-darwin.json" .
