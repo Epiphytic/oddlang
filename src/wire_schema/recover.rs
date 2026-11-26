@@ -713,13 +713,14 @@ pub fn from_source(source: &Path, selection: &Path, output: &Path) -> Result<()>
                     attrs,
                     &["tag", "content", "rename_all", "deny_unknown_fields"],
                 )?;
-                let (Some(tag), Some(content)) = (state.tag, state.content) else {
-                    observer
-                        .gaps
-                        .push(format!("{id}: union is not explicitly adjacent-tagged"));
+                let unit_enum = state.tag.is_none() && state.content.is_none()
+                    && !item.variants.is_empty()
+                    && item.variants.iter().all(|v| matches!(v.fields, Fields::Unit));
+                if !unit_enum && (state.tag.is_none() || state.content.is_none()) {
+                    observer.gaps.push(format!("{id}: union is not explicitly adjacent-tagged"));
                     continue;
-                };
-                if !state.deny_unknown
+                }
+                if (!unit_enum && !state.deny_unknown)
                     || state
                         .rename_all
                         .as_deref()
@@ -735,11 +736,10 @@ pub fn from_source(source: &Path, selection: &Path, output: &Path) -> Result<()>
                     .iter()
                     .map(|variant| observer.variant(id, variant, snake))
                     .collect::<Result<Vec<_>>>()?;
-                Definition::Adjacent {
-                    id: id.clone(),
-                    tag,
-                    content,
-                    variants,
+                match (state.tag, state.content) {
+                    (Some(tag), Some(content)) => Definition::Adjacent { id: id.clone(), tag, content, variants },
+                    (None, None) if unit_enum => Definition::UnitEnum { id: id.clone(), variants },
+                    _ => unreachable!("the union representation has been verified"),
                 }
             }
             _ => unreachable!("selected struct or enum"),

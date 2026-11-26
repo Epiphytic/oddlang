@@ -8,7 +8,16 @@ mod strict;
 
 use projected::{Irrigation, Packet, Sensor};
 
+mod valve;
+mod source_valve;
+
 fn main() {
+    for raw in [r#""fully_open""#, r#""off""#, r#""closed""#, r#"{"off":null}"#, r#"{"off":1}"#, r#"{"off":null,"x":1}"#, "null", "42"] {
+        let actual = serde_json::from_str::<valve::Valve>(raw).ok().map(|v| serde_json::to_string(&v).unwrap());
+        let original = serde_json::from_str::<source_valve::Valve>(raw).ok().map(|v| serde_json::to_string(&v).unwrap());
+        assert_eq!(actual, original);
+        assert_eq!(actual.is_some(), matches!(raw, r#""fully_open""# | r#""off""# | r#"{"off":null}"#));
+    }
     let missing = r#"{"channel":3}"#;
     assert!(serde_json::from_str::<strict::Sensor>(missing).is_err());
     assert!(serde_json::from_str::<Sensor>(missing).unwrap().meter.is_none());

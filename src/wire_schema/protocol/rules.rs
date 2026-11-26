@@ -355,7 +355,7 @@ impl<'a> Compiler<'a> {
                     .fields,
                 &self.native.foreign_members,
             ),
-            Definition::Adjacent { .. } => {
+            Definition::UnitEnum { .. } | Definition::Adjacent { .. } => {
                 return Err("match the case before accessing a union field".into());
             }
         };
@@ -447,7 +447,7 @@ impl<'a> Compiler<'a> {
             return Err("variant guard requires a declared union".into());
         };
         match self.definition(id)? {
-            Definition::Adjacent { variants, .. } => {
+            Definition::UnitEnum { variants, .. } | Definition::Adjacent { variants, .. } => {
                 let tagged = variants
                     .iter()
                     .find(|case| case.id == variant)
