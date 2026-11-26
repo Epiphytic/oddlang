@@ -28,6 +28,8 @@ Publish language-neutral cases and expected outcomes with the contract. Derive e
 
 Start with HTTP and use the same obligation model for additional protocols. Protocol bindings specify how to exercise and observe a case. Project-owned target overlays can select libraries or guide native adapter authoring. Verify each adapter against the shared expected outcomes. A Rust backend and TypeScript and Go clients can each prove conformance for the roles they declare.
 
+For Rust-to-Oddlang recovery, follow the [portable Rust recovery plan](docs/superpowers/plans/2026-11-25-portable-rust-recovery.md). Keep source structure independently auditable, record observable rules in the portable contract, and attach library names and versions as optional implementation hints.
+
 ## What the prototype must demonstrate
 
 1. **Structure and impact.** Generate a checked Rust account and a PostgreSQL table from the same domain model. Show that both enforce identical balance bounds. Query dependencies across local imports and compare the authoring and traversal cost with stable-ID TOML before investing further in RDF.
