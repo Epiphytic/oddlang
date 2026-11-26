@@ -1,3 +1,5 @@
+pub mod flat;
+pub mod flat_limit;
 mod generated;
 pub mod shape_only;
 pub mod singleton;
@@ -49,6 +51,23 @@ fn main() {
     };
     let valid = br#"{"protocol":"radio","version":7,"sequence":5,"message":{"dir":"send","payload":{"gain":13}}}"#;
     assert_eq!(encode_message(&packet).unwrap(), valid);
+    let flat_packet = flat::Transmit { sequence: 5, gain: 13 };
+    let flat_bytes = br#"{"dir":"send","payload":{"gain":13},"protocol":"radio","sequence":5,"version":7}"#;
+    assert_eq!(flat::encode_message(&flat_packet).unwrap(), flat_bytes);
+    let mut boundary = flat_limit::Transmit { sequence: 5, gain: 13 };
+    assert_eq!(flat_limit::encode_message(&boundary).unwrap(), flat_bytes);
+    boundary.sequence = 10;
+    assert_eq!(flat_limit::encode_message(&boundary), Err(Oversize));
+    assert!(matches!(flat_limit::decode_message(&[flat_bytes.as_slice(), b" "].concat()), Err(Oversize)));
+    assert!(flat::decode_message(br#"{"dir":"send","message":{},"payload":{"gain":13},"protocol":"radio","sequence":5,"version":7}"#).is_err());
+    let nested = flat::Scan { sequence: 7, plan: flat::Sweep::Calibration {} };
+    let nested_bytes = br#"{"dir":"scan","payload":{"data":{},"kind":"cal"},"protocol":"radio","sequence":7,"version":7}"#;
+    assert_eq!(flat::encode_scan(&nested).unwrap(), nested_bytes);
+    assert_eq!(flat::cal_digest(), Ok(raw_digest(br#"{"kind":"cal","data":{}}"#)));
+    assert!(flat::decode_message(flat_bytes).ok() == Some(flat_packet));
+    assert!(flat::decode_message(valid).is_err());
+    assert!(flat::decode_message(br#"{"dir":"send","payload":{"gain":13},"protocol":"radio","version":7,"sequence":5}"#).is_err());
+    assert!(flat::decode_message(br#"{"dir":"send","dir":"send","payload":{"gain":13},"protocol":"radio","sequence":5,"version":7}"#).is_err());
     assert_eq!(packet.validate_at(4), Err(Failure::Early));
     assert_eq!(packet.validate_at(5), Ok(()));
     assert_eq!(

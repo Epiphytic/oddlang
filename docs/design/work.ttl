@@ -2064,8 +2064,34 @@ w:basicCommandInteropBar a p:Decision ;
 w:basicCommandInterop a p:Task ;
     rdfs:label "Qualify the basic-command compatibility layer against mainline Marmish" ;
     p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan, w:basicCommandInteropBar ;
-    p:status p:planned ;
+    p:status p:active ;
     p:acceptance "Both generated-client/mainline-server and mainline-client/generated-server pairings reproduce reference statuses, output bytes and response formatting repeatedly on one platform, with distinct temporary identities, isolated instance roots, checked cleanup and a throughput observation." .
+
+w:basicCommandInterop p:evidence w:basicCommandStreamChecks ;
+    p:addresses w:basicServerEngineGap .
+w:basicCommandStreamChecks a p:Artifact ;
+    rdfs:label "Test exact command streams, detached CLI formatting and bounded throughput arithmetic" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/f035ebde10d2eaaacdcbe0e6b421401914dc12c7/verification/whole/basic-command-interop" .
+w:basicServerEngineGap a p:Finding ;
+    rdfs:label "The generated foreground owner declares an absent command engine" ;
+    p:source w:basicServerLifecycleGraph .
+w:basicServerLifecycleGraph a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/53ece04bad4d12f0a6846ecb652493be7bf92a55/oddlang/portable/workspace-v6/foreground-graph.json" .
+
+w:flatCanonicalFrame a p:Task ;
+    rdfs:label "Project flat sorted command envelopes from adjacent choices" ;
+    p:source w:basicCommandInteropPlan ; p:milestone w:marmishMilestone ;
+    p:acceptance "Use a portable layout declaration to place a tagged payload beside its envelope fields, preserve the frame limit, and reject duplicate or reordered JSON keys in an unrelated fixture." ;
+    p:status p:done ; p:evidence w:flatCanonicalRun .
+w:flatCanonicalRun a p:Artifact ;
+    p:location "verification/canonical-wire/flat-sorted-verification.md" .
+w:basicCommandInterop p:dependsOn w:flatCanonicalFrame ;
+    p:evidence w:basicGeneratedBuild, w:basicGeneratedRoles .
+w:basicGeneratedBuild a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/1155aefdc8144b9f07f8b32046ad8b92a5af1c31/verification/whole/basic-command-interop/generated-build-aarch64-apple-darwin.json" .
+w:basicGeneratedRoles a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/1155aefdc8144b9f07f8b32046ad8b92a5af1c31/verification/whole/basic-command-interop/generated-preflight-aarch64-apple-darwin.json" .
+
 w:wholeLinuxArmData a p:Artifact ;
     rdfs:label "Native ARM64 Linux generated Copy Data roles passed 253 public and 112 sealed cases each plus six mixed-peer directions" ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/tree/4e19e1c734f45b6f3d92addb2ae8b9cf7683e503/verification/whole/linux/aarch64-unknown-linux-gnu" .
@@ -2533,3 +2559,47 @@ w:generatedRelayActivation a p:Task ;
     p:source w:generatedRelayActivationPlan ;
     p:status p:active ;
     p:acceptance "Project a graph-bound relay startup and prove acknowledged authenticated key-package publication, transport activation and cleanup in the generated foreground daemon using a test-owned relay." .
+w:localCommandArgumentsPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-local-command-arguments.md" .
+w:localCommandArguments a p:Task ;
+    rdfs:label "Project typed CLI arguments into bounded local command requests" ;
+    p:milestone w:marmishMilestone ; p:source w:localCommandArgumentsPlan, w:basicCommandInteropPlan ;
+    p:status p:done ; p:dependsOn w:localCommandClient ;
+    p:evidence w:localCommandArgumentsVerification ;
+    p:acceptance "Link argument types against the CLI surface and prove declaration-order request bytes, runtime frame limits, and legacy literal behavior using an unrelated real Unix peer." .
+w:basicCommandInterop p:dependsOn w:localCommandArguments .
+
+w:basicCommandGeneratedBuildReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/89ae6cd168ae058abf3edbe14db1cd08fbbed695/verification/whole/basic-command-interop/generated-build-aarch64-apple-darwin.json" .
+w:basicCommandGeneratedRoleReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/89ae6cd168ae058abf3edbe14db1cd08fbbed695/verification/whole/basic-command-interop/generated-preflight-aarch64-apple-darwin.json" .
+w:basicCommandGeneratedBuild a p:Task ;
+    rdfs:label "Build and inventory the pinned generated basic-command candidate on macOS ARM64" ;
+    p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
+    p:status p:done ; p:evidence w:basicCommandGeneratedBuildReceipt, w:basicCommandGeneratedRoleReceipt ;
+    p:acceptance "Generate and compile from pinned portable inputs and verified dependencies in a clean restricted build workspace. Export digest-bound executables and record first missing CLI operations in a separate offline preflight." .
+w:basicCommandInterop p:dependsOn w:basicCommandGeneratedBuild .
+w:basicCommandClientOperationUnavailable a p:Finding ;
+    rdfs:label "Generated command client has no submit or wait handler" ;
+    p:source w:basicCommandGeneratedRoleReceipt .
+w:basicCommandServerOwnerUnavailable a p:Finding ;
+    rdfs:label "Generated foreground daemon binds a status owner, with no engine or worker" ;
+    p:source w:basicCommandGeneratedBuildReceipt .
+w:basicCommandInterop p:addresses w:basicCommandClientOperationUnavailable, w:basicCommandServerOwnerUnavailable .
+
+w:basicCommandOwnerHandoffReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/597dda6f9331cbb3521e3f4c679ef1b64d1939dc/verification/whole/basic-command-interop/upstream-local-owner-aarch64-apple-darwin.json" .
+w:basicCommandOwnerHandoffReference a p:Task ;
+    rdfs:label "Witness the pinned upstream client's first local owner requests" ;
+    p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
+    p:status p:done ; p:evidence w:basicCommandOwnerHandoffReceipt ;
+    p:acceptance "Measure exact framed readiness, room preparation and wait lookup requests, error responses, output bytes and exit statuses from the pinned client against a test-owned Unix socket." .
+w:basicCommandInterop p:dependsOn w:basicCommandOwnerHandoffReference .
+w:basicCommandClientOperationUnavailable p:source w:basicCommandOwnerHandoffReceipt .
+
+w:localCommandArgumentsVerification a p:Artifact ;
+    p:location "verification/local-command-client/typed-request-verification.md" .
+w:localCommandArgumentCatalogFinding a p:Finding ;
+    rdfs:label "Declare exact field encodings and avoid implicit CLI defaults in request obligations" ;
+    p:source w:localCommandArgumentsVerification .
+w:localCommandArguments p:addresses w:localCommandArgumentCatalogFinding .
