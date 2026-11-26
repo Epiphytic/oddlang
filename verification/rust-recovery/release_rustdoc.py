@@ -120,8 +120,10 @@ def extern_bindings(log, rustc, selected, packages):
             continue
         crate, = trace.flag(args, "--crate-name")
         output, = trace.flag(args, "--out-dir")
-        suffix, = [v.removeprefix("extra-filename=") for v in trace.flag(args, "-C")
-                   if v.startswith("extra-filename=")]
+        suffixes = [v.removeprefix("extra-filename=") for v in trace.flag(args, "-C")
+                    if v.startswith("extra-filename=")]
+        require(len(suffixes) <= 1, f"ambiguous output suffix for {crate}")
+        suffix = next(iter(suffixes), "")
         directory = Path(env["CARGO_MANIFEST_DIR"]).resolve()
         target = trace.flag(args, "--target")
         evidence = {"crate": crate, "crateTypes": sorted(crate_types),

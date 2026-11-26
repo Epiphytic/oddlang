@@ -1753,3 +1753,7 @@ w:crossTargetObserverReview a p:Finding ;
     rdfs:label "Host-only build dependencies can be absent from target-filtered Cargo metadata" ;
     p:source w:directObserverBindingFixture .
 w:directObserverBindings p:addresses w:crossTargetObserverReview .
+w:directObserverBindings p:addresses w:observerDylibSuffix .
+w:observerDylibSuffix a p:Finding ;
+    rdfs:label "Cargo can emit unhashed Rust dynamic library artifacts" ;
+    p:source w:directObserverBindingFixture .

@@ -20,11 +20,11 @@ class ReleaseComparison(unittest.TestCase):
 
     def test_unselected_host_producer_needs_no_target_package_entry(self):
         invocation = ("  Running `CARGO_MANIFEST_DIR=/src/hostonly /tool/rustc --crate-name hostonly "
-                      "--crate-type lib --out-dir /host -C extra-filename=-abc`\n")
+                      "--crate-type dylib --out-dir /host`\n")
         self.assertEqual(check.extern_bindings(invocation, Path("/tool/rustc"), [], {}), {})
         with self.assertRaisesRegex(ValueError, "unknown Cargo package producing extern"):
             check.extern_bindings(invocation, Path("/tool/rustc"),
-                                  ["--extern", "alias=/host/libhostonly-abc.rlib"], {})
+                                  ["--extern", "alias=/host/libhostonly.dylib"], {})
 
     def test_cross_target_with_host_only_build_dependency(self):
         target = "wasm32-wasip1"
@@ -60,6 +60,9 @@ class ReleaseComparison(unittest.TestCase):
                 dep = root / path
                 (dep / "src").mkdir(parents=True)
                 (dep / "Cargo.toml").write_text(f'[package]\nname="reading"\nversion="{version}"\nedition="2024"\n')
+                if path == "new":
+                    with (dep / "Cargo.toml").open("a") as out:
+                        out.write('[lib]\ncrate-type=["dylib"]\n')
                 (dep / "src/lib.rs").write_text("pub struct Reading;\n")
             with manifest.open("a") as out:
                 out.write('[dependencies]\nserde_derive="=1.0.229"\nfirst_read={package="reading",path="old",optional=true}\n'
@@ -85,6 +88,7 @@ pub type Next = next_read::Reading;
             bindings = results["profile"]["externBindings"]
             self.assertEqual(bindings["first_read"]["package"], {"name": "reading", "version": "1.0.0", "path": "old"})
             self.assertEqual(bindings["next_read"]["package"], {"name": "reading", "version": "2.0.0", "path": "new"})
+            self.assertEqual(bindings["next_read"]["crateTypes"], ["dylib"])
             proc_macro = bindings["serde_derive"]
             self.assertEqual(proc_macro["crateTypes"], ["proc-macro"])
             self.assertEqual(proc_macro["target"], [])
