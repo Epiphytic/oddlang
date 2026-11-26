@@ -83,11 +83,11 @@ with tempfile.TemporaryDirectory(prefix="oddlang-recover-plot-") as tmp:
         "choices": [{"name": "Mark", "id": "urn:terrain:mark"}],
     }
 
-    def document(rust):
+    def document(rust, include_private=True):
         source.write_text(rust)
         run("cargo", "+1.97.1", "rustdoc", "--offline", "--lib", "--",
-            "-Z", "unstable-options", "--output-format", "json", "--document-private-items",
-            cwd=work, env=env)
+            "-Z", "unstable-options", "--output-format", "json",
+            *(["--document-private-items"] if include_private else []), cwd=work, env=env)
 
     def recover(name, expected_failure=None, **overrides):
         selector.write_text(json.dumps(dict(selection, sourceSha256=digest(source),
@@ -164,5 +164,10 @@ with tempfile.TemporaryDirectory(prefix="oddlang-recover-plot-") as tmp:
         (work / "src/lib.rs").write_text(f"mod model;\npub use model::*;\n{shadow}\n")
         document(SOURCE)
         recover(label, "crate-root export", crateRootSha256=digest(work / "src/lib.rs"))
+
+    (work / "src/lib.rs").write_text("pub mod model;\npub use model::*;\nstruct Plot;\n")
+    document(SOURCE, include_private=False)
+    recover("public-docs-omit-shadow", "must include private items",
+            crateRootSha256=digest(work / "src/lib.rs"))
 
 print("Recovered default and strict Serde policy, source field order, and compiler-checked choice links")

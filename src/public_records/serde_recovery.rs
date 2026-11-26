@@ -40,6 +40,7 @@ struct ChoiceSelection {
 #[derive(Deserialize)]
 struct Document {
     format_version: u64,
+    includes_private: bool,
     root: u64,
     #[serde(deserialize_with = "unique_map")]
     index: BTreeMap<String, DocumentItem>,
@@ -166,6 +167,14 @@ fn root_exports(
         .ok_or("missing crate-root source span")?
         .filename
         .as_str();
+    if root_source.items.iter().any(|entry| {
+        recover::item_type_binding(entry)
+            .is_some_and(|(ident, _)| ident.unraw().to_string() == name)
+    }) {
+        return Err(format!(
+            "crate-root declaration can shadow the crate-root export of {name}"
+        ));
+    }
     let source_imports = recover::imports(root_source);
     if source_imports.iter().any(|import| {
         !matches!(import.declaration.vis, Visibility::Public(_))
@@ -552,6 +561,9 @@ pub fn recover_serde(source: &Path, rustdoc: &Path, selection: &Path, out: &Path
     }
     let document: Document =
         serde_json::from_slice(&document_bytes).map_err(|err| err.to_string())?;
+    if !document.includes_private {
+        return Err("rustdoc evidence must include private items".into());
+    }
     let root = document.item(document.root)?;
     if document.format_version != 57
         || root.crate_id != 0
