@@ -135,6 +135,41 @@ with tempfile.TemporaryDirectory(prefix="wire-schema-test-") as directory:
     consumer = root / "consumer"
     shutil.copytree(FIXTURE, consumer)
     shutil.copyfile(generated / "wire.rs", consumer / "src/projected.rs")
+    valve = root / "valve.rs"
+    valve.write_text('use serde::{Serialize,Deserialize};\n#[derive(Serialize,Deserialize)]\n'
+                     '#[serde(rename_all="snake_case")] pub enum Valve { FullyOpen, #[serde(rename="off")] Closed }')
+    valve_selection = {"id": "urn:garden:valves", "types": {"Valve": "urn:garden:valve"},
+                       "sourceSha256": hashlib.sha256(valve.read_bytes()).hexdigest()}
+    valve_model = root / "valve-model"
+    run("recover", "wire-schema", valve, write(root / "valve-selection.json", valve_selection), valve_model)
+    second = root / "valve-model-repeat"
+    run("recover", "wire-schema", valve, root / "valve-selection.json", second)
+    for name in ("graph.json", "rust.json", "observation.json"):
+        assert (valve_model / name).read_bytes() == (second / name).read_bytes()
+    valve_graph = json.loads((valve_model / "graph.json").read_bytes())
+    assert valve_graph["types"][0]["kind"] == "unit-enum"
+    empty = root / "empty.rs"
+    empty.write_text("use serde::{Serialize,Deserialize}; #[derive(Serialize,Deserialize)] pub enum Valve {}")
+    empty_selection = dict(valve_selection, sourceSha256=hashlib.sha256(empty.read_bytes()).hexdigest())
+    run("recover", "wire-schema", empty, write(root / "empty-selection.json", empty_selection), root / "empty")
+    assert any("not explicitly adjacent-tagged" in r["reason"]
+               for r in json.loads((root / "empty/observation.json").read_bytes())["gaps"])
+    for kind, error in [("empty", "distinct, nonempty"), ("duplicate", "distinct, nonempty"),
+                        ("payload", "unit payloads")]:
+        bad = json.loads((valve_model / "graph.json").read_bytes())
+        variants = bad["types"][0]["variants"]
+        if kind == "empty":
+            variants.clear()
+        elif kind == "duplicate":
+            variants[1]["name"] = variants[0]["name"]
+        else:
+            variants[0]["payload"] = {"kind":"record", "fields":[]}
+        run("build", "wire-schema", "rust", write(root / f"valve-{kind}.json", bad),
+            valve_model / "rust.json", root / f"valve-{kind}-bad", failure=error)
+    valve_projection = root / "valve-projection"
+    run("build", "wire-schema", "rust", valve_model / "graph.json", valve_model / "rust.json", valve_projection)
+    shutil.copyfile(valve_projection / "wire.rs", consumer / "src/valve.rs")
+    shutil.copyfile(valve, consumer / "src/source_valve.rs")
     strict_graph = json.loads(path.read_bytes())
     sensor = next(item for item in strict_graph["types"] if item["id"] == "urn:garden:sensor")
     meter = next(f for f in sensor["fields"] if f["name"] == "meter")

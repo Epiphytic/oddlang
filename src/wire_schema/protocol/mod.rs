@@ -230,7 +230,7 @@ impl Protocol {
                         }
                     }
                 }
-                Definition::External { .. } => {}
+                Definition::UnitEnum { .. } | Definition::External { .. } => {}
             }
         }
         for guard in &schema.guards {
@@ -300,7 +300,7 @@ impl Protocol {
                         Payload::Unit {} => true,
                     })
                 }
-                Definition::External { .. } => true,
+                Definition::UnitEnum { .. } | Definition::External { .. } => true,
             };
             if !visible {
                 return Err("public structural type refers to the internal frame".into());

@@ -1,6 +1,6 @@
 # Ordered JSON wire schemas
 
-The `oddlang-json-wire-schema-v1` graph describes named closed records and adjacent tagged unions. Stable IRIs identify definitions, fields, cases and validation guards. The `oddlang-json-wire-schema-rust-v1` binding supplies native names, derives and external Rust paths. Text enum contracts, compression blocks and other separately qualified wire types can appear as named external references.
+The `oddlang-json-wire-schema-v1` graph describes named closed records, unit enums and adjacent tagged unions. Stable IRIs identify definitions, fields, cases and validation guards. The `oddlang-json-wire-schema-rust-v1` binding supplies native names, derives and external Rust paths. Text enum contracts, compression blocks and other separately qualified wire types can appear as named external references.
 
 ```sh
 oddlang recover wire-schema SOURCE_RS SELECTION_JSON OBSERVED_DIR
@@ -16,6 +16,8 @@ The build command consumes only the graph and binding. It rejects unresolved sha
 - Records emit an object with fields in declared order. Serde also accepts positional tuples for named structs. An optional value accepts a missing key and JSON null, and the native projection emits its key and null when that value is absent.
 - Adjacent unions declare separate tag and content keys. Each case has an exact wire name and declares a unit, one named value, or an ordered record payload. Unit cases emit the tag without content. Closed shapes reject unknown and duplicate object fields.
 - Field values can be booleans, text, unsigned 8-, 16-, 32- or 64-bit integers, optional values, ordered lists, named references, or a declared byte adapter on a named field. The Base64-list adapter receives item, encoded-byte, aggregate-byte and per-item accounting rules. It validates list size, encoded text length, decoding and canonical padding, and total decoded bytes in order. Overall frame bounds belong to the caller before parsing.
+- A `unit-enum` declares stable variant IDs and wire names. Rust accepts a known string or a single-key object whose key is that name and whose value is null. It emits the string. Existing `external-tag-u8` hash slots use their external type and numeric tag table; keep those bindings pinned when reproducing historical digest bytes.
+- A nullable member with `requirePresence` must be present and can hold null. Recovery recognizes the fully qualified Serde deserializer and explicitly selected `required-nullable` adapters. Other custom deserializers need independent structural evidence.
 - A validation guard selects a record or a named record case, optionally checks a `when` predicate, and requires a typed predicate or returns its stable error IRI. Guards run in declaration order. The initial profile supports unsigned ranges, boolean and presence checks, list counts and uniqueness, and unsigned field comparisons. A guard applies only to its declared owner and case. Validation of a referenced value is a separate operation.
 - The emitted validator is independent of Serde admission. Byte-canonical envelope validation, input-to-envelope mappings, typed foreign validation calls and time-sensitive checks require additional declarations and independent evidence.
 
