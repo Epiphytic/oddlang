@@ -1484,3 +1484,23 @@ w:typedFiniteErrors a p:Task ;
     p:dependsOn w:plainValueChoices, w:sevenMemberBufferedWorkspace ;
     p:status p:active ;
     p:acceptance "Qualify public error and alias, exact reason capability and variant membership, fixed-width named fields and Display/Debug/source through independently compiled original and generated consumers. Share process-limit error identity without changing the older standalone projection. Integrate the published native identity choice." .
+w:publicConstantPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-public-constant.md" .
+w:publicConstantRecovery a p:Task ;
+    rdfs:label "Recover public unsigned constant declarations and products" ;
+    p:milestone w:marmishMilestone ; p:source w:publicConstantPlan ;
+    p:dependsOn w:sharedTypedDeclarations ;
+
+    p:acceptance "Bind the declared public symbol to real Rust compiler evidence and preserve its literal or multiplication expression in the existing portable shared-declarations graph. Replay an unrelated baseline and changed source through downstream native callers." ;
+    p:status p:done ; p:evidence w:publicConstantFixture .
+w:publicConstantFixture a p:Artifact ;
+    p:location "verification/public-constant/verify.py" .
+
+w:publicApiConvergencePlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-public-api-convergence.md" .
+w:publicApiConvergence a p:Task ;
+    rdfs:label "Converge the prototype constant, typed engine errors and native choice in the same generated workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;
+    p:dependsOn w:publicConstantRecovery, w:typedFiniteErrors ;
+    p:status p:active ;
+    p:acceptance "Qualify the combined compiler commands, preserve independently verified package members, replay public behaviors on both supported ARM64 hosts and rerun all 140 original Darwin imports against the combined workspace lock." .

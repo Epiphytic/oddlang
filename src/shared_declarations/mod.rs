@@ -9,6 +9,8 @@ use std::{
 };
 
 mod cases;
+mod recover;
+pub use recover::recover as recover_public_constant;
 mod rust;
 type Result<T> = std::result::Result<T, String>;
 
@@ -171,6 +173,13 @@ enum Width {
     U64,
     Usize,
     I64,
+}
+
+fn digest(bytes: &[u8]) -> String {
+    Sha256::digest(bytes)
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect()
 }
 
 impl Graph {
@@ -506,12 +515,6 @@ pub fn build(graph: &Path, overlay: &Path, output: &Path) -> Result<()> {
     }
     graph.validate(&binding)?;
     let source = rust::render(&graph, &binding)?;
-    let digest = |bytes: &[u8]| {
-        Sha256::digest(bytes)
-            .iter()
-            .map(|b| format!("{b:02x}"))
-            .collect::<String>()
-    };
     let hash =
         |value: &serde_json::Value| digest(&serde_json::to_vec(value).expect("serialize JSON"));
     let obligations =
