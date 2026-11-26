@@ -966,3 +966,8 @@ w:copyManifestQualification a p:Task ; rdfs:label "Qualify a native copy Manifes
     p:dependsOn w:binaryMetadataRecords ;
     p:acceptance "Compare source-free Manifest validation, binary encoding, decoding, namespace and canonical SHA-256 with the pinned original." .
 w:wholeMarmishProtocols p:dependsOn w:copyManifestQualification .
+w:orderedRecordWrites a p:Task ; rdfs:label "Recover ordered binary field writes from a pinned native encoder" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Observe native field order, encoding and width without storing source and compare an independent graph consumer with original and reordered native outputs." ;
+    p:evidence w:orderedWriterFixture .
+w:orderedWriterFixture a p:Artifact ; p:location "verification/record-writer/verify.py" .

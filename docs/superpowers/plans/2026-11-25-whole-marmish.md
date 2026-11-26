@@ -37,6 +37,7 @@ The independent stream comparison including macro expansions left 373 compiler-o
 - [x] Compose separately pinned native package contracts into one Cargo workspace with a root dependency lock. Compile a downstream caller of two generated crates and verify native binary return status. [Composition fixture](../../../verification/native-workspace/verify.py)
 - [x] Qualify acknowledged stream windows with all five upstream tests unchanged, including the three tests that inspect private storage. Compare 13,031 public observations and reject the retry-conflict mutation on Darwin ARM64. [Companion window qualification](https://github.com/Epiphytic/marmish-oddlang/pull/15)
 
+- [x] Recover the ordered field encodings of supported record writers, qualify source reordering and reject unsupported helpers. [Record writer profile](../../language/ordered-record-writes.md)
 
 - [x] Bind explicit byte discriminants and exhaustive conversion outcomes for string enums. [Shared declaration profile](../../language/shared-declarations.md)
 

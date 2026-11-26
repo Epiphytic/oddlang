@@ -13,6 +13,7 @@ pub(crate) use hash_view::{sha256_begin, sha256_enum, sha256_hex};
 mod obligations;
 pub mod protocol;
 pub mod recover;
+pub mod record_writer;
 mod render;
 
 type Result<T> = std::result::Result<T, String>;
