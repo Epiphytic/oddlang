@@ -1355,3 +1355,10 @@ w:releaseVersionTextGrammar a p:Task ;
     p:status p:active ;
     p:acceptance "Recover ordered prefix choice, ASCII decimal bounds, optional delimited suffix and entire-input consumption from pinned source. Match released vectors and source mutations against a native witness and an unrelated grammar." .
 w:wholeMarmishDistribution p:dependsOn w:releaseVersionTextGrammar .
+
+w:releaseVersionMethodResolutionReview a p:Finding ;
+    rdfs:label "Reject source inputs that can rebind canonical decimal methods" ;
+    p:source w:releaseVersionRecoveryReview .
+w:releaseVersionRecoveryReview a p:Artifact ;
+    p:location "docs/design/reviews/text-grammar.md" .
+w:releaseVersionTextGrammar p:addresses w:releaseVersionMethodResolutionReview .

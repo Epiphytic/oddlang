@@ -163,7 +163,13 @@ fn accepted_source_changes_move_the_boundary_and_unsupported_guards_fail_closed(
             FIXTURE.replace("None => octet(body, true)", "None => octet(body, false)"),
             "inconsistent decimal",
         ),
-        (format!("use prelude::r#Option;\n{FIXTURE}"), "shadowing"),
+        (format!("use prelude::r#Option;\n{FIXTURE}"), "scope"),
+        (
+            format!(
+                "trait Override {{ fn is_some(self) -> bool; }} impl Override for Option<u8> {{ fn is_some(self) -> bool {{ true }} }}\n{FIXTURE}"
+            ),
+            "scope",
+        ),
         (
             FIXTURE.replace("pub fn station", "#[cfg(unproven)] pub fn station"),
             "attributes",

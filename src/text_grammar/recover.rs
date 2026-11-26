@@ -5,7 +5,7 @@ use serde_json::json;
 use std::{collections::BTreeSet, fs, path::Path};
 use syn::{
     Expr, ExprMethodCall, FnArg, GenericArgument, Ident, Item, ItemFn, Lit, Pat, PathArguments,
-    ReturnType, Stmt, Type, UseTree, ext::IdentExt, punctuated::Punctuated, token::Comma,
+    ReturnType, Stmt, Type, ext::IdentExt, punctuated::Punctuated, token::Comma,
 };
 
 #[derive(Deserialize)]
@@ -320,45 +320,19 @@ fn reserved(name: &Ident) -> bool {
     )
 }
 
-fn import_shadows(tree: &UseTree, parent: Option<&Ident>) -> bool {
-    match tree {
-        UseTree::Glob(_) => true,
-        UseTree::Path(path) => import_shadows(&path.tree, Some(&path.ident)),
-        UseTree::Group(group) => group.items.iter().any(|item| import_shadows(item, parent)),
-        UseTree::Rename(rename) => reserved(&rename.rename),
-        UseTree::Name(name) if name.ident == "self" => parent.is_some_and(reserved),
-        UseTree::Name(name) => reserved(&name.ident),
-    }
-}
-
 fn check_scope(file: &syn::File) -> Result<()> {
     if file.attrs.iter().any(|attr| !attr.path().is_ident("doc")) {
         return Err(unsupported("source module attributes"));
     }
-    for item in &file.items {
-        let shadows = match item {
-            Item::Use(item) => import_shadows(&item.tree, None),
-            Item::Const(item) => reserved(&item.ident),
-            Item::Enum(item) => reserved(&item.ident),
-            Item::ExternCrate(item) => {
-                reserved(item.rename.as_ref().map_or(&item.ident, |(_, id)| id))
-            }
-            Item::Fn(item) => reserved(&item.sig.ident),
-            Item::Macro(_) | Item::Verbatim(_) => true,
-            Item::Mod(item) => reserved(&item.ident),
-            Item::Static(item) => reserved(&item.ident),
-            Item::Struct(item) => reserved(&item.ident),
-            Item::Trait(item) => reserved(&item.ident),
-            Item::TraitAlias(item) => reserved(&item.ident),
-            Item::Type(item) => reserved(&item.ident),
-            Item::Union(item) => reserved(&item.ident),
-            _ => false,
-        };
-        if shadows {
-            return Err(unsupported(
-                "shadowing, glob imports or module-level macro expansions",
-            ));
-        }
+    if file.items.len() != 2
+        || !file
+            .items
+            .iter()
+            .all(|item| matches!(item, Item::Fn(f) if !reserved(&f.sig.ident)))
+    {
+        return Err(unsupported(
+            "source scope; provide only the two selected functions",
+        ));
     }
     Ok(())
 }
@@ -418,7 +392,8 @@ pub fn recover(source: &Path, selection: &Path, output: &Path) -> Result<()> {
         "graphSha256": digest(&graph),
         "entry": capture.entry,
         "decimal": helper,
-        "unresolved": ["primitive and prelude resolution outside this source module requires a native witness"],
+        "sourceScope": "two-selected-functions",
+        "unresolved": ["method and name resolution in the original enclosing module requires a native witness"],
     }))?;
     write(output, &[("graph.json", &graph), ("recovery.lock", &lock)])
 }
