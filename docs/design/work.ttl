@@ -1209,7 +1209,8 @@ w:buildReportCommand p:dependsOn w:unifiedProfileWorkspace .
 w:buildReportRevision a p:Decision ; rdfs:label "Pin the represented release revision and record the actual product and tool digests in the verifier receipt" ;
     p:source w:buildReportCommandPlan ; p:reason "The native wire contract reports one source revision; the companion and its compiler have separate build identities." .
 w:buildReportSourceRecovery a p:Task ; rdfs:label "Recover the ordered profile, journal, engine, configuration and command format references from Rust" ;
-    p:milestone w:marmishMilestone ; p:source w:buildReportCommandPlan ; p:status p:planned ;
+    p:milestone w:marmishMilestone ; p:source w:buildReportCommandPlan ; p:status p:done ;
+    p:evidence w:buildReportStructuralFixture, w:buildReportStructuralReceipt ;
     p:dependsOn w:buildReportCommand ;
     p:acceptance "Link the five source declarations to the report in order, verify widths and conversion rules, and demonstrate a mutation against an independently compiled observer." .
 w:unifiedProfileWorkspaceReceipt a p:Artifact ;
@@ -1223,3 +1224,17 @@ w:buildReportPlanReview a p:Finding ;
     rdfs:label "Separate represented revision from compiled artifact provenance and check widths, formats and native guard precedence" ;
     p:source w:buildReportCommandPlan .
 w:buildReportCommand p:addresses w:buildReportPlanReview .
+
+w:buildReportBindingReview a p:Finding ;
+    rdfs:label "Reject direct primitive and compile-time macro shadowing, and verify native source types" ;
+    p:source w:buildReportCommandPlan .
+w:buildReportSourceRecovery p:addresses w:buildReportBindingReview .
+
+w:buildReportStructuralFixture a p:Artifact ;
+    p:location "verification/build-report-recovery/verify.py" .
+w:buildReportStructuralReceipt a p:Artifact ;
+    p:location "companion:verification/whole/release-info-structure/darwin-arm64/receipt.json" .
+w:buildReportRootMacroReview a p:Finding ;
+    rdfs:label "Reject crate-root reports where unselected modules may export a reserved macro" ;
+    p:source w:buildReportStructuralFixture .
+w:buildReportSourceRecovery p:addresses w:buildReportRootMacroReview .

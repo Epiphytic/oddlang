@@ -1,7 +1,7 @@
 pub mod assemble;
 pub mod binary_frame;
 pub mod binary_record;
-mod build_report;
+pub mod build_report;
 pub mod command_surface;
 pub mod contracts;
 pub mod endpoint_set;
