@@ -68,12 +68,6 @@ def identities(upstream, candidate):
     return revision
 
 
-def snapshot(folder):
-    return {str(p.relative_to(folder)): [stat.S_IMODE(p.lstat().st_mode),
-            hashlib.sha256(p.read_bytes()).hexdigest() if p.is_file() else None]
-            for p in sorted(folder.rglob("*"))}
-
-
 def snapshot(base):
     files = {}
     for path in sorted(base.rglob("*")):
@@ -219,8 +213,11 @@ def failure_locations(log_path, test):
     return [i for i, line in enumerate(log_path.read_text().splitlines(), start=1) if line == needle]
 
 
-def compare(upstream, candidate, directory):
-    revision = identities(upstream, candidate)
+def compare_archived(directory, original_commit, candidate_commit, candidate_tree):
+    """Recompute the comparison solely from authenticated reference and recorded native evidence."""
+    revision = candidate_commit
+    require(original_commit == baseline.PIN, "wrong archived original identity")
+    require(re.fullmatch("[0-9a-f]{40}", revision) and revision != baseline.PIN, "wrong archived candidate identity")
     ori, cand = directory / "original/native", directory / "candidate"
     require(baseline.sha(original.ARCHIVE) == original.DIGEST, "published original archive changed")
     with tarfile.open(original.ARCHIVE, "r:gz") as archive:
@@ -229,7 +226,8 @@ def compare(upstream, candidate, directory):
     original.check(ori.parent)
     a, b = [json.loads((d / "baseline.json").read_bytes()) for d in (ori, cand)]
     require(a["revision"] == baseline.PIN and b["revision"] == revision, "unexpected test provenance")
-    require(b["tree"] == git(candidate, "rev-parse", "HEAD^{tree}").decode().strip(), "candidate tree differs")
+    require(a["tree"] == original.TREE and b["tree"] == candidate_tree and re.fullmatch("[0-9a-f]{40}", candidate_tree),
+            "archived Git tree differs")
     inputs = command_rows(ori, a), command_rows(cand, b)
     original_rows, candidate_rows = inputs
     require(len(original_rows) == 22, "incomplete reference matrix")
@@ -318,6 +316,22 @@ def compare(upstream, candidate, directory):
             exact = (json.dumps(expected_status(prefix, bin_dir), separators=(",", ":")) + "\n").encode()
             require(raw == exact and not (cand / "install-status.stderr").read_bytes(),
                     "wrong installed status output")
+            fixture = probe.get("fixtureBefore", {})
+            require(set(fixture) == {"prefix", "bin", "state", "prefix/.lock",
+                                     "prefix/.marmish-native-install.json"}, "incomplete layout snapshot")
+            receipt = {"format": 1, "install_id": "0123456789abcdef0123456789abcdef",
+                       "prefix": str(prefix), "bin_dir": str(bin_dir), "generation": 0,
+                       "active": None, "launchers": []}
+            hashes = {"prefix/.lock": hashlib.sha256(b"").hexdigest(),
+                      "prefix/.marmish-native-install.json": hashlib.sha256(
+                          (json.dumps(receipt, separators=(",", ":")) + "\n").encode()).hexdigest()}
+            for path, recorded in fixture.items():
+                if isinstance(recorded, dict):
+                    mode, digest = stat.S_IMODE(int(recorded["mode"], 8)), recorded["sha256"]
+                else:
+                    mode, digest = recorded
+                require((mode, digest) == (0o600 if path in hashes else 0o700, hashes.get(path)),
+                        "fixture state differs from seeded inactive layout")
         except (ValueError, KeyError, TypeError):
             regressions.append("installed layout output differs from expected bytes")
     else:
@@ -340,6 +354,13 @@ def compare(upstream, candidate, directory):
               "commandDifferences": command_differences, "regressions": regressions,
               "unobserved": ["release artifacts and installed multi-host cohorts", "native Linux x86-64 and ARM64",
                              "interactive Keychain and Tor", "remote dispatch"]}
+    return result
+
+
+def compare(upstream, candidate, directory):
+    revision = identities(upstream, candidate)
+    tree = git(candidate, "rev-parse", "HEAD^{tree}").decode().strip()
+    result = compare_archived(directory, baseline.PIN, revision, tree)
     save(directory / "qualification.json", result)
     return result
 
