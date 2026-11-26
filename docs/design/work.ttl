@@ -2993,10 +2993,14 @@ w:retainedPollComparison a p:Artifact ;
 w:localRetainedPollRecovery a p:Task ;
     rdfs:label "Resume a client wait after a poll reply becomes available during interruption" ;
     p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
-    p:dependsOn w:boundedLocalWorkflowProgress ; p:status p:active ;
-    p:evidence w:retainedPollComparison ;
+    p:dependsOn w:boundedLocalWorkflowProgress ; p:status p:done ;
+    p:evidence w:retainedPollComparison, w:retainedLocalPollRecoveryReceipt ;
     p:acceptance "After interrupting the waiter at stdout/stderr offsets 8 and 9, the restarted generated client must reproduce the mainline suffixes, exit 7 and acknowledge the reply against the old cursor pair. Verify digest, session and cursor checks before emitting bytes or consuming a retained reply." .
 
 w:deferredOutputControlFinding a p:Finding ;
     rdfs:label "Isolate cursor arithmetic and retained object bounds in the deferred output witness" ;
     p:source w:deferredWorkflowOutputFixture .
+
+w:retainedLocalPollRecoveryReceipt a p:Artifact ;
+    rdfs:label "Source-free client recovers one retained terminal reply, with four independent refusal cases" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/bfc6deac182917d8e47325eee89dea3d4ee1368c/verification/whole/basic-command-interop/retained-poll-recovery-aarch64-apple-darwin.json" .
