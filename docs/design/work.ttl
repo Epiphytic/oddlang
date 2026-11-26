@@ -1145,3 +1145,28 @@ w:copyProtocolStructuralInventory a p:Artifact ;
 
 w:provisionedNativeWorkspaceReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/46> .
+
+w:localProviderLifecyclePlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-local-provider-lifecycle.md" .
+
+w:localProviderLifecycle a p:Task ;
+    rdfs:label "Own real local providers during foreground activation and shutdown" ;
+    p:milestone w:marmishMilestone ; p:source w:localProviderLifecyclePlan ;
+    p:status p:done ; p:evidence w:localProviderReceipt, w:localProviderBarrierFixture ; p:dependsOn w:provisionedNativeWorkspace ;
+    p:acceptance "Retain checked encrypted stores and native account and relay owners under the lease. Replay held direct TLS termination and failures with exact local reports and independent durable-state observations." .
+
+w:localProviderReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/53> .
+
+w:localProviderBarrierFixture a p:Artifact ;
+    p:location "verification/foreground-profile-owner/stages.py" .
+
+w:localProviderBarrierReview a p:Finding ;
+    rdfs:label "Prove terminal account database release and join the native forwarder's delivery worker" ;
+    p:source w:localProviderBarrierFixture .
+
+w:localProviderObservationReview a p:Finding ;
+    rdfs:label "Confirm a held TLS dial before signaling and bind the actual generated manifest to the release receipt" ;
+    p:source w:localProviderReceipt .
+
+w:localProviderLifecycle p:addresses w:localProviderBarrierReview, w:localProviderObservationReview .

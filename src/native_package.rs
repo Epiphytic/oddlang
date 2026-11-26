@@ -416,6 +416,22 @@ fn validate_command_callbacks(components: &[Component], base: &Path) -> Result<(
         .filter(|component| matches!(component.kind, Kind::LocalStatusOwner))
         .flat_map(|component| export_paths(component, "BoundOwner"))
         .collect::<BTreeSet<_>>();
+    let mut retained_stores = BTreeMap::new();
+    for component in components
+        .iter()
+        .filter(|component| matches!(component.kind, Kind::FileProfile))
+    {
+        if let Some(identity) = crate::file_profile::retained_stores(
+            &component.graph.read(base)?,
+            &component.overlay.read(base)?,
+        )? {
+            for path in export_paths(component, "open_retained_stores") {
+                if retained_stores.insert(path, identity.clone()).is_some() {
+                    return Err("duplicate retained store export".into());
+                }
+            }
+        }
+    }
     for component in components {
         let callback = match component.kind {
             Kind::LocalCommandClient => crate::local_command_client::callback(
@@ -426,6 +442,7 @@ fn validate_command_callbacks(components: &[Component], base: &Path) -> Result<(
                 &component.graph.read(base)?,
                 &component.overlay.read(base)?,
                 &status_owners,
+                &retained_stores,
             )?,
             Kind::FileProfile => crate::file_profile::callback(
                 &component.graph.read(base)?,

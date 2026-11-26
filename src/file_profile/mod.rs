@@ -111,6 +111,8 @@ struct Binding {
     signing: SigningProvider,
     #[serde(default)]
     storage: Option<complete::StorageProvider>,
+    #[serde(default)]
+    retained_stores: bool,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -255,7 +257,7 @@ fn load(graph: &[u8], binding: &[u8]) -> Result<(Policy, Binding), String> {
         (Some(initialize), Some(_)) => {
             initialize.validate(&graph)?;
         }
-        (None, None) => (),
+        (None, None) if !binding.retained_stores => (),
         _ => return Err("file profile storage mode and native provider must agree".into()),
     }
     Ok((graph, binding))
@@ -283,6 +285,11 @@ impl Errors {
             ("IO", &self.io),
         ]
     }
+}
+
+pub(crate) fn retained_stores(graph: &[u8], binding: &[u8]) -> Result<Option<String>, String> {
+    let (graph, binding) = load(graph, binding)?;
+    Ok(binding.retained_stores.then_some(graph.id))
 }
 
 pub(crate) fn callback(graph: &[u8], binding: &[u8]) -> Result<Callback, String> {
@@ -427,6 +434,9 @@ fn render(policy: &Policy, binding: &Binding) -> Result<String, String> {
     let arguments = &policy.arguments;
     if let Some(initialize) = &policy.initialize {
         initialize.render(&mut out, policy, binding)?;
+        if binding.retained_stores {
+            out.push_str(include_str!("retained.rs.in"));
+        }
         return Ok(out);
     }
     out.push_str(include_str!("pending.rs.in"));
