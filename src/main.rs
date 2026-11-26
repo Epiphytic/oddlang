@@ -1,24 +1,58 @@
 use oddlang::model::load_model;
 use std::{env, process::ExitCode};
-fn is_framing_mapping(path: &str) -> bool {
+fn mapping_has_profile(path: &str, profile: &str) -> bool {
     std::fs::read_to_string(path)
         .ok()
         .and_then(|text| toml::from_str::<toml::Table>(&text).ok())
         .and_then(|table| table.get("profile")?.as_str().map(str::to_owned))
         .as_deref()
-        == Some("framing-v1")
+        == Some(profile)
 }
 
-fn is_framing_import(path: &str) -> bool {
+fn import_has_profile(path: &str, profile: &str) -> bool {
     let lock = std::path::Path::new(path).join("import.lock");
     std::fs::read(lock)
         .ok()
         .and_then(|bytes| serde_json::from_slice::<serde_json::Value>(&bytes).ok())
-        .is_some_and(|value| value["profile"] == "framing-v1")
+        .is_some_and(|value| value["profile"] == profile)
 }
 
 fn run(args: &[String]) -> Result<(), String> {
     match args {
+        [group, cmd, manifest, mapping, out]
+            if group == "import"
+                && cmd == "rust"
+                && mapping_has_profile(mapping, "rust-facade-v1") =>
+        {
+            oddlang::facade::import(manifest.as_ref(), mapping.as_ref(), out.as_ref())
+        }
+        [group, cmd, dir, flag, pin]
+            if group == "import"
+                && cmd == "verify"
+                && flag == "--import-sha256"
+                && import_has_profile(dir, "rust-facade-v1") =>
+        {
+            oddlang::facade::verify_pinned(dir.as_ref(), pin)
+        }
+        [cmd, kind, dir, out, flag, pin]
+            if cmd == "build"
+                && kind == "module"
+                && flag == "--import-sha256"
+                && import_has_profile(dir, "rust-facade-v1") =>
+        {
+            oddlang::facade::build_pinned(dir.as_ref(), pin, out.as_ref())
+        }
+        [group, cmd, manifest, mapping, dir]
+            if group == "import"
+                && cmd == "replay"
+                && mapping_has_profile(mapping, "rust-facade-v1") =>
+        {
+            let fresh = tempfile::tempdir().map_err(|e| e.to_string())?;
+            let output = fresh.path().join("import");
+            oddlang::facade::import(manifest.as_ref(), mapping.as_ref(), &output)?;
+            oddlang::framing_projection::compare_directories(&output, dir.as_ref())
+        }
+
         [cmd, manifest, store, out] if cmd == "assemble" => {
             oddlang::assemble::assemble(manifest.as_ref(), store.as_ref(), out.as_ref())
         }
@@ -36,7 +70,7 @@ fn run(args: &[String]) -> Result<(), String> {
             oddlang::framing_projection::build(import.as_ref(), out.as_ref())
         }
         [group, cmd, manifest, mapping, out]
-            if group == "import" && cmd == "rust" && is_framing_mapping(mapping) =>
+            if group == "import" && cmd == "rust" && mapping_has_profile(mapping, "framing-v1") =>
         {
             oddlang::framing_import::import(manifest.as_ref(), mapping.as_ref(), out.as_ref())
         }
@@ -66,15 +100,21 @@ fn run(args: &[String]) -> Result<(), String> {
             )
         }
         [group, cmd, dir, output]
-            if group == "import" && cmd == "verify-build" && is_framing_import(dir) =>
+            if group == "import"
+                && cmd == "verify-build"
+                && import_has_profile(dir, "framing-v1") =>
         {
             oddlang::framing_projection::verify_build(dir.as_ref(), output.as_ref())
         }
-        [group, cmd, dir] if group == "import" && cmd == "verify" && is_framing_import(dir) => {
+        [group, cmd, dir]
+            if group == "import" && cmd == "verify" && import_has_profile(dir, "framing-v1") =>
+        {
             oddlang::framing_import::verify(dir.as_ref())
         }
         [group, cmd, manifest, mapping, dir]
-            if group == "import" && cmd == "replay" && is_framing_mapping(mapping) =>
+            if group == "import"
+                && cmd == "replay"
+                && mapping_has_profile(mapping, "framing-v1") =>
         {
             let fresh = tempfile::tempdir().map_err(|e| e.to_string())?;
             let output = fresh.path().join("import");

@@ -28,12 +28,25 @@ fn artifact() -> &'static Imported {
         let scratch = tempfile::tempdir().unwrap();
         let semantic = scratch.path().join("semantic");
         let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(SOURCE);
+        let copy = scratch.path().join("original");
+        fs::create_dir_all(copy.join("src")).unwrap();
+        for name in [
+            "Cargo.toml",
+            "Cargo.lock",
+            "mapping.toml",
+            "src/frame.rs",
+            "src/lib.rs",
+        ] {
+            fs::copy(source.join(name), copy.join(name)).unwrap();
+        }
+        let source = copy;
         framing_import::import(
             &source.join("Cargo.toml"),
             &source.join("mapping.toml"),
             &semantic,
         )
         .unwrap();
+        fs::remove_dir_all(source).unwrap();
         let files = FIXTURE_PATHS
             .into_iter()
             .map(|k| (k.to_owned(), fs::read_to_string(semantic.join(k)).unwrap()))
@@ -385,4 +398,175 @@ fn independently_pinned_release_digest_is_required() {
     fs::write(expected.join("import.lock"), lock.to_owned() + "\n").unwrap();
     assert_eq!(f.run().unwrap_err(), "external framing import pin mismatch");
     assert!(!f.candidate.exists());
+}
+
+fn facade_artifact() -> &'static Imported {
+    static CACHE: OnceLock<Imported> = OnceLock::new();
+    CACHE.get_or_init(|| {
+        let temp = tempfile::tempdir().unwrap();
+        let src = temp.path().join("original");
+        fs::create_dir_all(src.join("src")).unwrap();
+        for (name, text) in [
+            (
+                "Cargo.toml",
+                "[package]\nname='app'\nversion='0.1.0'\nedition='2021'\n[workspace]\n",
+            ),
+            (
+                "Cargo.lock",
+                "version=4\n[[package]]\nname='app'\nversion='0.1.0'\n",
+            ),
+            (
+                "facade.toml",
+                "profile='rust-facade-v1'\npackage='app'\n[exports]\nticket=['Ticket']\n",
+            ),
+            ("src/lib.rs", "mod ticket;\npub use ticket::Ticket;\n"),
+            ("src/ticket.rs", "pub struct Ticket;\n"),
+        ] {
+            fs::write(src.join(name), text).unwrap();
+        }
+        let semantic = temp.path().join("semantic");
+        oddlang::facade::import(&src.join("Cargo.toml"), &src.join("facade.toml"), &semantic)
+            .unwrap();
+        fs::remove_dir_all(src).unwrap();
+        let files: BTreeMap<_, _> = FIXTURE_PATHS
+            .into_iter()
+            .map(|name| {
+                (
+                    name.to_owned(),
+                    fs::read_to_string(semantic.join(name)).unwrap(),
+                )
+            })
+            .collect();
+        let output = temp.path().join("output");
+        oddlang::facade::build_pinned(&semantic, &sha(&files["import.lock"]), &output).unwrap();
+        Imported {
+            files,
+            receipt: fs::read_to_string(output.join("projection.json")).unwrap(),
+            generated: fs::read_to_string(output.join("lib.rs")).unwrap(),
+        }
+    })
+}
+
+fn composite() -> Fixture {
+    let facade = facade_artifact();
+    let f = Fixture::new(
+        &artifact().generated,
+        &[
+            (
+                "model/src/lib.rs",
+                "pub mod frame;\npub use frame::ProbeEnvelope;\n",
+            ),
+            ("app/src/ticket.rs", "pub struct Ticket;\n"),
+            (
+                "app/src/main.rs",
+                "fn main(){let _ = app::Ticket; println!(\"{}\", model::ProbeEnvelope::decode(&model::ProbeEnvelope::encode(&[42]).unwrap()).unwrap()[0]);}\n",
+            ),
+        ],
+    );
+    let mut doc: toml::Table = toml::from_str(&fs::read_to_string(&f.manifest).unwrap()).unwrap();
+    doc.insert("version".into(), 2.into());
+    let mut frame = toml::Table::new();
+    for key in ["graphSha256", "projectionSha256", "importSha256"] {
+        frame.insert(key.to_owned(), doc.remove(key).unwrap());
+    }
+    let target: Value = serde_json::from_str(&artifact().files["import.lock"]).unwrap();
+    doc.insert(
+        "target".into(),
+        target["build"]["target"].as_str().unwrap().into(),
+    );
+    frame.insert("profile".into(), "framing-v1".into());
+    frame.insert("package".into(), "independent-framing".into());
+    let receipt: Value = serde_json::from_str(&facade.receipt).unwrap();
+    let release = sha(&facade.files["import.lock"]);
+    let projection_hash = sha(&facade.receipt);
+    let import = f.store.join("imports").join(&release);
+    fs::create_dir(&import).unwrap();
+    for (name, bytes) in &facade.files {
+        fs::write(import.join(name), bytes).unwrap();
+    }
+    let projection = f.store.join("projections").join(&projection_hash);
+    fs::create_dir(&projection).unwrap();
+    fs::write(projection.join("projection.json"), &facade.receipt).unwrap();
+    fs::write(projection.join("lib.rs"), &facade.generated).unwrap();
+    let second: toml::Value = toml::from_str(&format!("profile='rust-facade-v1'\npackage='app'\ngraphSha256='{}'\nimportSha256='{release}'\nprojectionSha256='{projection_hash}'",receipt["graphSha256"].as_str().unwrap())).unwrap();
+    doc.insert(
+        "emitters".into(),
+        toml::Value::Array(vec![toml::Value::Table(frame), second]),
+    );
+    let rows = doc.get_mut("files").unwrap().as_array_mut().unwrap();
+    let row = rows
+        .iter_mut()
+        .find(|r| r["producer"].as_str() == Some("generated"))
+        .unwrap()
+        .as_table_mut()
+        .unwrap();
+    row.insert("path".into(), "model/src/frame.rs".into());
+    row.insert("emitter".into(), "framing-v1".into());
+    rows.push(toml::from_str(&format!("path='app/src/lib.rs'\nproducer='generated'\nemitter='rust-facade-v1'\nmodule='lib.rs'\nmode='100644'\nsha256='{}'",sha(&facade.generated))).unwrap());
+    fs::write(&f.manifest, toml::to_string(&doc).unwrap()).unwrap();
+    f
+}
+
+#[test]
+fn two_independent_emitters_compile_with_original_inputs_removed() {
+    let f = composite();
+    f.run().unwrap();
+    fs::remove_dir_all(&f.store).unwrap();
+    let run = Command::new("cargo")
+        .args(["run", "--locked", "--offline", "-p", "app"])
+        .current_dir(&f.candidate)
+        .env("CARGO_TARGET_DIR", f.root.path().join("target"))
+        .output()
+        .unwrap();
+    assert!(
+        run.status.success(),
+        "{}",
+        String::from_utf8_lossy(&run.stderr)
+    );
+    assert_eq!(run.stdout, b"42\n");
+}
+
+#[test]
+fn second_emitter_rejects_swaps_extra_blobs_and_coherently_rehashed_native_module() {
+    let f = composite();
+    let project = fs::read_to_string(&f.manifest).unwrap();
+    f.change("emitter = \"rust-facade-v1\"", "emitter = \"framing-v1\"");
+    f.rejected("unverified or reused emitted module");
+    fs::write(&f.manifest, &project).unwrap();
+    let extra = f.store.join("retained").join(sha("undeclared"));
+    fs::write(&extra, "undeclared").unwrap();
+    f.rejected("undeclared store entry");
+    fs::remove_file(extra).unwrap();
+    let facade = facade_artifact();
+    let old_pin = sha(&facade.receipt);
+    let projection = f.store.join("projections").join(&old_pin);
+    let changed = facade.generated.clone() + "// changed\n";
+    let receipt = facade
+        .receipt
+        .replace(&sha(&facade.generated), &sha(&changed));
+    fs::write(projection.join("lib.rs"), &changed).unwrap();
+    fs::write(projection.join("projection.json"), &receipt).unwrap();
+    fs::rename(&projection, projection.with_file_name(sha(&receipt))).unwrap();
+    f.change(&old_pin, &sha(&receipt));
+    f.change(&sha(&facade.generated), &sha(&changed));
+    f.rejected("projection receipt differs from the isolated emitter");
+}
+
+#[test]
+fn second_import_rejects_coherent_graph_and_source_map_rewrite_under_original_release_pin() {
+    let f = composite();
+    let original = &facade_artifact().files;
+    let dir = f.store.join("imports").join(sha(&original["import.lock"]));
+    let graph = original["domain.ttl"].clone() + "\n";
+    let old_graph = sha(&original["domain.ttl"]);
+    let map = original["source-map.json"].replace(&old_graph, &sha(&graph));
+    let lock = original["import.lock"]
+        .replace(&old_graph, &sha(&graph))
+        .replace(&sha(&original["source-map.json"]), &sha(&map));
+    assert_ne!(map, original["source-map.json"]);
+    assert_ne!(lock, original["import.lock"]);
+    fs::write(dir.join("domain.ttl"), graph).unwrap();
+    fs::write(dir.join("source-map.json"), map).unwrap();
+    fs::write(dir.join("import.lock"), lock).unwrap();
+    f.rejected("external facade import pin mismatch");
 }

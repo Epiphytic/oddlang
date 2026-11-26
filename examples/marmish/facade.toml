@@ -1,0 +1,6 @@
+profile = "rust-facade-v1"
+package = "marmish-core"
+
+[exports]
+config = ["ConfigError", "RelaySet", "Retention"]
+frame = ["FrameError", "Limits", "ProbeEnvelope"]

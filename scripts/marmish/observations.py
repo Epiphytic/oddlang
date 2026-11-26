@@ -58,6 +58,25 @@ def observe(binary, case):
     return {"id": case["id"], "operation": operation, "inputSha256": digest(data), "observed": actual}
 
 
+def build_core_consumer(upstream, temp, env):
+    env["CARGO_TARGET_DIR"] = str(temp / "target")
+    rustc = run(["rustc", "+1.97.1", "-Vv"], upstream, env=env).decode().strip()
+    host = next(line.removeprefix("host: ") for line in rustc.splitlines() if line.startswith("host: "))
+    build = run(["cargo", "+1.97.1", "build", "--locked", "--offline", "-p", "marmish-core",
+                 "--lib", "--message-format=json", "--target", host], upstream, env=env)
+    artifacts = [m for s in build.splitlines() if (m := json.loads(s))["reason"] == "compiler-artifact"
+                 and m["target"]["name"] == "marmish_core"]
+    [artifact] = artifacts
+    [rlib] = [Path(p) for p in artifact["filenames"] if p.endswith(".rlib")]
+    deps = temp / "target" / host / "debug/deps"
+    host_deps = temp / "target/debug/deps"
+    consumer = temp / "consumer"
+    run(["rustc", "+1.97.1", "--edition=2024", "--target", host, "--extern",
+         f"marmish_core={rlib}", "-L", f"dependency={deps}", "-L", f"dependency={host_deps}", CONSUMER, "-o", consumer], upstream, env=env)
+    run([consumer, "api"], upstream, env=env)
+    return consumer, build, rustc, host
+
+
 def collect(upstream, output):
     upstream, output = upstream.resolve(), output.resolve()
     table = json.loads(CONTRACT.read_bytes())
@@ -83,21 +102,7 @@ def collect(upstream, output):
     env = dict(os.environ, CARGO_NET_OFFLINE="true", RUSTUP_AUTO_INSTALL="0")
     with tempfile.TemporaryDirectory(prefix="marmish-core-observe-") as temp:
         temp = Path(temp)
-        env["CARGO_TARGET_DIR"] = str(temp / "target")
-        rustc = run(["rustc", "+1.97.1", "-Vv"], upstream, env=env).decode().strip()
-        host = next(line.removeprefix("host: ") for line in rustc.splitlines() if line.startswith("host: "))
-        build = run(["cargo", "+1.97.1", "build", "--locked", "--offline", "-p", "marmish-core",
-                     "--lib", "--message-format=json", "--target", host], upstream, env=env)
-        artifacts = [m for s in build.splitlines() if (m := json.loads(s))["reason"] == "compiler-artifact"
-                     and m["target"]["name"] == "marmish_core"]
-        [artifact] = artifacts
-        [rlib] = [Path(p) for p in artifact["filenames"] if p.endswith(".rlib")]
-        deps = temp / "target" / host / "debug/deps"
-        host_deps = temp / "target/debug/deps"
-        consumer = temp / "consumer"
-        run(["rustc", "+1.97.1", "--edition=2024", "--target", host, "--extern",
-             f"marmish_core={rlib}", "-L", f"dependency={deps}", "-L", f"dependency={host_deps}", CONSUMER, "-o", consumer], upstream, env=env)
-        run([consumer, "api"], upstream, env=env)
+        consumer, build, rustc, host = build_core_consumer(upstream, temp, env)
         [codec_artifact] = [m for s in build.splitlines() if (m := json.loads(s))["reason"] == "compiler-artifact"
                             and m["target"]["name"] == "base64" and m["package_id"].endswith("#base64@0.22.1")]
         [codec_rlib] = [p for p in codec_artifact["filenames"] if p.endswith(".rlib")]

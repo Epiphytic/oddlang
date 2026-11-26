@@ -37,3 +37,27 @@ The store layout is closed. The imported graph, import lock and verified source 
 File paths use slash-separated portable ASCII segments. Each emitted Rust module maps to exactly one generated workspace destination. SHA-256 covers file bytes. The qualified build requires an independently authenticated project manifest. Its `importSha256` pins the exact cache release, alongside the pinned projection receipt, Cargo lock and graph digests. The assembler copies the three import artifacts into a fresh scratch directory and verifies the framing release before generating the module. It compares the emitter's receipt and module bytes directly against the candidate bytes before publication. The original source tree and the candidate projection are absent from the emitter inputs. The generated artifact then retains its locked destination mode and digest.
 
 Literal Rust file includes and Cargo build-script paths must resolve within the staged tree. Retained build scripts and procedural macros are executable inputs. Runtime file reads by those programs require the separate isolated build and dependency inspection to establish a build-closure claim.
+
+## Version 2
+
+A version 2 workspace uses both the framing and Rust facade emitters. Replace the three top-level import, graph and projection digests with two emitter declarations. Keep the top-level Cargo lock digest, selected crates, target and features.
+
+```toml
+[[emitters]]
+profile = "framing-v1"
+package = "contract"
+importSha256 = "<digest of framing import.lock>"
+graphSha256 = "<digest of framing domain.ttl>"
+projectionSha256 = "<digest of framing projection.json>"
+
+[[emitters]]
+profile = "rust-facade-v1"
+package = "contract"
+importSha256 = "<digest of facade import.lock>"
+graphSha256 = "<digest of facade domain.ttl>"
+projectionSha256 = "<digest of facade projection.json>"
+```
+
+Each generated file row adds an `emitter` field naming its profile. Each retained row uses the version 1 fields. Both profiles use the store layout described above. Each import, graph and projection digest must differ between profiles. The import locks identify the package and target. Each generated file must occupy the named Cargo package’s `src/<module>` path. These rules allow the two profiles to contribute modules to the same package or separate packages.
+
+Assembly dispatches each pinned release to its named emitter in a fresh directory, checks the resulting receipt and compares the generated module bytes. The selected modules must consume both receipts in full. The project manifest supplies the independent release pins and must be authenticated by the caller.
