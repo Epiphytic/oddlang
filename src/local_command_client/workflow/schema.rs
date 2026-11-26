@@ -94,6 +94,8 @@ pub(super) struct Transition {
     pub(super) carry: Vec<String>,
     #[serde(default)]
     pub(super) outputs: Vec<BinaryOutput>,
+    #[serde(default)]
+    pub(super) bindings: Vec<BindingCheck>,
     pub(super) fresh_id: Option<String>,
     pub(super) record: Option<Record>,
     #[serde(default)]
@@ -155,9 +157,18 @@ pub(super) struct Rejection {
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
+pub(super) struct BindingCheck {
+    pub(super) id: String,
+    pub(super) left: Source,
+    pub(super) right: Source,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(super) struct BinaryOutput {
     pub(super) id: String,
     pub(super) channel: OutputChannel,
+    pub(super) reply_capture: Option<String>,
     pub(super) bytes: Vec<String>,
     pub(super) cursor: Vec<String>,
     pub(super) start: Option<String>,
@@ -187,6 +198,7 @@ pub(super) enum CaptureKind {
     String { maximum_bytes: u32 },
     Unsigned64,
     ExitStatus,
+    JsonObject { maximum_bytes: u32 },
 }
 
 #[derive(Deserialize)]

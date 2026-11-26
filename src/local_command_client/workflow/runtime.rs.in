@@ -97,6 +97,8 @@ fn capture_is_valid(value: &Value, kind: &CaptureKind) -> bool {
             value.as_str().is_some_and(|text| text.len() <= *maximum_bytes as usize)
         }
         CaptureKind::Unsigned64 => value.as_u64().is_some(),
+        CaptureKind::JsonObject { maximum_bytes } => value.is_object()
+            && serde_json::to_vec(value).is_ok_and(|bytes| bytes.len() <= *maximum_bytes as usize),
         CaptureKind::ExitStatus => value.as_u64().is_some_and(|status| u8::try_from(status).is_ok()),
     }
 }
@@ -200,6 +202,13 @@ async fn run_workflow(
             }
             transferred.insert(name.as_str(), Value::String(id));
         }
+        for binding in &transition.bindings {
+            let left = source_bytes(&binding.left, matches, &transferred, inputs)?;
+            let right = source_bytes(&binding.right, matches, &transferred, inputs)?;
+            if left != right {
+                return reject_reply(step, matches, &captured, inputs);
+            }
+        }
         let captured_exit = match &transition.effect {
             Effect::ExitCaptured { name } => Some(transferred.get(name.as_str())
                 .and_then(Value::as_u64).and_then(|n| u8::try_from(n).ok()).ok_or(PROTOCOL)?),
@@ -210,7 +219,7 @@ async fn run_workflow(
         {
             return Err(BUDGET);
         }
-        match emit_outputs(&reply, &transition.outputs, &captured) {
+        match emit_outputs(&reply, &transition.outputs, &captured, &transferred) {
             Err(error) if error.0 == PROTOCOL.0 && error.1 == PROTOCOL.1 => {
                 return reject_reply(step, matches, &captured, inputs);
             }

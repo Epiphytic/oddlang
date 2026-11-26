@@ -3,6 +3,7 @@
 from base64 import b64encode
 from hashlib import sha256
 import json
+import sys
 from pathlib import Path
 import tempfile
 
@@ -58,6 +59,33 @@ def main():
                               'carry': ['exit-status'], 'effect': {'kind': 'exit_captured', 'name': 'exit-status'}}]},
         ],
     }
+    deferred = '--deferred' in sys.argv[2:]
+    if deferred:
+        cursor, read, _ = graph['steps']
+        graph['entry'] = read['id']
+        initial = read['transitions'][0]
+        initial['when'].pop()
+        initial['capture'].extend([
+            {'name': 'retained-reply', 'path': ['$opened'],
+             'value_kind': {'kind': 'json_object', 'maximum_bytes': 512}},
+            {'name': 'request-hash', 'path': ['$opened', 'binding'],
+             'value_kind': {'kind': 'lower_hex', 'bytes': 32}},
+        ])
+        initial['effect']['step'] = cursor['id']
+        delivery = cursor['transitions'][0]
+        delivery['effect']['step'] = SUFFIX + 'step:ack'
+        delivery['carry'] = ['exit-status', 'retained-reply', 'request-hash']
+        delivery['outputs'] = initial.pop('outputs')
+        for output in delivery['outputs']:
+            output['reply_capture'] = 'retained-reply'
+            for name in ('bytes', 'cursor', 'upper'):
+                if name in output:
+                    output[name] = output[name][1:]
+        delivery['bindings'] = [{'id': SUFFIX + 'binding:previous',
+            'left': {'kind': 'captured', 'name': 'request-hash'},
+            'right': {'kind': 'sha256', 'fields': [
+                field('previous', {'kind': 'captured', 'name': 'previous'})]}}]
+        sample['binding'] = sha256(b'{"previous":5}').hexdigest()
     overlay = {'format': 'oddlang-local-command-client-rust-v1', 'entry': 'measure',
                'delivery_provider': 'base64-sha256'}
     with tempfile.TemporaryDirectory(prefix='owd-', dir='/tmp') as directory:
@@ -98,6 +126,16 @@ tokio = { version = "=1.54.1", features = ["io-util", "net", "rt", "time"] }
         start = [(b'{"cursor":"lookup"}', b'{"ready":true,"previous":5}')]
         read = b'{"action":"read"}'
         confirm = b'{"confirm":"measurement"}'
+        if deferred:
+            serve(binary, path, [(read, wrap(body(sample))), *start, (confirm, b'{"confirmed":true}')],
+                  (7, stdout, stderr), unit=False)
+            serve(binary, path, [(read, wrap(body(sample | {'binding': '0' * 64}))), *start],
+                  (12, b'', b'protocol\n'), unit=False)
+            serve(binary, path, [(read, wrap(body(sample))),
+                                 (start[0][0], b'{"ready":true,"previous":6}')],
+                  (12, b'', b'protocol\n'), unit=False)
+            print('field-meter deferred output waits for the retained hash and current cursor')
+            return
         serve(binary, path, start + [(read, wrap(body(sample))), (confirm, b'{"confirmed":true}')],
               (7, stdout, stderr), unit=False)
         serve(binary, path, start + [(read, wrap(body(sample))), (confirm, b'{"confirmed":false}')],

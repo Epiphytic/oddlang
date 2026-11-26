@@ -40,13 +40,17 @@ fn open_embedded(step: &str, reply: &mut Value, embedded: &EmbeddedReply) -> Res
     Ok(())
 }
 
-fn emit_outputs(reply: &Value, outputs: &[BinaryOutput], captures: &BTreeMap<&str, Value>) -> Result<(), Failure> {
+fn emit_outputs(reply: &Value, outputs: &[BinaryOutput], captures: &BTreeMap<&str, Value>, delivered: &BTreeMap<&str, Value>) -> Result<(), Failure> {
     let mut prepared = Vec::new();
     for output in outputs {
+        let (reply, cursors) = match &output.reply_capture {
+            Some(name) => (delivered.get(name.as_str()).ok_or(PROTOCOL)?, delivered),
+            None => (reply, captures),
+        };
         let bytes = decoded_bytes(reply, &output.bytes, output.maximum_bytes)?;
         let cursor = field_at(reply, &output.cursor, true).and_then(Value::as_u64).ok_or(PROTOCOL)?;
         let start = match &output.start {
-            Some(name) => captures.get(name.as_str()).and_then(Value::as_u64).ok_or(PROTOCOL)?,
+            Some(name) => cursors.get(name.as_str()).and_then(Value::as_u64).ok_or(PROTOCOL)?,
             None => 0,
         };
         let upper = match &output.upper {
