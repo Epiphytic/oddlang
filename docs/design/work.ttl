@@ -1198,3 +1198,9 @@ w:retainedReadbackComposition a p:Finding ;
     rdfs:label "Bind retained journal validation without applying initialization effects" ;
     p:source w:unifiedProfileWorkspacePlan .
 w:unifiedProfileWorkspace p:addresses w:retainedReadbackComposition .
+
+w:buildReportCommandPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-build-report.md" .
+w:buildReportCommand a p:Task ; rdfs:label "Project ordered native build metadata from the release contract" ;
+    p:milestone w:marmishMilestone ; p:source w:buildReportCommandPlan ; p:status p:active ;
+    p:acceptance "Verify actual Cargo target and package-version binding, explicit revision and format values and exact stdout, stderr and exit status with an independent program and both companion roles." .
