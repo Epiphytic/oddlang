@@ -88,10 +88,20 @@ struct Alias {
 #[serde(deny_unknown_fields)]
 struct StringEnum {
     id: String,
+    #[serde(default = "implicit_copy", skip_serializing_if = "is_copyable")]
+    copy: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     numbers: Option<Numbering>,
     variants: Vec<WireVariant>,
 }
+fn implicit_copy() -> bool {
+    true
+}
+
+fn is_copyable(value: &bool) -> bool {
+    *value
+}
+
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 struct Numbering {
