@@ -1,0 +1,845 @@
+{
+  "schema": 1,
+  "upstream_commit": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+  "cases": [
+    {
+      "name": "binary-data-encode",
+      "operation": "frame_encode",
+      "input": {
+        "kind": "data",
+        "offset": 258,
+        "bytes": "00ff7f"
+      },
+      "expected": "050000000b000000000000010200ff7f"
+    },
+    {
+      "name": "binary-data-decode",
+      "operation": "frame_decode",
+      "input": "050000000b000000000000010200ff7f",
+      "expected": {
+        "kind": "data",
+        "offset": 258,
+        "bytes": "00ff7f"
+      }
+    },
+    {
+      "name": "maximum-data-encode",
+      "operation": "frame_encode",
+      "input": {
+        "kind": "data",
+        "offset": 9223372036854767615,
+        "bytes": {
+          "prefix": "",
+          "byte": 170,
+          "repeat": 8192
+        }
+      },
+      "expected": {
+        "prefix": "05000020087fffffffffffdfff",
+        "byte": 170,
+        "repeat": 8192
+      }
+    },
+    {
+      "name": "maximum-data-decode",
+      "operation": "frame_decode",
+      "input": {
+        "prefix": "05000020087fffffffffffdfff",
+        "byte": 170,
+        "repeat": 8192
+      },
+      "expected": {
+        "kind": "data",
+        "offset": 9223372036854767615,
+        "bytes": {
+          "prefix": "",
+          "byte": 170,
+          "repeat": 8192
+        }
+      }
+    },
+    {
+      "name": "checkpoint-encode",
+      "operation": "frame_encode",
+      "input": {
+        "kind": "checkpoint",
+        "offset": 1048576,
+        "sha256": "3608bca1e44ea6c4d268eb6db02260269892c0b42b86bbf1e77a6fa16c3c9282"
+      },
+      "expected": "060000002800000000001000003608bca1e44ea6c4d268eb6db02260269892c0b42b86bbf1e77a6fa16c3c9282"
+    },
+    {
+      "name": "checkpoint-decode",
+      "operation": "frame_decode",
+      "input": "060000002800000000001000003608bca1e44ea6c4d268eb6db02260269892c0b42b86bbf1e77a6fa16c3c9282",
+      "expected": {
+        "kind": "checkpoint",
+        "offset": 1048576,
+        "sha256": "3608bca1e44ea6c4d268eb6db02260269892c0b42b86bbf1e77a6fa16c3c9282"
+      }
+    },
+    {
+      "name": "progress-encode",
+      "operation": "frame_encode",
+      "input": {
+        "kind": "progress",
+        "examined": 513,
+        "total": 513
+      },
+      "expected": "0a000000110200000000000002010000000000000201"
+    },
+    {
+      "name": "progress-decode",
+      "operation": "frame_decode",
+      "input": "0a000000110200000000000002010000000000000201",
+      "expected": {
+        "kind": "progress",
+        "examined": 513,
+        "total": 513,
+        "stage": "PrefixHash"
+      }
+    },
+    {
+      "name": "error-record-encode",
+      "operation": "frame_encode",
+      "input": {
+        "kind": "error"
+      },
+      "expected": "0b000000020900"
+    },
+    {
+      "name": "error-record-decode",
+      "operation": "frame_decode",
+      "input": "0b000000020900",
+      "expected": {
+        "kind": "error",
+        "code": "HashMismatch"
+      }
+    },
+    {
+      "name": "short-header",
+      "operation": "frame_decode",
+      "input": "05000000",
+      "expected": {
+        "error": "Invalid",
+        "detail": "copy_frame"
+      }
+    },
+    {
+      "name": "incorrect-length-before-unknown-tag",
+      "operation": "frame_decode",
+      "input": "ff00000001",
+      "expected": {
+        "error": "Invalid",
+        "detail": "copy_frame_length"
+      }
+    },
+    {
+      "name": "control-limit-before-length-and-tag",
+      "operation": "frame_decode",
+      "input": "ff00004001",
+      "expected": {
+        "error": "Limit"
+      }
+    },
+    {
+      "name": "unknown-tag",
+      "operation": "frame_decode",
+      "input": "ff00000000",
+      "expected": {
+        "error": "Invalid",
+        "detail": "copy_frame_tag"
+      }
+    },
+    {
+      "name": "checkpoint-truncated-hash",
+      "operation": "frame_decode",
+      "input": "0600000027000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "expected": {
+        "error": "Invalid",
+        "detail": "copy_truncated"
+      }
+    },
+    {
+      "name": "checkpoint-trailing-byte",
+      "operation": "frame_decode",
+      "input": "06000000290000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "expected": {
+        "error": "Invalid",
+        "detail": "copy_trailing"
+      }
+    },
+    {
+      "name": "data-empty",
+      "operation": "frame_decode",
+      "input": "05000000080000000000000000",
+      "expected": {
+        "error": "Limit"
+      }
+    },
+    {
+      "name": "data-offset-before-length",
+      "operation": "frame_decode",
+      "input": "05000000088000000000000000",
+      "expected": {
+        "error": "Offset"
+      }
+    },
+    {
+      "name": "data-end-overflow",
+      "operation": "frame_decode",
+      "input": "05000000097fffffffffffffff78",
+      "expected": {
+        "error": "Offset"
+      }
+    },
+    {
+      "name": "data-over-maximum",
+      "operation": "frame_decode",
+      "input": {
+        "prefix": "05000020090000000000000000",
+        "byte": 170,
+        "repeat": 8193
+      },
+      "expected": {
+        "error": "Limit"
+      }
+    },
+    {
+      "name": "progress-unknown-stage-first",
+      "operation": "frame_decode",
+      "input": "0a00000001ff",
+      "expected": {
+        "error": "Invalid",
+        "detail": "copy_enum"
+      }
+    },
+    {
+      "name": "progress-beyond-total",
+      "operation": "frame_decode",
+      "input": "0a000000110200000000000000050000000000000004",
+      "expected": {
+        "error": "Offset"
+      }
+    },
+    {
+      "name": "error-owner-mismatch",
+      "operation": "frame_decode",
+      "input": "0b000000020901",
+      "expected": {
+        "error": "Invalid",
+        "detail": "copy_error_owner"
+      }
+    },
+    {
+      "name": "encode-empty-data-before-overflow",
+      "operation": "frame_encode",
+      "input": {
+        "kind": "data",
+        "offset": 9223372036854775808,
+        "bytes": ""
+      },
+      "expected": {
+        "error": "Limit"
+      }
+    },
+    {
+      "name": "encode-data-offset-overflow",
+      "operation": "frame_encode",
+      "input": {
+        "kind": "data",
+        "offset": 9223372036854775807,
+        "bytes": "ff"
+      },
+      "expected": {
+        "error": "Offset"
+      }
+    },
+    {
+      "name": "fragmented-and-concatenated",
+      "operation": "frame_fragments",
+      "input": [
+        "050000",
+        "000b000000000000010200ff7f0b000000020900",
+        "0b000000020900",
+        "finish"
+      ],
+      "expected": [
+        {
+          "consumed": 3,
+          "frame": null
+        },
+        {
+          "consumed": 13,
+          "frame": {
+            "kind": "data",
+            "offset": 258,
+            "bytes": "00ff7f"
+          }
+        },
+        {
+          "consumed": 7,
+          "frame": {
+            "kind": "error",
+            "code": "HashMismatch"
+          }
+        },
+        "ok"
+      ]
+    },
+    {
+      "name": "fragmented-error-latches",
+      "operation": "frame_fragments",
+      "input": [
+        "ff00000000",
+        "0b000000020900",
+        "finish"
+      ],
+      "expected": [
+        {
+          "error": "Invalid",
+          "detail": "copy_frame_tag"
+        },
+        {
+          "error": "Invalid",
+          "detail": "copy_decoder_failed"
+        },
+        {
+          "error": "Invalid",
+          "detail": "copy_truncated"
+        }
+      ]
+    },
+    {
+      "name": "fragmented-truncated-at-eof",
+      "operation": "frame_fragments",
+      "input": [
+        "050000000b000000000000010200ff",
+        "finish"
+      ],
+      "expected": [
+        {
+          "consumed": 15,
+          "frame": null
+        },
+        {
+          "error": "Invalid",
+          "detail": "copy_truncated"
+        }
+      ]
+    },
+    {
+      "name": "hello-request-encode",
+      "operation": "request_encode",
+      "input": {
+        "binding": {
+          "stream": "abababababababababababababababab",
+          "session": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "client": "efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef",
+          "server": "0101010101010101010101010101010101010101010101010101010101010101"
+        },
+        "sequence": 20
+      },
+      "expected": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"abababababababababababababababab\",\"session\":\"cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"client\":\"efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef\",\"server\":\"0101010101010101010101010101010101010101010101010101010101010101\"},\"sequence\":20,\"message\":{\"direction\":\"request\",\"data\":{\"op\":\"hello\",\"data\":{\"codecs\":[\"none\",\"zlib\"]}}}}"
+    },
+    {
+      "name": "hello-request-decode",
+      "operation": "request_decode",
+      "input": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"abababababababababababababababab\",\"session\":\"cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"client\":\"efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef\",\"server\":\"0101010101010101010101010101010101010101010101010101010101010101\"},\"sequence\":20,\"message\":{\"direction\":\"request\",\"data\":{\"op\":\"hello\",\"data\":{\"codecs\":[\"none\",\"zlib\"]}}}}",
+      "expected": {
+        "binding": {
+          "stream": "abababababababababababababababab",
+          "session": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "client": "efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef",
+          "server": "0101010101010101010101010101010101010101010101010101010101010101"
+        },
+        "sequence": 20,
+        "body": {
+          "op": "hello",
+          "data": {
+            "codecs": [
+              "none",
+              "zlib"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "hello-request-digest",
+      "operation": "request_digest",
+      "input": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"abababababababababababababababab\",\"session\":\"cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"client\":\"efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef\",\"server\":\"0101010101010101010101010101010101010101010101010101010101010101\"},\"sequence\":20,\"message\":{\"direction\":\"request\",\"data\":{\"op\":\"hello\",\"data\":{\"codecs\":[\"none\",\"zlib\"]}}}}",
+      "expected": "85768bb0257cca4de861b7eab2f4c0dcf315523444a974068f107957bcde389b"
+    },
+    {
+      "name": "gap-response-encode",
+      "operation": "response_encode",
+      "input": {
+        "binding": {
+          "stream": "abababababababababababababababab",
+          "session": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "client": "efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef",
+          "server": "0101010101010101010101010101010101010101010101010101010101010101"
+        },
+        "sequence": 20,
+        "request_sha256": "85768bb0257cca4de861b7eab2f4c0dcf315523444a974068f107957bcde389b"
+      },
+      "expected": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"abababababababababababababababab\",\"session\":\"cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"client\":\"efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef\",\"server\":\"0101010101010101010101010101010101010101010101010101010101010101\"},\"sequence\":20,\"message\":{\"direction\":\"response\",\"data\":{\"request_sha256\":\"85768bb0257cca4de861b7eab2f4c0dcf315523444a974068f107957bcde389b\",\"body\":{\"op\":\"error\",\"data\":{\"code\":\"gap\"}}}}}"
+    },
+    {
+      "name": "gap-response-decode",
+      "operation": "response_decode",
+      "input": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"abababababababababababababababab\",\"session\":\"cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"client\":\"efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef\",\"server\":\"0101010101010101010101010101010101010101010101010101010101010101\"},\"sequence\":20,\"message\":{\"direction\":\"response\",\"data\":{\"request_sha256\":\"85768bb0257cca4de861b7eab2f4c0dcf315523444a974068f107957bcde389b\",\"body\":{\"op\":\"error\",\"data\":{\"code\":\"gap\"}}}}}",
+      "expected": {
+        "binding": {
+          "stream": "abababababababababababababababab",
+          "session": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "client": "efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef",
+          "server": "0101010101010101010101010101010101010101010101010101010101010101"
+        },
+        "sequence": 20,
+        "request_sha256": "85768bb0257cca4de861b7eab2f4c0dcf315523444a974068f107957bcde389b",
+        "body": {
+          "op": "error",
+          "data": {
+            "code": "gap"
+          }
+        }
+      }
+    },
+    {
+      "name": "leading-space-noncanonical",
+      "operation": "request_decode",
+      "input": " {\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"abababababababababababababababab\",\"session\":\"cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"client\":\"efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef\",\"server\":\"0101010101010101010101010101010101010101010101010101010101010101\"},\"sequence\":20,\"message\":{\"direction\":\"request\",\"data\":{\"op\":\"hello\",\"data\":{\"codecs\":[\"none\",\"zlib\"]}}}}",
+      "expected": {
+        "error": "Invalid",
+        "detail": "stream_wire"
+      }
+    },
+    {
+      "name": "uppercase-identity",
+      "operation": "request_decode",
+      "input": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"ABABABABABABABABABABABABABABABAB\",\"session\":\"cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"client\":\"efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef\",\"server\":\"0101010101010101010101010101010101010101010101010101010101010101\"},\"sequence\":20,\"message\":{\"direction\":\"request\",\"data\":{\"op\":\"hello\",\"data\":{\"codecs\":[\"none\",\"zlib\"]}}}}",
+      "expected": {
+        "error": "Invalid",
+        "detail": "stream_wire"
+      }
+    },
+    {
+      "name": "duplicate-codec",
+      "operation": "request_decode",
+      "input": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"abababababababababababababababab\",\"session\":\"cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"client\":\"efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef\",\"server\":\"0101010101010101010101010101010101010101010101010101010101010101\"},\"sequence\":20,\"message\":{\"direction\":\"request\",\"data\":{\"op\":\"hello\",\"data\":{\"codecs\":[\"none\",\"none\"]}}}}",
+      "expected": {
+        "error": "Invalid",
+        "detail": "stream_wire"
+      }
+    },
+    {
+      "name": "wrong-direction-request",
+      "operation": "request_decode",
+      "input": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"abababababababababababababababab\",\"session\":\"cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"client\":\"efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef\",\"server\":\"0101010101010101010101010101010101010101010101010101010101010101\"},\"sequence\":20,\"message\":{\"direction\":\"response\",\"data\":{\"request_sha256\":\"85768bb0257cca4de861b7eab2f4c0dcf315523444a974068f107957bcde389b\",\"body\":{\"op\":\"error\",\"data\":{\"code\":\"gap\"}}}}}",
+      "expected": {
+        "error": "Invalid",
+        "detail": "stream_wire"
+      }
+    },
+    {
+      "name": "wrong-direction-response",
+      "operation": "response_decode",
+      "input": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"abababababababababababababababab\",\"session\":\"cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"client\":\"efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef\",\"server\":\"0101010101010101010101010101010101010101010101010101010101010101\"},\"sequence\":20,\"message\":{\"direction\":\"request\",\"data\":{\"op\":\"hello\",\"data\":{\"codecs\":[\"none\",\"zlib\"]}}}}",
+      "expected": {
+        "error": "Invalid",
+        "detail": "stream_wire"
+      }
+    },
+    {
+      "name": "empty-invalid-json",
+      "operation": "request_decode",
+      "input": "",
+      "expected": {
+        "error": "Invalid",
+        "detail": "stream_wire"
+      }
+    },
+    {
+      "name": "codec-uncompressed-encode",
+      "operation": "codec_encode",
+      "input": {
+        "offset": 7,
+        "bytes": "00612aff",
+        "negotiated": "zlib"
+      },
+      "expected": {
+        "offset": 7,
+        "codec": "none",
+        "raw_len": 4,
+        "sha256": "cfbcfbc629c5241a05e27c5ca922b9bf8c68c89ee05fe3e48834d2f198d841de",
+        "data": "AGEq/w=="
+      }
+    },
+    {
+      "name": "codec-uncompressed-decode",
+      "operation": "codec_decode",
+      "input": {
+        "block": {
+          "offset": 7,
+          "codec": "none",
+          "raw_len": 4,
+          "sha256": "cfbcfbc629c5241a05e27c5ca922b9bf8c68c89ee05fe3e48834d2f198d841de",
+          "data": "AGEq/w=="
+        },
+        "negotiated": "none"
+      },
+      "expected": "00612aff"
+    },
+    {
+      "name": "codec-independent-zlib-decode",
+      "operation": "codec_decode",
+      "input": {
+        "block": {
+          "offset": 42,
+          "codec": "zlib",
+          "raw_len": 102,
+          "sha256": "ba42ac903664e676d4cf71d6c4c1260bb8fa74a5d714dc2d9a757d3cea5aecf6",
+          "data": "eJxLTEpOpD0CANt1Jw0="
+        },
+        "negotiated": "zlib"
+      },
+      "expected": "616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263"
+    },
+    {
+      "name": "codec-zlib-encode",
+      "operation": "codec_encode",
+      "input": {
+        "offset": 42,
+        "bytes": "616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263",
+        "negotiated": "zlib"
+      },
+      "expected": {
+        "zlib_roundtrip_hex": "616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263616263",
+        "offset": 42,
+        "sha256": "ba42ac903664e676d4cf71d6c4c1260bb8fa74a5d714dc2d9a757d3cea5aecf6"
+      }
+    },
+    {
+      "name": "codec-unnegotiated-zlib",
+      "operation": "codec_decode",
+      "input": {
+        "block": {
+          "offset": 42,
+          "codec": "zlib",
+          "raw_len": 102,
+          "sha256": "ba42ac903664e676d4cf71d6c4c1260bb8fa74a5d714dc2d9a757d3cea5aecf6",
+          "data": "eJxLTEpOpD0CANt1Jw0="
+        },
+        "negotiated": "none"
+      },
+      "expected": {
+        "error": "Codec"
+      }
+    },
+    {
+      "name": "codec-compressed-truncated",
+      "operation": "codec_decode",
+      "input": {
+        "block": {
+          "offset": 42,
+          "codec": "zlib",
+          "raw_len": 102,
+          "sha256": "ba42ac903664e676d4cf71d6c4c1260bb8fa74a5d714dc2d9a757d3cea5aecf6",
+          "data": "eJxLTEpOpD0CANt1Jw=="
+        },
+        "negotiated": "zlib"
+      },
+      "expected": {
+        "error": "Codec"
+      }
+    },
+    {
+      "name": "codec-compressed-trailing-input",
+      "operation": "codec_decode",
+      "input": {
+        "block": {
+          "offset": 42,
+          "codec": "zlib",
+          "raw_len": 102,
+          "sha256": "ba42ac903664e676d4cf71d6c4c1260bb8fa74a5d714dc2d9a757d3cea5aecf6",
+          "data": "eJxLTEpOpD0CANt1Jw0A"
+        },
+        "negotiated": "zlib"
+      },
+      "expected": {
+        "error": "Codec"
+      }
+    },
+    {
+      "name": "codec-compressed-wrong-digest",
+      "operation": "codec_decode",
+      "input": {
+        "block": {
+          "offset": 42,
+          "codec": "zlib",
+          "raw_len": 102,
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+          "data": "eJxLTEpOpD0CANt1Jw0="
+        },
+        "negotiated": "zlib"
+      },
+      "expected": {
+        "error": "Codec"
+      }
+    },
+    {
+      "name": "codec-compressed-wrong-raw-length",
+      "operation": "codec_decode",
+      "input": {
+        "block": {
+          "offset": 42,
+          "codec": "zlib",
+          "raw_len": 101,
+          "sha256": "ba42ac903664e676d4cf71d6c4c1260bb8fa74a5d714dc2d9a757d3cea5aecf6",
+          "data": "eJxLTEpOpD0CANt1Jw0="
+        },
+        "negotiated": "zlib"
+      },
+      "expected": {
+        "error": "Codec"
+      }
+    },
+    {
+      "name": "send-partial-delivery-and-eof",
+      "operation": "send_window",
+      "input": [
+        {
+          "op": "state"
+        },
+        {
+          "op": "push",
+          "bytes": "ff10"
+        },
+        {
+          "op": "push",
+          "bytes": "203040"
+        },
+        {
+          "op": "read",
+          "offset": 1,
+          "limit": 3
+        },
+        {
+          "op": "ack",
+          "offset": 6
+        },
+        {
+          "op": "state"
+        },
+        {
+          "op": "ack",
+          "offset": 3
+        },
+        {
+          "op": "read",
+          "offset": 2,
+          "limit": 0
+        },
+        {
+          "op": "finish",
+          "offset": 4
+        },
+        {
+          "op": "finish",
+          "offset": 5
+        },
+        {
+          "op": "push",
+          "bytes": ""
+        },
+        {
+          "op": "state"
+        },
+        {
+          "op": "ack",
+          "offset": 5
+        },
+        {
+          "op": "state"
+        }
+      ],
+      "expected": [
+        {
+          "produced": 0,
+          "acknowledged": 0,
+          "buffered": 0,
+          "credit": 262144,
+          "eof": null,
+          "drained": false
+        },
+        0,
+        2,
+        "102030",
+        {
+          "error": "Ack"
+        },
+        {
+          "produced": 5,
+          "acknowledged": 0,
+          "buffered": 5,
+          "credit": 262139,
+          "eof": null,
+          "drained": false
+        },
+        "ok",
+        {
+          "error": "Offset"
+        },
+        {
+          "error": "Eof"
+        },
+        "ok",
+        {
+          "error": "Eof"
+        },
+        {
+          "produced": 5,
+          "acknowledged": 3,
+          "buffered": 2,
+          "credit": 0,
+          "eof": 5,
+          "drained": false
+        },
+        "ok",
+        {
+          "produced": 5,
+          "acknowledged": 5,
+          "buffered": 0,
+          "credit": 0,
+          "eof": 5,
+          "drained": true
+        }
+      ]
+    },
+    {
+      "name": "receive-retry-gap-and-eof",
+      "operation": "receive_window",
+      "input": [
+        {
+          "op": "accept",
+          "offset": 0,
+          "bytes": "0102ff"
+        },
+        {
+          "op": "accept",
+          "offset": 2,
+          "bytes": "ff"
+        },
+        {
+          "op": "accept",
+          "offset": 0,
+          "bytes": "010200"
+        },
+        {
+          "op": "accept",
+          "offset": 0,
+          "bytes": "0102ff"
+        },
+        {
+          "op": "accept",
+          "offset": 4,
+          "bytes": "33"
+        },
+        {
+          "op": "pending",
+          "limit": 2
+        },
+        {
+          "op": "deliver",
+          "offset": 4
+        },
+        {
+          "op": "state"
+        },
+        {
+          "op": "deliver",
+          "offset": 2
+        },
+        {
+          "op": "pending",
+          "limit": 2
+        },
+        {
+          "op": "finish",
+          "offset": 3
+        },
+        {
+          "op": "accept",
+          "offset": 0,
+          "bytes": "0102ff"
+        },
+        {
+          "op": "accept",
+          "offset": 3,
+          "bytes": "33"
+        },
+        {
+          "op": "state"
+        },
+        {
+          "op": "deliver",
+          "offset": 3
+        },
+        {
+          "op": "state"
+        }
+      ],
+      "expected": [
+        true,
+        {
+          "error": "OldRetry"
+        },
+        {
+          "error": "Conflict"
+        },
+        false,
+        {
+          "error": "Gap"
+        },
+        "0102",
+        {
+          "error": "Ack"
+        },
+        {
+          "accepted": 3,
+          "delivered": 0,
+          "buffered": 3,
+          "credit": 262141,
+          "eof": null,
+          "drained": false
+        },
+        "ok",
+        "ff",
+        "ok",
+        false,
+        {
+          "error": "Eof"
+        },
+        {
+          "accepted": 3,
+          "delivered": 2,
+          "buffered": 1,
+          "credit": 0,
+          "eof": 3,
+          "drained": false
+        },
+        "ok",
+        {
+          "accepted": 3,
+          "delivered": 3,
+          "buffered": 0,
+          "credit": 0,
+          "eof": 3,
+          "drained": true
+        }
+      ]
+    }
+  ]
+}

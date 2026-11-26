@@ -10,5 +10,6 @@ pub mod import_rust;
 pub mod interpreter;
 pub mod language;
 pub mod model;
+pub mod rust_roundtrip;
 pub mod targets;
 pub mod wasm;
