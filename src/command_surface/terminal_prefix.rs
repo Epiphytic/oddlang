@@ -1,7 +1,7 @@
 fn terminal_prefix(
     args: &[OsString],
     trigger: &str,
-    globals: &[(&str, Option<&str>, Option<u8>, bool)],
+    globals: &[(&str, Option<&str>, Option<u8>, bool, bool)],
     allowed: &[&str],
     denied: &str,
     auxiliary: Command,
@@ -21,7 +21,7 @@ fn terminal_prefix(
                     .position(|byte| *byte == b'=')
                     .unwrap_or(name.len());
                 (
-                    globals.iter().find(|(_, long, _, _)| {
+                    globals.iter().find(|(_, long, _, _, _)| {
                         long.is_some_and(|long| long.as_bytes() == &name[..boundary])
                     }),
                     boundary != name.len(),
@@ -30,35 +30,43 @@ fn terminal_prefix(
             [b'-', short, rest @ ..] => (
                 globals
                     .iter()
-                    .find(|(_, _, token, _)| token == &Some(*short)),
+                    .find(|(_, _, token, _, _)| token == &Some(*short)),
                 !rest.is_empty(),
             ),
             _ => return None,
         };
-        let (id, _, _, value) = leading?;
+        let (id, _, _, value, hyphen_values) = leading?;
         if attached && !value {
             return None;
         }
         permitted &= allowed.contains(id);
-        index += if *value && !attached { 2 } else { 1 };
+        if *value && !attached {
+            if !hyphen_values && args.get(index + 1)?.as_encoded_bytes().starts_with(b"-") {
+                return None;
+            }
+            index += 2;
+        } else {
+            index += 1;
+        }
     }
-    // The leaf's successful parse is outside this terminal routing profile.
-    // Leave direct selection to the existing auxiliary path and out-of-scope
-    // separators to the primary parser; never dispatch from an auxiliary match.
+    if index == 1 {
+        return None;
+    }
+    if !permitted {
+        return Some(Invocation::Terminal(Error::raw(
+            clap::error::ErrorKind::InvalidValue,
+            format!("{denied}\n"),
+        )));
+    }
+    // A permitted prefix only contributes a terminal parser response.
+    // Neither a separator nor a successful auxiliary parse routes here.
     let tail = &args[index + 1..];
-    if index == 1 || tail.iter().any(|argument| argument == "--") {
+    if tail.iter().any(|argument| argument == "--") {
         return None;
     }
     let label = OsString::from(auxiliary.get_name());
-    let error = auxiliary
+    auxiliary
         .try_get_matches_from(std::iter::once(label).chain(tail.iter().cloned()))
-        .err()?;
-    if permitted {
-        Some(Invocation::Terminal(error))
-    } else {
-        Some(Invocation::Terminal(Error::raw(
-            clap::error::ErrorKind::InvalidValue,
-            format!("{denied}\n"),
-        )))
-    }
+        .err()
+        .map(Invocation::Terminal)
 }

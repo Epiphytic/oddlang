@@ -128,13 +128,35 @@ with tempfile.TemporaryDirectory(prefix="odd-meter-prefix-") as temp:
             assert (ref.returncode, ref.stdout, ref.stderr) == (got.returncode, got.stdout, got.stderr), argv
         outputs.append(run(root / "target/debug/candidate", *CASES[5], check=False).returncode)
         accepted = run(root / "target/debug/candidate", "--brief", "survey", "label", check=False)
-        assert accepted.returncode == 18 or accepted.returncode == 125
+        assert accepted.returncode == 18
+        assert b"unexpected argument 'label'" in accepted.stderr
+        if len(outputs) == 1:
+            denied = ["--agent=east", "survey", "label"]
+            ref = run(root / "target/debug/reference", *denied, check=False)
+            got = run(root / "target/debug/candidate", *denied, check=False)
+            assert (ref.returncode, ref.stdout, ref.stderr) == (got.returncode, got.stdout, got.stderr)
+            assert b"meter: option rejected" in got.stderr
     assert outputs == [18, 0]
     primary["terminal_prefixes"]["survey"]["allowed"].append("missing-option")
     graph.write_text(json.dumps(primary))
     rejected = run(COMPILER, "build", "cli-surface", "rust", graph, binding, root / "invalid.rs", check=False)
     assert rejected.returncode and b"invalid terminal prefix policy" in rejected.stderr
-    source.write_text(SOURCE.replace('matches!(field, "place" | "brief")', 'field.starts_with("p")'))
-    rejected = run(COMPILER, "recover", "cli-terminal-prefix", source, selection, graph, check=False)
-    assert rejected.returncode and b"expected a literal allowlist predicate" in rejected.stderr
+    for invalid, message in (
+        (SOURCE.replace('matches!(field, "place" | "brief")', 'field.starts_with("p")'),
+         b"expected a literal allowlist predicate"),
+        (SOURCE.replace('"place" | "brief"', '"place" | "place"'), b"duplicate allowed option identifier"),
+        (SOURCE.replace("!accept(field)", "accept(field)"), b"expected one direct rejected-prefix branch"),
+        (SOURCE.replace("ErrorKind::InvalidValue", "ErrorKind::UnknownArgument"), b"unsupported raw diagnostic format"),
+    ):
+        source.write_text(invalid)
+        rejected = run(COMPILER, "recover", "cli-terminal-prefix", source, selection, graph, check=False)
+        assert rejected.returncode and message in rejected.stderr
+    primary["terminal_prefixes"] = {"absent": policy}
+    graph.write_text(json.dumps(primary))
+    rejected = run(COMPILER, "build", "cli-surface", "rust", graph, binding, root / "invalid.rs", check=False)
+    assert rejected.returncode and b"invalid terminal prefix policy" in rejected.stderr
+    primary["terminal_prefixes"] = {"survey": {**policy, "denied": "invalid\ntext"}}
+    graph.write_text(json.dumps(primary))
+    rejected = run(COMPILER, "build", "cli-surface", "rust", graph, binding, root / "invalid.rs", check=False)
+    assert rejected.returncode and b"invalid terminal prefix policy" in rejected.stderr
 print("13 terminal cases match in both source revisions; successful parsing stays unbound.")

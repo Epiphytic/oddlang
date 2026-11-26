@@ -1563,3 +1563,8 @@ w:terminalPrefixCli a p:Task ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
     p:dependsOn w:publicDiagnosticsCliConvergence ; p:status p:active ;
     p:acceptance "Verify the original and generated terminal responses for long and short leading options, attached and separate values, root-help precedence and denial, on both ARM64 hosts. Keep successful operational paths outside the projection." .
+
+w:terminalPrefixDenialReview a p:Finding ;
+    rdfs:label "Keep a denied prefix terminal even when the auxiliary tail could parse" ;
+    p:source w:wholeMarmishPlan .
+w:terminalPrefixCli p:addresses w:terminalPrefixDenialReview .

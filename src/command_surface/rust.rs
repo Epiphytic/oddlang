@@ -125,6 +125,7 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> Result<String, String>
                     argument.long.as_deref(),
                     argument.short.map(|byte| byte as u8),
                     argument.kind.is_some(),
+                    argument.allow_hyphen_values,
                 )
             })
             .collect::<Vec<_>>();

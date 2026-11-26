@@ -42,11 +42,13 @@ long and short spellings and single-token value arities. It recognizes
 attached and separate option values. Built-in root help and version retain
 their precedence.
 
-Before changing a response, the projection requires that the auxiliary
-parser return a terminal help or usage result. Successful auxiliary parsing
-continues through the existing unbound primary path. Prefix clusters,
-unrecognized options and explicit separators stay with the primary parser.
-The profile does not project arbitrary pre-parser behavior.
+A denied prefix returns its terminal diagnostic before auxiliary parsing.
+A permitted prefix contributes a response only when the auxiliary parser
+returns help or a usage error. Successful auxiliary parsing continues through
+the existing unbound primary path. Unrecognized options, prefix clusters
+and separate option values that look like flags stay with the primary parser.
+A permitted prefix with a trailing separator does too. The profile does
+not project arbitrary pre-parser behavior.
 
 ```sh
 oddlang recover cli-terminal-prefix MODULE.rs SELECTION.json POLICY.json
