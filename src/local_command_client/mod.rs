@@ -242,6 +242,7 @@ pub(crate) enum RequiredArgument {
     Flag,
     OptionalValue,
     String,
+    RepeatedString,
     Path,
 }
 

@@ -6,6 +6,7 @@ pub mod endpoint_set;
 pub mod evolution;
 pub mod facade;
 pub mod field_relation;
+pub mod foreground_profile_owner;
 pub mod framing_import;
 pub mod framing_projection;
 pub mod http;
