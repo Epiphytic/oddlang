@@ -25,6 +25,8 @@ if (!Object.isFrozen(Sky) || "equals" in Sky || "partialEquals" in Sky || "equal
   throw new Error("comparison surface differs");
 if (Sky.equality !== "none" || Side.equality !== "partial" || Tier.equality !== "total")
   throw new Error("published equality capability differs");
+if (Sky.Clear !== Sky.Clear || Sky.Clear === Sky.Mist)
+  throw new Error("JavaScript strict comparison on the numeric choice differs");
 console.log(JSON.stringify({
   Sky: [Sky.ordinal(Sky.Clear), Sky.ordinal(Sky.Mist), Sky.ordinal(Sky.Cloud)],
   Side: [Side.ordinal(Side.Left), Side.ordinal(Side.Right), Side.partialEquals(Side.Left, Side.Left),

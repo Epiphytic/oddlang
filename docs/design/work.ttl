@@ -1727,3 +1727,8 @@ w:typescriptPlainChoices a p:Task ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
     p:dependsOn w:plainValueChoices ; p:status p:active ;
     p:acceptance "Project the existing ordered choice graph without Rust source or binding. Compare unrelated native Rust and Node witnesses in two revisions, compile TypeScript negative controls, preserve shared obligations, and replay a published data-only graph." .
+
+w:typescriptChoiceHostEquality a p:Finding ;
+    rdfs:label "Distinguish host strict comparison from a declared portable equality operation" ;
+    p:source w:wholeMarmishPlan .
+w:typescriptPlainChoices p:addresses w:typescriptChoiceHostEquality .
