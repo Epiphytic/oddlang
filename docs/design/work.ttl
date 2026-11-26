@@ -1403,3 +1403,11 @@ w:rootPublicDataRawBindingReview a p:Finding ;
     rdfs:label "Resolve raw and self imports by their native binding names" ;
     p:source w:rootPublicDataFixture .
 w:rootPublicData p:addresses w:rootPublicDataRawBindingReview .
+
+w:sixMemberMdkDataPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-six-member-mdk-data.md" .
+w:sixMemberMdkData a p:Task ;
+    rdfs:label "Qualify pure MDK public data in the same sealed six-member workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:sixMemberMdkDataPlan ;
+    p:status p:active ; p:dependsOn w:unifiedRecoveredVaultJournal, w:rootPublicData ;
+    p:acceptance "Preserve all five predecessor member pins and edges. With one compiler, build the sealed six-member workspace on both ARM64 hosts and replay the report, vault, journal and pure MDK witnesses." .
