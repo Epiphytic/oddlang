@@ -12,6 +12,7 @@ pub mod interpreter;
 pub mod json_envelope;
 pub mod language;
 pub mod model;
+pub mod native_package;
 pub mod rust_recovery;
 pub mod rust_roundtrip;
 pub mod tagged_wire;

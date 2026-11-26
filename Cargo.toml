@@ -11,6 +11,7 @@ arrow-avro = { version = "=60.2.0", default-features = false }
 postgres = "0.19"
 
 [dependencies]
+semver = "=1.0.28"
 tempfile = "3.27.0"
 serde = { version = "1", features = ["derive"] }
 sha2 = "0.11"

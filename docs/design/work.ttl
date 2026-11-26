@@ -706,3 +706,8 @@ w:orderedEndpointPolicyReview a p:Finding ;
     p:source w:orderedEndpointPolicyGuardFixture .
 w:orderedEndpointPolicyGuardFixture a p:Artifact ; p:location "verification/endpoint-set/verify.py" .
 w:endpointSetNormalization p:addresses w:orderedEndpointPolicyReview ; p:evidence w:orderedEndpointPolicyGuardFixture .
+w:nativePackageAssembly a p:Task ; rdfs:label "Assemble pinned semantic projections into a native Rust library" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Independently project two unrelated codecs into one private module, expose their selected public types, compile the consumer offline with its pinned dependency closure, and reject inconsistent pins or bindings." ;
+    p:evidence w:nativePackageFixture .
+w:nativePackageFixture a p:Artifact ; p:location "verification/native-package/verify.py" .
