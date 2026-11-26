@@ -1712,7 +1712,9 @@ w:structuralProfileCompiler a p:Task ;
     p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;
     p:dependsOn w:choiceEqualityRecovery, w:observationalRecordDefaults, w:terminalPrefixCli, w:lineGrammarNativeSupport, w:structuredDiagnosticsProgram ;
     p:acceptance "All seven unrelated profile fixtures use the same compiler executable, and the thirteen Rust library tests pass." ;
-    p:status p:done ; p:evidence w:publicApiConvergencePlan .
+    p:status p:done ; p:evidence w:structuralProfileCompilerReceipt .
+w:structuralProfileCompilerReceipt a p:Artifact ;
+    p:location "verification/structural-profile-composition/aarch64-apple-darwin.json" .
 w:structuralApplicationConvergence a p:Task ;
     rdfs:label "Qualify the combined seven-member workspace from the five generic compiler profiles" ;
     p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;

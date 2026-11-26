@@ -29,3 +29,5 @@ From a clean compiler checkout, build with `cargo +1.96.1 build --locked --offli
 - `structured-diagnostics/check.py` and `command-surface/prefix.py`
 
 All seven fixture commands and the 13 library tests passed on Darwin ARM64. They qualify compiler composition. The application checks above require a separate sealed build.
+
+The [compiler qualification receipt](../../../verification/structural-profile-composition/aarch64-apple-darwin.json) also covers the unrelated typed finite error fixture and the two text-grammar integration tests. Repeat these with `python3 -B verification/typed-finite-errors/verify.py "$cli"` and `cargo +1.96.1 test --locked --offline --test text_grammar`.
