@@ -27,6 +27,9 @@ The independent stream comparison including macro expansions left 373 compiler-o
 
 ## Implementation evidence
 
+- [x] Recover scalar byte adapters and bind ordered wire guard failures to typed native error constructors. [Wire schema profile](../../language/json-wire-schema.md)
+
+- [x] Recover and project ordered closed JSON records and adjacent unions. Verify vetted Serde adapters, typed ordered guards and explicit unsupported recovery evidence. [JSON wire schema plan](2026-11-26-json-wire-schema.md)
 - [x] Project bounded positioned integrity blocks. Exercise identity, optional zlib, checked offsets, canonical serialization and declared error precedence with an unrelated native consumer. [Block profile and fixture](../../language/integrity-block.md)
 - [x] Assemble pinned semantic projections into a native library with private module groups, public type reexports, exact dependency closure and a separate offline consumer. [Native package contract and test](../../language/native-package.md)
 

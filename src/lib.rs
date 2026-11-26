@@ -20,3 +20,4 @@ pub mod tagged_wire;
 pub mod targets;
 pub mod value_domain;
 pub mod wasm;
+pub mod wire_schema;
