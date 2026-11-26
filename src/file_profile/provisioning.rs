@@ -54,12 +54,18 @@ struct Column {
 #[derive(Deserialize, Serialize)]
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
 enum Source {
-    Literal { value: serde_json::Value },
+    Literal {
+        value: serde_json::Value,
+    },
     Profile,
     PublicIdentifier,
     Backend,
     Role,
-    AnyMember { field: String },
+    AnyMember {
+        field: String,
+        #[serde(default)]
+        active_role_only: bool,
+    },
     Changed,
     Created,
     Opened,
@@ -147,7 +153,7 @@ impl Provisioning {
             }
         }
         if self.report.is_empty() || !distinct(self.report.iter().map(|c|c.name.as_str()))
-            || self.report.iter().any(|c| matches!(&c.source,Source::AnyMember{field} if !self.sets.iter().any(|s|&s.field==field))) {
+            || self.report.iter().any(|c| matches!(&c.source,Source::AnyMember{field, ..} if !self.sets.iter().any(|s|&s.field==field))) {
             return Err("invalid provisioning report column".into());
         }
         for diagnostic in [
@@ -238,8 +244,26 @@ impl Provisioning {
                 Source::PublicIdentifier => "result.identifier".into(),
                 Source::Backend => "PROVISION_FILE".into(),
                 Source::Role => "result.config[PROVISION_ROLE_FIELD]".into(),
-                Source::AnyMember { field } => {
-                    format!("!result.config[{field:?}].as_array().ok_or(CONFIG_FORMAT)?.is_empty()")
+                Source::AnyMember {
+                    field,
+                    active_role_only,
+                } => {
+                    let present = format!(
+                        "!result.config[{field:?}].as_array().ok_or(CONFIG_FORMAT)?.is_empty()"
+                    );
+                    if *active_role_only {
+                        let set = self
+                            .sets
+                            .iter()
+                            .find(|set| &set.field == field)
+                            .ok_or_else(|| format!("unknown membership field {field}"))?;
+                        format!(
+                            "{:?}.contains(&result.config[PROVISION_ROLE_FIELD].as_str().ok_or(CONFIG_FORMAT)?) && {present}",
+                            set.roles
+                        )
+                    } else {
+                        present
+                    }
                 }
                 Source::Changed => "result.changed".into(),
                 Source::Created => "result.created".into(),

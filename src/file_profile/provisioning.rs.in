@@ -50,7 +50,7 @@ fn provision_members(
                         CONFIG_FORMAT
                     });
                 }
-                nostr::key::PublicKey::from_hex(value).map_err(|_| CONFIG_FORMAT)?
+                nostr::key::PublicKey::from_hex(value).map_err(|_| if external { PROVISION_MEMBER } else { CONFIG_FORMAT })?
             };
             Ok(key.to_hex())
         })
@@ -139,12 +139,10 @@ fn validate_provision_fields(
         return Err(CONFIG_FORMAT);
     }
     for (key, default) in defaults {
-        if let Some((_, _, _, _, allowed)) = MEMBERSHIPS.iter().find(|set| set.0 == key) {
+        if MEMBERSHIPS.iter().any(|set| set.0 == key) {
             let values: Vec<String> =
                 serde_json::from_value(fields[key].clone()).map_err(|_| CONFIG_FORMAT)?;
-            if provision_members(&values, false)?.len() != values.len()
-                || (!values.is_empty() && !allowed.contains(&role))
-            {
+            if provision_members(&values, false)?.len() != values.len() {
                 return Err(CONFIG_FORMAT);
             }
         } else if key != PROVISION_ROLE_FIELD && fields[key] != *default {
@@ -199,7 +197,7 @@ fn provision_document(
         .iter()
         .find(|(name, _)| *name == role)
         .map(|(_, role)| *role)
-        .ok_or(CONFIG_FORMAT)?;
+        .ok_or(PROVISION_MEMBER)?;
     document[PROVISION_ROLE_FIELD] = Value::from(role);
     let route = global
         .try_get_one::<String>(PROVISION_ROUTE)
@@ -255,9 +253,6 @@ fn provision_document(
         }
         if empty && !set.is_empty() {
             return Err(PROVISION_REMOVE);
-        }
-        if !set.is_empty() && !roles.contains(&role) {
-            return Err(CONFIG_FORMAT);
         }
         if set.len() > PROVISION_MAX {
             return Err(PROVISION_MEMBER);
