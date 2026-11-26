@@ -1,0 +1,78 @@
+{
+  "attempts": [
+    {
+      "case": "success",
+      "elapsed_ns": 301395331125,
+      "matched": false,
+      "repetition": 0,
+      "result": {
+        "status": 255,
+        "stderr": {
+          "bytes": 324,
+          "sha256": "e6247d6db666007c399fa34fc9f35c2b5dc47db8bf88a0b779c4e2a3291bdca0"
+        },
+        "stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "temperature": "cold"
+    }
+  ],
+  "both_upstream_owners_active": true,
+  "build_record_sha256": "20626333b5d35f320306303df40f6a4a28953a5a0a8f9b9d6750f4b2442361f3",
+  "cleanup_verification": "passed",
+  "client_active": true,
+  "distinct_identities": true,
+  "explicit_peer_authorization_verified": true,
+  "failure_type": "ValueError",
+  "fixture_sha256": "d9230b3ab14404a5f8abc95958e364070747fa610716217a309f2f29bc82854a",
+  "host_preferences_metadata_unchanged": true,
+  "isolated_file_credentials": true,
+  "outcome": "blocked",
+  "owned_onion_constructed": true,
+  "platform": "macos-arm64",
+  "reference_binary_sha256": {
+    "marmish": "8097469a154ba7cf3a5a4d4848537f7ce72ba9f767f90ab7362aba8074842ac7",
+    "marmish-engine-bridge": "225814a08efca7c3c408816856340f4c8ccc5bf832060956cb8abf8f955f71d4",
+    "marmish-engine-worker": "e2c92b02e0530af38502f67fd0f5221051aebb4010c39ef4d8a7b1be3601c842",
+    "marmish-keychain": "24f948313871451e29acd666d042a1a417d0a74e7e7c930bc1852c401d175a33",
+    "marmish-release-tool": "197604da722f307864dc8118a1f3c5b59ead55cfc2e344b1aa810dbd157f37a0",
+    "marmish-worker": "b95f465c76232d8b93498cb4db5c33017273042ad2263353366bb018e9650501",
+    "marmishd": "f35024f7a3a342392d36b83e4348f7bf0ea65d9e39b9358425c8249592038f41"
+  },
+  "reference_complete": false,
+  "relay_sha256": "7c5cbfee478f225bdfe8d5b83bf17612772adf8ead13e36d7d47a02ba24e14e3",
+  "sandbox_probes": true,
+  "schema": 1,
+  "server_active": true,
+  "setups": {
+    "client": {
+      "status": 0,
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 314,
+        "sha256": "f4ce8e683cc9fcdab1587d22b3a83aa06326bab49f52ab6a5c223ac4f833a1b9"
+      }
+    },
+    "server": {
+      "status": 0,
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 314,
+        "sha256": "c9593c38893fc6bde5fdff796b07617f9546266ace760373e8ddefc3545999a2"
+      }
+    }
+  },
+  "short_fixture_sha256": "84372c476ec162ca18e6dd6004d1df68e70ae4101c3555bf9e3875f0f1000b0c",
+  "short_interpreter_sha256": "0bd93edaf7552f46edeb6bda6ad5388982d9b45e85c2b5c84e730a5eaadac76d",
+  "stage": "command-corpus",
+  "upstream": "af54339d250290490d62d4475a77539b7e739071",
+  "workspace_removed": true
+}
