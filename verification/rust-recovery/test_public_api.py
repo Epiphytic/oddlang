@@ -46,10 +46,12 @@ with tempfile.TemporaryDirectory() as temp:
         ("Clone, Copy", "Clone"),
         ("const LIMIT: u16", "const LIMIT: u32"),
         ("pub fn read", "fn read"),
+        ("-> u16 { self.0 + pressure.len() as u16 }",
+         "-> u32 { u32::from(self.0) + pressure.len() as u32 }"),
     ], 2):
         probe = witness(root, SOURCE.replace(before, after), index)
         probe.check_returncode()
         assert json.loads(probe.stdout) != facts, (before, after)
     outside = witness(root, SOURCE.replace("pub struct Sample(u16)", "pub struct Sample(pub u16)"), 9)
     assert outside.returncode != 0 and "public tuple field" in outside.stderr
-    print("two equivalent facades matched, five public changes distinguished, unsupported shape rejected")
+    print("two equivalent facades matched, six public changes distinguished, unsupported shape rejected")
