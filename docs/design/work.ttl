@@ -2403,3 +2403,13 @@ w:privateManifestSuiteDarwin a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/cb6e38f463fece606f6b0e8c5fb2f920c46dfa16/verification/whole/suite/manifest-aarch64-apple-darwin.json" .
 w:privateManifestSuiteLinux a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/cb6e38f463fece606f6b0e8c5fb2f920c46dfa16/verification/whole/suite/manifest-aarch64-unknown-linux-gnu.json" .
+
+w:observationalRecordDefaultsDarwin a p:Artifact ;
+    p:location "companion:verification/whole/engine-native-records/aarch64-apple-darwin.json" .
+w:observationalRecordDefaultsLinux a p:Artifact ;
+    p:location "companion:verification/whole/engine-native-records/aarch64-unknown-linux-gnu.json" .
+w:observationalRecordDefaultsMutation a p:Artifact ;
+    p:location "companion:verification/whole/engine-native-records/source-mutation-aarch64-apple-darwin.json" .
+w:observationalRecordDefaultsCoverage a p:Artifact ;
+    p:location "companion:verification/whole/engine-native-records/README.md" .
+w:observationalRecordDefaults p:evidence w:observationalRecordDefaultsDarwin, w:observationalRecordDefaultsLinux, w:observationalRecordDefaultsMutation, w:observationalRecordDefaultsCoverage .
