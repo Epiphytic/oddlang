@@ -1,5 +1,5 @@
 use super::{RequiredArgument, arg_id, argument_kind, identity, schema};
-use serde_json::Value;
+use serde_json::{Value, json};
 use std::{collections::BTreeSet, fmt::Write};
 
 #[allow(dead_code)] // The generated native loader executes these declarations.
@@ -70,7 +70,9 @@ pub(super) fn validate<'a>(
         return Err("workflow profile fields must have distinct names".into());
     }
     for rule in &doc.relay_rules {
+        identity(&rule.id, seen)?;
         if !matches!(rule.scheme.as_str(), "ws" | "wss")
+            || (rule.v3_onion && rule.host_suffix.as_deref() != Some(".onion"))
             || rule.routes.is_empty()
             || rule.routes.iter().any(|route| route.is_empty())
             || rule
@@ -82,6 +84,7 @@ pub(super) fn validate<'a>(
         }
     }
     for check in &doc.checks {
+        identity(&check.id, seen)?;
         if !checked.insert(&check.field)
             || check.field.is_empty()
             || matches!(&check.test, InputTest::OneOf { values } if values.is_empty()
@@ -141,6 +144,50 @@ pub(super) fn validate<'a>(
         return Err("invalid or duplicate configured workflow output name".into());
     }
     Ok((arguments, names))
+}
+
+pub(super) fn reserved_entry(entry: &str) -> bool {
+    [
+        "private_openat",
+        "private_metadata",
+        "get_account",
+        "lower_hex",
+        "account_set",
+        "canonical_relays",
+        "valid_v3_onion",
+        "timestamped_id",
+        "profile_flag",
+        "read_command_stdin",
+        "load_profile_document",
+        "context_values",
+    ]
+    .contains(&entry)
+}
+
+pub(super) fn obligations(policy: &Value) -> Value {
+    let document = &policy["document"];
+    let mut rows = vec![json!({
+        "declaration": policy["id"], "role": "authorized-workflow-inputs",
+        "argumentSource": "explicitCommandLine",
+        "documentAccess": "readOnlyDescriptorRelativeNoFollow",
+        "relayOrder": "canonicalLexicographicUnique",
+        "profilePolicy": policy,
+    })];
+    for rule in document["checks"].as_array().into_iter().flatten() {
+        rows.push(
+            json!({"declaration": rule["id"], "role": "private-document-check", "value": rule}),
+        );
+    }
+    for rule in document["relay_rules"].as_array().into_iter().flatten() {
+        rows.push(
+            json!({"declaration": rule["id"], "role": "authorized-relay-rule", "value": rule}),
+        );
+    }
+    json!({
+        "format": "oddlang-private-workflow-input-obligations-v1",
+        "qualification": "independent-witness-required",
+        "obligations": rows,
+    })
 }
 
 pub(super) fn render(policy: &ProfileInputs, out: &mut String) {

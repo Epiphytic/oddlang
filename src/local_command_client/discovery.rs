@@ -155,8 +155,10 @@ fn iri(id: &str, seen: &mut BTreeSet<String>) -> Result<(), String> {
 }
 
 impl Discovery {
-    pub(super) fn selects_profile(&self, state: &str, profile: &str) -> bool {
-        self.state_argument == state && self.profile_argument == profile
+    pub(super) fn selects_profile(&self, state: &str, profile: &str, default: &str) -> bool {
+        self.state_argument == state
+            && self.profile_argument == profile
+            && self.default_profile == default
     }
 
     pub(super) fn obligations(&self) -> serde_json::Value {
