@@ -16,3 +16,32 @@ The original build accepts its compile-time revision override or captures Git HE
 Compare global flags, including rejected foreground, session and server limits and joint failures; compare usage errors. Qualify the no-startup-reporter environment. Installed-layout checks, descriptor-based startup reporting, broken output pipes, worker exact-argv, and installed-check and installed-fixture metadata entry points each retain separate conformance obligations. Cross-compilation uses Cargo's TARGET; execution on Linux amd64 and custom targets requires separate evidence.
 
 [Native ARM64 qualification](https://github.com/Epiphytic/marmish-oddlang/pull/60)
+
+## Structural recovery
+
+`oddlang recover build-report ROOT SELECTION OUTPUT` reads SHA-256-pinned Rust
+modules. The selection identifies ordinary crate roots, the loaded module path,
+a named record and its local constructor. Build-role bindings identify which
+compile-time strings represent Cargo's target and the represented revision.
+A pinned revision remains an input release fact.
+
+The bounded subset recovers derived Serde record fields in declaration order,
+with optional literal wire names. It accepts unsigned scalar literals,
+compile-time string inputs, and fixed arrays of named integer constants. The
+resolver follows plain external module declarations and direct constant
+aliases to typed literals across selected crates. Unsupported conditional or
+ambiguous definitions fail recovery. A separate ordered reference list keeps
+stable constant identities, signedness and width, alias links, and identity,
+unsigned widening and modular cast rules. The renderer calculates the list
+from these facts. Legacy literal arrays continue to encode as before.
+
+Recovery records candidates and file hashes. Native compiler and runtime
+checks establish the external crate name and role binding for each selected
+release. They do not qualify arbitrary conditional Rust module graphs, build
+scripts, serde customizations or other command behavior.
+
+- [x] Recover and render ordered declarations, and exercise a renamed fixture
+  with signed wrapping, unsigned widening, conditional definitions and
+  visibility and namespace controls.
+- [ ] Compare native original and generated client and daemon outputs, and
+  mutate the original engine declaration behind its public alias.
