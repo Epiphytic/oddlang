@@ -10,6 +10,12 @@
     "wireBytes": "MESSAGE",
     "recordLineBytes": "RECORD"
   },
+  "variantOrder": [
+    "urn:test:thumbnail:TooLarge",
+    "urn:test:thumbnail:Malformed",
+    "urn:test:thumbnail:UnexpectedRevision",
+    "urn:test:thumbnail:BadBinary"
+  ],
   "variants": {
     "urn:test:thumbnail:TooLarge": "TooLarge",
     "urn:test:thumbnail:Malformed": "Malformed",

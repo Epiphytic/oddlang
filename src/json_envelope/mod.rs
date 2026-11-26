@@ -293,6 +293,12 @@ impl Binding {
                 return Err("variantOrder must list every error IRI exactly once".into());
             }
         }
+        if [&self.codec_type, &self.limits_type, &self.error_type]
+            .iter()
+            .any(|name| name.as_str() == "oddlang_json_record")
+        {
+            return Err("Rust API type name conflicts with the generated Rust module".into());
+        }
         let groups = [
             vec![&self.codec_type, &self.limits_type, &self.error_type],
             vec![

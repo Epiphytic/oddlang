@@ -6,12 +6,12 @@ const CONSUMER: &str = include_str!("fixtures/json-envelope/consumer.rs");
 const MANIFEST: &str = include_str!("fixtures/json-envelope/Cargo.toml");
 const LOCK: &str = include_str!("fixtures/json-envelope/Cargo.lock");
 
-fn project(root: &Path, name: &str, graph: &str) -> std::process::Output {
+fn project(root: &Path, name: &str, graph: &str, binding_text: &str) -> std::process::Output {
     let graph_dir = root.join(format!("{name}-graph"));
     fs::create_dir(&graph_dir).unwrap();
     fs::write(graph_dir.join("domain.ttl"), graph).unwrap();
     let binding = graph_dir.join("binding.json");
-    fs::write(&binding, BINDING).unwrap();
+    fs::write(&binding, binding_text).unwrap();
     Command::new(env!("CARGO_BIN_EXE_oddlang"))
         .args(["build", "json-envelope", "rust"])
         .arg(graph_dir)
@@ -53,7 +53,7 @@ fn generic_envelope_produces_a_native_codec_for_an_unchanged_consumer() {
         ("reordered", &reordered),
         ("tuple", &tuple),
     ] {
-        let output = project(root, name, graph);
+        let output = project(root, name, graph, BINDING);
         assert!(
             output.status.success(),
             "{}",
@@ -110,11 +110,27 @@ fn malformed_relationships_and_unsafe_guard_order_are_rejected() {
             GRAPH.replace("c:value 13", "c:value 4294967296"),
         ),
     ] {
-        let output = project(scratch.path(), name, &graph);
+        let output = project(scratch.path(), name, &graph, BINDING);
         assert!(!output.status.success(), "accepted {name}");
         assert!(
             !scratch.path().join(name).exists(),
             "published incomplete output"
         );
+    }
+}
+
+#[test]
+fn binding_rejects_private_rust_namespace_collisions_before_publishing() {
+    let scratch = tempfile::tempdir().unwrap();
+    for (name, original) in [
+        ("codec", "Thumbnail"),
+        ("bounds", "Bounds"),
+        ("error", "ReadError"),
+    ] {
+        let binding = BINDING.replace(original, "oddlang_json_record");
+        let output = project(scratch.path(), name, GRAPH, &binding);
+        assert!(!output.status.success());
+        assert!(String::from_utf8_lossy(&output.stderr).contains("generated Rust module"));
+        assert!(!scratch.path().join(name).exists());
     }
 }

@@ -13,6 +13,10 @@ mod tuple;
 fn caller_keeps_the_bound_api_and_wire_contract() {
     use baseline::{Bounds, ReadError, Thumbnail};
     let _ = Bounds::default();
+    assert_eq!(ReadError::TooLarge as isize, 0);
+    assert_eq!(ReadError::Malformed as isize, 1);
+    assert_eq!(ReadError::UnexpectedRevision as isize, 2);
+    assert_eq!(ReadError::BadBinary as isize, 3);
     assert_eq!(
         (Bounds::PIXELS, Bounds::MESSAGE, Bounds::RECORD),
         (4, 52, 80)

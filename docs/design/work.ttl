@@ -685,3 +685,8 @@ w:boundedJsonEnvelopeProjection a p:Task ;
     p:evidence w:boundedJsonEnvelopeFixture .
 w:boundedJsonEnvelopeFixture a p:Artifact ; p:location "tests/json_envelope.rs" .
 w:wholeMarmishProtocols p:dependsOn w:boundedJsonEnvelopeProjection .
+
+w:boundedJsonEnvelopeBindingReview a p:Finding ;
+    rdfs:label "Reject native type names that collide with the generated module and verify public error ordinals" ;
+    p:source w:boundedJsonEnvelopeFixture .
+w:boundedJsonEnvelopeProjection p:addresses w:boundedJsonEnvelopeBindingReview .
