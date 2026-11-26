@@ -1454,3 +1454,15 @@ w:sevenMemberBufferedDarwin a p:Artifact ;
 w:sevenMemberBufferedLinux a p:Artifact ;
     p:location "companion:verification/whole/unified-buffered/aarch64-unknown-linux-gnu.json" .
 w:sevenMemberBufferedWorkspace p:evidence w:sevenMemberBufferedDarwin, w:sevenMemberBufferedLinux .
+
+w:publicConstantPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-public-constant.md" .
+w:publicConstantRecovery a p:Task ;
+    rdfs:label "Recover public unsigned constant declarations and products" ;
+    p:milestone w:marmishMilestone ; p:source w:publicConstantPlan ;
+    p:dependsOn w:sharedTypedDeclarations ;
+
+    p:acceptance "Bind the declared public symbol to real Rust compiler evidence and preserve its literal or multiplication expression in the existing portable shared-declarations graph. Replay an unrelated baseline and changed source through downstream native callers." ;
+    p:status p:done ; p:evidence w:publicConstantFixture .
+w:publicConstantFixture a p:Artifact ;
+    p:location "verification/public-constant/verify.py" .
