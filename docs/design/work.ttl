@@ -1071,5 +1071,9 @@ w:publicTypeBindingCutFinding a p:Finding ;
 w:publicTypeBindingGraph p:addresses w:publicTypeBindingCutFinding .
 
 w:publicTypeWorkspaceAudit a p:Task ; rdfs:label "Qualify upstream and generated workspace libraries and compile changed native import spellings" ;
-    p:milestone w:marmishMilestone ; p:source w:publicTypeBindingPlan ; p:dependsOn w:publicTypeBindingGraph ; p:status p:active ;
+    p:milestone w:marmishMilestone ; p:source w:publicTypeBindingPlan ; p:dependsOn w:publicTypeBindingGraph ; p:status p:done ; p:evidence w:publicTypeWorkspaceReceipts ;
     p:acceptance "Compare all available release libraries at a pinned default profile; compile each native public spelling against its counterpart, preserving differences in importability and type namespace." .
+
+w:publicTypeWorkspaceReceipts a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/58> .
+w:nativePublicApiGap a p:Finding ; rdfs:label "All 36 original native library public type imports fail against the generated v5 and v6 libraries" ;
+    p:source w:publicTypeWorkspaceReceipts .
