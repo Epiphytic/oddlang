@@ -187,7 +187,13 @@ pub(super) fn validate(response: &Response) -> Result<(), String> {
         || response.ordered_sequence_minimum.is_some()
         || response.id.is_some()
         || response.fields.iter().any(|field| {
-            field.id.is_some() || field.default || matches!(field.kind, ValueType::Shape(_))
+            field.id.is_some()
+                || field.default
+                || matches!(
+                    field.kind,
+                    ValueType::Shape(_)
+                        | ValueType::Primitive(Primitive::U8 | Primitive::U32 | Primitive::U64)
+                )
         });
     if typed || response.id.is_some() {
         insert_id(

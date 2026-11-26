@@ -189,6 +189,15 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
         invalid = subprocess.run([ODDLANG, "build", "local-command-client", "rust", root / (name + ".json"),
                                   root / "binding.json", root / name], capture_output=True)
         assert invalid.returncode and error in invalid.stderr and not (root / name).exists(), invalid.stderr
+    anonymous = json.loads((root / "graph.json").read_bytes())
+    anonymous["response"]["fields"][0]["kind"] = "u8"
+    write("anonymous-unsigned.json", anonymous)
+    invalid = subprocess.run(
+        [ODDLANG, "build", "local-command-client", "rust", root / "anonymous-unsigned.json",
+         root / "binding.json", root / "anonymous"], capture_output=True,
+    )
+    assert invalid.returncode and b"typed reply needs a root declaration identity" in invalid.stderr
+    assert not (root / "anonymous").exists()
     manifest["components"][1]["graph"] = pin("graph.json")
 
     def reject_link(message, output):

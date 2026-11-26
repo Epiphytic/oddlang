@@ -816,7 +816,7 @@ w:typedLocalCommandReplies a p:Task ;
 w:typedLocalCommandNativeReceipt a p:Artifact ;
     p:location "companion:verification/whole/status/generated-typed-macos-arm64.json" .
 w:typedLocalReplySequenceDefaultReview a p:Finding ;
-    rdfs:label "Keep the declared positional arity consistent with nullable default fields" ;
+    rdfs:label "Keep positional arity consistent with defaults and require stable identities for unsigned replies" ;
     p:source w:localCommandClientFixture .
 w:typedLocalCommandReplies p:addresses w:typedLocalReplySequenceDefaultReview .
 w:typedLocalCommandRepliesPlan a p:Artifact ;
