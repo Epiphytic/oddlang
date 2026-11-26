@@ -1316,3 +1316,8 @@ w:publicRecordEditionResolution a p:Finding ;
     rdfs:label "Bind bare glob lookup to a pinned Cargo edition" ;
     p:source w:publicObservationalRecordsPlan .
 w:publicObservationalRecords p:addresses w:publicRecordEditionResolution .
+
+w:publicRecordImportIdentity a p:Finding ;
+    rdfs:label "Check raw identifier and grouped self imports by their Rust binding identities" ;
+    p:source w:publicObservationalRecordsPlan .
+w:publicObservationalRecords p:addresses w:publicRecordImportIdentity .

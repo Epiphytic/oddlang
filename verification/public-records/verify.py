@@ -143,6 +143,14 @@ with tempfile.TemporaryDirectory() as directory:
     recover(work/"unknown-type","unsupported public record field type")
     records.write_text("use crate::CustomString as String;\n" + DECLARATION)
     recover(work/"shadowed-type","shadowed public record type")
+    for label, binding in (
+        ("raw-import", "use crate::other::r#String;"),
+        ("raw-declaration", "pub struct r#String;"),
+        ("grouped-self", "use crate::String::{self};"),
+        ("renamed-self", "use crate::Other::{self as String};"),
+    ):
+        records.write_text(binding+"\n"+DECLARATION)
+        recover(work/label,"shadowed public record type")
     records.write_text(DECLARATION)
     selection["modules"][1]["aliases"]["Archived"] = ROOT+":reading"
     recover(work/"duplicate-id","duplicate public record identity")

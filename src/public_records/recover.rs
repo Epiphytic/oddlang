@@ -1,7 +1,7 @@
 use super::*;
 use syn::{
     Attribute, GenericArgument, Item, ItemStruct, ItemUse, PathArguments, Token, Type, UseTree,
-    Visibility, punctuated::Punctuated,
+    Visibility, ext::IdentExt, punctuated::Punctuated,
 };
 
 #[derive(Deserialize)]
@@ -129,7 +129,7 @@ fn imports(file: &syn::File) -> Vec<Import<'_>> {
     ) {
         match tree {
             UseTree::Path(node) => {
-                prefix.push(node.ident.to_string());
+                prefix.push(node.ident.unraw().to_string());
                 flatten(use_item, &node.tree, prefix, into);
                 prefix.pop();
             }
@@ -139,20 +139,25 @@ fn imports(file: &syn::File) -> Vec<Import<'_>> {
                 }
             }
             UseTree::Name(node) => {
-                let name = node.ident.to_string();
                 let mut path = prefix.clone();
-                path.push(name.clone());
-                into.push(Import {
-                    name,
-                    path,
-                    declaration: use_item,
-                });
+                if node.ident != "self" {
+                    path.push(node.ident.unraw().to_string());
+                }
+                if let Some(name) = path.last() {
+                    into.push(Import {
+                        name: name.clone(),
+                        path,
+                        declaration: use_item,
+                    });
+                }
             }
             UseTree::Rename(node) => {
                 let mut path = prefix.clone();
-                path.push(node.ident.to_string());
+                if node.ident != "self" {
+                    path.push(node.ident.unraw().to_string());
+                }
                 into.push(Import {
-                    name: node.rename.to_string(),
+                    name: node.rename.unraw().to_string(),
                     path,
                     declaration: use_item,
                 });
@@ -205,7 +210,8 @@ fn item_type_binding(item: &Item) -> Option<(&syn::Ident, &Visibility)> {
 }
 
 fn reserved(name: &syn::Ident) -> bool {
-    PRELUDE_NAMES.iter().any(|n| *name == *n)
+    let name = name.unraw();
+    PRELUDE_NAMES.iter().any(|n| name == *n)
 }
 
 fn reject_item_expansion(file: &syn::File) -> Result<()> {
@@ -328,7 +334,10 @@ fn resolve_globs(
 }
 
 fn path_names(path: &syn::Path) -> Vec<String> {
-    path.segments.iter().map(|s| s.ident.to_string()).collect()
+    path.segments
+        .iter()
+        .map(|s| s.ident.unraw().to_string())
+        .collect()
 }
 
 fn path_is(path: &syn::Path, names: &[&str]) -> bool {
