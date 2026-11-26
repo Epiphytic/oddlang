@@ -98,6 +98,12 @@ with tempfile.TemporaryDirectory(prefix="endpoint-set-qualify-") as temp:
     shutil.copy2(generated / "endpoint_set.rs", consumer / "src/projection.rs")
     shutil.copy2(free / "endpoint_set.rs", consumer / "src/free.rs")
     shutil.copy2(different / "endpoint_set.rs", consumer / "src/different.rs")
-    subprocess.run(["cargo", "+1.97.1", "run", "--locked", "--offline", "--quiet",
-                    "--target-dir", root / "consumer-target"], cwd=consumer, check=True)
-print("endpoint-set qualification passed")
+    manifest_path = consumer / "Cargo.toml"
+    manifest = manifest_path.read_text(encoding="utf-8")
+    assert manifest.count('edition = "2024"') == 1
+    for edition in ("2021", "2024"):
+        manifest_path.write_text(manifest.replace('edition = "2024"', f'edition = "{edition}"'),
+                                 encoding="utf-8")
+        subprocess.run(["cargo", "+1.97.1", "run", "--locked", "--offline", "--quiet",
+                        "--target-dir", root / "consumer-target"], cwd=consumer, check=True)
+print("endpoint-set qualification passed in Rust editions 2021 and 2024")

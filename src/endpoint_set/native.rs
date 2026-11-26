@@ -193,9 +193,7 @@ fn normalize_entry(entry: &str, allow_loopback: bool) -> Result<String, Error> {
 }
 
 pub(super) fn normalize(entries: &[String], allow_loopback: bool) -> Result<Vec<String>, Error> {
-    if entries.is_empty()
-        && let Some(error) = EMPTY_ERROR
-    {
+    if let Some(error) = EMPTY_ERROR.filter(|_| entries.is_empty()) {
         return Err(error);
     }
     let mut output = Vec::new();
