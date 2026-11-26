@@ -14,3 +14,7 @@ macOS ARM64 and 44 of 887 on Linux ARM64. Both recorded five additional
 ignored cases and rejected the successful Cargo invocation whose exact
 MDK selector ran zero tests. It adds one credited case to the prior
 canonical suite on each host. The parser and provider are test-only.
+Both runs used workspace lock
+`0bf735fda63690510b21827669e79dcb54a055921f1ee0b91151a9d59f13c49d`.
+[macOS receipt](https://github.com/Epiphytic/marmish-oddlang/blob/c8d1fd024e8f59c72cc4a1935b7cc4c1ca04d118/verification/whole/suite/canonical-mdk-aarch64-apple-darwin.json)
+· [Linux receipt](https://github.com/Epiphytic/marmish-oddlang/blob/c8d1fd024e8f59c72cc4a1935b7cc4c1ca04d118/verification/whole/suite/canonical-mdk-aarch64-unknown-linux-gnu.json)
