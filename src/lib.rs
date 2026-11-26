@@ -1,4 +1,5 @@
 pub mod assemble;
+pub mod binary_frame;
 pub mod binary_record;
 pub mod command_surface;
 pub mod contracts;

@@ -166,6 +166,8 @@ enum Kind {
     WireSchema,
     WireProtocol,
     BinaryRecord,
+    BinaryFragment,
+    BinaryFrame,
     FieldRelation,
     LocalStatusOwner,
     ForegroundProfileOwner,
@@ -257,10 +259,20 @@ fn project(
             crate::field_relation::build(&path, &overlay, &output)?;
             "relations.rs"
         }
-        Kind::BinaryRecord => {
+        Kind::BinaryFrame => {
             let path = input.join("graph.json");
             io(fs::write(&path, graph))?;
-            crate::binary_record::build(&path, &overlay, &output)?;
+            crate::binary_frame::build(&path, &overlay, &output)?;
+            "frame.rs"
+        }
+        Kind::BinaryRecord | Kind::BinaryFragment => {
+            let path = input.join("graph.json");
+            io(fs::write(&path, graph))?;
+            if matches!(component.kind, Kind::BinaryFragment) {
+                crate::binary_record::build_bound_fragment(&path, &overlay, &output)?;
+            } else {
+                crate::binary_record::build(&path, &overlay, &output)?;
+            }
             "record.rs"
         }
         Kind::WireSchema => {
@@ -538,7 +550,7 @@ pub(super) fn build_pinned(raw: &[u8], base: &Path, output: &Path, standalone: b
     let mut records = Vec::new();
     let mut root_exports = String::new();
     for (index, component) in manifest.components.iter().enumerate() {
-        if matches!(component.kind, Kind::FieldRelation)
+        if matches!(component.kind, Kind::FieldRelation | Kind::BinaryFragment)
             && (!component.reexports.is_empty()
                 || !component.crate_reexports.is_empty()
                 || component
@@ -546,13 +558,13 @@ pub(super) fn build_pinned(raw: &[u8], base: &Path, output: &Path, standalone: b
                     .as_ref()
                     .is_some_and(|names| !names.is_empty()))
         {
-            return Err("field relation component cannot reexport items".into());
+            return Err("field relation or binary fragment component cannot reexport items".into());
         }
 
         if !ident(&component.module)
             || (component.reexports.is_empty()
                 && component.crate_reexports.is_empty()
-                && !matches!(component.kind, Kind::FieldRelation))
+                && !matches!(component.kind, Kind::FieldRelation | Kind::BinaryFragment))
         {
             return Err("invalid module or empty reexports".into());
         }
