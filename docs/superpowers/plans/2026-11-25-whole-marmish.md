@@ -1,5 +1,7 @@
 # Recovering the whole Marmish distribution
 
+The [basic-command interoperability plan](2026-11-26-basic-command-interop.md) defines the current compatibility milestone. The multi-platform gates below qualify the broader distribution.
+
 Build installable native Rust executables from a versioned, source-free Oddlang contract in `Epiphytic/marmish-oddlang`. Start with a client talking to a daemon and running a command through a worker. Finish with every shipped role, public workspace API, helper and supported installation profile accounted for. Compatibility means another implementation can consume the same inputs, interoperate with existing peers and produce the same specified outputs, state transitions and effects.
 
 Use upstream commit `af54339d250290490d62d4475a77539b7e739071` as the proposed release reference. The existing evidence is four commits older at `49fc705408a230bd0ad896248d08dbdd2faad05a`. The difference includes the installer and installed benchmark socket handling. Rebaseline before reusing results. [Upstream changes](https://github.com/Epiphytic/marmish/compare/49fc705408a230bd0ad896248d08dbdd2faad05a...af54339d250290490d62d4475a77539b7e739071) · [Existing role and platform inventory](../../design/portable-rust-boundary.md)
