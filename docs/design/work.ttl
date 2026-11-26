@@ -1785,3 +1785,7 @@ w:readOnlyFileIntegrity a p:Task ;
     p:dependsOn w:structuralProfileCompiler ;
     p:status p:active ;
     p:acceptance "Observe ordered file admission, bounded reads and digest checks on both native ARM64 hosts using inert files, and independently detect a source mutation." .
+
+w:readOnlyFileIntegrityFixture a p:Artifact ;
+    p:location "verification/read-only-file/check.py" .
+w:readOnlyFileIntegrity p:evidence w:readOnlyFileIntegrityFixture .

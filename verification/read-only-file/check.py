@@ -75,3 +75,58 @@ with tempfile.TemporaryDirectory() as scratch:
         result = subprocess.run([CLI, "build", "read-only-file", "rust", root / "graph.json",
                                  root / "rust.json", root / "negative"], capture_output=True)
         assert result.returncode and not (root / "negative").exists(), result
+
+    def pin(path, value=None):
+        file = root / path
+        if value is not None:
+            write(file, value)
+        return {"path": path, "sha256": hashlib.sha256(file.read_bytes()).hexdigest()}
+
+    fault, alias = "urn:fixture:Fault", "urn:fixture:Result"
+    invalid = profile["errors"]["descriptor"]["id"]
+    io = profile["errors"]["io"]["id"]
+    error_graph = {
+        "format": "oddlang-finite-error-domain-v1", "id": "urn:fixture:error-domain",
+        "error": fault, "result": alias, "categories": {},
+        "variants": {
+            invalid: {"payload": {"kind": "static-text"},
+                      "message": {"kind": "insertion", "prefix": "invalid: ", "suffix": ""},
+                      "source": False, "from": False},
+            io: {"payload": {"kind": "io-error"}, "message": {"kind": "literal", "text": "I/O"},
+                 "source": True, "from": True},
+        },
+    }
+    error_binding = {
+        "format": "oddlang-finite-error-rust-v1", "categoryTypes": {}, "variantOrder": [invalid, io],
+        "names": {fault: "Fault", alias: "Result", invalid: "Rejected", io: "Io"},
+    }
+    manifest = {
+        "format": "oddlang-native-package-v1", "name": "inert-sample", "version": "0.1.0",
+        "edition": "2021", "cargoLock": pin("Cargo.lock"),
+        "dependencies": {library: {"version": version} for library, version in
+                         [("libc", "0.2.189"), ("sha2", "0.10.9")]},
+        "components": [
+            {"kind": "finite-error-domain", "module": "fault", "reexports": ["Fault", "Result"],
+             "graph": pin("error.json", error_graph), "overlay": pin("error-rust.json", error_binding)},
+            {"kind": "read-only-file", "module": "descriptor", "reexports": [],
+             "crateReexports": ["open_sample", "read_sample", "check_sample"],
+             "graph": pin("graph.json", graph), "overlay": pin("rust.json", binding)},
+        ],
+    }
+    pin("package.json", manifest)
+    run(CLI, "build", "native-package", "rust", root / "package.json", root / "native", cwd=root)
+    run("cargo", "+1.97.1", "check", "--offline", "--locked", cwd=root / "native")
+    for label, modify, error in (
+        ("io-identity", lambda data: data.update(ioVariant="Rejected"), "invalid read-only file Rust binding"),
+        ("unresolved-variant", lambda data: data.update(ioVariant="Missing"),
+         "error role does not match its bound native variant"),
+        ("guessed-type", lambda data: data.update(error=["crate", "Missing"]),
+         "error role does not match its bound native variant"),
+    ):
+        invalid_binding = dict(binding)
+        modify(invalid_binding)
+        manifest["components"][1]["overlay"] = pin("rust.json", invalid_binding)
+        pin("package.json", manifest)
+        denied = subprocess.run([CLI, "build", "native-package", "rust", root / "package.json", root / label],
+                                capture_output=True, text=True)
+        assert denied.returncode and error in denied.stderr and not (root / label).exists(), denied

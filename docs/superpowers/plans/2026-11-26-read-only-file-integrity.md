@@ -6,8 +6,9 @@
 observable error role. A subsequent directory contract will link this component to a closed
 line grammar and compare the caller's expected digest before parsing.
 
-- [ ] Test an unrelated descriptor fixture, recover the baseline maximum link count and
-  a changed count from independent native observations, and check the projected result.
+- [x] Test an unrelated descriptor fixture with runtime, error binding and recovery controls.
+- [ ] Recover the baseline maximum link count and a changed count from independent native
+  observations, and check the projected result.
 - [ ] Replay file admission, byte bounds, optional ownership and permission checks, digest
   verification and I/O error mapping using inert files on both native ARM64 hosts.
 - [ ] Qualify a unique-candidate directory selector and read-only grammar composition.
