@@ -1,0 +1,30 @@
+async fn parse_request(stream: &mut UnixStream) -> bool {
+    let Ok(length) = stream.read_u32().await else { return false; };
+    if length == 0 || length > FRAME_LIMIT {
+        return false;
+    }
+    let mut body = vec![0; length as usize];
+    if stream.read_exact(&mut body).await.is_err()
+        || body.iter().find(|byte| !byte.is_ascii_whitespace()) != Some(&b'{')
+    {
+        return false;
+    }
+    serde_json::from_slice::<Request>(&body).is_ok_and(|request| request.action == REQUEST)
+}
+
+async fn handle_peer(mut stream: UnixStream, status: SnapshotPublisher) {
+    let request = tokio::time::timeout(Duration::from_millis(READ_DEADLINE), parse_request(&mut stream)).await;
+    let reply = if matches!(request, Ok(true)) {
+        Reply { ok: true, result: Some(Snapshot { phase: status.current() }), error: None }
+    } else {
+        Reply { ok: false, result: None, error: Some(INVALID_REQUEST) }
+    };
+    let Ok(body) = serde_json::to_vec(&reply) else { return; };
+    let write = async {
+        stream.write_u32(body.len() as u32).await?;
+        stream.write_all(&body).await?;
+        stream.shutdown().await
+    };
+    let _ = tokio::time::timeout(Duration::from_millis(WRITE_DEADLINE), write).await;
+}
+

@@ -96,6 +96,8 @@ struct Binding {
     format: String,
     executable: String,
     socket_option: String,
+    #[serde(default)]
+    routed_requests: bool,
 }
 
 fn validate(graph: &Graph, binding: &Binding) -> Result<(), String> {

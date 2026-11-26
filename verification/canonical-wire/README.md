@@ -27,3 +27,11 @@ The numeric `length` expression counts decoded bytes for `bounded-base64`. Text 
 The weather fixture checks nested lists, first-failure order, exact text and prefix checks, Unicode and JSON escape lengths, NUL exclusion and decoded byte counts. It also rejects mistyped operands, a shadowed binding and a duplicate nested declaration.
 
 The typed collection and text guard increment passed both fixture commands above on macOS ARM64 with Rust 1.97.1. The compiler library suite passed all 18 tests with a locked offline build. The process vocabulary and work graph passed Turtle parsing, and the ready-work query ran successfully.
+
+A protocol can declare `recordChecks` as a map from stable check identities to `owner` and ordered `steps`. An owner identifies an internal named record. Inside a check, the `value` scope borrows that record and its field paths use the record's declared field identities. A `check-record` step has its own identity, a `value` path of exactly the owner's record type, and a `check` identity. It propagates the first error from the shared check.
+
+The weather fixture calls shared checks from an endpoint’s nested list traversal. Check dependencies must be acyclic. Empty checks succeed, and unused checks retain their typed obligations while emitting no runtime functions. Adding declarations can change internal generated identifiers. Declaration and call obligations retain distinct identities.
+
+The weather fixture uses a shared check over each nested sample record. It checks chained calls, empty and unused declarations, equal output across reordered definitions, and rejection of unresolved calls, cycles, wrong owners and identity or native naming collisions. Generated Rust compiles with warnings denied.
+
+Both fixture commands passed with the shared-check compiler on macOS ARM64 with Rust 1.97.1. All 18 compiler library tests passed with a locked offline build. The process vocabulary and work graph parsed as Turtle, and the ready-work query completed.

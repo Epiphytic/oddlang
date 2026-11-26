@@ -44,6 +44,27 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
          \n#[derive(serde::Serialize)]\nstruct Reply {{\n    #[serde(rename = {:?})]\n    ok: bool,\n    #[serde(rename = {:?})]\n    result: Option<Snapshot>,\n    #[serde(rename = {:?})]\n    error: Option<&'static str>,\n}}",
         graph.request.key, graph.reply.state, graph.reply.ok, graph.reply.result, graph.reply.error
     ).unwrap();
-    out.push_str(include_str!("runtime.rs.in"));
+    let (listener, clone_route, route_argument, dispatch) = if binding.routed_requests {
+        (
+            include_str!("routed_listener.rs.in"),
+            "                    let route = route.clone();\n",
+            ", move |body| route(body)",
+            include_str!("routed_dispatch.rs.in"),
+        )
+    } else {
+        (
+            include_str!("status_listener.rs.in"),
+            "",
+            "",
+            include_str!("status_dispatch.rs.in"),
+        )
+    };
+    out.push_str(
+        &include_str!("runtime.rs.in")
+            .replace("{{listener_methods}}", listener)
+            .replace("{{route_clone}}", clone_route)
+            .replace("{{route_argument}}", route_argument)
+            .replace("{{request_dispatch}}", dispatch),
+    );
     out
 }

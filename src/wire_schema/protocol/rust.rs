@@ -26,6 +26,7 @@ pub(super) fn render(
     let mut compiler = Compiler::new(graph, schema, binding, native);
     compiler.validate_foreign()?;
     let mut text = format!("\ntype {ERROR} = {};\n", native.error_type);
+    text.push_str(&compiler.record_checks()?);
     for item in &graph.constants {
         let (kind, value) = match item.shape {
             Shape::Text {} => ("&str".into(), format!("{:?}", item.value.as_str().unwrap())),

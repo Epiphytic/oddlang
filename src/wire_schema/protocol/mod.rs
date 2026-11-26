@@ -34,6 +34,12 @@ struct Protocol {
     constants: Vec<Constant>,
     literals: BTreeMap<String, String>,
     endpoints: Vec<Endpoint>,
+    #[serde(
+        default,
+        skip_serializing_if = "BTreeMap::is_empty",
+        deserialize_with = "crate::shared_declarations::unique_map"
+    )]
+    record_checks: BTreeMap<String, rules::RecordCheck>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     foreign: Vec<rules::Foreign>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -241,6 +247,14 @@ impl Protocol {
         }
         for error in self.errors.keys() {
             add(error)?;
+        }
+        for (id, check) in &self.record_checks {
+            add(id)?;
+            for step in &check.steps {
+                for id in step.declarations() {
+                    add(id)?;
+                }
+            }
         }
         for endpoint in &self.endpoints {
             add(&endpoint.id)?;
@@ -511,6 +525,11 @@ impl Protocol {
                 fields: mapped,
             });
         }
+        for check in self.record_checks.values() {
+            for step in &check.steps {
+                step.errors(&mut errors);
+            }
+        }
         for digest in &self.digests {
             digest.errors(&mut errors);
         }
@@ -595,6 +614,16 @@ pub fn build(
     let rows = obligations["obligations"]
         .as_array_mut()
         .expect("shape obligations");
+    for (id, check) in &graph.record_checks {
+        rows.push(
+            serde_json::json!({"declaration":id,"role":"record-check","owner":check.owner,
+            "qualification":"independent-witness-required"}),
+        );
+        for step in &check.steps {
+            step.visit(&mut |item| rows.push(serde_json::json!({"declaration":item.id(),
+                "role":"admission","recordCheck":id,"step":item,"qualification":"independent-witness-required"})));
+        }
+    }
     for endpoint in &graph.endpoints {
         rows.push(serde_json::json!({
             "declaration":endpoint.id,

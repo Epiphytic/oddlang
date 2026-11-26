@@ -168,6 +168,17 @@ with tempfile.TemporaryDirectory(prefix="gauge-", dir="/tmp") as directory:
     run("cargo", "test", "--release", "--locked", "--offline", "--test", "consumer", cwd=build,
         env=dict(os.environ, GAUGE_TEST_DIR=str(root)))
 
+    binding["routed_requests"] = True
+    (root / "rust.json").write_text(json.dumps(binding))
+    manifest["components"][0]["overlay"] = pin("rust.json")
+    (root / "package.json").write_text(json.dumps(manifest))
+    routed = root / "routed-build"
+    run(ODDLANG, "build", "native-package", "rust", root / "package.json", routed)
+    (routed / "tests").mkdir()
+    shutil.copyfile(FIXTURE / "routed_consumer.rs", routed / "tests/routed_consumer.rs")
+    run("cargo", "test", "--release", "--locked", "--offline", "--test", "routed_consumer", cwd=routed,
+        env=dict(os.environ, GAUGE_TEST_DIR=str(root)))
+
     graph = json.loads((root / "graph.json").read_bytes())
     graph["lifecycle"]["transitions"][0]["from"] = "not-reachable"
     (root / "mutant.json").write_text(json.dumps(graph))
