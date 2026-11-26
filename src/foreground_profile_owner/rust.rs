@@ -204,6 +204,12 @@ fn render_lifecycle(
         writeln!(out, "const PROVIDER_READY: &str = {:?};", relay.ready_state).unwrap();
         writeln!(
             out,
+            "const RELAY_HEALTH_MS: u64 = {};",
+            relay.health_check_ms
+        )
+        .unwrap();
+        writeln!(
+            out,
             "const APPLICATION_COMPONENTS: &[u16] = &{:?};",
             relay.application_components
         )

@@ -154,6 +154,7 @@ struct RelayRuntime {
     cache_directory: String,
     maximum_frame_bytes: usize,
     ready_state: String,
+    health_check_ms: u64,
     application_components: Vec<u16>,
 }
 
@@ -270,9 +271,13 @@ impl Graph {
                                 &self.provider.directory,
                             ]
                             .contains(&name)
+                                && self.lifecycle.as_ref().is_some_and(|lifecycle| {
+                                    !lifecycle.excluded_profile_entries.contains(name)
+                                })
                         })
                     && (1024..=1_048_576).contains(&relay.maximum_frame_bytes)
                     && token(&relay.ready_state)
+                    && (25..=5000).contains(&relay.health_check_ms)
                     && (1..=64).contains(&relay.application_components.len())
                     && relay.application_components[0] > 0
                     && relay
@@ -565,7 +570,7 @@ mod tests {
             "provider":{"kind":"private_file_secp256k1","directory":"keys","signing_prefix":"sign","data_prefix":"data"},
             "activation":{"kind":"onion_websocket","route_value":"private","deadline_ms":90000,
                           "relay_runtime":{"state_directory":"network-state","cache_directory":"network-cache",
-                                           "maximum_frame_bytes":4096,"ready_state":"connected",
+                                           "maximum_frame_bytes":4096,"ready_state":"connected","health_check_ms":250,
                                            "application_components":[32772,32780]}},
             "diagnostics": ([
                 "scope","io","invalid_name","unsafe_directory","unsafe_file","already_running",
@@ -603,6 +608,15 @@ mod tests {
         ] {
             assert!(rust.contains(expected), "{expected}");
         }
+        let mut colliding = graph.clone();
+        colliding["lifecycle"]["excluded_profile_entries"] = json!(["network-state"]);
+        assert!(
+            load(
+                &serde_json::to_vec(&colliding).unwrap(),
+                &serde_json::to_vec(&binding).unwrap()
+            )
+            .is_err()
+        );
         binding.as_object_mut().unwrap().remove("relay_backend");
         assert!(load(&graph_bytes, &serde_json::to_vec(&binding).unwrap()).is_err());
     }

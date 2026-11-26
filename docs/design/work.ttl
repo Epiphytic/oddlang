@@ -2557,6 +2557,7 @@ w:generatedRelayActivation a p:Task ;
     rdfs:label "Activate the generated foreground relay provider" ;
     p:milestone w:marmishMilestone ;
     p:source w:generatedRelayActivationPlan ;
+    p:addresses w:generatedRelayReadinessFinding, w:generatedRelayDirectoryFinding ;
     p:status p:active ;
     p:acceptance "Project a graph-bound relay startup and prove acknowledged authenticated key-package publication, transport activation and cleanup in the generated foreground daemon using a test-owned relay." .
 w:localCommandArgumentsPlan a p:Artifact ;
@@ -2603,3 +2604,12 @@ w:localCommandArgumentCatalogFinding a p:Finding ;
     rdfs:label "Declare exact field encodings and avoid implicit CLI defaults in request obligations" ;
     p:source w:localCommandArgumentsVerification .
 w:localCommandArguments p:addresses w:localCommandArgumentCatalogFinding .
+
+w:generatedRelayReview a p:Artifact ;
+    p:location "companion:docs/reviews/basic-command-relay-activation.md" .
+w:generatedRelayReadinessFinding a p:Finding ;
+    rdfs:label "Withdraw foreground provider readiness when its relay or notification forwarder stops" ;
+    p:source w:generatedRelayReview .
+w:generatedRelayDirectoryFinding a p:Finding ;
+    rdfs:label "Reject relay directory bindings that startup would subsequently exclude" ;
+    p:source w:generatedRelayReview .

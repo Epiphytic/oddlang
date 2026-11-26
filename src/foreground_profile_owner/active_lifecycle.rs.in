@@ -3,7 +3,7 @@ use cgka_traits::TransportAdapter;
 use marmot_session::{AccountDeviceRuntime, AccountIdentityProofRequest, AccountIdentityProofSigner,
     SessionConfig, SessionError, StaticTransportRouting};
 use nostr::key::SecretKey;
-use nostr_sdk::{client::Client, prelude::SignerAuthenticator};
+use nostr_sdk::{client::Client, prelude::SignerAuthenticator, relay::{Relay, RelayNotification}};
 use tokio::{task::JoinHandle, time::{Instant, timeout_at}};
 use transport_nostr_adapter::NostrTransportAdapter;
 use transport_nostr_peeler::{MarmotNostrSigner, NostrMlsPeeler};
@@ -72,7 +72,7 @@ impl ActiveProviders {
         Ok(Self { runtime, journal, storage_closer, identity, relay, adapter, client, connector, stop, forwarder: None })
     }
 
-    async fn activate(&mut self, root: &Path) -> Result<(), Failure> {
+    async fn activate(&mut self, root: &Path) -> Result<Relay, Failure> {
         let deadline = Instant::now() + Duration::from_millis(ACTIVATION_MS);
         let dial = Duration::from_millis(DIAL_MS);
         timeout_at(deadline, async {
@@ -82,6 +82,7 @@ impl ActiveProviders {
             let url = self.connector.relay.as_str();
             self.client.add_relay(url).reconnect(false).connect_timeout(dial).await.map_err(|_| RELAY_FAILED)?;
             let relay = self.client.relay(url).await.map_err(|_| RELAY_FAILED)?.ok_or(RELAY_FAILED)?;
+            let mut notifications = relay.notifications();
             let mut connected = false;
             for _ in 0..DIAL_ATTEMPTS {
                 let remaining = deadline.saturating_duration_since(Instant::now()).min(dial);
@@ -92,23 +93,40 @@ impl ActiveProviders {
                 }
             }
             if !connected { return Err(RELAY_FAILED); }
+            loop {
+                match notifications.next().await {
+                    Some(RelayNotification::Authenticated) => break,
+                    Some(RelayNotification::AuthenticationFailed) | None => return Err(RELAY_FAILED),
+                    _ => (),
+                }
+            }
             self.runtime.republish_key_package().await.map_err(|_| PROVIDER_UNAVAILABLE)?;
             self.runtime.activate_transport(None).await.map_err(|_| RELAY_FAILED)?;
-            if self.forwarder.as_ref().is_none_or(|task| task.is_finished()) {
+            if !self.transport_live(&relay) {
                 return Err(RELAY_FAILED);
             }
-            Ok(())
+            Ok(relay)
         }).await.map_err(|_| ACTIVATION_DEADLINE)?
+    }
+
+    fn transport_live(&self, relay: &Relay) -> bool {
+        relay.status().is_connected() && self.forwarder.as_ref().is_some_and(|task| !task.is_finished())
+    }
+
+    async fn transport_lost(&self, relay: &Relay) -> Failure {
+        while self.transport_live(relay) {
+            tokio::time::sleep(Duration::from_millis(RELAY_HEALTH_MS)).await;
+        }
+        RELAY_FAILED
     }
 
     async fn stop(self) -> bool {
         let Self { runtime, journal, storage_closer, identity, relay, adapter, client, connector, stop, forwarder } = self;
-        let _ = stop.send(true);
         let deadline = Instant::now() + Duration::from_millis(SHUTDOWN_MS);
         let closed = stop_provider_stages(
             deadline,
             async { adapter.deactivate_account(&identity).await.is_ok() },
-            async { client.shutdown().await; client.is_shutdown() },
+            async { let _ = stop.send(true); client.shutdown().await; client.is_shutdown() },
             forwarder,
             relay.shutdown(),
         ).await;
@@ -146,11 +164,14 @@ async fn start(root: &Path, profile: &ProfileRecord, endpoint: Url) -> Result<()
                 tokio::select! {
                     _ = &mut stop => (),
                     result = providers.activate(root) => match result {
-                        Ok(()) => {
+                        Ok(relay) => {
                             if status.publish(PROVIDER_READY).is_err() {
                                 activation_failure = Some(CLEANUP);
                             } else {
-                                stop.await;
+                                tokio::select! {
+                                    _ = &mut stop => (),
+                                    error = providers.transport_lost(&relay) => activation_failure = Some(error),
+                                }
                             }
                         }
                         Err(error) => activation_failure = Some(error),

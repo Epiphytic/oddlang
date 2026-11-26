@@ -80,8 +80,12 @@ impl KeyPackagePublisher for BoundPublisher {
         let receipt = NostrKeyPackagePublisher::new(self.relay.clone())
             .publish_prepared_key_package(&publication, &event).await
             .map_err(|_| KeyPackagePublishError::exposed(RELAY_FAILED))?;
+        let accepted: Vec<_> = receipt.accepted.into_iter().map(|relay| relay.endpoint).collect();
+        if !accepted.contains(&self.endpoint) {
+            return Err(KeyPackagePublishError::exposed(RELAY_FAILED));
+        }
         Ok(KeyPackagePublishReceipt {
-            accepted: receipt.accepted.into_iter().map(|relay| relay.endpoint).collect(),
+            accepted,
             failed: receipt.failed.into_iter().map(|relay| relay.endpoint).collect(),
         })
     }
