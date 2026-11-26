@@ -128,3 +128,14 @@ It emits each alias as a Rust use of that same definition, so clients of
 the two paths can exchange the value directly. A native package projecting
 Serialize declares serde with the derive feature. Public module exports
 are selected through the usual native package reexports.
+
+### Private buffered input
+
+`oddlang recover buffered-input OBSERVATION SELECTION OUTPUT` accepts the
+pinned Rust shape adapter's v2 observation and a named record selection.
+The selection names the declaration, portable identity, role-to-field
+bindings and transition policies. The output contains the portable graph,
+Rust overlay and a recovery lock. Assembly accepts them through a
+`buffered-input` native package component with private visibility and empty
+reexports. Use registry zeroize 1.9.1 for the fixed erasing storage.
+See the [buffered input contract](../superpowers/specs/2026-11-26-buffered-input.md).

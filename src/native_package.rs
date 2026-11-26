@@ -194,6 +194,7 @@ impl Pin {
 #[derive(Deserialize, Serialize, Copy, Clone)]
 #[serde(rename_all = "kebab-case")]
 enum Kind {
+    BufferedInput,
     BuildReport,
     ProcessLimit,
     PublicRecords,
@@ -279,6 +280,10 @@ fn project(
     io(fs::create_dir(&input))?;
     let output = stage.join("projection");
     let source = match component.kind {
+        Kind::BufferedInput => {
+            crate::buffered_input::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
+            "buffer.rs"
+        }
         Kind::BuildReport => {
             crate::build_report::build(&graph, &io(fs::read(&overlay))?, &output)?;
             "report.rs"
@@ -538,13 +543,37 @@ impl RegistryProvider {
     }
 }
 
-fn validate_checked_values(manifest: &Manifest, base: &Path) -> Result<BTreeSet<RegistryProvider>> {
+fn require_erasing_storage(manifest: &Manifest, component: &str) -> Result<()> {
+    if manifest.registry_patches.contains_key(ZEROIZE.name)
+        || !manifest
+            .dependencies
+            .get(ZEROIZE.name)
+            .is_some_and(|dep| dep.version == ZEROIZE.version && dep.source.is_none())
+    {
+        return Err(format!(
+            "{component} requires the locked registry provider zeroize 1.9.1"
+        ));
+    }
+    Ok(())
+}
+
+fn validate_component_requirements(
+    manifest: &Manifest,
+    base: &Path,
+) -> Result<BTreeSet<RegistryProvider>> {
     let mut required = BTreeSet::new();
     let components = &manifest.components;
     let checked: Vec<_> = components
         .iter()
         .filter(|component| matches!(component.kind, Kind::CheckedValues))
         .collect();
+    if components
+        .iter()
+        .any(|c| matches!(c.kind, Kind::BufferedInput))
+    {
+        require_erasing_storage(manifest, "buffered-input")?;
+        required.insert(ZEROIZE);
+    }
     if checked.is_empty() {
         return Ok(required);
     }
@@ -568,16 +597,7 @@ fn validate_checked_values(manifest: &Manifest, base: &Path) -> Result<BTreeSet<
     }
     for component in checked {
         if crate::checked_values::needs_erasure_provider(&component.graph.read(base)?)? {
-            if manifest.registry_patches.contains_key(ZEROIZE.name)
-                || !manifest
-                    .dependencies
-                    .get(ZEROIZE.name)
-                    .is_some_and(|dep| dep.version == ZEROIZE.version && dep.source.is_none())
-            {
-                return Err(
-                    "fixed-bytes requires the locked registry provider zeroize 1.9.1".into(),
-                );
-            }
+            require_erasing_storage(manifest, "fixed-bytes")?;
             required.insert(ZEROIZE);
         }
         crate::checked_values::validate_error_links(&component.overlay.read(base)?, &providers)?;
@@ -727,7 +747,7 @@ pub(super) fn build_pinned(
     let manifest: Manifest =
         serde_json::from_slice(raw).map_err(|e| format!("package manifest: {e}"))?;
     validate_command_callbacks(&manifest.components, base)?;
-    let required = validate_checked_values(&manifest, base)?;
+    let required = validate_component_requirements(&manifest, base)?;
     let cargo = cargo_manifest(&manifest)?;
     let lock = manifest.cargo_lock.read(base)?;
     for provider in &required {
@@ -769,6 +789,17 @@ pub(super) fn build_pinned(
     let mut records = Vec::new();
     let mut root_exports = String::new();
     for (index, component) in manifest.components.iter().enumerate() {
+        if matches!(component.kind, Kind::BufferedInput)
+            && (component.visibility != Visibility::Private
+                || !component.reexports.is_empty()
+                || !component.crate_reexports.is_empty()
+                || component
+                    .root_reexports
+                    .as_ref()
+                    .is_some_and(|names| !names.is_empty()))
+        {
+            return Err("buffered-input must stay private".into());
+        }
         if matches!(component.kind, Kind::FieldRelation | Kind::BinaryFragment)
             && (!component.reexports.is_empty()
                 || !component.crate_reexports.is_empty()
@@ -783,7 +814,10 @@ pub(super) fn build_pinned(
         if !ident(&component.module)
             || (component.reexports.is_empty()
                 && component.crate_reexports.is_empty()
-                && !matches!(component.kind, Kind::FieldRelation | Kind::BinaryFragment))
+                && !matches!(
+                    component.kind,
+                    Kind::FieldRelation | Kind::BinaryFragment | Kind::BufferedInput
+                ))
         {
             return Err("invalid module or empty reexports".into());
         }
