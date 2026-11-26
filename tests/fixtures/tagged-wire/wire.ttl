@@ -1,0 +1,27 @@
+@prefix t: <urn:oddlang:tagged-wire:v1:> .
+@prefix e: <urn:example:packets:> .
+
+e:Packet a t:Contract ;
+    t:maxPayload 25 ;
+    t:shortHeader e:header ; t:payloadLimit e:limit ;
+    t:lengthMismatch e:length ; t:unknownTag e:tag ;
+    t:truncated e:truncated ; t:trailing e:trailing ;
+    t:invalidValue e:invalid ;
+    t:variant e:Chunk, e:Ping .
+
+e:Chunk t:name "Chunk" ; t:tag 42 ; t:field e:chunkData, e:chunkIndex .
+e:chunkIndex t:position 0 ; t:name "index" ; t:kind "uint-be" ;
+    t:width 8 ; t:max 18446744073709551614 ; t:rangeError e:range .
+e:chunkData t:position 1 ; t:name "data" ; t:kind "rest-bytes" ;
+    t:min 1 ; t:max 10 ; t:rangeError e:limit ; t:sumWith e:chunkIndex ; t:sumError e:range .
+e:Ping t:name "Ping" ; t:tag 62 ; t:field e:nonce .
+e:nonce t:position 0 ; t:name "nonce" ; t:kind "fixed-bytes" ; t:width 3 .
+
+e:header t:code "Header" .
+e:limit t:code "Limit" .
+e:length t:code "Length" .
+e:tag t:code "Tag" .
+e:truncated t:code "Truncated" .
+e:trailing t:code "Trailing" .
+e:invalid t:code "Invalid" .
+e:range t:code "Range" .

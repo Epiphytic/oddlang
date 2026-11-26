@@ -27,6 +27,15 @@ Run `scripts/setup-wasm.sh` once with network access. Then run `scripts/verify-w
 
 Run `scripts/verify-wasm.sh` for ledger execution. It publishes fresh bundles, builds handwritten and generated Rust components in two directories, and runs portable cases against Wasmtime, Node and headless Chromium. Its output directory holds release pins, Rust source, component binaries, host observations and a build digest comparison. Ledger guests use `wasm32-unknown-unknown` with Component Model bindings. The integer echo uses `wasm32-wasip2`.
 
+## Recovering Rust structure and portable wire contracts
+
+`oddlang recover rust` emits a pinned candidate declaration and relationship
+graph for a Cargo target. Tagged-wire recovery combines source observations
+with a reviewed graph. The resulting graph can build standalone Rust and
+TypeScript modules. The Marmish Data slice has reproduction commands and
+an independent compatibility record. [Rust structural vocabulary](docs/language/rust-structure.md)
+· [Portable Data result](docs/design/portable-rust-slice.md)
+
 ## Integration tests
 
 The full suite uses a Rust toolchain with edition 2024 support, PostgreSQL 16.6, Node.js and npm for the TypeScript client, and Go 1.22 or newer for the independent client. The client builds were exercised with Node.js 22 and npm 10. While online, cache the database image, both locked Rust dependency sets and the pinned TypeScript compiler.

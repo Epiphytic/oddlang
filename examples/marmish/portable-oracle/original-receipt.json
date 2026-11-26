@@ -1,0 +1,135 @@
+{
+  "alternateZlib": {
+    "directions": [
+      "Rust encoder to Python decoder",
+      "Python encoder to Rust decoder"
+    ],
+    "independentZlibHex": "78014b4c4a4ea43d0200db75270d",
+    "pythonZlibVersion": "1.2.12",
+    "rawBytes": 102,
+    "rawSha256": "ba42ac903664e676d4cf71d6c4c1260bb8fa74a5d714dc2d9a757d3cea5aecf6",
+    "rustZlibHex": "789cb5c2010d00000082b0ac68ff0ea4603b3b3d01db75270d"
+  },
+  "authoredCases": 96,
+  "freezeSha256": "9744b5727f86e472b76d69e6a7043d5e2e0f3715c79140d6086ce4ca2e20d339",
+  "holdout": {
+    "cases": 128,
+    "directReadDenied": true,
+    "fileSha256": "afd52185d31bd660ac6a83df554cfeb53e450dfa7ced9a74398994eebbfdb939",
+    "passed": true,
+    "peerCompared": false
+  },
+  "mixedBinaryAndJson": {
+    "writerToReader": [
+      "binary-data-decode",
+      "maximum-data-decode",
+      "checkpoint-decode",
+      "progress-decode",
+      "error-record-decode",
+      "hello-request-decode",
+      "gap-response-decode",
+      "spec-frame-start-decode",
+      "spec-frame-manifest-decode",
+      "spec-frame-resume-decode",
+      "spec-frame-prefix-decode",
+      "spec-frame-data-decode",
+      "spec-frame-checkpoint-decode",
+      "spec-frame-done-decode",
+      "spec-frame-commit-decode",
+      "spec-frame-finish-decode",
+      "spec-frame-progress-decode",
+      "spec-frame-error-decode",
+      "spec-request-hello-decode",
+      "spec-request-copy_hello-decode",
+      "spec-request-open_copy-decode",
+      "spec-request-open-decode",
+      "spec-request-exchange-decode",
+      "spec-request-cancel-decode",
+      "spec-request-status-decode",
+      "spec-response-copy_hello-decode",
+      "spec-response-copy_refused-decode",
+      "spec-response-hello-decode",
+      "spec-response-opened-decode",
+      "spec-response-exchange-decode",
+      "spec-response-error-decode"
+    ]
+  },
+  "negativeControls": {
+    "copy-data-tag": [
+      "binary-data-encode"
+    ],
+    "error-precedence": [
+      "codec-block-length-before-offset"
+    ],
+    "rejected-transition": [
+      "seed-0-receive-retry"
+    ]
+  },
+  "oracleSourceSha256": {
+    "archived-run.py": "7504cbb9831ffbb27efe9681ccbebbcc52e9ce7783cb89be4045945d160c39a7",
+    "run.py": "4476ef514166848f29d74bb94c94e334839db5348430b5936e7f844f2bcc6d40",
+    "seeded_cases.py": "0c53384301d8e13774fd5b0df245161edb440a7812e8159365ec54b6a1a48c6c",
+    "spec_cases.py": "ff6cefe53d2897de685d13754835b59ed5663fa0300d8a11e45f9695fe1533ed"
+  },
+  "priorCases": 50,
+  "provenance": {
+    "buildLocale": "C",
+    "callerBinding": "3dc9f035695f73d6a4473a9dcc587d0fdffa9b321723f924e97ae97e972e2318",
+    "callerSha256": "de9215db2e9cfd85cf2e9ffab40967b25d86a7ad5dcff4b2ebd1ea666bf807a8",
+    "cargoCommand": "cargo +1.97.1 build --locked --offline --target aarch64-apple-darwin --package marmish-stream --target-dir /var/folders/p6/hqr6jk8j0_z284rrbhn0d9vw0000gn/T/oddlang-portable-stream-build-hokb52w8 --message-format=json-render-diagnostics",
+    "cargoLockSha256": "9c5f7dde5c0f7d340e22dbefaa8a1c6ddb94c119011ba3e49ac8044c9b4cb0b3",
+    "compiler": [
+      "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+      "binary: rustc",
+      "commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+      "commit-date: 2026-07-14",
+      "host: aarch64-apple-darwin",
+      "release: 1.97.1",
+      "LLVM version: 22.1.6"
+    ],
+    "features": {
+      "flate2": [
+        "any_impl",
+        "miniz_oxide",
+        "rust_backend"
+      ],
+      "marmish_stream": [],
+      "serde": [
+        "default",
+        "derive",
+        "serde_derive",
+        "std"
+      ],
+      "serde_json": [
+        "default",
+        "std"
+      ]
+    },
+    "librarySha256": {
+      "marmish_stream": "247ecaf6df2b97cbc0da10e5bba573e7070186c2d5529f068214e4e0c6e89984",
+      "serde": "547520138eb4c22dfa6d8e733a75ef89fa1d5315d40328705a3477a579857db2",
+      "serde_json": "9a8b2fc9d704ce688c9935c141358f05814849d279d687e362ea4d19fecfeadc"
+    },
+    "profile": "dev",
+    "revision": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+    "rustcCommand": "rustc +1.97.1 --edition 2024 --crate-name stream_oracle --target aarch64-apple-darwin /private/tmp/oddlang-portable-build/examples/marmish/portable-oracle/stream.rs -L dependency=/var/folders/p6/hqr6jk8j0_z284rrbhn0d9vw0000gn/T/oddlang-portable-stream-build-hokb52w8/aarch64-apple-darwin/debug/deps -L dependency=/var/folders/p6/hqr6jk8j0_z284rrbhn0d9vw0000gn/T/oddlang-portable-stream-build-hokb52w8/debug/deps -o /var/folders/p6/hqr6jk8j0_z284rrbhn0d9vw0000gn/T/oddlang-portable-stream-build-hokb52w8/stream-oracle --extern marmish_stream=/var/folders/p6/hqr6jk8j0_z284rrbhn0d9vw0000gn/T/oddlang-portable-stream-build-hokb52w8/aarch64-apple-darwin/debug/libmarmish_stream.rlib --extern serde=/var/folders/p6/hqr6jk8j0_z284rrbhn0d9vw0000gn/T/oddlang-portable-stream-build-hokb52w8/aarch64-apple-darwin/debug/deps/libserde-9ecebe532bc3c5a5.rlib --extern serde_json=/var/folders/p6/hqr6jk8j0_z284rrbhn0d9vw0000gn/T/oddlang-portable-stream-build-hokb52w8/aarch64-apple-darwin/debug/deps/libserde_json-8cd75e2422190aaf.rlib",
+    "sourceSha256": {
+      "archived-main.rs": "6b5caa2a7d19af3960248ae86e7f175d4d142939efa7074c65ea6126eced8b1e",
+      "stream.rs": "330b2d57e272e0add9214bb6ef21f522d8e0f722d7e4419b53acda60ffa60657"
+    },
+    "target": "aarch64-apple-darwin"
+  },
+  "publicObservationArchiveSha256": "68aa67d0e97b880f2b123253884165f19c75138787ef9d1c792b5bbbab0e9637",
+  "publicObservationSha256": "00693291df0b7ded5774ff7ba9a508a71b59162e0cdf210cbab4cb29b7e87ff5",
+  "runtime": {
+    "environment": {
+      "PATH": "/usr/bin:/bin"
+    },
+    "locale": "C",
+    "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+    "python": "3.14.5",
+    "timezone": "UTC"
+  },
+  "schema": 1,
+  "seededCases": 257
+}

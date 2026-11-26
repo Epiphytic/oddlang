@@ -1,0 +1,61 @@
+
+export type Feed = { consumed: number; record: WireRecord | null };
+
+/** Buffers at most one record and leaves following bytes to the caller. */
+export class IncrementalDecoder {
+  #pending = new Uint8Array(headerWidth);
+  #size = 0;
+  #expected = headerWidth;
+  #failed = false;
+
+  feed(input: Uint8Array): Feed {
+    if (this.#failed) throw new WireError(streamErrors.failed);
+    try {
+      return this.#accept(input);
+    } catch (error) {
+      this.#failed = true;
+      this.#clearRecord();
+      throw error;
+    }
+  }
+
+  finish(): void {
+    if (this.#failed || this.#size !== 0) throw new WireError(streamErrors.incomplete);
+  }
+
+  #accept(input: Uint8Array): Feed {
+    if (!(input instanceof Uint8Array)) throw new WireError(errors.invalidValue);
+    let consumed = 0;
+    if (this.#size < headerWidth) {
+      consumed = Math.min(input.length, headerWidth - this.#size);
+      this.#pending.set(input.subarray(0, consumed), this.#size);
+      this.#size += consumed;
+      if (this.#size < headerWidth) return { consumed, record: null };
+      const length = new DataView(this.#pending.buffer).getUint32(1);
+      if (length > maxPayload) throw new WireError(errors.payloadLimit);
+      this.#expected = headerWidth + length;
+    }
+
+    const end = Math.min(input.length, consumed + this.#expected - this.#size);
+    const nextSize = this.#size + end - consumed;
+    if (nextSize > this.#pending.length) {
+      const capacity = Math.min(this.#expected, Math.max(nextSize, 2 * this.#pending.length));
+      const grown = new Uint8Array(capacity);
+      grown.set(this.#pending.subarray(0, this.#size));
+      this.#pending = grown;
+    }
+    this.#pending.set(input.subarray(consumed, end), this.#size);
+    this.#size = nextSize;
+    if (this.#size < this.#expected) return { consumed: end, record: null };
+
+    const record = decode(this.#pending.subarray(0, this.#size));
+    this.#clearRecord();
+    return { consumed: end, record };
+  }
+
+  #clearRecord(): void {
+    this.#pending = new Uint8Array(headerWidth);
+    this.#size = 0;
+    this.#expected = headerWidth;
+  }
+}

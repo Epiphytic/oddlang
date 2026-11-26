@@ -4,6 +4,17 @@
 
 **Design.** Follow the [contract recovery design](../../design/contract-recovery.md). Use the Rust compiler during extraction. Ship a structural inventory, a portable contract, a public Rust API binding, and optional implementation hints as separately addressable graphs. Use Rust for Oddlang and the drop-in Rust target. Use TypeScript on Node for the independent portability demonstration. Each phase below has a named subagent responsibility. Use the subagent-driven-development workflow and have Claude CLI review the diff and evidence in auto mode after each phase. Resolve findings and record residual gaps in the work graph before advancing.
 
+## Implementation status
+
+The original boundary and oracle gate passed. Candidate structural inventories
+exist for the stream library, bridge executable and its handler library.
+The Data-frame and incremental-decoder role has passed pinned, source-free
+Rust and TypeScript builds and independent replay. Exact structure,
+the rest of the processing model, original Rust API and CLI bindings, and
+broader workspace qualification still have open obligations.
+[Scoped evidence](../../design/portable-rust-slice.md)
+· [Phase reviews](../../design/portable-rust-implementation-review.md)
+
 ## What “exact” means
 
 | Graph | Contents | How to verify |
@@ -19,10 +30,10 @@ The published vocabulary admits typed facts, identifiers, protocol data literals
 
 ### 1. Freeze the boundary and independent oracle — inventory and oracle agents
 
-- [ ] Freeze upstream Marmish at `49fc705408a230bd0ad896248d08dbdd2faad05a`, Cargo.lock, target triple, enabled features, toolchain and runtime environment. Enumerate the workspace's actual CLI entry points, public API and processing boundaries. Publish an applicability matrix by platform/profile and specifically mark Rust source API, protocol API, CLI, and any promised ABI.
-- [ ] Start with the complete public surface of `marmish-stream` (codec, wire, windows and copy protocol) and a separately labeled real CLI slice of `marmish-engine-bridge`: argument rejection, EOF and a successful version-1 Init on a disposable state root through its processing handler. Record exact request, state, streams, status and relevant host effects before implementing the importer. The stream crate itself has no CLI. Keep the remaining bridge commands and project surfaces on the matrix.
-- [ ] Under `examples/marmish/`, freeze vectors and transcripts from upstream, authored specification cases and an independent seeded driver. Revalidate the prior stream corpus against this pin. Cover normal, boundary, malformed and overlapping errors, state after failure, retries, chunking and mixed peers. For nondeterminism declare allowed outcomes, ordering and normalization field by field. Compare raw bytes everywhere the interface promises them. Seal holdouts before generating any target.
-- [ ] Gate: untouched original passes all applicable obligations and the driver detects a deliberately changed expected tag, status and transition. Preserve commands, environment, seeds, digests, provenance and the full list of uncovered surfaces.
+- [x] Freeze upstream Marmish at `49fc705408a230bd0ad896248d08dbdd2faad05a`, Cargo.lock, target triple, enabled features, toolchain and runtime environment. Enumerate the workspace's actual CLI entry points, public API and processing boundaries. Publish an applicability matrix by platform/profile and specifically mark Rust source API, protocol API, CLI, and any promised ABI.
+- [x] Start with the complete public surface of `marmish-stream` (codec, wire, windows and copy protocol) and a separately labeled real CLI slice of `marmish-engine-bridge`: argument rejection, EOF and a successful version-1 Init on a disposable state root through its processing handler. Record exact request, state, streams, status and relevant host effects before implementing the importer. The stream crate itself has no CLI. Keep the remaining bridge commands and project surfaces on the matrix.
+- [x] Under `examples/marmish/`, freeze vectors and transcripts from upstream, authored specification cases and an independent seeded driver. Revalidate the prior stream corpus against this pin. Cover normal, boundary, malformed and overlapping errors, state after failure, retries, chunking and mixed peers. For nondeterminism declare allowed outcomes, ordering and normalization field by field. Compare raw bytes everywhere the interface promises them. Seal holdouts before generating any target.
+- [x] Gate: untouched original passes all applicable obligations and the driver detects a deliberately changed expected tag, status and transition. Preserve commands, environment, seeds, digests, provenance and the full list of uncovered surfaces.
 
 ### 2. Extract code-free structure — compiler and independent inventory agents
 

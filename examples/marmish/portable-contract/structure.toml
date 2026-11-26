@@ -1,0 +1,10 @@
+adapter = "../../../verification/rust-recovery/run.sh"
+adapterInputs = ["Cargo.toml", "Cargo.lock", "driver.rs"]
+package = "marmish-stream"
+targetKind = "lib"
+targetName = "marmish_stream"
+targetTriple = "aarch64-apple-darwin"
+defaultFeatures = true
+compilerCommit = "8bab26f4f68e0e26f0bb7960be334d5b520ea452"
+cargoLockSha256 = "9c5f7dde5c0f7d340e22dbefaa8a1c6ddb94c119011ba3e49ac8044c9b4cb0b3"
+sourceRevision = "49fc705408a230bd0ad896248d08dbdd2faad05a"

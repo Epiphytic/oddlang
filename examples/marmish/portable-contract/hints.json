@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "status": "advisory",
+  "revision": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+  "cargoLockSha256": "9c5f7dde5c0f7d340e22dbefaa8a1c6ddb94c119011ba3e49ac8044c9b4cb0b3",
+  "roles": [
+    {
+      "id": "urn:marmish:portable:role:byte-buffer:v1",
+      "contractSubject": "urn:marmish:portable:copy-frame:v1:Data",
+      "nativeLibrary": {
+        "name": "Rust standard library",
+        "version": "1.97.1",
+        "compilerCommit": "8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+        "operations": ["Vec::new", "Vec::extend", "Vec::with_capacity", "Vec::push"]
+      },
+      "interaction": "The encoder accumulates payload bytes in order and prefixes the frame envelope.",
+      "source": {
+        "path": "crates/marmish-stream/src/copy_protocol.rs",
+        "sha256": "cd25b010838a5f2d29d49550abe7ea99092064c5303d727a05efb1868612cbf2",
+        "lines": [[363, 365], [391, 399], [446, 453], [751, 753]]
+      }
+    },
+    {
+      "id": "urn:marmish:portable:role:bounded-zlib:v1",
+      "qualification": "observed-only",
+      "nativeLibrary": {
+        "name": "flate2",
+        "version": "1.1.10",
+        "defaultFeatures": false,
+        "enabledFeatures": ["any_impl", "miniz_oxide", "rust_backend"],
+        "operations": ["write::ZlibEncoder", "Decompress"],
+        "resolvedDependencies": {"crc32fast": "1.5.4", "miniz_oxide": "0.9.1"}
+      },
+      "interaction": "The compressed block path accepts negotiated zlib and requires complete bounded output with no leftover input. It returns the codec error on rejected decompression.",
+      "sources": [
+        {
+          "path": "crates/marmish-stream/src/codec.rs",
+          "sha256": "a0e5f99775d8122516341cf64166c2b620b664276722728fbad8b769ea7012df",
+          "lines": [[55, 77], [79, 108]]
+        },
+        {"path": "crates/marmish-stream/Cargo.toml", "lines": [[16, 16]]},
+        {"path": "Cargo.lock", "lines": [[1184, 1190], [2058, 2066], [3819, 3826]]}
+      ],
+      "resolution": "cargo tree --locked --offline -p marmish-stream -e features -i flate2"
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "revision": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+  "contract": "data.ttl",
+  "contractSha256": "82ddfed871221091be6b42adf6d0b009cb5ce10f864c414bdbaed5e19e4dad56",
+  "status": "tested-data-frame-role",
+  "overlay": {
+    "file": "data-overlay.ttl",
+    "sha256": "12a3f544d644e16d976117780b604468a2b8a623b4b8f3bd407e818f0255aa2b",
+    "variant": "urn:marmish:portable:copy-frame:v1:Data"
+  },
+  "sources": {
+    "protocol": {
+      "path": "crates/marmish-stream/src/copy_protocol.rs",
+      "sha256": "cd25b010838a5f2d29d49550abe7ea99092064c5303d727a05efb1868612cbf2"
+    },
+    "stream": {
+      "path": "crates/marmish-stream/src/lib.rs",
+      "sha256": "34a195e548fb5c8b97c746bdb54147677758684873140c624a9480472f2409eb"
+    }
+  },
+  "automaticEvidence": {
+    "file": "candidate.json",
+    "subjectNamespace": "urn:marmish:portable:copy-frame:v1:",
+    "materializedPredicates": ["tag"],
+    "observations": {
+      "Data": ["name", "tag"],
+      "offset": ["name", "position", "kind", "width"],
+      "bytes": ["name", "position", "kind"]
+    }
+  },
+  "sourceReview": [
+    {
+      "subjects": ["contract", "shortHeader", "limit", "lengthMismatch", "unknownTag"],
+      "protocolLines": [[10, 10], [446, 468], [543, 546]],
+      "findings": "Payload limit and decode envelope errors. Unknown-tag evidence applies to bytes unassigned upstream."
+    },
+    {
+      "subjects": ["offset", "truncated", "badOffset"],
+      "protocolLines": [[489, 489], [728, 734], [849, 861], [868, 878]],
+      "streamLines": [[11, 11]],
+      "findings": "Eight big-endian offset bytes are consumed and bounds checked before the remainder guard."
+    },
+    {
+      "subjects": ["bytes", "badOffset", "limit"],
+      "protocolLines": [[391, 398], [488, 497]],
+      "streamLines": [[7, 7], [11, 11], [37, 42]],
+      "findings": "Rest length is checked before the checked sum on both paths. Decode checks the individual offset first. The sum subsumes the offset bound in encode."
+    },
+    {
+      "subjects": ["contract", "feedFailed", "truncated"],
+      "protocolLines": [[550, 569], [570, 603]],
+      "findings": "An error in feed makes the decoder reject subsequent feeds. Finish reports incomplete or failed input without consuming bytes. Evidence covers the shared incremental envelope and the selected Data variant."
+    },
+    {
+      "subjects": ["trailing"],
+      "protocolLines": [[494, 497], [545, 545], [906, 912]],
+      "findings": "The reader defines this error, and the selected variant consumes the rest before calling it."
+    },
+    {
+      "subjects": ["invalidValue"],
+      "document": "../../../docs/language/tagged-wire.md",
+      "findings": "This portable native-input error covers malformed values at the target boundary. A typed upstream Rust Frame cannot express those inputs."
+    }
+  ],
+  "unresolved": [
+    "Compiler resolution of automatic observations and behavior outside the selected source patterns",
+    "Other variants: the graph cannot replace the full upstream decoder",
+    "Other variants through incremental decoding, windows, other library roles and process behavior",
+    "Complete obligation coverage for the wider project"
+  ]
+}

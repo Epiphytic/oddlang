@@ -1,0 +1,685 @@
+{
+  "additionalWithheldInputs": {
+    "withheldInput0": {
+      "file": "structure.ttl",
+      "role": "privateStructureGraph",
+      "sha256": "b4246a9713db14cb7a95ac528c9150ae786fc1dfa8685fc564b479fa35575c8c"
+    }
+  },
+  "alternativeLibraryValidation": "unresolved",
+  "approvedGraphSha256": "82ddfed871221091be6b42adf6d0b009cb5ce10f864c414bdbaed5e19e4dad56",
+  "build": {
+    "adapterBoundaries": {
+      "nodeRuntime": {
+        "deniedReadProbes": [
+          "advisoryHintSource",
+          "advisoryHintSourceThroughDataVolume",
+          "oracleVectors",
+          "oracleVectorsThroughDataVolume",
+          "sealedCapsule",
+          "sealedCapsuleThroughDataVolume",
+          "upstreamSource",
+          "upstreamSourceThroughDataVolume",
+          "withheldInput0",
+          "withheldInput0ThroughDataVolume",
+          "withheldStructureProbe",
+          "withheldStructureProbeThroughDataVolume"
+        ],
+        "sandboxProfileSha256": "b19c87f769e1a7dccf6c8b20b89b2e6c357b76adc473607998718276e4a66d7e"
+      },
+      "rustCompile": {
+        "deniedReadProbes": [
+          "advisoryHintSource",
+          "advisoryHintSourceThroughDataVolume",
+          "oracleVectors",
+          "oracleVectorsThroughDataVolume",
+          "sealedCapsule",
+          "sealedCapsuleThroughDataVolume",
+          "upstreamSource",
+          "upstreamSourceThroughDataVolume",
+          "withheldInput0",
+          "withheldInput0ThroughDataVolume",
+          "withheldStructureProbe",
+          "withheldStructureProbeThroughDataVolume"
+        ],
+        "sandboxProfileSha256": "660f69f1c10751dff35dfe1cb30b3329f967f0312305301f8319d040d6812395"
+      }
+    },
+    "commandArguments": {
+      "rust": [
+        "build",
+        "tagged-wire",
+        "rust",
+        "$STAGE/data.ttl",
+        "$STAGE/rust",
+        "--graph-sha256",
+        "82ddfed871221091be6b42adf6d0b009cb5ce10f864c414bdbaed5e19e4dad56"
+      ],
+      "typescript": [
+        "build",
+        "tagged-wire",
+        "typescript",
+        "$STAGE/data.ttl",
+        "$STAGE/typescript",
+        "--graph-sha256",
+        "82ddfed871221091be6b42adf6d0b009cb5ce10f864c414bdbaed5e19e4dad56"
+      ]
+    },
+    "deniedReadProbes": [
+      "advisoryHintSource",
+      "advisoryHintSourceThroughDataVolume",
+      "oracleVectors",
+      "oracleVectorsThroughDataVolume",
+      "sealedCapsule",
+      "sealedCapsuleThroughDataVolume",
+      "upstreamSource",
+      "upstreamSourceThroughDataVolume",
+      "withheldHintCopy",
+      "withheldHintCopyThroughDataVolume",
+      "withheldInput0",
+      "withheldInput0ThroughDataVolume",
+      "withheldStructureProbe",
+      "withheldStructureProbeThroughDataVolume"
+    ],
+    "generatedSourceSha256": {
+      "rust": "be03eda8830b276bfca68a3079630cfac776e224233d974002d42ec33a48bf2f",
+      "typescript": "b438efbe30b5e26f0ecf06d3798807f44626cc8f68a83bd24685411700abbece"
+    },
+    "generatorSha256": "fe3e951a3281ea3da3fccc33c3163f6323a12d5f86345f47a2be77f337892f04",
+    "graphFileSha256": "6ccf04e7c23d006a4c07ccdc1cd1b58e3d8bf0106a61b456d0af766c4ab1b3cd",
+    "graphSha256": "82ddfed871221091be6b42adf6d0b009cb5ce10f864c414bdbaed5e19e4dad56",
+    "projectionLockSha256": {
+      "rust": "3a8637db1db256753595272902e39acb565711cb67df14838514258ec2c03f31",
+      "typescript": "06baa9a19083f9e2cf3c93fbbfe96584afd9f689d94223d5dc76fc2142b224cd"
+    },
+    "sandboxProfileSha256": "c2531153519405afe303009915053f1273c41cdf7e61c93d94f8ad114deb7dde"
+  },
+  "buildWithoutHints": {
+    "adapterBoundaries": {
+      "nodeRuntime": {
+        "deniedReadProbes": [
+          "advisoryHintSource",
+          "advisoryHintSourceThroughDataVolume",
+          "oracleVectors",
+          "oracleVectorsThroughDataVolume",
+          "sealedCapsule",
+          "sealedCapsuleThroughDataVolume",
+          "upstreamSource",
+          "upstreamSourceThroughDataVolume",
+          "withheldInput0",
+          "withheldInput0ThroughDataVolume",
+          "withheldStructureProbe",
+          "withheldStructureProbeThroughDataVolume"
+        ],
+        "sandboxProfileSha256": "b19c87f769e1a7dccf6c8b20b89b2e6c357b76adc473607998718276e4a66d7e"
+      },
+      "rustCompile": {
+        "deniedReadProbes": [
+          "advisoryHintSource",
+          "advisoryHintSourceThroughDataVolume",
+          "oracleVectors",
+          "oracleVectorsThroughDataVolume",
+          "sealedCapsule",
+          "sealedCapsuleThroughDataVolume",
+          "upstreamSource",
+          "upstreamSourceThroughDataVolume",
+          "withheldInput0",
+          "withheldInput0ThroughDataVolume",
+          "withheldStructureProbe",
+          "withheldStructureProbeThroughDataVolume"
+        ],
+        "sandboxProfileSha256": "660f69f1c10751dff35dfe1cb30b3329f967f0312305301f8319d040d6812395"
+      }
+    },
+    "commandArguments": {
+      "rust": [
+        "build",
+        "tagged-wire",
+        "rust",
+        "$STAGE/data.ttl",
+        "$STAGE/rust",
+        "--graph-sha256",
+        "82ddfed871221091be6b42adf6d0b009cb5ce10f864c414bdbaed5e19e4dad56"
+      ],
+      "typescript": [
+        "build",
+        "tagged-wire",
+        "typescript",
+        "$STAGE/data.ttl",
+        "$STAGE/typescript",
+        "--graph-sha256",
+        "82ddfed871221091be6b42adf6d0b009cb5ce10f864c414bdbaed5e19e4dad56"
+      ]
+    },
+    "deniedReadProbes": [
+      "advisoryHintSource",
+      "advisoryHintSourceThroughDataVolume",
+      "oracleVectors",
+      "oracleVectorsThroughDataVolume",
+      "sealedCapsule",
+      "sealedCapsuleThroughDataVolume",
+      "upstreamSource",
+      "upstreamSourceThroughDataVolume",
+      "withheldInput0",
+      "withheldInput0ThroughDataVolume",
+      "withheldStructureProbe",
+      "withheldStructureProbeThroughDataVolume"
+    ],
+    "generatedSourceSha256": {
+      "rust": "be03eda8830b276bfca68a3079630cfac776e224233d974002d42ec33a48bf2f",
+      "typescript": "b438efbe30b5e26f0ecf06d3798807f44626cc8f68a83bd24685411700abbece"
+    },
+    "generatorSha256": "fe3e951a3281ea3da3fccc33c3163f6323a12d5f86345f47a2be77f337892f04",
+    "graphFileSha256": "6ccf04e7c23d006a4c07ccdc1cd1b58e3d8bf0106a61b456d0af766c4ab1b3cd",
+    "graphSha256": "82ddfed871221091be6b42adf6d0b009cb5ce10f864c414bdbaed5e19e4dad56",
+    "projectionLockSha256": {
+      "rust": "3a8637db1db256753595272902e39acb565711cb67df14838514258ec2c03f31",
+      "typescript": "06baa9a19083f9e2cf3c93fbbfe96584afd9f689d94223d5dc76fc2142b224cd"
+    },
+    "sandboxProfileSha256": "c2531153519405afe303009915053f1273c41cdf7e61c93d94f8ad114deb7dde"
+  },
+  "comparedOperationResults": {
+    "rust": 628,
+    "typescript": 628
+  },
+  "contract": "urn:marmish:portable:copy-frame:v1:Data",
+  "driverSourceSha256": {
+    "qualify_tagged.py": "a73d0e665601fd5e398afd46e6561509b76f26630b57d21acd0d0b8162d7c734",
+    "tagged_adapter.mjs": "5be9dd353fabb41c58439c4b3dda71e1a1252e648c24b5a6d3d8eac737643c52",
+    "tagged_adapter.rs": "8f8315f5975326950ec9ca9bcb08192e9b382f7951c642a0e4f3e000247cf2f1"
+  },
+  "freezeSha256": "9744b5727f86e472b76d69e6a7043d5e2e0f3715c79140d6086ce4ca2e20d339",
+  "gaps": [
+    "Copy variants other than Data and any mixed frames requiring another variant",
+    "Windows, codec, stream JSON wire, bridge command and host effects",
+    "Full Rust public paths, signatures, traits, bindings and native consumers",
+    "Invalid portable values and trailing payload are outside the selected upstream-comparison obligations",
+    "Successful filesystem reads were confined, and file metadata probes remain allowed",
+    "Native runtime dependencies and platform profiles beyond those recorded",
+    "Alternative compression library role is outside the Data contract"
+  ],
+  "hintOmission": {
+    "consumedByBuilder": false,
+    "file": "hints.json",
+    "sha256": "df91cb2d7511d98d4c0e100ac2f54596c667a5a49bd91fffaeac75938e620d38",
+    "withheldCopyPresenceOrAbsencePreservedOutput": true,
+    "withheldOnFirstBuild": true
+  },
+  "mixedPeers": {
+    "rustToTypescript": {
+      "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+      "records": 36,
+      "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+    },
+    "rustToUpstream": {
+      "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+      "records": 36,
+      "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+    },
+    "typescriptToRust": {
+      "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+      "records": 36,
+      "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+    },
+    "typescriptToUpstream": {
+      "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+      "records": 36,
+      "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+    },
+    "upstreamToRust": {
+      "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+      "records": 36,
+      "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+    },
+    "upstreamToTypescript": {
+      "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+      "records": 36,
+      "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+    }
+  },
+  "mutatedBuild": {
+    "adapterBoundaries": {
+      "nodeRuntime": {
+        "deniedReadProbes": [
+          "advisoryHintSource",
+          "advisoryHintSourceThroughDataVolume",
+          "oracleVectors",
+          "oracleVectorsThroughDataVolume",
+          "sealedCapsule",
+          "sealedCapsuleThroughDataVolume",
+          "upstreamSource",
+          "upstreamSourceThroughDataVolume",
+          "withheldInput0",
+          "withheldInput0ThroughDataVolume",
+          "withheldStructureProbe",
+          "withheldStructureProbeThroughDataVolume"
+        ],
+        "sandboxProfileSha256": "b19c87f769e1a7dccf6c8b20b89b2e6c357b76adc473607998718276e4a66d7e"
+      },
+      "rustCompile": {
+        "deniedReadProbes": [
+          "advisoryHintSource",
+          "advisoryHintSourceThroughDataVolume",
+          "oracleVectors",
+          "oracleVectorsThroughDataVolume",
+          "sealedCapsule",
+          "sealedCapsuleThroughDataVolume",
+          "upstreamSource",
+          "upstreamSourceThroughDataVolume",
+          "withheldInput0",
+          "withheldInput0ThroughDataVolume",
+          "withheldStructureProbe",
+          "withheldStructureProbeThroughDataVolume"
+        ],
+        "sandboxProfileSha256": "660f69f1c10751dff35dfe1cb30b3329f967f0312305301f8319d040d6812395"
+      }
+    },
+    "commandArguments": {
+      "rust": [
+        "build",
+        "tagged-wire",
+        "rust",
+        "$STAGE/data.ttl",
+        "$STAGE/rust",
+        "--graph-sha256",
+        "3a4aa56ae2590624a7078362d9102c7519982a3d38f4350567d8e9fb4a3ab943"
+      ],
+      "typescript": [
+        "build",
+        "tagged-wire",
+        "typescript",
+        "$STAGE/data.ttl",
+        "$STAGE/typescript",
+        "--graph-sha256",
+        "3a4aa56ae2590624a7078362d9102c7519982a3d38f4350567d8e9fb4a3ab943"
+      ]
+    },
+    "deniedReadProbes": [
+      "advisoryHintSource",
+      "advisoryHintSourceThroughDataVolume",
+      "oracleVectors",
+      "oracleVectorsThroughDataVolume",
+      "sealedCapsule",
+      "sealedCapsuleThroughDataVolume",
+      "upstreamSource",
+      "upstreamSourceThroughDataVolume",
+      "withheldInput0",
+      "withheldInput0ThroughDataVolume",
+      "withheldStructureProbe",
+      "withheldStructureProbeThroughDataVolume"
+    ],
+    "generatedSourceSha256": {
+      "rust": "8f83f6e10dea47fc4fe7b6f70aab36f24bd10e3bd5ab70d30e22bb97d298422f",
+      "typescript": "9335656e1f78984d47357524d7cb095a0f6209200fa16b7520b07cb8d97e2244"
+    },
+    "generatorSha256": "fe3e951a3281ea3da3fccc33c3163f6323a12d5f86345f47a2be77f337892f04",
+    "graphFileSha256": "58dfef2172a7ce31ccb26549edc73b5df28cbf277cc809e9301bfa2a3f9c26e4",
+    "graphSha256": "3a4aa56ae2590624a7078362d9102c7519982a3d38f4350567d8e9fb4a3ab943",
+    "projectionLockSha256": {
+      "rust": "a678f0abffb158210c941ace5d551b0634691ba4a45e2ba754427ac877a1581e",
+      "typescript": "6f89cef858e95fb49f89e789c6188d08a88a07d44293ef1bab439306af3a90e0"
+    },
+    "sandboxProfileSha256": "c2531153519405afe303009915053f1273c41cdf7e61c93d94f8ad114deb7dde"
+  },
+  "mutatedOutputs": {
+    "rust": "330000000b000000000000010200ff7f",
+    "typescript": "330000000b000000000000010200ff7f"
+  },
+  "mutation": {
+    "from": 5,
+    "mutantsDecodedOwnWire": [
+      "rust",
+      "typescript"
+    ],
+    "mutantsFedOwnWire": [
+      "rust",
+      "typescript"
+    ],
+    "mutantsRejectedOriginalDecodeAndFeed": [
+      "rust",
+      "typescript"
+    ],
+    "restoredPinReplayed": true,
+    "to": 51,
+    "upstreamRejected": [
+      "rust",
+      "typescript"
+    ],
+    "wrongEncodeTagsRejected": [
+      "rust",
+      "typescript"
+    ]
+  },
+  "originalCaller": {
+    "buildLocale": "C",
+    "callerBinding": "655e3c587689894e32b5b0524db65fbaaf88f303d056ccfffd52c76ac6c2a08d",
+    "callerSha256": "02b1b58c42c1a8b0d17fdcd7c5b368489df5dfaf1ff842e87f7cbd8ae748a333",
+    "cargoCommand": "cargo +1.97.1 build --locked --offline --target aarch64-apple-darwin --package marmish-stream --target-dir /private/var/folders/p6/hqr6jk8j0_z284rrbhn0d9vw0000gn/T/oddlang-qualify-copy-data-t07r4tr7/upstream-build --message-format=json-render-diagnostics",
+    "cargoLockSha256": "9c5f7dde5c0f7d340e22dbefaa8a1c6ddb94c119011ba3e49ac8044c9b4cb0b3",
+    "compiler": [
+      "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+      "binary: rustc",
+      "commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+      "commit-date: 2026-07-14",
+      "host: aarch64-apple-darwin",
+      "release: 1.97.1",
+      "LLVM version: 22.1.6"
+    ],
+    "features": {
+      "flate2": [
+        "any_impl",
+        "miniz_oxide",
+        "rust_backend"
+      ],
+      "marmish_stream": [],
+      "serde": [
+        "default",
+        "derive",
+        "serde_derive",
+        "std"
+      ],
+      "serde_json": [
+        "default",
+        "std"
+      ]
+    },
+    "librarySha256": {
+      "marmish_stream": "2dbb8f8471021a2b27aaf5e7918471392befdb10ede40fa162308955125096aa",
+      "serde": "0e6c8af29b3626c31301e75fa0682273290849bd485ab90c484e897b03de0bd9",
+      "serde_json": "9deff4573c5d65a0dad0a7ef9f7b015a6a473310969cc17ea070400bb9330861"
+    },
+    "profile": "dev",
+    "revision": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+    "rustcCommand": "rustc +1.97.1 --edition 2024 --crate-name stream_oracle --target aarch64-apple-darwin /private/tmp/oddlang-portable-build/examples/marmish/portable-oracle/stream.rs -L dependency=/private/var/folders/p6/hqr6jk8j0_z284rrbhn0d9vw0000gn/T/oddlang-qualify-copy-data-t07r4tr7/upstream-build/aarch64-apple-darwin/debug/deps -L dependency=/private/var/folders/p6/hqr6jk8j0_z284rrbhn0d9vw0000gn/T/oddlang-qualify-copy-data-t07r4tr7/upstream-build/debug/deps -o /private/var/folders/p6/hqr6jk8j0_z284rrbhn0d9vw0000gn/T/oddlang-qualify-copy-data-t07r4tr7/upstream-build/stream-oracle --extern marmish_stream=/private/var/folders/p6/hqr6jk8j0_z284rrbhn0d9vw0000gn/T/oddlang-qualify-copy-data-t07r4tr7/upstream-build/aarch64-apple-darwin/debug/libmarmish_stream.rlib --extern serde=/private/var/folders/p6/hqr6jk8j0_z284rrbhn0d9vw0000gn/T/oddlang-qualify-copy-data-t07r4tr7/upstream-build/aarch64-apple-darwin/debug/deps/libserde-9ecebe532bc3c5a5.rlib --extern serde_json=/private/var/folders/p6/hqr6jk8j0_z284rrbhn0d9vw0000gn/T/oddlang-qualify-copy-data-t07r4tr7/upstream-build/aarch64-apple-darwin/debug/deps/libserde_json-8cd75e2422190aaf.rlib",
+    "sourceSha256": {
+      "archived-main.rs": "6b5caa2a7d19af3960248ae86e7f175d4d142939efa7074c65ea6126eced8b1e",
+      "stream.rs": "330b2d57e272e0add9214bb6ef21f522d8e0f722d7e4419b53acda60ffa60657"
+    },
+    "target": "aarch64-apple-darwin"
+  },
+  "publicCaseIds": [
+    "binary-data-encode",
+    "binary-data-decode",
+    "maximum-data-encode",
+    "maximum-data-decode",
+    "short-header",
+    "incorrect-length-before-unknown-tag",
+    "control-limit-before-length-and-tag",
+    "unknown-tag",
+    "data-empty",
+    "data-offset-before-length",
+    "data-end-overflow",
+    "data-over-maximum",
+    "encode-empty-data-before-overflow",
+    "encode-data-offset-overflow",
+    "fragmented-error-latches",
+    "fragmented-truncated-at-eof",
+    "spec-frame-data-encode",
+    "spec-frame-data-decode",
+    "seed-0-data-write",
+    "seed-0-data-read",
+    "seed-0-fragmented",
+    "seed-0-uncompleted-finish-retry",
+    "seed-0-unknown-tag",
+    "seed-0-truncated-tag-precedence",
+    "seed-0-offset-overflow",
+    "seed-1-data-write",
+    "seed-1-data-read",
+    "seed-1-fragmented",
+    "seed-1-uncompleted-finish-retry",
+    "seed-1-unknown-tag",
+    "seed-1-truncated-tag-precedence",
+    "seed-1-offset-overflow",
+    "seed-2-data-write",
+    "seed-2-data-read",
+    "seed-2-fragmented",
+    "seed-2-uncompleted-finish-retry",
+    "seed-2-unknown-tag",
+    "seed-2-truncated-tag-precedence",
+    "seed-2-offset-overflow",
+    "seed-3-data-write",
+    "seed-3-data-read",
+    "seed-3-fragmented",
+    "seed-3-uncompleted-finish-retry",
+    "seed-3-unknown-tag",
+    "seed-3-truncated-tag-precedence",
+    "seed-3-offset-overflow",
+    "seed-4-data-write",
+    "seed-4-data-read",
+    "seed-4-fragmented",
+    "seed-4-uncompleted-finish-retry",
+    "seed-4-unknown-tag",
+    "seed-4-truncated-tag-precedence",
+    "seed-4-offset-overflow",
+    "seed-5-data-write",
+    "seed-5-data-read",
+    "seed-5-fragmented",
+    "seed-5-uncompleted-finish-retry",
+    "seed-5-unknown-tag",
+    "seed-5-truncated-tag-precedence",
+    "seed-5-offset-overflow",
+    "seed-6-data-write",
+    "seed-6-data-read",
+    "seed-6-fragmented",
+    "seed-6-uncompleted-finish-retry",
+    "seed-6-unknown-tag",
+    "seed-6-truncated-tag-precedence",
+    "seed-6-offset-overflow",
+    "seed-7-data-write",
+    "seed-7-data-read",
+    "seed-7-fragmented",
+    "seed-7-uncompleted-finish-retry",
+    "seed-7-unknown-tag",
+    "seed-7-truncated-tag-precedence",
+    "seed-7-offset-overflow",
+    "seed-8-data-write",
+    "seed-8-data-read",
+    "seed-8-fragmented",
+    "seed-8-uncompleted-finish-retry",
+    "seed-8-unknown-tag",
+    "seed-8-truncated-tag-precedence",
+    "seed-8-offset-overflow",
+    "seed-9-data-write",
+    "seed-9-data-read",
+    "seed-9-fragmented",
+    "seed-9-uncompleted-finish-retry",
+    "seed-9-unknown-tag",
+    "seed-9-truncated-tag-precedence",
+    "seed-9-offset-overflow",
+    "seed-10-data-write",
+    "seed-10-data-read",
+    "seed-10-fragmented",
+    "seed-10-uncompleted-finish-retry",
+    "seed-10-unknown-tag",
+    "seed-10-truncated-tag-precedence",
+    "seed-10-offset-overflow",
+    "seed-11-data-write",
+    "seed-11-data-read",
+    "seed-11-fragmented",
+    "seed-11-uncompleted-finish-retry",
+    "seed-11-unknown-tag",
+    "seed-11-truncated-tag-precedence",
+    "seed-11-offset-overflow",
+    "seed-12-data-write",
+    "seed-12-data-read",
+    "seed-12-fragmented",
+    "seed-12-uncompleted-finish-retry",
+    "seed-12-unknown-tag",
+    "seed-12-truncated-tag-precedence",
+    "seed-12-offset-overflow",
+    "seed-13-data-write",
+    "seed-13-data-read",
+    "seed-13-fragmented",
+    "seed-13-uncompleted-finish-retry",
+    "seed-13-unknown-tag",
+    "seed-13-truncated-tag-precedence",
+    "seed-13-offset-overflow",
+    "seed-14-data-write",
+    "seed-14-data-read",
+    "seed-14-fragmented",
+    "seed-14-uncompleted-finish-retry",
+    "seed-14-unknown-tag",
+    "seed-14-truncated-tag-precedence",
+    "seed-14-offset-overflow",
+    "seed-15-data-write",
+    "seed-15-data-read",
+    "seed-15-fragmented",
+    "seed-15-uncompleted-finish-retry",
+    "seed-15-unknown-tag",
+    "seed-15-truncated-tag-precedence",
+    "seed-15-offset-overflow",
+    "seed-16-data-write",
+    "seed-16-data-read",
+    "seed-16-fragmented",
+    "seed-16-uncompleted-finish-retry",
+    "seed-16-unknown-tag",
+    "seed-16-truncated-tag-precedence",
+    "seed-16-offset-overflow",
+    "seed-17-data-write",
+    "seed-17-data-read",
+    "seed-17-fragmented",
+    "seed-17-uncompleted-finish-retry",
+    "seed-17-unknown-tag",
+    "seed-17-truncated-tag-precedence",
+    "seed-17-offset-overflow",
+    "seed-18-data-write",
+    "seed-18-data-read",
+    "seed-18-fragmented",
+    "seed-18-uncompleted-finish-retry",
+    "seed-18-unknown-tag",
+    "seed-18-truncated-tag-precedence",
+    "seed-18-offset-overflow",
+    "seed-19-data-write",
+    "seed-19-data-read",
+    "seed-19-fragmented",
+    "seed-19-uncompleted-finish-retry",
+    "seed-19-unknown-tag",
+    "seed-19-truncated-tag-precedence",
+    "seed-19-offset-overflow",
+    "seed-20-data-write",
+    "seed-20-data-read",
+    "seed-20-fragmented",
+    "seed-20-uncompleted-finish-retry",
+    "seed-20-unknown-tag",
+    "seed-20-truncated-tag-precedence",
+    "seed-20-offset-overflow",
+    "seed-21-data-write",
+    "seed-21-data-read",
+    "seed-21-fragmented",
+    "seed-21-uncompleted-finish-retry",
+    "seed-21-unknown-tag",
+    "seed-21-truncated-tag-precedence",
+    "seed-21-offset-overflow",
+    "seed-22-data-write",
+    "seed-22-data-read",
+    "seed-22-fragmented",
+    "seed-22-uncompleted-finish-retry",
+    "seed-22-unknown-tag",
+    "seed-22-truncated-tag-precedence",
+    "seed-22-offset-overflow",
+    "seed-23-data-write",
+    "seed-23-data-read",
+    "seed-23-fragmented",
+    "seed-23-uncompleted-finish-retry",
+    "seed-23-unknown-tag",
+    "seed-23-truncated-tag-precedence",
+    "seed-23-offset-overflow",
+    "seed-24-data-write",
+    "seed-24-data-read",
+    "seed-24-fragmented",
+    "seed-24-uncompleted-finish-retry",
+    "seed-24-unknown-tag",
+    "seed-24-truncated-tag-precedence",
+    "seed-24-offset-overflow",
+    "seed-25-data-write",
+    "seed-25-data-read",
+    "seed-25-fragmented",
+    "seed-25-uncompleted-finish-retry",
+    "seed-25-unknown-tag",
+    "seed-25-truncated-tag-precedence",
+    "seed-25-offset-overflow",
+    "seed-26-data-write",
+    "seed-26-data-read",
+    "seed-26-fragmented",
+    "seed-26-uncompleted-finish-retry",
+    "seed-26-unknown-tag",
+    "seed-26-truncated-tag-precedence",
+    "seed-26-offset-overflow",
+    "seed-27-data-write",
+    "seed-27-data-read",
+    "seed-27-fragmented",
+    "seed-27-uncompleted-finish-retry",
+    "seed-27-unknown-tag",
+    "seed-27-truncated-tag-precedence",
+    "seed-27-offset-overflow",
+    "seed-28-data-write",
+    "seed-28-data-read",
+    "seed-28-fragmented",
+    "seed-28-uncompleted-finish-retry",
+    "seed-28-unknown-tag",
+    "seed-28-truncated-tag-precedence",
+    "seed-28-offset-overflow",
+    "seed-29-data-write",
+    "seed-29-data-read",
+    "seed-29-fragmented",
+    "seed-29-uncompleted-finish-retry",
+    "seed-29-unknown-tag",
+    "seed-29-truncated-tag-precedence",
+    "seed-29-offset-overflow",
+    "seed-30-data-write",
+    "seed-30-data-read",
+    "seed-30-fragmented",
+    "seed-30-uncompleted-finish-retry",
+    "seed-30-unknown-tag",
+    "seed-30-truncated-tag-precedence",
+    "seed-30-offset-overflow",
+    "seed-31-data-write",
+    "seed-31-data-read",
+    "seed-31-fragmented",
+    "seed-31-uncompleted-finish-retry",
+    "seed-31-unknown-tag",
+    "seed-31-truncated-tag-precedence",
+    "seed-31-offset-overflow",
+    "tagged-short-offset",
+    "tagged-control-cap-minus-one",
+    "tagged-control-cap",
+    "tagged-data-payload-minus-one",
+    "tagged-encode-8193-valid-offset",
+    "tagged-encode-8193-invalid-offset",
+    "tagged-encode-u64-max",
+    "tagged-decode-u64-max",
+    "tagged-data-length-mismatch",
+    "tagged-bytewise-stream",
+    "tagged-latched-cap"
+  ],
+  "publicCases": {
+    "frame_decode": 112,
+    "frame_encode": 41,
+    "frame_fragments": 100
+  },
+  "publicCount": 253,
+  "runtime": {
+    "clangSha256": "fc5e3cbba6ad54059295cad716aacb05ace8235f5f7a6031f1d8c15d24bd6d66",
+    "host": "macOS-26.6-arm64-arm-64bit-Mach-O",
+    "node": "v22.22.2",
+    "nodeOptions": [
+      "--no-warnings",
+      "--experimental-strip-types"
+    ],
+    "nodeSha256": "5c899797c4eb8f1db5563eea56538342ddb3e9276ee1b04a5a1f0f1023d2b011",
+    "rust": [
+      "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+      "binary: rustc",
+      "commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+      "commit-date: 2026-07-14",
+      "host: aarch64-apple-darwin",
+      "release: 1.97.1",
+      "LLVM version: 22.1.6"
+    ],
+    "rustcSha256": "210df6794001b73ec3d453878707fa1e0bdcb63c427024a6e6574bbe5615a4da",
+    "sdkSettingsSha256": "82165b15ee21419d4cffaba8895797391b908ac9499ba70f561f3e1bd16758d6"
+  },
+  "schema": 1,
+  "sealedCases": 112,
+  "upstreamRevision": "49fc705408a230bd0ad896248d08dbdd2faad05a"
+}

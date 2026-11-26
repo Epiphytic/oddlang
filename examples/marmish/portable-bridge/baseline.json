@@ -1,0 +1,103 @@
+{
+  "format": 1,
+  "upstream": {
+    "commit": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+    "tree": "c78b36ae6720565170bc6dce578531f58ab671c7",
+    "cargo_lock_sha256": "9c5f7dde5c0f7d340e22dbefaa8a1c6ddb94c119011ba3e49ac8044c9b4cb0b3",
+    "toolchain": "1.97.1",
+    "target": "aarch64-apple-darwin"
+  },
+  "request": "{\"id\":\"1234567890abcdef1234567890abcdef\",\"op\":\"init\",\"version\":@VERSION@,\"state_root\":@STATE@,\"worker_executable\":@WORKER@,\"server\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"allowed_principals\":[\"2222222222222222222222222222222222222222222222222222222222222222\"],\"cwd\":@CWD@}\n",
+  "replies": {
+    "initialized": "{\"id\":\"1234567890abcdef1234567890abcdef\",\"ok\":true,\"result\":{\"version\":1}}\n",
+    "invalid_request": "{\"error\":{\"code\":\"invalid_request\"},\"id\":\"1234567890abcdef1234567890abcdef\",\"ok\":false}\n"
+  },
+  "states": {
+    "absent": {
+      "entries": {"cwd": ["dir", "0700"]},
+      "frontend_lock": "absent"
+    },
+    "live": {
+      "entries": {
+        "cwd": ["dir", "0700"],
+        "state": ["dir", "0700"],
+        "state/engine.key": ["file", "0600", "key40"],
+        "state/engine.sqlite3": ["file", "0600", "nonempty"],
+        "state/engine.sqlite3-shm": ["file", "0600", "nonempty"],
+        "state/engine.sqlite3-wal": ["file", "0600", "nonempty"],
+        "state/frontend.lock": ["file", "0600", "empty"],
+        "state/jobs": ["dir", "0700"]
+      },
+      "frontend_lock": "held"
+    },
+    "closed": {
+      "entries": {
+        "cwd": ["dir", "0700"],
+        "state": ["dir", "0700"],
+        "state/engine.key": ["file", "0600", "key40"],
+        "state/engine.sqlite3": ["file", "0600", "nonempty"],
+        "state/frontend.lock": ["file", "0600", "empty"],
+        "state/jobs": ["dir", "0700"]
+      },
+      "frontend_lock": "available"
+    }
+  },
+  "cases": [
+    {
+      "id": "argument-rejection",
+      "args": ["--help"],
+      "exchanges": [],
+      "stdin_before_eof": "",
+      "stdout_after_eof": "",
+      "stderr": "",
+      "status": 1,
+      "final_state": "absent"
+    },
+    {
+      "id": "clean-eof",
+      "args": [],
+      "exchanges": [],
+      "stdin_before_eof": "",
+      "stdout_after_eof": "",
+      "stderr": "",
+      "status": 0,
+      "final_state": "absent"
+    },
+    {
+      "id": "partial-frame-at-eof",
+      "args": [],
+      "exchanges": [],
+      "stdin_before_eof": "{",
+      "stdout_after_eof": "{\"error\":{\"code\":\"invalid_framing\"},\"id\":null,\"ok\":false}\n",
+      "stderr": "",
+      "status": 0,
+      "final_state": "absent"
+    },
+    {
+      "id": "version-1-init-before-eof",
+      "args": [],
+      "exchanges": [
+        {"version": 1, "reply": "initialized", "state": "live"}
+      ],
+      "stdin_before_eof": "",
+      "stdout_after_eof": "",
+      "stderr": "",
+      "status": 0,
+      "final_state": "closed"
+    },
+    {
+      "id": "retry-after-rejected-version-and-double-init",
+      "args": [],
+      "exchanges": [
+        {"version": 0, "reply": "invalid_request", "state": "absent"},
+        {"version": 1, "reply": "initialized", "state": "live"},
+        {"version": 1, "reply": "invalid_request", "state": "live", "unchanged": true}
+      ],
+      "stdin_before_eof": "",
+      "stdout_after_eof": "",
+      "stderr": "",
+      "status": 0,
+      "final_state": "closed"
+    }
+  ]
+}

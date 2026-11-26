@@ -529,26 +529,30 @@ w:contractRecoveryDecision a p:Decision ;
 w:portableRustPlan a p:Artifact ; rdfs:label "Portable Rust recovery implementation plan" ; p:location "docs/superpowers/plans/2026-11-25-portable-rust-recovery.md" .
 
 w:portableRustBoundary a p:Task ; rdfs:label "Freeze project boundaries and independent observations" ;
-    p:milestone w:marmishMilestone ; p:source w:portableRustPlan ; p:status p:planned ;
+    p:milestone w:marmishMilestone ; p:source w:portableRustPlan ; p:status p:done ; p:evidence w:portableRustBoundaryRecord ;
     p:acceptance "Pin inventory, applicable surfaces, vectors and holdouts. Verify oracle sensitivity on the original." .
 
 w:portableRustStructure a p:Task ; rdfs:label "Recover source-free structural inventory" ;
-    p:milestone w:marmishMilestone ; p:source w:portableRustPlan ; p:status p:planned ;
+    p:milestone w:marmishMilestone ; p:source w:portableRustPlan ; p:status p:active ; p:evidence w:portableRustStructureRecord ;
+    p:reason "Compiler ordinals, partial types and unresolved independent reconciliation prevent an exact structure verdict." ;
     p:dependsOn w:portableRustBoundary ;
     p:acceptance "Independently reconcile all selected declarations and relationship endpoints and detect a missing item and a misdirected edge." .
 
 w:portableRustSemantics a p:Task ; rdfs:label "Recover processing and interaction contracts" ;
-    p:milestone w:marmishMilestone ; p:source w:portableRustPlan ; p:status p:planned ;
+    p:milestone w:marmishMilestone ; p:source w:portableRustPlan ; p:status p:active ; p:evidence w:portableDataRole ;
+    p:reason "Only the selected tagged Data frame and its incremental decoder vocabulary are released for this role. Complete processing and CLI recovery remain open." ;
     p:dependsOn w:portableRustStructure ;
     p:acceptance "Publish reviewed portable rules for wire, errors, CLI and state. Measure unresolved and manually authored rules." .
 
 w:portableRustTargets a p:Task ; rdfs:label "Build native targets from the portable contract" ;
-    p:milestone w:marmishMilestone ; p:source w:portableRustPlan ; p:status p:planned ;
+    p:milestone w:marmishMilestone ; p:source w:portableRustPlan ; p:status p:active ; p:evidence w:portableDataRole ;
+    p:reason "The standalone Rust and TypeScript modules cover the Data wire role. Full Rust API bindings, CLI replacement and an alternate implementation of a library role remain open." ;
     p:dependsOn w:portableRustSemantics ;
     p:acceptance "Build native Rust and Node targets without upstream inputs and qualify with hints removed and a library substitution." .
 
 w:portableRustQualification a p:Task ; rdfs:label "Qualify the slice and expand across the workspace" ;
-    p:milestone w:marmishMilestone ; p:source w:portableRustPlan ; p:status p:planned ;
+    p:milestone w:marmishMilestone ; p:source w:portableRustPlan ; p:status p:active ; p:evidence w:portableDataEvidence ;
+    p:reason "The tested Data role passes scoped peers. Remaining stream and workspace rows require independent conformance and source-free builds." ;
     p:dependsOn w:portableRustTargets ;
     p:acceptance "Publish per-surface evidence and expand until every promised project row passes source-independent build and consumer checks." .
 
@@ -558,3 +562,44 @@ w:portableRustBoundary p:addresses w:portableRustReview .
 w:portableRustStructure p:addresses w:portableRustReview .
 w:portableRustSemantics p:addresses w:portableRustReview .
 w:portableRustTargets p:addresses w:portableRustReview .
+
+
+w:portableRustBoundaryRecord a p:Artifact ;
+    p:location "docs/design/portable-rust-boundary.md" .
+w:portableRustImplementationReviews a p:Artifact ;
+    p:location "docs/design/portable-rust-implementation-review.md" .
+w:portableRustOpenFileLimit a p:Finding ;
+    rdfs:label "Bridge worker validation depended on the replay process open-file limit" ;
+    p:source w:portableRustImplementationReviews .
+w:portableRustBoundary p:addresses w:portableRustOpenFileLimit ;
+    p:evidence w:portableRustImplementationReviews .
+
+w:portableRustStructureRecord a p:Artifact ;
+    p:location "docs/design/portable-rust-structure.md" .
+w:portableDataRole a p:Artifact ;
+    p:location "docs/design/portable-rust-slice.md" .
+w:portableDataEvidence a p:Artifact ;
+    p:location "examples/marmish/portable-oracle/tagged-qualification.json" .
+w:portableRustStructureReview a p:Finding ;
+    rdfs:label "Capture function-valued operands, report implicit effects and bind the selected source and compiler inputs" ;
+    p:source w:portableRustImplementationReviews .
+w:portableTagRecoveryReview a p:Finding ;
+    rdfs:label "Reject source matches which shadow a selected variant or rebind its input and check reviewed fields against observations" ;
+    p:source w:portableRustImplementationReviews .
+w:portableTagQualificationReview a p:Finding ;
+    rdfs:label "Bind replay to the independent release pin and test a retagged record in both decoders" ;
+    p:source w:portableRustImplementationReviews .
+w:portableRustStructure p:addresses w:portableRustStructureReview .
+w:portableRustSemantics p:addresses w:portableTagRecoveryReview .
+w:portableRustQualification p:addresses w:portableTagQualificationReview .
+
+w:portableDataSlice a p:Task ;
+    rdfs:label "Recover and qualify a source-free native Data wire slice" ;
+    p:milestone w:marmishMilestone ; p:source w:portableRustPlan ; p:status p:done ;
+    p:dependsOn w:portableRustBoundary ;
+    p:acceptance "The recovered tag and reviewed field semantics produce both native modules. Pinned original, Rust and TypeScript pass independent Data frames, incremental state, causal mutants and read isolation." ;
+    p:evidence w:portableDataRole, w:portableDataEvidence, w:portableRustImplementationReviews .
+
+w:portableMarmishCopyRelease a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/pull/3" .
+w:portableDataSlice p:evidence w:portableMarmishCopyRelease .
