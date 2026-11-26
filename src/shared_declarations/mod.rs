@@ -461,10 +461,10 @@ impl Value {
     }
 }
 
-pub(crate) fn unit_error_variants(
+pub(crate) fn error_variants(
     graph: &[u8],
     overlay: &[u8],
-) -> Result<Vec<crate::native_package::UnitErrorVariant>> {
+) -> Result<Vec<crate::native_package::ErrorVariantExport>> {
     let graph: Graph =
         serde_json::from_slice(graph).map_err(|e| format!("shared declarations: {e}"))?;
     let binding: Binding =
@@ -476,13 +476,12 @@ pub(crate) fn unit_error_variants(
             continue;
         }
         for variant in error.variants {
-            if variant.payload == Payload::None {
-                variants.push(crate::native_package::UnitErrorVariant {
-                    error_type: binding.name(&error.id)?.to_owned(),
-                    variant: binding.name(&variant.id)?.to_owned(),
-                    id: variant.id,
-                });
-            }
+            variants.push(crate::native_package::ErrorVariantExport {
+                error_type: binding.name(&error.id)?.to_owned(),
+                variant: binding.name(&variant.id)?.to_owned(),
+                id: variant.id,
+                unit: variant.payload == Payload::None,
+            });
         }
     }
     Ok(variants)

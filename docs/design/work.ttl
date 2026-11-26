@@ -1290,4 +1290,4 @@ w:unifiedVaultEngineWorkspace a p:Task ;
 w:checkedValueErrorLinkageReview a p:Finding ;
     rdfs:label "Reject a checked constructor whose native error export has a different portable identity" ;
     p:source w:checkedValuesFixture .
-w:unifiedVaultEngineWorkspace p:addresses w:checkedValueErrorLinkageReview .
+w:checkedValueProductProjection p:addresses w:checkedValueErrorLinkageReview ; p:evidence w:checkedValuesFixture .

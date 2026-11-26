@@ -275,18 +275,18 @@ pub fn build(graph: &Path, overlay: &Path, output: &Path) -> Result<()> {
     build_bytes(&io(fs::read(graph))?, &io(fs::read(overlay))?, output)
 }
 
-pub(crate) fn unit_error_variants(
+pub(crate) fn error_variants(
     graph: &[u8],
     overlay: &[u8],
-) -> Result<Vec<crate::native_package::UnitErrorVariant>> {
+) -> Result<Vec<crate::native_package::ErrorVariantExport>> {
     let graph: Graph = serde_json::from_slice(graph).map_err(|e| e.to_string())?;
     let overlay: Overlay = serde_json::from_slice(overlay).map_err(|e| e.to_string())?;
     validate(&graph, &overlay)?;
     Ok(graph
         .variants
         .into_iter()
-        .filter(|(_, variant)| matches!(variant.payload, Payload::Unit))
-        .map(|(id, _)| crate::native_package::UnitErrorVariant {
+        .map(|(id, variant)| crate::native_package::ErrorVariantExport {
+            unit: matches!(variant.payload, Payload::Unit),
             error_type: overlay.names[&graph.error].clone(),
             variant: overlay.names[&id].clone(),
             id,

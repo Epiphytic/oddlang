@@ -471,10 +471,11 @@ fn export_paths(component: &Component, entry: &str) -> Vec<Vec<String>> {
     paths
 }
 
-pub(crate) struct UnitErrorVariant {
+pub(crate) struct ErrorVariantExport {
     pub id: String,
     pub error_type: String,
     pub variant: String,
+    pub unit: bool,
 }
 
 fn validate_checked_value_errors(components: &[Component], base: &Path) -> Result<()> {
@@ -487,14 +488,15 @@ fn validate_checked_value_errors(components: &[Component], base: &Path) -> Resul
     }
     let mut providers = BTreeMap::new();
     for component in components {
-        let unit_variants = match component.kind {
-            Kind::SharedDeclarations => crate::shared_declarations::unit_error_variants,
-            Kind::FiniteErrorDomain => crate::finite_error_domain::unit_error_variants,
+        let error_variants = match component.kind {
+            Kind::SharedDeclarations => crate::shared_declarations::error_variants,
+            Kind::FiniteErrorDomain => crate::finite_error_domain::error_variants,
             _ => continue,
         };
-        for error in unit_variants(&component.graph.read(base)?, &component.overlay.read(base)?)? {
+        for error in error_variants(&component.graph.read(base)?, &component.overlay.read(base)?)? {
             let paths = export_paths(component, &error.error_type)
                 .into_iter()
+                .filter(|_| error.unit)
                 .map(|path| format!("crate::{}::{}", path.join("::"), error.variant))
                 .collect::<BTreeSet<_>>();
             if providers.insert(error.id.clone(), paths).is_some() {
