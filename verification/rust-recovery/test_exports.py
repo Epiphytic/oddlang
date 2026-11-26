@@ -255,6 +255,18 @@ pub mod museum {
         ["cargo", "+1.97.1", "check", "--locked", "--offline"], package, False
     )
     assert "ambiguous_import_visibilities" in hidden_collision.stderr
+    src.write_text(
+        src.read_text().replace(
+            "deny(ambiguous_import_visibilities)", "warn(ambiguous_import_visibilities)"
+        )
+    )
+    warned = run(["cargo", "+1.97.1", "check", "--locked", "--offline"], package)
+    assert "ambiguous_import_visibilities" in warned.stderr
+    scoped = recover("visibility-lint-allowed")
+    root_binding = scoped["modules"][scoped["root"]]["bindings"]["museum"]
+    museum = scoped["modules"][root_binding["target"]]
+    assert "Renamed" in museum["bindings"] and "Renamed" not in museum["ambiguous"]
+    probe("pub use observations::museum::Renamed as chosen_visibility;")
     print(
         "checked aliases, public module cycles, visibility and changed export names against native callers"
     )

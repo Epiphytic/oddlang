@@ -2,10 +2,10 @@
 
 The source API gate needs to answer whether a downstream caller can name a type and access a field. A definition’s visibility and its usable public spelling are separate observations. Re-exports can give one definition several names, bypass a private parent module, or make a public glob ambiguous. The pinned Rust compiler resolves those bindings for each build profile.
 
-- [ ] Add a typed, source-free public type graph alongside the existing structural projections. Each public binding edge records the local module, public spelling and resolved definition. Start at the crate root and follow public module edges, retaining cycles as edges. Record ambiguous type names, names that resolve outside the selected crate, and unsupported namespaces as explicit limits. The first projection covers module-level type names. Value constructors, macros, trait lookup and external crate internals have separate obligations.
-- [ ] Record the declared field audience for local data types, including tuple fields and enum payloads. Module-scoped audience identifies the declaring visibility boundary. Use stable field IDs shared by the shape graph; the public binding graph describes access independently of layout and processing.
-- [ ] Exercise public alias through a private module, public and restricted fields, a renamed glob, an ambiguous glob, a module cycle and a feature-selected export in an unrelated crate. Compile positive and negative downstream callers and mutate an alias while keeping the type definition fixed.
-- [ ] Run the extractor against the pinned Marmish stream library and check actual external caller spellings. Check the work ontology, package the compiler as an open framework PR, and merge the reviewed companion graph with its receipt.
+- [x] Add a typed, source-free public type graph alongside the existing structural projections. Each public binding edge records the local module, public spelling and resolved definition. Start at the crate root and follow public module edges, retaining cycles as edges. Record ambiguous type names, names that resolve outside the selected crate, and unsupported namespaces as explicit limits. The first projection covers module-level type names. Value constructors, macros, trait lookup and external crate internals have separate obligations.
+- [x] Record the declared field audience for local data types, including tuple fields and enum payloads. Module-scoped audience identifies the declaring visibility boundary. Use stable field IDs shared by the shape graph; the public binding graph describes access independently of layout and processing.
+- [x] Exercise public alias through a private module, public and restricted fields, a renamed glob, an ambiguous glob, a module cycle and a feature-selected export in an unrelated crate. Compile positive and negative downstream callers and mutate an alias while keeping the type definition fixed.
+- [x] Run the extractor against the pinned Marmish stream library and check actual external caller spellings. Check the work ontology, package the compiler as an open framework PR, and merge the reviewed companion graph with its receipt.
 
 ## Pinned compiler and independent checks
 
@@ -32,3 +32,9 @@ reading against concrete data types. It records generic receivers that need
 an independently written instantiation as uncovered. Scope and origin identities
 remain available in the graph even when an original/generated comparison
 only compares the downstream audience and within-crate alias groups.
+
+Legacy structure and shape modes compile without the export feature or its
+inputs. The legacy graph observations are compared byte-for-byte against the
+base adapter. New legacy recovery locks will record the updated adapter
+script, manifest, and driver hashes. Historical locks remain provenance for
+their original adapter revisions.
