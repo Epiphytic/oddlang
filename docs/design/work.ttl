@@ -1446,5 +1446,11 @@ w:sevenMemberBufferedWorkspace a p:Task ;
     rdfs:label "Qualify the private buffered-input member in the sealed seven-member workspace" ;
     p:milestone w:marmishMilestone ; p:source w:sevenMemberBufferedWorkspacePlan ;
     p:dependsOn w:sixMemberMdkData, w:privateBufferedInput ;
-    p:status p:active ;
+    p:status p:done ;
     p:acceptance "Keep every six-member predecessor lock row and add the dependency-pinned private buffered reader. Build the same sealed workspace on both ARM64 hosts and replay the private reader with the earlier report, vault, journal and MDK witnesses." .
+
+w:sevenMemberBufferedDarwin a p:Artifact ;
+    p:location "companion:verification/whole/unified-buffered/aarch64-apple-darwin.json" .
+w:sevenMemberBufferedLinux a p:Artifact ;
+    p:location "companion:verification/whole/unified-buffered/aarch64-unknown-linux-gnu.json" .
+w:sevenMemberBufferedWorkspace p:evidence w:sevenMemberBufferedDarwin, w:sevenMemberBufferedLinux .
