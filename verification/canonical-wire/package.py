@@ -277,6 +277,21 @@ with tempfile.TemporaryDirectory(prefix="canonical-wire-package-") as directory:
         protocol["overlay"] = pin("protocol-rust.json", target)
         build(root / f"invalid-guard-{index}", message)
         node[key] = previous
+    external = identity("external-sampler")
+    data["types"].append({"kind": "external", "id": external})
+    names["externals"][external] = "crate::Sampler"
+    shape["graph"] = pin("shape.json", data)
+    shape["overlay"] = pin("shape-rust.json", names)
+    record_checks[unused_check]["owner"] = external
+    protocol["graph"] = pin("protocol.json", graph)
+    protocol["overlay"] = pin("protocol-rust.json", target)
+    build(root / "external-check-owner", "a shared check requires a named record")
+    record_checks[unused_check]["owner"] = sample_record
+    data["types"].pop()
+    del names["externals"][external]
+    shape["graph"] = pin("shape.json", data)
+    shape["overlay"] = pin("shape-rust.json", names)
+
     duplicate_key = json.dumps(graph).replace(
         json.dumps(empty_check) + ": {",
         json.dumps(empty_check) + ': {"owner": ' + json.dumps(sample_record) + ', "steps": []}, '

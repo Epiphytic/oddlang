@@ -30,7 +30,7 @@ The typed collection and text guard increment passed both fixture commands above
 
 A protocol can declare `recordChecks` as a map from stable check identities to `owner` and ordered `steps`. An owner identifies an internal named record. Inside a check, the `value` scope borrows that record and its field paths use the record's declared field identities. A `check-record` step has its own identity, a `value` path of exactly the owner's record type, and a `check` identity. It propagates the first error from the shared check.
 
-Endpoint, timed and case-digest steps can call these checks, including inside a list or optional scope. Check dependencies must be acyclic. Empty checks succeed, and unused checks retain their typed obligations while emitting no runtime functions. Declaration and call obligations retain distinct identities.
+The weather fixture calls shared checks from an endpoint’s nested list traversal. Check dependencies must be acyclic. Empty checks succeed, and unused checks retain their typed obligations while emitting no runtime functions. Adding declarations can change internal generated identifiers. Declaration and call obligations retain distinct identities.
 
 The weather fixture uses a shared check over each nested sample record. It checks chained calls, empty and unused declarations, equal output across reordered definitions, and rejection of unresolved calls, cycles, wrong owners and identity or native naming collisions. Generated Rust compiles with warnings denied.
 

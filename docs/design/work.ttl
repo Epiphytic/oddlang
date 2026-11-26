@@ -2847,3 +2847,9 @@ w:sharedWireRecordChecksPlan a p:Artifact ;
 w:basicCommandInterop p:dependsOn w:sharedWireRecordChecks .
 w:sharedWireRecordChecksVerification a p:Artifact ;
     p:location "verification/canonical-wire/README.md" .
+w:sharedWireRecordChecks p:addresses w:sharedWireRecordCheckCoverageFinding .
+w:sharedWireRecordCheckCoverageFinding a p:Finding ;
+    rdfs:label "Match fixture documentation to exercise coverage, verify external owner rejection and describe generated identifier ordering" ;
+    p:source w:sharedWireRecordCheckReview .
+w:sharedWireRecordCheckReview a p:Artifact ;
+    p:location "Claude auto review of the shared record check compiler and canonical wire fixture patch" .
