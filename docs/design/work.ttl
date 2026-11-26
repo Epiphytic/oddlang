@@ -971,3 +971,19 @@ w:orderedRecordWrites a p:Task ; rdfs:label "Recover ordered binary field writes
     p:acceptance "Observe native field order, encoding and width without storing source and compare an independent graph consumer with original and reordered native outputs." ;
     p:evidence w:orderedWriterFixture .
 w:orderedWriterFixture a p:Artifact ; p:location "verification/record-writer/verify.py" .
+w:localStatusOwnerPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-local-status-owner.md" .
+w:localStatusOwner a p:Task ;
+    rdfs:label "Generate a read-only owner lifecycle and local status listener" ;
+    p:milestone w:marmishMilestone ; p:source w:localStatusOwnerPlan ;
+    p:status p:done ; p:dependsOn w:localCommandClient ;
+    p:evidence w:localStatusOwnerFixture ;
+    p:acceptance "Exercise private socket ownership, guarded state publication, bounded status requests, and process signal cleanup on an unrelated fixture." .
+
+w:localStatusOwnerFixture a p:Artifact ;
+    p:location "verification/local-status-owner/check.py" .
+
+w:localStatusOwnerShutdownReview a p:Finding ;
+    rdfs:label "Keep every lifecycle frame bounded and unlink the owned socket before releasing its descriptor" ;
+    p:source w:localStatusOwnerFixture .
+w:localStatusOwner p:addresses w:localStatusOwnerShutdownReview .
