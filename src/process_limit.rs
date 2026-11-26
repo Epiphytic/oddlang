@@ -29,7 +29,7 @@ struct Platforms {
 #[derive(Deserialize)]
 #[serde(tag = "kind", rename_all = "kebab-case", deny_unknown_fields)]
 enum Policy {
-    NoOp,
+    NoOp {},
     LowerSoft { ceiling: u32 },
 }
 
@@ -116,7 +116,7 @@ compile_error!("process limit policy supports Linux and macOS only");
         )
         .unwrap();
         match platform {
-            Policy::NoOp => source.push_str("    Ok(())\n}\n"),
+            Policy::NoOp {} => source.push_str("    Ok(())\n}\n"),
             Policy::LowerSoft { ceiling } => {
                 if ceiling == 0 {
                     return Err("process limit ceiling must be positive".into());

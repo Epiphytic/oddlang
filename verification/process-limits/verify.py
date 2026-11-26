@@ -99,6 +99,10 @@ fn main() {
                   cwd=root, check=False)
         assert got.returncode and error in got.stderr.decode() and not invalid.exists(), got
 
+    graph["platforms"]["linux"]["ceiling"] = 384
+    component["graph"] = write(root, "graph.json", graph)
+    rejected("unknown field")
+    del graph["platforms"]["linux"]["ceiling"]
     graph["platforms"]["macos"]["ceiling"] = 0
     component["graph"] = write(root, "graph.json", graph)
     rejected("ceiling")
