@@ -5,7 +5,7 @@ Recover a portable ordered report of build facts. A field is a stable identity w
 - [x] Generate a reusable Rust package component and a checked CLI callback. Read package version from Cargo and capture the actual Cargo target at compilation, including cross-target builds. Lock any generated build script. Reject duplicate field identities and wire names, malformed revisions and unsupported value sources before publication.
 - [x] Run an independent unrelated-package fixture and verify byte-for-byte output through the native executable, including a wire-name mutation, changed package version, alternate source revision, target identity and negative controls. Check that old packages retain their lock hashes.
 - [x] Bind the two native release-report commands in the companion. Compare stdout, stderr and exit code against the original on both ARM64 hosts, check alternate product metadata without reading application source, preserve prior product locks, and publish exact framework and companion pins. Record any unsupported invocation combinations as gaps.
-- [ ] Recover source references separately. The first output contract and static format list are authored. The planned recovery must link the five original format declarations in compiler-checked order.
+- [x] Recover and qualify the five format declarations in order in a separate workspace projection.
 
 ## Native reference and scope from plan review
 
@@ -20,7 +20,7 @@ Compare global flags, including rejected foreground, session and server limits a
 ## Structural recovery
 
 `oddlang recover build-report ROOT SELECTION OUTPUT` reads SHA-256-pinned Rust
-modules. The selection identifies ordinary crate roots, the loaded module path,
+modules. The selection identifies ordinary crate roots, a nonempty ordinary submodule path,
 a named record and its local constructor. Build-role bindings identify which
 compile-time strings represent Cargo's target and the represented revision.
 A pinned revision remains an input release fact.
@@ -45,5 +45,5 @@ scripts, serde customizations or other command behavior.
 - [x] Recover and render ordered declarations, and exercise a renamed fixture
   with signed wrapping, unsigned widening, conditional definitions and
   visibility and namespace controls.
-- [ ] Compare native original and generated client and daemon outputs, and
+- [x] Compare native original and generated client and daemon outputs, and
   mutate the original engine declaration behind its public alias.

@@ -586,6 +586,9 @@ pub fn recover(base: &Path, selection: &Path, out: &Path) -> Result<()> {
     let base = base.canonicalize().map_err(|e| e.to_string())?;
     let raw = fs::read(selection).map_err(|e| e.to_string())?;
     let selection: Selection = serde_json::from_slice(&raw).map_err(|e| e.to_string())?;
+    if selection.module.is_empty() {
+        return Err("build-report recovery requires an ordinary record submodule".into());
+    }
     if selection.format != "oddlang-build-report-recovery-v1"
         || selection.target_env == selection.revision_env
         || [&selection.target_env, &selection.revision_env]

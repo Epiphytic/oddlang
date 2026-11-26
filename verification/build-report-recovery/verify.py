@@ -123,3 +123,25 @@ pub(crate) fn identification() -> Identification {
     declaration.write_text("use custom::alternate as r#env;\n" + source)
     rejected = recover(base / "raw-env")
     assert rejected.returncode != 0 and "reserved" in rejected.stderr
+    root_record = base / "root-record.rs"
+    write(root_record, '''
+mod helper;
+use serde::Serialize;
+#[derive(Serialize)]
+struct Identification { software: &'static str }
+fn identification() -> Identification {
+    Identification { software: env!("CARGO_PKG_VERSION") }
+}
+''')
+    write(base / "helper.rs", '''
+#[macro_export]
+macro_rules! env { ($name:literal) => { "sentinel" }; }
+''')
+    config = json.loads(selection.read_bytes())
+    config["roots"] = {"rover": "root-record.rs"}
+    config["module"] = []
+    config["sources"] = [pin(base, "root-record.rs")]
+    write(selection, json.dumps(config))
+    rejected = subprocess.run([cli, "recover", "build-report", base, selection, base / "root-output"],
+                              capture_output=True, text=True)
+    assert rejected.returncode != 0 and "submodule" in rejected.stderr
