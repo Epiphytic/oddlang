@@ -797,6 +797,13 @@ fn validate_command_callbacks(components: &[Component], base: &Path) -> Result<(
     Ok(())
 }
 
+fn valid_name(name: &str) -> bool {
+    !name.is_empty()
+        && name
+            .bytes()
+            .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, b'_' | b'-'))
+}
+
 fn cargo_dependencies(
     entries: &BTreeMap<String, Dependency>,
 ) -> Result<BTreeMap<&String, serde_json::Value>> {
@@ -821,12 +828,6 @@ fn cargo_dependencies(
 }
 
 fn cargo_manifest(manifest: &Manifest) -> Result<String> {
-    let valid_name = |name: &str| {
-        !name.is_empty()
-            && name
-                .bytes()
-                .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, b'_' | b'-'))
-    };
     if manifest.format != "oddlang-native-package-v1"
         || !valid_name(&manifest.name)
         || !matches!(manifest.edition.as_str(), "2021" | "2024")
