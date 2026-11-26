@@ -488,6 +488,7 @@ impl Protocol {
                     );
                 }
                 mapped.push(Field {
+                    require_presence: false,
                     id: item.id.clone(),
                     name: name.clone(),
                     shape: shape.clone(),

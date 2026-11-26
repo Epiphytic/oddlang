@@ -135,6 +135,37 @@ with tempfile.TemporaryDirectory(prefix="wire-schema-test-") as directory:
     consumer = root / "consumer"
     shutil.copytree(FIXTURE, consumer)
     shutil.copyfile(generated / "wire.rs", consumer / "src/projected.rs")
+    strict_graph = json.loads(path.read_bytes())
+    sensor = next(item for item in strict_graph["types"] if item["id"] == "urn:garden:sensor")
+    meter = next(f for f in sensor["fields"] if f["name"] == "meter")
+    meter["requirePresence"] = True
+    strict = root / "strict"
+    run("build", "wire-schema", "rust", write(root / "strict.json", strict_graph),
+        recovered / "rust.json", strict)
+    shutil.copyfile(strict / "wire.rs", consumer / "src/strict.rs")
+    catalog = json.loads((strict / "obligations.json").read_bytes())
+    obligation = next(r for r in catalog["obligations"] if r["declaration"] == meter["id"])
+    assert obligation["expected"]["parsePresence"] == "required-value-or-null"
+    sensor["fields"][0]["requirePresence"] = True
+    run("build", "wire-schema", "rust", write(root / "bad-presence.json", strict_graph),
+        recovered / "rust.json", root / "bad-presence", failure="requirePresence applies to a nullable field")
+
+    for helper in ("::serde::Deserialize::deserialize", "read_nullable", "unreviewed"):
+        policy = dict(selection["adapters"])
+        if helper == "read_nullable":
+            policy[helper] = {"kind": "required-nullable"}
+        authored = root / "presence-source.rs"
+        authored.write_text(source.read_text().replace("pub meter:", f'#[serde(deserialize_with = "{helper}")]\n    pub meter:'))
+        evidence = root / ("presence-source-" + helper.replace(":", "_"))
+        run("recover", "wire-schema", authored, write(root / "presence-selection.json",
+            dict(selection, adapters=policy, sourceSha256=hashlib.sha256(authored.read_bytes()).hexdigest())), evidence)
+        rows = json.loads((evidence / "graph.json").read_bytes())
+        observed_field = next(f for t in rows["types"] if t["id"] == sensor["id"]
+                              for f in t["fields"] if f["id"] == meter["id"])
+        if helper == "unreviewed":
+            assert any("unverified Serde deserializer" in r for r in rows["unresolved"])
+        else:
+            assert observed_field["requirePresence"] is True
     singleton = json.loads(path.read_bytes())
     single_event = next(row for row in singleton["types"] if row["id"] == event["id"])
     single_event["variants"] = [adjust]

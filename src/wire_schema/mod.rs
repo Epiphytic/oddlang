@@ -68,6 +68,12 @@ impl Definition {
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 struct Field {
+    #[serde(
+        rename = "requirePresence",
+        default,
+        skip_serializing_if = "std::ops::Not::not"
+    )]
+    require_presence: bool,
     id: String,
     name: String,
     #[serde(rename = "type")]
@@ -520,6 +526,9 @@ fn check_fields<'a>(
                 .is_some_and(|name| symbol(name) && names.insert(name))
         {
             return Err("invalid record field or Rust binding".into());
+        }
+        if field.require_presence && !matches!(field.shape, Shape::Optional { .. }) {
+            return Err("requirePresence applies to a nullable field".into());
         }
         check_shape(&field.shape, declared)?;
     }

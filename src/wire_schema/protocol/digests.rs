@@ -235,6 +235,7 @@ pub fn {function}(bytes: &[u8]) -> [u8;32] {{
                     };
                     args.push(format!("{argument}: {parameter_type}"));
                     mapped.push(Field {
+                        require_presence: false,
                         id: parameter.id.clone(),
                         name: argument.to_owned(),
                         shape: field.shape.clone(),

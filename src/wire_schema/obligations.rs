@@ -100,7 +100,7 @@ fn record_fields(rows: &mut Vec<Value>, fields: &[Field]) {
             json!({
                 "wireName":field.name,
                 "position":position,
-                "parsePresence":if optional { "value-or-null-or-omitted" } else { "required" },
+                "parsePresence":if field.require_presence { "required-value-or-null" } else if optional { "value-or-null-or-omitted" } else { "required" },
                 "emitPresence":"always",
                 "type":field.shape,
             }),
