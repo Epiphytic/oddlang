@@ -202,6 +202,12 @@ fn render_lifecycle(
         )
         .unwrap();
         writeln!(out, "const PROVIDER_READY: &str = {:?};", relay.ready_state).unwrap();
+        writeln!(
+            out,
+            "const APPLICATION_COMPONENTS: &[u16] = &{:?};",
+            relay.application_components
+        )
+        .unwrap();
         out.push_str(include_str!("onion_transport.rs.in"));
         out.push_str(include_str!("key_package.rs.in"));
         out.push_str(include_str!("active_lifecycle.rs.in"));

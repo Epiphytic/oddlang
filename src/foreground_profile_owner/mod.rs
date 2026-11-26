@@ -154,6 +154,7 @@ struct RelayRuntime {
     cache_directory: String,
     maximum_frame_bytes: usize,
     ready_state: String,
+    application_components: Vec<u16>,
 }
 
 #[derive(Deserialize)]
@@ -271,7 +272,13 @@ impl Graph {
                             .contains(&name)
                         })
                     && (1024..=1_048_576).contains(&relay.maximum_frame_bytes)
-                    && token(&relay.ready_state) =>
+                    && token(&relay.ready_state)
+                    && (1..=64).contains(&relay.application_components.len())
+                    && relay.application_components[0] > 0
+                    && relay
+                        .application_components
+                        .windows(2)
+                        .all(|pair| pair[0] < pair[1]) =>
             {
                 ()
             }
@@ -558,7 +565,8 @@ mod tests {
             "provider":{"kind":"private_file_secp256k1","directory":"keys","signing_prefix":"sign","data_prefix":"data"},
             "activation":{"kind":"onion_websocket","route_value":"private","deadline_ms":90000,
                           "relay_runtime":{"state_directory":"network-state","cache_directory":"network-cache",
-                                           "maximum_frame_bytes":4096,"ready_state":"connected"}},
+                                           "maximum_frame_bytes":4096,"ready_state":"connected",
+                                           "application_components":[32772,32780]}},
             "diagnostics": ([
                 "scope","io","invalid_name","unsafe_directory","unsafe_file","already_running",
                 "missing_profile","incompatible_format","invalid_profile","not_ready","backend_mismatch",
@@ -591,6 +599,7 @@ mod tests {
             "4096",
             "connected",
             "republish_key_package",
+            "[32772, 32780]",
         ] {
             assert!(rust.contains(expected), "{expected}");
         }

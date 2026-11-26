@@ -40,7 +40,7 @@ fn relay_directory(root: &Path, leaf: &str) -> Result<PathBuf, Failure> {
     Ok(path)
 }
 
-async fn bootstrap_onion(root: &Path) -> Result<TorClient<PreferredRuntime>, Failure> {
+async fn bootstrap_onion(root: &Path) -> Result<Arc<TorClient<PreferredRuntime>>, Failure> {
     let state = relay_directory(root, RELAY_STATE)?;
     let cache = relay_directory(root, RELAY_CACHE)?;
     let config = TorClientConfigBuilder::from_directories(state, cache)
@@ -54,7 +54,7 @@ async fn bootstrap_onion(root: &Path) -> Result<TorClient<PreferredRuntime>, Fai
 #[derive(Clone)]
 struct OnionConnector {
     relay: Url,
-    tor: Arc<tokio::sync::Mutex<Option<TorClient<PreferredRuntime>>>>,
+    tor: Arc<tokio::sync::Mutex<Option<Arc<TorClient<PreferredRuntime>>>>>,
     stop: watch::Receiver<bool>,
 }
 

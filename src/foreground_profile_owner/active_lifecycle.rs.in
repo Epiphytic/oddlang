@@ -64,7 +64,8 @@ impl ActiveProviders {
         let publisher = BoundPublisher { keys: keys.clone(), relay: relay.clone(), endpoint };
         let config = SessionConfig::with_storage(storage, Duration::ZERO, identity.as_slice().to_vec(),
             Box::new(NostrMlsPeeler::new().with_welcome_signer_arc(signer)),
-        ).account_identity_proof_signer(Arc::new(AccountSigner(keys)));
+        ).account_identity_proof_signer(Arc::new(AccountSigner(keys)))
+            .supported_app_components(APPLICATION_COMPONENTS.iter().copied());
         let runtime = AccountDeviceRuntime::open(config, || {
             Ok::<_, SessionError>((adapter.clone(), routing, publisher))
         }).map_err(|_| (1, PROVIDER_OPEN_FAILURE))?;
