@@ -46,4 +46,6 @@ their original adapter revisions.
 
 On Darwin ARM64 the original native library exposes 36 public type spellings and both candidates expose two. All 36 upstream imports failed against each candidate. Engine, MDK, prototype and vault have no generated member in those releases. [Paired workspace receipts](https://github.com/Epiphytic/marmish-oddlang/pull/58)
 
-- [ ] Audit the 140 original import spellings across all seven generated libraries on macOS ARM64 and archive their exact diagnostics. Check the prototype constant and compile-only signature separately. Keep type identity, behavior and source compatibility as separate obligations.
+- [x] Audit the 140 original import spellings across all seven generated libraries on macOS ARM64 and archive their exact diagnostics. Check the prototype constant and compile-only signature separately. Keep type identity, behavior and source compatibility as separate obligations.
+
+The seven-member audit compiled 65 of 140 archived import spellings. All 75 absent spellings returned E0432. The original prototype constant compiled as `usize` with value 131072 and the original function item coerced to the tested signature without a call. Both symbols returned E0425 against the generated prototype. The receipt archives each per-spelling result and the two separate prototype probes. [Darwin ARM64 receipt](https://github.com/Epiphytic/marmish-oddlang/blob/aa6b367a3d934eb1164afd8136017abe80d9c320/verification/whole/seven-public-imports/darwin-arm64.json)
