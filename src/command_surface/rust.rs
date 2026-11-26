@@ -172,10 +172,15 @@ fn validate<'a>(
                     || bounds.maximum.is_some_and(|max| max < bounds.minimum)
             })
             || (!arg.possible_values.is_empty() && !matches!(arg.kind, Some(ValueKind::String)))
+            || arg
+                .default_value
+                .as_ref()
+                .is_some_and(|value| !valid_default(arg, value))
         {
             return Err(format!("invalid argument settings for {}", arg.id));
         }
     }
+    validate_positionals(command)?;
     let members = ids.clone();
     for group in &command.groups {
         if !valid_name(&group.id)
@@ -220,6 +225,56 @@ fn validate<'a>(
         };
         operations.insert(path.clone());
         validate(child, &path, &globals, operations, depth + 1)?;
+    }
+    Ok(())
+}
+
+fn valid_default(arg: &Argument, value: &str) -> bool {
+    if arg.required {
+        return false;
+    }
+    match arg.kind {
+        None => false,
+        Some(ValueKind::String) => {
+            arg.possible_values.is_empty()
+                || arg.possible_values.iter().any(|possible| possible == value)
+        }
+        Some(ValueKind::U32) => value.parse::<u32>().is_ok(),
+        Some(ValueKind::Usize) => value.parse::<usize>().is_ok(),
+        Some(ValueKind::U64) => value.parse::<u64>().is_ok_and(|value| {
+            arg.bounds.as_ref().is_none_or(|bounds| {
+                value >= bounds.minimum && bounds.maximum.is_none_or(|maximum| value <= maximum)
+            })
+        }),
+        Some(ValueKind::OsString | ValueKind::Path) => true,
+    }
+}
+
+fn validate_positionals(command: &Command) -> Result<(), String> {
+    let args = command
+        .arguments
+        .iter()
+        .filter(|arg| arg.long.is_none() && arg.short.is_none())
+        .collect::<Vec<_>>();
+    let mut seen_optional = false;
+    for (index, arg) in args.iter().enumerate() {
+        let next = args.get(index + 1);
+        let invalid_last =
+            arg.last && (next.is_some() || (arg.required && !command.subcommands.is_empty()));
+        let invalid_repeated = arg.repeated
+            && next.is_some_and(|next| {
+                index + 2 != args.len()
+                    || (!next.required && !next.last)
+                    || (next.repeated && !next.last)
+            });
+        let invalid_required = arg.required && seen_optional && !arg.last;
+        if invalid_last || invalid_repeated || invalid_required {
+            return Err(format!(
+                "ambiguous placement of positional argument {}",
+                arg.id
+            ));
+        }
+        seen_optional |= !arg.required;
     }
     Ok(())
 }

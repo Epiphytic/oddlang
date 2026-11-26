@@ -67,10 +67,20 @@ with tempfile.TemporaryDirectory(prefix="oddlang-cli-fixture-") as workspace:
             )
         checked("cargo", "build", "--locked", "--offline", cwd=target)
     env = dict(os.environ, NO_COLOR="1", TERM="dumb")
+    outputs = {}
     for argv in cases:
         expected = observation(execute(root / "reference/target/debug/observatory", *argv, env=env))
         actual = observation(execute(root / "generated/target/debug/observatory", *argv, env=env))
         assert actual == expected, (argv, expected, actual)
+        outputs[tuple(argv)] = actual
+    help_status, help_stdout, help_stderr = outputs[("--help",)]
+    assert help_status == 0 and b"Usage: telescope" in help_stdout and not help_stderr
+    assert outputs[("--version",)] == (0, b"observatory 2.1.0\n", b"")
+    invalid_status, invalid_stdout, invalid_stderr = outputs[("--absent",)]
+    assert invalid_status == 12 and not invalid_stdout
+    assert invalid_stderr.endswith(b"telescope: invalid arguments\n")
+    assert outputs[("calibrate",)] == (125, b"", b"command operation unavailable\n")
+    assert outputs[("capture", "alpha")] == (0, b"urn:observatory:capture summit 3 alpha\n", b"")
 
     package_inputs = root / "package-inputs"
     package_inputs.mkdir()
@@ -130,6 +140,26 @@ with tempfile.TemporaryDirectory(prefix="oddlang-cli-fixture-") as workspace:
     )
     assert invalid.returncode and not (root / "rejected.rs").exists()
 
+    count["bounds"]["maximum"] = 10
+    count["default_value"] = "not-an-integer"
+    changed.write_text(json.dumps(graph))
+    invalid = execute(
+        ODDLANG, "build", "cli-surface", "rust", changed, FIXTURE / "binding.json",
+        root / "rejected.rs",
+    )
+    assert invalid.returncode and not (root / "rejected.rs").exists()
+    count["default_value"] = "3"
+
+    args = graph["root"]["subcommands"][0]["arguments"]
+    args[-1]["repeated"] = True
+    args.append({"id": "tail", "kind": "string", "value_name": "TAIL"})
+    changed.write_text(json.dumps(graph))
+    invalid = execute(
+        ODDLANG, "build", "cli-surface", "rust", changed, FIXTURE / "binding.json",
+        root / "rejected.rs",
+    )
+    assert invalid.returncode and b"ambiguous placement" in invalid.stderr
+
     unsupported = root / "unsupported.rs"
     source = (FIXTURE / "src/bin/reference.rs").read_text()
     unsupported.write_text(source.replace("visible_alias = \"scan\"", "long_about = \"unsupported\""))
@@ -139,4 +169,18 @@ with tempfile.TemporaryDirectory(prefix="oddlang-cli-fixture-") as workspace:
     )
     assert missing.returncode and not (root / "unsupported.json").exists()
 
-print(f"{len(cases)} exact process observations, deterministic recovery and assembly, and four mutation checks passed")
+    unsupported.write_text(source.replace("    sensor: OsString,", """    sensor: OsString,
+    #[arg(long, value_enum)]
+    filter: Option<Filter>,""") + """
+#[derive(clap::ValueEnum, Clone)]
+enum Filter {
+    /// Use the red filter.
+    Red,
+}""")
+    missing = execute(
+        ODDLANG, "recover", "cli-surface", unsupported, FIXTURE / "selection.json",
+        root / "unsupported.json",
+    )
+    assert missing.returncode and b"unsupported value variant Red" in missing.stderr
+
+print(f"{len(cases)} exact process observations, deterministic recovery and assembly, and seven mutation checks passed")

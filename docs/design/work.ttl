@@ -779,3 +779,8 @@ w:wholeMarmishStructure p:evidence w:wholeWindowQualification,w:wholeErrorFormat
 w:wholeWorkspaceAssembly p:evidence w:wholeProcessFixture, w:wholeCombinedWorkspace .
 w:wholeProcessFixture a p:Artifact ; p:location "verification/native-workspace/cli.py" .
 w:wholeCombinedWorkspace a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/commit/6a8becd1a4f712f5464604d640775a85c2d08b6c" .
+
+w:commandSurfaceValidationReview a p:Finding ;
+    rdfs:label "Preserve argument-carrier help and reject unsupported value help and malformed positional or default settings" ;
+    p:source w:commandSurfaceFixture .
+w:commandSurface p:addresses w:commandSurfaceValidationReview .

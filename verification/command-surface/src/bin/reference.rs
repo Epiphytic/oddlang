@@ -13,21 +13,24 @@ struct Telescope {
 
 #[derive(Subcommand)]
 enum Mode {
-    /// Record a group of exposures.
     #[command(visible_alias = "scan")]
-    Capture {
-        #[arg(long, default_value_t = 3, value_parser = clap::value_parser!(u64).range(1..=10))]
-        count: u64,
-        #[arg(long, conflicts_with = "silent")]
-        verbose: bool,
-        #[arg(long)]
-        silent: bool,
-        #[arg(long, requires = "silent")]
-        export: bool,
-        sensor: OsString,
-    },
+    Capture(Capture),
     #[command(hide = true)]
     Calibrate,
+}
+
+/// Record a group of exposures.
+#[derive(clap::Args)]
+struct Capture {
+    #[arg(long, default_value_t = 3, value_parser = clap::value_parser!(u64).range(1..=10))]
+    count: u64,
+    #[arg(long, conflicts_with = "silent")]
+    verbose: bool,
+    #[arg(long)]
+    silent: bool,
+    #[arg(long, requires = "silent")]
+    export: bool,
+    sensor: OsString,
 }
 
 fn main() -> ExitCode {

@@ -145,8 +145,12 @@ fn command(variant: &Variant, definitions: &Definitions<'_>) -> Result<Option<Co
             (&args.fields, args.attrs.as_slice(), Some(name))
         }
         Fields::Unnamed(_) => return Err("unsupported tuple subcommand".into()),
-        fields => (fields, &[][..], None),
+        fields @ Fields::Named(_) => (fields, &[][..], Some(variant.ident.to_string())),
+        fields @ Fields::Unit => (fields, &[][..], None),
     };
+    if command.help.is_none() {
+        command.help = help(type_attrs)?;
+    }
     for field in fields {
         if let Some(argument) = argument(field, definitions)? {
             command.arguments.push(argument);
@@ -155,7 +159,7 @@ fn command(variant: &Variant, definitions: &Definitions<'_>) -> Result<Option<Co
     let group_settings = attrs(type_attrs, "group")?;
     match group_settings.as_slice() {
         [] => {
-            if let Some(id) = implicit_group {
+            if let Some(id) = implicit_group.filter(|_| !command.arguments.is_empty()) {
                 command.groups.push(Group {
                     id,
                     arguments: command.arguments.iter().map(|arg| arg.id.clone()).collect(),
@@ -223,7 +227,8 @@ fn argument(field: &syn::Field, definitions: &Definitions<'_>) -> Result<Option<
             reject_conditional(&values.attrs)?;
             for variant in &values.variants {
                 reject_conditional(&variant.attrs)?;
-                if !matches!(variant.fields, Fields::Unit)
+                if variant.attrs.iter().any(|attr| attr.path().is_ident("doc"))
+                    || !matches!(variant.fields, Fields::Unit)
                     || !attrs(&variant.attrs, "value")?.is_empty()
                 {
                     return Err(format!("unsupported value variant {}", variant.ident));
