@@ -1776,3 +1776,13 @@ w:coreDeclarationComparison a p:Artifact ;
     rdfs:label "Two-host core declaration comparison" ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/10926d822bb9aa3a16b20ef35cfc63bebd586780/verification/whole/core-lexical/comparison.json" .
 w:wholeMarmishStructure p:dependsOn w:coreDeclarationOwnership .
+
+w:coreSemanticLookup a p:Task ;
+    rdfs:label "Resolve portable core types to component semantics independently of native bindings" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:coreDeclarationOwnership ; p:status p:done ; p:evidence w:coreSemanticProjection ;
+    p:acceptance "Resolve six stable type IDs through a neutral query to their pinned domains, error cases and limit parameters. Remove all native binding nodes and reject a substituted aggregate-error component." .
+w:wholeMarmishStructure p:dependsOn w:coreSemanticLookup .
+w:coreSemanticProjection a p:Artifact ;
+    rdfs:label "TypeScript retention projection selected by portable identity" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/00510414bb7ae23c48e9012587b7d83715297b7f/verification/whole/core-ownership/retention-node.json" .
