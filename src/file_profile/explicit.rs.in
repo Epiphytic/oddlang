@@ -1,0 +1,12 @@
+fn check_relays<'a>(route: Option<&str>, relays: impl Iterator<Item = &'a String>) -> Result<(), Failure> {
+    if route != Some(ROUTE) { return Err(CONFIGURATION); }
+    for relay in relays {
+        let url = url::Url::parse(relay).map_err(|_| INVALID_RELAY)?;
+        if url.scheme() != SCHEME || url.host().is_none() || !url.username().is_empty()
+            || url.password().is_some() || url.fragment().is_some()
+        {
+            return Err(INVALID_RELAY);
+        }
+    }
+    Ok(())
+}

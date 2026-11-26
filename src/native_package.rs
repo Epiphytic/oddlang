@@ -29,6 +29,8 @@ struct Manifest {
     edition: String,
     #[serde(default)]
     dependencies: BTreeMap<String, Dependency>,
+    #[serde(default)]
+    registry_patches: BTreeMap<String, GitSource>,
     cargo_lock: Pin,
     #[serde(default)]
     binaries: Vec<Binary>,
@@ -84,6 +86,37 @@ struct Dependency {
     version: String,
     #[serde(default)]
     features: Vec<String>,
+    default_features: Option<bool>,
+    source: Option<GitSource>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct GitSource {
+    git: String,
+    revision: String,
+}
+
+impl GitSource {
+    fn cargo(&self) -> Result<serde_json::Value> {
+        if !self.git.strip_prefix("https://").is_some_and(|url| {
+            url.split_once('/')
+                .is_some_and(|(host, path)| !host.is_empty() && !path.is_empty())
+                && !url.chars().any(|ch| {
+                    ch.is_control() || ch.is_whitespace() || matches!(ch, '@' | '?' | '#')
+                })
+        }) || self.revision.len() != 40
+            || !self
+                .revision
+                .bytes()
+                .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+        {
+            return Err(
+                "git dependency requires an HTTPS repository and full lowercase revision".into(),
+            );
+        }
+        Ok(serde_json::json!({"git":self.git,"rev":self.revision}))
+    }
 }
 
 #[derive(Deserialize)]
@@ -129,6 +162,7 @@ enum Kind {
     SequenceJournal,
     CliSurface,
     LocalCommandClient,
+    FileProfile,
 }
 
 #[derive(Deserialize)]
@@ -213,6 +247,10 @@ fn project(
             crate::endpoint_set::build(&path, &pin, Some((&overlay, &binding)), &output)?;
             "endpoint_set.rs"
         }
+        Kind::FileProfile => {
+            crate::file_profile::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
+            "profile.rs"
+        }
         Kind::LocalCommandClient => {
             crate::local_command_client::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
             "client.rs"
@@ -276,12 +314,14 @@ fn project(
 fn validate_command_callbacks(components: &[Component], base: &Path) -> Result<()> {
     let callbacks = components
         .iter()
-        .filter(|component| matches!(component.kind, Kind::LocalCommandClient))
+        .filter(|component| matches!(component.kind, Kind::LocalCommandClient | Kind::FileProfile))
         .map(|component| {
-            let callback = crate::local_command_client::callback(
-                &component.graph.read(base)?,
-                &component.overlay.read(base)?,
-            )?;
+            let graph = component.graph.read(base)?;
+            let overlay = component.overlay.read(base)?;
+            let callback = match component.kind {
+                Kind::FileProfile => crate::file_profile::callback(&graph, &overlay),
+                _ => crate::local_command_client::callback(&graph, &overlay),
+            }?;
             Ok((component, callback))
         })
         .collect::<Result<Vec<_>>>()?;
@@ -339,7 +379,16 @@ fn cargo_manifest(manifest: &Manifest) -> Result<String> {
             return Err(format!("invalid dependency: {name}"));
         }
         semver::Version::parse(&dependency.version).map_err(|e| format!("{name} version: {e}"))?;
-        dependencies.insert(name, serde_json::json!({"version":format!("={}",dependency.version),"features":dependency.features}));
+        let mut record = match &dependency.source {
+            Some(source) => source.cargo()?,
+            None => serde_json::json!({}),
+        };
+        record["version"] = format!("={}", dependency.version).into();
+        record["features"] = serde_json::json!(dependency.features);
+        if let Some(default_features) = dependency.default_features {
+            record["default-features"] = default_features.into();
+        }
+        dependencies.insert(name, record);
     }
     if manifest
         .components
@@ -352,8 +401,18 @@ fn cargo_manifest(manifest: &Manifest) -> Result<String> {
     {
         return Err("cli-surface requires the pinned clap 4.6.7 provider".into());
     }
-    let cargo = serde_json::json!({"package":{"name":manifest.name,"version":manifest.version,
+    let mut cargo = serde_json::json!({"package":{"name":manifest.name,"version":manifest.version,
         "edition":manifest.edition,"publish":false},"dependencies":dependencies,"workspace":{}});
+    if !manifest.registry_patches.is_empty() {
+        let mut patches = BTreeMap::new();
+        for (name, source) in &manifest.registry_patches {
+            if !valid_name(name) {
+                return Err(format!("invalid registry patch crate: {name}"));
+            }
+            patches.insert(name, source.cargo()?);
+        }
+        cargo["patch"] = serde_json::json!({"crates-io":patches});
+    }
     toml::to_string_pretty(&cargo).map_err(|e| format!("Cargo manifest: {e}"))
 }
 
@@ -370,6 +429,9 @@ pub(super) fn build_pinned(raw: &[u8], base: &Path, output: &Path, standalone: b
     let manifest: Manifest =
         serde_json::from_slice(raw).map_err(|e| format!("package manifest: {e}"))?;
     validate_command_callbacks(&manifest.components, base)?;
+    if !standalone && !manifest.registry_patches.is_empty() {
+        return Err("registry patches require standalone native package assembly".into());
+    }
     let cargo = cargo_manifest(&manifest)?;
     let lock = manifest.cargo_lock.read(base)?;
     let parent = output
@@ -584,5 +646,37 @@ mod binary_tests {
             String::from_utf8_lossy(&run.stderr)
         );
         assert_eq!(run.stdout, b"ready\n");
+    }
+}
+
+#[cfg(test)]
+mod git_sources_tests {
+    use super::GitSource;
+
+    #[test]
+    fn admits_revision_pinned_https_only() {
+        let git = "https://example.invalid/team/library".to_owned();
+        let revision = "a".repeat(40);
+        let source = GitSource {
+            git: git.clone(),
+            revision: revision.clone(),
+        };
+        assert_eq!(source.cargo().unwrap()["rev"], revision);
+        for source in [
+            GitSource {
+                git: git.clone(),
+                revision: "main".into(),
+            },
+            GitSource {
+                git: "file:///checkout".into(),
+                revision: revision.clone(),
+            },
+            GitSource {
+                git: "https://secret@example.invalid/lib".into(),
+                revision,
+            },
+        ] {
+            assert!(source.cargo().is_err());
+        }
     }
 }
