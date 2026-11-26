@@ -34,17 +34,30 @@ fn configured_relays(route: &str, relays: &[String]) -> Result<Vec<String>, Fail
     if relays.is_empty() || relays.len() > MAXIMUM_RELAYS { return Err(CONFIG_RELAY_COUNT); }
     let mut canonical = std::collections::BTreeSet::new();
     for value in relays {
-        if value.len() > 2048 || value.chars().any(|ch| ch.is_control() || ch.is_whitespace() || ch == '\\') {
+        if value.len() > RELAY_MAX_BYTES || value.chars().any(|ch|
+            (REJECT_CONTROL && ch.is_control()) || (REJECT_WHITESPACE && ch.is_whitespace())
+                || REJECTED_RELAY_CHARS.contains(ch))
+        {
             return Err(INVALID_RELAY);
         }
         let url = url::Url::parse(value).map_err(|_| INVALID_RELAY)?;
-        if url.scheme() != SCHEME || url.host().is_none() || !url.username().is_empty()
-            || url.password().is_some() || url.query().is_some() || url.fragment().is_some()
-            || url.port() == Some(0) || url.host_str().is_some_and(|host| host.ends_with('.') || host.ends_with(".onion"))
-        { return Err(CONFIGURATION); }
+        let host = url.host_str().ok_or(CONFIGURATION)?;
+        if url.scheme() != SCHEME
+            || (REJECT_CREDENTIALS && (!url.username().is_empty() || url.password().is_some()))
+            || (REJECT_QUERY && url.query().is_some()) || (REJECT_FRAGMENT && url.fragment().is_some())
+            || (REJECT_ZERO_PORT && url.port() == Some(0))
+            || REJECTED_HOST_SUFFIXES.iter().any(|suffix| host.ends_with(suffix))
+        {
+            return Err(CONFIGURATION);
+        }
         let authority = value.split_once("://").and_then(|(_, rest)| rest.split('/').next()).ok_or(INVALID_RELAY)?;
-        if authority.contains('@') || authority.ends_with(':') || authority.rsplit_once(':').is_some_and(|(_,port)|
-            !port.ends_with(']') && port.len()>1 && port.starts_with('0')) { return Err(CONFIGURATION); }
+        if (REJECT_CREDENTIALS && authority.contains('@'))
+            || (REJECT_EMPTY_PORT && authority.ends_with(':'))
+            || (REJECT_PADDED_PORT && authority.rsplit_once(':').is_some_and(|(_,port)|
+                !port.ends_with(']') && port.len()>1 && port.starts_with('0')))
+        {
+            return Err(CONFIGURATION);
+        }
         canonical.insert(url.to_string());
     }
     Ok(canonical.into_iter().collect())

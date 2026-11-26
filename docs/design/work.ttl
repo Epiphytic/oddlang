@@ -874,3 +874,8 @@ w:nativeConfiguredProfileInit a p:Task ;
     p:evidence w:nativeConfiguredProfileInitReceipt .
 w:nativeConfiguredProfileInitReceipt a p:Artifact ;
     p:location "companion:verification/whole/status/configured-init-macos-arm64.json" .
+
+w:nativeConfiguredRelayPolicyFinding a p:Finding ;
+    rdfs:label "Make URL restrictions part of the declared policy" ;
+    p:source w:nativeFileProfilePlan .
+w:nativeConfiguredProfileInit p:addresses w:nativeConfiguredRelayPolicyFinding .
