@@ -1753,8 +1753,11 @@ w:typescriptExtendedChoiceConvergence a p:Task ;
     rdfs:label "Preserve the TypeScript capability boundary when composing choice profiles" ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
     p:dependsOn w:fieldlessChoiceCapabilities, w:typescriptPlainChoices ;
-    p:status p:planned ;
+    p:status p:done ; p:evidence w:combinedChoiceTargetReceipt ;
     p:acceptance "On a compiler with both targets, confirm an admitted copyable choice projects and that clone-only and derived-Debug choices fail without emitting TypeScript output unless their capabilities have independent conformance." .
+
+w:combinedChoiceTargetReceipt a p:Artifact ;
+    p:location "verification/plain-value-choices/combined-aarch64-apple-darwin.json" .
 
 w:fieldlessChoiceSpanReview a p:Finding ;
     rdfs:label "Distinguish whole-file recovery input from qualification-time source extraction" ;

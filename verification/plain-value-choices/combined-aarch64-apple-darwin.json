@@ -1,0 +1,55 @@
+{
+  "runtime": "8f4ccdd43c0526849219c4acb42194361053544a",
+  "runtimeSha256": "6ca44fcc4d8233b6f8a4f3a6eb0fe2ecb68acdf43976d6cdba226a2a671c8752",
+  "rustPredecessor": {
+    "runtime": "8e3320aacb0106d543c3e21ab1faf60a02132c04",
+    "sha256": "acd6b75d715ee0ed9201f4b5d91842da88a445aa30c903fcfc6c2fdca10915be"
+  },
+  "typescriptPredecessor": {
+    "runtime": "86b23552d02f67ee7156a4ce0ece3e07c1fc3fb0",
+    "sha256": "4d25a91ff8aeee9b728b92a9a5930ce52862b48eea3a4a700bbb18ffb0678351"
+  },
+  "rustc": [
+    "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+    "binary: rustc",
+    "commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+    "commit-date: 2026-07-14",
+    "host: aarch64-apple-darwin",
+    "release: 1.97.1",
+    "LLVM version: 22.1.6"
+  ],
+  "node": "v22.22.2",
+  "typescript": "Version 5.9.3",
+  "results": {
+    "typescript_subset.py": {
+      "scriptSha256": "a46d178deb9c1e9e251bb7424e95f3d547ee9e22f68ee99bfe2077fda2163466",
+      "exitCode": 0,
+      "stdout": "values.ts e62a207748c97fd3ce28668c319d0f5744247a881449ce3c964419deb3b1f08e\nobligations.json d2c2e186a654a27179b31172a1311070b280717ed1d242b8b09e24836276db98\nprojection.lock c41b530d9a0c86489b61704f162331c59e26f60a615b81297ac36ca97b9956fb\nTypeScript projects the plain choice and rejects clone-only and derived Debug choices.\n"
+    },
+    "typescript.py": {
+      "scriptSha256": "31cafd1686a5c16b903110c09d4bd9c5b061942535fe271d5d739a28e1aa7713",
+      "exitCode": 0,
+      "stdout": "Rust and TypeScript agree on both choice revisions, capability checks and exact ordinals.\n"
+    },
+    "capabilities.py": {
+      "scriptSha256": "a8c07493e13a0f0f4c1063a158df3199e8401f18214e73746d0cd0f1fceef537",
+      "exitCode": 0,
+      "stdout": "Both native variants match exact Debug, Eq, Clone, Copy and declaration ordinals.\n"
+    },
+    "equality.py": {
+      "scriptSha256": "3a65953c5f7f8346da6aa24ec2a406cbf74138d9ad901a7134cd62fb1f1caae6",
+      "exitCode": 0,
+      "stdout": "Three original and generated choice equality contracts passed.\n"
+    },
+    "verify.py": {
+      "scriptSha256": "a18c30b1423db0c1f56bd8317b750422f8b30a16fc9d3695e1273595540a4fa0",
+      "exitCode": 0,
+      "stdout": ""
+    },
+    "legacy_bytes.py": {
+      "scriptSha256": "b0b0c27b8e3ae35189e7f59831c6e94e2ee57d71180b4f6811dc3afad52af06a",
+      "exitCode": 0,
+      "stdout": "graph.json 28a62cd4432998957dcf11e10def8fe926c5f0847869447a621d6fba8eb98c4e\nrust.json d2dcabb9b71f5bf1856badea70b935dac3f919d2c443f6d108169115f26bc8e6\nvalues.rs 96c768acabda17585f83b869b12fb3691d481d0e0443ecc37e67e12d0c871b30\nobligations.json c848b04378f76da6788b8c479abab209a827242a5d2e04fbe9883763f54120a5\n"
+    }
+  }
+}

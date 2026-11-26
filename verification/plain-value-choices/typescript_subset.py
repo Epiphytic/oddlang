@@ -1,4 +1,5 @@
 """Require the copyable TypeScript profile to reject unsupported choice capabilities."""
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -34,7 +35,9 @@ with tempfile.TemporaryDirectory(prefix="checked-choice-ts-subset-") as director
         previous, old_output = build("previous", {}, Path(sys.argv[2]).resolve())
         assert previous.returncode == 0, previous.stderr
         for name in ("values.ts", "obligations.json", "projection.lock"):
-            assert (output / name).read_bytes() == (old_output / name).read_bytes(), name
+            data = (output / name).read_bytes()
+            assert data == (old_output / name).read_bytes(), name
+            print(name, hashlib.sha256(data).hexdigest())
     for label, graph_fields in (("clone-only", {"copy": False}), ("derived-debug", {"debug": True})):
         failure, output = build(label, graph_fields)
         assert failure.returncode and not output.exists(), (label, failure.stderr)

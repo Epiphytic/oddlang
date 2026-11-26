@@ -37,12 +37,13 @@ The separate TypeScript plain-choice target promises copying and ordinal
 conversion. The TypeScript target rejects a graph that requires
 clone-only semantics or derived Debug. Run the projection control below
 to check the supported subset. It first checks an admitted plain choice, then
-requires both unsupported graph inputs to fail without an output.
+requires both unsupported graph inputs to fail without creating output files.
+Pass the pre-convergence TypeScript compiler as a second argument to
+compare the supported projection and lock bytes.
 
 ```sh
 python3 verification/plain-value-choices/typescript_subset.py target/release/oddlang
 ```
-
 
 ## TypeScript plain choices
 
