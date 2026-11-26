@@ -173,6 +173,9 @@ fn write_fields<'a>(
     let visibility = if public { "pub " } else { "" };
     for field in fields {
         write!(text, "{indent}#[serde(rename = {:?}", field.name).unwrap();
+        if field.require_presence {
+            text.push_str(r#", deserialize_with = "::serde::Deserialize::deserialize""#);
+        }
         let adapter = match &field.shape {
             Shape::LowerHex { bytes, diagnostic } => Some(Adapter::Hex {
                 bytes: *bytes,

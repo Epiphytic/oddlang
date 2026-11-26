@@ -2695,3 +2695,12 @@ w:profileRoleSwitchCases a p:Artifact ;
     rdfs:label "Thirty local cases including grant retention, forbidden additions and reactivation" ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/7fa56586df8e13253f3347a27ed157a0a3dfad31/verification/whole/basic-command-interop/local-profile-setup-aarch64-apple-darwin.json" .
 w:leasedProfileSetup p:source w:roleScopedMembershipReport ; p:evidence w:profileRoleSwitchCases .
+
+w:requiredNullableWire a p:Task ;
+    rdfs:label "Distinguish required nullable fields from omittable fields" ;
+    p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
+    p:status p:done ; p:evidence w:requiredNullableGarden ;
+    p:acceptance "Generate and compile an unrelated fixture where a missing nullable member fails, null and the full u64 range round-trip, and the historical optional form continues accepting omission." .
+w:requiredNullableGarden a p:Artifact ;
+    p:location "verification/wire-schema/verify.py" .
+w:basicCommandInterop p:dependsOn w:requiredNullableWire .

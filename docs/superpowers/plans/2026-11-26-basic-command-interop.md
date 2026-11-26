@@ -39,3 +39,5 @@
 - [ ] **Qualify one sealed candidate.** Run the full matrix in phase 3 above with the same binary digests throughout. Preserve failed attempts and cleanup results as sanitized receipts. A digest change starts a new qualification series.
 
 The [reference-only failure receipt](../../../verification/basic-command-reference-blocked-macos-arm64.json) records both active peers and verified cleanup. The pinned companion baseline contains the [two mixed attempts and reference build](https://github.com/Epiphytic/marmish-oddlang/tree/8269da7f831da021f271d816586a51a7d666c061/verification/whole/basic-command-interop) and the [six local-owner observations](https://github.com/Epiphytic/marmish-oddlang/blob/8269da7f831da021f271d816586a51a7d666c061/verification/whole/basic-command-interop/upstream-local-owner-aarch64-apple-darwin.json).
+
+- [x] Preserve the difference between omitted and required nullable reply members, recover vetted Serde adapters, and verify omission, null and integer precision in the unrelated garden consumer. [Wire-schema checks](../../../verification/wire-schema/README.md)

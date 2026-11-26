@@ -3,10 +3,20 @@ mod original;
 mod projected;
 #[allow(dead_code)]
 mod single;
+#[allow(dead_code)]
+mod strict;
 
 use projected::{Irrigation, Packet, Sensor};
 
 fn main() {
+    let missing = r#"{"channel":3}"#;
+    assert!(serde_json::from_str::<strict::Sensor>(missing).is_err());
+    assert!(serde_json::from_str::<Sensor>(missing).unwrap().meter.is_none());
+    for value in ["null", "0", "9007199254740993", "18446744073709551615"] {
+        let wire = format!(r#"{{"channel":3,"meter":{value}}}"#);
+        let sensor: strict::Sensor = serde_json::from_str(&wire).unwrap();
+        assert_eq!(serde_json::to_string(&sensor).unwrap(), wire);
+    }
     assert_eq!(
         serde_json::to_string(&Irrigation::Sample(Sensor {
             channel: 3,
