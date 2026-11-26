@@ -221,6 +221,7 @@ pub(crate) fn validate_callbacks(
                 RequiredArgument::String | RequiredArgument::RepeatedString => {
                     matches!(arg.kind, Some(ValueKind::String))
                 }
+                RequiredArgument::Unsigned64 => matches!(arg.kind, Some(ValueKind::U64)),
                 RequiredArgument::Path => matches!(arg.kind, Some(ValueKind::Path)),
             };
             // Clap stores subcommand-local options on a different ArgMatches.

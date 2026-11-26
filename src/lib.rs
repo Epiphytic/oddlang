@@ -1,11 +1,13 @@
 pub mod assemble;
-pub mod command_surface;
+pub mod binary_frame;
 pub mod binary_record;
+pub mod command_surface;
 pub mod contracts;
 pub mod endpoint_set;
 pub mod evolution;
 pub mod facade;
 pub mod field_relation;
+pub mod file_profile;
 pub mod foreground_profile_owner;
 pub mod framing_import;
 pub mod framing_projection;
