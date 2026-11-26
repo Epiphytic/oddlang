@@ -280,6 +280,12 @@ fn resolve_globs(
 ) -> Result<BTreeSet<String>> {
     let mut used = BTreeSet::new();
     let mut unresolved = BTreeSet::new();
+    let locally_bound = |prefix: &str| {
+        file.items
+            .iter()
+            .any(|item| item_type_binding(item).is_some_and(|(name, _)| name.unraw() == prefix))
+            || imports_in_scope.iter().any(|import| import.name == prefix)
+    };
     for glob in imports_in_scope.iter().filter(|import| import.name == "*") {
         let child = match glob.path.as_slice() {
             [name] => name,
@@ -288,6 +294,7 @@ fn resolve_globs(
                 if syntax_candidate
                     && !tail.is_empty()
                     && !matches!(prefix.as_str(), "crate" | "self" | "super")
+                    && (glob.declaration.leading_colon.is_some() || !locally_bound(prefix))
                     && glob.path.iter().all(|part| symbol(part))
                     && glob.declaration.attrs.iter().all(is_doc) =>
             {

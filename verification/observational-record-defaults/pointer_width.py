@@ -109,6 +109,10 @@ with tempfile.TemporaryDirectory(prefix="odd-pointer-module-") as tmp:
     module_recovery(extern_glob + SOURCE, "repeat")
     assert (root / "candidate/recovery.lock").read_bytes() == (root / "repeat/recovery.lock").read_bytes()
     module_recovery("use crate::catalog::*;\n" + SOURCE, "local-shadow", "unsupported public record glob source")
+    module_recovery("mod catalog { pub mod shapes { pub type usize = u32; } }\n" + extern_glob + SOURCE,
+                    "inline-module", "unsupported public record glob source")
+    module_recovery("use crate::catalog;\n" + extern_glob + SOURCE,
+                    "named-local-import", "unsupported public record glob source")
     module_recovery("#[cfg(unix)] " + extern_glob + SOURCE, "conditional-glob",
                     "unsupported public record glob source")
 

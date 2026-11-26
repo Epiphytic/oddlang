@@ -1749,3 +1749,7 @@ w:pointerWidthPublicRecords a p:Task ;
     p:acceptance "A native fixture observes the pointer-width primitive at zero and maximum and distinguishes a fixed-width source mutation and a shadowed type." .
 w:pointerWidthRecordFixture a p:Artifact ;
     p:location "verification/observational-record-defaults/pointer_width.py" .
+w:pointerWidthLocalGlobReview a p:Finding ;
+    rdfs:label "Keep locally bound glob prefixes out of the unresolved dependency path" ;
+    p:source w:pointerWidthRecordFixture .
+w:pointerWidthPublicRecords p:addresses w:pointerWidthLocalGlobReview .
