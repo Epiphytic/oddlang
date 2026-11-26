@@ -11,6 +11,7 @@ use std::{
 };
 
 mod recover;
+mod typed;
 pub use recover::recover;
 
 type Result<T> = std::result::Result<T, String>;
@@ -21,15 +22,58 @@ struct Graph {
     format: String,
     id: String,
     error: String,
-    result: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    result: Option<String>,
     #[serde(deserialize_with = "unique_map")]
     variants: BTreeMap<String, Variant>,
     #[serde(deserialize_with = "unique_map")]
     categories: BTreeMap<String, Table>,
+    #[serde(
+        default,
+        skip_serializing_if = "BTreeMap::is_empty",
+        deserialize_with = "unique_map"
+    )]
+    choices: BTreeMap<String, Vec<ChoiceCase>>,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    equality: bool,
 }
 
 #[derive(Deserialize, Serialize)]
 struct Table(#[serde(deserialize_with = "unique_map")] BTreeMap<String, String>);
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct ChoiceCase {
+    id: String,
+    text: String,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct ProductField {
+    id: String,
+    width: Width,
+}
+
+#[derive(Clone, Copy, Deserialize, Serialize)]
+#[serde(rename_all = "lowercase")]
+enum Width {
+    U8,
+    U16,
+    U32,
+    U64,
+}
+
+impl Width {
+    fn rust(self) -> &'static str {
+        match self {
+            Self::U8 => "u8",
+            Self::U16 => "u16",
+            Self::U32 => "u32",
+            Self::U64 => "u64",
+        }
+    }
+}
 
 #[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -48,6 +92,8 @@ enum Payload {
     StaticText,
     IoError,
     Category { table: String },
+    Choice { choice: String },
+    Product { fields: Vec<ProductField> },
 }
 
 #[derive(Deserialize, Serialize)]
@@ -82,6 +128,11 @@ fn validate(graph: &Graph, overlay: &Overlay) -> Result<()> {
     if graph.format != "oddlang-finite-error-domain-v1"
         || overlay.format != "oddlang-finite-error-rust-v1"
         || graph.variants.is_empty()
+        || (graph.result.is_none()
+            && graph
+                .variants
+                .values()
+                .any(|variant| !matches!(variant.payload, Payload::Unit)))
     {
         return Err("unsupported or empty finite error domain".into());
     }
@@ -94,7 +145,9 @@ fn validate(graph: &Graph, overlay: &Overlay) -> Result<()> {
         Ok(())
     };
     add(&graph.error)?;
-    add(&graph.result)?;
+    if let Some(result) = &graph.result {
+        add(result)?;
+    }
     for id in graph.variants.keys() {
         add(id)?;
     }
@@ -105,6 +158,25 @@ fn validate(graph: &Graph, overlay: &Overlay) -> Result<()> {
         }
         for key in values.keys() {
             add(key)?;
+        }
+    }
+    for (id, cases) in &graph.choices {
+        add(id)?;
+        if cases.is_empty() {
+            return Err("empty error payload choice".into());
+        }
+        for case in cases {
+            add(&case.id)?;
+        }
+    }
+    for variant in graph.variants.values() {
+        if let Payload::Product { fields } = &variant.payload {
+            if fields.is_empty() {
+                return Err("empty named error payload".into());
+            }
+            for field in fields {
+                add(&field.id)?;
+            }
         }
     }
     NamedNode::new(&graph.id).map_err(|error| error.to_string())?;
@@ -121,11 +193,35 @@ fn validate(graph: &Graph, overlay: &Overlay) -> Result<()> {
         let mut seen = BTreeSet::new();
         names.into_iter().all(|name| seen.insert(name))
     }
-    if !distinct([&overlay.names[&graph.error], &overlay.names[&graph.result]])
+    if graph
+        .result
+        .as_ref()
+        .is_some_and(|result| overlay.names[result] == overlay.names[&graph.error])
         || !distinct(graph.variants.keys().map(|id| &overlay.names[id]))
         || !distinct(graph.categories.keys().map(|id| &overlay.names[id]))
     {
         return Err("duplicate native name within error declaration scope".into());
+    }
+    if !distinct(
+        std::iter::once(&graph.error)
+            .chain(graph.result.iter())
+            .chain(graph.choices.keys())
+            .map(|id| &overlay.names[id]),
+    ) || graph
+        .choices
+        .values()
+        .any(|cases| !distinct(cases.iter().map(|case| &overlay.names[&case.id])))
+        || graph
+            .variants
+            .values()
+            .any(|variant| match &variant.payload {
+                Payload::Product { fields } => {
+                    !distinct(fields.iter().map(|field| &overlay.names[&field.id]))
+                }
+                _ => false,
+            })
+    {
+        return Err("duplicate native error choice or product name".into());
     }
     for (id, Table(table)) in &graph.categories {
         let path = &overlay.category_types[id];
@@ -140,6 +236,7 @@ fn validate(graph: &Graph, overlay: &Overlay) -> Result<()> {
         }
     }
     let mut tables = BTreeSet::new();
+    let mut choices = BTreeSet::new();
     let mut conversion = false;
     for variant in graph.variants.values() {
         let inserts = matches!(variant.message, Message::Insertion { .. });
@@ -148,10 +245,18 @@ fn validate(graph: &Graph, overlay: &Overlay) -> Result<()> {
                 tables.insert(table);
             }
             Payload::Category { .. } => return Err("unknown category table".into()),
-            Payload::Unit | Payload::IoError if inserts => {
+            Payload::Choice { choice } if graph.choices.contains_key(choice) => {
+                choices.insert(choice);
+            }
+            Payload::Choice { .. } => return Err("unknown error payload choice".into()),
+            Payload::Unit | Payload::IoError | Payload::Product { .. } if inserts => {
                 return Err("display cannot insert this payload".into());
             }
             _ => {}
+        }
+        if graph.equality && matches!(variant.payload, Payload::IoError | Payload::Category { .. })
+        {
+            return Err("opaque error payload does not declare equality".into());
         }
         if (variant.source || variant.from) && !matches!(variant.payload, Payload::IoError) {
             return Err("error source or conversion requires an I/O error payload".into());
@@ -159,6 +264,9 @@ fn validate(graph: &Graph, overlay: &Overlay) -> Result<()> {
         if variant.from && (!variant.source || std::mem::replace(&mut conversion, true)) {
             return Err("conflicting I/O error conversion".into());
         }
+    }
+    if !choices.into_iter().eq(graph.choices.keys()) {
+        return Err("unused error payload choice".into());
     }
     if !tables.into_iter().eq(graph.categories.keys()) {
         return Err("unused category table".into());
@@ -177,8 +285,21 @@ fn native_path(path: &[String]) -> String {
 fn render(graph: &Graph, overlay: &Overlay) -> String {
     let names = &overlay.names;
     let name = &names[&graph.error];
-    let alias = &names[&graph.result];
-    let mut out = format!("#[derive(Debug)]\npub enum {name} {{\n");
+    let mut out = String::new();
+    for (id, cases) in &graph.choices {
+        crate::checked_values::render_plain_choice(
+            &mut out,
+            &names[id],
+            cases.iter().map(|case| names[&case.id].as_str()),
+            true,
+        );
+    }
+    let equality = if graph.equality {
+        ", PartialEq, Eq"
+    } else {
+        ""
+    };
+    writeln!(out, "#[derive(Debug{equality})]\npub enum {name} {{").unwrap();
     let variants = overlay
         .variant_order
         .iter()
@@ -192,18 +313,39 @@ fn render(graph: &Graph, overlay: &Overlay) -> String {
             Payload::Category { table } => {
                 format!("({})", native_path(&overlay.category_types[table]))
             }
+            Payload::Choice { choice } => format!("(self::{})", names[choice]),
+            Payload::Product { fields } => {
+                let fields = fields
+                    .iter()
+                    .map(|field| {
+                        format!(
+                            "{}: ::core::primitive::{}",
+                            names[&field.id],
+                            field.width.rust()
+                        )
+                    })
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                format!(" {{ {fields} }}")
+            }
         };
         writeln!(out, "    {name}{payload},").unwrap();
     }
-    writeln!(
-        out,
-        "}}\npub type {alias}<T> = ::core::result::Result<T, self::{name}>;\n"
-    )
-    .unwrap();
+    if let Some(result) = &graph.result {
+        let alias = &names[result];
+        writeln!(
+            out,
+            "}}\npub type {alias}<T> = ::core::result::Result<T, self::{name}>;\n"
+        )
+        .unwrap();
+    } else {
+        out.push_str("}\n");
+    }
     writeln!(out, "impl ::core::fmt::Display for {name} {{\n    fn fmt(&self, formatter: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {{\n        match self {{").unwrap();
     for (name, variant) in variants.clone() {
         let arg = match (&variant.payload, &variant.message) {
             (Payload::Unit, _) => "",
+            (Payload::Product { .. }, _) => " { .. }",
             (_, Message::Literal { .. }) => "(_)",
             (_, Message::Insertion { .. }) => "(value)",
         };
@@ -212,6 +354,19 @@ fn render(graph: &Graph, overlay: &Overlay) -> String {
             Message::Insertion { prefix, suffix } => {
                 let value = match &variant.payload {
                     Payload::Category { table } => format!("self::{}(value)", names[table]),
+                    Payload::Choice { choice } => {
+                        let mut expression = "match value {".to_owned();
+                        for case in &graph.choices[choice] {
+                            write!(
+                                expression,
+                                " self::{}::{} => {:?},",
+                                names[choice], names[&case.id], case.text
+                            )
+                            .unwrap();
+                        }
+                        expression.push_str(" }");
+                        expression
+                    }
                     _ => "value".to_owned(),
                 };
                 format!(
@@ -226,10 +381,13 @@ fn render(graph: &Graph, overlay: &Overlay) -> String {
     for (name, variant) in variants.clone() {
         let (arg, body) = if variant.source {
             ("(source)", "::core::option::Option::Some(source)")
-        } else if matches!(variant.payload, Payload::Unit) {
-            ("", "::core::option::Option::None")
         } else {
-            ("(_)", "::core::option::Option::None")
+            let arg = match variant.payload {
+                Payload::Unit => "",
+                Payload::Product { .. } => " { .. }",
+                _ => "(_)",
+            };
+            (arg, "::core::option::Option::None")
         };
         writeln!(out, "            Self::{name}{arg} => {body},").unwrap();
     }

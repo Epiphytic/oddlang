@@ -28,6 +28,7 @@ pub mod model;
 pub mod native_package;
 mod process_limit;
 pub mod public_records;
+mod root_data_scope;
 pub mod rust_recovery;
 pub mod rust_roundtrip;
 pub mod sequence_journal;

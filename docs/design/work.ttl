@@ -1389,6 +1389,37 @@ w:unifiedRecoveredVaultJournal a p:Task ;
 w:unifiedRecoveredVaultJournalReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/76> .
 
+w:rootPublicDataPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-root-public-data.md" .
+w:rootPublicData a p:Task ;
+    rdfs:label "Recover standalone public unit errors and Debug records at crate root" ;
+    p:milestone w:marmishMilestone ; p:source w:rootPublicDataPlan ; p:status p:done ;
+    p:dependsOn w:finiteErrorDomains, w:publicObservationalRecords ;
+    p:acceptance "Compare all seven MDK public error variants and the ordered public version record against original Rust. Change their pinned source and observe the exact Display and Debug changes through a native consumer." .
+w:rootPublicDataFixture a p:Artifact ;
+    p:location "verification/root-public-data/verify.py" .
+w:mdkPublicDataReceipt a p:Artifact ;
+    p:location "companion:verification/whole/mdk-public-data/darwin-arm64/receipt.json" .
+w:rootPublicData p:evidence w:rootPublicDataFixture, w:mdkPublicDataReceipt .
+
+w:rootPublicDataRawBindingReview a p:Finding ;
+    rdfs:label "Resolve raw and self imports by their native binding names" ;
+    p:source w:rootPublicDataFixture .
+w:rootPublicData p:addresses w:rootPublicDataRawBindingReview .
+
+w:sixMemberMdkDataPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-six-member-mdk-data.md" .
+w:sixMemberMdkData a p:Task ;
+    rdfs:label "Qualify pure MDK public data in the same sealed six-member workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:sixMemberMdkDataPlan ;
+    p:status p:done ; p:dependsOn w:unifiedRecoveredVaultJournal, w:rootPublicData ;
+    p:acceptance "Preserve all five predecessor member pins and edges. With one compiler, build the sealed six-member workspace on both ARM64 hosts and replay the report, vault, journal and pure MDK witnesses." .
+
+w:sixMemberMdkDarwin a p:Artifact ;
+    p:location "companion:verification/whole/unified-mdk/aarch64-apple-darwin.json" .
+w:sixMemberMdkLinux a p:Artifact ;
+    p:location "companion:verification/whole/unified-mdk/aarch64-unknown-linux-gnu.json" .
+w:sixMemberMdkData p:evidence w:sixMemberMdkDarwin, w:sixMemberMdkLinux .
 w:privateBufferedInputPlan a p:Artifact ;
     p:location "docs/superpowers/plans/2026-11-26-buffered-input.md" .
 w:privateBufferedInput a p:Task ;
@@ -1408,3 +1439,63 @@ w:recoveredWorkspaceNamedSuiteReceipt a p:Artifact ;
 
 w:privateBufferedInputFixture a p:Artifact ;
     p:location "verification/buffered-input/verify.py" .
+
+w:sevenMemberBufferedWorkspacePlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-seven-member-buffered-workspace.md" .
+w:sevenMemberBufferedWorkspace a p:Task ;
+    rdfs:label "Qualify the private buffered-input member in the sealed seven-member workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:sevenMemberBufferedWorkspacePlan ;
+    p:dependsOn w:sixMemberMdkData, w:privateBufferedInput ;
+    p:status p:done ;
+    p:acceptance "Keep every six-member predecessor lock row and add the dependency-pinned private buffered reader. Build the same sealed workspace on both ARM64 hosts and replay the private reader with the earlier report, vault, journal and MDK witnesses." .
+
+w:sevenMemberBufferedDarwin a p:Artifact ;
+    p:location "companion:verification/whole/unified-buffered/aarch64-apple-darwin.json" .
+w:sevenMemberBufferedLinux a p:Artifact ;
+    p:location "companion:verification/whole/unified-buffered/aarch64-unknown-linux-gnu.json" .
+w:sevenMemberBufferedWorkspace p:evidence w:sevenMemberBufferedDarwin, w:sevenMemberBufferedLinux .
+
+w:plainValueChoices a p:Task ;
+    rdfs:label "Recover and project plain closed value choices" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:checkedValueProductProjection ;
+    p:acceptance "Compare original and generated native exhaustiveness, exact capabilities and declaration-order casts. Reorder a pinned ordinary choice at its Rust source, and verify only the intended ordinal observations change." ;
+    p:evidence w:plainChoiceFixture, w:nativeBackendChoiceReceipt .
+w:plainChoiceFixture a p:Artifact ;
+    p:location "verification/plain-value-choices/verify.py" .
+w:nativeBackendChoiceReceipt a p:Artifact ;
+    p:location "companion:verification/whole/backend-choice/darwin-arm64/receipt.json" .
+
+w:plainChoiceBindingsReview a p:Finding ;
+    rdfs:label "Reject item macros and impl heads that mention the selected choice in any role" ;
+    p:source w:plainChoiceFixture .
+w:plainValueChoices p:addresses w:plainChoiceBindingsReview .
+
+w:plainChoiceAssociatedTypeReview a p:Finding ;
+    rdfs:label "Check associated-type aliases before projecting a plain choice" ;
+    p:source w:plainChoiceFixture .
+w:plainValueChoices p:addresses w:plainChoiceAssociatedTypeReview .
+
+w:typedFiniteErrorsPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-typed-finite-errors.md" .
+w:typedFiniteErrors a p:Task ;
+    rdfs:label "Recover finite error choices and typed product variants" ;
+    p:milestone w:marmishMilestone ; p:source w:typedFiniteErrorsPlan ;
+    p:dependsOn w:plainValueChoices, w:sevenMemberBufferedWorkspace ;
+    p:status p:done ;
+    p:acceptance "Qualify public error and alias, exact reason capability and variant membership, fixed-width named fields and Display/Debug/source through independently compiled original and generated consumers. Share process-limit error identity without changing the older standalone projection. Integrate the published native identity choice." .
+
+w:typedFiniteErrorPrimitiveShadow a p:Finding ;
+    rdfs:label "Reject local declarations that shadow a recovered primitive width" ;
+    p:source w:typedFiniteErrorsPlan .
+w:typedFiniteErrors p:addresses w:typedFiniteErrorPrimitiveShadow .
+
+w:typedFiniteErrorsFixture a p:Artifact ;
+    p:location "verification/typed-finite-errors/verify.py" .
+w:typedFiniteErrorsDarwin a p:Artifact ;
+    p:location "companion:verification/whole/engine-public-error/aarch64-apple-darwin.json" .
+w:typedFiniteErrorsLinux a p:Artifact ;
+    p:location "companion:verification/whole/engine-public-error/aarch64-unknown-linux-gnu.json" .
+w:typedFiniteErrorsMutation a p:Artifact ;
+    p:location "companion:verification/whole/engine-public-error/source-mutation-aarch64-apple-darwin.json" .
+w:typedFiniteErrors p:evidence w:typedFiniteErrorsFixture, w:typedFiniteErrorsDarwin, w:typedFiniteErrorsLinux, w:typedFiniteErrorsMutation .

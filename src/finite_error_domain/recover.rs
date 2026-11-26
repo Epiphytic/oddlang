@@ -10,12 +10,16 @@ use syn::{
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct Selection {
+pub(super) struct Selection {
     format: String,
-    id: String,
+    pub(super) id: String,
     source_sha256: String,
-    error: String,
-    result: String,
+    pub(super) error: String,
+    pub(super) result: Option<String>,
+    #[serde(default)]
+    pub(super) choices: Vec<String>,
+    #[serde(default, deserialize_with = "unique_map")]
+    pub(super) variant_ids: BTreeMap<String, String>,
 }
 
 struct Diagnostic {
@@ -44,7 +48,7 @@ impl Parse for Diagnostic {
     }
 }
 
-fn docs(attrs: &[Attribute]) -> bool {
+pub(super) fn docs(attrs: &[Attribute]) -> bool {
     attrs.iter().all(|attr| attr.path().is_ident("doc"))
 }
 
@@ -159,7 +163,7 @@ fn literal_table(helper: &ItemFn, ty: &Type) -> Result<BTreeMap<String, String>>
     Ok(result)
 }
 
-fn check_alias(alias: &syn::ItemType, error: &syn::Ident) -> Result<()> {
+pub(super) fn check_alias(alias: &syn::ItemType, error: &syn::Ident) -> Result<()> {
     if error == "T" {
         return Err("result alias parameter shadows the error type".into());
     }
@@ -200,7 +204,7 @@ fn message(diagnostic: &Diagnostic, field: bool) -> Result<Message> {
     Err("unsupported diagnostic interpolation".into())
 }
 
-fn derive_error(error: &syn::ItemEnum) -> Result<()> {
+pub(super) fn derive_error(error: &syn::ItemEnum, imported: bool, equality: bool) -> Result<()> {
     let attrs: Vec<_> = error
         .attrs
         .iter()
@@ -213,13 +217,15 @@ fn derive_error(error: &syn::ItemEnum) -> Result<()> {
         .parse_args_with(Punctuated::<syn::Path, Comma>::parse_terminated)
         .map_err(|e| e.to_string())?;
     let names: BTreeSet<_> = paths.iter().map(strict_path).collect::<Result<_>>()?;
+    let debug = vec!["Debug".to_owned()];
+    let mut standard = BTreeSet::from([debug.clone(), vec!["thiserror".into(), "Error".into()]]);
+    let via_import = BTreeSet::from([debug, vec!["Error".into()]]);
+    if equality {
+        standard.extend([vec!["Eq".into()], vec!["PartialEq".into()]]);
+    }
     if !derive.path().is_ident("derive")
-        || paths.len() != 2
-        || names
-            != BTreeSet::from([
-                vec!["Debug".into()],
-                vec!["thiserror".into(), "Error".into()],
-            ])
+        || paths.len() != standard.len()
+        || (names != standard && !(imported && names == via_import))
         || !matches!(error.vis, Visibility::Public(_))
         || !error.generics.params.is_empty()
         || error.generics.where_clause.is_some()
@@ -231,6 +237,9 @@ fn derive_error(error: &syn::ItemEnum) -> Result<()> {
 
 fn extract(source: &str, selection: Selection) -> Result<(Graph, Overlay)> {
     let file = syn::parse_file(source).map_err(|error| error.to_string())?;
+    let Some(result) = selection.result.as_ref() else {
+        return units(&file, selection);
+    };
     if !docs(&file.attrs) || file.shebang.is_some() {
         return Err("unsupported parent attributes on error module".into());
     }
@@ -242,7 +251,7 @@ fn extract(source: &str, selection: Selection) -> Result<(Graph, Overlay)> {
             Item::Enum(item) if item.ident == selection.error && error.is_none() => {
                 error = Some(item)
             }
-            Item::Type(item) if item.ident == selection.result && alias.is_none() => {
+            Item::Type(item) if item.ident == result.as_str() && alias.is_none() => {
                 alias = Some(item)
             }
             Item::Fn(item) if helpers.insert(item.sig.ident.to_string(), item).is_none() => {}
@@ -253,7 +262,7 @@ fn extract(source: &str, selection: Selection) -> Result<(Graph, Overlay)> {
         error.ok_or("missing error enum")?,
         alias.ok_or("missing result alias")?,
     );
-    derive_error(error)?;
+    derive_error(error, false, false)?;
     check_alias(alias, &error.ident)?;
 
     let id = selection.id;
@@ -262,15 +271,17 @@ fn extract(source: &str, selection: Selection) -> Result<(Graph, Overlay)> {
         format: "oddlang-finite-error-domain-v1".into(),
         id: id.clone(),
         error: fresh("type", &selection.error),
-        result: fresh("alias", &selection.result),
+        result: Some(fresh("alias", result)),
         variants: BTreeMap::new(),
         categories: BTreeMap::new(),
+        choices: BTreeMap::new(),
+        equality: false,
     };
     let mut overlay = Overlay {
         format: "oddlang-finite-error-rust-v1".into(),
         names: BTreeMap::from([
             (graph.error.clone(), selection.error),
-            (graph.result.clone(), selection.result),
+            (graph.result.as_ref().unwrap().clone(), result.clone()),
         ]),
         variant_order: Vec::new(),
         category_types: BTreeMap::new(),
@@ -377,22 +388,38 @@ pub fn recover(source: &Path, selection: &Path, output: &Path) -> Result<()> {
     let selection: Selection =
         serde_json::from_slice(&selection_bytes).map_err(|e| e.to_string())?;
     let source_sha = digest(source.as_bytes());
-    if selection.format != "oddlang-finite-error-selection-v1"
-        || selection.source_sha256 != source_sha
+    if !matches!(
+        selection.format.as_str(),
+        "oddlang-finite-error-selection-v1" | "oddlang-typed-finite-error-selection-v1"
+    ) || selection.source_sha256 != source_sha
     {
         return Err("finite error source selection version or digest mismatch".into());
     }
-    let (graph, overlay) = extract(&source, selection)?;
+    let typed = selection.format == "oddlang-typed-finite-error-selection-v1";
+    let (graph, overlay) = if typed {
+        super::typed::extract(&source, selection)?
+    } else {
+        if !selection.choices.is_empty() || !selection.variant_ids.is_empty() {
+            return Err("typed declarations require the typed source selection profile".into());
+        }
+        extract(&source, selection)?
+    };
     let graph = json(&graph)?;
     let overlay = json(&overlay)?;
+    let mut gaps = vec![
+        "thiserror expansion and caller-visible behavior require independent native replay",
+        "external enum exhaustiveness and crate-root reexports require downstream compilation",
+    ];
+    if typed {
+        gaps.push("sibling item macro expansion and Rust name resolution require native replay");
+    }
     let receipt = json(&serde_json::json!({
         "format": "oddlang-finite-error-observation-v1",
         "sourceSha256": source_sha,
         "selectionSha256": digest(&selection_bytes),
         "graphSha256": digest(&graph),
         "overlaySha256": digest(&overlay),
-        "gaps": ["thiserror expansion and caller-visible behavior require independent native replay",
-                 "external enum exhaustiveness and crate-root reexports require downstream compilation"],
+        "gaps": gaps,
     }))?;
     publish(
         output,
@@ -402,4 +429,133 @@ pub fn recover(source: &Path, selection: &Path, output: &Path) -> Result<()> {
             ("observation.json", &receipt),
         ],
     )
+}
+
+fn units(file: &syn::File, selection: Selection) -> Result<(Graph, Overlay)> {
+    use crate::root_data_scope as scope;
+    scope::ordinary_root(file)?;
+    scope::bindings(file, &[&selection.error])?;
+    let permitted_import: syn::ItemUse = parse_quote!(
+        use thiserror::Error;
+    );
+    let mut imported = false;
+    let mut chosen = None;
+    for item in &file.items {
+        match item {
+            Item::Use(import) if *import == permitted_import && !imported => imported = true,
+            Item::Use(import)
+                if scope::imports_reserved(
+                    &import.tree,
+                    None,
+                    &["Debug", "Error", "Result", "thiserror"],
+                ) =>
+            {
+                return Err("reserved or glob import in standalone unit error scope".into());
+            }
+            Item::Type(alias)
+                if scope::name(&alias.ident, &["Result"])
+                    && matches!(alias.vis, Visibility::Public(_)) =>
+            {
+                return Err("standalone unit error scope has a public Result alias".into());
+            }
+            Item::Enum(item) if item.ident == selection.error => {
+                if chosen.replace(item).is_some() {
+                    return Err("duplicate selected standalone unit error".into());
+                }
+            }
+            Item::ExternCrate(item)
+                if scope::name(
+                    item.rename.as_ref().map_or(&item.ident, |(_, alias)| alias),
+                    &["Debug", "Error", "thiserror"],
+                ) =>
+            {
+                return Err("shadowed standalone error derive".into());
+            }
+            Item::Union(item) if scope::name(&item.ident, &["Debug", "Error", "thiserror"]) => {
+                return Err("shadowed standalone error derive".into());
+            }
+            Item::TraitAlias(item)
+                if scope::name(&item.ident, &["Debug", "Error", "thiserror"]) =>
+            {
+                return Err("shadowed standalone error derive".into());
+            }
+            Item::Enum(item) if scope::name(&item.ident, &["Debug", "Error", "thiserror"]) => {
+                return Err("shadowed standalone error derive".into());
+            }
+            Item::Struct(item) if scope::name(&item.ident, &["Debug", "Error", "thiserror"]) => {
+                return Err("shadowed standalone error derive".into());
+            }
+            Item::Mod(item) if scope::name(&item.ident, &["Debug", "Error", "thiserror"]) => {
+                return Err("shadowed standalone error derive".into());
+            }
+            Item::Trait(item) if scope::name(&item.ident, &["Debug", "Error", "thiserror"]) => {
+                return Err("shadowed standalone error derive".into());
+            }
+            Item::Type(item) if scope::name(&item.ident, &["Debug", "Error", "thiserror"]) => {
+                return Err("shadowed standalone error derive".into());
+            }
+            _ => {}
+        }
+    }
+    let item = chosen.ok_or("missing standalone unit error")?;
+    derive_error(item, imported, false)?;
+    let root = selection.id;
+    let error = format!("{root}:type:{}", selection.error);
+    let mut graph = Graph {
+        format: "oddlang-finite-error-domain-v1".into(),
+        id: root,
+        error: error.clone(),
+        result: None,
+        variants: BTreeMap::new(),
+        categories: BTreeMap::new(),
+        choices: BTreeMap::new(),
+        equality: false,
+    };
+    let mut overlay = Overlay {
+        format: "oddlang-finite-error-rust-v1".into(),
+        names: BTreeMap::from([(error, selection.error)]),
+        variant_order: Vec::new(),
+        category_types: BTreeMap::new(),
+    };
+    for variant in &item.variants {
+        let attrs: Vec<_> = variant
+            .attrs
+            .iter()
+            .filter(|attr| !attr.path().is_ident("doc"))
+            .collect();
+        let [attribute] = attrs.as_slice() else {
+            return Err("standalone unit error requires one literal diagnostic".into());
+        };
+        if !matches!(variant.fields, Fields::Unit)
+            || variant.discriminant.is_some()
+            || !attribute.path().is_ident("error")
+        {
+            return Err("expected unconditional unit error with an implicit ordinal".into());
+        }
+        let diagnostic = attribute
+            .parse_args::<Diagnostic>()
+            .map_err(|e| e.to_string())?;
+        let message = message(&diagnostic, false)?;
+        let name = variant.ident.to_string();
+        let id = format!("{}:variant:{name}", graph.id);
+        overlay.variant_order.push(id.clone());
+        overlay.names.insert(id.clone(), name);
+        if graph
+            .variants
+            .insert(
+                id,
+                Variant {
+                    payload: Payload::Unit,
+                    message,
+                    source: false,
+                    from: false,
+                },
+            )
+            .is_some()
+        {
+            return Err("duplicate standalone unit error variant".into());
+        }
+    }
+    validate(&graph, &overlay)?;
+    Ok((graph, overlay))
 }
