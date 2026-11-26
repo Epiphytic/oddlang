@@ -1,0 +1,40 @@
+{
+  "compiler": "ff55ee7eb7c2cfe95a89e1384a3416d701120a56",
+  "compilerSha256": "fd0e3972435deb508bba36a4984b62e0a15acee974f33c9000130f2058b5eac7",
+  "existingFixturesPassed": [
+    "verification/public-records/read_policy.py",
+    "verification/serde-string-choice/verify.py",
+    "verification/observational-record-defaults/pointer_width.py"
+  ],
+  "fixtureSha256": "8f5aa24d6c0a2d9e0ce25020b70d837e95a3dd8de5b511bbe222ae3cdd5a5303",
+  "format": "oddlang-serde-public-record-recovery-receipt-v1",
+  "identicalLegacyArtifacts": {
+    "model/graph.json": "879380ea262679ca5f68431bf5e2be9860f1fe87e4ab694a6c4bd18b3cf2b44d",
+    "model/recovery.lock": "506a8dd515869d406aa8b2d25e800d6257e5482b0328dbc07cb926842e861977",
+    "model/rust.json": "26fff29ea2d1119d46822d0d083ef334ecb7439022c38cbdb7d8ce686f0db23c",
+    "product/Cargo.lock": "9cf3e2edbfd40065a94c60e86dcbbd25a9525eac60ea914a395fe37c8755f355",
+    "product/Cargo.toml": "7d4664fffbad4c7d4301683ef3bd88e59604ef92c7de91c24c05f6d1f97f4daf",
+    "product/package.lock": "7137580050dd336914266fb29746c509957a41d6db74161a37ad940e8d21b0b1",
+    "product/src/group_0/__projection_0.rs": "f2553625c5ae5501ec90cd6479eeb3413a5d57e8d3ef7b9198b84d35319bcf43",
+    "product/src/group_0/mod.rs": "1c30e5db413e305ac76ff62f7a308f24ccd3bb4107de328bebb15c85a36cde3b",
+    "product/src/lib.rs": "faf1fe45b1239c050137fcec90301c18582a97bb8fb3af52819aebdcf1a23ab0",
+    "projection/projection.lock": "81900c8bfc9184d826e5a53855b79c40819095b69cf6e553a5722ce0e404fd4d",
+    "projection/records.rs": "f2553625c5ae5501ec90cd6479eeb3413a5d57e8d3ef7b9198b84d35319bcf43"
+  },
+  "nativeSourceAndProjectionPassed": [
+    "serde defaults",
+    "deny_unknown_fields mutation",
+    "field reorder mutation"
+  ],
+  "platform": "aarch64-apple-darwin",
+  "rustdoc": "1.97.1",
+  "sourceOrEvidenceRejected": [
+    "unrelated choice declaration",
+    "stale module bytes",
+    "stale crate root bytes",
+    "unsupported Serde attribute",
+    "shadowed Option",
+    "missing enum root export"
+  ],
+  "unchangedPredecessor": "4e43a3d2367cbb1839ff224ccb24da175c6b8278"
+}
