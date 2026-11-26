@@ -49,6 +49,9 @@ pub(super) enum Number {
     Length {
         value: Path,
     },
+    JsonStringLength {
+        value: Path,
+    },
     SaturatingAdd {
         left: Box<Number>,
         right: Box<Number>,
@@ -124,6 +127,17 @@ pub(super) enum Condition {
         overhead: u32,
         maximum: u64,
     },
+    TextEqual {
+        value: Path,
+        text: String,
+    },
+    TextPrefix {
+        value: Path,
+        text: String,
+    },
+    TextExcludesNul {
+        value: Path,
+    },
     Variant {
         value: Path,
         variant: String,
@@ -153,6 +167,12 @@ pub(super) enum Step {
         steps: Vec<Step>,
     },
     Some {
+        id: String,
+        value: Path,
+        bind: String,
+        steps: Vec<Step>,
+    },
+    ForEach {
         id: String,
         value: Path,
         bind: String,
@@ -408,12 +428,24 @@ impl<'a> Compiler<'a> {
                     value.shape,
                     Shape::List { .. }
                         | Shape::BoundedBase64List { .. }
+                        | Shape::BoundedBase64 { .. }
                         | Shape::LowerHex { .. }
                         | Shape::Text {}
                 ) {
                     return Err("guard length needs ordered values, bytes or text".into());
                 }
                 Ok(format!("({}).len() as u64", value.rust))
+            }
+            Number::JsonStringLength { value } => {
+                let value = self.text(value, scope)?;
+                Ok(format!(
+                    r#"({}).bytes().fold(2u64, |size, octet| size.saturating_add(match octet {{
+                        b'"' | b'\\' | b'\x08' | b'\t' | b'\n' | b'\x0c' | b'\r' => 2,
+                        0..=0x1f => 6,
+                        _ => 1,
+                    }}))"#,
+                    value.rust
+                ))
             }
             Number::SaturatingAdd { left, right } | Number::SaturatingSubtract { left, right } => {
                 let op = if matches!(number, Number::SaturatingAdd { .. }) {
@@ -484,6 +516,14 @@ impl<'a> Compiler<'a> {
         } else {
             Err("guard needs a byte sequence list".into())
         }
+    }
+
+    fn text(&self, path: &Path, scope: &Scope) -> Result<Value> {
+        let value = self.path(path, scope)?;
+        if !matches!(value.shape, Shape::Text {}) {
+            return Err("guard expects text".into());
+        }
+        Ok(value)
     }
 
     fn condition(&self, condition: &Condition, scope: &Scope) -> Result<String> {
@@ -574,6 +614,18 @@ impl<'a> Compiler<'a> {
                     value.rust
                 ))
             }
+            Condition::TextEqual { value, text } => {
+                let value = self.text(value, scope)?;
+                Ok(format!("({}).as_str() == {text:?}", value.rust))
+            }
+            Condition::TextPrefix { value, text } => {
+                let value = self.text(value, scope)?;
+                Ok(format!("({}).starts_with({text:?})", value.rust))
+            }
+            Condition::TextExcludesNul { value } => {
+                let value = self.text(value, scope)?;
+                Ok(format!("!({}).as_bytes().contains(&0)", value.rust))
+            }
             Condition::Variant { value, variant } => self.tagged(&path(value)?, variant),
             Condition::All { items } | Condition::Any { items } => {
                 if items.is_empty() {
@@ -654,6 +706,24 @@ impl<'a> Compiler<'a> {
                         value.rust
                     )
                     .unwrap();
+                    let mut scope = scope.clone();
+                    supplied(
+                        &mut scope,
+                        bind,
+                        Provided::Value(Value { rust, shape: *item }),
+                    )?;
+                    self.sequence(steps, &scope, &child, text)?;
+                    writeln!(text, "{indent}}}").unwrap();
+                }
+                Step::ForEach {
+                    value, bind, steps, ..
+                } => {
+                    let value = self.path(value, scope)?;
+                    let Shape::List { item } = value.shape else {
+                        return Err("guard iteration requires a typed list".into());
+                    };
+                    let rust = self.fresh();
+                    writeln!(text, "{indent}for {rust} in ({}).iter() {{", value.rust).unwrap();
                     let mut scope = scope.clone();
                     supplied(
                         &mut scope,
@@ -801,6 +871,7 @@ impl Step {
             Self::Require { id, .. }
             | Self::If { id, .. }
             | Self::Some { id, .. }
+            | Self::ForEach { id, .. }
             | Self::Cases { id, .. }
             | Self::Call { id, .. }
             | Self::OnSuccess { id, .. } => id,
@@ -810,7 +881,10 @@ impl Step {
     pub fn visit<'a>(&'a self, visit: &mut impl FnMut(&'a Step)) {
         visit(self);
         match self {
-            Self::If { steps, .. } | Self::Some { steps, .. } | Self::OnSuccess { steps, .. } => {
+            Self::If { steps, .. }
+            | Self::Some { steps, .. }
+            | Self::ForEach { steps, .. }
+            | Self::OnSuccess { steps, .. } => {
                 for step in steps {
                     step.visit(visit);
                 }
@@ -837,7 +911,10 @@ impl Step {
             Self::Require { error, .. } => {
                 errors.insert(error);
             }
-            Self::If { steps, .. } | Self::Some { steps, .. } | Self::OnSuccess { steps, .. } => {
+            Self::If { steps, .. }
+            | Self::Some { steps, .. }
+            | Self::ForEach { steps, .. }
+            | Self::OnSuccess { steps, .. } => {
                 for step in steps {
                     step.errors(errors);
                 }
