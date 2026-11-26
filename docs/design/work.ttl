@@ -1783,9 +1783,15 @@ w:readOnlyFileIntegrity a p:Task ;
     rdfs:label "Recover and qualify read-only descriptor and integrity rules" ;
     p:milestone w:marmishMilestone ; p:source w:readOnlyFileIntegrityPlan ;
     p:dependsOn w:structuralProfileCompiler ;
-    p:status p:active ;
+    p:status p:done ;
     p:acceptance "Observe ordered file admission, bounded reads and digest checks on both native ARM64 hosts using inert files, and independently detect a source mutation." .
 
 w:readOnlyFileIntegrityFixture a p:Artifact ;
     p:location "verification/read-only-file/check.py" .
-w:readOnlyFileIntegrity p:evidence w:readOnlyFileIntegrityFixture .
+w:readOnlyFileIntegrity p:evidence w:readOnlyFileIntegrityFixture, w:readOnlyFileDarwin, w:readOnlyFileLinux .
+
+w:readOnlyFileDarwin a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/d27146eee73937d147b9db32d3210d515220be04/verification/whole/local-file-integrity/aarch64-apple-darwin.json" .
+
+w:readOnlyFileLinux a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/d27146eee73937d147b9db32d3210d515220be04/verification/whole/local-file-integrity/aarch64-unknown-linux-gnu.json" .
