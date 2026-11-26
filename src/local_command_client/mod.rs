@@ -7,6 +7,7 @@ use std::{collections::BTreeSet, fs, path::Path};
 mod discovery;
 mod replies;
 mod rust;
+mod workflow;
 use replies::{Declaration, Primitive, ValueType};
 
 #[derive(Deserialize)]
@@ -432,6 +433,9 @@ pub(crate) struct Callback {
 }
 
 pub(crate) fn callback(graph: &[u8], binding: &[u8]) -> Result<Callback, String> {
+    if workflow::matches_graph(graph) {
+        return workflow::callback(graph, binding);
+    }
     let (graph, binding) = load(graph, binding)?;
     let mut arguments = vec![(graph.socket_argument.clone(), RequiredArgument::Path)];
     if let Some(discovery) = &graph.discovery {
@@ -453,6 +457,9 @@ pub fn build(graph: &Path, binding: &Path, output: &Path) -> Result<(), String> 
 }
 
 pub(crate) fn build_bytes(graph: &[u8], binding: &[u8], output: &Path) -> Result<(), String> {
+    if workflow::matches_graph(graph) {
+        return workflow::build(graph, binding, output);
+    }
     let (contract, overlay) = load(graph, binding)?;
     let source = rust::render(&contract, &overlay.entry)?;
     let hash = |bytes: &[u8]| {
@@ -520,18 +527,7 @@ fn load(graph: &[u8], binding: &[u8]) -> Result<(Graph, Binding), String> {
     contract.validate()?;
     let overlay: Binding = serde_json::from_slice(binding).map_err(|error| error.to_string())?;
     if overlay.format != "oddlang-local-command-client-rust-v1"
-        || !overlay
-            .entry
-            .bytes()
-            .next()
-            .is_some_and(|byte| byte.is_ascii_lowercase())
-        || !overlay
-            .entry
-            .bytes()
-            .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'_')
-        || overlay.entry == "gen"
-        || syn::parse_str::<syn::Ident>(&overlay.entry).is_err()
-        || matches!(overlay.entry.as_str(), "run_inner" | "perform" | "exchange")
+        || !valid_entry(&overlay.entry)
         || (overlay.entry == "request_body" && contract.request_arguments().next().is_some())
         || (contract.discovery.is_some()
             && (overlay.entry == "discover_endpoint" || overlay.entry.starts_with("endpoint_")))
@@ -539,4 +535,17 @@ fn load(graph: &[u8], binding: &[u8]) -> Result<(Graph, Binding), String> {
         return Err("invalid local command client entry".into());
     }
     Ok((contract, overlay))
+}
+
+fn valid_entry(entry: &str) -> bool {
+    entry
+        .bytes()
+        .next()
+        .is_some_and(|byte| byte.is_ascii_lowercase())
+        && entry
+            .bytes()
+            .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'_')
+        && entry != "gen"
+        && syn::parse_str::<syn::Ident>(entry).is_ok()
+        && !matches!(entry, "run_inner" | "perform" | "exchange")
 }

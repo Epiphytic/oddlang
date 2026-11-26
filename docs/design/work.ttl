@@ -2630,3 +2630,22 @@ w:basicServerQualification a p:Task ;
     p:status p:planned ; p:dependsOn w:basicPeerObservation, w:basicPeerSetup ;
     p:acceptance "A mainline client receives the expected results from the verified generated receiver for all fixed cases." .
 w:basicCommandInterop p:dependsOn w:basicClientQualification, w:basicServerQualification .
+
+w:localOwnerWorkflowPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-local-owner-workflow.md" .
+w:localOwnerWorkflow a p:Task ;
+    rdfs:label "Project bounded stateful same-user local command exchanges" ;
+    p:milestone w:marmishMilestone ; p:source w:localOwnerWorkflowPlan, w:basicCommandInteropPlan ;
+    p:status p:done ; p:dependsOn w:localCommandArguments, w:basicCommandOwnerHandoffReference ;
+    p:evidence w:localOwnerWorkflowVerification, w:localSubmitHandoffReference ;
+    p:acceptance "Generate a linked native CLI request sequence. Verify ordered response decisions, capture validation, fixed request bytes, and one finite deadline and budget with an independent Unix peer." .
+w:basicCommandInterop p:dependsOn w:localOwnerWorkflow .
+
+w:localOwnerWorkflowVerification a p:Artifact ;
+    p:location "verification/local-owner-workflow/runtime-verification.md" .
+w:localSubmitHandoffReference a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/2c986260f6cbebf489b3330899ab1067fe03b7b7/verification/whole/basic-command-interop/upstream-local-owner-aarch64-apple-darwin.json" .
+w:localWorkflowCaptureLifetimeFinding a p:Finding ;
+    rdfs:label "Reject workflow capture use without assignment on every incoming path" ;
+    p:source w:localOwnerWorkflowVerification .
+w:localOwnerWorkflow p:addresses w:localWorkflowCaptureLifetimeFinding .
