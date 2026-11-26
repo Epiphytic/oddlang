@@ -1730,6 +1730,21 @@ w:sharedWireChoiceCopyFixture a p:Artifact ;
     p:location "verification/shared-declarations/verify.py" .
 w:wholeMarmishStructure p:dependsOn w:sharedWireChoiceCopy .
 
+w:serdeStringChoiceRecoveryPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-serde-string-choice-recovery.md" .
+w:serdeStringChoiceRecovery a p:Task ;
+    rdfs:label "Recover ordered Rust unit enums with exact Serde strings" ;
+    p:milestone w:marmishMilestone ; p:source w:serdeStringChoiceRecoveryPlan ;
+    p:status p:done ; p:dependsOn w:sharedWireChoiceCopy ;
+    p:evidence w:serdeStringChoiceRecoveryFixture ;
+    p:acceptance "Recover a checked shared-declarations graph and disjoint Rust bindings from pinned source and qualify target semantics and a true source mutation with native consumers." .
+w:serdeStringChoiceRecoveryFixture a p:Artifact ;
+    p:location "verification/serde-string-choice/verify.py" .
+w:serdeStringChoiceDeriveFixtureReview a p:Finding ;
+    rdfs:label "Exercise qualified Serde derives and reject explicit stock-derive or macro-use shadows" ;
+    p:source w:serdeStringChoiceRecoveryFixture .
+w:serdeStringChoiceRecovery p:addresses w:serdeStringChoiceDeriveFixtureReview .
+
 w:linuxKnownPublicImports a p:Task ;
     rdfs:label "Compile the same 140 public spellings against original and canonical Linux libraries" ;
     p:status p:done ; p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
