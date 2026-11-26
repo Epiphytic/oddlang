@@ -27,6 +27,7 @@ struct Protocol {
     maximum_wire_bytes: u32,
     size_error: String,
     admission_error: String,
+    errors: BTreeMap<String, Error>,
     constants: Vec<Constant>,
     literals: BTreeMap<String, String>,
     endpoints: Vec<Endpoint>,
@@ -91,7 +92,7 @@ struct Guard {
 struct Native {
     format: String,
     error_type: String,
-    errors: BTreeMap<String, NativeError>,
+    errors: BTreeMap<String, String>,
     constants: BTreeMap<String, String>,
     fields: BTreeMap<String, String>,
     endpoints: BTreeMap<String, NativeEndpoint>,
@@ -99,11 +100,13 @@ struct Native {
     foreign_members: BTreeMap<String, String>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     auxiliary: BTreeMap<String, String>,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    internal_envelope: bool,
 }
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
-struct NativeError {
+struct Error {
     variant: String,
     argument: Option<String>,
 }
@@ -167,7 +170,138 @@ fn same_literal_type(left: &Shape, right: &Shape) -> bool {
     }
 }
 
+impl Native {
+    fn shape_is_public(&self, shape: &Shape, graph: &Protocol, union: &str) -> bool {
+        if !self.internal_envelope {
+            return true;
+        }
+        match shape {
+            Shape::Ref { id } => id != &graph.envelope && id != union,
+            Shape::Optional { item } | Shape::List { item } => {
+                self.shape_is_public(item, graph, union)
+            }
+            _ => true,
+        }
+    }
+}
+
+fn payload_fields(payload: &Payload) -> &[Field] {
+    match payload {
+        Payload::Record { fields } => fields,
+        _ => &[],
+    }
+}
+
 impl Protocol {
+    fn validate_declarations(&self, schema: &Schema) -> Result<()> {
+        let mut ids = BTreeSet::new();
+        let mut add = |id: &str| -> Result<()> {
+            iri(id)?;
+            if !ids.insert(id.to_owned()) {
+                return Err(format!("duplicate wire declaration {id}"));
+            }
+            Ok(())
+        };
+        add(&schema.id)?;
+        add(&self.id)?;
+        for definition in &schema.types {
+            add(definition.id())?;
+            match definition {
+                Definition::Record { fields, .. } => {
+                    for field in fields {
+                        add(&field.id)?;
+                    }
+                }
+                Definition::Adjacent { variants, .. } => {
+                    for variant in variants {
+                        add(&variant.id)?;
+                        for field in payload_fields(&variant.payload) {
+                            add(&field.id)?;
+                        }
+                    }
+                }
+                Definition::External { .. } => {}
+            }
+        }
+        for guard in &schema.guards {
+            add(&guard.id)?;
+        }
+        for constant in &self.constants {
+            add(&constant.id)?;
+        }
+        for error in self.errors.keys() {
+            add(error)?;
+        }
+        for endpoint in &self.endpoints {
+            add(&endpoint.id)?;
+            for field in &endpoint.fields {
+                add(&field.id)?;
+            }
+            for guard in &endpoint.guards {
+                add(&guard.id)?;
+            }
+            for step in endpoint.steps.iter().chain(&endpoint.timed) {
+                for id in step.declarations() {
+                    add(id)?;
+                }
+            }
+        }
+        for foreign in &self.foreign {
+            for field in &foreign.fields {
+                add(&field.id)?;
+            }
+            for variant in &foreign.variants {
+                add(variant)?;
+            }
+            for method in &foreign.methods {
+                add(&method.id)?;
+            }
+        }
+        for alias in &self.aliases {
+            add(&alias.id)?;
+        }
+        for adapter in &self.hex_exports {
+            add(&adapter.id)?;
+        }
+        for digest in &self.digests {
+            for id in digest.declarations() {
+                add(id)?;
+            }
+        }
+        Ok(())
+    }
+
+    fn validate_visibility(&self, schema: &Schema, native: &Native, union: &str) -> Result<()> {
+        if !native.internal_envelope {
+            return Ok(());
+        }
+        let is_internal = |id: &str| id == self.envelope || id == union;
+        for shape in &schema.types {
+            if is_internal(shape.id()) {
+                continue;
+            }
+            let is_public = |field: &Field| native.shape_is_public(&field.shape, self, union);
+            let visible = match shape {
+                Definition::Record { fields, .. } => fields.iter().all(is_public),
+                Definition::Adjacent { variants, .. } => {
+                    variants.iter().all(|variant| match &variant.payload {
+                        Payload::Record { fields } => fields.iter().all(is_public),
+                        Payload::Newtype { shape } => native.shape_is_public(shape, self, union),
+                        Payload::Unit {} => true,
+                    })
+                }
+                Definition::External { .. } => true,
+            };
+            if !visible {
+                return Err("public structural type refers to the internal frame".into());
+            }
+        }
+        if schema.guards.iter().any(|guard| is_internal(&guard.owner)) {
+            return Err("an internal frame cannot own standalone structural validation".into());
+        }
+        Ok(())
+    }
+
     fn view<'a>(
         &'a self,
         schema: &'a Schema,
@@ -177,7 +311,7 @@ impl Protocol {
         if self.format != FORMAT || native.format != "oddlang-json-wire-protocol-rust-v1" {
             return Err("unsupported wire protocol or native binding".into());
         }
-        iri(&self.id)?;
+        self.validate_declarations(schema)?;
         if self.maximum_wire_bytes == 0
             || !native_path(&native.error_type)
             || self.endpoints.is_empty()
@@ -196,7 +330,7 @@ impl Protocol {
         else {
             return Err("envelope selector must refer to an adjacent union".into());
         };
-        let mut ids = BTreeSet::new();
+        self.validate_visibility(schema, native, selector_type)?;
         let mut names: BTreeSet<_> = schema
             .types
             .iter()
@@ -204,11 +338,8 @@ impl Protocol {
             .collect();
         let mut constant_ids = BTreeSet::new();
         for constant in &self.constants {
-            iri(&constant.id)?;
-            if !ids.insert(constant.id.as_str())
-                || !literal_matches(&constant.value, &constant.shape)
-            {
-                return Err("invalid or duplicate protocol constant".into());
+            if !literal_matches(&constant.value, &constant.shape) {
+                return Err("invalid protocol constant".into());
             }
             constant_ids.insert(constant.id.as_str());
             let name = native
@@ -248,14 +379,11 @@ impl Protocol {
         let mut errors = BTreeSet::from([self.size_error.as_str(), self.admission_error.as_str()]);
         let mut endpoints = Vec::new();
         for endpoint in &self.endpoints {
-            iri(&endpoint.id)?;
-            if !ids.insert(&endpoint.id) || !endpoint_ids.insert(endpoint.id.as_str()) {
-                return Err("duplicate native endpoint identity".into());
-            }
+            endpoint_ids.insert(endpoint.id.as_str());
             let variant = variants
                 .iter()
                 .find(|item| item.id == endpoint.variant)
-                .ok_or(" unknown endpoint case")?;
+                .ok_or("unknown endpoint case")?;
             let target = native
                 .endpoints
                 .get(&endpoint.id)
@@ -292,8 +420,7 @@ impl Protocol {
             }
             let mut mapped = Vec::new();
             for item in &endpoint.fields {
-                iri(&item.id)?;
-                if !ids.insert(&item.id) || !required.remove(&item.from) {
+                if !required.remove(&item.from) {
                     return Err(
                         "endpoint must map each envelope and case value exactly once".into(),
                     );
@@ -321,6 +448,9 @@ impl Protocol {
                         shape
                     }
                 };
+                if !native.shape_is_public(shape, self, selector_type) {
+                    return Err("public native endpoint field refers to the internal frame".into());
+                }
                 if !supports_derive(shape, "Clone", binding)
                     || target
                         .derives
@@ -341,10 +471,6 @@ impl Protocol {
                 return Err("endpoint must map every field to one distinct binding".into());
             }
             for guard in &endpoint.guards {
-                iri(&guard.id)?;
-                if !ids.insert(&guard.id) {
-                    return Err("duplicate operation guard identity".into());
-                }
                 guard.require.validate(&mapped)?;
                 if let Some(when) = &guard.when {
                     when.validate(&mapped)?;
@@ -364,18 +490,35 @@ impl Protocol {
         if constant_ids != native.constants.keys().map(String::as_str).collect()
             || endpoint_ids != native.endpoints.keys().map(String::as_str).collect()
             || field_ids != native.fields.keys().map(String::as_str).collect()
-            || errors != native.errors.keys().map(String::as_str).collect()
+            || errors != self.errors.keys().map(String::as_str).collect()
         {
             return Err(
                 "wire protocol target binding must cover exactly the declared API and errors"
                     .into(),
             );
         }
-        for (id, error) in &native.errors {
+        let mut variants = BTreeMap::new();
+        for (id, error) in &self.errors {
             iri(id)?;
-            if !symbol(&error.variant) {
-                return Err("invalid native protocol error variant".into());
+            iri(&error.variant)?;
+            let takes_text = error.argument.is_some();
+            if variants
+                .insert(error.variant.as_str(), takes_text)
+                .is_some_and(|previous| previous != takes_text)
+            {
+                return Err("one protocol error variant cannot mix unit and text arguments".into());
             }
+        }
+        if variants
+            .keys()
+            .copied()
+            .ne(native.errors.keys().map(String::as_str))
+            || !native.errors.values().all(|variant| symbol(variant))
+            || !distinct(native.errors.values())
+        {
+            return Err(
+                "native error variants must cover the declared protocol error roles".into(),
+            );
         }
         Ok(View {
             envelope,
@@ -401,11 +544,17 @@ pub fn build(
     let binding: Native = json(binding)?;
     let view = graph.view(&shape, &shape_binding, &binding)?;
 
+    let internal = [&*graph.envelope, view.union];
+    let internal = if binding.internal_envelope {
+        &internal[..]
+    } else {
+        &[]
+    };
     let mut wire = super::render::project_with_options(
         &shape,
         &shape_binding,
         !graph.hex_exports.is_empty(),
-        &[&graph.envelope, view.union],
+        internal,
     );
     wire.push_str(&rust::render(
         &graph,
@@ -423,6 +572,9 @@ pub fn build(
             "declaration":endpoint.id,
             "role":"canonical-frame",
             "maximumWireBytes":graph.maximum_wire_bytes,
+            "envelope":graph.envelope,
+            "selector":graph.selector,
+            "literals":graph.literals,
             "selectedCase":endpoint.variant,
             "mappings":endpoint.fields,
             "decodeOrder":["wire-size","closed-parse","literals","canonical-reencode","case","validation"],
@@ -444,6 +596,10 @@ pub fn build(
                 "endpoint":endpoint.id,"predicate":guard.require,"when":guard.when,"error":guard.error,
                 "qualification":"independent-witness-required"}));
         }
+    }
+    for (id, error) in &graph.errors {
+        rows.push(serde_json::json!({"declaration":id,"role":"named-error",
+            "error":error,"qualification":"independent-witness-required"}));
     }
     for constant in &graph.constants {
         rows.push(

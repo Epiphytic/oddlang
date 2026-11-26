@@ -7,9 +7,9 @@ use std::{collections::BTreeMap, fmt::Write as _};
 
 const ERROR: &str = "__OddlangProtocolError";
 
-pub(super) fn error(native: &Native, id: &str) -> String {
-    let constructor = &native.errors[id];
-    let variant = &constructor.variant;
+pub(super) fn error(graph: &Protocol, native: &Native, id: &str) -> String {
+    let constructor = &graph.errors[id];
+    let variant = &native.errors[&constructor.variant];
     match &constructor.argument {
         Some(arg) => format!("{ERROR}::{variant}({arg:?})"),
         None => format!("{ERROR}::{variant}"),
@@ -39,8 +39,8 @@ pub(super) fn render(
         .unwrap();
     }
     let env_type = &binding.names[&graph.envelope];
-    let size = error(native, &graph.size_error);
-    let admission = error(native, &graph.admission_error);
+    let size = error(graph, native, &graph.size_error);
+    let admission = error(graph, native, &graph.admission_error);
     let limit = graph.maximum_wire_bytes;
     writeln!(text, r#"
 fn __oddlang_encode_frame(value: &{env_type}) -> ::core::result::Result<::std::vec::Vec<u8>, {ERROR}> {{
@@ -104,7 +104,7 @@ fn emit_endpoint(
     let choice = &binding.names[view.union];
     let variant = &binding.names[&endpoint.variant.id];
     let selector = &binding.names[&graph.selector];
-    let admission = error(native, &graph.admission_error);
+    let admission = error(graph, native, &graph.admission_error);
     if !endpoint.target.derives.is_empty() {
         let derives = endpoint
             .target
@@ -136,7 +136,7 @@ fn emit_endpoint(
             .collect();
         for guard in &endpoint.graph.guards {
             let assertion = expression(&guard.require, &operands);
-            let failure = error(native, &guard.error);
+            let failure = error(graph, native, &guard.error);
             let when = guard.when.as_ref().map_or_else(String::new, |predicate| {
                 format!("{} && ", expression(predicate, &operands))
             });
@@ -146,9 +146,9 @@ fn emit_endpoint(
         text.push_str("    ::core::result::Result::Ok(())\n}\n");
     }
     if let Some(method) = &endpoint.target.timed {
-        writeln!(text, "\nimpl {name} {{\n    pub fn {method}(&self, now: u64) -> ::core::result::Result<(), {ERROR}> {{\n        let value = self;").unwrap();
+        writeln!(text, "\nimpl {name} {{\n    pub fn {method}(&self, now: u64) -> ::core::result::Result<(), {ERROR}> {{\n").unwrap();
         if has_admission {
-            writeln!(text, "        {validate}(value)?;").unwrap();
+            writeln!(text, "        {validate}(self)?;").unwrap();
         }
         for line in timed.lines() {
             writeln!(text, "    {line}").unwrap();

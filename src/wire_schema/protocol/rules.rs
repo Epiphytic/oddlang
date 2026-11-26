@@ -199,7 +199,7 @@ enum Provided {
 
 type Scope = BTreeMap<String, Provided>;
 
-fn native_fields(fields: &[Field]) -> Provided {
+fn native_fields(fields: &[Field], prefix: &str) -> Provided {
     Provided::Fields(
         fields
             .iter()
@@ -207,7 +207,7 @@ fn native_fields(fields: &[Field]) -> Provided {
                 (
                     field.id.clone(),
                     Value {
-                        rust: format!("&value.{}", field.name),
+                        rust: format!("&{prefix}{}", field.name),
                         shape: field.shape.clone(),
                     },
                 )
@@ -229,7 +229,6 @@ pub(super) struct Compiler<'a> {
     pub binding: &'a Binding,
     pub native: &'a Native,
     cursor: usize,
-    ids: BTreeSet<String>,
 }
 
 impl<'a> Compiler<'a> {
@@ -245,7 +244,6 @@ impl<'a> Compiler<'a> {
             binding,
             native,
             cursor: 0,
-            ids: BTreeSet::new(),
         }
     }
 
@@ -302,11 +300,16 @@ impl<'a> Compiler<'a> {
         steps: &[Step],
         clock: bool,
     ) -> Result<String> {
-        self.compile(&view.fields, steps, clock)
+        let receiver = if clock { "self." } else { "value." };
+        self.compile(native_fields(&view.fields, receiver), steps, clock)
     }
 
-    pub fn compile(&mut self, fields: &[Field], steps: &[Step], clock: bool) -> Result<String> {
-        let mut scope = Scope::from([("value".to_owned(), native_fields(fields))]);
+    pub fn digest(&mut self, fields: &[Field], steps: &[Step]) -> Result<String> {
+        self.compile(native_fields(fields, ""), steps, false)
+    }
+
+    fn compile(&mut self, operands: Provided, steps: &[Step], clock: bool) -> Result<String> {
+        let mut scope = Scope::from([("value".to_owned(), operands)]);
         if clock {
             scope.insert(
                 "clock".to_owned(),
@@ -524,6 +527,7 @@ impl<'a> Compiler<'a> {
                     Shape::List { item }
                         if crate::wire_schema::supports_derive(item, "PartialEq", self.binding) => {
                     }
+                    Shape::BoundedBase64List { .. } => {}
                     _ => return Err("uniqueness requires comparable ordered elements".into()),
                 }
                 Ok(format!(
@@ -617,19 +621,15 @@ impl<'a> Compiler<'a> {
     ) -> Result<()> {
         let child = format!("{indent}    ");
         for step in steps {
-            iri(step.id())?;
-            if !self.ids.insert(step.id().to_owned()) {
-                return Err("duplicate typed guard identity".into());
-            }
             match step {
                 Step::Require {
                     predicate, error, ..
                 } => {
                     let condition = self.condition(predicate, scope)?;
-                    if !self.native.errors.contains_key(error) {
+                    if !self.graph.errors.contains_key(error) {
                         return Err("unbound typed guard error".into());
                     }
-                    let error = rust::error(self.native, error);
+                    let error = rust::error(self.graph, self.native, error);
                     writeln!(text, "{indent}if !({condition}) {{\n{child}return ::core::result::Result::Err({error});\n{indent}}}").unwrap();
                 }
                 Step::If {
@@ -824,6 +824,12 @@ impl Step {
             }
             Self::Call { .. } | Self::Require { .. } => {}
         }
+    }
+
+    pub fn declarations(&self) -> Vec<&str> {
+        let mut ids = Vec::new();
+        self.visit(&mut |step| ids.push(step.id()));
+        ids
     }
 
     pub fn errors<'a>(&'a self, errors: &mut BTreeSet<&'a str>) {

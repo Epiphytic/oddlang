@@ -116,6 +116,13 @@ tx["timed"] = [{"kind": "require", "id": "urn:radio:clock",
                 "error": "urn:radio:early"}]
 target["endpoints"]["urn:radio:tx"]["timed"] = "validate_at"
 target["errors"]["urn:radio:early"] = {"variant": "Early"}
+protocol["errors"] = {}
+rust_errors = {}
+for identity, binding_info in target["errors"].items():
+    variant = f"{identity}:variant"
+    protocol["errors"][identity] = {"variant": variant, "argument": binding_info.get("argument")}
+    rust_errors[variant] = binding_info["variant"]
+target["errors"] = rust_errors
 protocol["digests"] = [
     {"id": "urn:radio:raw-digest", "kind": "bytes"},
     {"id": "urn:radio:tx-digest", "kind": "case", "union": message, "variant": send,
@@ -124,6 +131,107 @@ protocol["digests"] = [
 ]
 target["auxiliary"] = {"urn:radio:raw-digest": "raw_digest", "urn:radio:tx-digest": "transmit_digest",
                        "urn:radio:level-arg": "gain"}
+
+def step(kind, name, **members):
+    return {"kind": kind, "id": f"urn:radio:{name}", **members}
+
+
+def reference(id):
+    return {"kind": "ref", "id": id}
+
+
+def require(name, predicate, error="range"):
+    return step("require", name, predicate=predicate, error=f"urn:radio:{error}")
+
+
+def bound(left, right):
+    return {"kind": "compare", "left": left, "operator": "at-most", "right": right}
+
+
+def integer(value):
+    return {"kind": "constant", "value": value}
+
+
+sweep = "urn:radio:sweep"
+burst = "urn:radio:burst"
+calibration = "urn:radio:cal"
+probe = "urn:radio:probe"
+scan = "urn:radio:scan"
+check = "urn:radio:probe-check"
+estimate = "urn:radio:probe-estimate"
+samples, sensor, token = "urn:radio:burst:samples", "urn:radio:burst:sensor", "urn:radio:burst:token"
+policy = {"maxItems": 4, "maxItemBytes": 3, "maxTotalBytes": 8, "perItemOverhead": 1,
+          "listLimitMessage": "too many samples", "encodedLimitMessage": "too many encoded bytes",
+          "decodedLimitMessage": "too many bytes", "syntaxMessage": "bad samples"}
+hex16 = {"kind": "lower-hex", "bytes": 16, "diagnostic": "radio hex"}
+shape["types"][1]["variants"].append(
+    {"id": scan, "name": "scan", "payload": {"kind": "newtype", "type": reference(sweep)}})
+shape["types"].extend([
+    {"kind":"external", "id":probe},
+    {"kind":"adjacent", "id":sweep, "tag":"kind", "content":"data", "variants":[
+        {"id":burst, "name":"burst", "payload":{"kind":"record", "fields":[
+            field("burst", "samples", {"kind": "bounded-base64-list", "policy": policy}),
+            field("burst", "sensor", {"kind": "optional", "item": reference(probe)}),
+            field("burst", "token", hex16),
+        ]}},
+        {"id":calibration, "name":"cal", "payload":{"kind":"record", "fields":[]}},
+    ]},
+])
+binding["names"].update({sweep:"Sweep", scan:"Scan", burst:"Burst", calibration:"Calibration",
+                         samples:"samples", sensor:"sensor", token:"token"})
+binding["derives"][sweep] = ["Clone", "PartialEq", "Eq"]
+binding["externals"][probe] = "crate::Probe"
+binding["externalDerives"] = {probe: ["Clone", "PartialEq", "Eq"]}
+scan_id, plan_field, seq_field = "urn:radio:scan-operation", "urn:radio:scan-plan", "urn:radio:scan-seq"
+protocol["maximumWireBytes"] = 240
+protocol["endpoints"].append({
+    "id":scan_id, "variant":scan, "guards":[],
+    "fields": [
+        {"id":seq_field, "from":{"kind":"envelope-field", "field":"urn:radio:envelope:sequence"}},
+        {"id":plan_field, "from":{"kind":"case-value"}},
+    ],
+    "steps":[step("cases", "sweep-guards", value=operand("value", plan_field), arms=[{
+        "variant":burst, "bind":"case", "steps":[
+            require("unique-samples", {"kind":"unique", "value":operand("case", samples)}),
+            require("sample-budget", {"kind":"total-bytes", "value":operand("case", samples),
+                                        "overhead":1, "maximum":4}, "size"),
+            require("sample-token", bound(
+                {"kind":"big-endian-prefix", "value":operand("case", token), "bytes":1}, integer(8))),
+            step("some", "probe-present", value=operand("case", sensor), bind="present", steps=[
+                step("call", "probe-call", value=operand("present"), method=check),
+                step("on-success", "probe-estimate-call", value=operand("present"), method=estimate,
+                     bind="sample", steps=[require("probe-bound", bound(
+                         {"kind":"field", "value":operand("sample")}, integer(3)))]),
+            ]),
+        ],
+    }])],
+})
+target["fields"].update({plan_field:"plan", seq_field:"sequence"})
+target["endpoints"][scan_id] = {"type":"Scan", "encode":"encode_scan","decode":"decode_scan",
+                                 "derives":["Clone","PartialEq","Eq"]}
+rx["timed"] = [require("reply-clock", bound({"kind":"field","value":operand("clock")}, integer(10)), "early")]
+target["endpoints"][rx["id"]]["timed"] = "validate_at"
+protocol["foreign"] = [{"id":probe,"fields":[],"variants":[],"methods":[
+    {"id":check,"returns":"unit"},{"id":estimate,"returns":"unsigned"}]}]
+target["foreignMembers"] = {check:"permit", estimate:"estimate"}
+protocol["aliases"] = [{"id":"urn:radio:token-alias","bytes":16}]
+protocol["hexExports"] = [{"id":"urn:radio:token-encoding","bytes":16,"diagnostic":"radio hex"}]
+cal_hash, burst_hash = "urn:radio:cal-hash", "urn:radio:burst-hash"
+protocol["digests"].extend([
+    {"id":cal_hash,"kind":"case","union":sweep,"variant":calibration,"parameters":[],"steps":[]},
+    {"id":burst_hash,"kind":"case","union":sweep,"variant":burst,"parameters":[
+        {"id":"urn:radio:samples-arg","field":samples,"passing":"borrowed-list"},
+        {"id":"urn:radio:sensor-arg","field":sensor,"passing":"owned"},
+        {"id":"urn:radio:token-arg","field":token,"passing":"owned"},
+    ],"steps":[require("digest-sample-budget", {
+        "kind":"total-bytes", "value":operand("value", "urn:radio:samples-arg"),
+        "overhead":1, "maximum":4,
+    }, "size")]},
+])
+target["auxiliary"].update({"urn:radio:token-alias":"Token","urn:radio:token-encoding":"token_hex",
+    cal_hash:"cal_digest", burst_hash:"burst_digest", "urn:radio:samples-arg":"samples",
+    "urn:radio:sensor-arg":"sensor", "urn:radio:token-arg":"token"})
+target["internalEnvelope"] = True
 
 with tempfile.TemporaryDirectory(prefix="canonical-wire-") as directory:
     temp = Path(directory)
@@ -146,8 +254,31 @@ with tempfile.TemporaryDirectory(prefix="canonical-wire-") as directory:
     run(*common, write(temp / "missing.json", bad), overlay, temp / "missing", failure="endpoint must map")
     bad = json.loads(graph.read_bytes())
     bad["endpoints"][0]["steps"] = bad["endpoints"][0].pop("timed")
-    run(*common, write(temp / "clock.json", bad), overlay, temp / "clock",
-        failure="timed guards require")
+    altered_target = json.loads(overlay.read_bytes())
+    del altered_target["endpoints"]["urn:radio:tx"]["timed"]
+    run(*common, write(temp / "clock.json", bad), write(temp / "clock-overlay.json", altered_target),
+        temp / "clock", failure="unknown guard scope clock")
+    bad = json.loads(graph.read_bytes())
+    bad["endpoints"][0]["timed"][0]["id"] = "urn:radio:gain-check"
+    run(*common, write(temp / "duplicate.json", bad), overlay, temp / "duplicate",
+        failure="duplicate wire declaration")
+    bad = json.loads(graph.read_bytes())
+    bad["digests"][0]["id"] = "urn:radio:tx"
+    run(*common, write(temp / "duplicate-digest.json", bad), overlay, temp / "digest",
+        failure="duplicate wire declaration")
+    public_shape, native_shape = json.loads(shape_path.read_bytes()), json.loads(shape_binding.read_bytes())
+    public_shape["types"].append({"kind":"record", "id":"urn:radio:outer",
+                                  "fields":[field("outer", "ref", reference(message))]})
+    native_shape["names"].update({"urn:radio:outer":"Outer", "urn:radio:outer:ref":"frame"})
+    run("build", "wire-protocol", "rust", write(temp / "public.json", public_shape),
+        write(temp / "public-overlay.json", native_shape), graph, overlay, temp / "leak",
+        failure="public structural type refers to the internal frame")
+    bad = json.loads(shape_path.read_bytes())
+    bad["guards"].append({"id":"urn:radio:plain-envelope-check","owner":env,
+        "require":{"kind":"unsigned-range","field":"urn:radio:envelope:sequence",
+                   "minimum":1,"maximum":20},"error":"urn:radio:range"})
+    run("build", "wire-protocol", "rust", write(temp / "private-guard.json", bad), shape_binding,
+        graph, overlay, temp / "invisible-guard", failure="internal frame cannot own")
     consumer = temp / "consumer"
     shutil.copytree(ROOT / "fixture", consumer)
     shutil.copyfile(output / "wire.rs", consumer / "src/generated.rs")

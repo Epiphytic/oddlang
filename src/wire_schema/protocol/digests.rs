@@ -61,6 +61,18 @@ impl Digest {
             Self::Bytes { id } | Self::Case { id, .. } => id,
         }
     }
+    pub fn declarations(&self) -> Vec<&str> {
+        let mut ids = vec![self.id()];
+        if let Self::Case {
+            parameters, steps, ..
+        } = self
+        {
+            ids.extend(parameters.iter().map(|parameter| parameter.id.as_str()));
+            ids.extend(steps.iter().flat_map(Step::declarations));
+        }
+        ids
+    }
+
     pub fn errors<'a>(&'a self, errors: &mut BTreeSet<&'a str>) {
         if let Self::Case { steps, .. } = self {
             for step in steps {
@@ -142,7 +154,7 @@ fn __oddlang_protocol_sha256(bytes: &[u8]) -> [u8;32] {
 "#,
         );
     }
-    for (index, digest) in graph.digests.iter().enumerate() {
+    for digest in &graph.digests {
         let function = name(digest.id())?;
         if !ids.insert(digest.id()) || !globals.insert(function) {
             return Err("duplicate digest operation".into());
@@ -179,7 +191,6 @@ pub fn {function}(bytes: &[u8]) -> [u8;32] {{
                 let mut parameters_used = BTreeSet::new();
                 let mut args = Vec::new();
                 let mut mapped = Vec::new();
-                let mut initializers = Vec::new();
                 let mut construction = Vec::new();
                 for parameter in parameters {
                     let argument = name(&parameter.id)?;
@@ -193,15 +204,24 @@ pub fn {function}(bytes: &[u8]) -> [u8;32] {{
                         .iter()
                         .find(|field| field.id == parameter.field)
                         .ok_or("unknown digest case field")?;
+                    if !native.shape_is_public(&field.shape, graph, view.union) {
+                        return Err("public digest argument refers to the internal frame".into());
+                    }
                     let (parameter_type, expression) = match parameter.passing {
                         Passing::Owned => (ty(&field.shape, binding), argument.to_owned()),
                         Passing::BorrowedList => {
                             let item = match &field.shape {
-                                Shape::List { item } => ty(item, binding),
+                                Shape::List { item }
+                                    if crate::wire_schema::supports_derive(
+                                        item, "Clone", binding,
+                                    ) =>
+                                {
+                                    ty(item, binding)
+                                }
                                 Shape::BoundedBase64List { .. } => "::std::vec::Vec<u8>".to_owned(),
                                 _ => {
                                     return Err(
-                                        "borrowed-list digest parameter requires an ordered list"
+                                        "borrowed-list digest parameter requires a cloneable ordered list"
                                             .into(),
                                     );
                                 }
@@ -210,42 +230,28 @@ pub fn {function}(bytes: &[u8]) -> [u8;32] {{
                         }
                     };
                     args.push(format!("{argument}: {parameter_type}"));
-                    initializers.push(format!("{argument}: {expression}"));
                     mapped.push(Field {
                         id: parameter.id.clone(),
                         name: argument.to_owned(),
                         shape: field.shape.clone(),
                     });
-                    construction.push(format!("{}: value.{argument}", binding.names[&field.id]));
+                    construction.push(format!("{}: {expression}", binding.names[&field.id]));
                 }
                 if consumed.len() != fields.len() {
                     return Err("serialized digest must bind every case field".into());
                 }
                 let args = args.join(", ");
-                let private = format!("__OddlangDigestArgs{index}");
-                writeln!(
-                    text,
-                    "
-struct {private} {{"
-                )
-                .unwrap();
-                for item in &mapped {
-                    writeln!(text, "    {}: {},", item.name, ty(&item.shape, binding)).unwrap();
-                }
-                let initial = initializers.join(", ");
                 let constructed = construction.join(", ");
-                let error = rust::error(native, &graph.admission_error);
+                let error = rust::error(graph, native, &graph.admission_error);
                 let role = &binding.names[union];
                 let case = &binding.names[variant];
                 writeln!(
                     text,
-                    "}}
-
+                    "
 pub fn {function}({args}) -> ::core::result::Result<[u8;32], __OddlangProtocolError> {{"
                 )
                 .unwrap();
-                writeln!(text, "    let value = {private} {{ {initial} }};").unwrap();
-                text.push_str(&compiler.compile(&mapped, steps, false)?);
+                text.push_str(&compiler.digest(&mapped, steps)?);
                 writeln!(
                     text,
                     r#"    let case = {role}::{case} {{ {constructed} }};

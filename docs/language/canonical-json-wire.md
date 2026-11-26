@@ -1,6 +1,6 @@
 # Canonical JSON wire operations
 
-An operation graph selects an envelope record and its adjacent union field from a pinned [JSON wire schema](json-wire-schema.md). Each endpoint selects one case and maps every nonliteral envelope field and case field to a distinct member of its native input record. A newtype case supplies one value and a unit case supplies none. Protocol constants constrain envelope fields as typed literals. The Rust binding supplies exported names, typed derive choices and error constructors.
+An operation graph selects an envelope record and its adjacent union field from a pinned [JSON wire schema](json-wire-schema.md). Each endpoint selects one case and maps every nonliteral envelope field and case field to a distinct member of its native input record. A newtype case supplies one value and a unit case supplies none. Protocol constants constrain envelope fields as typed literals. The Rust binding supplies exported names, typed derive choices and native error variants. It may mark the selected envelope and union internal when no public shape, native field or digest argument exposes them, and neither owns standalone structural validation. The operation graph selects each semantic error and the associated static argument.
 
 ```sh
 oddlang build wire-protocol rust SHAPE SHAPE_BINDING PROTOCOL PROTOCOL_BINDING OUTPUT
