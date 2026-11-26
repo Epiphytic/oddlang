@@ -1,0 +1,171 @@
+name: Native Linux AMD64 original bridge effects
+on:
+  push:
+    branches: [verify/original-linux-amd64-effects]
+permissions:
+  contents: read
+jobs:
+  observe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      ORIGINAL: af54339d250290490d62d4475a77539b7e739071
+      TARGET: x86_64-unknown-linux-gnu
+      CARGO_TERM_COLOR: never
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Build pinned bridge and worker
+        run: |
+          set -euxo pipefail
+          test "$(uname -m)" = x86_64
+          test "$(id -u)" -ne 0
+          if ! command -v strace; then
+            sudo -n apt-get update
+            sudo -n apt-get install -y strace
+          fi
+          mkdir "$RUNNER_TEMP/receipts"
+          git init "$RUNNER_TEMP/reference"
+          git -C "$RUNNER_TEMP/reference" fetch --depth=1 https://github.com/Epiphytic/marmish "$ORIGINAL"
+          git -C "$RUNNER_TEMP/reference" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/reference" rev-parse HEAD)" = "$ORIGINAL"
+          rustup toolchain install 1.97.1 --profile minimal
+          cd "$RUNNER_TEMP/reference"
+          cargo +1.97.1 fetch --locked --target "$TARGET"
+          cargo +1.97.1 build --locked --offline --release --target "$TARGET" \
+            --target-dir "$RUNNER_TEMP/build" -p marmish-prototype --bin marmish-engine-bridge \
+            -p marmish-engine --bin marmish-engine-worker
+          {
+            git rev-parse HEAD 'HEAD^{tree}'
+            sha256sum Cargo.lock rust-toolchain.toml
+            rustc +1.97.1 -vV
+            uname -smr
+            strace --version | sed -n '1p'
+          } > "$RUNNER_TEMP/receipts/effects-build.txt"
+      - name: Independently observe bridge at low and high inherited NOFILE limits
+        run: |
+          set -euxo pipefail
+          high=1048576
+          if [[ "$(ulimit -H -n)" != unlimited ]] && (( $(ulimit -H -n) < high )); then
+            sudo -n prlimit --pid "$$" --nofile="$high:$high"
+          fi
+          python3 - "$GITHUB_WORKSPACE/examples/marmish/portable-bridge" \
+            "$RUNNER_TEMP/build/$TARGET/release" "$RUNNER_TEMP/receipts/effects.json" <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import resource
+          import subprocess
+          import sys
+          import tempfile
+
+          fixture_dir, binaries, report_path = map(Path, sys.argv[1:])
+          sys.path.insert(0, str(fixture_dir))
+          from verify import ENVIRONMENT, UMASK, inspect_state, read_reply
+
+          fixture_file = fixture_dir / "baseline.json"
+          fixture = json.loads(fixture_file.read_text())
+          bridge = binaries / "marmish-engine-bridge"
+          worker = binaries / "marmish-engine-worker"
+          uid = os.geteuid()
+          assert uid != 0
+
+          def digest(path):
+              return hashlib.sha256(path.read_bytes()).hexdigest()
+
+          def fields(path):
+              return dict(line.split(":\t", 1) for line in path.read_text().splitlines() if ":\t" in line)
+
+          def probe(limit):
+              with tempfile.TemporaryDirectory(prefix="original-bridge-effects-", dir="/tmp") as tmp:
+                  root = Path(tmp)
+                  cwd = root / "cwd"
+                  cwd.mkdir(mode=0o700)
+                  state = root / "state"
+                  trace = root / "trace"
+                  request = fixture["request"].replace("@VERSION@", "1")
+                  for key, value in {"STATE": state, "CWD": cwd, "WORKER": worker}.items():
+                      request = request.replace(f"@{key}@", json.dumps(str(value)))
+                  initial, _ = inspect_state(root)
+                  cmd = ["/usr/bin/prlimit", f"--nofile={limit}:{limit}", "--",
+                         "/usr/bin/strace", "-ff", "-qq", "-e", "trace=execve,exit_group,fcntl",
+                         "-o", trace, bridge]
+                  with subprocess.Popen(cmd, cwd=cwd, env=ENVIRONMENT, umask=UMASK,
+                                        stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE, bufsize=0) as tracer:
+                      try:
+                          tracer.stdin.write(request.encode("ascii"))
+                          reply = read_reply(tracer.stdout)
+                          children = Path(f"/proc/{tracer.pid}/task/{tracer.pid}/children")
+                          children = [Path("/proc") / child for child in children.read_text().split()]
+                          candidates = [proc for proc in children if (proc / "exe").resolve() == bridge]
+                          assert len(candidates) == 1, candidates
+                          proc = candidates[0]
+                          limits = resource.prlimit(int(proc.name), resource.RLIMIT_NOFILE)
+                          assert limits == (limit, limit), limits
+                          status = fields(proc / "status")
+                          assert int(status["Uid"].split()[1]) == uid
+                          assert not int(status["CapEff"], 16)
+                          descriptor_targets = []
+                          for fd in (proc / "fd").iterdir():
+                              target = os.readlink(fd)
+                              if target.startswith(str(state) + "/"):
+                                  descriptor_targets.append(target.replace(str(state), "$STATE"))
+                          live, _ = inspect_state(root)
+                          stdout, stderr = tracer.communicate(timeout=15)
+                      finally:
+                          if tracer.poll() is None:
+                              tracer.kill()
+                              tracer.wait(timeout=10)
+                  after, _ = inspect_state(root)
+                  if limit == 256:
+                      assert reply == fixture["replies"]["initialized"], reply
+                      assert live == fixture["states"]["live"], live
+                      assert after == fixture["states"]["closed"], after
+                      assert (tracer.returncode, stdout, stderr) == (0, b"", b"")
+                  trace_text = trace.with_suffix("." + proc.name).read_text()
+                  ofd = any("F_OFD_SETLK" in line and line.rstrip().endswith("= 0")
+                            for line in trace_text.splitlines())
+                  exec_observed = any(line.startswith("execve(") and str(bridge) in line and
+                                      line.rstrip().endswith("= 0") for line in trace_text.splitlines())
+                  exit_observed = f"exit_group({tracer.returncode})" in trace_text
+                  assert exec_observed and exit_observed
+                  if reply == fixture["replies"]["initialized"]:
+                      assert ofd
+                      assert live["frontend_lock"] == "held"
+                      assert after["frontend_lock"] == "available"
+                      assert {"$STATE/" + name for name in (
+                          "frontend.lock", "engine.sqlite3", "engine.sqlite3-wal", "engine.sqlite3-shm"
+                      )} <= set(descriptor_targets)
+                  return {
+                      "inheritedNofile": list(limits),
+                      "reply": reply,
+                      "lock": [initial["frontend_lock"], live["frontend_lock"], after["frontend_lock"]],
+                      "stateDescriptorTargets": sorted(set(descriptor_targets)),
+                      "bridgeExecSyscallObserved": exec_observed,
+                      "bridgeOfdLockSyscallSucceeded": ofd,
+                      "bridgeExitSyscallObserved": exit_observed,
+                      "effectiveUid": uid,
+                      "effectiveCapabilities": int(status["CapEff"], 16),
+                      "exitStatus": tracer.returncode,
+                      "stdoutAfterEof": stdout.decode("latin1").replace(str(root), "$RUN"),
+                      "stderr": stderr.decode("latin1").replace(str(root), "$RUN"),
+                  }
+
+          result = {
+              "target": os.environ["TARGET"],
+              "originalRevision": os.environ["ORIGINAL"],
+              "fixtureSha256": digest(fixture_file),
+              "verifierSha256": digest(fixture_dir / "verify.py"),
+              "binarySha256": {path.name: digest(path) for path in (bridge, worker)},
+              "witnesses": [probe(256), probe(1048576)],
+          }
+          report_path.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: original-linux-amd64-effects
+          path: ${{ runner.temp }}/receipts
+          if-no-files-found: error
