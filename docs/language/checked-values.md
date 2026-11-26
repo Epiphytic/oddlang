@@ -13,3 +13,69 @@ The native package assembler resolves every checked error binding against a unit
 An opaque `fixed-bytes` type declares an unsigned 32-bit `length`, a `failure` IRI for length mismatch, and `onDrop: "erase"`. Its native binding supplies a by-value constructor, a checked sequence constructor and a read-only array view through the `constructor`, `parse` and `view` keys. Supply empty `order` and omit fields and traits. The owner stores its own bytes, has a private backing field and exposes a borrow tied to its lifetime. The Rust backend uses the locked registry provider zeroize 1.9.1. Its destruction guarantee covers the object's current storage on drop. There is no requirement to clear a caller's separate input or copies left behind by moves.
 
 Run `oddlang recover fixed-bytes OBSERVATION SELECTION OUTPUT` on a v2 rustc shape observation. Select the source declaration identity, domain IRI, output value IRI and failure IRI in the JSON keys `source`, `domain`, `value` and `failure`. Recovery reads the monomorphic tuple member, provider type, element and extent. The failure mapping and the public construction and borrowing interface require independent caller qualification. The resulting graph contains no source syntax or provider path. Run `python3 -B verification/checked-values/fixed_bytes.py /path/to/oddlang` to exercise an independent source-width change.
+
+### Clone-only choices and derived Debug
+
+A Rust recovery selection with format `oddlang-plain-choice-selection-v2`
+accepts a public, fieldless enum that derives `Clone`, optionally
+`Copy` and `Debug`, and its declared equality capabilities. Cases
+retain declaration order and use implicit discriminants. Serde derives,
+custom formatting and explicit discriminants require different profiles.
+
+The choice graph defaults `copy` to true and `debug` to false. These
+defaults preserve the earlier copyable profile's bytes. A clone-only choice
+has `copy: false`, and the overlay omits the copy trait. A choice with
+`debug: true` emits Rust's derived variant-name formatting. The original
+v1 recovery selector retains its copyable, no-Debug scope.
+
+Recover from a standalone declaration whose whole-file digest is pinned.
+A qualification may extract an exact declaration span and stage it as that
+file. It must independently establish the enclosing library's public paths,
+trait resolution and missing capabilities.
+
+The separate TypeScript plain-choice target promises copying and ordinal
+conversion. The TypeScript target rejects a graph that requires
+clone-only semantics or derived Debug. Run the projection control below
+to check the supported subset. It first checks an admitted plain choice, then
+requires both unsupported graph inputs to fail without creating output files.
+Pass the pre-convergence TypeScript compiler as a second argument to
+compare the supported projection and lock bytes.
+
+```sh
+python3 verification/plain-value-choices/typescript_subset.py target/release/oddlang
+```
+
+## TypeScript plain choices
+
+```sh
+oddlang build checked-values typescript GRAPH.json OVERLAY.json OUTPUT
+```
+
+The TypeScript profile accepts a checked-values graph containing only plain
+choices. Its `oddlang-checked-values-typescript-v1` overlay binds each type
+and case identity to a target name. The order in the graph sets zero-based
+ordinals. Rust bindings and source are outside this build's input.
+
+Each generated TypeScript type brands its finite numeric values with a
+distinct choice identity. An immutable companion object exposes the named
+members, `ordinal`, and `fromOrdinal`. The latter checks an unknown input
+against the finite ordinal set and returns `undefined` for an invalid
+number or other value. These are target ordinal conversions. The profile
+declares no wire representation.
+
+An `equality` literal reports `none`, `partial`, or `total`. A choice
+with partial capability provides `partialEquals`. A choice with total
+capability provides `equals`. Each compares two members of that same
+choice by case identity. The absence of a comparison operation is part
+of the generated module's contract. JavaScript's built-in comparison
+operators remain available to consumers of numeric values.
+
+The projector emits `values.ts`, `obligations.json` and a sealed
+`projection.lock`. The Rust and TypeScript targets emit the same portable
+choice obligations. The independent fixture compares Rust and Node
+observations, including a source-order change, TypeScript type rejections
+and deterministic graph and binding output.
+
+```sh
+python3 verification/plain-value-choices/typescript.py target/release/oddlang
+```

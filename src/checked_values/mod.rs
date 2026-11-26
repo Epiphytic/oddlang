@@ -2,10 +2,12 @@
 mod fixed_recovery;
 mod recover_choice;
 pub use fixed_recovery::recover_fixed_bytes;
-pub(crate) use recover_choice::plain_choice_cases;
+pub(crate) use recover_choice::{additional_binding, plain_choice_cases};
 pub use recover_choice::recover;
 pub(crate) use rust::render_plain_choice;
 mod rust;
+mod typescript;
+pub use typescript::build as build_typescript;
 
 use crate::{
     native_package::publish,
@@ -54,6 +56,10 @@ enum Definition {
         cases: Vec<String>,
         #[serde(default, skip_serializing_if = "Equality::is_total")]
         equality: Equality,
+        #[serde(default = "default_copy", skip_serializing_if = "is_copy")]
+        copy: bool,
+        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+        debug: bool,
     },
     #[serde(rename = "fixed-bytes")]
     FixedBytes {
@@ -76,6 +82,14 @@ enum Definition {
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         guards: Vec<Guard>,
     },
+}
+
+fn default_copy() -> bool {
+    true
+}
+
+fn is_copy(copy: &bool) -> bool {
+    *copy
 }
 
 #[derive(Deserialize, Serialize)]
@@ -302,10 +316,14 @@ impl Graph {
                     }
                     errors.insert(failure);
                 }
-                Definition::Choice { cases, .. } => {
+                Definition::Choice { cases, copy, .. } => {
                     if cases.is_empty()
                         || native.order != *cases
-                        || native.traits != [Derived::Copy]
+                        || (if *copy {
+                            native.traits != [Derived::Copy]
+                        } else {
+                            !native.traits.is_empty()
+                        })
                         || native.view.is_some()
                         || native.parse.is_some()
                         || native.shape.is_some()
@@ -519,20 +537,33 @@ pub fn build(graph: &Path, overlay: &Path, output: &Path) -> Result<()> {
         native.traits.sort();
     }
     let source = rust::render(&graph, &bindings);
-    let obligations = encode(&json!({
+    let obligations = encode(&obligations(&graph))?;
+    let lock = encode(&json!({
+        "format":"oddlang-checked-values-lock-v1","domainSha256":digest(&encode(&graph)?),"bindingSha256":digest(&encode(&bindings)?),
+        "sourceSha256":digest(source.as_bytes()),"obligationsSha256":digest(&obligations),
+    }))?;
+    publish_projection("values.rs", &source, &obligations, &lock, output)
+}
+
+fn obligations(graph: &Graph) -> serde_json::Value {
+    json!({
         "format":FORMAT,"domain":graph.id,
         "obligations":graph.types.iter().map(|(id,definition)| {
             let expected = match definition {
                 Definition::FixedBytes { length, failure, on_drop } =>
                     json!({"length":length,"failure":failure,"onDrop":on_drop,"view":"borrow","input":"exact-bytes"}),
-                Definition::Choice { cases, equality } => json!({
-                    "orderedCases":cases,"copy":true,"equality":match equality {
-                        Equality::None => "none",
-                        Equality::Partial => "partial-case-identity",
-                        Equality::Total => "case-identity",
-                    },
-                    "externalRepresentation":null, "targetOrdinals":"zero-based-declaration-order"
-                }),
+                Definition::Choice { cases, equality, copy, debug } => {
+                    let mut expected = json!({
+                        "orderedCases":cases,"copy":copy,"equality":match equality {
+                            Equality::None => "none",
+                            Equality::Partial => "partial-case-identity",
+                            Equality::Total => "case-identity",
+                        },
+                        "externalRepresentation":null, "targetOrdinals":"zero-based-declaration-order"
+                    });
+                    if *debug { expected["debug"] = json!("derived-variant-name"); }
+                    expected
+                },
                 Definition::Enum { values, failure } => json!({"values":values,"failure":failure}),
                 Definition::Record { fields, constructor, guards } =>
                     json!({"fields":fields,"constructor":constructor,"orderedGuards":guards}),
@@ -540,20 +571,25 @@ pub fn build(graph: &Path, overlay: &Path, output: &Path) -> Result<()> {
             json!({"declaration":id,"role":"checked-value-domain","expected":expected,
                    "qualification":"independent-witness-required"})
         }).collect::<Vec<_>>()
-    }))?;
-    let lock = encode(&json!({
-        "format":"oddlang-checked-values-lock-v1","domainSha256":digest(&encode(&graph)?),"bindingSha256":digest(&encode(&bindings)?),
-        "sourceSha256":digest(source.as_bytes()),"obligationsSha256":digest(&obligations),
-    }))?;
+    })
+}
+
+fn publish_projection(
+    filename: &str,
+    source: &str,
+    obligations: &[u8],
+    lock: &[u8],
+    output: &Path,
+) -> Result<()> {
     let parent = output
         .parent()
         .filter(|path| !path.as_os_str().is_empty())
         .unwrap_or(Path::new("."));
     let stage = tempfile::tempdir_in(parent).map_err(|err| err.to_string())?;
     for (name, bytes) in [
-        ("values.rs", source.as_bytes()),
-        ("obligations.json", &obligations),
-        ("projection.lock", &lock),
+        (filename, source.as_bytes()),
+        ("obligations.json", obligations),
+        ("projection.lock", lock),
     ] {
         fs::write(stage.path().join(name), bytes).map_err(|err| err.to_string())?;
     }

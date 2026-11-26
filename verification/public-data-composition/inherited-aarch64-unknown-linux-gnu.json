@@ -1,0 +1,54 @@
+{
+  "runtime": "900cfa517d0136fa80c2b5e92ccf9b1a3b2a71ab",
+  "host": "aarch64-unknown-linux-gnu",
+  "binarySha256": "d96dcd109cc623c800ba6ab6440526eba71b1b4e99ede16fd571acd48c60aaa7",
+  "compositionReceiptSha256": "0040278cdac4f18b1e16e7a580f53a975c1ca8a428853b4c810d1fd7f03fca23",
+  "runnerSha256": "fc1a7d491c65015668bb4d29834535fb00954892c7f3a1baf73276051a811a8f",
+  "fixtures": [
+    {
+      "path": "verification/line-grammar/verify_records.py",
+      "fixtureSha256": "09e67d27b9b70f60405896399cab5b16cd08da410c70aa42684264b26582f81a",
+      "stdout": "Typed records, finite relation, checked aggregate, and formatters passed"
+    },
+    {
+      "path": "verification/line-grammar/verify_support.py",
+      "fixtureSha256": "0a96762deed0e9f623986604bece10104d097c1672fd9ae5b37d26296c66d017",
+      "stdout": "Native crate-visible grammar and finite-choice declarations passed"
+    },
+    {
+      "path": "verification/line-grammar/verify.py",
+      "fixtureSha256": "ff3374ec4b3980a656027ef4cba0da1de59cdc8032292090d41e99e2be76a963",
+      "stdout": "Ordered line grammar native typed and malformed cases passed"
+    },
+    {
+      "path": "verification/observational-record-defaults/verify.py",
+      "fixtureSha256": "3b9196029bdd7b65d9a9c592444fa72196040cb2a0c10ffefc050b537580420b",
+      "stdout": "Unsigned fields, fieldwise defaults, native paths and unresolved macro controls passed."
+    },
+    {
+      "path": "verification/plain-value-choices/equality.py",
+      "fixtureSha256": "3a65953c5f7f8346da6aa24ec2a406cbf74138d9ad901a7134cd62fb1f1caae6",
+      "stdout": "Three original and generated choice equality contracts passed."
+    },
+    {
+      "path": "verification/structured-diagnostics/check.py",
+      "fixtureSha256": "6667bf0eeb3f102f630c4c57036e4c5efced6aafdb4db5e972365f445b0d7aeb",
+      "stdout": "Two native source revisions match deterministically, including repeated enable, closed sink and text update."
+    },
+    {
+      "path": "verification/command-surface/prefix.py",
+      "fixtureSha256": "d9bc38031e918c869e7d5c699a57b97b903fbbeaa983206fedbe9543192b6bb6",
+      "stdout": "13 terminal cases match in both source revisions; successful parsing stays unbound."
+    },
+    {
+      "path": "verification/typed-finite-errors/verify.py",
+      "fixtureSha256": "d2ad24acb7e156b0dfe4716fda0f020e1e643e4d3ff1eb62826a0f96b6a50079",
+      "stdout": "Unrelated typed enum, fixed-width product and diagnostic mutation passed."
+    },
+    {
+      "path": "verification/plain-value-choices/verify.py",
+      "fixtureSha256": "a18c30b1423db0c1f56bd8317b750422f8b30a16fc9d3695e1273595540a4fa0",
+      "stdout": ""
+    }
+  ]
+}

@@ -109,7 +109,8 @@ pub(super) fn render(g: &Graph, b: &Binding) -> Result<String> {
         if e.numbers.is_some() {
             out.push_str("#[repr(u8)]\n");
         }
-        writeln!(out,"#[derive(Debug, Clone, Copy, PartialEq, Eq, ::serde::Serialize, ::serde::Deserialize)]\npub enum {} {{",b.name(&e.id)?).unwrap();
+        let copy = if e.copy { ", Copy" } else { "" };
+        writeln!(out,"#[derive(Debug, Clone{copy}, PartialEq, Eq, ::serde::Serialize, ::serde::Deserialize)]\npub enum {} {{",b.name(&e.id)?).unwrap();
         let variants: BTreeMap<_, _> = e.variants.iter().map(|v| (&v.id, v)).collect();
         for id in &b.variant_order[&e.id] {
             let tag = e

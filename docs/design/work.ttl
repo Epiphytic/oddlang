@@ -1728,6 +1728,51 @@ w:wholeMarmishAgentNavigation a p:Task ;
     p:acceptance "The agent guide points to both plans and asks for the lock and native receipts supporting each reported count." ;
     p:status p:done ; p:evidence w:guide .
 
+w:fieldlessChoiceCapabilities a p:Task ;
+    rdfs:label "Recover optional copying and derived variant-name formatting for public fieldless choices" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:plainValueChoices ; p:status p:done ;
+    p:evidence w:fieldlessChoicesDarwin, w:fieldlessChoicesLinux, w:fieldlessChoiceFixtureReceipt ;
+    p:addresses w:fieldlessChoiceFixtureEvidenceReview ;
+    p:acceptance "Preserve historical copyable graph bytes, compare an unrelated Rust fixture, and verify unchanged consumers of pinned original and generated engine choices with real source order and trait mutations on both ARM64 hosts." .
+
+w:fieldlessChoiceFixtureReceipt a p:Artifact ;
+    p:location "verification/plain-value-choices/aarch64-apple-darwin.json" .
+w:fieldlessChoiceFixtureEvidenceReview a p:Finding ;
+    rdfs:label "Publish separate evidence for unrelated choice conformance and historical artifact bytes" ;
+    p:source w:fieldlessChoiceFixtureEvidenceReviewSource .
+w:fieldlessChoiceFixtureEvidenceReviewSource a p:Artifact ;
+    p:location "Claude auto review of ff7829a4d8c022c646bb80693834c70f37f17710" .
+
+w:fieldlessChoicesDarwin a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/042f018252c9ed04bea97e10f7da1df16da1e0b0/verification/whole/engine-fieldless-choices/aarch64-apple-darwin.json> .
+w:fieldlessChoicesLinux a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/042f018252c9ed04bea97e10f7da1df16da1e0b0/verification/whole/engine-fieldless-choices/aarch64-unknown-linux-gnu.json> .
+
+w:typescriptExtendedChoiceConvergence a p:Task ;
+    rdfs:label "Preserve the TypeScript capability boundary when composing choice profiles" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:fieldlessChoiceCapabilities, w:typescriptPlainChoices ;
+    p:status p:done ; p:evidence w:combinedChoiceTargetReceipt ;
+    p:acceptance "On a compiler with both targets, confirm an admitted copyable choice projects and that clone-only and derived-Debug choices fail without emitting TypeScript output unless their capabilities have independent conformance." .
+
+w:combinedChoiceTargetReceipt a p:Artifact ;
+    p:location "verification/plain-value-choices/combined-aarch64-apple-darwin.json" .
+
+w:fieldlessChoiceSpanReview a p:Finding ;
+    rdfs:label "Distinguish whole-file recovery input from qualification-time source extraction" ;
+    p:source w:fieldlessChoiceSpanReviewSource .
+w:fieldlessChoiceSpanReviewSource a p:Artifact ;
+    p:location "Claude auto review of 8e3320aacb0106d543c3e21ab1faf60a02132c04" .
+w:fieldlessChoiceScopeDocumentation a p:Task ;
+    rdfs:label "Document the whole-file pin and exact declaration staging boundary" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:plainValueChoices ; p:status p:done ;
+    p:addresses w:fieldlessChoiceSpanReview ; p:evidence w:fieldlessChoiceScopeGuide ;
+    p:acceptance "Describe the recovery input digest, distinguish extraction from recovery, and require independent enclosing-library witnesses." .
+w:fieldlessChoiceScopeGuide a p:Artifact ;
+    p:location "docs/language/checked-values.md#clone-only-choices-and-derived-debug" .
+
 w:canonicalDarwinContracts a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/55da1b628138d48d1984f87f173a061886d48ea8/verification/whole/canonical-workspace/aarch64-apple-darwin.json" .
 
@@ -1739,6 +1784,23 @@ w:canonicalDarwinTests a p:Artifact ;
 
 w:canonicalLinuxTests a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4744286ce98b89b8e712cfa2fe8618cb8959e7bd/verification/whole/suite/canonical-aarch64-unknown-linux-gnu.json" .
+
+w:typescriptPlainChoices a p:Task ;
+    rdfs:label "Project closed copyable choices into TypeScript with explicit equality capabilities" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:plainValueChoices ; p:status p:done ;
+    p:evidence w:typescriptPlainChoiceFixture, w:typescriptVaultModeReceipt ;
+    p:acceptance "Project the existing ordered choice graph without Rust source or binding. Compare unrelated native Rust and Node witnesses in two revisions, compile TypeScript negative controls, preserve shared obligations, and replay a published data-only graph." .
+
+w:typescriptChoiceHostEquality a p:Finding ;
+    rdfs:label "Distinguish host strict comparison from a declared portable equality operation" ;
+    p:source w:wholeMarmishPlan .
+w:typescriptPlainChoices p:addresses w:typescriptChoiceHostEquality .
+
+w:typescriptPlainChoiceFixture a p:Artifact ;
+    p:location "verification/plain-value-choices/typescript.py" .
+w:typescriptVaultModeReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/8621f49d40217132c8d3842a54531e066e93dfec/verification/whole/vault-mode-typescript/receipt.json> .
 
 w:pointerWidthRecordPlan a p:Artifact ;
     p:location "docs/superpowers/plans/2026-11-26-pointer-width-records.md" .
@@ -1753,3 +1815,74 @@ w:pointerWidthLocalGlobReview a p:Finding ;
     rdfs:label "Keep locally bound glob prefixes out of the unresolved dependency path" ;
     p:source w:pointerWidthRecordFixture .
 w:pointerWidthPublicRecords p:addresses w:pointerWidthLocalGlobReview .
+
+w:sharedWireChoiceCopy a p:Task ;
+    rdfs:label "Preserve explicit clone-only value semantics for a wire string choice" ;
+    p:source w:wholeMarmishPlan ; p:milestone w:marmishMilestone ; p:status p:done ;
+    p:acceptance "An unrelated generated numbered choice round-trips through Serde, supports Clone and rejects a Copy bound. The legacy default and explicit true project identically." ;
+    p:evidence w:sharedWireChoiceCopyFixture .
+w:sharedWireChoiceCopyFixture a p:Artifact ;
+    rdfs:label "Native string-choice numbering, wire and Copy controls" ;
+    p:location "verification/shared-declarations/verify.py" .
+w:wholeMarmishStructure p:dependsOn w:sharedWireChoiceCopy .
+
+w:linuxKnownPublicImports a p:Task ;
+    rdfs:label "Compile the same 140 public spellings against original and canonical Linux libraries" ;
+    p:status p:done ; p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:acceptance "Record compiler outcomes and diagnostics on the fixed Darwin inventory including the Linux original, candidate, private and missing controls." ;
+    p:evidence w:linuxKnownPublicImportsReceipt .
+w:linuxKnownPublicImportsReceipt a p:Artifact ;
+    rdfs:label "Linux native import results and dependency closure" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a5c9b34e04ffdc1fd4836916ffaa75df1d225f9f/verification/whole/canonical-linux-imports/aarch64-unknown-linux-gnu.json" .
+w:outputGapReason a p:Task ;
+    rdfs:label "Project the public output-gap reason and observe the range record" ;
+    p:status p:done ; p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:linuxKnownPublicImports, w:sharedWireChoiceCopy ;
+    p:acceptance "On Darwin and Linux ARM64, compare the original and source-free reason on 17 JSON results, native case order and Copy exclusion. Record 18 original range results for the subsequent record projection." ;
+    p:evidence w:outputGapReceipt .
+w:outputGapReceipt a p:Artifact ;
+    rdfs:label "Standalone public reason package and comparison with the original data contract" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/0df41666cdae3b5b045502fc2f68935cbed3d794/verification/whole/gap-range-reference" .
+w:outputGapRecord a p:Task ;
+    rdfs:label "Recover and project an open public record with an optional unsigned field and a named wire choice" ;
+    p:status p:planned ; p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:outputGapReason ;
+    p:acceptance "Project the range fields and reproduce the original accepted and rejected inputs, including unknown object keys, missing optional keys, duplicate keys, tuples and range endpoints, with an unrelated control." .
+w:wholeMarmishStructure p:dependsOn w:outputGapRecord .
+w:serdeStringChoiceRecoveryPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-serde-string-choice-recovery.md" .
+w:serdeStringChoiceRecovery a p:Task ;
+    rdfs:label "Recover ordered Rust unit enums with exact Serde strings" ;
+    p:milestone w:marmishMilestone ; p:source w:serdeStringChoiceRecoveryPlan ;
+    p:status p:done ; p:dependsOn w:sharedWireChoiceCopy ;
+    p:evidence w:serdeStringChoiceRecoveryFixture ;
+    p:acceptance "Recover a checked shared-declarations graph and disjoint Rust bindings from pinned source and qualify target semantics and a true source mutation with native consumers." .
+w:serdeStringChoiceRecoveryFixture a p:Artifact ;
+    p:location "verification/serde-string-choice/verify.py" .
+w:serdeStringChoiceDeriveFixtureReview a p:Finding ;
+    rdfs:label "Exercise qualified Serde derives and reject explicit stock-derive or macro-use shadows" ;
+    p:source w:serdeStringChoiceRecoveryFixture .
+w:serdeStringChoiceRecovery p:addresses w:serdeStringChoiceDeriveFixtureReview .
+
+w:combinedPublicDataCompiler a p:Task ;
+    rdfs:label "Qualify record and both choice recovery profiles in a single compiler" ;
+    p:source w:wholeMarmishPlan ; p:milestone w:marmishMilestone ;
+    p:dependsOn w:pointerWidthPublicRecords, w:typescriptExtendedChoiceConvergence, w:serdeStringChoiceRecovery ;
+    p:status p:done ; p:evidence w:combinedPublicDataDarwin, w:combinedPublicDataLinux ;
+    p:acceptance "One compiler per native ARM64 host passes record and choice fixtures, nine inherited fixtures and the predecessor library tests by name. The Darwin build also executes a TypeScript consumer." .
+w:combinedPublicDataDarwin a p:Artifact ; p:location "verification/public-data-composition/aarch64-apple-darwin.json" .
+w:combinedPublicDataLinux a p:Artifact ; p:location "verification/public-data-composition/aarch64-unknown-linux-gnu.json" .
+w:combinedPublicDataCompiler p:evidence w:inheritedPublicDataDarwin, w:inheritedPublicDataLinux .
+w:inheritedPublicDataDarwin a p:Artifact ; p:location "verification/public-data-composition/inherited-aarch64-apple-darwin.json" .
+w:inheritedPublicDataLinux a p:Artifact ; p:location "verification/public-data-composition/inherited-aarch64-unknown-linux-gnu.json" .
+w:combinedPublicDataWorkspace a p:Task ;
+    rdfs:label "Compose the recovered public data shapes under one application lock" ;
+    p:source w:wholeMarmishPlan ; p:milestone w:marmishMilestone ;
+    p:dependsOn w:combinedPublicDataCompiler, w:outputGapReason ; p:status p:done ;
+    p:evidence w:combinedWorkspaceDataDarwin, w:combinedWorkspaceDataLinux, w:combinedWorkspaceTestsDarwin, w:combinedWorkspaceTestsLinux ;
+    p:acceptance "Measure the same 140 imports against one generated workspace on both ARM64 hosts and compare data callers, typed failures, member pins and unchanged upstream test results." .
+w:wholeMarmishStructure p:dependsOn w:combinedPublicDataWorkspace .
+w:combinedWorkspaceDataDarwin a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/8f945d725dea3f4d4812eb6ea24bc7a1aff8d75b/verification/whole/canonical-public-data/aarch64-apple-darwin.json" .
+w:combinedWorkspaceTestsDarwin a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/db13a780b894456be708efdbf1e68593b316c679/verification/whole/suite/canonical-public-data-aarch64-apple-darwin.json" .
+w:combinedWorkspaceDataLinux a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/8f945d725dea3f4d4812eb6ea24bc7a1aff8d75b/verification/whole/canonical-public-data/aarch64-unknown-linux-gnu.json" .
+w:combinedWorkspaceTestsLinux a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/db13a780b894456be708efdbf1e68593b316c679/verification/whole/suite/canonical-public-data-aarch64-unknown-linux-gnu.json" .
