@@ -961,7 +961,7 @@ w:recoverCheckedFrameFragments a p:Task ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
     p:dependsOn w:recoverTaggedFrameEncoder, w:recoverFramePreflight ;
     p:acceptance "Pin the check and delegate on one record value. Recover field order, scalar representations and option payloads. Rebuild both upstream fragment mutations and qualify exact native bytes and named rejections. Record independent validator and decoder obligations." ;
-    p:addresses w:checkedFrameFragmentReview ; p:evidence w:checkedFrameFragmentFixture .
+    p:addresses w:checkedFrameFragmentReview ; p:evidence w:checkedFrameFragmentFixture, w:checkedCopyFragmentNativeReceipt .
 w:wholeMarmishProtocols p:dependsOn w:recoverCheckedFrameFragments .
 w:checkedFrameFragmentFixture a p:Artifact ;
     p:location "verification/rust-recovery/frame-fragments/verify.py" .
@@ -970,3 +970,5 @@ w:checkedFrameFragmentReview a p:Finding ;
     p:source w:checkedFrameFragmentReviewArtifact .
 w:checkedFrameFragmentReviewArtifact a p:Artifact ;
     p:location "docs/design/reviews/rust-frame-fragments.md" .
+w:checkedCopyFragmentNativeReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/63a3b76980c347dc9414e3a9997c83cbd66fc776/verification/whole/source-copy-frame-fragments/reference-aarch64-apple-darwin.json" .
