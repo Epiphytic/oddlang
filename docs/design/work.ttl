@@ -668,3 +668,13 @@ w:wholeReferenceAMD64 a p:Artifact ;
 w:wholeReferenceSealedLinux a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/tree/69a766b/verification/whole/linux/aarch64-unknown-linux-gnu" .
 w:wholeMarmishFreeze p:evidence w:wholeReferenceState, w:wholeReferenceCLI, w:wholeReferenceAMD64, w:wholeReferenceSealedLinux .
+
+w:wholeNullableDomain a p:Task ; p:label "Recover and project a checked optional unsigned value" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:active ;
+    p:acceptance "Recover the interval, default and public error observations from an isolated pinned native build. Reproduce the graph in Rust and TypeScript and reject an independent boundary mutant." ;
+    p:evidence w:wholeValueDomainSpec, w:wholeRetentionCaller .
+w:wholeValueDomainSpec a p:Artifact ; p:location "docs/language/value-domains.md" .
+w:wholeRetentionCaller a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/pull/7" .
+w:wholeWorkspaceShapeArchive a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/commit/f6f31b50ab34ca59c9d60aaeb4b29035a9726b8f" .
+w:wholeMarmishStructure p:evidence w:wholeWorkspaceShapeArchive .

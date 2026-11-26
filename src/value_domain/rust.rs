@@ -14,7 +14,12 @@ pub(super) fn render(domain: &Domain, binding: &Binding) -> String {
     let integer = format!("::core::primitive::u{}", domain.bits);
     let error = &variants[&domain.range_error];
     let mut out = format!("#[derive(Debug, PartialEq, Eq)]\npub enum {error_type} {{\n");
-    for variant in variants.values() {
+    let order: Vec<_> = binding
+        .variant_order
+        .as_ref()
+        .map_or_else(|| variants.keys().collect(), |ids| ids.iter().collect());
+    for id in order {
+        let variant = &variants[id];
         writeln!(out, "    {variant},").unwrap();
     }
     writeln!(out,"}}\nimpl ::core::fmt::Display for {error_type} {{\n    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {{\n        f.write_str(match self {{").unwrap();

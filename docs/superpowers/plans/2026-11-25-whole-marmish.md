@@ -27,6 +27,10 @@ The independent stream comparison including macro expansions left 373 compiler-o
 
 ## Implementation evidence
 
+- [x] Archive ordered declaration candidates for all 72 workspace build profiles (24 per native platform). Twenty-five distinct graphs account for all cells. Reachable calls, cross-package identity and behavior still require qualification. [Reviewed archive](https://github.com/Epiphytic/marmish-oddlang/pull/8)
+- [ ] Recover a checked nullable value and its public errors through the pinned Rust API, verify source provenance, and compare the native projections against an independent caller. [Recovery and projection](../../../docs/language/value-domains.md) · [Companion qualification](https://github.com/Epiphytic/marmish-oddlang/pull/7)
+
+
 - [x] Recover ordered native data declarations through a generic Rust compiler adapter. The shape projection preserves declaration order, applied types and ownership, and publishes gaps for unresolved identities, bounds and layout. Its unrelated fixture exercises ordering, type and feature mutations. Workspace-wide structural reconciliation remains part of phase 2. [Shape vocabulary and fixture](../../../verification/rust-recovery/README.md)
 - The phase 1 baseline now includes original dev and release stream observations on the three native platforms. The macOS and Linux ARM64 sealed observations are separately pinned. The companion tests record CLI parse behavior, v1 state reopen and corrupted-state rejection on macOS. These are original-side measurements. [Original release baseline](https://github.com/Epiphytic/marmish-oddlang/pull/4)
 

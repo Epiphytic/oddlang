@@ -110,6 +110,8 @@ struct Binding {
     maximum_constant: String,
     error_type: String,
     variants: BTreeMap<String, String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    variant_order: Option<Vec<String>>,
 }
 
 fn check_names(names: &[&str]) -> Result<()> {
@@ -129,6 +131,12 @@ fn check_names(names: &[&str]) -> Result<()> {
 
 impl Binding {
     fn validate(&self) -> Result<()> {
+        if let Some(order) = &self.variant_order {
+            let ids: BTreeSet<_> = order.iter().collect();
+            if ids.len() != order.len() || ids != self.variants.keys().collect() {
+                return Err("variantOrder must list every error IRI exactly once".into());
+            }
+        }
         check_names(&[&self.type_name, &self.error_type])?;
         check_names(&[&self.constructor, &self.accessor, &self.maximum_constant])?;
         check_names(
