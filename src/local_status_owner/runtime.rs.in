@@ -1,0 +1,255 @@
+
+use std::{
+    fs, future::Future, io::{self, Write},
+    os::unix::fs::{FileTypeExt, MetadataExt, PermissionsExt},
+    path::{Path, PathBuf}, process::ExitCode, sync::Arc, time::Duration,
+};
+use tokio::{
+    io::{AsyncReadExt, AsyncWriteExt},
+    net::{UnixListener, UnixStream},
+    sync::{Semaphore, watch},
+    task::JoinSet,
+};
+
+#[derive(Clone, Copy, Debug)]
+pub struct OwnerError(&'static str);
+
+impl std::fmt::Display for OwnerError {
+    fn fmt(&self, output: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        output.write_str(self.0)
+    }
+}
+
+impl std::error::Error for OwnerError {}
+
+fn uid() -> u32 {
+    // SAFETY: geteuid has no arguments and returns the process credential.
+    unsafe { libc::geteuid() }
+}
+
+struct OwnedSocket {
+    path: PathBuf,
+    device: u64,
+    inode: u64,
+}
+
+impl OwnedSocket {
+    fn claim(path: PathBuf) -> Result<Self, OwnerError> {
+        let entry = fs::symlink_metadata(&path).map_err(|_| OwnerError(IO))?;
+        if !entry.file_type().is_socket() || entry.uid() != uid() {
+            return Err(OwnerError(OCCUPIED));
+        }
+        Ok(Self { path, device: entry.dev(), inode: entry.ino() })
+    }
+
+    fn remove(&self) -> Result<(), OwnerError> {
+        let meta = match fs::symlink_metadata(&self.path) {
+            Ok(meta) => meta,
+            Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(()),
+            Err(_) => return Err(OwnerError(CLEANUP)),
+        };
+        if meta.file_type().is_socket() && meta.dev() == self.device && meta.ino() == self.inode {
+            fs::remove_file(&self.path).map_err(|_| OwnerError(CLEANUP))?;
+        }
+        Ok(())
+    }
+}
+
+impl Drop for OwnedSocket {
+    fn drop(&mut self) {
+        let _ = self.remove();
+    }
+}
+
+#[derive(Clone)]
+pub struct SnapshotPublisher {
+    sender: watch::Sender<&'static str>,
+}
+
+impl SnapshotPublisher {
+    pub fn current(&self) -> &'static str {
+        *self.sender.borrow()
+    }
+
+    pub fn publish(&self, next: &str) -> Result<(), OwnerError> {
+        let updated = self.sender.send_if_modified(|current| {
+            if let Some((_, successor)) = TRANSITIONS.iter().find(|&&(from, to)| from == *current && to == next) {
+                *current = successor;
+                true
+            } else {
+                false
+            }
+        });
+        if updated { Ok(()) } else { Err(OwnerError(INVALID_TRANSITION)) }
+    }
+}
+
+struct Lifetime {
+    snapshot: SnapshotPublisher,
+}
+
+impl Lifetime {
+    fn stop(&self) {
+        let _ = self.snapshot.sender.send_if_modified(|current| {
+            if *current == STOPPING {
+                false
+            } else {
+                *current = STOPPING;
+                true
+            }
+        });
+    }
+}
+
+impl Drop for Lifetime {
+    fn drop(&mut self) {
+        self.stop();
+    }
+}
+
+pub struct BoundOwner {
+    listener: UnixListener,
+    socket: OwnedSocket,
+    lifetime: Lifetime,
+}
+
+impl BoundOwner {
+    /// Bind in a Tokio runtime. Ownership never overwrites an existing path.
+    pub fn bind(path: &Path) -> Result<Self, OwnerError> {
+        let parent = path.parent().filter(|p| !p.as_os_str().is_empty()).ok_or(OwnerError(PATH))?;
+        let filename = path.file_name().ok_or(OwnerError(PATH))?;
+        let meta = fs::symlink_metadata(parent).map_err(|_| OwnerError(IO))?;
+        if !meta.is_dir() || meta.uid() != uid() || meta.mode() & 0o077 != 0 {
+            return Err(OwnerError(PRIVATE_PARENT));
+        }
+        let canonical = parent.canonicalize().map_err(|_| OwnerError(IO))?;
+        let resolved = fs::symlink_metadata(&canonical).map_err(|_| OwnerError(IO))?;
+        if !resolved.is_dir() || resolved.uid() != uid() || resolved.mode() & 0o077 != 0
+            || resolved.dev() != meta.dev() || resolved.ino() != meta.ino()
+        {
+            return Err(OwnerError(PRIVATE_PARENT));
+        }
+        let path = canonical.join(filename);
+        if path.as_os_str().as_encoded_bytes().len() >= MAX_PATH {
+            return Err(OwnerError(PATH));
+        }
+        let listener = UnixListener::bind(&path).map_err(|error| {
+            OwnerError(if error.kind() == io::ErrorKind::AddrInUse { OCCUPIED } else { IO })
+        })?;
+        let socket = OwnedSocket::claim(path)?;
+        fs::set_permissions(&socket.path, fs::Permissions::from_mode(0o600)).map_err(|_| OwnerError(IO))?;
+        let (snapshot, _) = watch::channel(BOUND);
+        Ok(Self { listener, socket, lifetime: Lifetime { snapshot: SnapshotPublisher { sender: snapshot } } })
+    }
+
+    pub fn snapshot_publisher(&self) -> SnapshotPublisher {
+        self.lifetime.snapshot.clone()
+    }
+
+    pub async fn serve_until(self, shutdown: impl Future<Output = ()>) -> Result<(), OwnerError> {
+        let Self { listener, socket, lifetime } = self;
+        let clients = Arc::new(Semaphore::new(MAX_CLIENTS));
+        let mut tasks = JoinSet::new();
+        tokio::pin!(shutdown);
+        loop {
+            tokio::select! {
+                biased;
+                _ = &mut shutdown => break,
+                _ = tasks.join_next(), if !tasks.is_empty() => {},
+                result = listener.accept() => {
+                    let (stream, _) = match result {
+                        Ok(peer) => peer,
+                        Err(_) => {
+                            tokio::select! {
+                                _ = &mut shutdown => break,
+                                _ = tokio::time::sleep(Duration::from_millis(ACCEPT_RETRY)) => {}
+                            }
+                            continue;
+                        }
+                    };
+                    if !stream.peer_cred().is_ok_and(|credential| credential.uid() == uid()) {
+                        continue;
+                    }
+                    let Ok(permit) = clients.clone().try_acquire_owned() else { continue; };
+                    let status = lifetime.snapshot.clone();
+                    tasks.spawn(async move {
+                        let _permit = permit;
+                        handle_peer(stream, status).await;
+                    });
+                }
+            }
+        }
+        drop(listener);
+        lifetime.stop();
+        tasks.shutdown().await;
+        socket.remove()
+    }
+}
+
+async fn parse_request(stream: &mut UnixStream) -> bool {
+    let Ok(length) = stream.read_u32().await else { return false; };
+    if length == 0 || length > FRAME_LIMIT {
+        return false;
+    }
+    let mut body = vec![0; length as usize];
+    if stream.read_exact(&mut body).await.is_err()
+        || body.iter().find(|byte| !byte.is_ascii_whitespace()) != Some(&b'{')
+    {
+        return false;
+    }
+    serde_json::from_slice::<Request>(&body).is_ok_and(|request| request.action == REQUEST)
+}
+
+async fn handle_peer(mut stream: UnixStream, status: SnapshotPublisher) {
+    let request = tokio::time::timeout(Duration::from_millis(READ_DEADLINE), parse_request(&mut stream)).await;
+    let reply = if matches!(request, Ok(true)) {
+        Reply { ok: true, result: Some(Snapshot { phase: status.current() }), error: None }
+    } else {
+        Reply { ok: false, result: None, error: Some(INVALID_REQUEST) }
+    };
+    let Ok(body) = serde_json::to_vec(&reply) else { return; };
+    let write = async {
+        stream.write_u32(body.len() as u32).await?;
+        stream.write_all(&body).await?;
+        stream.shutdown().await
+    };
+    let _ = tokio::time::timeout(Duration::from_millis(WRITE_DEADLINE), write).await;
+}
+
+pub fn run_owner() -> ExitCode {
+    let command = clap::Command::new(EXECUTABLE).arg(
+        clap::Arg::new("local_endpoint")
+            .long(SOCKET_OPTION)
+            .required(true)
+            .value_parser(clap::value_parser!(PathBuf))
+    );
+    let matches = match command.try_get_matches() {
+        Ok(matches) => matches,
+        Err(error) => {
+            let code = error.exit_code() as u8;
+            let _ = error.print();
+            return ExitCode::from(code);
+        }
+    };
+    let path = matches.get_one::<PathBuf>("local_endpoint").expect("declared required socket option");
+    let result = tokio::runtime::Builder::new_current_thread().enable_all().build()
+        .map_err(|_| OwnerError(IO)).and_then(|runtime| runtime.block_on(async {
+            use tokio::signal::unix::{SignalKind, signal};
+            let mut term = signal(SignalKind::terminate()).map_err(|_| OwnerError(IO))?;
+            let mut interrupt = signal(SignalKind::interrupt()).map_err(|_| OwnerError(IO))?;
+            let owner = BoundOwner::bind(path)?;
+            owner.serve_until(async {
+                tokio::select! {
+                    _ = term.recv() => {},
+                    _ = interrupt.recv() => {},
+                }
+            }).await
+        }));
+    match result {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(error) => {
+            let _ = writeln!(io::stderr().lock(), "{error}");
+            ExitCode::FAILURE
+        }
+    }
+}

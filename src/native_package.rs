@@ -129,6 +129,7 @@ enum Kind {
     SequenceJournal,
     CliSurface,
     LocalCommandClient,
+    LocalStatusOwner,
 }
 
 #[derive(Deserialize)]
@@ -212,6 +213,10 @@ fn project(
             let binding = crate::endpoint_set::overlay_digest(&overlay)?;
             crate::endpoint_set::build(&path, &pin, Some((&overlay, &binding)), &output)?;
             "endpoint_set.rs"
+        }
+        Kind::LocalStatusOwner => {
+            crate::local_status_owner::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
+            "owner.rs"
         }
         Kind::LocalCommandClient => {
             crate::local_command_client::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
