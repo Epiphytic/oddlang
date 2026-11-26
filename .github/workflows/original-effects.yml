@@ -50,7 +50,7 @@ jobs:
           if [[ "$(ulimit -H -n)" != unlimited ]] && (( $(ulimit -H -n) < high )); then
             sudo -n prlimit --pid "$$" --nofile="$high:$high"
           fi
-          python3 - "$GITHUB_WORKSPACE/examples/marmish/portable-bridge" \
+          python3 -B - "$GITHUB_WORKSPACE/examples/marmish/portable-bridge" \
             "$RUNNER_TEMP/build/$TARGET/release" "$RUNNER_TEMP/receipts/effects.json" <<'PY'
           import hashlib
           import json
@@ -63,7 +63,7 @@ jobs:
 
           fixture_dir, binaries, report_path = map(Path, sys.argv[1:])
           sys.path.insert(0, str(fixture_dir))
-          from verify import ENVIRONMENT, UMASK, inspect_state, read_reply
+          from verify import ENVIRONMENT, UMASK, compare_state, inspect_state, read_reply
 
           fixture_file = fixture_dir / "baseline.json"
           fixture = json.loads(fixture_file.read_text())
@@ -80,11 +80,12 @@ jobs:
 
           def probe(limit):
               with tempfile.TemporaryDirectory(prefix="original-bridge-effects-", dir="/tmp") as tmp:
-                  root = Path(tmp)
+                  root = Path(tmp) / "observed"
+                  root.mkdir(mode=0o700)
                   cwd = root / "cwd"
                   cwd.mkdir(mode=0o700)
                   state = root / "state"
-                  trace = root / "trace"
+                  trace = Path(tmp) / "trace"
                   request = fixture["request"].replace("@VERSION@", "1")
                   for key, value in {"STATE": state, "CWD": cwd, "WORKER": worker}.items():
                       request = request.replace(f"@{key}@", json.dumps(str(value)))
@@ -122,8 +123,8 @@ jobs:
                   after, _ = inspect_state(root)
                   if limit == 256:
                       assert reply == fixture["replies"]["initialized"], reply
-                      assert live == fixture["states"]["live"], live
-                      assert after == fixture["states"]["closed"], after
+                      compare_state("live", fixture["states"]["live"], live)
+                      compare_state("closed", fixture["states"]["closed"], after)
                       assert (tracer.returncode, stdout, stderr) == (0, b"", b"")
                   trace_text = trace.with_suffix("." + proc.name).read_text()
                   ofd = any("F_OFD_SETLK" in line and line.rstrip().endswith("= 0")
