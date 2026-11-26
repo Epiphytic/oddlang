@@ -14,9 +14,7 @@ fn selected_scope(file: &syn::File, selected: &[&str], alias: &str) -> Result<()
         !matches!(item, Item::Macro(_)) && !matches!(item, Item::Type(item) if item.ident == alias)
     });
     scope::bindings(&inspected, selected)?;
-    let mut reserved = selected.to_vec();
-    reserved.extend([
-        alias,
+    let intrinsic = [
         "Debug",
         "Clone",
         "Copy",
@@ -28,38 +26,40 @@ fn selected_scope(file: &syn::File, selected: &[&str], alias: &str) -> Result<()
         "u16",
         "u32",
         "u64",
-    ]);
+    ];
+    if selected
+        .iter()
+        .chain([&alias])
+        .any(|name| intrinsic.contains(name))
+    {
+        return Err("typed error selection shadows a required native declaration".into());
+    }
+    let reserved = selected
+        .iter()
+        .copied()
+        .chain([alias])
+        .chain(intrinsic)
+        .collect::<Vec<_>>();
     for item in &file.items {
-        match item {
+        let competing = match item {
             Item::Use(import) if scope::imports_reserved(&import.tree, None, &reserved) => {
                 return Err("typed error declarations have unresolved import bindings".into());
             }
-            Item::Struct(item) if scope::name(&item.ident, &reserved) => {
-                return Err("shadowing typed error declaration".into());
+            Item::Enum(item) if !scope::name(&item.ident, selected) => Some(&item.ident),
+            Item::Struct(item) => Some(&item.ident),
+            Item::Union(item) => Some(&item.ident),
+            Item::Trait(item) => Some(&item.ident),
+            Item::TraitAlias(item) => Some(&item.ident),
+            Item::Type(item) if item.ident != alias => Some(&item.ident),
+            Item::Mod(item) => Some(&item.ident),
+            Item::ExternCrate(item) => {
+                Some(item.rename.as_ref().map_or(&item.ident, |(_, name)| name))
             }
-            Item::Type(item) if item.ident != alias && scope::name(&item.ident, &reserved) => {
-                return Err("shadowing typed error declaration".into());
-            }
-            Item::Mod(item) if scope::name(&item.ident, &reserved) => {
-                return Err("shadowing typed error declaration".into());
-            }
-            Item::ExternCrate(item)
-                if scope::name(
-                    item.rename.as_ref().map_or(&item.ident, |(_, name)| name),
-                    &reserved,
-                ) =>
-            {
-                return Err("shadowing typed error declaration".into());
-            }
-            Item::Macro(item)
-                if item
-                    .ident
-                    .as_ref()
-                    .is_some_and(|name| scope::name(name, &reserved)) =>
-            {
-                return Err("shadowing typed error declaration".into());
-            }
-            _ => {}
+            Item::Macro(item) => item.ident.as_ref(),
+            _ => None,
+        };
+        if competing.is_some_and(|name| scope::name(name, &reserved)) {
+            return Err("shadowing typed error declaration".into());
         }
     }
     Ok(())

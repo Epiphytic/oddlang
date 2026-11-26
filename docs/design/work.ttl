@@ -1484,3 +1484,8 @@ w:typedFiniteErrors a p:Task ;
     p:dependsOn w:plainValueChoices, w:sevenMemberBufferedWorkspace ;
     p:status p:active ;
     p:acceptance "Qualify public error and alias, exact reason capability and variant membership, fixed-width named fields and Display/Debug/source through independently compiled original and generated consumers. Share process-limit error identity without changing the older standalone projection. Integrate the published native identity choice." .
+
+w:typedFiniteErrorPrimitiveShadow a p:Finding ;
+    rdfs:label "Reject local declarations that shadow a recovered primitive width" ;
+    p:source w:typedFiniteErrorsPlan .
+w:typedFiniteErrors p:addresses w:typedFiniteErrorPrimitiveShadow .
