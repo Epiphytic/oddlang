@@ -1748,3 +1748,8 @@ w:directObserverBindings a p:Task ;
 w:directObserverBindingFixture a p:Artifact ;
     p:location "verification/rust-recovery/test_release_rustdoc.py" .
 w:wholeMarmishStructure p:dependsOn w:directObserverBindings .
+
+w:crossTargetObserverReview a p:Finding ;
+    rdfs:label "Host-only build dependencies can be absent from target-filtered Cargo metadata" ;
+    p:source w:directObserverBindingFixture .
+w:directObserverBindings p:addresses w:crossTargetObserverReview .

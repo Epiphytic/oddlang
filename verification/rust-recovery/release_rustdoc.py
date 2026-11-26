@@ -123,11 +123,10 @@ def extern_bindings(log, rustc, selected, packages):
         suffix, = [v.removeprefix("extra-filename=") for v in trace.flag(args, "-C")
                    if v.startswith("extra-filename=")]
         directory = Path(env["CARGO_MANIFEST_DIR"]).resolve()
-        require(directory in packages, f"unknown Cargo package producing {crate}")
         target = trace.flag(args, "--target")
-        evidence = {"package": packages[directory], "crate": crate, "crateTypes": sorted(crate_types),
+        evidence = {"crate": crate, "crateTypes": sorted(crate_types),
                     "target": target, "explicitCfg": sorted(trace.flag(args, "--cfg"))}
-        producers[(Path(output), crate + suffix)].append(evidence)
+        producers[(Path(output), crate + suffix)].append((directory, evidence))
 
     bindings = {}
     for arg in trace.flag(selected, "--extern"):
@@ -139,7 +138,9 @@ def extern_bindings(log, rustc, selected, packages):
         stems = {artifact.stem, artifact.stem.removeprefix("lib")}
         candidates = [row for stem in stems for row in producers.get((artifact.parent, stem), [])]
         require(len(candidates) == 1, f"expected one build producer for extern {alias}, found {len(candidates)}")
-        bindings[alias] = candidates[0]
+        directory, evidence = candidates[0]
+        require(directory in packages, f"unknown Cargo package producing extern {alias}")
+        bindings[alias] = {**evidence, "package": packages[directory]}
     return bindings
 
 

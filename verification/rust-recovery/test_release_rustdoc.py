@@ -18,6 +18,37 @@ class ReleaseComparison(unittest.TestCase):
             with self.subTest(count=count), self.assertRaisesRegex(ValueError, f"found {count}"):
                 check.extern_bindings(log, Path("/tool/rustc"), ["--extern", "value=/build/libreading-abc.rmeta"], package)
 
+    def test_unselected_host_producer_needs_no_target_package_entry(self):
+        invocation = ("  Running `CARGO_MANIFEST_DIR=/src/hostonly /tool/rustc --crate-name hostonly "
+                      "--crate-type lib --out-dir /host -C extra-filename=-abc`\n")
+        self.assertEqual(check.extern_bindings(invocation, Path("/tool/rustc"), [], {}), {})
+        with self.assertRaisesRegex(ValueError, "unknown Cargo package producing extern"):
+            check.extern_bindings(invocation, Path("/tool/rustc"),
+                                  ["--extern", "alias=/host/libhostonly-abc.rlib"], {})
+
+    def test_cross_target_with_host_only_build_dependency(self):
+        target = "wasm32-wasip1"
+        installed = subprocess.check_output(
+            ["rustup", "target", "list", "--installed", "--toolchain", check.TOOLS], text=True).splitlines()
+        if target not in installed:
+            self.skipTest(f"toolchain lacks {target}")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "src").mkdir()
+            (root / "hostonly/src").mkdir(parents=True)
+            (root / "Cargo.toml").write_text(
+                '[package]\nname="cross-observer"\nversion="1.0.0"\nedition="2024"\n'
+                '[target.\'cfg(not(target_family="wasm"))\'.build-dependencies]\nhostonly={path="hostonly"}\n')
+            (root / "hostonly/Cargo.toml").write_text('[package]\nname="hostonly"\nversion="1.0.0"\nedition="2024"\n')
+            (root / "hostonly/src/lib.rs").write_text("pub fn metadata() {}\n")
+            (root / "build.rs").write_text("fn main() { hostonly::metadata(); }\n")
+            (root / "src/lib.rs").write_text("pub struct Reading;\n")
+            subprocess.run(["cargo", "+1.97.1", "generate-lockfile", "--offline"], cwd=root, check=True)
+            report = check.collect(root, "cross-observer", "lib", "cross_observer", target, False, [])
+            self.assertEqual(report["profile"]["externBindings"], {})
+            matched = [r["path"] for r in report["comparison"]["matched"]]
+            self.assertIn(["cross_observer", "Reading"], matched)
+
     def test_profile_identity_and_mutations(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
