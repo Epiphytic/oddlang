@@ -1736,9 +1736,15 @@ w:publicRecordReadPolicy a p:Task ;
     rdfs:label "Qualify public data record deserialization policy and composed field identities" ;
     p:milestone w:marmishMilestone ; p:source w:publicRecordReadPolicyPlan ;
     p:dependsOn w:observationalRecordDefaults ;
-    p:status p:active ;
+    p:status p:done ;
     p:acceptance "Check default closure, an explicit open object policy, optional scalars, positional input and external string choices with unrelated and original native cases, and reproduce a source mutation." .
 
 w:publicRecordReadPolicyFixture a p:Artifact ;
     p:location "verification/public-records/read_policy.py" .
-w:publicRecordReadPolicy p:evidence w:publicRecordReadPolicyFixture .
+w:publicRecordReadPolicy p:evidence w:publicRecordReadPolicyFixture, w:publicRecordReadPolicyDarwin, w:publicRecordReadPolicyLinux .
+
+w:publicRecordReadPolicyDarwin a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/77c4c6272bf317e11cf9a2783eb7b00e3fcca0f0/verification/whole/gap-range-record/aarch64-apple-darwin.json" .
+
+w:publicRecordReadPolicyLinux a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/77c4c6272bf317e11cf9a2783eb7b00e3fcca0f0/verification/whole/gap-range-record/aarch64-unknown-linux-gnu.json" .
