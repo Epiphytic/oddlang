@@ -798,6 +798,14 @@ w:binaryRecordReview a p:Finding ;
     p:source w:binaryRecordFixture .
 w:boundedBinaryRecords p:addresses w:binaryRecordReview .
 
+w:typedFieldRelations a p:Task ; rdfs:label "Project typed ordered cross-record relations" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:boundedBinaryRecords, w:typedHashViews ;
+    p:acceptance "Compare typed fields and arguments with explicit short-circuit order and propagate a checked operation error only when reached. Verify each outcome and reject invalid operands." ;
+    p:evidence w:typedFieldRelationFixture .
+w:typedFieldRelationFixture a p:Artifact ; p:location "verification/field-relation/verify.py" .
+w:wholeMarmishProtocols p:dependsOn w:typedFieldRelations .
+
 w:binaryMetadataRecords a p:Task ; rdfs:label "Project optional binary metadata and ordered constraints" ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
     p:dependsOn w:boundedBinaryRecords, w:typedHashViews ;
@@ -805,6 +813,11 @@ w:binaryMetadataRecords a p:Task ; rdfs:label "Project optional binary metadata 
     p:evidence w:binaryMetadataFixture .
 w:binaryMetadataFixture a p:Artifact ; p:location "verification/binary-record/metadata.py" .
 w:wholeMarmishProtocols p:dependsOn w:binaryMetadataRecords .
+
+w:typedFieldRelationReview a p:Finding ;
+    rdfs:label "Require native equality and copy capabilities and compile assembled relation components" ;
+    p:source w:copyFieldRelationNativeReview .
+w:typedFieldRelations p:addresses w:typedFieldRelationReview .
 
 w:binaryMetadataErrorReview a p:Finding ;
     rdfs:label "Separate parse-time offsets and tags from deferred Manifest field and metadata errors" ;
@@ -823,7 +836,67 @@ w:copyManifestNativeReview a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/2926c6aefdaca70ff1370d31f3d670aa84fb5973/docs/reviews/oddlang-copy-manifest.md" .
 
 w:copyCheckpointQualification a p:Task ; rdfs:label "Qualify a native copy Checkpoint and its FileIdentity value" ;
-    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:evidence w:copyCheckpointNativeReceipt ;
     p:dependsOn w:copyManifestQualification ;
     p:acceptance "Reproduce checked Checkpoint encoding and decoding, including native FileIdentity shapes and exact errors." .
 w:wholeMarmishProtocols p:dependsOn w:copyCheckpointQualification .
+
+w:copyFieldRelationQualification a p:Task ; rdfs:label "Qualify native copy Manifest matching and helper consistency checks" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:evidence w:copyFieldRelationNativeReceipt ;
+    p:dependsOn w:copyManifestQualification, w:typedFieldRelations ;
+    p:acceptance "Verify explicit field correspondence, checked helper start and build identity, and short-circuited error propagation against the pinned original." .
+w:wholeMarmishProtocols p:dependsOn w:copyFieldRelationQualification .
+
+w:copyFieldRelationNativeReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b7ffe42e9423b22a893057a950fb2364429a80d0/verification/whole/copy-field-relations/reference-aarch64-apple-darwin.json" .
+w:copyFieldRelationNativeReview a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b7ffe42e9423b22a893057a950fb2364429a80d0/docs/reviews/oddlang-copy-field-relations.md" .
+
+w:compositeBinaryRecords a p:Task ; rdfs:label "Project checked nested and checksummed composite binary records" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:binaryMetadataRecords ;
+    p:acceptance "Verify exact nested binary codecs, fixed records, typed checked timing and optional member checks, and integrity-domain ordering." ;
+    p:evidence w:binaryCompositeFixture .
+w:binaryCompositeFixture a p:Artifact ; p:location "verification/binary-record/composite.py" .
+w:copyCheckpointQualification p:dependsOn w:compositeBinaryRecords .
+
+w:boundedTaggedBinaryFrames a p:Task ; rdfs:label "Project bounded tagged binary frames and incremental parsers" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:compositeBinaryRecords, w:copyFieldRelationQualification ;
+    p:acceptance "Verify exact envelope tags, header limits, ordered case checks, terminal bytes, nested fragments and incremental poisoned-input behavior against an independent native fixture." ;
+    p:evidence w:binaryFrameFixture .
+w:binaryFrameFixture a p:Artifact ; p:location "verification/binary-frame/verify.py" .
+w:copyProtocolQualification a p:Task ; rdfs:label "Qualify the complete native copy protocol library surface on macOS ARM64" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:evidence w:copyProtocolNativeReceipt, w:copyProtocolStructuralInventory ;
+    p:dependsOn w:copyCheckpointQualification, w:boundedTaggedBinaryFrames ;
+    p:acceptance "Compile the full source-free copy API and compare all original tests, exact error cases, frame payloads and public constants, with explicit structural gap accounting." .
+w:wholeMarmishProtocols p:dependsOn w:copyProtocolQualification .
+
+w:binaryFrameFragmentReview a p:Finding ;
+    rdfs:label "Check borrowed and bound record fragments at both native call sites and enforce the consumed limit" ;
+    p:source w:copyProtocolNativeReview .
+w:boundedTaggedBinaryFrames p:addresses w:binaryFrameFragmentReview .
+
+w:copyCheckpointNativeReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/6f6fb441b8be647f40092ca3f76aedabe79040f1/verification/whole/copy-checkpoint/reference-aarch64-apple-darwin.json" .
+w:copyCheckpointNativeReview a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/6f6fb441b8be647f40092ca3f76aedabe79040f1/docs/reviews/oddlang-copy-checkpoint.md" .
+w:checkpointDecodePrecedenceReview a p:Finding ;
+    rdfs:label "Keep footer, complete-version reads, inner record errors and deferred Checkpoint validation in order" ;
+    p:source w:copyCheckpointNativeReview .
+w:compositeBinaryRecords p:addresses w:checkpointDecodePrecedenceReview .
+w:compositeExternalContractLinkage a p:Task ;
+    rdfs:label "Check composite slot bounds and member types against pinned external codec contracts" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned ;
+    p:dependsOn w:compositeBinaryRecords ;
+    p:acceptance "Verify external codec identities, independently declared inner limits and exact native types before emitting a composed package." .
+
+w:copyProtocolNativeReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4bb7977930c330143d9068b9dfb45143dcb524e9/verification/whole/copy-frame/reference-aarch64-apple-darwin.json" .
+w:copyProtocolNativeReview a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4bb7977930c330143d9068b9dfb45143dcb524e9/docs/reviews/oddlang-copy-frame.md" .
+w:copyProtocolStructuralInventory a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4bb7977930c330143d9068b9dfb45143dcb524e9/verification/whole/copy-frame/structural-gap.md" .
