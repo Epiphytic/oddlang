@@ -291,6 +291,7 @@ fn render(graph: &Graph, overlay: &Overlay) -> String {
             &mut out,
             &names[id],
             cases.iter().map(|case| names[&case.id].as_str()),
+            crate::checked_values::Equality::Total,
             true,
         );
     }

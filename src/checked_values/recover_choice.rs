@@ -49,7 +49,7 @@ fn shadow(item: &Item) -> bool {
     }
 }
 
-fn ordinary_derives(item: &syn::ItemEnum, debug: bool) -> Result<()> {
+fn ordinary_derives(item: &syn::ItemEnum, debug: bool) -> Result<Equality> {
     let attrs: Vec<_> = item
         .attrs
         .iter()
@@ -73,14 +73,22 @@ fn ordinary_derives(item: &syn::ItemEnum, debug: bool) -> Result<()> {
         })
         .map(ToString::to_string)
         .collect();
-    let mut expected: BTreeSet<_> = CAPABILITIES.into_iter().map(str::to_owned).collect();
-    if debug {
-        expected.insert("Debug".into());
+    if derives.len() != args.len()
+        || !derives.contains("Clone")
+        || !derives.contains("Copy")
+        || derives.contains("Debug") != debug
+        || derives
+            .iter()
+            .any(|name| !CAPABILITIES.contains(&name.as_str()) && name != "Debug")
+    {
+        return Err("unsupported derives on copyable plain choice".into());
     }
-    if args.len() != expected.len() || derives != expected {
-        return Err("plain choice requires standard Clone, Copy, PartialEq and Eq derives".into());
+    match (derives.contains("PartialEq"), derives.contains("Eq")) {
+        (true, true) => Ok(Equality::Total),
+        (true, false) => Ok(Equality::Partial),
+        (false, false) => Ok(Equality::None),
+        (false, true) => Err("plain choice Eq requires PartialEq".into()),
     }
-    Ok(())
 }
 
 fn names(ident: &syn::Ident, expected: &str) -> bool {
@@ -155,7 +163,13 @@ fn additional_binding(file: &syn::File, name: &str) -> bool {
 }
 
 pub(crate) fn plain_choice_cases(item: &syn::ItemEnum, debug: bool) -> Result<Vec<String>> {
-    ordinary_derives(item, debug)?;
+    if ordinary_derives(item, debug)? != Equality::Total {
+        return Err("plain error reason requires total equality".into());
+    }
+    unit_cases(item)
+}
+
+fn unit_cases(item: &syn::ItemEnum) -> Result<Vec<String>> {
     if !matches!(item.vis, Visibility::Public(_))
         || !item.generics.params.is_empty()
         || item.generics.where_clause.is_some()
@@ -202,7 +216,8 @@ fn extract(source: &str, selection: &Selection) -> Result<(Graph, Binding)> {
     let mut cases = Vec::new();
     let mut names = BTreeMap::new();
     let type_id = format!("{}:type", selection.id);
-    for label in plain_choice_cases(item, false)? {
+    let equality = ordinary_derives(item, false)?;
+    for label in unit_cases(item)? {
         let id = format!("{type_id}:{label}");
         names.insert(id.clone(), label);
         cases.push(id);
@@ -214,6 +229,7 @@ fn extract(source: &str, selection: &Selection) -> Result<(Graph, Binding)> {
             type_id.clone(),
             Definition::Choice {
                 cases: cases.clone(),
+                equality,
             },
         )]),
     };
