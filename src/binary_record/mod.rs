@@ -1,6 +1,7 @@
 //! Ordered, bounded binary records with named decode and validation failures.
 mod composite;
 mod extension;
+pub(crate) mod package;
 use composite::{Constraint, ExternalRecord, Integrity, IntegrityBinding, RecordBinding};
 mod rust;
 use extension::{Guard, HashBinding, HashView, Payload, Record};

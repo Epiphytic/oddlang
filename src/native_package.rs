@@ -573,6 +573,23 @@ fn require_erasing_storage(manifest: &Manifest, component: &str) -> Result<()> {
     Ok(())
 }
 
+fn validate_nested_codecs(components: &[Component], base: &Path) -> Result<()> {
+    use crate::binary_record::package::{PinnedRecord, validate};
+
+    let records = components
+        .iter()
+        .filter(|component| matches!(component.kind, Kind::BinaryRecord | Kind::BinaryFragment))
+        .map(|component| {
+            PinnedRecord::read(
+                &component.graph.read(base)?,
+                &component.overlay.read(base)?,
+                |name| export_paths(component, name),
+            )
+        })
+        .collect::<Result<Vec<_>>>()?;
+    validate(&records)
+}
+
 fn validate_line_grammar_errors(components: &[Component], base: &Path) -> Result<()> {
     for parser in components
         .iter()
@@ -825,6 +842,7 @@ pub(super) fn build_pinned(
     validate_command_callbacks(&manifest.components, base)?;
     let required = validate_component_requirements(&manifest, base)?;
     validate_line_grammar_errors(&manifest.components, base)?;
+    validate_nested_codecs(&manifest.components, base)?;
     let cargo = cargo_manifest(&manifest)?;
     let lock = manifest.cargo_lock.read(base)?;
     for provider in &required {
