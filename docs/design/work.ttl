@@ -1145,3 +1145,7 @@ w:copyProtocolStructuralInventory a p:Artifact ;
 
 w:provisionedNativeWorkspaceReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/46> .
+
+w:nativeWorkspaceColdStart a p:Task ; rdfs:label "Build native workspaces from portable inputs and an empty dependency cache" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:active ;
+    p:acceptance "Fetch only through locked Cargo resolution from the package and workspace manifests, retain offline compilation, reject stale pins and reproduce the released workspace lock." .

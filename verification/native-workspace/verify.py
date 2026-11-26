@@ -62,3 +62,7 @@ with tempfile.TemporaryDirectory() as temp:
     m["members"]["thermometer"].pop("dependencies");m["members"]["station"]["manifest"]["sha256"]="0"*64;put(spec,m)
     assert "digest mismatch" in build("tampered",False).stderr
     print("two checked packages; local edge linked by unchanged caller; fresh-output, cycle, identity and digest controls passed")
+
+    from bootstrap import verify as verify_bootstrap
+    verify_bootstrap(CLI, root / "bootstrap", make, pin, put)
+    print("empty-cache failure, pinned Git acquisition, disconnected rebuild and stale root lock checked")

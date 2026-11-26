@@ -20,3 +20,9 @@ python3 -B verification/native-package/verify.py target/debug/oddlang
 ```
 
 It generates two codecs into one private module, exercises the public API from an integration test, compares independently generated directories and rejects stale pins, an inconsistent Cargo lock, invalid or duplicate exports, a symlink escape and preexisting output. On macOS and Linux it also inserts an empty destination after generation begins and verifies the competing directory stays empty.
+
+### Building with an empty dependency cache
+
+`oddlang build native-workspace rust MANIFEST OUTPUT --fetch-locked` allows Cargo to fetch the dependencies named in each pinned package lock and the composed workspace lock. Use this on a connected build host with the selected toolchain installed. Cargo uses the configured registries, Git sources and cache. The command keeps each lock read-only and runs the workspace binary check offline. Existing Cargo offline settings still apply.
+
+Once the cache is populated, omit the flag for an offline build. Both modes generate the same workspace manifest, member sources and release locks. A failed resolution leaves the requested output path available for a retry. The cache may retain dependencies fetched before the failure.
