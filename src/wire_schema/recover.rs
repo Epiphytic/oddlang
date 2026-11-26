@@ -444,7 +444,7 @@ impl Observer<'_> {
     }
 }
 
-fn item_attrs(item: &Item) -> &[Attribute] {
+pub(super) fn item_attrs(item: &Item) -> &[Attribute] {
     match item {
         Item::Const(item) => &item.attrs,
         Item::Enum(item) => &item.attrs,

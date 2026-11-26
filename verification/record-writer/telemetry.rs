@@ -1,5 +1,7 @@
-#[derive(Clone, Copy)]
 enum Band { Low = 3, High = 9 }
+
+impl Copy for Band {}
+impl Clone for Band { fn clone(&self) -> Self { *self } }
 
 struct Reading {
     sequence: u64,

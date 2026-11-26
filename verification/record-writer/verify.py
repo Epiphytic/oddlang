@@ -67,7 +67,13 @@ with tempfile.TemporaryDirectory() as temp:
     mutant = recover(root / "swap", SOURCE.replace(a, "TEMP").replace(b, a).replace("TEMP", b))
     compare(root / "swap", mutant)
     assert mutant["fields"][:2] == graph["fields"][:2][::-1]
+    raw = recover(root / "raw", SOURCE.replace("powered", "r#type"))
+    assert raw["fields"][-1]["field"] == "urn:radio:reading:field:type"
+    assert graph["externalTags"]["urn:radio:band"] == {"urn:radio:band:Low": 3, "urn:radio:band:High": 9}
     for i, (old, new) in enumerate([
+        ("enum Band", "macro_rules! shape { () => { type u64 = u32; } } shape!(); enum Band"),
+        ("enum Band", "#[another::inject] enum Band"),
+        ("High = 9", "High = 300"),
         ("to_be_bytes", "to_le_bytes"), ("target.extend(data);", "target.extend(data); target.push(0);"),
         (a, "if row.powered { " + a + " }"), ("fn packet(", "#[cfg(unix)]\nfn packet("),
         ("struct Reading", "use custom::Vec;\nstruct Reading"), (b, b + " unknown(sink);"),

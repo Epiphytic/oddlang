@@ -3,6 +3,7 @@ use super::{Result, digest, encode, io, iri, json, publish};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use std::{collections::BTreeMap, fs, path::Path};
+use syn::ext::IdentExt;
 use syn::{Expr, FnArg, Item, ItemFn, Member, Pat, Stmt, Type, parse_quote};
 
 #[derive(Deserialize)]
@@ -11,6 +12,8 @@ struct Selection {
     source_sha256: String,
     owner: String,
     record: String,
+    #[serde(default)]
+    module: Vec<String>,
     writer: String,
     #[serde(default)]
     tag_types: BTreeMap<String, String>,
@@ -156,12 +159,12 @@ struct Reader<'a> {
 impl Reader<'_> {
     fn ty(&self, field: &syn::Ident) -> Result<&Type> {
         self.types
-            .get(&field.to_string())
+            .get(&field.unraw().to_string())
             .copied()
             .ok_or_else(|| format!("missing field {field}"))
     }
     fn slot(&mut self, field: &syn::Ident, encoding: &str, shape: Value) {
-        let id = format!("{}:field:{field}", self.select.owner);
+        let id = format!("{}:field:{}", self.select.owner, field.unraw());
         self.shapes.insert(id.clone(), shape);
         self.slots.push(json!({"field":id,"encoding":encoding}));
     }
@@ -260,6 +263,52 @@ impl Reader<'_> {
     }
 }
 
+fn tag_numbers(
+    module: &syn::File,
+    sel: &Selection,
+) -> Result<BTreeMap<String, BTreeMap<String, u8>>> {
+    let mut result = BTreeMap::new();
+    for (tag, id) in &sel.tag_types {
+        let enums: Vec<_> = module
+            .items
+            .iter()
+            .filter_map(|item| match item {
+                Item::Enum(e) if e.ident == tag => Some(e),
+                _ => None,
+            })
+            .collect();
+        let [decl] = enums.as_slice() else {
+            return Err(format!("expected one local enum for byte tag {tag}"));
+        };
+        let mut next = Some(0u8);
+        let mut codes = BTreeMap::new();
+        for variant in &decl.variants {
+            if !matches!(variant.fields, syn::Fields::Unit) || !plain(&variant.attrs) {
+                return Err(format!("unsupported byte tag variant {}", variant.ident));
+            }
+            let value = match &variant.discriminant {
+                Some((_, Expr::Lit(lit))) => match &lit.lit {
+                    syn::Lit::Int(n) => n
+                        .base10_parse::<u8>()
+                        .map_err(|_| format!("byte tag out of range: {}", variant.ident))?,
+                    _ => return Err("non-integer byte tag".into()),
+                },
+                None => next.ok_or("byte tag overflow")?,
+                _ => return Err("unsupported byte tag expression".into()),
+            };
+            let key = format!("{id}:{}", variant.ident.unraw());
+            if codes.values().any(|v| *v == value) || codes.insert(key, value).is_some() {
+                return Err("duplicate byte tag".into());
+            }
+            next = value.checked_add(1);
+        }
+        if codes.is_empty() || result.insert(id.clone(), codes).is_some() {
+            return Err("empty or duplicate byte tag type".into());
+        }
+    }
+    Ok(result)
+}
+
 pub fn recover(source: &Path, selection: &Path, out: &Path) -> Result<()> {
     let sel: Selection = json(selection)?;
     iri(&sel.owner)?;
@@ -271,8 +320,29 @@ pub fn recover(source: &Path, selection: &Path, out: &Path) -> Result<()> {
     if hash != sel.source_sha256 {
         return Err("writer source digest mismatch".into());
     }
-    let module = syn::parse_file(std::str::from_utf8(&bytes).map_err(|e| e.to_string())?)
+    let mut module = syn::parse_file(std::str::from_utf8(&bytes).map_err(|e| e.to_string())?)
         .map_err(|e| e.to_string())?;
+    for name in &sel.module {
+        if module.attrs.iter().any(|a| {
+            a.path().is_ident("no_implicit_prelude")
+                || a.path().is_ident("cfg")
+                || a.path().is_ident("cfg_attr")
+        }) {
+            return Err("unsupported enclosing module configuration".into());
+        }
+        let mut children = module.items.into_iter().filter_map(|item| match item {
+            Item::Mod(m) if m.ident == name => Some(m),
+            _ => None,
+        });
+        let child = children
+            .next()
+            .ok_or_else(|| format!("missing inline module {name}"))?;
+        if children.next().is_some() || !plain(&child.attrs) {
+            return Err(format!("ambiguous or decorated inline module {name}"));
+        }
+        module.attrs = child.attrs;
+        module.items = child.content.ok_or("module requires compiler expansion")?.1;
+    }
     if !plain(&module.attrs) {
         return Err("conditional or nonstandard module attributes".into());
     }
@@ -282,12 +352,29 @@ pub fn recover(source: &Path, selection: &Path, out: &Path) -> Result<()> {
             return Err(format!("shadowed or rebound standard type {name}"));
         }
     }
-    if let Some(gap) = gaps
-        .iter()
-        .find(|g| !g.starts_with("unexpanded source item macro "))
-    {
-        return Err(format!("unresolved writer scope: {gap}"));
+    if let Some(gap) = gaps.first() {
+        return Err(format!(
+            "unresolved writer scope: {gap}; supply the pinned compiler expansion"
+        ));
     }
+    for item in &module.items {
+        if !super::recover::item_attrs(item).iter().all(|a| {
+            plain(std::slice::from_ref(a))
+                || [
+                    "serde",
+                    "repr",
+                    "automatically_derived",
+                    "must_use",
+                    "deprecated",
+                    "inline",
+                ]
+                .iter()
+                .any(|name| a.path().is_ident(name))
+        }) {
+            return Err("unexpanded or decorated item in writer scope; supply the pinned compiler expansion".into());
+        }
+    }
+    let tag_numbers = tag_numbers(&module, &sel)?;
     let records: Vec<_> = module
         .items
         .iter()
@@ -312,7 +399,7 @@ pub fn recover(source: &Path, selection: &Path, out: &Path) -> Result<()> {
             .attrs
             .iter()
             .all(|a| plain(std::slice::from_ref(a)) || a.path().is_ident("serde"))
-            || fields.insert(name.to_string(), &f.ty).is_some()
+            || fields.insert(name.unraw().to_string(), &f.ty).is_some()
         {
             return Err(format!("conditional or ambiguous field {name}"));
         }
@@ -346,8 +433,8 @@ pub fn recover(source: &Path, selection: &Path, out: &Path) -> Result<()> {
     if reader.slots.is_empty() {
         return Err("empty writer".into());
     }
-    let graph = json!({"format":"oddlang-ordered-field-writes-v1","owner":sel.owner,"fields":reader.slots,"fieldTypes":reader.shapes});
-    let witness = json!({"format":"oddlang-rust-record-writer-observation-v1","sourceSha256":hash,"record":sel.record,"writer":sel.writer,"graphSha256":digest(&encode(&graph)?),"externalTagTypes":sel.tag_types,"scope":"lexical","resolutionGaps":gaps});
+    let graph = json!({"format":"oddlang-ordered-field-writes-v1","owner":sel.owner,"fields":reader.slots,"fieldTypes":reader.shapes,"externalTags":tag_numbers});
+    let witness = json!({"format":"oddlang-rust-record-writer-observation-v1","sourceSha256":hash,"record":sel.record,"writer":sel.writer,"graphSha256":digest(&encode(&graph)?),"externalTagTypes":sel.tag_types,"module":sel.module,"scope":"lexical","resolutionGaps":gaps});
     publish(
         out,
         &[
