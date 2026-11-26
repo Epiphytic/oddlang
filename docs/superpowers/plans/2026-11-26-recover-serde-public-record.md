@@ -23,4 +23,4 @@ The selected record lives in a top-level sibling file module. The record and any
 
 The output files are `graph.json`, `rust.json`, and `recovery.lock`. Qualification must use independently produced Rustdoc evidence from the pinned build and an independent downstream caller to confirm Serde behavior. The linked enum's semantic contract is qualified separately by its own recovery and generation tooling.
 
-The [macOS ARM64 receipt](../../../verification/public-records/receipts/serde-recovery-aarch64-apple-darwin.json) records three native source and projection passes, six rejection controls, and byte equality for the 11 predecessor artifacts. Replay the generic native check with `python3 -B verification/public-records/recover_serde.py PATH_TO_ODDLANG`.
+The [macOS ARM64 receipt](../../../verification/public-records/receipts/serde-recovery-aarch64-apple-darwin.json) records three native source and projection passes, eight rejection controls, and byte equality for the 11 predecessor artifacts. Replay the generic native check with `python3 -B verification/public-records/recover_serde.py PATH_TO_ODDLANG`.

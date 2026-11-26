@@ -1939,3 +1939,8 @@ w:combinedRangeData a p:Task ;
 w:combinedRangeDarwin a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4a3d00c49cee5fbafd6e6cfc06110287b43bd384/verification/whole/canonical-range-data/aarch64-apple-darwin.json" .
 w:combinedRangeLinux a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4a3d00c49cee5fbafd6e6cfc06110287b43bd384/verification/whole/canonical-range-data/aarch64-unknown-linux-gnu.json" .
 w:wholeMarmishStructure p:dependsOn w:combinedRangeData .
+
+w:serdePublicRecordRootShadow a p:Finding ;
+    rdfs:label "Private crate-root declarations can hide public glob exports" ;
+    p:source w:recoverSerdePublicRecordsReceipt .
+w:recoverSerdePublicRecords p:addresses w:serdePublicRecordRootShadow .
