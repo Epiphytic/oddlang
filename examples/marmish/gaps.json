@@ -10,15 +10,6 @@
       ]
     },
     {
-      "blockedOn": "urn:oddlang:work:marmish-capability-modules",
-      "lexicalSites": 2,
-      "path": "crates/marmish-core/src/lib.rs",
-      "status": "retained-native",
-      "targets": [
-        "marmish-core:lib:marmish_core"
-      ]
-    },
-    {
       "blockedOn": "urn:oddlang:work:marmish-capability-native",
       "lexicalSites": 8,
       "path": "crates/marmish-engine/src/admission.rs",
@@ -875,15 +866,8 @@
     }
   ],
   "revision": "49fc705408a230bd0ad896248d08dbdd2faad05a",
-  "scope": "Known runtime-source lexical declaration sites outside the framing module. Macro expansions, lexical call targets and per-configuration compiled-item counts remain open.",
+  "scope": "Known runtime-source lexical declaration sites outside the regenerated modules. Macro expansions, lexical call targets and per-configuration compiled-item counts remain open.",
   "tasks": [
-    {
-      "construct": "public module and re-export resolution",
-      "fixtureToExtract": "two modules re-export a checked type",
-      "id": "urn:oddlang:work:marmish-capability-modules",
-      "negative": "reject an ambiguous or cfg-dependent re-export",
-      "positive": "public path and type identity agree"
-    },
     {
       "construct": "URL normalization and configuration validators",
       "fixtureToExtract": "a two-entry relay list",
