@@ -418,6 +418,19 @@ fn render_room_submit(
     writeln!(out, "const SUBMIT_QUEUED: &str = {:?};", model.queued).unwrap();
     writeln!(
         out,
+        "const SUBMIT_ACCEPTED_OK: bool = {};",
+        model.accepted_ok
+    )
+    .unwrap();
+    writeln!(out, "const SUBMIT_REFUSED_OK: bool = {};", model.refused_ok).unwrap();
+    writeln!(
+        out,
+        "const SUBMIT_HANDLE_FORMAT: u8 = {};",
+        model.handle_format
+    )
+    .unwrap();
+    writeln!(
+        out,
         "const SUBMIT_FAILURES: &[&str] = &{:?};",
         model.failures
     )
@@ -508,4 +521,52 @@ fn render_room_submit(
     out.push_str("    };\n    encode_submit_wire(&value).map_err(|_| SUBMIT_FAILURES[0])\n}\n");
     let SubmitIdClock::UnixSecondsU48be = model.id_clock;
     out.push_str(include_str!("room_submit.rs.in"));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn local_submission_projection_uses_the_application_spelling_and_receipt_version() {
+        let prepare = serde_json::from_value(serde_json::json!({
+            "contract":"urn:gauge:room", "configuration":"gauge.json", "maximum_config_bytes":512,
+            "operation":"reserve", "request":["action","station","routes"],
+            "reply":["valid","reading","problem","work","phase","room","node","reason","receipt"],
+            "states":["pending","reserved","refused"], "categories":["grant","route","unknown","capacity","offline"],
+            "config_fields":["mode","grants","routes","protocol"], "roles":["collect","store"],
+            "name_prefix":"reading-", "description":"Retained gauge room", "deadline_ms":150, "slot_limit":2
+        })).unwrap();
+        let submit = serde_json::from_value(serde_json::json!({
+            "contract":"urn:gauge:record","operation":"record",
+            "request":["action","station","routes","room","ticket","sample"],
+            "payload":["measurements","capture","opaque"],
+            "handle":["revision","gauge","station","room","capture","checksum"],
+            "handle_field":"receipt","queued":"committed","accepted_ok":true,"refused_ok":false,
+            "handle_format":7,"failures":["invalid","unreserved","ticket_taken","capture_taken","journal"],
+            "max_future_seconds":30,"id_clock":"unix_seconds_u48be"
+        })).unwrap();
+        let binding = serde_json::from_value(serde_json::json!({
+            "queue":["readings"],"request_type":["wire","Sample"],
+            "encode":["wire","encode_sample"],
+            "fields":["node","station","room","ticket","capture","measurements","opaque"]
+        }))
+        .unwrap();
+        let mut source = String::new();
+        render_room_submit(&mut source, &prepare, &submit, &binding);
+        syn::parse_file(&source).unwrap();
+        for expected in [
+            "#[serde(rename = \"action\")]\n    operation: String,",
+            "#[serde(rename = \"work\")]\n    command: T,",
+            "#[serde(rename = \"receipt\")]\n    handle: SubmitHandle,",
+            "#[serde(rename = \"checksum\")]\n    digest: String,",
+            "const SUBMIT_QUEUED: &str = \"committed\";",
+            "const SUBMIT_ACCEPTED_OK: bool = true;",
+            "const SUBMIT_REFUSED_OK: bool = false;",
+            "const SUBMIT_HANDLE_FORMAT: u8 = 7;",
+            "measurements: chunks,",
+        ] {
+            assert!(source.contains(expected), "missing {expected}");
+        }
+    }
 }

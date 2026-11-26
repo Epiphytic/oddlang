@@ -25,7 +25,7 @@ async fn route_room_request(
     };
     match result {
         Ok(handle) => serde_json::to_vec(&SubmitReply {
-            ok: true,
+            ok: SUBMIT_ACCEPTED_OK,
             result: (),
             error: (),
             command: SubmitAccepted {
@@ -35,7 +35,7 @@ async fn route_room_request(
         })
         .ok(),
         Err(category) => serde_json::to_vec(&SubmitReply {
-            ok: true,
+            ok: SUBMIT_REFUSED_OK,
             result: (),
             error: (),
             command: SubmitRefused {
@@ -196,7 +196,7 @@ fn persist_verified_submit(
         .map_err(submit_queue_failure)?;
     let receipt = accepted.receipt();
     Ok(SubmitHandle {
-        format: 1,
+        format: SUBMIT_HANDLE_FORMAT,
         profile: profile.to_owned(),
         remote,
         session,
