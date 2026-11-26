@@ -1,10 +1,12 @@
 //! Portable ordered public records with native name and re-export bindings.
 mod recover;
 mod root;
+mod serde_recovery;
 
 pub use recover::recover;
 pub(crate) use recover::{imports, item_type_binding};
 pub use root::recover_root;
+pub use serde_recovery::recover_serde;
 
 use crate::shared_declarations::unique_map;
 use crate::wire_schema::{digest, encode, iri, symbol, type_symbol};
