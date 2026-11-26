@@ -1944,3 +1944,22 @@ w:serdePublicRecordRootShadow a p:Finding ;
     rdfs:label "Private crate-root declarations can hide public glob exports and public-only Rustdoc can omit them" ;
     p:source w:recoverSerdePublicRecordsReceipt .
 w:recoverSerdePublicRecords p:addresses w:serdePublicRecordRootShadow .
+
+w:manualRecordAssembly a p:Finding ;
+    rdfs:label "Recovering the record fields and type links still leaves stable-ID assignment, package composition and dependency selection to the author" ;
+    p:source w:combinedRangeDarwin, w:recoverSerdePublicRecordsPlan .
+
+w:outputGapRecord p:dependsOn w:recoverSerdePublicRecords ;
+    p:evidence w:linkedRangeSourceDarwin, w:linkedRangeSourceLinux .
+w:linkedRangeSourceDarwin a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/6355ae8504a7eb64ae01fc0591f29e3879c38128/verification/whole/gap-range-recovery/aarch64-apple-darwin/receipt.json" .
+w:linkedRangeSourceLinux a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/6355ae8504a7eb64ae01fc0591f29e3879c38128/verification/whole/gap-range-recovery/aarch64-unknown-linux-gnu/receipt.json" .
+
+w:recoveredRangeWorkspace a p:Task ;
+    rdfs:label "Assemble the seven packages from the recovered range and reason" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:outputGapRecord, w:combinedRangeData, w:serdeStringChoiceRecovery ;
+    p:acceptance "Deny access to the upstream source and independently authored fallback graphs on both ARM64 hosts. Compare the complete emitted tree with the qualified workspace and account for changed graph provenance in the locks." ;
+    p:evidence w:recoveredRangeWorkspaceDarwin, w:recoveredRangeWorkspaceLinux .
+w:wholeMarmishStructure p:dependsOn w:recoveredRangeWorkspace .
+w:recoveredRangeWorkspaceDarwin a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/3d543c15a74e3927af19a75e6421578a273889c3/verification/whole/canonical-recovered-range/aarch64-apple-darwin.json" .
+w:recoveredRangeWorkspaceLinux a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/3d543c15a74e3927af19a75e6421578a273889c3/verification/whole/canonical-recovered-range/aarch64-unknown-linux-gnu.json" .
