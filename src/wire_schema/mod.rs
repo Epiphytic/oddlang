@@ -9,6 +9,7 @@ use std::{
 };
 
 mod obligations;
+pub mod protocol;
 pub mod recover;
 mod render;
 
@@ -62,7 +63,7 @@ struct Field {
     shape: Shape,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize)]
 #[serde(tag = "kind", rename_all = "kebab-case", deny_unknown_fields)]
 enum Shape {
     Bool {},

@@ -1,0 +1,17 @@
+# Canonical JSON wire operations
+
+An operation graph selects an envelope record and its adjacent union field from a pinned [JSON wire schema](json-wire-schema.md). Each endpoint selects one case and maps every nonliteral envelope field and case field to a distinct member of its native input record. A newtype case supplies one value and a unit case supplies none. Protocol constants constrain envelope fields as typed literals. The Rust binding supplies exported names, typed derive choices and native error variants. It may mark the selected envelope and union internal when no public shape, native field or digest argument exposes them, and neither owns standalone structural validation. The operation graph selects each semantic error and the associated static argument.
+
+```sh
+oddlang build wire-protocol rust SHAPE SHAPE_BINDING PROTOCOL PROTOCOL_BINDING OUTPUT
+```
+
+Decoding checks the input byte limit, parses the closed shape, checks fixed literals, and compares the input to the canonical compact re-encoding. It then selects a direction and runs its ordered validation. An invalid closed shape, field order, direction, or spelling uses the declared admission error. The byte limit belongs to the canonical frame, including all encoded fields and metadata. The native Serde value types expose their own structural deserialization semantics. For instance, a Serde record may admit positional arrays in direct deserialization while the corresponding frame still requires the canonical object representation.
+
+Encoding checks the endpoint's validation before creating or serializing a frame. Timed admission is optional. It first runs the same validation, then runs typed steps with the caller's unsigned clock. The caller chooses when to read the clock and when the timed method applies.
+
+Typed steps look up members by stable ID and compose unsigned arithmetic, equality, references, byte prefixes, optional scopes, case payload scopes, ordered uniqueness and bounded byte aggregates. Checks execute in graph order. External types must be declared by the structural contract. Foreign capabilities describe the fields, unit or unsigned result methods, and unit variants used by the rules. The Rust binding assigns their native names. An ordered call propagates the foreign error. A success-conditional step explicitly evaluates its inner rules only when the declared unsigned-returning call succeeds.
+
+Optional SHA-256 operations hash byte slices or the canonical serialization of a declared adjacent case. A case hash specifies its complete parameter mapping and its own ordered validation. Fixed-width aliases expose native byte-array types. A lower-hex adapter export uses the declared width and diagnostic.
+
+The projection publishes `wire.rs`, `projection.lock`, and `obligations.json`. The lock binds the canonical input graphs and overlays, generated source, and obligation catalog. The catalog identifies validation steps, field mappings, wire orders, foreign capabilities and digest roles. Independent peer evidence remains necessary for each role.
