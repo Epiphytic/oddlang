@@ -16,9 +16,12 @@ struct Selection {
     cargo_lock_sha256: String,
     compiler_commit: String,
     package: String,
+    #[serde(default)]
     bits: u8,
+    #[serde(default)]
     range_error: String,
     api: Binding,
+    source_module: Option<String>,
 }
 
 fn output(cmd: &mut Command) -> Result<Vec<u8>> {
@@ -267,14 +270,147 @@ fn probe(selection: &Selection) -> Result<String> {
         ))
 }
 
+pub fn recover_structure(manifest: &Path, selection: &Path, destination: &Path) -> Result<()> {
+    recover_mode(manifest, selection, destination, true)
+}
+
+fn source_module(
+    package: &Value,
+    exported: &Path,
+    selection: &Selection,
+) -> Result<(String, String)> {
+    let module = selection
+        .source_module
+        .as_deref()
+        .ok_or("structural recovery requires sourceModule")?;
+    if syn::parse_str::<syn::Ident>(module).is_err() || module.starts_with("r#") {
+        return Err("invalid source module name".into());
+    }
+    let targets = package["targets"]
+        .as_array()
+        .ok_or("missing package targets")?;
+    let libraries = targets
+        .iter()
+        .filter(|target| {
+            target["kind"]
+                .as_array()
+                .is_some_and(|kinds| kinds.iter().any(|kind| kind == "lib" || kind == "rlib"))
+        })
+        .collect::<Vec<_>>();
+    let [library] = libraries.as_slice() else {
+        return Err("expected one package library".into());
+    };
+    let root = Path::new(
+        library["src_path"]
+            .as_str()
+            .ok_or("missing package library source")?,
+    );
+    let root = root.canonicalize().map_err(|e| e.to_string())?;
+    if !root.starts_with(exported) {
+        return Err("library source escapes export".into());
+    }
+    let source = fs::read_to_string(&root).map_err(|e| e.to_string())?;
+    let parsed = syn::parse_file(&source).map_err(|e| e.to_string())?;
+    super::structural::check_scope(&parsed)?;
+    let declarations = parsed
+        .items
+        .iter()
+        .filter_map(|item| match item {
+            syn::Item::Mod(item) if item.ident == module => Some(item),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+    let [item] = declarations.as_slice() else {
+        return Err("expected one direct source module".into());
+    };
+    if item.content.is_some()
+        || item.attrs.iter().any(|a| {
+            a.path().is_ident("cfg") || a.path().is_ident("cfg_attr") || a.path().is_ident("path")
+        })
+    {
+        return Err("expected a conventional unconditional external source module".into());
+    }
+    fn direct_exports(tree: &syn::UseTree, names: &mut Vec<String>) {
+        match tree {
+            syn::UseTree::Name(name) => names.push(name.ident.to_string()),
+            syn::UseTree::Group(group) => group
+                .items
+                .iter()
+                .for_each(|item| direct_exports(item, names)),
+            _ => (),
+        }
+    }
+    let mut public = Vec::new();
+    for item in parsed.items {
+        if let syn::Item::Use(item) = item
+            && matches!(item.vis, syn::Visibility::Public(_))
+            && item
+                .attrs
+                .iter()
+                .all(|a| !a.path().is_ident("cfg") && !a.path().is_ident("cfg_attr"))
+            && item.leading_colon.is_none()
+            && let syn::UseTree::Path(path) = item.tree
+            && path.ident == module
+        {
+            direct_exports(&path.tree, &mut public);
+        }
+    }
+    if !public.contains(&selection.api.type_name) || !public.contains(&selection.api.error_type) {
+        return Err("selected value and error must be direct public module re-exports".into());
+    }
+    let file = root
+        .parent()
+        .ok_or("library source has no parent")?
+        .join(format!("{module}.rs"));
+    let file = file.canonicalize().map_err(|e| e.to_string())?;
+    let relative = file
+        .strip_prefix(exported)
+        .map_err(|_| "source module escapes export")?;
+    let text = fs::read_to_string(&file).map_err(|e| e.to_string())?;
+    Ok((relative.to_string_lossy().into_owned(), text))
+}
+
+fn render_graph(
+    s: &Selection,
+    bounds: [u64; 3],
+    messages: &std::collections::BTreeMap<String, String>,
+) -> String {
+    let [min, max, default] = bounds;
+    let mut graph = format!(
+        "@prefix c: <urn:oddlang:core:> .\n<{}> a c:OptionalUnsignedRange ; c:bits {} ; c:minimum {min} ; c:maximum {max} ; c:defaultValue {default} ; c:rangeError <{}> .\n",
+        s.api.domain, s.bits, s.range_error
+    );
+    for (id, message) in messages {
+        let literal = Literal::new_simple_literal(message);
+        graph.push_str(&format!("<{id}> a c:NamedError ; c:message {literal} .\n"));
+    }
+    graph
+}
+
 pub fn recover(manifest: &Path, selection_path: &Path, destination: &Path) -> Result<()> {
+    recover_mode(manifest, selection_path, destination, false)
+}
+
+fn recover_mode(
+    manifest: &Path,
+    selection_path: &Path,
+    destination: &Path,
+    structural: bool,
+) -> Result<()> {
     let manifest = manifest.canonicalize().map_err(|e| e.to_string())?;
     if manifest.file_name().and_then(|s| s.to_str()) != Some("Cargo.toml") {
         return Err("expected Cargo.toml".into());
     }
     let input = fs::read(selection_path).map_err(|e| e.to_string())?;
-    let s: Selection = serde_json::from_slice(&input).map_err(|e| e.to_string())?;
-    if !matches!(s.bits, 8 | 16 | 32 | 64) {
+    let mut s: Selection = serde_json::from_slice(&input).map_err(|e| e.to_string())?;
+    if structural != s.source_module.is_some() {
+        return Err("sourceModule is for structural value-domain recovery".into());
+    }
+    if structural {
+        if s.bits != 0 || !s.range_error.is_empty() {
+            return Err("structural recovery derives bits and rangeError from the source".into());
+        }
+    } else if !matches!(s.bits, 8 | 16 | 32 | 64) {
         return Err("invalid unsigned width".into());
     }
     for id in std::iter::once(&s.api.domain).chain(s.api.variants.keys()) {
@@ -288,8 +424,6 @@ pub fn recover(manifest: &Path, selection_path: &Path, destination: &Path) -> Re
     {
         return Err("invalid package name".into());
     }
-    let program = probe(&s)?;
-    let probe_sha256 = digest(program.as_bytes());
     let manifest_parent = manifest.parent().ok_or("missing manifest parent")?;
     let checkout = PathBuf::from(git_text(
         manifest_parent,
@@ -350,6 +484,21 @@ pub fn recover(manifest: &Path, selection_path: &Path, destination: &Path) -> Re
         .iter()
         .find(|p| p["name"] == s.package)
         .ok_or("unknown workspace package")?;
+    let from_source = if structural {
+        let (module_path, text) = source_module(package, &exported, &s)?;
+        let facts = super::structural::derive(&text, &s.api)?;
+        s.bits = facts.bits;
+        s.range_error = facts.range_error;
+        Some((
+            render_graph(&s, facts.bounds, &facts.errors),
+            module_path,
+            digest(text.as_bytes()),
+        ))
+    } else {
+        None
+    };
+    let program = probe(&s)?;
+    let probe_sha256 = digest(program.as_bytes());
     let compiler = String::from_utf8(output(tool(&rustc, root, &cache, &rustc).arg("-vV"))?)
         .map_err(|e| e.to_string())?;
     if !compiler
@@ -442,10 +591,7 @@ pub fn recover(manifest: &Path, selection_path: &Path, destination: &Path) -> Re
     let [min, max, default] = bounds.as_slice() else {
         return Err("invalid observed interval".into());
     };
-    let mut graph = format!(
-        "@prefix c: <urn:oddlang:core:> .\n<{}> a c:OptionalUnsignedRange ; c:bits {} ; c:minimum {min} ; c:maximum {max} ; c:defaultValue {default} ; c:rangeError <{}> .\n",
-        s.api.domain, s.bits, s.range_error
-    );
+    let mut messages = std::collections::BTreeMap::new();
     for id in s.api.variants.keys() {
         let raw = lines.next().ok_or("missing error display")?;
         if !raw.bytes().all(|b| b.is_ascii_hexdigit()) || raw.len() % 2 != 0 {
@@ -456,13 +602,30 @@ pub fn recover(manifest: &Path, selection_path: &Path, destination: &Path) -> Re
             .map(|i| u8::from_str_radix(&raw[i..i + 2], 16))
             .collect::<std::result::Result<Vec<_>, _>>()
             .map_err(|e| e.to_string())?;
-        let literal =
-            Literal::new_simple_literal(String::from_utf8(msg).map_err(|e| e.to_string())?);
-        graph.push_str(&format!("<{id}> a c:NamedError ; c:message {literal} .\n"));
+        messages.insert(
+            id.clone(),
+            String::from_utf8(msg).map_err(|e| e.to_string())?,
+        );
     }
     if lines.next().is_some() {
         return Err("unexpected observations".into());
     }
+    let observed = render_graph(&s, [*min, *max, *default], &messages);
+    let (graph, structure) = match from_source {
+        Some((graph, module, sha256)) => {
+            if graph != observed {
+                return Err("structural range and sealed native API observation disagree".into());
+            }
+            (
+                graph,
+                Some(
+                    serde_json::json!({"method":"rust-optional-unsigned-interval-v1","module":module,
+                                        "sourceSha256":sha256,"independentNativeAgreement":true}),
+                ),
+            )
+        }
+        None => (observed, None),
+    };
     clean(&checkout, &s.source_revision)?;
     let parent = destination
         .parent()
@@ -471,7 +634,10 @@ pub fn recover(manifest: &Path, selection_path: &Path, destination: &Path) -> Re
     let tmp = tempfile::tempdir_in(parent).map_err(|e| e.to_string())?;
     fs::write(tmp.path().join("domain.ttl"), graph).map_err(|e| e.to_string())?;
     let domain = super::load(tmp.path())?;
-    let receipt = serde_json::json!({"qualification":"candidate","sourceRevision":s.source_revision,"sourceTree":source_tree,"probeSha256":probe_sha256,"compilerCommit":s.compiler_commit,"cargoLockSha256":s.cargo_lock_sha256,"host":host,"profile":"release","package":s.package,"selectionSha256":digest(&input),"graphSha256":digest(&serde_json::to_vec(&domain).map_err(|e|e.to_string())?),"numericCoverage":if s.bits<=16 {"exhaustive"} else {"sampled; interval property requires independent review"}});
+    let mut receipt = serde_json::json!({"qualification":"candidate","sourceRevision":s.source_revision,"sourceTree":source_tree,"probeSha256":probe_sha256,"compilerCommit":s.compiler_commit,"cargoLockSha256":s.cargo_lock_sha256,"host":host,"profile":"release","package":s.package,"selectionSha256":digest(&input),"graphSha256":digest(&serde_json::to_vec(&domain).map_err(|e|e.to_string())?),"numericCoverage":if s.bits<=16 {"exhaustive"} else {"sampled; interval property requires independent review"}});
+    if let Some(structure) = structure {
+        receipt["structuralDerivation"] = structure;
+    }
     fs::write(
         tmp.path().join("observation.json"),
         serde_json::to_vec_pretty(&receipt).map_err(|e| e.to_string())?,
