@@ -39,6 +39,28 @@ fn run(args: &[String]) -> Result<(), String> {
         [cmd, kind, target, root, overlay, out] if cmd == "build" && kind == "value-domain" && target == "rust" => {
             oddlang::value_domain::build(root.as_ref(), overlay.as_ref(), out.as_ref())
         }
+        [group, command, graph] if group == "endpoint-set" && command == "digest" => {
+            println!("{}", oddlang::endpoint_set::digest(graph.as_ref())?);
+            Ok(())
+        }
+        [group, command, overlay] if group == "endpoint-set" && command == "overlay-digest" => {
+            println!("{}", oddlang::endpoint_set::overlay_digest(overlay.as_ref())?);
+            Ok(())
+        }
+        [command, kind, target, graph, output, flag, pin]
+            if command == "build" && kind == "endpoint-set" && target == "rust"
+                && flag == "--graph-sha256" =>
+        {
+            oddlang::endpoint_set::build(graph.as_ref(), pin, None, output.as_ref())
+        }
+        [command, kind, target, graph, overlay, output, graph_flag, graph_pin, overlay_flag, overlay_pin]
+            if command == "build" && kind == "endpoint-set" && target == "rust"
+                && graph_flag == "--graph-sha256" && overlay_flag == "--overlay-sha256" =>
+        {
+            oddlang::endpoint_set::build(
+                graph.as_ref(), graph_pin, Some((overlay.as_ref(), overlay_pin)), output.as_ref(),
+            )
+        }
         [group, kind, source, selection, overlay, variant, output]
             if group == "recover" && kind == "tagged-contract" =>
         {
@@ -349,7 +371,7 @@ fn run(args: &[String]) -> Result<(), String> {
             oddlang::targets::build(&load_model(dir)?, std::path::Path::new(out))
                 .map_err(|e| e.to_string())
         }
-        _ => Err("usage: oddlang check PROJECT | impact PROJECT IRI | build PROJECT OUTPUT | recover rust MANIFEST --profile PROFILE --out OUTPUT | recover rust-shapes MANIFEST --profile PROFILE --out OUTPUT | recover tagged-contract SOURCE SELECTION OVERLAY VARIANT OUTPUT | build json-envelope rust GRAPH OVERLAY OUTPUT | tagged-wire digest GRAPH | build tagged-wire TARGET GRAPH OUTPUT --graph-sha256 PIN | import rust-tree MANIFEST PACKAGE OUTPUT | build rust-tree BUNDLE OUTPUT --bundle-sha256 PIN".into()),
+        _ => Err("usage: oddlang check PROJECT | impact PROJECT IRI | build PROJECT OUTPUT | recover rust MANIFEST --profile PROFILE --out OUTPUT | recover rust-shapes MANIFEST --profile PROFILE --out OUTPUT | recover tagged-contract SOURCE SELECTION OVERLAY VARIANT OUTPUT | build json-envelope rust GRAPH OVERLAY OUTPUT | endpoint-set digest GRAPH | endpoint-set overlay-digest OVERLAY | build endpoint-set rust GRAPH [OVERLAY] OUTPUT --graph-sha256 PIN [--overlay-sha256 PIN] | tagged-wire digest GRAPH | build tagged-wire TARGET GRAPH OUTPUT --graph-sha256 PIN | import rust-tree MANIFEST PACKAGE OUTPUT | build rust-tree BUNDLE OUTPUT --bundle-sha256 PIN".into()),
     }
 }
 fn main() -> ExitCode {

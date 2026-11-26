@@ -1,0 +1,46 @@
+{
+  "vocabulary": "oddlang-endpoint-set-v1",
+  "id": "urn:download-mirrors:policy:v1",
+  "parser": "whatwg-url",
+  "providerHint": {"cargoPackage": "url", "version": "2.5.8"},
+  "errors": [
+    "urn:download-mirrors:empty",
+    "urn:download-mirrors:url",
+    "urn:download-mirrors:components",
+    "urn:download-mirrors:scheme",
+    "urn:download-mirrors:address",
+    "urn:download-mirrors:loopback"
+  ],
+  "empty": {"kind": "reject", "error": "urn:download-mirrors:empty"},
+  "deduplicate": true,
+  "rules": [
+    {
+      "kind": "forbidden-input", "unicodeWhitespace": true,
+      "unicodeControl": true, "characters": "", "error": "urn:download-mirrors:url"
+    },
+    {
+      "kind": "forbidden-input", "unicodeWhitespace": false,
+      "unicodeControl": false, "characters": "@", "error": "urn:download-mirrors:components"
+    },
+    {"kind": "parse", "error": "urn:download-mirrors:url"},
+    {"kind": "allowed-schemes", "schemes": ["https"], "error": "urn:download-mirrors:scheme"},
+    {
+      "kind": "url-components",
+      "forbid": ["username", "password", "query", "fragment", "port"],
+      "allowedPaths": ["/"], "error": "urn:download-mirrors:components"
+    },
+    {
+      "kind": "host-policy", "error": "urn:download-mirrors:address",
+      "dns": {
+        "syntax": "ascii-labels", "trailingDot": "strip-one",
+        "loopbackSuffixes": ["local.example"], "rewriteError": "urn:download-mirrors:url"
+      },
+      "ip": {
+        "loopback": ["127.0.0.0/8", "::1/128"],
+        "ipv4": {"deny": ["198.51.100.64/26"], "allow": ["198.51.100.0/24"], "defaultAllow": false},
+        "ipv6": {"deny": ["2001:db8:1::/48"], "allow": ["2001:db8::/32"], "defaultAllow": false}
+      }
+    },
+    {"kind": "loopback-opt-in", "error": "urn:download-mirrors:loopback"}
+  ]
+}

@@ -690,3 +690,13 @@ w:boundedJsonEnvelopeBindingReview a p:Finding ;
     rdfs:label "Reject native type names that collide with the generated module and verify public error ordinals" ;
     p:source w:boundedJsonEnvelopeFixture .
 w:boundedJsonEnvelopeProjection p:addresses w:boundedJsonEnvelopeBindingReview .
+w:endpointSetNormalization a p:Task ;
+    rdfs:label "Project ordered endpoint-set normalization to native Rust" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:evidence w:endpointSetEvidence ;
+    p:acceptance "Build a deterministic checked native set with ordered errors and declared URL, DNS, IP and deduplication policy. Compile an unrelated consumer with an external error enum and exercise boundary cases." .
+
+w:endpointSetEvidence a p:Artifact ;
+    rdfs:label "Locked offline endpoint-set qualification with an unrelated Rust consumer" ;
+    p:location "verification/endpoint-set/README.md" .
+w:wholeMarmishProtocols p:dependsOn w:endpointSetNormalization .
