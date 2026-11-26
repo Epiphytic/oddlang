@@ -1,0 +1,37 @@
+async fn read_request(stream: &mut UnixStream) -> Option<Vec<u8>> {
+    let length = stream.read_u32().await.ok()?;
+    if length == 0 || length > FRAME_LIMIT {
+        return None;
+    }
+    let mut body = vec![0; length as usize];
+    stream.read_exact(&mut body).await.ok()?;
+    serde_json::from_slice::<serde_json::Value>(&body).ok()?.is_object().then_some(body)
+}
+
+async fn handle_peer(
+    mut stream: UnixStream,
+    status: SnapshotPublisher,
+    route: impl Fn(&[u8]) -> Option<Vec<u8>>,
+) {
+    let request = tokio::time::timeout(Duration::from_millis(READ_DEADLINE), read_request(&mut stream))
+        .await.ok().flatten();
+    let is_status = request.as_deref().and_then(|body| serde_json::from_slice::<Request>(body).ok())
+        .is_some_and(|request| request.action == REQUEST);
+    let body = if is_status {
+        serde_json::to_vec(&Reply { ok: true, result: Some(Snapshot { phase: status.current() }), error: None }).ok()
+    } else {
+        request.as_deref().and_then(route).filter(|body| {
+            !body.is_empty() && body.len() <= FRAME_LIMIT as usize
+        }).or_else(|| {
+            serde_json::to_vec(&Reply { ok: false, result: None, error: Some(INVALID_REQUEST) }).ok()
+        })
+    };
+    let Some(body) = body else { return; };
+    let write = async {
+        stream.write_u32(body.len() as u32).await?;
+        stream.write_all(&body).await?;
+        stream.shutdown().await
+    };
+    let _ = tokio::time::timeout(Duration::from_millis(WRITE_DEADLINE), write).await;
+}
+

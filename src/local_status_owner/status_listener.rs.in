@@ -1,0 +1,1 @@
+    pub async fn serve_until(self, shutdown: impl Future<Output = ()>) -> Result<(), OwnerError> {
