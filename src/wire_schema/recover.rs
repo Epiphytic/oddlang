@@ -444,7 +444,7 @@ impl Observer<'_> {
     }
 }
 
-fn item_attrs(item: &Item) -> &[Attribute] {
+pub(super) fn item_attrs(item: &Item) -> &[Attribute] {
     match item {
         Item::Const(item) => &item.attrs,
         Item::Enum(item) => &item.attrs,
@@ -545,7 +545,7 @@ fn scan_imports(
     }
 }
 
-fn lexical_scope(file: &syn::File) -> (BTreeMap<String, String>, BTreeSet<String>, Vec<String>) {
+pub(super) fn lexical_scope(file: &syn::File) -> (BTreeMap<String, String>, BTreeSet<String>, Vec<String>) {
     let mut imports = BTreeMap::new();
     let mut locals = BTreeSet::new();
     let mut gaps = Vec::new();
@@ -638,6 +638,8 @@ pub fn from_source(source: &Path, selection: &Path, output: &Path) -> Result<()>
             names: BTreeMap::new(),
             derives: BTreeMap::new(),
             native_validation: BTreeMap::new(),
+            hash_views: BTreeMap::new(),
+            hash_variants: BTreeMap::new(),
             externals: config
                 .externals
                 .values()
@@ -767,6 +769,8 @@ pub fn from_source(source: &Path, selection: &Path, output: &Path) -> Result<()>
         id: config.id.clone(),
         types,
         guards: Vec::new(),
+        hash_views: Vec::new(),
+        hash_tags: BTreeMap::new(),
         unresolved: observer.gaps,
     };
     let graph = encode(&schema)?;

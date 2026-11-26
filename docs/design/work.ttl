@@ -773,3 +773,21 @@ w:nativeWirePackage a p:Task ; rdfs:label "Assemble recovered wire schemas into 
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:dependsOn w:wireByteValues, w:nativePackageAssembly, w:sharedTypedDeclarations ;
     p:acceptance "Assemble an unrelated bounded byte record and compile it locked and offline." ;
     p:status p:done ; p:evidence w:wireByteFixture .
+
+w:typedHashViews a p:Task ; rdfs:label "Project ordered typed hashing and hexadecimal record views" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:wireByteValues, w:nativePackageAssembly ;
+    p:acceptance "Project independent SHA-256 views with portable field order, binary encodings, stable enum tag identities and named validation. Qualify an unrelated native consumer with independent expected bytes and negative controls." ;
+    p:evidence w:typedHashViewsFixture .
+w:typedHashViewsFixture a p:Artifact ; p:location "verification/wire-schema/hash_views.py" .
+w:wholeMarmishProtocols p:dependsOn w:typedHashViews .
+w:typedHashIdentityReview a p:Finding ;
+    rdfs:label "Reject hash tag case IRIs that alias a view, parameter or existing declaration" ;
+    p:source w:typedHashViewsFixture .
+w:typedHashViews p:addresses w:typedHashIdentityReview .
+
+w:orderedRecordWrites a p:Task ; rdfs:label "Recover ordered binary field writes from a pinned native encoder" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Observe native field order, encoding and width without storing source and compare an independent graph consumer with original and reordered native outputs." ;
+    p:evidence w:orderedWriterFixture .
+w:orderedWriterFixture a p:Artifact ; p:location "verification/record-writer/verify.py" .
