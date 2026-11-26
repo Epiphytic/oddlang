@@ -373,7 +373,11 @@ fn validate(
             }
             if let Some(name) = &transition.fresh_id {
                 if !workflow.delivery
-                    || profile.is_none()
+                    || profile.is_none_or(|profile| {
+                        u16::from(profile.payload.timestamp_bytes)
+                            + u16::from(profile.payload.random_bytes)
+                            != 16
+                    })
                     || !arg_id(name)
                     || captures
                         .insert(name.as_str(), &REQUEST_ID)

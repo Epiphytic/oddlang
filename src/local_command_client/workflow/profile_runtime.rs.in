@@ -314,6 +314,21 @@ fn context_values(policy: &ProfileInputs, matches: &ArgMatches) -> Result<BTreeM
     }
     let doc = &policy.document;
     let (value, selected_profile, directory) = load_profile_document(policy, matches)?;
+    let destination = if policy.resume.is_some() {
+        None
+    } else {
+        let (principal, external) = matches.subcommand().ok_or(PROFILE_DESTINATION)?;
+        if !principal.starts_with("npub1") || principal.len() != 63 {
+            return Err(PROFILE_DESTINATION);
+        }
+        let remote = get_account(principal).ok_or(PROFILE_DESTINATION)?;
+        let authorized = account_set(value.get(&doc.trusted).ok_or(PROFILE_SCHEMA)?, doc.maximum_accounts)
+            .ok_or(PROFILE_SCHEMA)?;
+        if !authorized.contains(&remote) {
+            return Err(PROFILE_AUTHORITY);
+        }
+        Some((remote, external))
+    };
     let profile_route = value.get(&doc.route).and_then(Value::as_str).ok_or(PROFILE_SCHEMA)?;
     let route = matches.try_get_one::<String>(&args.route).map_err(|_| BINDING)?
         .filter(|_| explicit_argument(matches, &args.route));
@@ -334,16 +349,7 @@ fn context_values(policy: &ProfileInputs, matches: &ArgMatches) -> Result<BTreeM
     if let Some(resume) = &policy.resume {
         return resume_inputs(policy, resume, matches, &value, selected_profile, &directory);
     }
-    let (principal, external) = matches.subcommand().ok_or(PROFILE_DESTINATION)?;
-    if !principal.starts_with("npub1") || principal.len() != 63 {
-        return Err(PROFILE_DESTINATION);
-    }
-    let remote = get_account(principal).ok_or(PROFILE_DESTINATION)?;
-    let authorized = account_set(value.get(&doc.trusted).ok_or(PROFILE_SCHEMA)?, doc.maximum_accounts)
-        .ok_or(PROFILE_SCHEMA)?;
-    if !authorized.contains(&remote) {
-        return Err(PROFILE_AUTHORITY);
-    }
+    let (remote, external) = destination.ok_or(PROFILE_SCOPE)?;
     let mut raw = external.try_get_many::<OsString>("").map_err(|_| PROFILE_ARGV)?.ok_or(PROFILE_ARGV)?;
     if raw.next().map(OsString::as_os_str) != Some(OsStr::new("--")) {
         return Err(PROFILE_SEPARATOR);
