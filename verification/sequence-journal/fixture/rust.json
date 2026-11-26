@@ -1,7 +1,8 @@
 {
   "format": "oddlang-sequence-journal-rust-v1",
   "types": {
-    "urn:telemetry-queue:state": "TelemetryQueue"
+    "urn:telemetry-queue:state": "TelemetryQueue",
+    "urn:telemetry-queue:near-cursor-limit": "BoundaryQueue"
   },
   "methods": {
     "urn:telemetry-queue:usable": "usable",
@@ -15,7 +16,10 @@
     "urn:telemetry-queue:close": "close",
     "urn:telemetry-queue:view": "view",
     "urn:telemetry-queue:post": "post",
-    "urn:telemetry-queue:probe_rollback": "probe_rollback"
+    "urn:telemetry-queue:probe_rollback": "probe_rollback",
+    "urn:telemetry-queue:probe_evict_rollback": "probe_evict_rollback",
+    "urn:telemetry-queue:boundary:at_limit": "at_limit",
+    "urn:telemetry-queue:boundary:write": "write"
   },
   "errorType": "super::QueueError",
   "errorVariants": {

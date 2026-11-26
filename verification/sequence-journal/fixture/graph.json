@@ -15,6 +15,12 @@
     },
     "max-cursor": {
       "cursor": "7"
+    },
+    "absolute-max": {
+      "cursor": "18446744073709551615"
+    },
+    "no-receipts": {
+      "size": 0
     }
   },
   "errors": [
@@ -117,6 +123,15 @@
       "receiptCapacity": "max-receipts",
       "cursorLimit": "max-cursor",
       "initialCursor": "0"
+    },
+    {
+      "id": "urn:telemetry-queue:near-cursor-limit",
+      "byteCapacity": "max-bytes",
+      "recordCapacity": "max-records",
+      "appendLimit": "max-append",
+      "receiptCapacity": "no-receipts",
+      "cursorLimit": "absolute-max",
+      "initialCursor": "18446744073709551614"
     }
   ],
   "operations": [
@@ -743,6 +758,90 @@
               "bytes": {
                 "arg": "payload"
               }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "urn:telemetry-queue:probe_evict_rollback",
+      "state": "urn:telemetry-queue:state",
+      "access": "write",
+      "params": [
+        {
+          "name": "payload",
+          "type": "bytes"
+        }
+      ],
+      "result": "unit",
+      "fallible": true,
+      "cases": [
+        {
+          "id": "urn:telemetry-queue:probe_evict_rollback:0",
+          "when": [],
+          "value": {
+            "unit": true
+          },
+          "effects": [
+            {
+              "kind": "evict-receipt",
+              "error": "urn:telemetry-queue:Bounds"
+            },
+            {
+              "kind": "append",
+              "error": "urn:telemetry-queue:Bounds",
+              "bytes": {
+                "arg": "payload"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "urn:telemetry-queue:boundary:at_limit",
+      "state": "urn:telemetry-queue:near-cursor-limit",
+      "access": "read",
+      "params": [],
+      "result": "cursor",
+      "fallible": false,
+      "cases": [
+        {
+          "id": "urn:telemetry-queue:boundary:at_limit:0",
+          "when": [],
+          "value": {
+            "fact": "end"
+          },
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "urn:telemetry-queue:boundary:write",
+      "state": "urn:telemetry-queue:near-cursor-limit",
+      "access": "write",
+      "params": [
+        {
+          "name": "bytes",
+          "type": "bytes"
+        }
+      ],
+      "result": "cursor",
+      "fallible": true,
+      "cases": [
+        {
+          "id": "urn:telemetry-queue:boundary:write:0",
+          "when": [],
+          "value": {
+            "fact": "end"
+          },
+          "effects": [
+            {
+              "kind": "append",
+              "bytes": {
+                "arg": "bytes"
+              },
+              "error": "urn:telemetry-queue:Cursor"
             }
           ]
         }

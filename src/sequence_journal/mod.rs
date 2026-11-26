@@ -41,6 +41,7 @@ pub fn build(
     let stage =
         tempfile::tempdir_in(parent).map_err(|err| format!("stage journal output: {err}"))?;
     let source = render::rust(&graph, &overlay);
+    let obligations = format!("{:#}\n", obligations(&graph));
     let lock = serde_json::json!({
         "format": schema::FORMAT,
         "graphSha256": graph_pin,
@@ -49,11 +50,57 @@ pub fn build(
         "source": "sequence_journal.rs",
         "sourceSha256": hash(source.as_bytes()),
         "receiptDigest": "sha256",
+        "obligationsSha256": hash(obligations.as_bytes()),
     });
     fs::write(stage.path().join("sequence_journal.rs"), source)
+        .and_then(|()| fs::write(stage.path().join("obligations.json"), obligations))
         .and_then(|()| fs::write(stage.path().join("projection.lock"), format!("{lock:#}\n")))
         .map_err(|err| format!("write journal output: {err}"))?;
-    fs::rename(stage.path(), output).map_err(|err| format!("publish journal output: {err}"))
+    crate::native_package::publish(stage.path(), output)
+}
+
+fn obligations(graph: &Graph) -> serde_json::Value {
+    use serde_json::{Map, json};
+    let mut operations = Map::new();
+    let mut cases = Map::new();
+    for operation in &graph.operations {
+        let ids: Vec<_> = operation.cases.iter().map(|case| &case.id).collect();
+        operations.insert(
+            operation.id.clone(),
+            json!({
+                "state": operation.state,
+                "access": operation.access,
+                "params": operation.params,
+                "result": operation.result,
+                "fallible": operation.fallible,
+                "orderedCases": ids,
+            }),
+        );
+        for case in &operation.cases {
+            let outcome = match &case.reject {
+                Some(error) => json!({"error": error, "state": "unchanged"}),
+                None => json!({"result": operation.result}),
+            };
+            let effect_errors: Vec<_> = case
+                .effects
+                .iter()
+                .map(|effect| {
+                    let (kind, error, _) = effect.parts();
+                    json!({"effect": kind.replace('_', "-"), "error": error, "state": "unchanged"})
+                })
+                .collect();
+            cases.insert(
+                case.id.clone(),
+                json!({
+                    "operation": operation.id,
+                    "outcome": outcome,
+                    "effectFailures": effect_errors,
+                    "evidence": "portable-scenario-required",
+                }),
+            );
+        }
+    }
+    json!({"format": "oddlang-sequence-journal-obligations-v1", "operations": operations, "cases": cases})
 }
 
 fn load(path: &Path) -> Result<Graph> {

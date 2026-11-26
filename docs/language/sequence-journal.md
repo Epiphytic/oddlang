@@ -107,3 +107,18 @@ to variants of that external enum. Every state and operation is bound
 once. Each state type implements `Default` with its declared initial
 state. Method borrows follow `access`. Cursor and size map to `u64` and
 `usize`. Bytes enter as `&[u8]` and leave as `Vec<u8>`.
+
+```sh
+oddlang sequence-journal digest GRAPH
+oddlang sequence-journal overlay-digest OVERLAY
+oddlang build sequence-journal rust GRAPH OVERLAY OUTPUT \
+  --graph-sha256 GRAPH_DIGEST --overlay-sha256 OVERLAY_DIGEST
+```
+
+The Rust projection uses the `sha2` crate for fingerprints. Supply its
+locked version as a native package dependency. Component kind
+`sequence-journal` composes with other native package components.
+The projection lock pins generated source and `obligations.json`.
+The latter enumerates ordered case identities per operation, named
+rejections and effect failures that must leave state unchanged. A
+portable scenario is still required to demonstrate each case.
