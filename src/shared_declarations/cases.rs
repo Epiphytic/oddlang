@@ -64,8 +64,26 @@ pub(super) fn derive(graph: &Graph, binding: &Binding) -> Result<Json> {
             let rejected: Vec<_> = (0u8..=255)
                 .filter(|byte| !n.tags.values().any(|tag| tag == byte))
                 .collect();
-            cases.get_mut(&enumeration.id).unwrap()["numberAdmission"] =
-                json!({"accept":n.tags,"reject":rejected,"error":n.unknown});
+            let (owner, variant) = graph.error_variant(&n.unknown.id)?;
+            let argument = n
+                .unknown
+                .argument
+                .as_ref()
+                .map(|v| {
+                    v.as_str()
+                        .map(str::to_owned)
+                        .unwrap_or_else(|| v.to_string())
+                })
+                .unwrap_or_default();
+            let display: String = variant
+                .message
+                .iter()
+                .map(|seg| match seg {
+                    Segment::Text { text } => text.as_str(),
+                    Segment::Payload { .. } => argument.as_str(),
+                })
+                .collect();
+            cases.get_mut(&enumeration.id).unwrap()["numberAdmission"] = json!({"accept":n.tags,"reject":rejected,"error":n.unknown,"errorType":owner.id,"display":display});
         }
         for variant in &enumeration.variants {
             cases.insert(&variant.id,json!({"kind":"string-variant","wireString":variant.wire,"encode":true,"decode":true}));
