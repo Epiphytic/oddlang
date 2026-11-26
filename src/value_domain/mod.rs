@@ -14,6 +14,7 @@ use std::{
 type Result<T> = std::result::Result<T, String>;
 pub mod recover;
 mod rust;
+mod structural;
 mod typescript;
 
 #[derive(Serialize)]

@@ -39,3 +39,26 @@ pub(crate) fn error_link(binding: &[u8]) -> Result<Option<records::NativeError>>
         Binding::Captures(_) => None,
     })
 }
+
+pub(crate) fn validate_catalog_record(
+    grammar: &[u8],
+    native: &[u8],
+    catalog: &crate::local_file_catalog::Graph,
+    binding: &crate::local_file_catalog::Binding,
+) -> Result<()> {
+    let graph: Graph = serde_json::from_slice(grammar).map_err(|error| error.to_string())?;
+    let projected: Binding = serde_json::from_slice(native).map_err(|error| error.to_string())?;
+    graph.validate(&projected)?;
+    let (Some(result), Binding::Records(record)) = (&graph.record_result, &projected) else {
+        return Err("local file catalog needs one typed line record".into());
+    };
+    if graph.id != catalog.manifest_grammar
+        || graph.max_bytes != catalog.maximum_catalog_bytes
+        || record.error.id != catalog.error_id()
+        || record.error.r#type != binding.error
+        || record.error.variant != binding.invalid_variant
+    {
+        return Err("local file catalog grammar or error role differs".into());
+    }
+    result.validate_catalog_roles(&graph, record, &binding.record, catalog.asset_names())
+}

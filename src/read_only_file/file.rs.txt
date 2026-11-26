@@ -1,0 +1,75 @@
+#[allow(dead_code)]
+pub(crate) fn @OPEN@(
+    path: &::std::path::Path,
+    maximum: u64,
+) -> ::core::result::Result<::std::fs::File, @ERROR@> {
+    use ::std::os::unix::fs::{MetadataExt, OpenOptionsExt};
+    let path_type = ::std::fs::symlink_metadata(path)
+        .map_err(@ERROR@::@IO@)?
+        .file_type();
+    if !path_type.is_file() && !path_type.is_symlink() {
+        return Err(@ERROR@::@INVALID@("@UNSAFE@"));
+    }
+    let handle = ::std::fs::OpenOptions::new()
+        .read(true)
+        .custom_flags(::libc::O_NOFOLLOW | ::libc::O_CLOEXEC | ::libc::O_NONBLOCK)
+        .open(path)
+        .map_err(@ERROR@::@IO@)?;
+    let facts = handle.metadata().map_err(@ERROR@::@IO@)?;
+    if !facts.is_file() || !(1..=@MAX_LINKS@).contains(&facts.nlink()) || facts.len() > maximum {
+        return Err(@ERROR@::@INVALID@("@UNSAFE@"));
+    }
+    Ok(handle)
+}
+
+#[allow(dead_code)]
+pub(crate) fn @READ@(
+    path: &::std::path::Path,
+    maximum: u64,
+) -> ::core::result::Result<::std::vec::Vec<u8>, @ERROR@> {
+    use ::std::io::Read;
+    let handle = @OPEN@(path, maximum)?;
+    let ceiling = maximum.checked_add(1).ok_or(@ERROR@::@INVALID@("@BOUNDED@"))?;
+    let mut bytes = ::std::vec::Vec::new();
+    handle.take(ceiling).read_to_end(&mut bytes).map_err(@ERROR@::@IO@)?;
+    if bytes.len() as u64 > maximum {
+        return Err(@ERROR@::@INVALID@("@BOUNDED@"));
+    }
+    Ok(bytes)
+}
+
+#[allow(dead_code)]
+pub(crate) fn @VERIFY@(
+    path: &::std::path::Path,
+    expected_bytes: u64,
+    expected_mode: u32,
+    expected_digest: &[u8; 32],
+    check_owner_and_mode: bool,
+) -> ::core::result::Result<(), @ERROR@> {
+    use ::sha2::Digest;
+    use ::std::{io::Read, os::unix::fs::MetadataExt};
+    let handle = @OPEN@(path, expected_bytes)?;
+    let facts = handle.metadata().map_err(@ERROR@::@IO@)?;
+    if facts.len() != expected_bytes
+        || (check_owner_and_mode
+            && (facts.uid() != unsafe { ::libc::geteuid() } || facts.mode() & @MODE_MASK@ != expected_mode))
+    {
+        return Err(@ERROR@::@INVALID@("@METADATA@"));
+    }
+
+    let ceiling = expected_bytes.checked_add(1).ok_or(@ERROR@::@INVALID@("@DIGEST@"))?;
+    let mut handle = handle.take(ceiling);
+    let mut state = ::sha2::Sha256::new();
+    let mut buffer = [0u8; @CHUNK@];
+    loop {
+        match handle.read(&mut buffer).map_err(@ERROR@::@IO@)? {
+            0 => break,
+            count => state.update(&buffer[..count]),
+        }
+    }
+    let actual: [u8; 32] = state.finalize().into();
+    if handle.limit() != 1 || &actual != expected_digest {
+        return Err(@ERROR@::@INVALID@("@DIGEST@"));
+    }
+    Ok(())
+}

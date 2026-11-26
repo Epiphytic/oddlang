@@ -17,3 +17,5 @@ The Rust package must select the crates.io zeroize 1.9.1 provider and lock its d
 - [x] Compose the qualified vault package and source-recovered release metadata into the next five-member release. Replay the unchanged strict public values test and independently check exact-array ownership and drop. The separately pinned earlier five-member workspace keeps its existing acceptance evidence. [Successor native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/70)
 
 The [companion qualification](https://github.com/Epiphytic/marmish-oddlang/pull/68) records identical semantic, package and dependency seals for macOS and Linux ARM64. Each host passed the original test in both libraries. A changed array length gave E0277 when compiling the unchanged test module.
+
+- [x] Project the fixed-width value graph into a native Node TypeScript module. Confirm portable widths and failure identities, independent input and output copies, and deterministic artifacts on an unrelated fixture and the published 32-byte graph. Record on-drop erasure as unsupported on this target. [Native Node receipt](https://github.com/Epiphytic/marmish-oddlang/pull/73)

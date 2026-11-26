@@ -4,9 +4,13 @@ version = "0.1.0"
 edition = "2024"
 publish = false
 
+[features]
+public-type-bindings = []
+
 [dependencies]
 serde = { version = "=1.0.229", features = ["derive"] }
 serde_json = "=1.0.154"
+sha2 = "=0.11.2"
 
 [[bin]]
 name = "oddlang-rust-recovery-driver"

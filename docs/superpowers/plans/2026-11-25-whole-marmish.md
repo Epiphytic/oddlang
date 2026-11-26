@@ -29,6 +29,8 @@ The independent stream comparison including macro expansions left 373 compiler-o
 
 ## Implementation evidence
 
+- [x] Consolidate the 105 reviewed compiler heads. On macOS ARM64, `cargo test --locked --offline --no-fail-fast` with PostgreSQL 16.6 and the pinned HTTP and Wasm tools passed 181 tests with one ignored. Replayed the nested codec, bounded JSON and offline workspace fixtures, parsed both Turtle files and ran the ready-work query.
+
 - [x] Qualify Launch writer recovery and a changed upstream writer on both ARM64 hosts. [Changed source qualification](https://github.com/Epiphytic/marmish-oddlang/pull/29) · [Linux replay](https://github.com/Epiphytic/marmish-oddlang/pull/31)
 - [x] Observe native plaintext and TLS rejection with exact status, exit, shutdown and socket cleanup on both hosts. [Original transport evidence](https://github.com/Epiphytic/marmish-oddlang/pull/34)
 - [x] Build the copy relations and automatic status client in one native workspace. [Two-platform qualification](https://github.com/Epiphytic/marmish-oddlang/pull/36)
@@ -44,7 +46,7 @@ The independent stream comparison including macro expansions left 373 compiler-o
 
 - [x] Recover and project state-gated structured diagnostics as a native library. Match exact bytes, caller-owned value updates and sink failures in an independent source mutation fixture. [Structured diagnostics](../../language/structured-diagnostics.md)
 - [x] Compose the public API, terminal CLI and diagnostics into one sealed seven-member artifact. Replay the Darwin CLI and import inventories, preserve inherited native public behavior, and observe the help and version subset independently on native Linux ARM64. Matched 128/132 Darwin CLI cases, 71/140 Darwin imports and 82/86 Linux help/version cases. [Darwin](https://github.com/Epiphytic/marmish-oddlang/blob/37a5be63638cfc7a6796a7058313bc5c03be5519/verification/whole/converged-diagnostics-cli/aarch64-apple-darwin.json) · [Linux](https://github.com/Epiphytic/marmish-oddlang/blob/37a5be63638cfc7a6796a7058313bc5c03be5519/verification/whole/converged-diagnostics-cli/aarch64-unknown-linux-gnu.json)
-- [ ] Recover the leading-option policy and match terminal responses on both ARM64 hosts, keeping successful auxiliary operations outside the projection.
+- [x] Recover the leading-option policy and match terminal responses on both ARM64 hosts, keeping successful auxiliary operations outside the projection. Both ARM64 hosts matched all 164 scoped rows and retained the measured post-parse difference. [Darwin](https://github.com/Epiphytic/marmish-oddlang/blob/faacb6133e3db379ad037979b28261d773b37e95/verification/whole/terminal-prefix/aarch64-apple-darwin.json) · [Linux](https://github.com/Epiphytic/marmish-oddlang/blob/faacb6133e3db379ad037979b28261d773b37e95/verification/whole/terminal-prefix/aarch64-unknown-linux-gnu.json)
 
 - [x] Compose separately pinned native package contracts into one Cargo workspace with a root dependency lock. Compile a downstream caller of two generated crates and verify native binary return status. [Composition fixture](../../../verification/native-workspace/verify.py)
 - [x] Qualify acknowledged stream windows with all five upstream tests unchanged, including the three tests that inspect private storage. Compare 13,031 public observations and reject the retry-conflict mutation on Darwin ARM64. [Companion window qualification](https://github.com/Epiphytic/marmish-oddlang/pull/15)
@@ -59,7 +61,15 @@ The independent stream comparison including macro expansions left 373 compiler-o
 - [x] Project bounded positioned integrity blocks. Exercise identity, optional zlib, checked offsets, canonical serialization and declared error precedence with an unrelated native consumer. [Block profile and fixture](../../language/integrity-block.md)
 - [x] Generate shared constant, error, result and enum declarations, bind public and crate-private paths and ship declaration-keyed expectations. [Shared declarations and unrelated qualification fixture](../../language/shared-declarations.md)
 
+- [x] Build the native Rust core library from the three pinned contracts and qualify its seven unchanged integration tests on Darwin and Linux ARM64. A public caller matched 1,735 observations on each host. [Core package and receipts](https://github.com/Epiphytic/marmish-oddlang/pull/11)
+- [x] Independently recover shared stream declarations, build the compression module from its separately authored policy, and read original and generated blocks on both peers. Five unchanged codec tests pass on Darwin ARM64. [Module and qualification](https://github.com/Epiphytic/marmish-oddlang/pull/12)
+
+
+- [x] Recover selected symbolic constants, public error payloads and result aliases from a pinned source module as candidate declarations. [Recovery fixture](../../../verification/rust-recovery/test_shared_source.py)
+
+
 - [x] Assemble pinned semantic projections into a native library with private module groups, public type reexports, exact dependency closure and a separate offline consumer. [Native package contract and test](../../language/native-package.md)
+- [x] Compare the exported paths, ordered unit variants, documented inherent signatures and directly implemented trait identities of two independently compiled concrete value APIs. Run controls that alter each observed property. [Native witness fixture](../../../verification/rust-recovery/test_public_api.py)
 
 - [x] Archive ordered declaration candidates for all 72 workspace build profiles (24 per native platform). Twenty-five distinct graphs account for all cells. Reachable calls, cross-package identity and behavior still require qualification. [Reviewed archive](https://github.com/Epiphytic/marmish-oddlang/pull/8)
 - [x] Recover a checked nullable value and its public errors through the pinned Rust API, verify source provenance, and compare the native projections against an independent caller. [Recovery and projection](../../../docs/language/value-domains.md) · [Companion qualification](https://github.com/Epiphytic/marmish-oddlang/pull/7)
@@ -106,7 +116,7 @@ The principal feasibility risk is recovering intended behavior where only incide
 - [x] Project bounded tagged frame variants and a one-frame incremental decoder. [Binary frame profile](../../language/binary-frames.md)
 - [x] Qualify the complete copy protocol library against every unchanged pinned native test and exact frame error controls on macOS ARM64. [Native receipt and structural inventory](https://github.com/Epiphytic/marmish-oddlang/pull/42)
 
-- [ ] Check composite slot bounds and member types against pinned external codec contracts before package emission.
+- [x] Check composite slot bounds and member types against pinned external codec contracts before package emission. Resolve each nested stable ID to one in-package codec, verify its byte maximum and exact member types and Rust exports, and reject cycles. [File-format fixture and mismatch controls](../../../verification/binary-record/package.py)
 
 - [x] Define finite scalar views, typed checked products, and named error categories. Verify exact native value semantics, borrowed getters, private constructors and UTF-8 boundary behavior in an unrelated standalone package. [Checked value domains](../../language/checked-values.md)
 - [x] Compose the verified vault value and engine process-limit packages into the native error and release-report workspace. Build the pinned portable closure with source reads and network denied on macOS ARM64. Compare the unchanged copy protocol tests, vault and error callers, process-limit observations and release-report cases. [Five-member native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/67)
@@ -130,3 +140,48 @@ The principal feasibility risk is recovering intended behavior where only incide
 
 - [x] Exercise the range record and its linked reason in the seven-package workspace. Both ARM64 hosts matched 35 value and diagnostic cases, compiled the public path and rejected the private path. Both Cargo locks and the six other member locks were preserved. [Workspace evidence](https://github.com/Epiphytic/marmish-oddlang/pull/123)
 - [x] Select the recovered record and linked choice in the seven-package manifest. Compare the full tree with the previously qualified generated workspace on both ARM64 hosts. All 84 Rust files match, and the two changed lockfiles identify the new graph inputs. [Recovered workspace evidence](https://github.com/Epiphytic/marmish-oddlang/tree/3d543c15a74e3927af19a75e6421578a273889c3/verification/whole/canonical-recovered-range)
+
+- [x] Recover typed array elements, fixed extents and const-parameter identity in the structural graph. Verify nested, empty, symbolic and source-mutated arrays in the [compiler fixture](../../../verification/rust-recovery/test_shapes.py).
+- [x] Reconcile the ARM64 stream array refinement against the v1 release and independently compare rustdoc-visible element types and extents. [63 resolved fields and scoped evidence](https://github.com/Epiphytic/marmish-oddlang/pull/45)
+- [x] Inventory named runnable and ignored cases for all compiled default release harnesses on the two ARM64 hosts. [Named reference suites](https://github.com/Epiphytic/marmish-oddlang/pull/43)
+- [x] Complete the original Linux ARM64 default release run in a private checkout and bind it to the named harness inventory. [887 passed and five ignored](https://github.com/Epiphytic/marmish-oddlang/pull/47)
+
+- [x] Derive ordered field equality from a pinned compiler observation. Qualify a source mutation with an independent native fixture and emit explicit unresolved evidence for unsupported equality. [Recovery profile](../../language/field-relations.md#compiler-backed-recovery-of-direct-conjunctions) · [Upstream source mutation and native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/48)
+- [x] Check composite slot bounds and member types against pinned external codec contracts before package emission. The v5 stream member retains its published lock. [Manifest linkage and negative controls](https://github.com/Epiphytic/marmish-oddlang/pull/52)
+- [x] Build from the graph and an initially empty Cargo home using only the locked third-party dependencies, then rebuild offline and compare the workspace lock. Both ARM64 hosts regenerated the same v5 workspace from 55 pinned inputs and passed 34 parser cases per role. [Clean-build receipts](https://github.com/Epiphytic/marmish-oddlang/pull/50)
+
+- [x] Recover frame discriminator and payload correspondence from the pinned Rust encoder. Rebuild the ordered frame graph, inventory unresolved effects per variant, and compare native bytes after source substitution. [Recovery profile](../../language/binary-frames.md#compiler-backed-encoder-structure) · [Native encoder and source-mutation evidence](https://github.com/Epiphytic/marmish-oddlang/pull/51)
+
+- [x] Recover ordered encoder preconditions and named errors from the pinned compiler. Check simultaneous failures, valid bytes and an upstream precedence mutation with independent native callers. [Frame preflight profile](../../language/binary-frames.md#compiler-backed-encoder-preflight) · [Native first-error mutation receipt](https://github.com/Epiphytic/marmish-oddlang/pull/55)
+
+- [x] Recover checked encoder delegation and ordered record fragments through compiler evidence. Compare both fragment source mutations and separately retain validator and decoder obligations. [Checked fragment recovery](../../language/binary-frames.md#compiler-backed-checked-record-fragments) · [Native fragment mutation receipt](https://github.com/Epiphytic/marmish-oddlang/pull/59)
+
+
+- [x] Qualify the standalone vault metadata and pure value API using original and generated native callers. Compare compiler shapes, private field admission and a UTF-8 byte-limit mutation. [Vault native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/63)
+
+### Plain closed value choices
+
+- [x] Recover a pinned ordinary public fieldless enum into ordered case
+  identities. Project the choice as a Rust enum with declaration-order casts,
+  copyable values and case equality. Keep representation tables and wire
+  formats outside this choice profile.
+- [x] Compare native original and generated consumers of the standalone
+  identity choice, including a source-only order mutation, exhaustive matches,
+  trait checks and forbidden capabilities. Repeat the projection with an
+  unrelated source fixture.
+
+The structural profile admits only an ordinary public, non-generic Rust enum
+with implicit discriminants and the standard Clone, Copy, PartialEq and Eq
+derives. Inline cases with fields, explicit representation, additional traits,
+and conditional variants are unsupported. The pinned source excludes item macros
+and bindings that add implementations involving the choice. Recovery records file provenance and
+a native name-resolution and trait witness obligation. Existing checked records
+derive Debug and cannot embed this kind of choice without another record
+capability profile.
+
+- [x] Compare the direct external dependency selected for every alias in the release compiler and rustdoc observers. Exercise two versions of a path package and a host proc-macro in an independent fixture; swapping the aliases while retaining their spellings must change the binding comparison. [Observer fixture](../../../verification/rust-recovery/test_release_rustdoc.py)
+
+- [x] Compare declared visibility for paired module-level items and record or union fields (including tuple positions), resolving crate and ancestor module scopes across compiler and Rustdoc. Detect source changes that preserve a field name and widen its audience. [Release observer fixture](../../../verification/rust-recovery/test_release_rustdoc.py)
+- [x] Archive the original and generated core-library ownership and visibility observations on both ARM64 hosts. Bind the six downstream type names to their actual declaration paths and component pins. [Two-host observations and component pins](https://github.com/Epiphytic/marmish-oddlang/tree/10926d822bb9aa3a16b20ef35cfc63bebd586780/verification/whole/core-lexical)
+- [x] Resolve the six core type IDs to their pinned components and semantic declarations without reading native bindings. Verify identical query results after removing all Rust binding nodes and detect an aggregate error bound to the wrong component. [Node replay](https://github.com/Epiphytic/marmish-oddlang/blob/a1f0de219d60d2baa962a8f7fa5403525ac7f7f5/verification/whole/core-ownership/retention-node.json)
+- [x] Measure public inherent member names for the six core type pairs and compile caller controls. Record declaration paths, receiver exclusions, and any missing or extra names. [Two-host native caller controls](https://github.com/Epiphytic/marmish-oddlang/tree/9caf478ba084416195fbf7f3279eb516d44478a3/verification/whole/core-inherent).

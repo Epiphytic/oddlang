@@ -71,7 +71,7 @@ at the declaration level.
 
 ## Same-profile declaration comparison
 
-`release_rustdoc.py` runs the compiler adapter and a separate private-item rustdoc JSON pass with Rust 1.97.1. Both must use the pinned compiler commit and requested target. The verifier compares the actual Cargo invocations' edition, crate kind, feature and build-script cfg flags, code generation settings affecting cfg, external dependency aliases and remapped workspace root. It forwards the compiler's optimization and assertion settings because Cargo's release rustdoc command can omit them. The unstable JSON switch is enabled only in the rustdoc subprocess. Rustdoc implicitly selects `cfg(doc)`; the report and fixture preserve that difference. Run the fixture with `python3 -B verification/rust-recovery/test_release_rustdoc.py`.
+`release_rustdoc.py` runs the compiler adapter and a separate private-item rustdoc JSON pass with Rust 1.97.1. Both must use the pinned compiler commit and requested target. The verifier compares the actual Cargo invocations' edition, crate kind, feature and build-script cfg flags, code generation settings affecting cfg, direct external dependency bindings and remapped workspace root. It forwards the compiler's optimization and assertion settings because Cargo's release rustdoc command can omit them. The unstable JSON switch is enabled only in the rustdoc subprocess. Rustdoc implicitly selects `cfg(doc)`; the report and fixture preserve that difference. Run the fixture with `python3 -B verification/rust-recovery/test_release_rustdoc.py`.
 
 ```sh
 python3 -B verification/rust-recovery/release_rustdoc.py /path/to/workspace package \
@@ -80,7 +80,12 @@ python3 -B verification/rust-recovery/release_rustdoc.py /path/to/workspace pack
 
 The semantic comparison uses enclosing declared names and normalized categories. It preserves collisions and counts observations with missing identity by original kind. Declaration witnesses carry each observer's file and starting line. The separate `spanEvidence` section retains the historical diagnostic method. Supply `--previous-spans PATH` with a prior `reconcile_rustdoc.py` report to track each original one-sided key.
 
-A path match verifies the presence of a named declaration at this ownership boundary. It does not qualify its type, layout, body or effects. The current mapping needs additional identity rules for impl-owned items, generic parameters and anonymous or synthetic items. Aliases are compared by name. Dependency instance and content reconciliation remains open. Cargo build scripts can observe their environment, and macro expansion differs between documentation and code-generation interfaces.
+A path match verifies the presence of a named declaration at this ownership boundary. It does not qualify its type, layout, body or effects. The current mapping needs additional identity rules for impl-owned items, generic parameters and anonymous or synthetic items. For each direct alias, the report traces the exact supplied artifact to a compiler invocation in that observer's fresh build and its package in locked Cargo metadata. The recorded binding includes the producer's crate name, crate type, explicit target and cfg values, package name and version, and registry/Git source or relative path. A host proc-macro has an empty explicit target list. An unresolved or ambiguous selected artifact rejects the comparison. Hosts can compile build dependencies absent from the selected target’s metadata. The fixture exercises this distinction when the Rust 1.97.1 `wasm32-wasip1` target is installed. This check covers direct dependency selection. Transitive compilation-unit identity and content hashing for path dependencies remain open. Cargo build scripts can observe their environment, and macro expansion differs between documentation and code-generation interfaces.
+
+### Declared visibility
+
+For uniquely paired module-level declarations and struct or union fields (including tuple positions), `comparison.declaredAccess` reports each observer’s declared access as public or restricted to a named module. Both `pub(super)` and a Rustdoc restriction referring to the same ancestor resolve to that module path. A missing scope stays unresolved. A declaration can match by name and differ in access. The report counts other uniquely matched declaration kinds outside the comparison. Rust re-exports and the visibility of enclosing items can further affect which paths an external caller can use; those require separate checks.
+
 ## Ordered data shapes
 
 The same pinned Cargo profile can recover a candidate data shape graph.
@@ -101,7 +106,7 @@ keep their IDs when moved within the same owner. Tuple fields use positional
 identities. Declarations are sorted by ID and field, variant, parameter and
 argument positions are zero-based. Source positions are absent from the graph.
 
-The `oddlang-data-shapes-v1` vocabulary describes products, sums and unions
+The `oddlang-data-shapes-v2` vocabulary describes products, sums and unions
 through ordered members, nested types and nominal references. Fixed-width
 scalars carry widths in bits. Pointer-sized integers carry the selected
 target's width. References identify shared or exclusive borrowing and name
@@ -111,10 +116,47 @@ Named types retain the compiler-resolved definition and bind each argument
 to its declared parameter. A graph consumer can use these observations to
 author a portable type contract and map nominal references to contract IDs.
 
-The graph reports owner-scoped gaps for array lengths, constant arguments,
+An array retains its element shape and a target-evaluated fixed count, a reference to the declaring constant parameter, or an unresolved extent with an owner-scoped gap. Nested arrays retain each dimension. Locks from pinned v1 adapters retain the v1 vocabulary.
+
+The graph reports owner-scoped gaps for unresolved array lengths, constant arguments,
 unsupported types and lifetimes, raw pointer provenance, explicit
 discriminants, union active fields and generic constraints or defaults. The
 candidate also leaves visibility, export paths, stable workspace package
 instances and native layout open. It covers local data declarations for
 the selected profile. Library type internals, behavioral effects, generic
 satisfaction and compatibility across profiles still require evidence.
+
+### Compare a concrete public value API
+
+Build a public rustdoc JSON document for each library with the same pinned 1.97.1 toolchain, target and flags. Run `oddlang inspect native-value-api FILE.json` on each and compare the output. This independent native witness resolves private-module reexports to their public root names. It records the order of unit enum variants, private tuple arity, inherent method parameter/return types, receiver and borrow mode, associated constant types and non-blanket trait identities including auto traits. Parameter names and private module names can change without changing the comparison. The extractor rejects public shapes outside this small vocabulary. Public rustdoc omits callable items marked `#[doc(hidden)]`. The witness also omits trait associated types, trait method bodies and overrides, constant values, layout, blanket impls and attributes including `#[non_exhaustive]`. Equality covers the recorded observations only. Runtime obligations cover values and behavior.
+
+Run `python3 verification/rust-recovery/test_public_api.py /path/to/oddlang` for the unrelated native fixture. The numeric rustdoc references, source spans and code bodies never enter the witness.
+
+### Recover shared value declarations
+
+`oddlang recover shared-declarations CHECKOUT SELECTION.json NEW_DIRECTORY` reads one Git blob at a full commit ID. The selector assigns contract IRIs to chosen public names and error variants. Source changes to numeric literals, multiplication, references, supported integer maxima, error payloads, display literals, declaration order and Result targets change the semantic graph or the native overlay. The output includes source and selection digests. No compiler invocation is needed for this source-level candidate. The native binding accepts public u8/u16/u32/u64/usize constants, and errors deriving Debug, Clone, Copy, PartialEq, Eq and thiserror::Error. A native build is required to verify constant expression type checking and overflow at the selected target width. Its subset excludes conditional items, nonliteral display formatting, generic errors and payload types beyond the documented primitives. A pinned native build and independent consumer qualify inferred facts and platform-dependent types. Module resolution, macro expansion and the binding of the derive attribute to its actual dependency require a separate build witness.
+
+Run `python3 verification/rust-recovery/test_shared_source.py /path/to/oddlang` for positive revision controls and rejecting cases.
+
+### Cross-library imports
+
+Run `probe_consumer_paths.py EXPECTED_EXPORTS SUBJECT_GRAPH_DIRECTORY SUBJECT_CARGO_TOML TARGET_DIRECTORY RECEIPT` to compile independent downstream imports from one public type graph against a second library. Use an existing qualification's native Cargo target directory to reuse dependencies. The subject directory contains its `exports.json` and `exports.lock`. Each receipt records membership in the subject type namespace separately from whether a Rust import compiles. An import can succeed after replacement by a value. Other compiler failures outside missing paths, privacy and the ambiguity lint stop qualification. Callers responsible for a release qualification must also verify the checked-out or generated source tree against their source pin.
+
+The observer verifies the adjacent export locks, compiler and native target. For the subject it checks package selection, workspace entry, recorded Cargo configuration and optional source revision. It builds in the same Cargo configuration directory used by extraction. Ambiguous candidates are reported separately; an ordinary import may resolve in another namespace even when the subject graph has no corresponding type. Constructor and pattern access require separate consumers.
+
+The receipt pins both export locks. Unresolved expected spellings, including anonymous imports that cannot be named by an ordinary downstream caller, are listed separately from the imports that were compiled.
+
+Pass `--public-inherent` to include `rustdocPublicInherent` in the release
+report. It records declared-public functions, associated constants and
+associated types on concrete local records, enums and unions. Each entry
+has the declaring type's lexical owner path, the Rustdoc kind and the item
+name. The default report is unchanged. Inspect the separate declaration and
+downstream import evidence to determine which type names are reachable.
+
+Trait implementations belong to a different surface. Generic definitions,
+specialized receivers, constrained implementations and receivers without a
+local nominal declaration path are excluded from this observation. The
+report counts excluded local inherent implementations present in the Rustdoc index. A separate Rustdoc pass includes private and documentation-hidden declarations. Rustdoc sets `cfg(doc)` and can omit block-local and nonnominal implementations entirely. The counts describe this index. Item
+names alone do not establish signature or behavioral equivalence. The
+independent fixture compiles a caller and checks rustc's rejection of a
+private method and a method used with the wrong type argument.

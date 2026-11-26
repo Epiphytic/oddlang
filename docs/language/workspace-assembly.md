@@ -193,3 +193,42 @@ and discard them, declare `readPolicy` with
 projection delegates the exact JSON diagnostics to the bound Serde provider.
 This policy applies only to the declared public data record. Closed protocol
 schemas and conservative Rust source recovery keep their existing behavior.
+
+`oddlang recover observed-buffered-input OBSERVATION STRUCTURAL_SELECTION TRACE OUTPUT`
+pairs the same compiler shape observation with controlled native evidence
+for the three existing policies. The structural selector supplies
+`declaration`, `id` and `fields`. The receipt distinguishes compiler-observed
+structure, trace-inferred policies and provider assumptions. The output
+graph and overlay use the existing buffered-input formats.
+See the [trace contract](../superpowers/specs/2026-11-26-observed-buffered-input.md).
+
+### Bounded local JSON test input
+
+A bounded JSON input component declares one maximum byte count, a record
+count, LF termination and guard precedence. The byte limit applies to
+each JSON value or line and includes its delimiter. With duplicate object
+members, the last value wins. Remaining JSON value behavior uses the pinned
+native provider.
+
+The Rust binding names two existing unit errors. The native package checks
+their declaration identities and keeps the parser private under test
+configuration. Recovery accepts pinned boundary observations, including
+observed reader consumption at the limit. Compile the original private case
+only after the sealed library has been assembled.
+
+Native package manifests may bind an offline test-only library through
+`devDependencies`. It uses the same version and source declaration as
+`dependencies` and renders as Cargo's `[dev-dependencies]`. Names cannot
+collide with ordinary dependencies or declared workspace siblings. A bounded
+JSON component can bind its pinned provider as a development dependency.
+
+A local file catalog may bind the typed result of a bounded line grammar
+and a crate-private read-only descriptor policy. The graph declares basename
+families, their suffix, the fixed catalog name, the naming anchor, the ordered
+literal artifact names and the caller-supplied SHA-256 check. The selector
+counts matching UTF-8 names before it reads or parses one, including names
+whose bytes would fail the grammar. Ownership and low-mode checks apply to
+the fixed-name branch. Native bindings select
+the typed parser, asset fields and file policy. Assembly checks the grammar
+and policy identities, constructor order, field widths, error roles and
+private exports. The contract operates on inert local files.

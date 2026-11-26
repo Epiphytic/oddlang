@@ -8,8 +8,14 @@ extern crate rustc_middle;
 extern crate rustc_span;
 extern crate rustc_type_ir;
 
+#[cfg(feature = "public-type-bindings")]
+mod export_model;
+#[cfg(feature = "public-type-bindings")]
+mod exports;
 mod shape_model;
 mod shapes;
+mod relations;
+mod tagged_frame;
 
 use std::collections::BTreeSet;
 use std::{env, fs, process};
@@ -598,6 +604,49 @@ struct Recovery;
 
 impl Callbacks for Recovery {
     fn after_analysis<'tcx>(&mut self, _compiler: &Compiler, tcx: TyCtxt<'tcx>) -> Compilation {
+        if let Ok(selection) = env::var("ODD_RECOVERY_TAGGED_FRAME_FRAGMENTS") {
+            let compiler = env::var("ODD_RECOVERY_COMPILER").expect("compiler commit");
+            let output = env::var_os("ODD_RECOVERY_OUT").expect("frame fragment destination");
+            let file = fs::File::create_new(output).expect("create frame fragment observation");
+            serde_json::to_writer(file, &tagged_frame::observe_fragments(tcx, &compiler, &selection))
+                .expect("serialize frame fragment observation");
+            return Compilation::Continue;
+        }
+        if let Ok(selection) = env::var("ODD_RECOVERY_TAGGED_FRAME_GUARDS") {
+            let compiler = env::var("ODD_RECOVERY_COMPILER").expect("compiler commit");
+            let output = env::var_os("ODD_RECOVERY_OUT").expect("frame guard destination");
+            let file = fs::File::create_new(output).expect("create frame guard observation");
+            serde_json::to_writer(file, &tagged_frame::observe_guards(tcx, &compiler, &selection))
+                .expect("serialize frame guard observation");
+            return Compilation::Continue;
+        }
+        if let Ok(method) = env::var("ODD_RECOVERY_TAGGED_FRAME") {
+            let compiler = env::var("ODD_RECOVERY_COMPILER").expect("compiler commit");
+            let output = env::var_os("ODD_RECOVERY_OUT").expect("tagged frame destination");
+            let file = fs::File::create_new(output).expect("create tagged frame observation");
+            serde_json::to_writer(file, &tagged_frame::observe(tcx, &compiler, &method))
+                .expect("serialize tagged frame observation");
+            return Compilation::Continue;
+        }
+        if let Ok(method) = env::var("ODD_RECOVERY_FIELD_CONJUNCTION") {
+            let compiler = env::var("ODD_RECOVERY_COMPILER").expect("compiler commit");
+            let output = env::var_os("ODD_RECOVERY_OUT").expect("field conjunction destination");
+            let file = fs::File::create_new(output).expect("create field conjunction observation");
+            serde_json::to_writer(file, &relations::observe(tcx, &compiler, &method))
+                .expect("serialize field conjunction observation");
+            return Compilation::Continue;
+        }
+        #[cfg(feature = "public-type-bindings")]
+        if env::var_os("ODD_RECOVERY_TYPE_EXPORTS").is_some() {
+            let compiler = env::var("ODD_RECOVERY_COMPILER").expect("compiler commit");
+            let output = env::var_os("ODD_RECOVERY_OUT").expect("export observation destination");
+            serde_json::to_writer(
+                fs::File::create_new(output).expect("create export observation"),
+                &exports::observe(tcx, compiler),
+            )
+            .expect("serialize export observation");
+            return Compilation::Continue;
+        }
         if env::var_os("ODD_RECOVERY_DATA_SHAPES").is_some() {
             let compiler = env::var("ODD_RECOVERY_COMPILER").expect("compiler commit");
             let output = env::var_os("ODD_RECOVERY_OUT").expect("shape observation destination");
