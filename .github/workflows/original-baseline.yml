@@ -1,0 +1,50 @@
+name: Native Linux original baseline
+on:
+  push:
+    branches: [verify/original-linux-amd64]
+permissions:
+  contents: read
+jobs:
+  observe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Prepare pinned native workspace
+        env:
+          REVISION: af54339d250290490d62d4475a77539b7e739071
+        run: |
+          set -eu
+          test "$(uname -m)" = x86_64
+          git init "$RUNNER_TEMP/reference"
+          git -C "$RUNNER_TEMP/reference" fetch --depth=1 https://github.com/Epiphytic/marmish "$REVISION"
+          git -C "$RUNNER_TEMP/reference" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/reference" rev-parse HEAD)" = "$REVISION"
+          rustup toolchain install 1.97.1 --profile minimal
+          cargo +1.97.1 fetch --locked --manifest-path "$RUNNER_TEMP/reference/Cargo.toml"
+      - name: Repeat public stream tests in both Cargo profiles
+        run: |
+          set -eu
+          mkdir "$RUNNER_TEMP/receipts"
+          for profile in dev release; do
+            python3 -B examples/marmish/portable-oracle/run.py --upstream "$RUNNER_TEMP/reference" \
+              --original-target x86_64-unknown-linux-gnu --original-revision af54339d250290490d62d4475a77539b7e739071 \
+              --original-profile "$profile" --receipt "$RUNNER_TEMP/receipts/$profile.json"
+          done
+          python3 - "$RUNNER_TEMP/receipts" <<'PY'
+          import json, pathlib, sys
+          old = json.loads(pathlib.Path('examples/marmish/portable-oracle/original-receipt.json').read_bytes())
+          for p in pathlib.Path(sys.argv[1]).glob('*.json'):
+              new = json.loads(p.read_bytes())
+              for key in ('publicObservationSha256', 'priorCases', 'authoredCases', 'seededCases',
+                          'mixedBinaryAndJson', 'negativeControls', 'freezeSha256'):
+                  if old[key] != new[key]:
+                      raise SystemExit(f"{p.name}: {key} differs from independent baseline")
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: original-linux-amd64
+          path: ${{ runner.temp }}/receipts
+          if-no-files-found: error
