@@ -1740,3 +1740,7 @@ w:serdeStringChoiceRecovery a p:Task ;
     p:acceptance "Recover a checked shared-declarations graph and disjoint Rust bindings from pinned source and qualify target semantics and a true source mutation with native consumers." .
 w:serdeStringChoiceRecoveryFixture a p:Artifact ;
     p:location "verification/serde-string-choice/verify.py" .
+w:serdeStringChoiceDeriveFixtureReview a p:Finding ;
+    rdfs:label "Exercise qualified Serde derives and reject explicit stock-derive or macro-use shadows" ;
+    p:source w:serdeStringChoiceRecoveryFixture .
+w:serdeStringChoiceRecovery p:addresses w:serdeStringChoiceDeriveFixtureReview .

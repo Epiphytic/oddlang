@@ -92,6 +92,9 @@ fn main() {{
         ("baseline", SOURCE, [("Marsh", "wet-ground"), ("Granite", "Granite")], False),
         ("changed", CHANGED, [("Granite", "Granite"), ("Marsh", "shallow-marsh")], False),
         ("copy", SOURCE.replace("Clone,", "Clone, Copy,"), [("Marsh", "wet-ground"), ("Granite", "Granite")], True),
+        ("qualified", "\n".join(SOURCE.splitlines()[1:]).replace(
+            "WireSerialize, Deserialize", "::serde::Serialize, serde::Deserialize"),
+         [("Marsh", "wet-ground"), ("Granite", "Granite")], False),
     ):
         work = recover(source, label)
         repeated = recover(source, label + "-repeat")
@@ -121,5 +124,7 @@ fn main() {{
             "rename-all", "unsupported enum attribute")
     recover(SOURCE + "\nimpl Terrain { pub fn extra(&self) {} }", "extra-impl", "selected enum has an additional binding")
     recover(SOURCE + "\nuse local::*;", "glob", "unsupported derive scope")
+    recover(SOURCE + "\nuse std::clone::Clone as Debug;", "stock-shadow", "shadowed Serde or stock derive")
+    recover(SOURCE + "\n#[macro_use] mod extra {}", "macro-use", "unsupported derive scope")
 
 print("Pinned Serde string choices, native capabilities, spelling/order mutation and rejection controls pass.")
