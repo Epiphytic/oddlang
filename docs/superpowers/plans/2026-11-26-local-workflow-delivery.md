@@ -6,4 +6,10 @@
 
 - [x] Freeze the original local queued, poll and consume behavior using the exact pinned client and the fixed binary fixture.
 - [x] Verify reusable checked embedded replies and ordered binary output with a workflow fixture that has no Marmish role.
-- [ ] Integrate the bounded generated Marmish client handoff and compare output, delivery cursors and failure behavior against the independent reference.
+- [x] Integrate the bounded generated Marmish client handoff and compare output, delivery cursors and failure behavior against the independent reference.
+
+## Multi-poll and handle handoff
+
+- [x] Generate fresh IDs after authenticated submit and cursor lookup. Bind each response, output range, prior cursor pair and consumption acknowledgement before advancing.
+- [x] Preserve named failure and detached handle bytes. Resume the explicit handle with the selected private profile, without issuing a new submit.
+- [x] Compose the delivery workflow with the prepared generated owner and generated typed response validators. Replay finite chunks, detached resume and refusals against an independent counterpart.

@@ -38,6 +38,7 @@ pub(super) struct Step {
     pub(super) id: String,
     pub(super) request: Vec<Field>,
     pub(super) embedded: Option<EmbeddedReply>,
+    pub(super) reject: Option<Rejection>,
     pub(super) transitions: Vec<Transition>,
 }
 
@@ -93,6 +94,10 @@ pub(super) struct Transition {
     pub(super) carry: Vec<String>,
     #[serde(default)]
     pub(super) outputs: Vec<BinaryOutput>,
+    pub(super) fresh_id: Option<String>,
+    pub(super) record: Option<Record>,
+    #[serde(default)]
+    pub(super) flags: std::collections::BTreeMap<String, bool>,
     pub(super) effect: Effect,
 }
 
@@ -104,6 +109,7 @@ pub(super) struct Predicate {
     pub(super) equals: Option<Value>,
     pub(super) equals_source: Option<Source>,
     pub(super) equals_path: Option<Vec<String>>,
+    pub(super) one_of: Option<Vec<Value>>,
 }
 
 fn present<'de, D: serde::Deserializer<'de>, T: Deserialize<'de>>(
@@ -119,6 +125,32 @@ pub(super) struct EmbeddedReply {
     pub(super) bytes: Vec<String>,
     pub(super) sha256: Vec<String>,
     pub(super) maximum_bytes: u32,
+    pub(super) tagged: Option<Tag>,
+    #[serde(default)]
+    pub(super) wire_check: bool,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Tag {
+    pub(super) path: Vec<String>,
+    pub(super) value: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Record {
+    pub(super) id: String,
+    pub(super) prefix: String,
+    pub(super) source: Source,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Rejection {
+    pub(super) id: String,
+    pub(super) diagnostic: Diagnostic,
+    pub(super) record: Option<Record>,
 }
 
 #[derive(Deserialize)]
@@ -128,6 +160,8 @@ pub(super) struct BinaryOutput {
     pub(super) channel: OutputChannel,
     pub(super) bytes: Vec<String>,
     pub(super) cursor: Vec<String>,
+    pub(super) start: Option<String>,
+    pub(super) upper: Option<Vec<String>>,
     pub(super) maximum_bytes: u32,
 }
 
@@ -146,7 +180,7 @@ pub(super) struct Capture {
     pub(super) value_kind: CaptureKind,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Eq, PartialEq)]
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
 pub(super) enum CaptureKind {
     LowerHex { bytes: u8 },

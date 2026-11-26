@@ -187,7 +187,7 @@ fn read_command_stdin(maximum: usize, timeout: Duration) -> Result<Vec<u8>, Fail
 fn load_profile_document<'a>(
     policy: &'a ProfileInputs,
     matches: &'a ArgMatches,
-) -> Result<(Value, &'a str), Failure> {
+) -> Result<(Value, &'a str, File), Failure> {
     let doc = &policy.document;
     let args = &policy.arguments;
     let base = matches.try_get_one::<PathBuf>(&args.state).map_err(|_| BINDING)?
@@ -237,7 +237,61 @@ fn load_profile_document<'a>(
             return Err(PROFILE_SCHEMA);
         }
     }
-    Ok((value, profile))
+    Ok((value, profile, profile_dir))
+}
+
+fn resume_inputs(
+    policy: &ProfileInputs, resume: &profile_schema::Resume, matches: &ArgMatches,
+    configuration: &Value, profile: &str, directory: &File,
+) -> Result<BTreeMap<String, Value>, Failure> {
+    let child = matches.subcommand_matches(&resume.command).ok_or(PROFILE_SCOPE)?;
+    let text = child.try_get_one::<String>(&resume.handle_argument).map_err(|_| BINDING)?
+        .filter(|_| explicit_argument(child, &resume.handle_argument)).ok_or(PROFILE_SCOPE)?;
+    if text.len() > resume.maximum_handle_bytes as usize { return Err(PROFILE_SCOPE); }
+    let strict_json::Strict(handle) = serde_json::from_str(text).map_err(|_| PROFILE_SCOPE)?;
+    let keys = &resume.handle_fields;
+    if !handle.as_object().is_some_and(|fields| fields.len() == 6)
+        || handle.get(&keys.version_key).and_then(Value::as_u64) != Some(u64::from(keys.version))
+        || handle.get(&keys.profile).and_then(Value::as_str) != Some(profile)
+    {
+        return Err(PROFILE_SCOPE);
+    }
+    let hex = |key: &str, bytes| handle.get(key).and_then(Value::as_str)
+        .filter(|text| lower_hex(text, bytes)).ok_or(PROFILE_SCOPE);
+    let remote = hex(&keys.remote, 32)?;
+    let session = hex(&keys.session, 16)?;
+    let invocation = hex(&keys.invocation, 16)?;
+    let digest = hex(&keys.digest, 32)?;
+    let allowed = account_set(configuration.get(&policy.document.trusted).ok_or(PROFILE_SCHEMA)?,
+                              policy.document.maximum_accounts).ok_or(PROFILE_SCHEMA)?;
+    if !allowed.contains(remote) { return Err(PROFILE_AUTHORITY); }
+    let manifest = &resume.manifest;
+    let file = private_openat(directory.as_raw_fd(), OsStr::new(&manifest.leaf), false).map_err(|_| PROFILE_FILE)?;
+    if !private_metadata(&file, false, policy.document.file_mode).map_err(|_| IO)? {
+        return Err(PROFILE_FILE);
+    }
+    let mut contents = Vec::new();
+    file.take(u64::from(manifest.maximum_bytes) + 1).read_to_end(&mut contents).map_err(|_| IO)?;
+    if contents.len() > manifest.maximum_bytes as usize { return Err(PROFILE_SIZE); }
+    let strict_json::Strict(account) = serde_json::from_slice(&contents).map_err(|_| PROFILE_SCHEMA)?;
+    if account.get(&manifest.version_key).and_then(Value::as_u64) != Some(u64::from(manifest.version))
+        || account.get(&manifest.name_key).and_then(Value::as_str) != Some(profile)
+        || account.get(&manifest.phase_key).and_then(Value::as_str) != Some(manifest.ready.as_str())
+    {
+        return Err(PROFILE_SCHEMA);
+    }
+    let local = account.get(&manifest.account_key).and_then(Value::as_str)
+        .filter(|account| lower_hex(account, 32)).and_then(get_account).ok_or(PROFILE_SCHEMA)?;
+    use serde_json::json;
+    let outputs = &policy.outputs;
+    Ok(BTreeMap::from([
+        (outputs.remote.clone(), json!(remote)),
+        (outputs.invocation.clone(), json!(invocation)),
+        (outputs.selected_profile.clone().ok_or(PROTOCOL)?, json!(profile)),
+        (resume.local_account_output.clone(), json!(local)),
+        (resume.session_output.clone(), json!(session)),
+        (resume.digest_output.clone(), json!(digest)),
+    ]))
 }
 
 fn context_values(policy: &ProfileInputs, matches: &ArgMatches) -> Result<BTreeMap<String, Value>, Failure> {
@@ -259,17 +313,22 @@ fn context_values(policy: &ProfileInputs, matches: &ArgMatches) -> Result<BTreeM
         }
     }
     let doc = &policy.document;
-    let (value, selected_profile) = load_profile_document(policy, matches)?;
-    let (principal, external) = matches.subcommand().ok_or(PROFILE_DESTINATION)?;
-    if !principal.starts_with("npub1") || principal.len() != 63 {
-        return Err(PROFILE_DESTINATION);
-    }
-    let remote = get_account(principal).ok_or(PROFILE_DESTINATION)?;
-    let authorized = account_set(value.get(&doc.trusted).ok_or(PROFILE_SCHEMA)?, doc.maximum_accounts)
-        .ok_or(PROFILE_SCHEMA)?;
-    if !authorized.contains(&remote) {
-        return Err(PROFILE_AUTHORITY);
-    }
+    let (value, selected_profile, directory) = load_profile_document(policy, matches)?;
+    let destination = if policy.resume.is_some() {
+        None
+    } else {
+        let (principal, external) = matches.subcommand().ok_or(PROFILE_DESTINATION)?;
+        if !principal.starts_with("npub1") || principal.len() != 63 {
+            return Err(PROFILE_DESTINATION);
+        }
+        let remote = get_account(principal).ok_or(PROFILE_DESTINATION)?;
+        let authorized = account_set(value.get(&doc.trusted).ok_or(PROFILE_SCHEMA)?, doc.maximum_accounts)
+            .ok_or(PROFILE_SCHEMA)?;
+        if !authorized.contains(&remote) {
+            return Err(PROFILE_AUTHORITY);
+        }
+        Some((remote, external))
+    };
     let profile_route = value.get(&doc.route).and_then(Value::as_str).ok_or(PROFILE_SCHEMA)?;
     let route = matches.try_get_one::<String>(&args.route).map_err(|_| BINDING)?
         .filter(|_| explicit_argument(matches, &args.route));
@@ -287,6 +346,10 @@ fn context_values(policy: &ProfileInputs, matches: &ArgMatches) -> Result<BTreeM
             return Err(PROFILE_RELAYS);
         }
     }
+    if let Some(resume) = &policy.resume {
+        return resume_inputs(policy, resume, matches, &value, selected_profile, &directory);
+    }
+    let (remote, external) = destination.ok_or(PROFILE_SCOPE)?;
     let mut raw = external.try_get_many::<OsString>("").map_err(|_| PROFILE_ARGV)?.ok_or(PROFILE_ARGV)?;
     if raw.next().map(OsString::as_os_str) != Some(OsStr::new("--")) {
         return Err(PROFILE_SEPARATOR);

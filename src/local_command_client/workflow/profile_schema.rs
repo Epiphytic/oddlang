@@ -11,6 +11,7 @@ pub(crate) struct ProfileInputs {
     pub(crate) document: InputDocument,
     pub(crate) payload: Payload,
     pub(crate) outputs: OutputNames,
+    pub(crate) resume: Option<Resume>,
     pub(crate) errors: BTreeMap<String, Diagnostic>,
 }
 
@@ -112,4 +113,44 @@ pub(crate) struct OutputNames {
 pub(crate) struct Diagnostic {
     pub(crate) exit: u8,
     pub(crate) stderr: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct Resume {
+    pub(crate) id: String,
+    pub(crate) command: String,
+    pub(crate) operation: String,
+    pub(crate) handle_argument: String,
+    pub(crate) maximum_handle_bytes: u32,
+    pub(crate) handle_fields: HandleFields,
+    pub(crate) manifest: AccountManifest,
+    pub(crate) local_account_output: String,
+    pub(crate) session_output: String,
+    pub(crate) digest_output: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct HandleFields {
+    pub(crate) version_key: String,
+    pub(crate) version: u8,
+    pub(crate) profile: String,
+    pub(crate) remote: String,
+    pub(crate) session: String,
+    pub(crate) invocation: String,
+    pub(crate) digest: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct AccountManifest {
+    pub(crate) leaf: String,
+    pub(crate) maximum_bytes: u32,
+    pub(crate) version_key: String,
+    pub(crate) version: u8,
+    pub(crate) name_key: String,
+    pub(crate) phase_key: String,
+    pub(crate) ready: String,
+    pub(crate) account_key: String,
 }

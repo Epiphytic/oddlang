@@ -2,7 +2,11 @@
 
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use std::{collections::BTreeSet, fs, path::Path};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    fs,
+    path::Path,
+};
 
 mod discovery;
 mod replies;
@@ -419,6 +423,8 @@ struct Binding {
     entry: String,
     profile_provider: Option<String>,
     delivery_provider: Option<String>,
+    #[serde(default)]
+    delivery_wire_checks: BTreeMap<String, Vec<String>>,
 }
 
 #[derive(Clone, Copy)]
@@ -536,6 +542,7 @@ fn load(graph: &[u8], binding: &[u8]) -> Result<(Graph, Binding), String> {
     if overlay.format != "oddlang-local-command-client-rust-v1"
         || overlay.profile_provider.is_some()
         || overlay.delivery_provider.is_some()
+        || !overlay.delivery_wire_checks.is_empty()
         || !valid_entry(&overlay.entry)
         || (overlay.entry == "request_body" && contract.request_arguments().next().is_some())
         || (contract.discovery.is_some()
