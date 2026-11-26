@@ -177,3 +177,17 @@ Rust overlay and a recovery lock. Assembly accepts them through a
 `buffered-input` native package component with private visibility and empty
 reexports. Use registry zeroize 1.9.1 for the fixed erasing storage.
 See the [buffered input contract](../superpowers/specs/2026-11-26-buffered-input.md).
+
+### Bounded local JSON test input
+
+A bounded JSON input component declares one maximum byte count, a record
+count, LF termination and guard precedence. The byte limit applies to
+each JSON value or line and includes its delimiter. With duplicate object
+members, the last value wins. Remaining JSON value behavior uses the pinned
+native provider.
+
+The Rust binding names two existing unit errors. The native package checks
+their declaration identities and keeps the parser private under test
+configuration. Recovery accepts pinned boundary observations, including
+observed reader consumption at the limit. Compile the original private case
+only after the sealed library has been assembled.

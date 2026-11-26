@@ -195,6 +195,7 @@ impl Pin {
 #[serde(rename_all = "kebab-case")]
 enum Kind {
     BufferedInput,
+    BoundedJsonInput,
     BuildReport,
     ProcessLimit,
     PublicRecords,
@@ -283,6 +284,10 @@ fn project(
         Kind::BufferedInput => {
             crate::buffered_input::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
             "buffer.rs"
+        }
+        Kind::BoundedJsonInput => {
+            crate::bounded_json_input::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
+            "metadata.rs"
         }
         Kind::BuildReport => {
             crate::build_report::build(&graph, &io(fs::read(&overlay))?, &output)?;
@@ -514,6 +519,12 @@ pub(super) const ZEROIZE: RegistryProvider = RegistryProvider {
     checksum: "e13084392c5e4bc371903e2935a5eaeed24905a7511356b883835e18a78f6879",
 };
 
+const STRUCTURAL_JSON: RegistryProvider = RegistryProvider {
+    name: "serde_json",
+    version: "1.0.151",
+    checksum: "c841b55ecdae098c80dcae9cf767f6f8a0c2cdb3416bbef72181df4d0fe73f14",
+};
+
 impl RegistryProvider {
     pub fn verify_lock(&self, bytes: &[u8]) -> Result<()> {
         let lock = std::str::from_utf8(bytes)
@@ -584,7 +595,29 @@ fn validate_component_requirements(
             limits.push(error);
         }
     }
-    if checked.is_empty() && limits.is_empty() {
+    let mut json_inputs = Vec::new();
+    for component in components
+        .iter()
+        .filter(|c| matches!(c.kind, Kind::BoundedJsonInput))
+    {
+        if !manifest.dependencies.get("serde_json").is_some_and(|dep| {
+            dep.version == STRUCTURAL_JSON.version
+                && dep.features.is_empty()
+                && dep.source.is_none()
+                && dep.default_features != Some(false)
+        }) || manifest.registry_patches.contains_key("serde_json")
+        {
+            return Err(
+                "bounded JSON input requires the default locked serde_json provider 1.0.151".into(),
+            );
+        }
+        required.insert(STRUCTURAL_JSON);
+        json_inputs.extend(crate::bounded_json_input::error_paths(
+            &component.graph.read(base)?,
+            &component.overlay.read(base)?,
+        )?);
+    }
+    if checked.is_empty() && limits.is_empty() && json_inputs.is_empty() {
         return Ok(required);
     }
     let mut providers = BTreeMap::new();
@@ -614,6 +647,14 @@ fn validate_component_requirements(
     }
     for error in limits {
         error.validate_link(&providers)?;
+    }
+    for (id, path) in json_inputs {
+        if !providers
+            .get(&id)
+            .is_some_and(|paths| paths.contains(&path))
+        {
+            return Err(format!("unresolved bounded JSON unit error: {id}"));
+        }
     }
     Ok(required)
 }
@@ -802,7 +843,7 @@ pub(super) fn build_pinned(
     let mut records = Vec::new();
     let mut root_exports = String::new();
     for (index, component) in manifest.components.iter().enumerate() {
-        if matches!(component.kind, Kind::BufferedInput)
+        if matches!(component.kind, Kind::BufferedInput | Kind::BoundedJsonInput)
             && (component.visibility != Visibility::Private
                 || !component.reexports.is_empty()
                 || !component.crate_reexports.is_empty()
@@ -811,7 +852,12 @@ pub(super) fn build_pinned(
                     .as_ref()
                     .is_some_and(|names| !names.is_empty()))
         {
-            return Err("buffered-input must stay private".into());
+            let name = if matches!(component.kind, Kind::BufferedInput) {
+                "buffered-input"
+            } else {
+                "bounded-json-input"
+            };
+            return Err(format!("{name} must stay private"));
         }
         if matches!(component.kind, Kind::FieldRelation | Kind::BinaryFragment)
             && (!component.reexports.is_empty()
@@ -829,7 +875,10 @@ pub(super) fn build_pinned(
                 && component.crate_reexports.is_empty()
                 && !matches!(
                     component.kind,
-                    Kind::FieldRelation | Kind::BinaryFragment | Kind::BufferedInput
+                    Kind::FieldRelation
+                        | Kind::BinaryFragment
+                        | Kind::BufferedInput
+                        | Kind::BoundedJsonInput
                 ))
         {
             return Err("invalid module or empty reexports".into());
