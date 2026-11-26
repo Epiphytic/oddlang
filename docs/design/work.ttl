@@ -2838,6 +2838,20 @@ w:boundedLocalWorkflowProgress a p:Task ;
     p:evidence w:boundedLocalWorkflowProgressReplay ;
     p:acceptance "Verify fresh request identity, prior and produced cursor bounds, typed reply guard, exact detached handle bytes, inline wait admission and named failures using independent Unix owner evidence." .
 w:basicCommandInterop p:dependsOn w:boundedLocalWorkflowProgress .
+w:wholeCommandReplyAdmission a p:Task ;
+    rdfs:label "Compare generated response wire admission and canonical output to pinned mainline" ;
+    p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
+    p:dependsOn w:collectionWireGuards, w:sharedWireRecordChecks ;
+    p:status p:done ;
+    p:acceptance "Compile the response codec from portable inputs, compare 117 mainline packet observations by case ID and exact bytes, and preserve the existing 108 structural comparisons." ;
+    p:evidence w:wholeReplyGeneratedReceipt, w:wholeReplyMainlineReceipt, w:wholeReplyStructureReceipt .
+w:basicClientQualification p:dependsOn w:wholeCommandReplyAdmission .
+w:wholeReplyGeneratedReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/edafba6a026b8aefd6ae1015b5dd23b6278b44c9/verification/whole/command-responses/generated-envelope-aarch64-apple-darwin.json" .
+w:wholeReplyMainlineReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/edafba6a026b8aefd6ae1015b5dd23b6278b44c9/verification/whole/command-responses/reference-envelope-aarch64-apple-darwin.json" .
+w:wholeReplyStructureReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/edafba6a026b8aefd6ae1015b5dd23b6278b44c9/verification/whole/command-responses/aarch64-apple-darwin.json" .
 
 w:boundedPrepareWarmPreview a p:Artifact ;
     rdfs:label "Warm native room preparation and matching upstream admission on a test-owned relay" ;
@@ -2863,3 +2877,22 @@ w:sharedWireRecordCheckReview a p:Artifact ;
 
 w:boundedLocalWorkflowProgressReplay a p:Artifact ;
     p:location "verification/local-owner-workflow/progress-verification.md" .
+w:postPrepareLocalResponseFailure a p:Finding ;
+    rdfs:label "The source-denied client with room preparation exits 255 before a receiver receipt" ;
+    p:reason "The 32-byte stderr hash matches the declared local response diagnostic. Both owners activated and cleanup passed. The owner currently routes status and prepare; the client next requires submit." ;
+    p:source w:postPrepareMixedClientReceipt .
+w:postPrepareMixedClientReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/dd5f514e66a47ad7c8c168d3df3c72c92ae62eb7/verification/whole/basic-command-interop/bounded-prepare-mixed-foreground-generated-client-upstream-server-macos-arm64.json" .
+w:basicClientQualification p:addresses w:postPrepareLocalResponseFailure .
+
+w:relaySinkShutdown a p:Task ;
+    rdfs:label "Keep native relay flush and close usable after a refused frame" ;
+    p:milestone w:marmishMilestone ;
+    p:source w:basicCommandInteropPlan ;
+    p:status p:done ;
+    p:dependsOn w:generatedRelayActivation ;
+    p:acceptance "A stopped or oversized frame fails before queueing it, and flush and close remain valid after the failure. Reproduce the prior terminal panic on the locked sink and pass the corrected sink fixture." ;
+    p:evidence w:relaySinkShutdownFixture .
+w:relaySinkShutdownFixture a p:Artifact ;
+    p:location "verification/foreground-profile-owner/relay-sink/test.rs" .
+w:boundedLocalOwnerPrepare p:dependsOn w:relaySinkShutdown .

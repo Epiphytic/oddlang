@@ -95,14 +95,11 @@ impl OnionConnector {
             .await.map_err(|_| relay_error(RELAY_FAILED))?;
         let (sink, stream) = socket.split();
         let stop = self.stop.clone();
-        let sink = sink.sink_map_err(|_| relay_error(RELAY_FAILED)).with(move |frame: Message| {
-            let stopped = *stop.borrow();
-            async move {
-                if stopped || frame.len() > limit {
-                    return Err(relay_error(RELAY_FAILED));
-                }
-                Ok::<NativeMessage, nostr_sdk::error::Error>(frame.into())
+        let sink = CheckedRelaySink::new(sink.sink_map_err(|_| relay_error(RELAY_FAILED)), move |frame: Message| {
+            if *stop.borrow() || frame.len() > limit {
+                return Err(relay_error(RELAY_FAILED));
             }
+            Ok::<NativeMessage, nostr_sdk::error::Error>(frame.into())
         });
         let mut stop = self.stop.clone();
         let stream = stream.take_until(async move {
