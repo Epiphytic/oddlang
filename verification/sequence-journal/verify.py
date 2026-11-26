@@ -99,6 +99,12 @@ with tempfile.TemporaryDirectory(prefix="sequence-journal-") as directory:
     flat_overlay = write(work / "flat-overlay.json", flat_binding)
     flat = generate(graph, flat_overlay, work / "flat-generated")
     consumer(flat, "flat-public")
+    mixed_binding = copy.deepcopy(flat_binding)
+    del mixed_binding["storage"][PREFIX + "near-cursor-limit"]
+    mixed = generate(graph, write(work / "mixed-overlay.json", mixed_binding), work / "mixed-generated")
+    consumer(mixed, "mixed-public")
+    empty_storage = write(work / "empty-storage.json", {**binding, "storage": {}})
+    assert run(BINARY, "sequence-journal", "overlay-digest", empty_storage) == overlay_pin
     flat_crate = work / "flat-public"
     journal = flat_crate / "src/journal.rs"
     with journal.open("ab") as source:
