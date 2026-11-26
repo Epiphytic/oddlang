@@ -1023,6 +1023,12 @@ w:localOwnerTlsOracle a p:Task ; rdfs:label "Freeze direct relay admission, acti
     p:evidence w:localOwnerTlsReceipt .
 w:localOwnerTlsReceipt a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/34> .
 w:integratedNativeInterfaces a p:Task ; rdfs:label "Build one composed native release with current copy and status interfaces" ;
-    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:active ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ; p:evidence w:integratedClientReceipt ;
     p:dependsOn w:combinedNativeRelease, w:copyFieldRelationQualification ;
     p:acceptance "Recover source-independent packages together from one root lock and run mixed discovery and upstream library cases on the resulting artifacts." .
+
+w:integratedClientReceipt a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/36> .
+w:combinedForegroundPeers a p:Task ; rdfs:label "Qualify both foreground daemon and status client from one release" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned ;
+    p:dependsOn w:integratedNativeInterfaces, w:localOwnerTlsOracle ;
+    p:acceptance "Build both peers from the same portable workspace and exercise automatic discovery, live activation, lease contention, and crash recovery on both ARM64 hosts with original and generated processes." .
