@@ -1,5 +1,5 @@
 //! Build native workspace members from individually pinned semantic package inputs.
-use crate::native_package::{self, Pin, digest};
+use crate::native_package::{self, DependencyCache, Pin, digest};
 use serde::Deserialize;
 use serde_json::json;
 use std::{
@@ -47,6 +47,14 @@ fn merge_registry_patches(target: &mut toml::Table, patches: toml::Table) -> Res
 }
 
 pub fn build(path: &Path, destination: &Path) -> Result<()> {
+    assemble(path, destination, DependencyCache::Offline)
+}
+
+pub fn build_fetch_locked(path: &Path, destination: &Path) -> Result<()> {
+    assemble(path, destination, DependencyCache::FetchLocked)
+}
+
+fn assemble(path: &Path, destination: &Path, cache: DependencyCache) -> Result<()> {
     let path = path.canonicalize().map_err(|e| e.to_string())?;
     let base = path.parent().ok_or("missing workspace directory")?;
     let raw = read(&path)?;
@@ -94,6 +102,7 @@ pub fn build(path: &Path, destination: &Path) -> Result<()> {
             member_base.parent().unwrap(),
             &dir,
             Some(&member.dependencies),
+            cache,
         )?);
         let cargo_file = dir.join("Cargo.toml");
         let mut cargo: toml::Table = std::str::from_utf8(&read(&cargo_file)?)
@@ -150,17 +159,7 @@ pub fn build(path: &Path, destination: &Path) -> Result<()> {
     }
     let manifest = toml::to_string_pretty(&manifest).map_err(|e| e.to_string())?;
     write(&root.join("Cargo.toml"), &manifest)?;
-    let result = Command::new("cargo")
-        .args(["metadata", "--offline", "--locked", "--format-version", "1"])
-        .current_dir(&root)
-        .output()
-        .map_err(|e| e.to_string())?;
-    if !result.status.success() {
-        return Err(format!(
-            "invalid composed workspace: {}",
-            String::from_utf8_lossy(&result.stderr)
-        ));
-    }
+    cache.resolve(&root, "invalid composed workspace")?;
     if has_binaries {
         let checked = Command::new("cargo")
             .args([

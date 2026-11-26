@@ -2133,3 +2133,13 @@ w:fieldConjunctionDerefReview a p:Finding ;
     p:source w:fieldConjunctionReview .
 w:copySourceConjunctionNativeReceipt a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/c8c187862a114efaf2bc8fce403471959d3a939d/verification/whole/copy-source-correspondence/reference-aarch64-apple-darwin.json" .
+
+w:nativeWorkspaceColdStart a p:Task ; rdfs:label "Build native workspaces from portable inputs and an empty dependency cache" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ; p:evidence w:nativeWorkspaceColdStartReceipts, w:nativeWorkspaceColdStartLockProbe ;
+    p:acceptance "Fetch only through locked Cargo resolution from the package and workspace manifests, retain offline compilation, reject stale pins and reproduce the released workspace lock." .
+
+w:nativeWorkspaceColdStartReceipts a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/50> .
+
+w:nativeWorkspaceColdStartLockProbe a p:Artifact ;
+    p:location <https://github.com/Epiphytic/oddlang/blob/e2ec7338dcf141f95d2f1e24d9bee20cc1cec44b/verification/native-workspace/bootstrap.py> .

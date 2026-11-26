@@ -872,13 +872,38 @@ pub fn build(path: &Path, output: &Path) -> Result<()> {
     let path = io(path.canonicalize())?;
     let base = path.parent().ok_or("missing manifest directory")?;
     let raw = io(fs::read(&path))?;
-    build_pinned(&raw, base, output, None).map(|_| ())
+    build_pinned(&raw, base, output, None, DependencyCache::Offline).map(|_| ())
 }
+#[derive(Clone, Copy)]
+pub(super) enum DependencyCache {
+    Offline,
+    FetchLocked,
+}
+
+impl DependencyCache {
+    pub(super) fn resolve(self, directory: &Path, context: &str) -> Result<()> {
+        let mut cargo = Command::new("cargo");
+        cargo.args(["metadata", "--locked", "--format-version", "1"]);
+        if matches!(self, Self::Offline) {
+            cargo.arg("--offline");
+        }
+        let result = io(cargo.current_dir(directory).output())?;
+        if !result.status.success() {
+            return Err(format!(
+                "{context}: {}",
+                String::from_utf8_lossy(&result.stderr)
+            ));
+        }
+        Ok(())
+    }
+}
+
 pub(super) fn build_pinned(
     raw: &[u8],
     base: &Path,
     output: &Path,
     siblings: Option<&BTreeSet<String>>,
+    cache: DependencyCache,
 ) -> Result<BTreeSet<RegistryProvider>> {
     let input: Manifest<recovered::ComponentInput> =
         serde_json::from_slice(raw).map_err(|e| format!("package manifest: {e}"))?;
@@ -1087,17 +1112,7 @@ pub(super) fn build_pinned(
             ));
         }
     }
-    // Cargo validates the dependency closure and resolves the exact external crates without building.
-    let result = io(Command::new("cargo")
-        .args(["metadata", "--locked", "--offline", "--format-version", "1"])
-        .current_dir(&package)
-        .output())?;
-    if !result.status.success() {
-        return Err(format!(
-            "Cargo.lock validation: {}",
-            String::from_utf8_lossy(&result.stderr)
-        ));
-    }
+    cache.resolve(&package, "Cargo.lock validation")?;
     let receipt = serde_json::json!({"format":"oddlang-native-package-lock-v1","manifestSha256":digest(&raw),
         "cargoLockSha256":digest(&lock),"cargoManifestSha256":digest(cargo.as_bytes()),"generatedFiles":generated_files,"components":records});
     io(fs::write(
