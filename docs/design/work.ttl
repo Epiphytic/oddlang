@@ -1129,7 +1129,7 @@ w:provisionedNativeWorkspacePlan a p:Artifact ;
 w:provisionedNativeWorkspace a p:Task ;
     rdfs:label "Qualify the native workspace with encrypted init and the complete copy codec" ;
     p:milestone w:marmishMilestone ; p:source w:provisionedNativeWorkspacePlan ;
-    p:status p:active ; p:dependsOn w:combinedForegroundPeers, w:nativeFileProfileStores, w:copyProtocolQualification ;
+    p:status p:done ; p:evidence w:provisionedNativeWorkspaceReceipt ; p:dependsOn w:combinedForegroundPeers, w:nativeFileProfileStores, w:copyProtocolQualification ;
     p:acceptance "Build one locked workspace in native ARM64 isolation, check all upstream stream tests and cross every initializer, foreground owner and status client choice on real local profiles." .
 
 w:workspaceRegistryPatchAgreement a p:Finding ;
@@ -1142,3 +1142,6 @@ w:copyProtocolNativeReview a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4bb7977930c330143d9068b9dfb45143dcb524e9/docs/reviews/oddlang-copy-frame.md" .
 w:copyProtocolStructuralInventory a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4bb7977930c330143d9068b9dfb45143dcb524e9/verification/whole/copy-frame/structural-gap.md" .
+
+w:provisionedNativeWorkspaceReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/46> .
