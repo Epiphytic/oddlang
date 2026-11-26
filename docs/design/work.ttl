@@ -1055,4 +1055,4 @@ w:originalPrivateDefaultReleaseReceipt a p:Artifact ; p:location <https://github
 
 w:publicTypeBindingGraph a p:Task ; rdfs:label "Recover public type spellings and field audiences from the Rust compiler" ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:active ;
-    p:acceptance "Resolve public module names and aliases to stable type identities, retain ambiguity and field audience, and compare unchanged external callers with a source mutation." .
+    p:acceptance "Resolve public module names and aliases to stable identities at the shortest lexicographic cut. Retain candidate ambiguity and field audiences. Verify deterministic outputs, independent rustdoc, native caller probes, and the original/generated core and stream plus original engine profiles." .
