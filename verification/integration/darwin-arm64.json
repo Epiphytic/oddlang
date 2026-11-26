@@ -114,7 +114,11 @@
     "setup": "PostgreSQL 16.6 and pinned HTTP and WebAssembly tools",
     "passed": 181,
     "failed": 0,
-    "ignored": 1
+    "ignored": 1,
+    "fixedByteTypeScriptTests": [
+      "equivalent_graph_bytes_produce_identical_artifacts_and_other_kinds_are_rejected",
+      "projects_exact_native_bytes_with_independent_input_and_output_copies"
+    ]
   },
   "fixtureCommand": "python3 <fixture> target/debug/oddlang",
   "fixtures": {
@@ -152,7 +156,7 @@
     },
     "verification/plain-value-choices/verify.py": {
       "exitCode": 0,
-      "summary": ""
+      "summary": "Completed the native choice fixture."
     },
     "verification/process-limits/startup.py": {
       "exitCode": 0,

@@ -2510,6 +2510,7 @@ w:prBranchConsolidation a p:Task ;
     p:evidence w:prBranchConsolidationVerification, w:fixedByteTypeScriptFixture, w:compositePackageFixture, w:boundedJsonInputFixture ;
     p:acceptance "Make every reviewed Oddlang head reachable in one compiler history. Preserve both TypeScript checked-value entry points, reconcile nested codec linkage and recovered package dev dependencies, and run the host tests and work-graph query." .
 w:prBranchConsolidationVerification a p:Artifact ;
+    rdfs:label "Exact integrated heads, host suite, TypeScript entry points and nested codec encode and decode verification" ;
     p:location "verification/integration/darwin-arm64.json" .
 
 w:nestedCodecProviderMaximum a p:Decision ;
