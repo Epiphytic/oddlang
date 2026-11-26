@@ -1202,7 +1202,7 @@ w:unifiedProfileWorkspace p:addresses w:retainedReadbackComposition .
 w:buildReportCommandPlan a p:Artifact ;
     p:location "docs/superpowers/plans/2026-11-26-build-report.md" .
 w:buildReportCommand a p:Task ; rdfs:label "Project ordered native build metadata from the release contract" ;
-    p:milestone w:marmishMilestone ; p:source w:buildReportCommandPlan ; p:status p:active ;
+    p:milestone w:marmishMilestone ; p:source w:buildReportCommandPlan ; p:status p:done ; p:evidence w:buildReportFixture, w:buildReportReceipt ;
     p:acceptance "Verify actual Cargo target and package-version binding, explicit revision and format values and exact stdout, stderr and exit status with an independent program and the original and generated client and daemon on both ARM64 hosts." .
 
 w:buildReportCommand p:dependsOn w:unifiedProfileWorkspace .
@@ -1214,3 +1214,12 @@ w:buildReportSourceRecovery a p:Task ; rdfs:label "Recover the ordered profile, 
     p:acceptance "Link the five source declarations to the report in order, verify widths and conversion rules, and demonstrate a mutation against an independently compiled observer." .
 w:unifiedProfileWorkspaceReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/56> .
+
+w:buildReportFixture a p:Artifact ;
+    p:location "verification/build-report/verify.py" .
+w:buildReportReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/60> .
+w:buildReportPlanReview a p:Finding ;
+    rdfs:label "Separate represented revision from compiled artifact provenance and check widths, formats and native guard precedence" ;
+    p:source w:buildReportCommandPlan .
+w:buildReportCommand p:addresses w:buildReportPlanReview .
