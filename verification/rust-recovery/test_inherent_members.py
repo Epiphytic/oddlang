@@ -19,6 +19,8 @@ class InherentNames(unittest.TestCase):
 pub mod sensor {
     pub struct Meter;
     impl Meter { pub const LIMIT: u8 = 3; pub fn read(&self) {} fn hidden() {} }
+    #[doc(hidden)] impl Meter { #[doc(hidden)] pub fn hidden_from_docs() {} }
+    #[cfg(not(doc))] impl Meter { pub fn compiler_only() {} }
     pub trait Measure { fn derived(); }
     impl Measure for Meter { fn derived() {} }
     pub struct Batch<T>(pub T);
@@ -30,13 +32,14 @@ pub mod sensor {
                                    False, [], public_inherent=True)["rustdocPublicInherent"]
             owner = ["optic", "sensor", "Meter"]
             self.assertEqual(report["items"], [{"owner": owner, "kind": "assoc_const", "name": "LIMIT"},
+                                               {"owner": owner, "kind": "function", "name": "hidden_from_docs"},
                                                {"owner": owner, "kind": "function", "name": "read"}])
-            self.assertEqual(report["excludedLocalInherentImpls"]["generic-or-specialized-receiver"], 1)
+            self.assertEqual(report["excludedIndexedLocalInherentImpls"]["generic-or-specialized-receiver"], 1)
             rustc = check.tool("rustc")
             lib = root / "liboptic.rlib"
             subprocess.run([rustc, "--crate-type=rlib", "--crate-name", "optic", source, "-o", lib], check=True)
             for expression, diagnostic in [
-                ("let _ = Meter::LIMIT; Meter.read(); Batch(1u8).specific();", None),
+                ("let _ = Meter::LIMIT; Meter.read(); Meter::hidden_from_docs(); Meter::compiler_only(); Batch(1u8).specific();", None),
                 ("Meter::hidden();", "E0624"), ("Batch(1u16).specific();", "E0599"),
             ]:
                 caller = root / "caller.rs"

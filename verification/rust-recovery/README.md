@@ -134,7 +134,7 @@ downstream import evidence to determine which type names are reachable.
 Trait implementations belong to a different surface. Generic definitions,
 specialized receivers, constrained implementations and receivers without a
 local nominal declaration path are excluded from this observation. The
-report counts excluded local inherent implementations by reason. Item
+report counts excluded local inherent implementations present in the Rustdoc index. A separate Rustdoc pass includes private and documentation-hidden declarations. Rustdoc sets `cfg(doc)` and can omit block-local and nonnominal implementations entirely. The counts describe this index. Item
 names alone do not establish signature or behavioral equivalence. The
 independent fixture compiles a caller and checks rustc's rejection of a
 private method and a method used with the wrong type argument.

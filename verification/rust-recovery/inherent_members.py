@@ -30,4 +30,5 @@ def inventory(document, owners):
                 raise ValueError(f"unsupported public inherent item kind or name: {kind}")
             declarations.append({"owner": owners[receiver["id"]], "kind": kind, "name": item["name"]})
     declarations.sort(key=lambda item: (item["owner"], item["kind"], item["name"]))
-    return {"items": declarations, "excludedLocalInherentImpls": dict(sorted(excluded.items()))}
+    return {"scope": "indexed-local-inherent-impls-with-private-and-hidden-items-under-cfg-doc",
+            "items": declarations, "excludedIndexedLocalInherentImpls": dict(sorted(excluded.items()))}

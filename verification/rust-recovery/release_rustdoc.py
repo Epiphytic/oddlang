@@ -401,14 +401,24 @@ def collect(root, package, kind, target, triple, no_default, features, previous=
         result = compare(compiler, document, root)
         extra = {}
         if public_inherent:
-            rows = {row[0]: row for row in doc_rows(document)}
+            # Preserve the original reconciliation profile. Rustdoc excludes
+            # doc(hidden) even with private items enabled unless asked separately.
+            _, hidden_log = command([*flags, "--document-hidden-items"], root, documentation)
+            hidden_args = invocation(hidden_log, wrapper, crate)
+            require(hidden_args.count("--document-hidden-items") == 1
+                    and [a for a in hidden_args if a != "--document-hidden-items"] == doc_args,
+                    "hidden-item observation changed the Rustdoc invocation")
+            extended = json.loads((build / "cargo" / triple / "doc" / (crate + ".json")).read_bytes())
+            require(extended["format_version"] == 57 and extended["includes_private"]
+                    and extended["target"]["triple"] == triple, "unexpected inherent Rustdoc profile")
+            rows = {row[0]: row for row in doc_rows(extended)}
             owners = {}
             for key, row in rows.items():
                 if row[4] in {"record", "sum", "union"}:
                     path = declaration_path(rows, key)
                     if path is not None:
                         owners[key] = list(path)
-            extra["rustdocPublicInherent"] = inherent_members.inventory(document, owners)
+            extra["rustdocPublicInherent"] = inherent_members.inventory(extended, owners)
         legacy = span_evidence(compiler, document, root, previous)
     require(pinned_source(root, revision) == source, "source changed during observation")
     return {"schema": 1, "source": source, "package": package, "targetKind": kind, "defaultFeatures": not no_default,
