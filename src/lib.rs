@@ -8,6 +8,7 @@ pub mod http;
 pub mod impact;
 pub mod import_rust;
 pub mod interpreter;
+pub mod json_envelope;
 pub mod language;
 pub mod model;
 pub mod rust_recovery;

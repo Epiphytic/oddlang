@@ -1,0 +1,23 @@
+@prefix c: <urn:oddlang:core:> .
+@prefix image: <urn:test:thumbnail:> .
+
+image:envelope a c:JsonEnvelope ;
+  c:shape c:ClosedRequiredObject ;
+  c:field image:revision, image:pixels ;
+  c:rawBytes 4 ; c:wireBytes 52 ; c:recordLineBytes 80 ;
+  c:encodeOrder "raw-size json wire-size" ;
+  c:decodeOrder "wire-size json literal encoded-size base64 raw-size canonical" ;
+  c:sizeError image:TooLarge ; c:jsonError image:Malformed ;
+  c:literalError image:UnexpectedRevision ; c:encodingError image:BadBinary .
+
+image:revision a c:JsonEnvelopeField ;
+  c:position 0 ; c:wireName "rev" ; c:fieldKind c:UnsignedLiteral ;
+  c:bits 32 ; c:value 13 .
+
+image:pixels a c:JsonEnvelopeField ;
+  c:position 1 ; c:wireName "pixels" ; c:fieldKind c:CanonicalBase64 .
+
+image:TooLarge a c:NamedError ; c:message "thumbnail exceeds bounds" .
+image:Malformed a c:NamedError ; c:message "malformed thumbnail" .
+image:UnexpectedRevision a c:NamedError ; c:message "unknown thumbnail revision" .
+image:BadBinary a c:NamedError ; c:message "invalid thumbnail pixel encoding" .

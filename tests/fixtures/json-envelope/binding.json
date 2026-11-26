@@ -1,0 +1,19 @@
+{
+  "domain": "urn:test:thumbnail:envelope",
+  "codecType": "Thumbnail",
+  "limitsType": "Bounds",
+  "errorType": "ReadError",
+  "encode": "write",
+  "decode": "read",
+  "constants": {
+    "rawBytes": "PIXELS",
+    "wireBytes": "MESSAGE",
+    "recordLineBytes": "RECORD"
+  },
+  "variants": {
+    "urn:test:thumbnail:TooLarge": "TooLarge",
+    "urn:test:thumbnail:Malformed": "Malformed",
+    "urn:test:thumbnail:UnexpectedRevision": "UnexpectedRevision",
+    "urn:test:thumbnail:BadBinary": "BadBinary"
+  }
+}

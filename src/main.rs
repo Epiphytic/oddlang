@@ -19,6 +19,9 @@ fn import_has_profile(path: &str, profile: &str) -> bool {
 
 fn run(args: &[String]) -> Result<(), String> {
     match args {
+        [cmd, kind, target, root, overlay, out] if cmd == "build" && kind == "json-envelope" && target == "rust" => {
+            oddlang::json_envelope::build(root.as_ref(), overlay.as_ref(), out.as_ref())
+        }
         [cmd, kind, target, root, overlay, release]
             if cmd == "verify" && kind == "value-domain" && target == "rust" => {
                 oddlang::value_domain::verify(root.as_ref(), Some(overlay.as_ref()), release.as_ref())
@@ -346,7 +349,7 @@ fn run(args: &[String]) -> Result<(), String> {
             oddlang::targets::build(&load_model(dir)?, std::path::Path::new(out))
                 .map_err(|e| e.to_string())
         }
-        _ => Err("usage: oddlang check PROJECT | impact PROJECT IRI | build PROJECT OUTPUT | recover rust MANIFEST --profile PROFILE --out OUTPUT | recover rust-shapes MANIFEST --profile PROFILE --out OUTPUT | recover tagged-contract SOURCE SELECTION OVERLAY VARIANT OUTPUT | tagged-wire digest GRAPH | build tagged-wire TARGET GRAPH OUTPUT --graph-sha256 PIN | import rust-tree MANIFEST PACKAGE OUTPUT | build rust-tree BUNDLE OUTPUT --bundle-sha256 PIN".into()),
+        _ => Err("usage: oddlang check PROJECT | impact PROJECT IRI | build PROJECT OUTPUT | recover rust MANIFEST --profile PROFILE --out OUTPUT | recover rust-shapes MANIFEST --profile PROFILE --out OUTPUT | recover tagged-contract SOURCE SELECTION OVERLAY VARIANT OUTPUT | build json-envelope rust GRAPH OVERLAY OUTPUT | tagged-wire digest GRAPH | build tagged-wire TARGET GRAPH OUTPUT --graph-sha256 PIN | import rust-tree MANIFEST PACKAGE OUTPUT | build rust-tree BUNDLE OUTPUT --bundle-sha256 PIN".into()),
     }
 }
 fn main() -> ExitCode {

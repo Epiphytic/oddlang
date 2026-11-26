@@ -678,3 +678,10 @@ w:wholeRetentionCaller a p:Artifact ; p:location "https://github.com/Epiphytic/m
 w:wholeWorkspaceShapeArchive a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/commit/f6f31b50ab34ca59c9d60aaeb4b29035a9726b8f" .
 w:wholeMarmishStructure p:evidence w:wholeWorkspaceShapeArchive .
+w:boundedJsonEnvelopeProjection a p:Task ;
+    rdfs:label "Project a generic bounded JSON envelope into a native Rust API" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Generate deterministic Rust from ordered envelope fields, wire bounds, shape policy and declared guards. An unrelated unchanged caller must detect field, size and precedence mutations and reject duplicate keys and noncanonical Base64." ;
+    p:evidence w:boundedJsonEnvelopeFixture .
+w:boundedJsonEnvelopeFixture a p:Artifact ; p:location "tests/json_envelope.rs" .
+w:wholeMarmishProtocols p:dependsOn w:boundedJsonEnvelopeProjection .
