@@ -41,7 +41,12 @@ impl {limits_type} {{
 pub enum {error_type} {{
 "#
     );
-    for variant in binding.variants.values() {
+    let order: Vec<_> = binding.variant_order.as_ref().map_or_else(
+        || binding.variants.keys().collect(),
+        |ids| ids.iter().collect(),
+    );
+    for id in order {
+        let variant = &binding.variants[id];
         writeln!(source, "    {variant},").unwrap();
     }
     writeln!(

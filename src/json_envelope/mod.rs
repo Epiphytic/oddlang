@@ -270,6 +270,8 @@ struct Binding {
     decode: String,
     constants: Constants,
     variants: BTreeMap<String, String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    variant_order: Option<Vec<String>>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -284,6 +286,12 @@ impl Binding {
     fn validate(&self, envelope: &Envelope) -> Result<()> {
         if self.domain != envelope.id || !self.variants.keys().eq(envelope.errors.keys()) {
             return Err("binding must name the envelope and every error exactly".into());
+        }
+        if let Some(order) = &self.variant_order {
+            let ids: BTreeSet<_> = order.iter().collect();
+            if ids.len() != order.len() || ids != self.variants.keys().collect() {
+                return Err("variantOrder must list every error IRI exactly once".into());
+            }
         }
         let groups = [
             vec![&self.codec_type, &self.limits_type, &self.error_type],
