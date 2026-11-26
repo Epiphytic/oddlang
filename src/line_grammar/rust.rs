@@ -1,4 +1,4 @@
-use super::model::*;
+use super::{model::*, records::RecordSupport};
 use std::{collections::BTreeMap, fmt::Write as _};
 
 const DECIMAL: &::core::primitive::str = r#"
@@ -42,6 +42,7 @@ struct Renderer<'a> {
     source: String,
     grammars: BTreeMap<&'a str, usize>,
     captures: BTreeMap<&'a str, usize>,
+    support: Option<&'a RecordSupport>,
     locals: usize,
     uses_decimal: bool,
     uses_hex: bool,
@@ -74,11 +75,15 @@ impl<'a> Renderer<'a> {
             Token::Text { capture, choices, grammar } => {
                 self.guard(format!("!{input}.is_empty()"));
                 if !choices.is_empty() {
-                    self.guard(format!("{choices:?}.contains(&{input})"));
+                    let name = capture.as_ref().and_then(|id| self.support?.text_choices.get(id));
+                    let choices = name.cloned().unwrap_or_else(|| format!("{choices:?}"));
+                    self.guard(format!("{choices}.contains(&{input})"));
                 }
                 if let Some(grammar) = grammar {
-                    let index = self.grammars[grammar.as_str()];
-                    self.guard(format!("__grammar_{index}::accepts({input})"));
+                    let alias = self.support.and_then(|support| support.nested_grammars.get(grammar));
+                    let function = alias.cloned().unwrap_or_else(||
+                        format!("__grammar_{}::accepts", self.grammars[grammar.as_str()]));
+                    self.guard(format!("{function}({input})"));
                 }
                 if capture.is_some() {
                     self.bind(capture.as_deref(), input.to_owned());
@@ -133,6 +138,10 @@ pub(super) fn render(graph: &Graph, overlay: &Binding) -> Result<String> {
         source: "use ::core::option::Option::{None as __None, Some as __Some};\nuse ::core::option::Option as __Option;\n".into(),
         grammars,
         captures: BTreeMap::new(),
+        support: match overlay {
+            Binding::Records(binding) => Some(&binding.support),
+            Binding::Captures(_) => None,
+        },
         locals: 0,
         uses_decimal: false,
         uses_hex: false,
@@ -147,6 +156,7 @@ pub(super) fn render(graph: &Graph, overlay: &Binding) -> Result<String> {
         .unwrap();
     }
     if let (Binding::Records(binding), Some(result)) = (overlay, &graph.record_result) {
+        binding.emit_support(graph, &render.grammars, &mut render.source);
         result.declarations(binding, &mut render.source);
     } else if let Binding::Captures(binding) = overlay {
         let (generic, lifetime) = if captures.values().any(|t| *t == Kind::Text) {

@@ -1,4 +1,4 @@
-use super::model::{Captures, Kind, Result, unsigned_maximum};
+use super::model::{Captures, Grammars, Graph, Kind, Result, unsigned_maximum};
 use crate::{native_package::ident, shared_declarations::unique_map, wire_schema::iri};
 use serde::{Deserialize, Serialize};
 use std::{
@@ -111,6 +111,77 @@ pub(super) struct RecordBinding {
     records: BTreeMap<String, NativeRecord>,
     #[serde(deserialize_with = "unique_map")]
     formatters: BTreeMap<String, String>,
+    #[serde(default, skip_serializing_if = "RecordSupport::is_empty")]
+    pub support: RecordSupport,
+}
+
+#[derive(Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(super) struct RecordSupport {
+    #[serde(default, deserialize_with = "unique_map")]
+    pub nested_grammars: BTreeMap<String, String>,
+    #[serde(default, deserialize_with = "unique_map")]
+    pub text_choices: BTreeMap<String, String>,
+}
+
+impl RecordSupport {
+    fn is_empty(&self) -> bool {
+        self.nested_grammars.is_empty() && self.text_choices.is_empty()
+    }
+}
+
+impl RecordBinding {
+    pub(super) fn validate_support(&self, graph: &Graph, grammars: &Grammars<'_>) -> Result<()> {
+        let names = self
+            .support
+            .nested_grammars
+            .values()
+            .chain(self.support.text_choices.values())
+            .chain(self.records.values().map(|record| &record.name));
+        if !names_are_valid(names) {
+            return Err("expected distinct native support names".into());
+        }
+        if self
+            .support
+            .nested_grammars
+            .keys()
+            .any(|id| !grammars.contains_key(id.as_str()))
+        {
+            return Err("native support names an unknown nested text grammar".into());
+        }
+        if self
+            .support
+            .text_choices
+            .keys()
+            .any(|id| graph.text_choices(id).is_none())
+        {
+            return Err("native support names an unknown finite text choice capture".into());
+        }
+        Ok(())
+    }
+
+    pub(super) fn emit_support(&self, graph: &Graph, grammars: &Grammars<'_>, source: &mut String) {
+        let visibility = self.visibility.native();
+        for (id, name) in &self.support.nested_grammars {
+            writeln!(
+                source,
+                "{visibility} fn {name}(value: &::core::primitive::str) -> ::core::primitive::bool {{ self::__grammar_{}::accepts(value) }}",
+                grammars[id.as_str()]
+            )
+            .unwrap();
+        }
+        for (id, name) in &self.support.text_choices {
+            let choices = graph
+                .text_choices(id)
+                .expect("validated finite choice capture");
+            writeln!(
+                source,
+                "{visibility} const {name}: [&'static ::core::primitive::str; {}] = {choices:?};",
+                choices.len()
+            )
+            .unwrap();
+        }
+    }
 }
 
 #[derive(Deserialize, Serialize)]

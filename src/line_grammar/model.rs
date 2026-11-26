@@ -10,7 +10,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 pub(super) type Result<T> = std::result::Result<T, String>;
 pub(super) type Captures<'a> = BTreeMap<&'a str, Kind>;
-type Grammars<'a> = BTreeMap<&'a str, usize>;
+pub(super) type Grammars<'a> = BTreeMap<&'a str, usize>;
 
 #[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -150,6 +150,18 @@ fn add<'a>(captures: &mut Captures<'a>, id: Option<&'a str>, kind: Kind) -> Resu
 }
 
 impl Token {
+    fn text_choices(&self, id: &str) -> Option<&[String]> {
+        match self {
+            Self::Text {
+                capture, choices, ..
+            } if capture.as_deref() == Some(id) && !choices.is_empty() => Some(choices),
+            Self::Split { left, right, .. } => {
+                left.text_choices(id).or_else(|| right.text_choices(id))
+            }
+            _ => None,
+        }
+    }
+
     fn validate<'a>(
         &'a self,
         lexical: &mut LexicalRules<'a, '_>,
@@ -254,6 +266,13 @@ impl Token {
 }
 
 impl Graph {
+    pub(super) fn text_choices(&self, id: &str) -> Option<&[String]> {
+        self.rows
+            .iter()
+            .flatten()
+            .find_map(|token| token.text_choices(id))
+    }
+
     pub(super) fn validate(&self, binding: &Binding) -> Result<(Captures<'_>, Grammars<'_>)> {
         iri(&self.id)?;
         if self.format != "oddlang-line-grammar-v1"
@@ -312,7 +331,10 @@ impl Graph {
         }
         match (binding, &self.record_result) {
             (Binding::Captures(binding), None) => binding.validate(&captures)?,
-            (Binding::Records(binding), Some(result)) => result.validate(binding, &captures)?,
+            (Binding::Records(binding), Some(result)) => {
+                result.validate(binding, &captures)?;
+                binding.validate_support(self, &grammars)?;
+            }
             _ => return Err("Rust overlay must match the grammar result form".into()),
         }
         Ok((captures, grammars))
