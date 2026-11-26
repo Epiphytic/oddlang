@@ -775,3 +775,7 @@ w:wholeWindowQualification a p:Artifact ; p:location "https://github.com/Epiphyt
 w:wholeErrorFormatting a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/commit/d34ce43674bbcd27232a36c62d8bffb1ddc51fbc" .
 w:wholeWireCandidates a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/commit/ddd27f3487759cd5c5939426be797608e7278697" .
 w:wholeMarmishStructure p:evidence w:wholeWindowQualification,w:wholeErrorFormatting,w:wholeWireCandidates .
+
+w:wholeWorkspaceAssembly p:evidence w:wholeProcessFixture, w:wholeCombinedWorkspace .
+w:wholeProcessFixture a p:Artifact ; p:location "verification/native-workspace/cli.py" .
+w:wholeCombinedWorkspace a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/commit/6a8becd1a4f712f5464604d640775a85c2d08b6c" .
