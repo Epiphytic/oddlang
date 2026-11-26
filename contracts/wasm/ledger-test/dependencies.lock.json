@@ -1,0 +1,9 @@
+{
+  "pins": [
+    {
+      "identity": "urn:oddlang:ledger:wasm:package",
+      "version": "1.0.0",
+      "manifestSha256": "11b91c3884df55fe828a0cfd42779e4d257b29c4781329cd5ecb871f3f23fb1d"
+    }
+  ]
+}

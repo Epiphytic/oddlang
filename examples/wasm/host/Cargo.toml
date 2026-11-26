@@ -1,0 +1,8 @@
+[package]
+name = "empty-linker"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+wasmtime = { version = "=45.0.0", default-features = false, features = ["anyhow", "component-model", "cranelift", "runtime", "std"] }

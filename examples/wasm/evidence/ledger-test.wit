@@ -1,0 +1,30 @@
+package root:component;
+
+world root {
+  import oddlang:ledger/ledger-types@1.0.0;
+  use oddlang:ledger/ledger-types@1.0.0.{account, transfer-error};
+  import initial-state: func() -> list<account>;
+
+  export complete-snapshot: func() -> list<account>;
+  export fixture-load: func(accounts: list<account>);
+  export lookup: func(id: string) -> option<account>;
+  export transfer: func(source: string, destination: string, amount: s64) -> result<_, transfer-error>;
+}
+package oddlang:ledger@1.0.0 {
+  interface ledger-types {
+    record account {
+      id: string,
+      owner: string,
+      balance: s64,
+    }
+
+    enum transfer-error {
+      source-missing,
+      destination-missing,
+      same-account,
+      non-positive-amount,
+      insufficient-funds,
+      destination-overflow,
+    }
+  }
+}

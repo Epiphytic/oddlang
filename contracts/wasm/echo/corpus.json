@@ -1,0 +1,89 @@
+[
+  {
+    "caseId": "unicode-and-empty-values",
+    "covers": [
+      {
+        "declaration": "urn:oddlang:echo:echo",
+        "role": "wasm.exporter"
+      }
+    ],
+    "imports": [],
+    "calls": [
+      {
+        "function": "echo",
+        "arguments": [
+          {
+            "text": "漢字🦋",
+            "items": {
+              "some": []
+            },
+            "choice": {
+              "empty": null
+            }
+          }
+        ],
+        "expected": {
+          "text": "漢字🦋",
+          "items": {
+            "some": []
+          },
+          "choice": {
+            "empty": null
+          }
+        }
+      },
+      {
+        "function": "echo",
+        "arguments": [
+          {
+            "text": "",
+            "items": {
+              "none": true
+            },
+            "choice": {
+              "number": "-9223372036854775808"
+            }
+          }
+        ],
+        "expected": {
+          "text": "",
+          "items": {
+            "none": true
+          },
+          "choice": {
+            "number": "-9223372036854775808"
+          }
+        }
+      },
+      {
+        "function": "echo",
+        "arguments": [
+          {
+            "text": "λ",
+            "items": {
+              "some": [
+                "",
+                "β"
+              ]
+            },
+            "choice": {
+              "enabled": false
+            }
+          }
+        ],
+        "expected": {
+          "text": "λ",
+          "items": {
+            "some": [
+              "",
+              "β"
+            ]
+          },
+          "choice": {
+            "enabled": false
+          }
+        }
+      }
+    ]
+  }
+]

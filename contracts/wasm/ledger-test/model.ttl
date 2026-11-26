@@ -1,0 +1,8 @@
+@prefix w: <urn:oddlang:wasm:> .
+@prefix l: <urn:oddlang:ledger:wasm:> .
+
+l:test-package a w:Package ; w:name "oddlang:ledger-test@1.0.0" .
+l:test-world a w:World ; w:name "ledger-test" ; w:entry true ; w:include l:world ; w:export l:fixture-load, l:complete-snapshot .
+l:fixture-load a w:Function ; w:name "fixture-load" ; w:param l:accounts .
+l:accounts a w:Param ; w:name "accounts" ; w:ordinal 0 ; w:valueType "list<account>" .
+l:complete-snapshot a w:Function ; w:name "complete-snapshot" ; w:result "list<account>" .
