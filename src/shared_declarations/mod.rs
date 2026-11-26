@@ -486,6 +486,7 @@ pub(crate) fn error_variants(
         }
         for variant in error.variants {
             variants.push(crate::native_package::ErrorVariantExport {
+                io_error: false,
                 error_type: binding.name(&error.id)?.to_owned(),
                 variant: binding.name(&variant.id)?.to_owned(),
                 id: variant.id,
