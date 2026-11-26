@@ -170,6 +170,36 @@ fn observes_file_bytes_and_bound() {
     wider = copy.deepcopy(outer)
     wider["layout"][1]["encoding"]["maximum"] = 7
     build("wide-cap", outside=wider)
+
+    variable = copy.deepcopy(inner)
+    variable["maximum"] = 12
+    note = "urn:geology:note"
+    variable["layout"].append(slot(note, encoding("bytes", minimum=0, maximum=2, overflow=FAULT)))
+    variable_binding = copy.deepcopy(inner_binding)
+    variable_binding["names"][note] = "note"
+    independent = copy.deepcopy(outer)
+    independent["maximum"] = 18
+    independent["layout"][1]["encoding"]["maximum"] = 11
+    independent["externalRecords"][LAYER]["codecMaximum"] = 12
+    product = build("independent-caps", inside=variable, inside_binding=variable_binding,
+                    outside=independent, roots=("Layer",))
+    (product / "tests").mkdir()
+    (product / "tests" / "widths.rs").write_text("""
+use geology::{Failure, Layer, Sample};
+
+#[test]
+fn enforces_the_slot_bound_for_an_independently_valid_codec_value() {
+    let longer = [255, 254, 40, 41, 42, 43, 0, 0, 0, 2, 1, 2];
+    assert!(Layer::decode(&longer).is_ok());
+    let mut wrapped = vec![71, 1, 0, 0, 0, 12];
+    wrapped.extend(longer);
+    assert!(matches!(Sample::decode(&wrapped), Err(Failure::Overflow)));
+
+    let smaller = [71, 1, 0, 0, 0, 11, 255, 254, 40, 41, 42, 43, 0, 0, 0, 1, 1];
+    assert_eq!(Sample::decode(&smaller).unwrap().encode().unwrap(), smaller);
+}
+""")
+    run(*CARGO, "test", "--locked", "--offline", cwd=product, env=env)
     build("missing", provide=False, failure="nested codec identity has no pinned package export")
     build("duplicate", extra=True, failure="ambiguous pinned nested codec")
     renamed = copy.deepcopy(inner_binding)

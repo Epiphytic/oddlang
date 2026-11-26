@@ -1,0 +1,205 @@
+{
+  "compilerCommit": "c3eeef07450586f4095fede1faba2b18ebbc9f63",
+  "platform": "arm64-darwin",
+  "ancestryCheck": "git merge-base --is-ancestor <head> <compilerCommit>",
+  "heads": {
+    "23": "764fdfab0991b9e94c4e8085ed5236a74c5c2324",
+    "24": "ec3f38a0437a10d18c6b8d527327d26eef2d05df",
+    "25": "62a9a970b99e3ef994aa6cef75c1c15ba75b3c40",
+    "26": "3ae6122d6d5dc8f2c4c439a71322ac2ee7490ea2",
+    "27": "0d6f32040165165040aa333c363ece8347cef42a",
+    "28": "68348ee525af50bc4e1c154c58e8c403fcf98b1a",
+    "29": "a635eec8e0f71d2dabc9aee28655e26494a7506f",
+    "30": "e3e0fa1f72aa32c76770bd192e99586fbd388cc9",
+    "31": "9b07fe802944070d91ec9b4d930119d46fc8aa92",
+    "32": "828fc258b77e9d3936f9bf09302ae93022aac3dd",
+    "33": "e32de7c620d13454a0c3aa19bf36a074c9f1a05f",
+    "34": "f61e2757a21ba2941ecf9fdc38d811e457a2b1cd",
+    "35": "166e7d932a8db1b6b7d1945621b32074ba3d4725",
+    "36": "e30040907c1e128cf1beb3a6230179c0ce1fdbba",
+    "37": "95c2ab14034f2ad8eabdf71709316ad89c6dc79f",
+    "38": "b0f704d502dcf96339d0f52621be53c5c1caf34a",
+    "39": "09a00ce50caf0c41f404b11f72b63526bff85df1",
+    "40": "2f3e52081116cf372b710b4ce75f1defcd86d633",
+    "41": "25ea63ce1aea475d7a3a3fa050a4042c46345409",
+    "42": "888bddf3af72b1a4b983de68dc3a0f4931fdc39a",
+    "43": "4ab1add37ead89416acfd5a282e8fdefe6fbbc17",
+    "44": "810e7b77ff629be9dcc055028439b0ae768809a5",
+    "45": "970bd5ca0f3c2103004126e3fbcae03eca225863",
+    "46": "0eaa55315b166be48c1309fcd3e162b9a934608f",
+    "47": "2c399640cb3fc2af060e10ff176aa4932fdcd332",
+    "48": "f45f1308d995114740a8d55770f5c4ab3615bc40",
+    "49": "3a5b645d1e66e9d4fd12409ce64aab2d4dd9adc2",
+    "50": "dd467534f6e0a139e4b1b6e023ce9e5015078747",
+    "51": "5b236edea742250bec581042efe4d23d1bad75a0",
+    "52": "69456692c88d5ed3b59dacf5d9c5757539abbfb8",
+    "53": "c1fc1fb6cfefa346359a2837e5d28a700477164d",
+    "54": "543ebcd3cb47de0f74a4da70990b1c3d584e7c63",
+    "55": "555c6393f085f141277e379daec1ac4d70726675",
+    "56": "64937f685ba88b423a73d94aad8b4448d642fdfa",
+    "57": "955650af405ae2df280f86849e08f2cdfc4fb208",
+    "58": "97baf641bd362f6a4be9f778bce51dfa428a433e",
+    "59": "f4b9524314cfe5f8c229bc18e9afe5a48d0c60b7",
+    "60": "8854379e8162b35bf5fc06307d0fb37d2725154d",
+    "61": "d0e61f6cc998262690555a85675bb7a938a36ba8",
+    "62": "241d73ed6cd6d56f58ead84181fac7717467f822",
+    "63": "ed1a4b9bd1dd8494b16b47be9a25a354f8b6b0d3",
+    "64": "32f0bb4262530800df69173a9cfe39efeb8ef575",
+    "65": "bc743f3f5782384cc888899999a6811affc37751",
+    "66": "e9fd42215f8d0ec067501ca97174edeedc5fcdcc",
+    "67": "180e98b583aa8ee00c7632b07b1c657119106e68",
+    "68": "c24abf880ee83fc9f7577852d136d9626fc89bec",
+    "69": "4a4c78c5b1d09e083bf6069c59599928ea7e2277",
+    "70": "a2fa1bb3858a4a42547a31c784afeaaf3df190d8",
+    "71": "6a3bb40988f9f0b0938ac2c70c84906f1d691eeb",
+    "72": "d43dfdbead68636e0e7df749aacb5d2d4c7964c9",
+    "73": "510fa6c9e1dfd0f556ce8ef20cedb8f5b895bc38",
+    "74": "40148302be04b3452bb5f1512207c0b7b31ad9c2",
+    "75": "4df4c1085e64302c2095caa471032a32bbe0a867",
+    "76": "7894f7affa291b455ee3953f438f2034110ef7e4",
+    "77": "0edbd87712a959373030f3a3c20cea3136eeed24",
+    "78": "3fbb5cbe2b9d65de84a001d1ff6b0a3f2a07206e",
+    "79": "9fb309af797451fcf6ba09b9d660dc0b0306b0ac",
+    "80": "17beaa608cdd0b718e5d4a912bd2c7cca8203bc5",
+    "81": "e1699c53eee8d7d691ff829ce1a50ed753a65c18",
+    "82": "de14e748a0c57b9ee6aaae164ab713408fee7c71",
+    "83": "7f2dbf0e2a2f95e6302d48b3028d8b35d5afdf03",
+    "84": "26e1aad927967572a8f238ee423d5690791285db",
+    "85": "f6ef205351425d36df450b18b71e5757448ea514",
+    "86": "f0c02f8baf804afac2b12515f95eb8b9337af22c",
+    "87": "a9c228e8ed6712f86733a7acff4e039a8331c3cf",
+    "88": "3752b07fd328608d45233759f9a88c0a86979727",
+    "89": "f52b8428da0ba2ec78853167b1c003100dde6f90",
+    "90": "f26a7e28fe1703c63d66c88076d88b1981d53379",
+    "91": "967c98469a93b1c232d7d561d7a6a8ef92caa53b",
+    "92": "da7fc5856ca88a06a5c808f20dc7cd9a6677a0e9",
+    "93": "f1922a3b76833675f7da077eec5ce2e19cde8f22",
+    "94": "a3fbd1929082f3561b9a9f2b0240913048942960",
+    "95": "25e1a22617ea4290cb7f32144d41e7579dfce61c",
+    "96": "c161c51e03dcfd21b31aa7fc14f1ac0813f8002a",
+    "97": "16bfd8fda3e6c63efbb9436dd7cee46cd9620e3b",
+    "98": "fc5f9497df585916c15c32e6a6d679ee86ff876f",
+    "99": "9b0fc6cc1d91df724f3a68555963c7078c0fca17",
+    "100": "ae000c22f0bf615f9940ef215c57d37b171c0ede",
+    "101": "73e676bbd9b8f01a7c1e088b90c8a296ab3ff158",
+    "102": "6870e830deebe0423e72c403981ec75041104836",
+    "103": "3ecde041eabdfd3f942ebd36d2c3e5964aada11a",
+    "104": "0faacb455ab6abd1542fe269e87d45ef1494d838",
+    "105": "6f7d658c9bf17b530bed92e2f5caed962df289fd",
+    "106": "66a55576ddb52870672e2ae34df8e7c6f3292140",
+    "107": "ef65fa23ec69e0d80c7531e4d0e4e5961ea69858",
+    "108": "c0b948f6cff8ff8c3d8d13df24618f956fcc3564",
+    "109": "329c7c74fb9f661c2f63591beb1267a1ba1bec31",
+    "110": "5c8bb850debd32aff8e8a32a41e51fd90b2f7468",
+    "111": "af1c80adf19b0a2c73bf97ee6c4a8612a0a0192c",
+    "112": "271e9e56a7e5cdbc79bf66f8e95b19aacf34b713",
+    "113": "e3020b37db18dbec4d7526a85932e2ff4c73ea1f",
+    "114": "1270162572a4f2b1e27c59899a928d8151fbeb20",
+    "115": "1f3742909d606c861849f882772f6cd895705c98",
+    "116": "45aa968cf7bff55e0f9e9994531f7c4149ea45f8",
+    "117": "74dff9170ac849ac6bd2f38b3fa6cf3eda24b4e1",
+    "118": "312cd658fb726cdb7b1561afa4c9f4f1b48402bb",
+    "119": "56a8adc0f3fb148a24300950a965e7005549b8fc",
+    "120": "ac5dd39c4c09bab5e1d1a687f47543bf2b219096",
+    "121": "4e43a3d2367cbb1839ff224ccb24da175c6b8278",
+    "122": "a1515d6885155ba9bb8bdeb63ab1e5cb33744886",
+    "123": "d63dde7b88f7f4c4375c622b072fa24e8d9d0c62",
+    "124": "91f683bf8663a9403981009c9f3d6668e203c9a2",
+    "125": "6ea42ee1a8384654faca7ac5c755c00c928d2bc3",
+    "126": "f959d2e72f60e156c00f248f2d74d05b9a132991",
+    "127": "ac5ba721e323aecc90bae26ec72dbc0c8e81e511"
+  },
+  "suite": {
+    "command": "cargo test --locked --offline --no-fail-fast",
+    "setup": "PostgreSQL 16.6 and pinned HTTP and WebAssembly tools",
+    "passed": 181,
+    "failed": 0,
+    "ignored": 1
+  },
+  "fixtureCommand": "python3 <fixture> target/debug/oddlang",
+  "fixtures": {
+    "verification/binary-record/package.py": {
+      "exitCode": 0,
+      "summary": "Pinned nested file-format package, exact bytes, and linkage controls pass."
+    },
+    "verification/binary-record/verify.py": {
+      "exitCode": 0,
+      "summary": "Portable tagged record agrees with independent bytes, bounds and named errors."
+    },
+    "verification/bounded-json-input/verify.py": {
+      "exitCode": 0,
+      "summary": "Renamed bounded JSON profile, record checks and linkage controls passed."
+    },
+    "verification/checked-values/fixed_bytes.py": {
+      "exitCode": 0,
+      "summary": "Recovered 7 and 9 octets; both native bounds, copy ownership, borrowing, drop provider and trait controls passed."
+    },
+    "verification/checked-values/verify.py": {
+      "exitCode": 0,
+      "summary": "Qualified unrelated checked records, enum tables, error categories and a native bound mutation."
+    },
+    "verification/native-workspace/verify.py": {
+      "exitCode": 0,
+      "summary": "empty-cache failure, pinned Git acquisition, disconnected rebuild and stale root lock checked"
+    },
+    "verification/observed-buffered-input/verify.py": {
+      "exitCode": 0,
+      "summary": "Real shape-invariant Rust mutation changed all three inferred policies; both native projections reproduce their traces."
+    },
+    "verification/plain-value-choices/typescript.py": {
+      "exitCode": 0,
+      "summary": "Rust and TypeScript agree on both choice revisions, capability checks and exact ordinals."
+    },
+    "verification/plain-value-choices/verify.py": {
+      "exitCode": 0,
+      "summary": ""
+    },
+    "verification/process-limits/startup.py": {
+      "exitCode": 0,
+      "summary": "Sibling startup succeeds before CLI and emits its declared failure before argument parsing"
+    },
+    "verification/process-limits/verify.py": {
+      "exitCode": 0,
+      "summary": "Portable descriptor budget: low/equal/high child cases and invalid graph/binding pass"
+    },
+    "verification/rust-recovery/field-conjunction/verify.py": {
+      "exitCode": 0,
+      "summary": "Qualified unrelated native equality, field mutation, cross-file invalidation and six unresolved controls."
+    },
+    "verification/rust-recovery/frame-fragments/verify.py": {
+      "exitCode": 0,
+      "summary": "Verified checked append and checked delegate layouts, native bytes and rejections."
+    },
+    "verification/rust-recovery/frame-guards/verify.py": {
+      "exitCode": 0,
+      "summary": "Verified separate error orders, exact native bytes and three unresolved controls."
+    },
+    "verification/rust-recovery/tagged-frame/verify.py": {
+      "exitCode": 0,
+      "summary": "Verified compiler-resolved tagged-frame discriminator, writes, and altered header control."
+    },
+    "verification/rust-recovery/test_public_api.py": {
+      "exitCode": 0,
+      "summary": "two equivalent facades matched, six public changes distinguished, unsupported shape rejected"
+    },
+    "verification/rust-recovery/test_shared_source.py": {
+      "exitCode": 0,
+      "summary": "pinned revisions, symbolic references, typed messages, unsupported cases and existing destinations checked"
+    }
+  },
+  "workGraph": {
+    "engine": "RDFLib SPARQL",
+    "turtleFiles": [
+      "docs/design/process.ttl",
+      "docs/design/work.ttl"
+    ],
+    "query": "docs/design/ready.rq",
+    "readyTasks": [
+      "urn:oddlang:work:basicCommandInterop",
+      "urn:oddlang:work:nativeFileProfileExtendedInit"
+    ],
+    "taskStatusesUnique": true,
+    "dependenciesResolve": true,
+    "triplesLostSinceMerge": 0
+  }
+}
