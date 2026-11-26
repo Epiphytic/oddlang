@@ -107,7 +107,7 @@ tokio = { version = "=1.54.1", features = ["io-util", "net", "rt", "time"] }
                       wrap(body(sample), digest=sha256(body(sample)).hexdigest().upper()),
                       body(json.loads(wrap(body(sample))) | {'$opened': sample}),
                       body(json.loads(wrap(body(sample))) | {'encoded': 'YR=='}),
-                      wrap(body(sample | {'padding': 'x' * 512})),
+                      wrap(b'x' * 513),
                       wrap(body(sample)[:-1] + b',"exit":7}')):
             serve(binary, path, [(read, reply)], (12, b'', b'protocol\n'), unit=False)
         obligations = (product / 'workflow-obligations.json').read_bytes()
