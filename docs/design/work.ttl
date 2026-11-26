@@ -1214,3 +1214,8 @@ w:finiteErrorDomainFixture a p:Artifact ;
 w:nativeErrorDomainReceipt a p:Artifact ;
     p:location "companion:verification/whole/native-error/darwin-arm64/receipt.json" .
 w:finiteErrorDomains p:evidence w:finiteErrorDomainFixture, w:nativeErrorDomainReceipt .
+
+w:finiteErrorNameResolutionReview a p:Finding ;
+    rdfs:label "Reproduce Rust alias shadowing and qualify generated category helper calls" ;
+    p:source w:finiteErrorDomainFixture .
+w:finiteErrorDomains p:addresses w:finiteErrorNameResolutionReview .

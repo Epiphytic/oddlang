@@ -211,7 +211,7 @@ fn render(graph: &Graph, overlay: &Overlay) -> String {
             Message::Literal { text } => format!("formatter.write_str({text:?})"),
             Message::Insertion { prefix, suffix } => {
                 let value = match &variant.payload {
-                    Payload::Category { table } => format!("{}(value)", names[table]),
+                    Payload::Category { table } => format!("self::{}(value)", names[table]),
                     _ => "value".to_owned(),
                 };
                 format!(

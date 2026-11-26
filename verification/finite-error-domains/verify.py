@@ -13,7 +13,7 @@ source = '''
 pub enum Fault {
     #[error("device unavailable")]
     Device(#[from] std::io::Error),
-    #[error("reading: {}", category(.0))]
+    #[error("reading: {}", formatter(.0))]
     Reading(sample::Reading),
     #[error("measurement: {0}")]
     Measurement(&'static str),
@@ -23,7 +23,7 @@ pub enum Fault {
 
 pub type Outcome<T> = std::result::Result<T, Fault>;
 
-pub(crate) fn category(code: &sample::Reading) -> &'static str {
+pub(crate) fn formatter(code: &sample::Reading) -> &'static str {
     use sample::Reading::*;
     match code { Missing => "absent", Broken => "unreadable" }
 }
@@ -98,7 +98,7 @@ with tempfile.TemporaryDirectory() as scratch:
            baseline / "graph.json", invalid_overlay, output)
     for malformed in (source.replace('Broken => "unreadable"', '_ => "unreadable"'),
                       source.replace('match code', 'match other'),
-                      source.replace('category(.0)', 'category(.1)')):
+                      source.replace('formatter(.0)', 'formatter(.1)')):
         input_path.write_text(malformed)
         spec = json.loads(selection.read_bytes())
         spec["sourceSha256"] = hashlib.sha256(malformed.encode()).hexdigest()
@@ -107,3 +107,14 @@ with tempfile.TemporaryDirectory() as scratch:
     assert not output.exists()
     caller.write_text(probe.replace("Missing, Broken", "Missing, Broken, NewCase"))
     reject("non-exhaustive patterns", "rustc", "--edition=2021", caller, "-o", program)
+
+    # The unqualified name T here denotes the alias parameter, not the error enum.
+    shadowed = source.replace("pub enum Fault", "pub enum T").replace("Result<T, Fault>", "Result<T, T>")
+    input_path.write_text(shadowed)
+    spec = json.loads(selection.read_bytes())
+    spec["error"] = "T"
+    spec["sourceSha256"] = hashlib.sha256(shadowed.encode()).hexdigest()
+    selection.write_text(json.dumps(spec))
+    reject("result alias parameter shadows", cli, "recover", "finite-error-domain",
+           input_path, selection, output)
+    assert not output.exists()

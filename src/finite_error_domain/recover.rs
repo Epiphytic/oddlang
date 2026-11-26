@@ -160,6 +160,9 @@ fn literal_table(helper: &ItemFn, ty: &Type) -> Result<BTreeMap<String, String>>
 }
 
 fn check_alias(alias: &syn::ItemType, error: &syn::Ident) -> Result<()> {
+    if error == "T" {
+        return Err("result alias parameter shadows the error type".into());
+    }
     let expected: Type = parse_quote!(std::result::Result<T, #error>);
     let expected_generics: syn::Generics = parse_quote!(<T>);
     if !matches!(alias.vis, Visibility::Public(_))
