@@ -1,4 +1,7 @@
-use super::{Binding, Encoding, Graph};
+use super::{
+    Binding, Encoding, Graph,
+    extension::{self, Payload},
+};
 use std::fmt::Write as _;
 
 pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
@@ -15,6 +18,7 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
         }
     };
     let slots = &graph.layout;
+    extension::render_records(&mut text, graph, binding);
     writeln!(
         text,
         "#[derive(Clone, PartialEq, Eq)]\npub struct {name} {{"
@@ -23,6 +27,10 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
     for slot in slots.iter().filter(|slot| slot.encoding.field()) {
         let ty = match &slot.encoding {
             Encoding::UnsignedBe { bits, .. } => format!("::core::primitive::u{bits}"),
+            Encoding::Bool { .. } => "::core::primitive::bool".into(),
+            Encoding::Optional { payload, .. } => {
+                format!("::core::option::Option<{}>", payload.ty(binding))
+            }
             Encoding::FixedBytes { size } => format!("[::core::primitive::u8; {size}]"),
             Encoding::Bytes { .. } => "::std::vec::Vec<::core::primitive::u8>".into(),
             Encoding::AsciiAtom { .. } => "::std::string::String".into(),
@@ -39,16 +47,34 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
     let value_fault = fault(&graph.errors.value);
     for slot in slots.iter().filter(|slot| slot.encoding.field()) {
         let field = &binding.names[&slot.id];
+        let mut error = value_fault.clone();
         let rule = match &slot.encoding {
             Encoding::UnsignedBe {
-                minimum, maximum, ..
+                minimum,
+                maximum,
+                value_error,
+                ..
             } => {
+                if let Some(id) = value_error {
+                    error = fault(id);
+                }
                 format!("({minimum}..={maximum}).contains(&self.{field})")
             }
             Encoding::Bytes {
-                minimum, maximum, ..
+                minimum,
+                maximum,
+                excludes,
+                value_error,
+                ..
             } => {
-                format!("({minimum}..={maximum}).contains(&self.{field}.len())")
+                if let Some(id) = value_error {
+                    error = fault(id);
+                }
+                let mut rule = format!("({minimum}..={maximum}).contains(&self.{field}.len())");
+                for byte in excludes {
+                    write!(rule, " && !self.{field}.contains(&{byte})").unwrap();
+                }
+                rule
             }
             Encoding::AsciiAtom {
                 minimum,
@@ -65,7 +91,16 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
         };
         writeln!(
             text,
-            "        if !({rule}) {{ return ::core::result::Result::Err({value_fault}); }}"
+            "        if !({rule}) {{ return ::core::result::Result::Err({error}); }}"
+        )
+        .unwrap();
+    }
+    for guard in &graph.guards {
+        writeln!(
+            text,
+            "        if !({}) {{ return ::core::result::Result::Err({}); }}",
+            guard.expression(binding),
+            fault(&guard.error)
         )
         .unwrap();
     }
@@ -80,7 +115,19 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
                 fixed += 4;
                 write!(sizes, " + self.{}.len()", binding.names[&slot.id]).unwrap();
             }
-            encoding => fixed += encoding.width().expect("validated layout").0,
+            Encoding::Optional { payload, .. } => {
+                fixed += 1;
+                let name = &binding.names[&slot.id];
+                let width = payload
+                    .width(&graph.records)
+                    .expect("validated optional width");
+                write!(
+                    sizes,
+                    " + if self.{name}.is_some() {{ {width} }} else {{ 0 }}"
+                )
+                .unwrap();
+            }
+            encoding => fixed += encoding.width(&graph.records).expect("validated layout").0,
         }
     }
     writeln!(
@@ -109,6 +156,34 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
                     text,
                     "        __output.extend_from_slice(&{}.to_be_bytes());",
                     field()
+                )
+                .unwrap();
+            }
+            Encoding::Bool { .. } => {
+                writeln!(
+                    text,
+                    "        __output.push(::core::primitive::u8::from({}));",
+                    field()
+                )
+                .unwrap();
+            }
+            Encoding::Optional { payload, .. } => {
+                writeln!(text, "        if let ::core::option::Option::Some(__value) = &{} {{\n            __output.push(1);", field()).unwrap();
+                match payload {
+                    Payload::UnsignedBe { .. } => writeln!(
+                        text,
+                        "            __output.extend_from_slice(&__value.to_be_bytes());"
+                    )
+                    .unwrap(),
+                    Payload::Record { id } => {
+                        for member in &graph.records[id].fields {
+                            writeln!(text, "            __output.extend_from_slice(&__value.{}.to_be_bytes());", binding.names[&member.id]).unwrap();
+                        }
+                    }
+                }
+                writeln!(
+                    text,
+                    "        }} else {{\n            __output.push(0);\n        }}"
                 )
                 .unwrap();
             }
@@ -164,8 +239,60 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
                 )
                 .unwrap();
             }
-            Encoding::UnsignedBe { bits, .. } => {
-                writeln!(text, "        let {variable} = ::core::primitive::u{bits}::from_be_bytes(__take(&mut __rest, {})?.try_into().expect(\"fixed width\"));", bits / 8).unwrap();
+            Encoding::UnsignedBe {
+                bits,
+                minimum,
+                maximum,
+                read_error,
+                ..
+            } => {
+                writeln!(
+                    text,
+                    "        let {variable} = {};",
+                    read_integer(*bits, false)
+                )
+                .unwrap();
+                if let Some(id) = read_error {
+                    writeln!(text, "        if !({minimum}..={maximum}).contains(&{variable}) {{ return ::core::result::Result::Err({}); }}", fault(id)).unwrap();
+                }
+            }
+            Encoding::Bool { error } => {
+                writeln!(text, "        let {variable} = match __take(&mut __rest, 1)?[0] {{\n            0 => false,\n            1 => true,\n            _ => return ::core::result::Result::Err({}),\n        }};",fault(error)).unwrap();
+            }
+            Encoding::Optional { payload, error } => {
+                writeln!(text, "        let {variable} = match __take(&mut __rest, 1)?[0] {{\n            0 => ::core::option::Option::None,").unwrap();
+                match payload {
+                    Payload::UnsignedBe { bits } => writeln!(
+                        text,
+                        "            1 => ::core::option::Option::Some({}),",
+                        read_integer(*bits, false)
+                    )
+                    .unwrap(),
+                    Payload::Record { id } => {
+                        writeln!(
+                            text,
+                            "            1 => ::core::option::Option::Some({} {{",
+                            binding.names[id]
+                        )
+                        .unwrap();
+                        for member in &graph.records[id].fields {
+                            writeln!(
+                                text,
+                                "                {}: {},",
+                                binding.names[&member.id],
+                                read_integer(member.bits, member.signed)
+                            )
+                            .unwrap();
+                        }
+                        writeln!(text, "            }}),").unwrap();
+                    }
+                }
+                writeln!(
+                    text,
+                    "            _ => return ::core::result::Result::Err({}),\n        }};",
+                    fault(error)
+                )
+                .unwrap();
             }
             Encoding::FixedBytes { size } => {
                 writeln!(text, "        let {variable} = __take(&mut __rest, {size})?.try_into().expect(\"fixed width\");").unwrap();
@@ -252,10 +379,20 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
     }
     writeln!(
         text,
-        "        }};\n        __value.validate()?;\n        ::core::result::Result::Ok(__value)\n    }}\n}}"
+        "        }};\n        __value.validate()?;\n        ::core::result::Result::Ok(__value)\n    }}"
     )
     .unwrap();
+    extension::render_views(&mut text, graph, binding);
+    text.push_str("}\n");
     text
+}
+
+fn read_integer(bits: u8, signed: bool) -> String {
+    let ty = extension::integer(bits, signed);
+    format!(
+        "{ty}::from_be_bytes(__take(&mut __rest, {})?.try_into().expect(\"fixed width\"))",
+        bits / 8
+    )
 }
 
 fn atom(

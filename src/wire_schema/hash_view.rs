@@ -303,11 +303,8 @@ pub(super) fn render(
             writeln!(text, "        self.{method}()?;").unwrap();
         }
         match (&view.algorithm, &native.library) {
-            (Algorithm::Sha256, Library::Sha2) => text.push_str(
-                "        use ::sha2::Digest as _;\n        let mut __oddlang_hash = ::sha2::Sha256::new();\n"
-            ),
+            (Algorithm::Sha256, Library::Sha2) => sha256_begin(text, &view.domain),
         }
-        writeln!(text, "        __oddlang_hash.update({:?});", view.domain).unwrap();
         for slot in &view.fields {
             let (encoding, value, tag_table) = match slot {
                 Slot::Field { field, encoding } => {
@@ -346,13 +343,7 @@ pub(super) fn render(
         let result = match &view.output {
             Output::Bytes {} => "__oddlang_hash.finalize().into()",
             Output::LowerHex { prefix } => {
-                text.push_str("        use ::core::fmt::Write as _;\n");
-                writeln!(
-                    text,
-                    "        let mut __oddlang_text = ::std::string::String::from({prefix:?});"
-                )
-                .unwrap();
-                text.push_str("        for __oddlang_byte in __oddlang_hash.finalize() {\n            write!(__oddlang_text, \"{__oddlang_byte:02x}\").expect(\"format into String\");\n        }\n");
+                sha256_hex(text, prefix);
                 "__oddlang_text"
             }
         };
@@ -392,16 +383,42 @@ fn render_slot(
         Encoding::ExternalTagU8 => {
             let table = tag_table.expect("validated external tag");
             let ty = &binding.externals[table];
-            writeln!(text, "        __oddlang_hash.update([match &{value} {{").unwrap();
-            for (case, tag) in &schema.hash_tags[table] {
-                writeln!(
-                    text,
-                    "            {ty}::{} => {tag}u8,",
-                    binding.hash_variants[case]
-                )
-                .unwrap();
-            }
-            text.push_str("        }]);\n");
+            sha256_enum(
+                text,
+                value,
+                ty,
+                &schema.hash_tags[table],
+                &binding.hash_variants,
+            );
         }
     }
+}
+
+pub(crate) fn sha256_begin(text: &mut String, domain: &[u8]) {
+    text.push_str("        use ::sha2::Digest as _;\n        let mut __oddlang_hash = ::sha2::Sha256::new();\n");
+    writeln!(text, "        __oddlang_hash.update({domain:?});").unwrap();
+}
+
+pub(crate) fn sha256_hex(text: &mut String, prefix: &str) {
+    text.push_str("        use ::core::fmt::Write as _;\n");
+    writeln!(
+        text,
+        "        let mut __oddlang_text = ::std::string::String::from({prefix:?});"
+    )
+    .unwrap();
+    text.push_str("        for __oddlang_byte in __oddlang_hash.finalize() {\n            write!(__oddlang_text, \"{__oddlang_byte:02x}\").expect(\"format into String\");\n        }\n");
+}
+
+pub(crate) fn sha256_enum(
+    text: &mut String,
+    value: &str,
+    ty: &str,
+    tags: &BTreeMap<String, u8>,
+    names: &BTreeMap<String, String>,
+) {
+    writeln!(text, "        __oddlang_hash.update([match &{value} {{").unwrap();
+    for (case, tag) in tags {
+        writeln!(text, "            {ty}::{} => {tag}u8,", names[case]).unwrap();
+    }
+    text.push_str("        }]);\n");
 }

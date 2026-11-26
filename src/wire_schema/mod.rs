@@ -9,6 +9,7 @@ use std::{
 };
 
 mod hash_view;
+pub(crate) use hash_view::{sha256_begin, sha256_enum, sha256_hex};
 mod obligations;
 pub mod recover;
 mod render;

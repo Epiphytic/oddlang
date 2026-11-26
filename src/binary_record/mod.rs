@@ -1,5 +1,7 @@
 //! Ordered, bounded binary records with named decode and validation failures.
+mod extension;
 mod rust;
+use extension::{Guard, HashBinding, HashView, Payload, Record};
 
 use crate::shared_declarations::unique_map;
 use crate::wire_schema::{digest, encode, iri, json, symbol, type_symbol};
@@ -22,6 +24,21 @@ struct Graph {
     maximum: u32,
     layout: Vec<Slot>,
     errors: Errors,
+    #[serde(
+        default,
+        skip_serializing_if = "BTreeMap::is_empty",
+        deserialize_with = "unique_map"
+    )]
+    records: BTreeMap<String, Record>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    guards: Vec<Guard>,
+    #[serde(
+        rename = "hashViews",
+        default,
+        skip_serializing_if = "BTreeMap::is_empty",
+        deserialize_with = "unique_map"
+    )]
+    hash_views: BTreeMap<String, HashView>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -58,6 +75,21 @@ enum Encoding {
         bits: u8,
         minimum: u64,
         maximum: u64,
+        #[serde(rename = "readError", default, skip_serializing_if = "Option::is_none")]
+        read_error: Option<String>,
+        #[serde(
+            rename = "valueError",
+            default,
+            skip_serializing_if = "Option::is_none"
+        )]
+        value_error: Option<String>,
+    },
+    Bool {
+        error: String,
+    },
+    Optional {
+        payload: Payload,
+        error: String,
     },
     FixedBytes {
         size: u32,
@@ -66,6 +98,14 @@ enum Encoding {
         minimum: u32,
         maximum: u32,
         overflow: String,
+        #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+        excludes: BTreeSet<u8>,
+        #[serde(
+            rename = "valueError",
+            default,
+            skip_serializing_if = "Option::is_none"
+        )]
+        value_error: Option<String>,
     },
     AsciiAtom {
         minimum: u32,
@@ -92,19 +132,37 @@ impl Encoding {
 
     fn errors(&self) -> Vec<&str> {
         match self {
-            Self::Literal { error, .. } | Self::EnumU8 { error, .. } => vec![error],
+            Self::Literal { error, .. }
+            | Self::EnumU8 { error, .. }
+            | Self::Bool { error }
+            | Self::Optional { error, .. } => vec![error],
             Self::LengthPrefixedLiteral {
                 overflow, error, ..
             }
             | Self::AsciiAtom {
                 overflow, error, ..
             } => vec![overflow, error],
-            Self::Bytes { overflow, .. } => vec![overflow],
-            Self::UnsignedBe { .. } | Self::FixedBytes { .. } => Vec::new(),
+            Self::Bytes {
+                overflow,
+                value_error,
+                ..
+            } => std::iter::once(overflow.as_str())
+                .chain(value_error.as_deref())
+                .collect(),
+            Self::UnsignedBe {
+                read_error,
+                value_error,
+                ..
+            } => read_error
+                .as_deref()
+                .into_iter()
+                .chain(value_error.as_deref())
+                .collect(),
+            Self::FixedBytes { .. } => Vec::new(),
         }
     }
 
-    fn width(&self) -> Result<(u64, u64)> {
+    fn width(&self, records: &BTreeMap<String, Record>) -> Result<(u64, u64)> {
         let fixed = |size| Ok((size, size));
         let framed = |minimum: u32, maximum: u32| {
             if minimum > maximum {
@@ -117,6 +175,7 @@ impl Encoding {
                 bits,
                 minimum,
                 maximum,
+                ..
             } if matches!(bits, 8 | 16 | 32 | 64)
                 && minimum <= maximum
                 && *maximum <= u64::MAX >> (64 - bits) =>
@@ -149,7 +208,8 @@ impl Encoding {
                 }
                 framed(*minimum, *maximum)
             }
-            Self::EnumU8 { .. } => fixed(1),
+            Self::EnumU8 { .. } | Self::Bool { .. } => fixed(1),
+            Self::Optional { payload, .. } => Ok((1, 1 + payload.width(records)?)),
         }
     }
 }
@@ -166,6 +226,12 @@ struct Binding {
     error_type: String,
     #[serde(deserialize_with = "unique_map")]
     errors: BTreeMap<String, Fault>,
+    #[serde(
+        default,
+        skip_serializing_if = "BTreeMap::is_empty",
+        deserialize_with = "unique_map"
+    )]
+    hash_views: BTreeMap<String, HashBinding>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -210,6 +276,8 @@ impl Graph {
         iri(&self.id)?;
         let mut ids = BTreeSet::from([self.id.as_str()]);
         let mut names = BTreeSet::new();
+        extension::validate_records(self, binding, &mut ids, &mut names)?;
+        let mut fields = BTreeSet::new();
         let mut externals = BTreeMap::new();
         let mut errors = BTreeSet::from([
             self.errors.value.as_str(),
@@ -226,10 +294,11 @@ impl Graph {
             }
             if slot.encoding.field() {
                 names.insert(&slot.id);
+                fields.insert(&slot.id);
             }
             let (min, max) = slot
                 .encoding
-                .width()
+                .width(&self.records)
                 .map_err(|err| format!("{}: {err}", slot.id))?;
             minimum += min;
             maximum += max;
@@ -248,15 +317,17 @@ impl Graph {
                 }
             }
         }
-        if minimum > self.maximum.into() || names.is_empty() {
+        if minimum > self.maximum.into() || fields.is_empty() {
             return Err("binary record cannot fit its maximum or has no fields".into());
         }
         if !names.into_iter().eq(binding.names.keys())
-            || !unique(binding.names.values())
-            || binding
-                .names
-                .values()
-                .any(|name| !symbol(name) || !name.as_bytes()[0].is_ascii_lowercase())
+            || !unique(fields.iter().filter_map(|id| binding.names.get(*id)))
+            || fields.iter().any(|id| {
+                !binding
+                    .names
+                    .get(*id)
+                    .is_some_and(|name| symbol(name) && name.as_bytes()[0].is_ascii_lowercase())
+            })
         {
             return Err("missing, invalid or duplicate binary field name".into());
         }
@@ -281,6 +352,7 @@ impl Graph {
                 }
             }
         }
+        extension::validate_checks(self, binding, &mut ids, &mut errors)?;
         if !errors
             .iter()
             .copied()
@@ -313,6 +385,15 @@ impl Graph {
                 "expected": {"position": index, "encoding": slot.encoding},
                 "qualification": witness,
             }));
+        }
+        for (id, record) in &self.records {
+            obligations.push(json!({"declaration":id,"role":"inline-binary-record","qualification":witness,"expected":record}));
+        }
+        for guard in &self.guards {
+            obligations.push(json!({"declaration":guard.id,"role":"binary-guard","qualification":witness,"expected":guard}));
+        }
+        for (id, view) in &self.hash_views {
+            obligations.push(json!({"declaration":id,"role":"typed-hash-view","qualification":witness,"expected":view}));
         }
         json!({"domain": self.id, "obligations": obligations})
     }
