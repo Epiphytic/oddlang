@@ -10,18 +10,36 @@ import release_rustdoc as check
 
 
 class ReleaseComparison(unittest.TestCase):
+    def test_missing_and_ambiguous_producers_reject_the_observation(self):
+        package = {Path("/src/reading"): {"name": "reading", "version": "1.0", "path": "reading"}}
+        invocation = ("  Running `CARGO_MANIFEST_DIR=/src/reading /tool/rustc --crate-name reading "
+                      "--crate-type lib --out-dir /build -C extra-filename=-abc`\n")
+        for log, count in [("", 0), (invocation * 2, 2)]:
+            with self.subTest(count=count), self.assertRaisesRegex(ValueError, f"found {count}"):
+                check.extern_bindings(log, Path("/tool/rustc"), ["--extern", "value=/build/libreading-abc.rmeta"], package)
+
     def test_profile_identity_and_mutations(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / "src").mkdir()
             manifest = root / "Cargo.toml"
             manifest.write_text('[package]\nname="specimen"\nversion="1.0.0"\nedition="2024"\n'
-                                '[features]\nchoose=[]\n[profile.release]\ndebug-assertions=true\n')
+                                '[features]\nchoose=["dep:first_read"]\n[profile.release]\ndebug-assertions=true\n')
+            for path, version in (("old", "1.0.0"), ("new", "2.0.0")):
+                dep = root / path
+                (dep / "src").mkdir(parents=True)
+                (dep / "Cargo.toml").write_text(f'[package]\nname="reading"\nversion="{version}"\nedition="2024"\n')
+                (dep / "src/lib.rs").write_text("pub struct Reading;\n")
+            with manifest.open("a") as out:
+                out.write('[dependencies]\nserde_derive="=1.0.229"\nfirst_read={package="reading",path="old",optional=true}\n'
+                          'next_read={package="reading",path="new"}\n')
             source = root / "src/lib.rs"
             source.write_text("""
 mod first { fn read() {} }
 mod second { fn read() {} }
 pub struct Sample { pub tag: u8 }
+#[cfg(feature="choose")] pub type Prior = first_read::Reading;
+pub type Next = next_read::Reading;
 #[cfg(feature="choose")] pub fn selected() {}
 #[cfg(debug_assertions)] pub fn asserts_enabled() {}
 #[cfg(doc)] pub fn only_docs() {}
@@ -33,6 +51,18 @@ pub struct Sample { pub tag: u8 }
             with patch.object(check, "compare", wraps=check.compare) as capture:
                 results = check.collect(*options)
                 original_compiler = capture.call_args.args[0]
+            bindings = results["profile"]["externBindings"]
+            self.assertEqual(bindings["first_read"]["package"], {"name": "reading", "version": "1.0.0", "path": "old"})
+            self.assertEqual(bindings["next_read"]["package"], {"name": "reading", "version": "2.0.0", "path": "new"})
+            proc_macro = bindings["serde_derive"]
+            self.assertEqual(proc_macro["crateTypes"], ["proc-macro"])
+            self.assertEqual(proc_macro["target"], [])
+            self.assertEqual(proc_macro["package"]["version"], "1.0.229")
+            self.assertTrue(proc_macro["package"]["source"].startswith("registry+"))
+            swapped = copy.deepcopy(results["profile"])
+            swapped["externBindings"]["first_read"] = bindings["next_read"]
+            with self.assertRaisesRegex(ValueError, "externBindings"):
+                check.compare_profiles(results["profile"], swapped)
             compared = results["comparison"]
 
             def names(group):
@@ -51,7 +81,14 @@ pub struct Sample { pub tag: u8 }
             before = names("matched")
             source.write_text(source.read_text().replace("pub tag", "pub renamed"))
             with patch.object(check, "compare", wraps=check.compare) as capture:
-                compared = check.collect(*options)["comparison"]
+                text = manifest.read_text().replace('path="old",optional=true', 'path="new",optional=true')
+                manifest.write_text(text.replace('next_read={package="reading",path="new"', 'next_read={package="reading",path="old"'))
+                changed = check.collect(*options)
+                self.assertEqual(changed["profile"]["externAliases"], results["profile"]["externAliases"])
+                self.assertEqual(changed["profile"]["externBindings"]["first_read"], bindings["next_read"])
+                with self.assertRaisesRegex(ValueError, "externBindings"):
+                    check.compare_profiles(results["profile"], changed["profile"])
+                compared = changed["comparison"]
                 changed_document = capture.call_args.args[1]
             self.assertEqual(before - names("matched"), {("specimen", "Sample", "tag")})
             self.assertEqual(names("matched") - before, {("specimen", "Sample", "renamed")})
