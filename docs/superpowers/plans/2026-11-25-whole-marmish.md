@@ -177,3 +177,5 @@ and bindings that add implementations involving the choice. Recovery records fil
 a native name-resolution and trait witness obligation. Existing checked records
 derive Debug and cannot embed this kind of choice without another record
 capability profile.
+
+- [x] Compare the direct external dependency selected for every alias in the release compiler and rustdoc observers. Exercise two versions of a path package and a host proc-macro in an independent fixture; swapping the aliases while retaining their spellings must change the binding comparison. [Observer fixture](../../../verification/rust-recovery/test_release_rustdoc.py)

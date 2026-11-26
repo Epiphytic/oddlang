@@ -87,6 +87,65 @@ def profile(args, root):
     }
 
 
+def cargo_packages(root, triple, package, no_default, features, env):
+    flags = [tool("cargo"), "metadata", "--format-version", "1", "--locked", "--offline",
+             "--filter-platform", triple]
+    if no_default:
+        flags.append("--no-default-features")
+    for feature in features:
+        flags.extend(["--features", feature if "/" in feature else f"{package}/{feature}"])
+    raw, _ = command(flags, root, env)
+    packages = {}
+    for entry in json.loads(raw)["packages"]:
+        directory = Path(entry["manifest_path"]).resolve().parent
+        if entry["source"] is None:
+            identity = {"path": os.path.relpath(directory, root)}
+        else:
+            identity = {"source": entry["source"]}
+        packages[directory] = {**identity, "name": entry["name"], "version": entry["version"]}
+    return packages
+
+
+def extern_bindings(log, rustc, selected, packages):
+    """Resolve each selected --extern file back to its producer in the same fresh build."""
+    producers = defaultdict(list)
+    for words in trace.commands(log):
+        if str(rustc) not in words:
+            continue
+        index = words.index(str(rustc))
+        args = words[index + 1:]
+        env = dict(word.split("=", 1) for word in words[:index] if "=" in word)
+        crate_types = trace.flag(args, "--crate-type")
+        if not set(crate_types).intersection({"lib", "rlib", "dylib", "proc-macro"}):
+            continue
+        crate, = trace.flag(args, "--crate-name")
+        output, = trace.flag(args, "--out-dir")
+        suffixes = [v.removeprefix("extra-filename=") for v in trace.flag(args, "-C")
+                    if v.startswith("extra-filename=")]
+        require(len(suffixes) <= 1, f"ambiguous output suffix for {crate}")
+        suffix = next(iter(suffixes), "")
+        directory = Path(env["CARGO_MANIFEST_DIR"]).resolve()
+        target = trace.flag(args, "--target")
+        evidence = {"crate": crate, "crateTypes": sorted(crate_types),
+                    "target": target, "explicitCfg": sorted(trace.flag(args, "--cfg"))}
+        producers[(Path(output), crate + suffix)].append((directory, evidence))
+
+    bindings = {}
+    for arg in trace.flag(selected, "--extern"):
+        alias, sep, filename = arg.partition("=")
+        require(sep and alias not in bindings, f"missing or duplicate extern binding: {alias}")
+        artifact = Path(filename)
+        require(artifact.suffix in {".rmeta", ".rlib", ".dylib", ".so", ".dll"},
+                f"unsupported extern artifact: {artifact.name}")
+        stems = {artifact.stem, artifact.stem.removeprefix("lib")}
+        candidates = [row for stem in stems for row in producers.get((artifact.parent, stem), [])]
+        require(len(candidates) == 1, f"expected one build producer for extern {alias}, found {len(candidates)}")
+        directory, evidence = candidates[0]
+        require(directory in packages, f"unknown Cargo package producing extern {alias}")
+        bindings[alias] = {**evidence, "package": packages[directory]}
+    return bindings
+
+
 def compare_profiles(left, right):
     for key in left:
         require(left[key] == right.get(key), f"observer profile changed {key}: {left[key]} vs {right.get(key)}")
@@ -227,7 +286,10 @@ def collect(root, package, kind, target, triple, no_default, features, previous=
                                     root, env | {"ODD_RECOVERY_PROFILE_TRACE": "1"})
         compiler = json.loads(raw)
         require(compiler["compiler"] == COMMIT and compiler["crateName"] == crate, "wrong compiler inventory")
-        compiled = profile(invocation(compiler_log, rustc, crate), root)
+        packages = cargo_packages(root, triple, package, no_default, features, env)
+        compiler_args = invocation(compiler_log, rustc, crate)
+        compiled = profile(compiler_args, root)
+        compiled["externBindings"] = extern_bindings(compiler_log, rustc, compiler_args, packages)
         # Enable unstable JSON output only in rustdoc; dependency compilers
         # and build scripts use the regular stable toolchain environment.
         wrapper = build / "doc-wrapper"
@@ -248,7 +310,9 @@ def collect(root, package, kind, target, triple, no_default, features, previous=
         for setting in compiled["codegen"]:
             flags.extend(["-C", setting])
         _, doc_log = command(flags, root, documentation)
-        observed = profile(invocation(doc_log, wrapper, crate), root)
+        doc_args = invocation(doc_log, wrapper, crate)
+        observed = profile(doc_args, root)
+        observed["externBindings"] = extern_bindings(doc_log, rustc, doc_args, packages)
         compare_profiles(compiled, observed)
         require(compiled["target"] == [triple] and compiled["pathMaps"] ==
                 ["--remap-path-prefix=$WORKSPACE=/oddlang-workspace"], "requested target or path map differs")

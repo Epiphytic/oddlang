@@ -2441,3 +2441,21 @@ w:boundedJsonInput p:evidence w:boundedJsonInputFixture .
 w:boundedJsonInputNativeReceipts a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/tree/e4db3246252b54a59196ac0af2ce62ad3f4e9912/verification/whole/mdk-json-input" .
 w:boundedJsonInput p:evidence w:boundedJsonInputNativeReceipts .
+
+w:directObserverBindings a p:Task ;
+    rdfs:label "Reconcile the actual Cargo package selected for each direct compiler and rustdoc alias" ;
+    p:source w:wholeMarmishPlan ; p:milestone w:marmishMilestone ;
+    p:acceptance "Trace each alias to one compiler build producer and its locked package identity. Distinguish swapped package versions and identify host proc-macros in the unrelated release fixture." ;
+    p:status p:done ; p:evidence w:directObserverBindingFixture .
+w:directObserverBindingFixture a p:Artifact ;
+    p:location "verification/rust-recovery/test_release_rustdoc.py" .
+w:wholeMarmishStructure p:dependsOn w:directObserverBindings .
+
+w:crossTargetObserverReview a p:Finding ;
+    rdfs:label "Host-only build dependencies can be absent from target-filtered Cargo metadata" ;
+    p:source w:directObserverBindingFixture .
+w:directObserverBindings p:addresses w:crossTargetObserverReview .
+w:directObserverBindings p:addresses w:observerDylibSuffix .
+w:observerDylibSuffix a p:Finding ;
+    rdfs:label "Cargo can emit unhashed Rust dynamic library artifacts" ;
+    p:source w:directObserverBindingFixture .
