@@ -83,3 +83,5 @@ The principal feasibility risk is recovering intended behavior where only incide
 - [x] Qualify the complete copy protocol library against every unchanged pinned native test and exact frame error controls on macOS ARM64. [Native receipt and structural inventory](https://github.com/Epiphytic/marmish-oddlang/pull/42)
 
 - [ ] Check composite slot bounds and member types against pinned external codec contracts before package emission.
+
+- [x] Derive ordered field equality from a pinned compiler observation. Qualify a source mutation with an independent native fixture and emit explicit unresolved evidence for unsupported equality. [Recovery profile](../../language/field-relations.md#compiler-backed-recovery-of-direct-conjunctions)

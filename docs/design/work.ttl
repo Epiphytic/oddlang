@@ -900,3 +900,19 @@ w:copyProtocolNativeReview a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4bb7977930c330143d9068b9dfb45143dcb524e9/docs/reviews/oddlang-copy-frame.md" .
 w:copyProtocolStructuralInventory a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4bb7977930c330143d9068b9dfb45143dcb524e9/verification/whole/copy-frame/structural-gap.md" .
+
+w:recoverFieldConjunctions a p:Task ;
+    rdfs:label "Recover direct Rust field equality conjunctions from pinned compiler evidence" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:typedFieldRelations ;
+    p:acceptance "Reproduce ordered field correspondence from a selected native method. Compare independent native outcomes before and after editing its source and reject ambiguous bindings or equality whose semantics are unproven." ;
+    p:addresses w:fieldConjunctionProvenanceReview ;
+    p:evidence w:fieldConjunctionNativeFixture .
+w:wholeMarmishProtocols p:dependsOn w:recoverFieldConjunctions .
+w:fieldConjunctionNativeFixture a p:Artifact ;
+    p:location "verification/rust-recovery/field-conjunction/verify.py" .
+w:fieldConjunctionProvenanceReview a p:Finding ;
+    rdfs:label "Pin compiler-read source files and select only inherent methods" ;
+    p:source w:fieldConjunctionReview .
+w:fieldConjunctionReview a p:Artifact ;
+    p:location "docs/design/reviews/rust-field-conjunctions.md" .
