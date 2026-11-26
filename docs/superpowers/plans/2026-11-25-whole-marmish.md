@@ -78,3 +78,4 @@ The principal feasibility risk is recovering intended behavior where only incide
 - [x] Qualify the copy Manifest and Mtime against the pinned native original. [Native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/32)
 - [ ] Qualify the copy Checkpoint and its FileIdentity record against the pinned native original.
 - [x] Qualify Manifest matching and the helper start and build consistency checks against the pinned native original. [Native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/33)
+- [x] Project nested checked codecs, fixed record fields and checksum footers with independent timing and error precedence witnesses. [Composite records](../../language/binary-records.md#composite-binary-records)

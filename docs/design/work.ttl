@@ -852,3 +852,11 @@ w:copyFieldRelationNativeReceipt a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b7ffe42e9423b22a893057a950fb2364429a80d0/verification/whole/copy-field-relations/reference-aarch64-apple-darwin.json" .
 w:copyFieldRelationNativeReview a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b7ffe42e9423b22a893057a950fb2364429a80d0/docs/reviews/oddlang-copy-field-relations.md" .
+
+w:compositeBinaryRecords a p:Task ; rdfs:label "Project checked nested and checksummed composite binary records" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:binaryMetadataRecords ;
+    p:acceptance "Verify exact nested binary codecs, fixed records, typed checked timing and optional member checks, and integrity-domain ordering." ;
+    p:evidence w:binaryCompositeFixture .
+w:binaryCompositeFixture a p:Artifact ; p:location "verification/binary-record/composite.py" .
+w:copyCheckpointQualification p:dependsOn w:compositeBinaryRecords .

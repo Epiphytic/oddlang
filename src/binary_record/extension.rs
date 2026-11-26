@@ -211,7 +211,7 @@ pub(super) fn validate_records<'a>(
     for (id, record) in &graph.records {
         iri(id)?;
         if !graph.layout.iter().any(|slot| {
-            matches!(&slot.encoding, Encoding::Optional { payload: Payload::Record { id: payload }, .. } if payload == id)
+            matches!(&slot.encoding, Encoding::Optional { payload: Payload::Record { id: payload }, .. } | Encoding::Inline { id: payload } if payload == id)
         }) {
             return Err(format!("unused inline binary record: {id}"));
         }

@@ -34,3 +34,13 @@ An unsigned slot may supply a `readError` to check its range immediately after r
 A `presence-equals` guard equates a boolean with optional presence. An `optional-mask` guard requires all `required` bits and forbids bits outside `allowed` when an unsigned value is present. An `optional-member-range` guard applies an inclusive unsigned range to a member of a present inline record. Each guard has a stable identity and a named validation error.
 
 Binary `hashViews` select an ordered list of fixed byte arrays and enumerated tag fields. The digest is SHA-256 of the declared domain bytes and selected wire representations. The output is the supplied prefix followed by lowercase hexadecimal digest bytes. The corresponding native binding selects the method name and SHA-256 library. These views operate independently of validation. [Independent metadata fixture](../../verification/binary-record/metadata.py)
+
+## Composite binary records
+
+A `nested` slot stores a checked external record with a big-endian u32 byte length. The slot declares its bound and overflow error. Decode delegates to the named record at that point in the layout and propagates its error. Validation checks each nested record when its field is reached. The graph declares any external members inspected by constraints, and the Rust overlay binds those names to the projected type.
+
+A `signed-be` slot stores a signed fixed-width integer. An `inline` slot stores the ordered integer members of a required declared record without a presence tag. Setting `requireFull` on a literal checks truncation before comparing the complete literal.
+
+A composite constraint compares typed local fields, declared nested fields or exact literals. It can require enum membership or optional presence, compare a present inline record with another field, impose a checked minimum signed time difference, and combine predicates by implication and equivalence. An overflowing time difference fails the constraint. Constraints run in order after the field guards and named record guards.
+
+Optional `integrity` specifies a SHA-256 checksum over explicit domain bytes and the record payload. The encoded footer is 32 bytes and counts toward the complete byte bound. Decode first checks the maximum and the presence of the full footer, then compares the digest, then parses the payload. The graph supplies separate errors for short and mismatching footers. [Independent composite fixture](../../verification/binary-record/composite.py)
