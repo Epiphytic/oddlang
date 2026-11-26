@@ -118,7 +118,7 @@ impl<'a> Bounds<'a> {
                     }
                     text.push_str("    }\n");
                 }
-                Definition::External { .. } => unreachable!("checks use defined shapes only"),
+                Definition::UnitEnum { .. } | Definition::External { .. } => unreachable!("checks use defined shapes only"),
             }
             text.push_str("    ::core::result::Result::Ok(())\n}\n");
         }
@@ -194,7 +194,7 @@ fn has_bounds(definition: &Definition, checked: &BTreeSet<&str>) -> bool {
                 Payload::Unit {} => false,
             })
         }
-        Definition::External { .. } => false,
+        Definition::UnitEnum { .. } | Definition::External { .. } => false,
     }
 }
 

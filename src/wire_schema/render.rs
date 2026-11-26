@@ -66,6 +66,13 @@ pub(super) fn project_with_options(
                 }
                 super::hash_view::render(&mut text, schema, binding, id, fields);
             }
+            Definition::UnitEnum { variants, .. } => {
+                writeln!(text, "{visibility}enum {name} {{").unwrap();
+                for variant in variants {
+                    writeln!(text, "    #[serde(rename = {:?})]\n    {},", variant.name, binding.names[&variant.id]).unwrap();
+                }
+                text.push_str("}\n\n");
+            }
             Definition::Adjacent {
                 tag,
                 content,
@@ -173,6 +180,9 @@ fn write_fields<'a>(
     let visibility = if public { "pub " } else { "" };
     for field in fields {
         write!(text, "{indent}#[serde(rename = {:?}", field.name).unwrap();
+        if field.require_presence {
+            text.push_str(r#", deserialize_with = "::serde::Deserialize::deserialize""#);
+        }
         let adapter = match &field.shape {
             Shape::LowerHex { bytes, diagnostic } => Some(Adapter::Hex {
                 bytes: *bytes,
