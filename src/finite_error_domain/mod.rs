@@ -21,7 +21,8 @@ struct Graph {
     format: String,
     id: String,
     error: String,
-    result: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    result: Option<String>,
     #[serde(deserialize_with = "unique_map")]
     variants: BTreeMap<String, Variant>,
     #[serde(deserialize_with = "unique_map")]
@@ -82,6 +83,11 @@ fn validate(graph: &Graph, overlay: &Overlay) -> Result<()> {
     if graph.format != "oddlang-finite-error-domain-v1"
         || overlay.format != "oddlang-finite-error-rust-v1"
         || graph.variants.is_empty()
+        || (graph.result.is_none()
+            && graph
+                .variants
+                .values()
+                .any(|variant| !matches!(variant.payload, Payload::Unit)))
     {
         return Err("unsupported or empty finite error domain".into());
     }
@@ -94,7 +100,9 @@ fn validate(graph: &Graph, overlay: &Overlay) -> Result<()> {
         Ok(())
     };
     add(&graph.error)?;
-    add(&graph.result)?;
+    if let Some(result) = &graph.result {
+        add(result)?;
+    }
     for id in graph.variants.keys() {
         add(id)?;
     }
@@ -121,7 +129,10 @@ fn validate(graph: &Graph, overlay: &Overlay) -> Result<()> {
         let mut seen = BTreeSet::new();
         names.into_iter().all(|name| seen.insert(name))
     }
-    if !distinct([&overlay.names[&graph.error], &overlay.names[&graph.result]])
+    if graph
+        .result
+        .as_ref()
+        .is_some_and(|result| overlay.names[result] == overlay.names[&graph.error])
         || !distinct(graph.variants.keys().map(|id| &overlay.names[id]))
         || !distinct(graph.categories.keys().map(|id| &overlay.names[id]))
     {
@@ -177,7 +188,6 @@ fn native_path(path: &[String]) -> String {
 fn render(graph: &Graph, overlay: &Overlay) -> String {
     let names = &overlay.names;
     let name = &names[&graph.error];
-    let alias = &names[&graph.result];
     let mut out = format!("#[derive(Debug)]\npub enum {name} {{\n");
     let variants = overlay
         .variant_order
@@ -195,11 +205,16 @@ fn render(graph: &Graph, overlay: &Overlay) -> String {
         };
         writeln!(out, "    {name}{payload},").unwrap();
     }
-    writeln!(
-        out,
-        "}}\npub type {alias}<T> = ::core::result::Result<T, self::{name}>;\n"
-    )
-    .unwrap();
+    if let Some(result) = &graph.result {
+        let alias = &names[result];
+        writeln!(
+            out,
+            "}}\npub type {alias}<T> = ::core::result::Result<T, self::{name}>;\n"
+        )
+        .unwrap();
+    } else {
+        out.push_str("}\n");
+    }
     writeln!(out, "impl ::core::fmt::Display for {name} {{\n    fn fmt(&self, formatter: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {{\n        match self {{").unwrap();
     for (name, variant) in variants.clone() {
         let arg = match (&variant.payload, &variant.message) {
