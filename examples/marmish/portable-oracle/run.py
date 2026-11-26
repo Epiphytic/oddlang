@@ -52,28 +52,37 @@ def corpus_digest(cases):
     return sha(json.dumps(cases, sort_keys=True, separators=(",", ":")).encode()).hex()
 
 
-def validate_pin(workspace):
+def original_arguments(parser):
+    parser.add_argument("--original-target", choices=(TARGET, "x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu"),
+                        default=TARGET, help="required native rustc host triple")
+    parser.add_argument("--original-revision", default=UPSTREAM, help="required full Git commit of the original build")
+    parser.add_argument("--original-lock", default=CARGO_LOCK, help="required SHA-256 of the original Cargo.lock")
+    parser.add_argument("--original-profile", choices=("dev", "release"), default="dev")
+
+
+def validate_pin(workspace, revision_pin, lock_pin):
     revision = subprocess.check_output(
         ["git", "-C", workspace, "rev-parse", "HEAD"], text=True, timeout=20,
     ).strip()
-    require(revision == UPSTREAM, f"workspace revision differs: {revision}")
+    require(revision == revision_pin, f"workspace revision differs: {revision}")
     status = subprocess.check_output(
         ["git", "-C", workspace, "status", "--porcelain", "--untracked-files=all"],
         text=True, timeout=20,
     )
     require(not status, f"workspace contains modifications: {status}")
     lock = digest(workspace / "Cargo.lock")
-    require(lock == CARGO_LOCK, f"unexpected Cargo.lock digest: {lock}")
+    require(lock == lock_pin, f"unexpected Cargo.lock digest: {lock}")
     return {"revision": revision, "cargoLockSha256": lock}
 
 
-def build_original(workspace, target):
-    provenance = validate_pin(workspace)
+def build_original(workspace, target, revision_pin=UPSTREAM, lock_pin=CARGO_LOCK, profile="dev", triple=TARGET):
+    provenance = validate_pin(workspace, revision_pin, lock_pin)
     compiler = subprocess.check_output([*RUSTC, "-vV"], text=True, timeout=20)
-    require(f"host: {TARGET}\n" in compiler, f"requires observed target {TARGET}")
+    require(f"host: {triple}\n" in compiler, f"requires observed target {triple}")
     require(compiler.startswith("rustc 1.97.1 "), "expected Rust 1.97.1")
+    profile_directory = {"dev": "debug", "release": "release"}[profile]
     cargo_command = [
-        *CARGO, "build", "--locked", "--offline", "--target", TARGET,
+        *CARGO, "build", "--locked", "--offline", "--profile", profile, "--target", triple,
         "--package", "marmish-stream", "--target-dir", str(target),
         "--message-format=json-render-diagnostics",
     ]
@@ -104,19 +113,19 @@ def build_original(workspace, target):
     binding = corpus_digest({"upstream": provenance, "compiler": compiler, "sources": sources, "libs": linked})
     rustc_command = [
         *RUSTC, "--edition", "2024", "--crate-name", "stream_oracle",
-        "--target", TARGET, str(ROOT / "stream.rs"), "-L",
-        f"dependency={target / TARGET / 'debug' / 'deps'}",
-        "-L", f"dependency={target / 'debug' / 'deps'}", "-o", str(caller),
+        "--target", triple, str(ROOT / "stream.rs"), "-L",
+        f"dependency={target / triple / profile_directory / 'deps'}",
+        "-L", f"dependency={target / profile_directory / 'deps'}", "-o", str(caller),
     ]
     for name, path in sorted(libraries.items()):
         rustc_command.extend(["--extern", f"{name}={path}"])
     cargo_environment.update(ODDLANG_STREAM_DRIVER_BINDING=binding, ODDLANG_STREAM_DRIVER_ROLE="original")
     subprocess.run(rustc_command, env=cargo_environment, cwd=workspace, check=True, timeout=45)
-    require(validate_pin(workspace) == provenance, "upstream identity changed during build")
+    require(validate_pin(workspace, revision_pin, lock_pin) == provenance, "upstream identity changed during build")
     require({name: digest(path) for name, path in libraries.items()} == linked,
             "linked libraries changed during build")
     provenance.update({
-        "features": features, "profile": "dev", "target": TARGET, "compiler": compiler.splitlines(),
+        "features": features, "profile": profile, "target": triple, "compiler": compiler.splitlines(),
         "callerBinding": binding, "callerSha256": digest(caller), "librarySha256": linked,
         "sourceSha256": sources, "cargoCommand": shlex.join(cargo_command),
         "rustcCommand": shlex.join(rustc_command), "buildLocale": "C",
@@ -258,6 +267,7 @@ def main():
     parser.add_argument("--holdout", type=Path, help="qualification-owned sealed input and expectations")
     parser.add_argument("--observations", type=Path, help="optional gzip of public observations")
     parser.add_argument("--receipt", type=Path, required=True)
+    original_arguments(parser)
     args = parser.parse_args()
     require(bool(args.upstream) != bool(args.command), "select exactly one of --upstream or --command")
     freeze = json.loads(FREEZE.read_bytes())
@@ -275,7 +285,10 @@ def main():
     holdout = sealed_cases(args.holdout, freeze) if args.holdout else None
     with tempfile.TemporaryDirectory(prefix="oddlang-portable-stream-build-") as directory:
         if args.upstream:
-            command, provenance = build_original(args.upstream.resolve(), Path(directory))
+            command, provenance = build_original(
+                args.upstream.resolve(), Path(directory), args.original_revision, args.original_lock,
+                args.original_profile, args.original_target,
+            )
         else:
             command, provenance = args.command, {"callerSha256": digest(Path(args.command[0]))}
         binding = provenance.get("callerBinding")
@@ -288,7 +301,7 @@ def main():
         compressed = zlib_peers(command, cases, observations, binding)
         require(digest(Path(command[0])) == provenance["callerSha256"], "adapter changed during replay")
         report = {
-            "schema": 1, "provenance": provenance, "freezeSha256": digest(FREEZE),
+            "schema": 1, "corpusRevision": freeze["revision"], "provenance": provenance, "freezeSha256": digest(FREEZE),
             "oracleSourceSha256": {
                 name: digest(path) for name, path in [
                     ("run.py", Path(__file__)),

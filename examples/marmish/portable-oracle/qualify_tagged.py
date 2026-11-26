@@ -278,9 +278,7 @@ def generated_writes(stage, adapters, cases):
     return outputs
 
 
-def compare_original(upstream, stage, public, holdout, holdout_path, mutations):
-    command, provenance = oracle.build_original(upstream, stage)
-    binding = provenance["callerBinding"]
+def compare_original(command, binding, public, holdout, holdout_path, mutations):
     observations = oracle.observe(command, public, binding)
     oracle.require(not oracle.failures(public, observations), "original failed public expectations")
     if holdout:
@@ -292,7 +290,6 @@ def compare_original(upstream, stage, public, holdout, holdout_path, mutations):
             raise ValueError("sealed original replay failed") from None
     oracle.require(not oracle.failures(mutations, oracle.observe(command, mutations, binding)),
                    "original accepted a changed Data tag")
-    return command, provenance
 
 
 def peers(stage, adapters, cases, original, binding):
@@ -353,6 +350,7 @@ def main():
     parser.add_argument("--holdout", type=Path)
     parser.add_argument("--deny-read", action="append", type=Path, default=[])
     parser.add_argument("--receipt", type=Path, required=True)
+    oracle.original_arguments(parser)
     args = parser.parse_args()
     target = shutil.which("node")
     oracle.require(target is not None, "Node is required to run generated TypeScript")
@@ -436,8 +434,12 @@ def main():
                 assert_observations(release, command, holdout, sealed=True)
         witness = next(row for row in public if row["name"] == "binary-data-encode")
         output = mutation_results(release, alternate, adapters, mutant, witness)
-        original_command, original = compare_original(
-            upstream, work / "upstream-build", public, holdout, args.holdout, list(output.values()),
+        original_command, original = oracle.build_original(
+            upstream, work / "upstream-build", args.original_revision, args.original_lock, args.original_profile,
+            args.original_target,
+        )
+        compare_original(
+            original_command, original["callerBinding"], public, holdout, args.holdout, list(output.values()),
         )
         mixed = peers(release, adapters, public, original_command, original["callerBinding"])
         # Recheck the unmodified contract after both mutation controls.
@@ -449,7 +451,7 @@ def main():
         receipt = {
             "schema": 1, "contract": SCOPE, "approvedGraphSha256": RELEASE_PIN,
             "additionalWithheldInputs": withheld_inputs,
-            "upstreamRevision": oracle.UPSTREAM, "freezeSha256": oracle.digest(oracle.FREEZE),
+            "upstreamRevision": original["revision"], "corpusRevision": freeze["revision"], "freezeSha256": oracle.digest(oracle.FREEZE),
             "publicCases": dict(Counter(row["operation"] for row in public)), "publicCount": len(public),
             "publicCaseIds": [row["name"] for row in public],
             "sealedCases": len(holdout), "comparedOperationResults": compared,

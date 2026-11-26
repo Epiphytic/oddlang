@@ -618,7 +618,7 @@ w:wholeMarmishOperations a p:Task ; rdfs:label "Qualify all workspace and instal
     p:dependsOn w:wholeMarmishCommand ; p:acceptance "Close positive, error, state migration and failure cases for all applicable roles." .
 w:wholeMarmishDistribution a p:Task ; rdfs:label "Build and qualify the complete source-free distribution" ;
     p:dependsOn w:wholeMarmishOperations ; p:acceptance "Publish source-isolated builds and mixed-peer installation, upgrade and platform evidence." .
-w:wholeMarmishFreeze p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned .
+w:wholeMarmishFreeze p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:active .
 w:wholeMarmishStructure p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned .
 w:wholeMarmishProtocols p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned .
 w:wholeMarmishCommand p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned .
@@ -631,3 +631,7 @@ w:wholeMarmishFreeze p:addresses w:wholeMarmishReview .
 w:wholeMarmishStructure p:addresses w:wholeMarmishReview .
 w:wholeMarmishCommand p:addresses w:wholeMarmishReview .
 w:wholeMarmishOperations p:addresses w:wholeMarmishReview .
+
+w:wholeReleaseInventory a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/5960f66f76650ad674e218fec443ca6fd9ac19b0/verification/whole-marmish/inventory" .
+w:wholeMarmishFreeze p:evidence w:wholeReleaseInventory .
