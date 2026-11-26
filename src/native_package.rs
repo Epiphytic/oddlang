@@ -129,6 +129,7 @@ enum Kind {
     SequenceJournal,
     CliSurface,
     LocalCommandClient,
+    FileProfile,
 }
 
 #[derive(Deserialize)]
@@ -213,6 +214,10 @@ fn project(
             crate::endpoint_set::build(&path, &pin, Some((&overlay, &binding)), &output)?;
             "endpoint_set.rs"
         }
+        Kind::FileProfile => {
+            crate::file_profile::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
+            "profile.rs"
+        }
         Kind::LocalCommandClient => {
             crate::local_command_client::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
             "client.rs"
@@ -276,12 +281,14 @@ fn project(
 fn validate_command_callbacks(components: &[Component], base: &Path) -> Result<()> {
     let callbacks = components
         .iter()
-        .filter(|component| matches!(component.kind, Kind::LocalCommandClient))
+        .filter(|component| matches!(component.kind, Kind::LocalCommandClient | Kind::FileProfile))
         .map(|component| {
-            let callback = crate::local_command_client::callback(
-                &component.graph.read(base)?,
-                &component.overlay.read(base)?,
-            )?;
+            let graph = component.graph.read(base)?;
+            let overlay = component.overlay.read(base)?;
+            let callback = match component.kind {
+                Kind::FileProfile => crate::file_profile::callback(&graph, &overlay),
+                _ => crate::local_command_client::callback(&graph, &overlay),
+            }?;
             Ok((component, callback))
         })
         .collect::<Result<Vec<_>>>()?;

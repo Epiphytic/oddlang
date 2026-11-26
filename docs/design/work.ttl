@@ -833,3 +833,19 @@ w:localEndpointDiscoveryPlan a p:Artifact ;
     p:location "docs/superpowers/plans/2026-11-26-local-endpoint-discovery.md" .
 w:localEndpointNativeReceipt a p:Artifact ;
     p:location "companion:verification/whole/status/discovery-macos-arm64.json" .
+
+w:nativeFileProfilePreparation a p:Task ;
+    rdfs:label "Prepare private file-backed profile credentials with native providers" ;
+    p:milestone w:marmishMilestone ; p:source w:nativeFileProfilePlan ; p:status p:done ;
+    p:dependsOn w:localEndpointDiscovery ;
+    p:acceptance "Project exclusive scope, random key generation, atomic no-replace publications, identity verification and pending metadata. Exercise representative native filesystem effects." ;
+    p:evidence w:nativeFileProfileFixture .
+w:nativeFileProfilePlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-native-file-profile.md" .
+w:nativeFileProfileFixture a p:Artifact ;
+    p:location "verification/file-profile/check.py" .
+w:nativeFileProfileStores a p:Task ;
+    rdfs:label "Complete native initialization after encrypted storage opens and verified counts" ;
+    p:milestone w:marmishMilestone ; p:source w:nativeFileProfilePlan ; p:status p:active ;
+    p:dependsOn w:nativeFileProfilePreparation ;
+    p:acceptance "Initialize and reopen both native encrypted stores before publishing ready identity; independently verify schema versions and counts before either peer can repair a fixture profile." .
