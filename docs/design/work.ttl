@@ -1561,10 +1561,22 @@ w:publicDiagnosticsCliLinux a p:Artifact ;
 w:terminalPrefixCli a p:Task ;
     rdfs:label "Recover and project leading-option policy for auxiliary terminal CLI responses" ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
-    p:dependsOn w:publicDiagnosticsCliConvergence ; p:status p:active ;
+    p:dependsOn w:publicDiagnosticsCliConvergence ; p:status p:done ;
+    p:evidence w:terminalPrefixFixture, w:terminalPrefixDarwin, w:terminalPrefixLinux ;
     p:acceptance "Verify the original and generated terminal responses for long and short leading options, attached and separate values, root-help precedence and denial, on both ARM64 hosts. Keep successful operational paths outside the projection." .
 
 w:terminalPrefixDenialReview a p:Finding ;
     rdfs:label "Keep a denied prefix terminal even when the auxiliary tail could parse" ;
     p:source w:wholeMarmishPlan .
 w:terminalPrefixCli p:addresses w:terminalPrefixDenialReview .
+
+w:terminalPrefixCli p:addresses w:terminalCliPrefixGap .
+w:terminalPrefixFixture a p:Artifact ;
+    p:location "verification/command-surface/prefix.py" .
+w:terminalPrefixDarwin a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/faacb6133e3db379ad037979b28261d773b37e95/verification/whole/terminal-prefix/aarch64-apple-darwin.json> .
+w:terminalPrefixLinux a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/faacb6133e3db379ad037979b28261d773b37e95/verification/whole/terminal-prefix/aarch64-unknown-linux-gnu.json> .
+w:terminalCliPostParseGap a p:Finding ;
+    rdfs:label "The independent auxiliary parser accepts a version flag as a positional before the original post-parse host check" ;
+    p:source w:terminalPrefixDarwin, w:terminalPrefixLinux .
