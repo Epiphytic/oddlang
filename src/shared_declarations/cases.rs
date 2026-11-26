@@ -11,6 +11,12 @@ pub(super) fn derive(graph: &Graph, binding: &Binding) -> Result<Json> {
             json!({"kind":"constant","unsignedDecimal":values[constant.id.as_str()].to_string()}),
         );
     }
+    for constant in &graph.text_constants {
+        cases.insert(
+            &constant.id,
+            json!({"kind":"text-constant","value":constant.value}),
+        );
+    }
     for alias in &graph.results {
         cases.insert(
             &alias.id,

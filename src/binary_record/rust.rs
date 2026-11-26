@@ -6,7 +6,8 @@ use std::fmt::Write as _;
 
 pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
     let mut text = String::new();
-    let name = &binding.name;
+    let existing = binding.existing_type.as_deref();
+    let name = existing.unwrap_or(&binding.name);
     let error = &binding.error_type;
     let max = graph.maximum;
     let fault = |id: &str| {
@@ -18,35 +19,46 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
         }
     };
     let slots = &graph.layout;
-    extension::render_records(&mut text, graph, binding);
-    writeln!(
-        text,
-        "#[derive(Clone, PartialEq, Eq)]\npub struct {name} {{"
-    )
-    .unwrap();
-    for slot in slots.iter().filter(|slot| slot.encoding.field()) {
-        let ty = match &slot.encoding {
-            Encoding::UnsignedBe { bits, .. } => format!("::core::primitive::u{bits}"),
-            Encoding::Bool { .. } => "::core::primitive::bool".into(),
-            Encoding::Optional { payload, .. } => {
-                format!("::core::option::Option<{}>", payload.ty(binding))
-            }
-            Encoding::FixedBytes { size } => format!("[::core::primitive::u8; {size}]"),
-            Encoding::Bytes { .. } => "::std::vec::Vec<::core::primitive::u8>".into(),
-            Encoding::AsciiAtom { .. } => "::std::string::String".into(),
-            Encoding::EnumU8 { external, .. } => binding.externals[external].path.clone(),
-            _ => unreachable!("literal has no native field"),
-        };
-        writeln!(text, "    pub {}: {ty},", binding.names[&slot.id]).unwrap();
+    if existing.is_none() {
+        extension::render_records(&mut text, graph, binding);
+        writeln!(
+            text,
+            "#[derive(Clone, PartialEq, Eq)]\npub struct {name} {{"
+        )
+        .unwrap();
+        for slot in slots.iter().filter(|slot| slot.encoding.field()) {
+            let ty = match &slot.encoding {
+                Encoding::UnsignedBe { bits, .. } => format!("::core::primitive::u{bits}"),
+                Encoding::Bool { .. } => "::core::primitive::bool".into(),
+                Encoding::SignedBe { bits } => extension::integer(*bits, true),
+                Encoding::Inline { id } => binding.names[id].clone(),
+                Encoding::Nested { record, .. } => binding.external_records[record].path.clone(),
+                Encoding::Optional { payload, .. } => {
+                    format!("::core::option::Option<{}>", payload.ty(binding))
+                }
+                Encoding::FixedBytes { size } => format!("[::core::primitive::u8; {size}]"),
+                Encoding::Bytes { .. } => "::std::vec::Vec<::core::primitive::u8>".into(),
+                Encoding::AsciiAtom { .. } => "::std::string::String".into(),
+                Encoding::EnumU8 { external, .. } => binding.externals[external].path.clone(),
+                _ => unreachable!("literal has no native field"),
+            };
+            writeln!(text, "    pub {}: {ty},", binding.names[&slot.id]).unwrap();
+        }
+        writeln!(text, "}}").unwrap();
     }
-    writeln!(
-        text,
-        "}}\nimpl {name} {{\n    pub fn validate(&self) -> ::core::result::Result<(), {error}> {{"
-    )
-    .unwrap();
+    let (visibility, validation) = if existing.is_none() {
+        ("pub ", "validate")
+    } else {
+        ("", "__oddlang_validate_layout")
+    };
+    writeln!(text,"impl {name} {{\n    {visibility}fn {validation}(&self) -> ::core::result::Result<(), {error}> {{").unwrap();
     let value_fault = fault(&graph.errors.value);
     for slot in slots.iter().filter(|slot| slot.encoding.field()) {
         let field = &binding.names[&slot.id];
+        if matches!(slot.encoding, Encoding::Nested { .. }) {
+            writeln!(text, "        self.{field}.validate()?;").unwrap();
+            continue;
+        }
         let mut error = value_fault.clone();
         let rule = match &slot.encoding {
             Encoding::UnsignedBe {
@@ -104,12 +116,29 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
         )
         .unwrap();
     }
+    for constraint in &graph.constraints {
+        writeln!(
+            text,
+            "        if !({}) {{ return ::core::result::Result::Err({}); }}",
+            constraint.rust(graph, binding),
+            fault(&constraint.error)
+        )
+        .unwrap();
+    }
     writeln!(text, "        ::core::result::Result::Ok(())\n    }}").unwrap();
 
-    writeln!(text, "    pub fn encode(&self) -> ::core::result::Result<::std::vec::Vec<::core::primitive::u8>, {error}> {{\n        self.validate()?;").unwrap();
-    let mut fixed = 0u64;
+    let (encode_visibility, encode_name) = if existing.is_none() {
+        ("pub", "encode")
+    } else {
+        ("pub(crate)", "__oddlang_encode")
+    };
+    writeln!(text, "    {encode_visibility} fn {encode_name}(&self) -> ::core::result::Result<::std::vec::Vec<::core::primitive::u8>, {error}> {{\n        self.validate()?;").unwrap();
+    if existing.is_some() {
+        writeln!(text, "        self.__oddlang_validate_layout()?;").unwrap();
+    }
+    let mut fixed = if graph.integrity.is_some() { 32 } else { 0 };
     let mut sizes = String::new();
-    for slot in slots {
+    for (index, slot) in slots.iter().enumerate() {
         match &slot.encoding {
             Encoding::Bytes { .. } | Encoding::AsciiAtom { .. } => {
                 fixed += 4;
@@ -127,6 +156,14 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
                 )
                 .unwrap();
             }
+            Encoding::Nested {
+                maximum, overflow, ..
+            } => {
+                fixed += 4;
+                let name = &binding.names[&slot.id];
+                writeln!(text, "        let __nested_{index} = self.{name}.encode()?;\n        if __nested_{index}.len() > {maximum} {{ return ::core::result::Result::Err({}); }}",fault(overflow)).unwrap();
+                write!(sizes, " + __nested_{index}.len()").unwrap();
+            }
             encoding => fixed += encoding.width(&graph.records).expect("validated layout").0,
         }
     }
@@ -135,7 +172,7 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
         "        let __size = {fixed}usize{sizes};\n        if __size > {max} {{ return ::core::result::Result::Err({}); }}\n        let mut __output = ::std::vec::Vec::with_capacity(__size);",
         fault(&graph.errors.encode_size)
     ).unwrap();
-    for slot in slots {
+    for (index, slot) in slots.iter().enumerate() {
         let name = binding.names.get(&slot.id);
         let field = || format!("self.{}", name.expect("validated field"));
         match &slot.encoding {
@@ -151,7 +188,7 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
                 .unwrap();
                 writeln!(text, "        __output.extend_from_slice(&{bytes:?});").unwrap();
             }
-            Encoding::UnsignedBe { .. } => {
+            Encoding::UnsignedBe { .. } | Encoding::SignedBe { .. } => {
                 writeln!(
                     text,
                     "        __output.extend_from_slice(&{}.to_be_bytes());",
@@ -166,6 +203,20 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
                     field()
                 )
                 .unwrap();
+            }
+            Encoding::Nested { .. } => {
+                writeln!(text, "        __output.extend_from_slice(&(__nested_{index}.len() as u32).to_be_bytes());\n        __output.extend_from_slice(&__nested_{index});").unwrap();
+            }
+            Encoding::Inline { id } => {
+                for member in &graph.records[id].fields {
+                    writeln!(
+                        text,
+                        "        __output.extend_from_slice(&{}.{}.to_be_bytes());",
+                        field(),
+                        binding.names[&member.id]
+                    )
+                    .unwrap();
+                }
             }
             Encoding::Optional { payload, .. } => {
                 writeln!(text, "        if let ::core::option::Option::Some(__value) = &{} {{\n            __output.push(1);", field()).unwrap();
@@ -213,9 +264,43 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
             }
         }
     }
+    if let Some(integrity) = &graph.integrity {
+        hash_start(&mut text, integrity, binding);
+        text.push_str("        __oddlang_hash.update(&__output);\n        __output.extend_from_slice(&__oddlang_hash.finalize());\n");
+    }
     writeln!(text, "        ::core::result::Result::Ok(__output)\n    }}").unwrap();
 
-    writeln!(text, "    pub fn decode(input: &[u8]) -> ::core::result::Result<Self, {error}> {{\n        if input.len() > {max} {{ return ::core::result::Result::Err({}); }}\n        let mut __rest = input;", fault(&graph.errors.decode_size)).unwrap();
+    if graph.fragment {
+        writeln!(
+            text,
+            "    pub(crate) fn __oddlang_check(&self) -> ::core::result::Result<(), {error}> {{"
+        )
+        .unwrap();
+        if existing.is_some() {
+            text.push_str(
+                "        self.validate()?;\n        self.__oddlang_validate_layout()\n    }\n",
+            );
+        } else {
+            text.push_str("        self.validate()\n    }\n");
+        }
+        if existing.is_none() {
+            writeln!(text,"    pub(crate) fn __oddlang_encode(&self) -> ::core::result::Result<::std::vec::Vec<u8>, {error}> {{\n        self.encode()\n    }}").unwrap();
+            writeln!(text, "    pub fn decode(input: &[u8]) -> ::core::result::Result<Self, {error}> {{\n        if input.len() > {max} {{ return ::core::result::Result::Err({}); }}\n        let mut rest = input;\n        let value = Self::__oddlang_read_prefix(&mut rest)?;\n        if !rest.is_empty() {{ return ::core::result::Result::Err({}); }}\n        value.__oddlang_check()?;\n        ::core::result::Result::Ok(value)\n    }}",fault(&graph.errors.decode_size),fault(&graph.errors.trailing)).unwrap();
+        }
+        writeln!(text,"    pub(crate) fn __oddlang_read_prefix(input: &mut &[u8]) -> ::core::result::Result<Self, {error}> {{\n        let mut __rest = *input;").unwrap();
+    } else {
+        let reader = if graph.integrity.is_none() {
+            "\n        let mut __rest = input;"
+        } else {
+            ""
+        };
+        writeln!(text, "    pub fn decode(input: &[u8]) -> ::core::result::Result<Self, {error}> {{\n        if input.len() > {max} {{ return ::core::result::Result::Err({}); }}{reader}", fault(&graph.errors.decode_size)).unwrap();
+        if let Some(integrity) = &graph.integrity {
+            writeln!(text,"        let __end = input.len().checked_sub(32).ok_or_else(|| {})?;\n        let (__payload, __checksum) = input.split_at(__end);",fault(&integrity.short)).unwrap();
+            hash_start(&mut text, integrity, binding);
+            writeln!(text,"        __oddlang_hash.update(__payload);\n        let __actual: [u8; 32] = __oddlang_hash.finalize().into();\n        if __actual != __checksum {{ return ::core::result::Result::Err({}); }}\n        let mut __rest = __payload;",fault(&integrity.mismatch)).unwrap();
+        }
+    }
     let short = fault(&graph.errors.truncated);
     writeln!(text, "        fn __take<'a>(input: &mut &'a [u8], size: usize) -> ::core::result::Result<&'a [u8], {error}> {{\n            let ::core::option::Option::Some((head, tail)) = input.split_at_checked(size) else {{ return ::core::result::Result::Err({short}); }};\n            *input = tail;\n            ::core::result::Result::Ok(head)\n        }}").unwrap();
     if slots.iter().any(|slot| {
@@ -224,6 +309,7 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
             Encoding::AsciiAtom { .. }
                 | Encoding::Bytes { .. }
                 | Encoding::LengthPrefixedLiteral { .. }
+                | Encoding::Nested { .. }
         )
     }) {
         writeln!(text, "        fn __length(input: &mut &[u8]) -> ::core::result::Result<usize, {error}> {{\n            ::core::result::Result::Ok(::core::primitive::u32::from_be_bytes(__take(input, 4)?.try_into().expect(\"fixed width\")) as usize)\n        }}").unwrap();
@@ -231,13 +317,22 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
     for (index, slot) in slots.iter().enumerate() {
         let variable = format!("__field_{index}");
         match &slot.encoding {
-            Encoding::Literal { bytes, error } => {
-                writeln!(
-                    text,
-                    "        __rest = __rest.strip_prefix(&{bytes:?}).ok_or_else(|| {})?;",
-                    fault(error)
-                )
-                .unwrap();
+            Encoding::Literal {
+                bytes,
+                error,
+                require_full,
+            } => {
+                if *require_full {
+                    writeln!(text, "        if __take(&mut __rest,{})? != {bytes:?} {{ return ::core::result::Result::Err({}); }}",
+                        bytes.len(), fault(error)).unwrap();
+                } else {
+                    writeln!(
+                        text,
+                        "        __rest = __rest.strip_prefix(&{bytes:?}).ok_or_else(|| {})?;",
+                        fault(error)
+                    )
+                    .unwrap();
+                }
             }
             Encoding::UnsignedBe {
                 bits,
@@ -255,6 +350,40 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
                 if let Some(id) = read_error {
                     writeln!(text, "        if !({minimum}..={maximum}).contains(&{variable}) {{ return ::core::result::Result::Err({}); }}", fault(id)).unwrap();
                 }
+            }
+            Encoding::SignedBe { bits } => {
+                writeln!(
+                    text,
+                    "        let {variable} = {};",
+                    read_integer(*bits, true)
+                )
+                .unwrap();
+            }
+            Encoding::Nested {
+                record,
+                maximum,
+                overflow,
+            } => {
+                writeln!(text,"        let __size = __length(&mut __rest)?;\n        if __size > {maximum} {{ return ::core::result::Result::Err({}); }}",fault(overflow)).unwrap();
+                writeln!(
+                    text,
+                    "        let {variable} = {}::decode(__take(&mut __rest, __size)?)?;",
+                    binding.external_records[record].path
+                )
+                .unwrap();
+            }
+            Encoding::Inline { id } => {
+                writeln!(text, "        let {variable} = {} {{", binding.names[id]).unwrap();
+                for member in &graph.records[id].fields {
+                    writeln!(
+                        text,
+                        "            {}: {},",
+                        binding.names[&member.id],
+                        read_integer(member.bits, member.signed)
+                    )
+                    .unwrap();
+                }
+                writeln!(text, "        }};").unwrap();
             }
             Encoding::Bool { error } => {
                 writeln!(text, "        let {variable} = match __take(&mut __rest, 1)?[0] {{\n            0 => false,\n            1 => true,\n            _ => return ::core::result::Result::Err({}),\n        }};",fault(error)).unwrap();
@@ -359,12 +488,15 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
             }
         }
     }
-    writeln!(
-        text,
-        "        if !__rest.is_empty() {{ return ::core::result::Result::Err({}); }}\n        let __value = Self {{",
-        fault(&graph.errors.trailing)
-    )
-    .unwrap();
+    if !graph.fragment {
+        writeln!(
+            text,
+            "        if !__rest.is_empty() {{ return ::core::result::Result::Err({}); }}",
+            fault(&graph.errors.trailing)
+        )
+        .unwrap();
+    }
+    writeln!(text, "        let __value = Self {{").unwrap();
     for (index, slot) in slots
         .iter()
         .enumerate()
@@ -377,14 +509,29 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
         )
         .unwrap();
     }
-    writeln!(
-        text,
-        "        }};\n        __value.validate()?;\n        ::core::result::Result::Ok(__value)\n    }}"
-    )
-    .unwrap();
+    if graph.fragment {
+        writeln!(text,"        }};\n        if input.len() - __rest.len() > {max} {{ return ::core::result::Result::Err({}); }}\n        *input = __rest;\n        ::core::result::Result::Ok(__value)\n    }}",
+            fault(&graph.errors.decode_size)).unwrap();
+    } else {
+        text.push_str("        };\n        __value.validate()?;\n        ::core::result::Result::Ok(__value)\n    }\n");
+    }
     extension::render_views(&mut text, graph, binding);
     text.push_str("}\n");
     text
+}
+
+fn hash_start(text: &mut String, integrity: &super::Integrity, binding: &Binding) {
+    match (
+        &integrity.algorithm,
+        binding
+            .integrity
+            .as_ref()
+            .expect("validated integrity binding"),
+    ) {
+        (super::composite::Algorithm::Sha256, super::IntegrityBinding::Sha2) => {
+            crate::wire_schema::sha256_begin(text, &integrity.domain)
+        }
+    }
 }
 
 fn read_integer(bits: u8, signed: bool) -> String {
