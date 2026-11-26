@@ -11,6 +11,8 @@ oddlang build cli-surface rust GRAPH.json BINDING.json cli.rs
 
 A binding key is the canonical command path with slash-separated components, an empty string for no selected command, or `*` for an external subcommand. The emitted `parse` reports a terminal Clap response, a matched command and its typed native bindings, or an uncovered command. `run_cli` writes parser responses to the provider-selected stream and returns the bound status. `run_cli_with` allows a native consumer to bind known operation IRIs to effects. All unimplemented operations return the uncovered status. External subcommand arguments are parser data and the projection does not launch a process.
 
+Native package manifests can include the `cli-surface` component with pinned graph and overlay and select `run_cli` as a reexport. The manifest declares the exact Clap 4.6.7 dependency.
+
 The independent [observatory fixture](../../verification/command-surface/) compares the Rust derive and generated implementations using captured process stdout, stderr and status. It exercises help, version, hidden commands, option and command aliases, required values, conflicts, requirements, numeric bounds, global defaults and callback dispatch. The generated build consumes graph and binding. The mutation checks change a boundary, submit an invalid graph, and add an unsupported source attribute.
 
 ```sh

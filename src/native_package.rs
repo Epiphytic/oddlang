@@ -82,6 +82,7 @@ enum Kind {
     IntegrityBlock,
     SharedDeclarations,
     SequenceJournal,
+    CliSurface,
 }
 
 #[derive(Deserialize)]
@@ -166,6 +167,14 @@ fn project(
             crate::endpoint_set::build(&path, &pin, Some((&overlay, &binding)), &output)?;
             "endpoint_set.rs"
         }
+        Kind::CliSurface => {
+            crate::command_surface::build_package_component(
+                &graph,
+                &io(fs::read(&overlay))?,
+                &output,
+            )?;
+            "cli.rs"
+        }
         Kind::SequenceJournal => {
             let path = input.join("graph.json");
             io(fs::write(&path, graph))?;
@@ -236,6 +245,17 @@ fn cargo_manifest(manifest: &Manifest) -> Result<String> {
         }
         semver::Version::parse(&dependency.version).map_err(|e| format!("{name} version: {e}"))?;
         dependencies.insert(name, serde_json::json!({"version":format!("={}",dependency.version),"features":dependency.features}));
+    }
+    if manifest
+        .components
+        .iter()
+        .any(|component| matches!(component.kind, Kind::CliSurface))
+        && manifest
+            .dependencies
+            .get("clap")
+            .is_none_or(|dependency| dependency.version != "4.6.7")
+    {
+        return Err("cli-surface requires the pinned clap 4.6.7 provider".into());
     }
     let cargo = serde_json::json!({"package":{"name":manifest.name,"version":manifest.version,
         "edition":manifest.edition,"publish":false},"dependencies":dependencies,"workspace":{}});

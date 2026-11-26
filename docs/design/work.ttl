@@ -761,7 +761,7 @@ w:sequenceJournalNativeStorage a p:Task ;
 w:commandSurface a p:Task ;
     rdfs:label "Recover and project declarative native command grammars" ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
-    p:status p:done ; p:evidence w:commandSurfaceFixture ;
+    p:status p:done ; p:dependsOn w:nativePackageAssembly ; p:evidence w:commandSurfaceFixture ;
     p:acceptance "Compare independent derived and generated Rust executables on exact help, version, error, alias, requirement, default and parsed dispatch observations. Detect unsupported syntax and graph changes." .
 w:commandSurfaceFixture a p:Artifact ;
     p:location "verification/command-surface/check.py" .

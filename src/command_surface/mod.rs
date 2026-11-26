@@ -120,3 +120,32 @@ pub fn recover(source: &Path, selection: &Path, output: &Path) -> Result<(), Str
 pub fn build(graph: &Path, binding: &Path, output: &Path) -> Result<(), String> {
     write(output, rust::render(&read(graph)?, &read(binding)?)?)
 }
+
+pub(crate) fn build_package_component(
+    graph: &[u8],
+    binding: &[u8],
+    output: &Path,
+) -> Result<(), String> {
+    use sha2::{Digest, Sha256};
+    let decode = |error: serde_json::Error| error.to_string();
+    let source = rust::render(
+        &serde_json::from_slice(graph).map_err(decode)?,
+        &serde_json::from_slice(binding).map_err(decode)?,
+    )?;
+    let hash = |bytes: &[u8]| {
+        Sha256::digest(bytes)
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect::<String>()
+    };
+    let lock = serde_json::json!({
+        "format": "oddlang-command-surface-lock-v1",
+        "provider": "clap@4.6.7",
+        "graphSha256": hash(graph),
+        "bindingSha256": hash(binding),
+        "sourceSha256": hash(source.as_bytes()),
+    });
+    std::fs::create_dir(output).map_err(|error| error.to_string())?;
+    write(&output.join("cli.rs"), source)?;
+    write(&output.join("projection.lock"), format!("{lock:#}\n"))
+}

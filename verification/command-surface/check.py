@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Compare independently derived Clap fixtures with source-free projection."""
 
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -71,6 +72,40 @@ with tempfile.TemporaryDirectory(prefix="oddlang-cli-fixture-") as workspace:
         actual = observation(execute(root / "generated/target/debug/observatory", *argv, env=env))
         assert actual == expected, (argv, expected, actual)
 
+    package_inputs = root / "package-inputs"
+    package_inputs.mkdir()
+    for source in (root / "graph.json", FIXTURE / "binding.json", FIXTURE / "Cargo.lock"):
+        shutil.copy(source, package_inputs)
+    def pin(name):
+        return {"path": name, "sha256": hashlib.sha256((package_inputs / name).read_bytes()).hexdigest()}
+    manifest = {
+        "format": "oddlang-native-package-v1",
+        "name": "observatory",
+        "edition": "2021",
+        "version": "2.1.0",
+        "cargoLock": pin("Cargo.lock"),
+        "dependencies": {"clap": {"version": "4.6.7", "features": ["derive"]}},
+        "components": [{
+            "kind": "cli-surface", "module": "command",
+            "graph": pin("graph.json"), "overlay": pin("binding.json"),
+            "reexports": ["run_cli", "run_cli_with"],
+        }],
+    }
+    package_manifest = package_inputs / "package.json"
+    package_manifest.write_text(json.dumps(manifest))
+    for name in ("package-first", "package-second"):
+        checked(ODDLANG, "build", "native-package", "rust", package_manifest, root / name)
+        checked("cargo", "check", "--locked", "--offline", cwd=root / name)
+    package_lock = (root / "package-first/package.lock").read_bytes()
+    assert package_lock == (root / "package-second/package.lock").read_bytes()
+    assert b"oddlang-command-surface-lock-v1" in package_lock
+    manifest["dependencies"]["clap"]["version"] = "4.6.6"
+    package_manifest.write_text(json.dumps(manifest))
+    wrong_provider = execute(
+        ODDLANG, "build", "native-package", "rust", package_manifest, root / "package-invalid",
+    )
+    assert wrong_provider.returncode and b"pinned clap 4.6.7 provider" in wrong_provider.stderr
+
     graph = json.loads((root / "graph.json").read_bytes())
     count = graph["root"]["subcommands"][0]["arguments"][0]
     count["bounds"]["maximum"] = 9
@@ -104,4 +139,4 @@ with tempfile.TemporaryDirectory(prefix="oddlang-cli-fixture-") as workspace:
     )
     assert missing.returncode and not (root / "unsupported.json").exists()
 
-print(f"{len(cases)} exact process observations, deterministic recovery, and three mutation checks passed")
+print(f"{len(cases)} exact process observations, deterministic recovery and assembly, and four mutation checks passed")
