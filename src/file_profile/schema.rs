@@ -1,4 +1,7 @@
 //! Restricted SQLite schema declarations for native file profile providers.
+mod configured_storage;
+pub(super) use configured_storage::ConfiguredStorage;
+
 use serde::{Deserialize, Serialize};
 use std::{
     collections::{BTreeMap, BTreeSet},

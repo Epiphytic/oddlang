@@ -1,5 +1,6 @@
 //! Native projection of a private file-backed credential profile.
 mod complete;
+mod configured;
 mod schema;
 
 use crate::local_command_client::{Callback, RequiredArgument};
@@ -375,6 +376,14 @@ pub(crate) fn build_bytes(graph: &[u8], binding: &[u8], output: &Path) -> Result
 fn render(policy: &Policy, binding: &Binding) -> Result<String, String> {
     let mut out = String::from(include_str!("runtime.rs.in"));
     for (name, diagnostic) in policy.errors.iter() {
+        if name == "STATE_REQUIRED"
+            && policy
+                .initialize
+                .as_ref()
+                .is_some_and(complete::Initialization::has_config)
+        {
+            continue;
+        }
         writeln!(
             out,
             "const {name}: Failure = Failure({}, {:?});",
