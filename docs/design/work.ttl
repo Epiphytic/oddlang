@@ -2637,7 +2637,7 @@ w:basicMixedSetupAttempts a p:Artifact ;
 w:basicPeerObservation a p:Task ;
     rdfs:label "Freeze an attributed upstream command reference" ;
     p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
-    p:status p:active ;
+    p:status p:done ; p:evidence w:qualifiedMainlineCommandReference, w:referenceStartupCleanup ;
     p:acceptance "Publish digest-pinned inputs and expected results for the complete fixed corpus on isolated upstream peers, correlate results with server-side fixture receipts, and verify cleanup on success and failure." .
 w:basicReferenceForegroundExitReceipt a p:Artifact ;
     rdfs:label "Sanitized reference foreground failure and cleanup receipt" ;
@@ -2924,3 +2924,15 @@ w:admittedRoomBindingReceipt a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/010b99ed4f2b15330b99165ea71c863753f58ec7/verification/whole/command-room-binding/aarch64-apple-darwin.json" .
 w:basicServerQualification p:dependsOn w:admittedRoomWireBinding .
 w:basicClientQualification p:dependsOn w:admittedRoomWireBinding .
+
+w:boundedLocalOwnerPrepare p:evidence w:coldRoomPrepareResult .
+w:coldRoomPrepareResult a p:Artifact ;
+    rdfs:label "Cold generated client room admission and cleanup with the repaired relay shutdown" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/8c410e5536cccd6b11797b28393a3d1683088ede/verification/whole/basic-command-interop/bounded-owner-prepare-fixed-live-aarch64-apple-darwin.json" .
+
+w:qualifiedMainlineCommandReference a p:Artifact ;
+    rdfs:label "Mainline control with 24 attributed command outcomes and verified cleanup on macOS ARM64" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/c90c6b1510a05e67fdfe8a046b74ca34e528e59d/verification/whole/basic-command-interop/upstream-qualified-corpus-macos-arm64.json" .
+w:referenceStartupCleanup a p:Artifact ;
+    rdfs:label "Earlier mainline startup timeout with verified cleanup before any command" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/c90c6b1510a05e67fdfe8a046b74ca34e528e59d/verification/whole/basic-command-interop/upstream-engine-startup-deadline-macos-arm64.json" .
