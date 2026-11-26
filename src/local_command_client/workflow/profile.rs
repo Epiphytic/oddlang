@@ -138,9 +138,15 @@ pub(super) fn validate<'a>(
         &out.invocation,
     ]
     .into_iter()
+    .chain(out.selected_profile.iter())
+    .chain(out.followup_request.iter())
     .map(String::as_str)
     .collect::<BTreeSet<_>>();
-    if names.len() != 6 || names.iter().any(|name| !arg_id(name)) {
+    if names.len()
+        != 6 + usize::from(out.selected_profile.is_some())
+            + usize::from(out.followup_request.is_some())
+        || names.iter().any(|name| !arg_id(name))
+    {
         return Err("invalid or duplicate configured workflow output name".into());
     }
     Ok((arguments, names))

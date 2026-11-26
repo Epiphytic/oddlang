@@ -9,6 +9,8 @@ pub(super) struct Workflow {
     pub(super) socket_argument: String,
     pub(super) discovery: Option<Value>,
     pub(super) profile_inputs: Option<Value>,
+    #[serde(default)]
+    pub(super) delivery: bool,
     pub(super) transport: Transport,
     pub(super) errors: std::collections::BTreeMap<String, Diagnostic>,
     pub(super) entry: String,
@@ -35,6 +37,7 @@ pub(super) struct Diagnostic {
 pub(super) struct Step {
     pub(super) id: String,
     pub(super) request: Vec<Field>,
+    pub(super) embedded: Option<EmbeddedReply>,
     pub(super) transitions: Vec<Transition>,
 }
 
@@ -65,6 +68,9 @@ pub(super) enum Source {
     Object {
         fields: Vec<Field>,
     },
+    Sha256 {
+        fields: Vec<Field>,
+    },
 }
 
 #[derive(Clone, Copy, Deserialize)]
@@ -85,6 +91,8 @@ pub(super) struct Transition {
     pub(super) capture: Vec<Capture>,
     #[serde(default)]
     pub(super) carry: Vec<String>,
+    #[serde(default)]
+    pub(super) outputs: Vec<BinaryOutput>,
     pub(super) effect: Effect,
 }
 
@@ -92,7 +100,42 @@ pub(super) struct Transition {
 #[serde(deny_unknown_fields)]
 pub(super) struct Predicate {
     pub(super) path: Vec<String>,
-    pub(super) equals: Value,
+    #[serde(default, deserialize_with = "present")]
+    pub(super) equals: Option<Value>,
+    pub(super) equals_source: Option<Source>,
+    pub(super) equals_path: Option<Vec<String>>,
+}
+
+fn present<'de, D: serde::Deserializer<'de>, T: Deserialize<'de>>(
+    deserializer: D,
+) -> Result<Option<T>, D::Error> {
+    T::deserialize(deserializer).map(Some)
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EmbeddedReply {
+    pub(super) id: String,
+    pub(super) bytes: Vec<String>,
+    pub(super) sha256: Vec<String>,
+    pub(super) maximum_bytes: u32,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct BinaryOutput {
+    pub(super) id: String,
+    pub(super) channel: OutputChannel,
+    pub(super) bytes: Vec<String>,
+    pub(super) cursor: Vec<String>,
+    pub(super) maximum_bytes: u32,
+}
+
+#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum OutputChannel {
+    Stdout,
+    Stderr,
 }
 
 #[derive(Deserialize)]
@@ -109,6 +152,7 @@ pub(super) enum CaptureKind {
     LowerHex { bytes: u8 },
     String { maximum_bytes: u32 },
     Unsigned64,
+    ExitStatus,
 }
 
 #[derive(Deserialize)]
@@ -116,4 +160,5 @@ pub(super) enum CaptureKind {
 pub(super) enum Effect {
     Continue { step: String, delay_ms: u32 },
     Exit { status: u8, stderr: String },
+    ExitCaptured { name: String },
 }

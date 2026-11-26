@@ -1,11 +1,17 @@
-use schema::{ArgumentKind, CaptureKind, Effect, Field, Source, Workflow};
+use schema::{ArgumentKind, BinaryOutput, CaptureKind, Effect, EmbeddedReply, Field, Source, Workflow};
 use serde_json::Value;
 use std::collections::BTreeMap;
 
 type Response = strict_json::Strict;
 
 fn field_at<'a>(root: &'a Value, path: &[String]) -> Option<&'a Value> {
-    path.iter().try_fold(root, |value, key| value.get(key))
+    path.iter().try_fold(root, |value, key| {
+        if let Some(array) = value.as_array() {
+            array.get(key.parse::<usize>().ok()?)
+        } else {
+            value.get(key)
+        }
+    })
 }
 
 fn explicit_argument(matches: &ArgMatches, id: &str) -> bool {
@@ -49,23 +55,31 @@ fn request(
         let key = serde_json::to_vec(&field.key).map_err(|_| FRAME_JSON)?;
         append(body, &key)?;
         append(body, b":")?;
-        let encoded = match &field.source {
-            Source::Object { fields } => {
-                request(body, fields, matches, values, inputs)?;
-                continue;
-            }
-            Source::Literal { value } => serde_json::to_vec(value),
-            Source::Argument { id, value_kind } => {
-                serde_json::to_vec(&argument_value(matches, id, *value_kind)?)
-            }
-            Source::Captured { name } => {
-                serde_json::to_vec(values.get(name.as_str()).ok_or(PROTOCOL)?)
-            }
-            Source::Input { name } => serde_json::to_vec(inputs.get(name).ok_or(PROTOCOL)?),
-        }.map_err(|_| FRAME_JSON)?;
-        append(body, &encoded)?;
+        append(body, &source_bytes(&field.source, matches, values, inputs)?)?;
     }
     append(body, b"}")
+}
+
+fn source_bytes(
+    source: &Source,
+    matches: &ArgMatches,
+    values: &BTreeMap<&str, Value>,
+    inputs: &BTreeMap<String, Value>,
+) -> Result<Vec<u8>, Failure> {
+    match source {
+        Source::Object { fields } | Source::Sha256 { fields } => {
+            let mut body = Vec::new();
+            request(&mut body, fields, matches, values, inputs)?;
+            if matches!(source, Source::Sha256 { .. }) {
+                return serde_json::to_vec(&native_digest(&body)?).map_err(|_| FRAME_JSON);
+            }
+            Ok(body)
+        }
+        Source::Literal { value } => serde_json::to_vec(value).map_err(|_| FRAME_JSON),
+        Source::Argument { id, value_kind } => serde_json::to_vec(&argument_value(matches, id, *value_kind)?).map_err(|_| FRAME_JSON),
+        Source::Captured { name } => serde_json::to_vec(values.get(name.as_str()).ok_or(PROTOCOL)?).map_err(|_| FRAME_JSON),
+        Source::Input { name } => serde_json::to_vec(inputs.get(name).ok_or(PROTOCOL)?).map_err(|_| FRAME_JSON),
+    }
 }
 
 fn capture_is_valid(value: &Value, kind: &CaptureKind) -> bool {
@@ -78,6 +92,7 @@ fn capture_is_valid(value: &Value, kind: &CaptureKind) -> bool {
             value.as_str().is_some_and(|text| text.len() <= *maximum_bytes as usize)
         }
         CaptureKind::Unsigned64 => value.as_u64().is_some(),
+        CaptureKind::ExitStatus => value.as_u64().is_some_and(|status| u8::try_from(status).is_ok()),
     }
 }
 
@@ -93,12 +108,37 @@ async fn run_workflow(
         let step = workflow.steps.iter().find(|step| step.id == state).ok_or(PROTOCOL)?;
         let mut body = Vec::new();
         request(&mut body, &step.request, matches, &captured, inputs)?;
-        let strict_json::Strict(reply) = exchange(path, &body).await?;
-        let transition = step.transitions.iter().find(|transition| {
-            transition.when.iter().all(|predicate| {
-                field_at(&reply, &predicate.path) == Some(&predicate.equals)
-            })
-        }).ok_or(PROTOCOL)?;
+        let strict_json::Strict(mut reply) = exchange(path, &body).await?;
+        if let Some(embedded) = &step.embedded {
+            open_embedded(&mut reply, embedded)?;
+        }
+        let mut transition = None;
+        for selected in &step.transitions {
+            let mut matches_all = true;
+            for predicate in &selected.when {
+                let expected = if let Some(source) = &predicate.equals_source {
+                    serde_json::from_slice(&source_bytes(source, matches, &captured, inputs)?)
+                        .map_err(|_| FRAME_JSON)?
+                } else if let Some(path) = &predicate.equals_path {
+                    let Some(value) = field_at(&reply, path) else {
+                        matches_all = false;
+                        break;
+                    };
+                    value.clone()
+                } else {
+                    predicate.equals.as_ref().ok_or(PROTOCOL)?.clone()
+                };
+                if field_at(&reply, &predicate.path) != Some(&expected) {
+                    matches_all = false;
+                    break;
+                }
+            }
+            if matches_all {
+                transition = Some(selected);
+                break;
+            }
+        }
+        let transition = transition.ok_or(PROTOCOL)?;
         let mut transferred = BTreeMap::new();
         for name in &transition.carry {
             let value = captured.remove(name.as_str()).ok_or(PROTOCOL)?;
@@ -111,11 +151,19 @@ async fn run_workflow(
             transferred.insert(field.name.as_str(), value.clone());
         }
         captured = transferred;
+        let captured_exit = match &transition.effect {
+            Effect::ExitCaptured { name } => Some(captured.get(name.as_str())
+                .and_then(Value::as_u64).and_then(|n| u8::try_from(n).ok()).ok_or(PROTOCOL)?),
+            _ => None,
+        };
+        if matches!(transition.effect, Effect::Continue { .. })
+            && exchange_index + 1 == workflow.transport.maximum_exchanges
+        {
+            return Err(BUDGET);
+        }
+        emit_outputs(&reply, &transition.outputs)?;
         match &transition.effect {
             Effect::Continue { step, delay_ms } => {
-                if exchange_index + 1 == workflow.transport.maximum_exchanges {
-                    return Err(BUDGET);
-                }
                 state = step;
                 if *delay_ms != 0 {
                     tokio::time::sleep(Duration::from_millis(u64::from(*delay_ms))).await;
@@ -127,6 +175,7 @@ async fn run_workflow(
                 }
                 return Ok(*status);
             }
+            Effect::ExitCaptured { .. } => return captured_exit.ok_or(PROTOCOL),
         }
     }
     Err(BUDGET)

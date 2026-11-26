@@ -103,6 +103,8 @@ pub(crate) struct OutputNames {
     pub(crate) stdin: String,
     pub(crate) request: String,
     pub(crate) invocation: String,
+    pub(crate) selected_profile: Option<String>,
+    pub(crate) followup_request: Option<String>,
 }
 
 #[derive(Deserialize)]
