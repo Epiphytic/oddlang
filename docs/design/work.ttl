@@ -1018,3 +1018,8 @@ w:plainChoiceFixture a p:Artifact ;
     p:location "verification/plain-value-choices/verify.py" .
 w:nativeBackendChoiceReceipt a p:Artifact ;
     p:location "companion:verification/whole/backend-choice/darwin-arm64/receipt.json" .
+
+w:plainChoiceBindingsReview a p:Finding ;
+    rdfs:label "Reject item macros and impl heads that mention the selected choice in any role" ;
+    p:source w:plainChoiceFixture .
+w:plainValueChoices p:addresses w:plainChoiceBindingsReview .

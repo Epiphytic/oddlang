@@ -82,6 +82,18 @@ with tempfile.TemporaryDirectory() as scratch:
         source + "\nmod other { use super::Compass as Alias; impl ::core::fmt::Debug for Alias {} }",
         source + "\nimpl ::core::fmt::Debug for r#Compass {}",
         source + "\nimpl ::core::fmt::Debug for (Compass) {}",
+        source + "\nimpl From<Compass> for u8 { fn from(_: Compass) -> Self { 7 } }",
+        source + "\nimpl PartialEq<Compass> for u8 { fn eq(&self, _: &Compass) -> bool { false } }",
+        source + r"""
+macro_rules! display { () => {
+    impl ::core::fmt::Debug for Compass {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+            f.write_str("compass")
+        }
+    }
+}; }
+display!();
+""",
         "use other::Replacement as Copy;\n" + source,
         source.replace("Inland,", "#[cfg(any())] Inland,"),
         source.replace("pub enum", "enum"),

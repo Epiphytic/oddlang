@@ -110,7 +110,8 @@ The principal feasibility risk is recovering intended behavior where only incide
 The structural profile admits only an ordinary public, non-generic Rust enum
 with implicit discriminants and the standard Clone, Copy, PartialEq and Eq
 derives. Inline cases with fields, explicit representation, additional traits,
-and conditional variants are unsupported. Recovery records file provenance and
+and conditional variants are unsupported. The pinned source excludes item macros
+and bindings that add implementations involving the choice. Recovery records file provenance and
 a native name-resolution and trait witness obligation. Existing checked records
 derive Debug and cannot embed this kind of choice without another record
 capability profile.

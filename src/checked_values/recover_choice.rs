@@ -1,6 +1,6 @@
 //! Structural recovery for ordinary fieldless choices.
 use super::*;
-use syn::{Fields, Item, Meta, Type, UseTree, Visibility, punctuated::Punctuated, token::Comma};
+use syn::{Fields, Item, Meta, UseTree, Visibility, punctuated::Punctuated, token::Comma};
 
 const CAPABILITIES: [&str; 4] = ["Clone", "Copy", "Eq", "PartialEq"];
 
@@ -89,40 +89,53 @@ fn names(ident: &syn::Ident, expected: &str) -> bool {
 fn additional_binding(file: &syn::File, name: &str) -> bool {
     use syn::visit::{self, Visit};
 
-    fn refers_to(ty: &Type, name: &str) -> bool {
-        struct Reference<'a>(&'a str, bool);
-        impl<'ast> Visit<'ast> for Reference<'_> {
-            fn visit_type_path(&mut self, path: &'ast syn::TypePath) {
-                self.1 |= path
-                    .path
-                    .segments
-                    .last()
-                    .is_some_and(|part| names(&part.ident, self.0));
-                visit::visit_type_path(self, path);
-            }
+    struct Reference<'a> {
+        name: &'a str,
+        found: bool,
+    }
+    impl<'ast> Visit<'ast> for Reference<'_> {
+        fn visit_ident(&mut self, ident: &'ast syn::Ident) {
+            self.found |= names(ident, self.name);
         }
-        let mut reference = Reference(name, false);
-        reference.visit_type(ty);
-        reference.1
     }
 
-    struct Scan<'a>(&'a str, bool);
-    impl<'ast> Visit<'ast> for Scan<'_> {
+    struct Bindings<'a> {
+        name: &'a str,
+        found: bool,
+    }
+    impl<'ast> Visit<'ast> for Bindings<'_> {
         fn visit_item_impl(&mut self, item: &'ast syn::ItemImpl) {
-            self.1 |= refers_to(&item.self_ty, self.0);
+            let mut head = Reference {
+                name: self.name,
+                found: false,
+            };
+            head.visit_type(&item.self_ty);
+            head.visit_generics(&item.generics);
+            if let Some((_, trait_path, _)) = &item.trait_ {
+                head.visit_path(trait_path);
+            }
+            self.found |= head.found;
             visit::visit_item_impl(self, item);
         }
         fn visit_item_type(&mut self, item: &'ast syn::ItemType) {
-            self.1 |= refers_to(&item.ty, self.0);
+            let mut alias = Reference {
+                name: self.name,
+                found: false,
+            };
+            alias.visit_type(&item.ty);
+            self.found |= alias.found;
         }
         fn visit_use_rename(&mut self, item: &'ast syn::UseRename) {
-            self.1 |= names(&item.ident, self.0);
+            self.found |= names(&item.ident, self.name);
+        }
+        fn visit_item_macro(&mut self, _item: &'ast syn::ItemMacro) {
+            self.found = true;
         }
     }
 
-    let mut scan = Scan(name, false);
+    let mut scan = Bindings { name, found: false };
     scan.visit_file(file);
-    scan.1
+    scan.found
 }
 
 fn extract(source: &str, selection: &Selection) -> Result<(Graph, Binding)> {
@@ -142,7 +155,7 @@ fn extract(source: &str, selection: &Selection) -> Result<(Graph, Binding)> {
         || additional_binding(&file, &selection.name)
     {
         return Err(
-            "plain choice requires one public non-generic enum without aliases or additional impls"
+            "plain choice requires one public non-generic enum without aliases, additional impls or item macros"
                 .into(),
         );
     }
