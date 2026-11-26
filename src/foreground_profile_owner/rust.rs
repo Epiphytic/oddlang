@@ -100,7 +100,12 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
     out.push_str(include_str!("support.rs.in"));
     out.push('\n');
     if let (Some(lifecycle), Some(path)) = (&graph.lifecycle, &binding.retained_stores) {
-        render_lifecycle(&mut out, lifecycle, path);
+        render_lifecycle(
+            &mut out,
+            lifecycle,
+            path,
+            graph.activation.relay_runtime.as_ref(),
+        );
     } else {
         out.push_str(include_str!("runtime.rs.in"));
     }
@@ -129,7 +134,12 @@ fn fields<const N: usize>(out: &mut String, fields: [(&str, &str, &String); N]) 
     }
 }
 
-fn render_lifecycle(out: &mut String, model: &Lifecycle, path: &[String]) {
+fn render_lifecycle(
+    out: &mut String,
+    model: &Lifecycle,
+    path: &[String],
+    relay: Option<&RelayRuntime>,
+) {
     writeln!(out, "use crate::{} as open_stores;", path.join("::")).unwrap();
     writeln!(out, "const SHUTDOWN_MS: u64 = {};", model.shutdown_ms).unwrap();
     writeln!(out, "const DIAL_MS: u64 = {};", model.dial_ms).unwrap();
@@ -172,6 +182,43 @@ fn render_lifecycle(out: &mut String, model: &Lifecycle, path: &[String]) {
         ],
     );
     out.push_str("}\n");
-    out.push_str(include_str!("lifecycle.rs.in"));
+    if let Some(relay) = relay {
+        writeln!(
+            out,
+            "const RELAY_STATE: &str = {:?};",
+            relay.state_directory
+        )
+        .unwrap();
+        writeln!(
+            out,
+            "const RELAY_CACHE: &str = {:?};",
+            relay.cache_directory
+        )
+        .unwrap();
+        writeln!(
+            out,
+            "const RELAY_FRAME_LIMIT: usize = {};",
+            relay.maximum_frame_bytes
+        )
+        .unwrap();
+        writeln!(out, "const PROVIDER_READY: &str = {:?};", relay.ready_state).unwrap();
+        writeln!(
+            out,
+            "const RELAY_HEALTH_MS: u64 = {};",
+            relay.health_check_ms
+        )
+        .unwrap();
+        writeln!(
+            out,
+            "const APPLICATION_COMPONENTS: &[u16] = &{:?};",
+            relay.application_components
+        )
+        .unwrap();
+        out.push_str(include_str!("onion_transport.rs.in"));
+        out.push_str(include_str!("key_package.rs.in"));
+        out.push_str(include_str!("active_lifecycle.rs.in"));
+    } else {
+        out.push_str(include_str!("lifecycle.rs.in"));
+    }
     out.push_str(include_str!("shutdown.rs.in"));
 }

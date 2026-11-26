@@ -16,6 +16,12 @@ pub(super) fn derive(schema: &Schema) -> Value {
                 ));
                 record_fields(&mut obligations, fields);
             }
+            Definition::UnitEnum { id, variants } => {
+                obligations.push(row(id, "wire-shape", json!({"input":["name-string","single-key-object-with-null-value"],"output":"name-string","reject":["unknown-name","non-null-object-value","extra-keys","other-json-types"]})));
+                for variant in variants {
+                    obligations.push(row(&variant.id, "wire-case", json!({"value":variant.name})));
+                }
+            }
             Definition::Adjacent {
                 id,
                 tag,
@@ -100,7 +106,7 @@ fn record_fields(rows: &mut Vec<Value>, fields: &[Field]) {
             json!({
                 "wireName":field.name,
                 "position":position,
-                "parsePresence":if optional { "value-or-null-or-omitted" } else { "required" },
+                "parsePresence":if field.require_presence { "required-value-or-null" } else if optional { "value-or-null-or-omitted" } else { "required" },
                 "emitPresence":"always",
                 "type":field.shape,
             }),

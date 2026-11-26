@@ -2551,6 +2551,17 @@ w:independentNestedCodecBounds a p:Decision ;
     p:supersedes w:nestedCodecProviderMaximum ;
     p:reason "A nested slot has its own named overflow contract. Structural minimum width determines whether the slot can hold a value. An explicit codecMaximum checks the provider's exact aggregate limit, and runtime encoders and decoders continue to enforce the slot limit." .
 
+w:generatedRelayActivationPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-generated-relay-activation.md" .
+w:generatedRelayActivation a p:Task ;
+    rdfs:label "Activate the generated foreground relay provider" ;
+    p:milestone w:marmishMilestone ;
+    p:source w:generatedRelayActivationPlan ;
+    p:addresses w:generatedRelayReadinessFinding, w:generatedRelayDirectoryFinding ;
+    p:dependsOn w:combinedForegroundPeers, w:nativeFileProfileStores ;
+    p:status p:done ;
+    p:evidence w:generatedRelayBuildEvidence, w:generatedRelayRuntimeEvidence ;
+    p:acceptance "Project a graph-bound relay startup and prove acknowledged authenticated key-package publication, transport activation and cleanup in the generated foreground daemon using a test-owned relay." .
 w:localCommandArgumentsPlan a p:Artifact ;
     p:location "docs/superpowers/plans/2026-11-26-local-command-arguments.md" .
 w:localCommandArguments a p:Task ;
@@ -2596,6 +2607,20 @@ w:localCommandArgumentCatalogFinding a p:Finding ;
     p:source w:localCommandArgumentsVerification .
 w:localCommandArguments p:addresses w:localCommandArgumentCatalogFinding .
 
+w:generatedRelayReview a p:Artifact ;
+    p:location "companion:docs/reviews/basic-command-relay-activation.md" .
+w:generatedRelayReadinessFinding a p:Finding ;
+    rdfs:label "Withdraw foreground provider readiness when its relay or notification forwarder stops" ;
+    p:source w:generatedRelayReview .
+w:generatedRelayDirectoryFinding a p:Finding ;
+    rdfs:label "Reject relay directory bindings that startup would subsequently exclude" ;
+    p:source w:generatedRelayReview .
+
+w:generatedRelayBuildEvidence a p:Artifact ;
+    p:location "companion:verification/whole/basic-command-interop/generated-provider-build-aarch64-apple-darwin.json" .
+w:generatedRelayRuntimeEvidence a p:Artifact ;
+    p:location "companion:verification/whole/basic-command-interop/generated-provider-relay-aarch64-apple-darwin.json" .
+w:basicCommandInterop p:dependsOn w:generatedRelayActivation .
 w:leasedProfileSetup a p:Task ;
     rdfs:label "Project role and membership edits under the private profile lease" ;
     p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
@@ -2676,7 +2701,9 @@ w:authorizedLocalCommandInputsPlan a p:Artifact ;
 w:authorizedLocalCommandInputs a p:Task ;
     rdfs:label "Project authorized private profile inputs for the native local command client" ;
     p:milestone w:marmishMilestone ; p:source w:authorizedLocalCommandInputsPlan, w:basicCommandInteropPlan ;
-    p:status p:active ; p:dependsOn w:localOwnerWorkflow ;
+    p:status p:done ; p:dependsOn w:localOwnerWorkflow ;
+    p:evidence w:authorizedProfileVerification, w:authorizedProfileNativeBuild, w:authorizedProfileNativeHandoff ;
+    p:addresses w:authorizedProfileDefaultFinding, w:authorizedProfileArgumentFinding, w:authorizedProfileCatalogFinding ;
     p:acceptance "Use descriptor-relative read-only profile admission, validate target and relay authority before same-user IPC, preserve bounded bytes and validate status, prepare and submit through the ordinary generated CLI." .
 w:basicCommandInterop p:dependsOn w:authorizedLocalCommandInputs .
 
@@ -2688,3 +2715,55 @@ w:localWorkflowDelivery a p:Task ;
     p:status p:active ; p:dependsOn w:localOwnerWorkflow, w:authorizedLocalCommandInputs ;
     p:acceptance "Validate canonical reply digest and delivery binding, preserve separate byte streams and compare write and consume behavior with an independent local oracle." .
 w:basicCommandInterop p:dependsOn w:localWorkflowDelivery .
+w:authorizedProfileVerification a p:Artifact ;
+    p:location "verification/local-owner-workflow/authorized-profile-verification.md" .
+w:authorizedProfileNativeBuild a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/68027d1a81715b18808557fb283918eb1932058a/verification/whole/basic-command-interop/generated-client-owner-build-aarch64-apple-darwin.json" .
+w:authorizedProfileNativeHandoff a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/68027d1a81715b18808557fb283918eb1932058a/verification/whole/basic-command-interop/generated-client-owner-aarch64-apple-darwin.json" .
+w:authorizedProfileDefaultFinding a p:Finding ;
+    rdfs:label "Require matching endpoint and profile default state selection" ;
+    p:source w:authorizedProfileVerification .
+w:authorizedProfileArgumentFinding a p:Finding ;
+    rdfs:label "Tie required local profile inputs to explicit CLI argument sources" ;
+    p:source w:authorizedProfileVerification .
+w:authorizedProfileCatalogFinding a p:Finding ;
+    rdfs:label "Declare composed endpoint and profile input rules in the obligation catalogs" ;
+    p:source w:authorizedProfileVerification .
+
+w:requiredNullableWire a p:Task ;
+    rdfs:label "Distinguish required nullable fields from omittable fields" ;
+    p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
+    p:status p:done ; p:evidence w:requiredNullableGarden ;
+    p:acceptance "Generate and compile an unrelated fixture where a missing nullable member fails, null and the full u64 range round-trip, and the historical optional form continues accepting omission." .
+w:requiredNullableGarden a p:Artifact ;
+    p:location "verification/wire-schema/verify.py" .
+w:basicCommandInterop p:dependsOn w:requiredNullableWire .
+
+w:composedBasicOwnerCandidate a p:Task ;
+    rdfs:label "Compose and qualify generated setup, provider and local client roles" ;
+    p:milestone w:marmishMilestone ;
+    p:source w:basicCommandInteropPlan ;
+    p:dependsOn w:leasedProfileSetup, w:generatedRelayActivation, w:localOwnerWorkflow ;
+    p:status p:done ;
+    p:acceptance "Build one pinned companion candidate, qualify setup and authenticated provider activation in both mixed peer directions, and replay the local client handoff against a bounded fixture." ;
+    p:evidence w:composedBasicOwnerBuild, w:composedBasicOwnerReplay, w:composedGeneratedClientActivation, w:composedGeneratedServerActivation .
+w:composedBasicOwnerBuild a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b4e9c2ad3434d79740a05d7b4ec078ee59f24728/verification/whole/basic-command-interop/composed-basic-owner-build-aarch64-apple-darwin.json" .
+w:composedBasicOwnerReplay a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b4e9c2ad3434d79740a05d7b4ec078ee59f24728/verification/whole/basic-command-interop/COMPOSED-OWNER.md" .
+w:basicCommandInterop p:dependsOn w:composedBasicOwnerCandidate .
+w:composedGeneratedClientActivation a p:Artifact ;
+    rdfs:label "Generated client and upstream server activation and cleanup on macOS ARM64" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/9fc7d3ba8e4f474f4950cf9cc0307c28d5c1de21/verification/whole/basic-command-interop/composed-mixed-activation-generated-client-upstream-server-macos-arm64.json" .
+w:composedGeneratedServerActivation a p:Artifact ;
+    rdfs:label "Upstream client and generated server activation and cleanup on macOS ARM64" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/9fc7d3ba8e4f474f4950cf9cc0307c28d5c1de21/verification/whole/basic-command-interop/composed-mixed-activation-upstream-client-generated-server-macos-arm64.json" .
+
+w:unitEnumWire a p:Task ;
+    rdfs:label "Recover and project named unit enums in wire records" ;
+    p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
+    p:status p:done ; p:evidence w:unitEnumGarden ;
+    p:acceptance "Recover renamed unit cases with stable identities, compile their native projection, and compare its serialization and rejection behavior with an unrelated original enum." .
+w:unitEnumGarden a p:Artifact ; p:location "verification/wire-schema/README.md" .
+w:basicCommandInterop p:dependsOn w:unitEnumWire .

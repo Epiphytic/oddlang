@@ -36,6 +36,7 @@ struct External {
 #[derive(Deserialize)]
 #[serde(tag = "kind", rename_all = "kebab-case", deny_unknown_fields)]
 enum Adapter {
+    RequiredNullable {},
     LowerHex { bytes: usize, diagnostic: String },
     BoundedBase64List { policy: BinaryList },
     BoundedBase64 { policy: BinaryScalar },
@@ -48,6 +49,7 @@ struct Serde {
     tag: Option<String>,
     content: Option<String>,
     adapter: Option<String>,
+    deserialize_with: Option<String>,
     deny_unknown: bool,
 }
 
@@ -106,6 +108,7 @@ impl Observer<'_> {
                     "tag" => value.tag = Some(text.value()),
                     "content" => value.content = Some(text.value()),
                     "with" => value.adapter = Some(text.value()),
+                    "deserialize_with" => value.deserialize_with = Some(text.value()),
                     _ => unreachable!("known string Serde attributes"),
                 }
                 Ok(())
@@ -237,7 +240,7 @@ impl Observer<'_> {
                 let rust = rust.strip_prefix("r#").unwrap_or(&rust).to_owned();
                 let id = format!("{owner}:field:{rust}");
                 self.attributes(&id, &field.attrs);
-                let opts = self.serde(&id, &field.attrs, &["rename", "with"])?;
+                let opts = self.serde(&id, &field.attrs, &["rename", "with", "deserialize_with"])?;
                 let shape = if let Some(adapter) = opts.adapter {
                     let shape = match self.selection.adapters.get(&adapter) {
                         Some(Adapter::LowerHex { bytes, diagnostic })
@@ -265,8 +268,22 @@ impl Observer<'_> {
                 } else {
                     self.shape(&id, &field.ty)
                 };
+                let mut require_presence = false;
+                if let Some(adapter) = opts.deserialize_with {
+                    let standard = adapter == "::serde::Deserialize::deserialize";
+                    let selected = matches!(self.selection.adapters.get(&adapter), Some(Adapter::RequiredNullable {}));
+                    if matches!(shape, Shape::Optional { .. }) && (standard || selected) {
+                        require_presence = true;
+                        if selected {
+                            self.used_adapters.insert(adapter);
+                        }
+                    } else {
+                        self.gaps.push(format!("{id}: unverified Serde deserializer {adapter}"));
+                    }
+                }
                 self.binding.names.insert(id.clone(), rust.clone());
                 Ok(Field {
+                    require_presence,
                     id,
                     name: opts.rename.unwrap_or(rust),
                     shape,
@@ -696,13 +713,14 @@ pub fn from_source(source: &Path, selection: &Path, output: &Path) -> Result<()>
                     attrs,
                     &["tag", "content", "rename_all", "deny_unknown_fields"],
                 )?;
-                let (Some(tag), Some(content)) = (state.tag, state.content) else {
-                    observer
-                        .gaps
-                        .push(format!("{id}: union is not explicitly adjacent-tagged"));
+                let unit_enum = state.tag.is_none() && state.content.is_none()
+                    && !item.variants.is_empty()
+                    && item.variants.iter().all(|v| matches!(v.fields, Fields::Unit));
+                if !unit_enum && (state.tag.is_none() || state.content.is_none()) {
+                    observer.gaps.push(format!("{id}: union is not explicitly adjacent-tagged"));
                     continue;
-                };
-                if !state.deny_unknown
+                }
+                if (!unit_enum && !state.deny_unknown)
                     || state
                         .rename_all
                         .as_deref()
@@ -718,11 +736,10 @@ pub fn from_source(source: &Path, selection: &Path, output: &Path) -> Result<()>
                     .iter()
                     .map(|variant| observer.variant(id, variant, snake))
                     .collect::<Result<Vec<_>>>()?;
-                Definition::Adjacent {
-                    id: id.clone(),
-                    tag,
-                    content,
-                    variants,
+                match (state.tag, state.content) {
+                    (Some(tag), Some(content)) => Definition::Adjacent { id: id.clone(), tag, content, variants },
+                    (None, None) if unit_enum => Definition::UnitEnum { id: id.clone(), variants },
+                    _ => unreachable!("the union representation has been verified"),
                 }
             }
             _ => unreachable!("selected struct or enum"),

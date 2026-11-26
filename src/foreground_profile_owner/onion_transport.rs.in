@@ -1,0 +1,135 @@
+
+use arti_client::{BootstrapBehavior, TorClient, config::TorClientConfigBuilder};
+use async_wsocket::Message;
+use futures_util::{SinkExt, StreamExt};
+use nostr::types::Url;
+use nostr_sdk::transport::websocket::{WebSocketSink, WebSocketStream, WebSocketTransport};
+use tokio::sync::watch;
+use tokio_tungstenite::tungstenite::{Message as NativeMessage, protocol::WebSocketConfig};
+use tor_rtcompat::PreferredRuntime;
+
+fn onion_relay(matches: &ArgMatches) -> Result<Url, (u8, Failure)> {
+    let rejected = (125, RELAY_SCOPE);
+    let route = matches.try_get_one::<String>(ROUTE_ARG).ok().flatten();
+    let mut values = matches.try_get_many::<String>(RELAY_ARG).ok().flatten().ok_or(rejected)?;
+    let value = values.next().ok_or(rejected)?;
+    if route.is_none_or(|value| value != ROUTE_VALUE) || values.next().is_some() || value.len() > 1024 {
+        return Err(rejected);
+    }
+    let parsed = url::Url::parse(value).map_err(|_| rejected)?;
+    let onion = parsed.host_str().and_then(|host| host.strip_suffix(".onion")).ok_or(rejected)?;
+    if parsed.scheme() != "ws"
+        || !parsed.username().is_empty() || parsed.password().is_some()
+        || parsed.query().is_some() || parsed.fragment().is_some()
+        || parsed.port() == Some(0)
+        || onion.len() != 56 || !onion.bytes().all(|b| matches!(b, b'a'..=b'z' | b'2'..=b'7'))
+    {
+        return Err(rejected);
+    }
+    Url::parse(parsed.as_str()).map_err(|_| rejected)
+}
+
+fn relay_directory(root: &Path, leaf: &str) -> Result<PathBuf, Failure> {
+    let path = root.join(leaf);
+    match fs::DirBuilder::new().mode(0o700).create(&path) {
+        Ok(()) => (),
+        Err(error) if error.kind() == io::ErrorKind::AlreadyExists => (),
+        Err(_) => return Err(IO),
+    }
+    directory(&path)?;
+    Ok(path)
+}
+
+async fn bootstrap_onion(root: &Path) -> Result<Arc<TorClient<PreferredRuntime>>, Failure> {
+    let state = relay_directory(root, RELAY_STATE)?;
+    let cache = relay_directory(root, RELAY_CACHE)?;
+    let config = TorClientConfigBuilder::from_directories(state, cache)
+        .build().map_err(|_| PROVIDER_OPEN_FAILURE)?;
+    let tor = TorClient::builder().config(config).bootstrap_behavior(BootstrapBehavior::Manual)
+        .create_unbootstrapped_async().await.map_err(|_| PROVIDER_OPEN_FAILURE)?;
+    tor.bootstrap().await.map_err(|_| RELAY_FAILED)?;
+    Ok(tor)
+}
+
+#[derive(Clone)]
+struct OnionConnector {
+    relay: Url,
+    tor: Arc<tokio::sync::Mutex<Option<Arc<TorClient<PreferredRuntime>>>>>,
+    stop: watch::Receiver<bool>,
+}
+
+impl std::fmt::Debug for OnionConnector {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str("OnionConnector")
+    }
+}
+
+fn relay_error(error: Failure) -> nostr_sdk::error::Error {
+    nostr_sdk::error::Error::transport(io::Error::other(error))
+}
+
+fn relay_frame(message: NativeMessage) -> Result<Message, nostr_sdk::error::Error> {
+    Ok(match message {
+        NativeMessage::Text(value) => Message::Text(value.to_string()),
+        NativeMessage::Binary(value) => Message::Binary(value.to_vec()),
+        NativeMessage::Ping(value) => Message::Ping(value.to_vec()),
+        NativeMessage::Pong(value) => Message::Pong(value.to_vec()),
+        NativeMessage::Close(value) => Message::Close(value.map(Into::into)),
+        NativeMessage::Frame(_) => return Err(relay_error(RELAY_FAILED)),
+    })
+}
+
+impl OnionConnector {
+    async fn open(&self, url: &Url) -> Result<(WebSocketSink, WebSocketStream), nostr_sdk::error::Error> {
+        let target = url::Url::parse(url.as_str()).map_err(|_| relay_error(RELAY_SCOPE))?;
+        let host = target.host_str().ok_or_else(|| relay_error(RELAY_SCOPE))?;
+        let port = target.port_or_known_default().ok_or_else(|| relay_error(RELAY_SCOPE))?;
+        let tor = self.tor.lock().await.clone().ok_or_else(|| relay_error(RELAY_FAILED))?;
+        let stream = tor.connect((host, port)).await.map_err(|_| relay_error(RELAY_FAILED))?;
+        let limit = RELAY_FRAME_LIMIT;
+        let limits = WebSocketConfig::default()
+            .max_message_size(Some(limit))
+            .max_frame_size(Some(limit))
+            .max_write_buffer_size(limit + 128 * 1024);
+        let (socket, _) = tokio_tungstenite::client_async_with_config(url.as_str(), stream, Some(limits))
+            .await.map_err(|_| relay_error(RELAY_FAILED))?;
+        let (sink, stream) = socket.split();
+        let stop = self.stop.clone();
+        let sink = sink.sink_map_err(|_| relay_error(RELAY_FAILED)).with(move |frame: Message| {
+            let stopped = *stop.borrow();
+            async move {
+                if stopped || frame.len() > limit {
+                    return Err(relay_error(RELAY_FAILED));
+                }
+                Ok::<NativeMessage, nostr_sdk::error::Error>(frame.into())
+            }
+        });
+        let mut stop = self.stop.clone();
+        let stream = stream.take_until(async move {
+            let _ = stop.wait_for(|stopped| *stopped).await;
+        }).map(|frame| frame.map_err(|_| relay_error(RELAY_FAILED)).and_then(relay_frame));
+        Ok((Box::pin(sink), Box::pin(stream)))
+    }
+}
+
+impl WebSocketTransport for OnionConnector {
+    fn support_ping(&self) -> bool { true }
+
+    fn connect<'a>(
+        &'a self, url: &'a Url, proxy: Option<SocketAddr>,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<
+        Output = Result<(WebSocketSink, WebSocketStream), nostr_sdk::error::Error>
+    > + Send + 'a>> {
+        Box::pin(async move {
+            if url != &self.relay || proxy.is_some() {
+                return Err(relay_error(RELAY_SCOPE));
+            }
+            let mut stop = self.stop.clone();
+            tokio::select! {
+                biased;
+                _ = stop.wait_for(|stopped| *stopped) => Err(relay_error(RELAY_FAILED)),
+                opened = self.open(url) => opened,
+            }
+        })
+    }
+}
