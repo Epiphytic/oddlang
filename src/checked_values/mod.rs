@@ -525,8 +525,12 @@ pub fn build(graph: &Path, overlay: &Path, output: &Path) -> Result<()> {
             let expected = match definition {
                 Definition::FixedBytes { length, failure, on_drop } =>
                     json!({"length":length,"failure":failure,"onDrop":on_drop,"view":"borrow","input":"exact-bytes"}),
-                Definition::Choice { cases, .. } => json!({
-                    "orderedCases":cases,"copy":true,"equality":"case-identity",
+                Definition::Choice { cases, equality } => json!({
+                    "orderedCases":cases,"copy":true,"equality":match equality {
+                        Equality::None => "none",
+                        Equality::Partial => "partial-case-identity",
+                        Equality::Total => "case-identity",
+                    },
                     "externalRepresentation":null, "targetOrdinals":"zero-based-declaration-order"
                 }),
                 Definition::Enum { values, failure } => json!({"values":values,"failure":failure}),

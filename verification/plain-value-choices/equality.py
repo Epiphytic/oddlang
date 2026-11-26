@@ -26,6 +26,9 @@ def verify(cli, root, mode, derives):
     generated = root / f"generated-{mode}"
     subprocess.run([cli, "build", "checked-values", "rust", bundle / "graph.json",
                     bundle / "rust.json", generated], check=True)
+    obligation, = json.loads((generated / "obligations.json").read_bytes())["obligations"]
+    expected_capability = {"none": "none", "partial": "partial-case-identity", "total": "case-identity"}
+    assert obligation["expected"]["equality"] == expected_capability[mode]
     library = root / "libsampling.rlib"
     for path in (source, generated / "values.rs"):
         subprocess.run(["rustc", "+1.97.1", "--crate-name", "sampling", "--crate-type", "rlib", path,
