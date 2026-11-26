@@ -27,10 +27,10 @@ struct SelectedModule {
     scope_globs: BTreeMap<String, String>,
 }
 
-pub(super) struct Import<'a> {
-    pub(super) name: String,
-    path: Vec<String>,
-    declaration: &'a ItemUse,
+pub(crate) struct Import<'a> {
+    pub(crate) name: String,
+    pub(crate) path: Vec<String>,
+    pub(crate) declaration: &'a ItemUse,
 }
 
 pub(super) fn select_source(path: &Path, pin: &str) -> Result<syn::File> {
@@ -120,7 +120,7 @@ fn is_doc(attr: &Attribute) -> bool {
     attr.path().is_ident("doc")
 }
 
-pub(super) fn imports(file: &syn::File) -> Vec<Import<'_>> {
+pub(crate) fn imports(file: &syn::File) -> Vec<Import<'_>> {
     fn flatten<'a>(
         use_item: &'a ItemUse,
         tree: &UseTree,
@@ -184,6 +184,7 @@ const PRELUDE_NAMES: &[&str] = &[
     "u8",
     "u32",
     "u64",
+    "usize",
     "String",
     "Vec",
     "std",
@@ -197,7 +198,7 @@ const PRELUDE_NAMES: &[&str] = &[
     "derive",
 ];
 
-fn item_type_binding(item: &Item) -> Option<(&syn::Ident, &Visibility)> {
+pub(crate) fn item_type_binding(item: &Item) -> Option<(&syn::Ident, &Visibility)> {
     match item {
         Item::Enum(item) => Some((&item.ident, &item.vis)),
         Item::Struct(item) => Some((&item.ident, &item.vis)),
@@ -275,12 +276,36 @@ fn resolve_globs(
     file: &syn::File,
     imports_in_scope: &[Import<'_>],
     pins: &BTreeMap<String, String>,
-) -> Result<()> {
+    syntax_candidate: bool,
+) -> Result<BTreeSet<String>> {
     let mut used = BTreeSet::new();
+    let mut unresolved = Vec::new();
+    let mut local_bindings: BTreeSet<_> = file
+        .items
+        .iter()
+        .filter_map(item_type_binding)
+        .map(|(name, _)| name.unraw().to_string())
+        .chain(
+            imports_in_scope
+                .iter()
+                .filter(|item| item.name != "*")
+                .map(|item| item.name.clone()),
+        )
+        .collect();
     for glob in imports_in_scope.iter().filter(|import| import.name == "*") {
         let child = match glob.path.as_slice() {
             [name] => name,
             [prefix, name] if prefix == "self" => name,
+            [prefix, tail @ ..]
+                if syntax_candidate
+                    && !tail.is_empty()
+                    && !matches!(prefix.as_str(), "crate" | "self" | "super")
+                    && glob.path.iter().all(|part| symbol(part))
+                    && glob.declaration.attrs.iter().all(is_doc) =>
+            {
+                unresolved.push((prefix, glob));
+                continue;
+            }
             _ => return Err("unsupported public record glob source".into()),
         };
         let pin = pins
@@ -323,24 +348,42 @@ fn resolve_globs(
         for item in &scope.items {
             if let Some((name, vis)) = item_type_binding(item)
                 && !matches!(vis, Visibility::Inherited)
-                && reserved(name)
             {
-                return Err(format!("shadowed public record type through glob: {name}"));
+                if reserved(name) {
+                    return Err(format!("shadowed public record type through glob: {name}"));
+                }
+                local_bindings.insert(name.unraw().to_string());
             }
         }
-        if imports(&scope).iter().any(|import| {
-            !matches!(import.declaration.vis, Visibility::Inherited)
-                && (import.name == "*" || PRELUDE_NAMES.contains(&import.name.as_str()))
-        }) {
-            return Err(format!(
-                "unsupported public record glob re-export in child: {child}"
-            ));
+        for import in imports(&scope)
+            .into_iter()
+            .filter(|import| !matches!(import.declaration.vis, Visibility::Inherited))
+        {
+            if import.name == "*" || PRELUDE_NAMES.contains(&import.name.as_str()) {
+                return Err(format!(
+                    "unsupported public record glob re-export in child: {child}"
+                ));
+            }
+            local_bindings.insert(import.name);
         }
     }
     if used.len() != pins.len() {
         return Err("unused public record glob source pin".into());
     }
-    Ok(())
+    unresolved
+        .into_iter()
+        .map(|(root, glob)| {
+            let prefix = if glob.declaration.leading_colon.is_some() {
+                "::"
+            } else {
+                if local_bindings.contains(root) {
+                    return Err("unsupported public record glob source".into());
+                }
+                ""
+            };
+            Ok(format!("{prefix}{}::*", glob.path.join("::")))
+        })
+        .collect()
 }
 
 fn path_names(path: &syn::Path) -> Vec<String> {
@@ -413,6 +456,9 @@ fn field_type(ty: &Type, imports: &[Import<'_>]) -> Result<Value> {
     }
     if path.is_ident("u64") {
         return Ok(Value::U64);
+    }
+    if path.is_ident("usize") || path_is(path, &["core", "primitive", "usize"]) {
+        return Ok(Value::PointerUnsigned);
     }
     if path.is_ident("String") || path_is(path, &["std", "string", "String"]) {
         return Ok(Value::Text);
@@ -493,7 +539,10 @@ pub fn recover(lib: &Path, selection: &Path, out: &Path) -> Result<()> {
     let selection_bytes = io(fs::read(selection))?;
     let selected: Selection =
         serde_json::from_slice(&selection_bytes).map_err(|e| e.to_string())?;
-    if selected.format != "oddlang-rust-public-record-selection-v1" || selected.modules.is_empty() {
+    let syntax_candidate = selected.format == "oddlang-rust-public-record-candidate-selection-v1";
+    if (!syntax_candidate && selected.format != "oddlang-rust-public-record-selection-v1")
+        || selected.modules.is_empty()
+    {
         return Err("invalid public record source selection".into());
     }
     let lib = io(lib.canonicalize())?;
@@ -504,6 +553,7 @@ pub fn recover(lib: &Path, selection: &Path, out: &Path) -> Result<()> {
     let mut bindings = BTreeMap::new();
     let mut identities = BTreeMap::new();
     let mut sources = BTreeMap::new();
+    let mut unresolved_globs = BTreeMap::new();
     let mut graph = Graph {
         format: GRAPH.into(),
         modules: Vec::new(),
@@ -520,7 +570,16 @@ pub fn recover(lib: &Path, selection: &Path, out: &Path) -> Result<()> {
             }
         } else {
             reject_type_shadows(&rust, &imports)?;
-            resolve_globs(directory, &rust, &imports, &part.scope_globs)?;
+            let globs = resolve_globs(
+                directory,
+                &rust,
+                &imports,
+                &part.scope_globs,
+                syntax_candidate,
+            )?;
+            if !globs.is_empty() {
+                unresolved_globs.insert(&part.name, globs);
+            }
         }
         let mut module = Module {
             id: part.id.clone(),
@@ -599,7 +658,7 @@ pub fn recover(lib: &Path, selection: &Path, out: &Path) -> Result<()> {
         .filter(|module| !module.scope_globs.is_empty())
         .map(|module| (&module.name, &module.scope_globs))
         .collect();
-    let lock = encode(&serde_json::json!({
+    let mut lock = serde_json::json!({
         "format":"oddlang-public-record-recovery-lock-v1",
         "selectionSha256":digest(&selection_bytes),
         "crateSourceSha256":selected.lib_sha256,
@@ -609,7 +668,14 @@ pub fn recover(lib: &Path, selection: &Path, out: &Path) -> Result<()> {
         "globSourceSha256":scope_globs,
         "graphSha256":digest(&graph),
         "overlaySha256":digest(&overlay),
-    }))?;
+    });
+    if syntax_candidate {
+        lock["unresolvedGlobBindings"] = serde_json::json!(unresolved_globs);
+        lock["gap"] = serde_json::json!(
+            "Unresolved glob imports and Rust bindings require independent native compilation"
+        );
+    }
+    let lock = encode(&lock)?;
     emit(
         out,
         &[

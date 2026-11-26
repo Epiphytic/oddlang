@@ -20,3 +20,9 @@ Run the unrelated meter example with `python3 -B verification/shared-declaration
 A string enum optionally declares a byte representation as `numbers: {"tags": {"variant IRI": 3}, "unknown": {"id":"declared error variant IRI","argument":"text for a text payload"}}`. Every variant requires a different byte. The unknown error must name a declared variant. Its argument must match the declared payload type. Unit variants omit it. The ordinary native names determine the constructor. An optional `externalErrorTypes` map binds a declared error type to a native provider path with the same type name; the consumer compiles and qualifies that provider independently. The generator emits explicit discriminants, a u8 representation and a checked TryFrom implementation. Its obligation table includes all 256 accepted or rejected inputs independently of the Serde string spellings.
 
 A graph can also declare `textConstants` with stable IDs and literal strings, emitted as Rust static strings. The `i64` native width accepts nonnegative integer expressions up to the signed limit.
+
+A string enum may declare `"copy": false` when consumers must explicitly
+clone its values. Rust then omits the Copy implementation and still derives
+Clone, equality, Debug and both Serde traits. The obligations include this
+explicit copy restriction. Omitted or explicitly true uses the original
+copyable profile and preserves its projection and lock bytes.

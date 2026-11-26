@@ -10,7 +10,9 @@ use std::{
 
 mod cases;
 mod recover;
+mod recover_choice;
 pub use recover::recover as recover_public_constant;
+pub use recover_choice::recover as recover_serde_string_choice;
 mod rust;
 type Result<T> = std::result::Result<T, String>;
 
@@ -88,10 +90,20 @@ struct Alias {
 #[serde(deny_unknown_fields)]
 struct StringEnum {
     id: String,
+    #[serde(default = "implicit_copy", skip_serializing_if = "is_copyable")]
+    copy: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     numbers: Option<Numbering>,
     variants: Vec<WireVariant>,
 }
+fn implicit_copy() -> bool {
+    true
+}
+
+fn is_copyable(value: &bool) -> bool {
+    *value
+}
+
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 struct Numbering {

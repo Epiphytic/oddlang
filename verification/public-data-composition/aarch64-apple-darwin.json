@@ -1,0 +1,68 @@
+{
+  "runtime": "900cfa517d0136fa80c2b5e92ccf9b1a3b2a71ab",
+  "binarySha256": "87b498ef68a76730d633bf4c9227a9d26c7f6384f97b7613c633d5adb0191c4e",
+  "fixtureRustc": [
+    "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+    "binary: rustc",
+    "commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+    "commit-date: 2026-07-14",
+    "host: aarch64-apple-darwin",
+    "release: 1.97.1",
+    "LLVM version: 22.1.6"
+  ],
+  "compilerRustc": [
+    "rustc 1.96.1 (31fca3adb 2026-06-26)",
+    "binary: rustc",
+    "commit-hash: 31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd",
+    "commit-date: 2026-06-26",
+    "host: aarch64-apple-darwin",
+    "release: 1.96.1",
+    "LLVM version: 22.1.2"
+  ],
+  "host": "aarch64-apple-darwin",
+  "runnerSha256": "5f185e66015afb5349d177e0cc1105089c4de37e87da92f2c62e114649eae4f5",
+  "fixtures": {
+    "verification/observational-record-defaults/pointer_width.py": {
+      "fixtureSha256": "f8180e9167d2d272f4cf87419581c486ca72817475c3bee118d5692f83ade25f",
+      "output": "Pointer-width fields, fixed-width source mutation and explicit shape rejections pass.\nModule candidates record unresolved qualified glob bindings and preserve strict controls."
+    },
+    "verification/plain-value-choices/capabilities.py": {
+      "fixtureSha256": "a8c07493e13a0f0f4c1063a158df3199e8401f18214e73746d0cd0f1fceef537",
+      "output": "Both native variants match exact Debug, Eq, Clone, Copy and declaration ordinals."
+    },
+    "verification/shared-declarations/verify.py": {
+      "fixtureSha256": "398f1e553949df34730fa6c5b2421d5df8c734c80afd4e5d5d96ffc150deb8ca",
+      "output": "Shared constants, errors, typed messages, aliases, native ordinals, serde wires and module visibility qualified."
+    },
+    "verification/serde-string-choice/verify.py": {
+      "fixtureSha256": "39423bcdddef743fb082844324faf0e2fa3e033665384e633300da38af4bc3d7",
+      "output": "Pinned Serde string choices, native capabilities, spelling/order mutation and rejection controls pass."
+    },
+    "verification/plain-value-choices/typescript_subset.py": {
+      "fixtureSha256": "a46d178deb9c1e9e251bb7424e95f3d547ee9e22f68ee99bfe2077fda2163466",
+      "output": "TypeScript projects the plain choice and rejects clone-only and derived Debug choices."
+    },
+    "verification/plain-value-choices/typescript.py": {
+      "fixtureSha256": "31cafd1686a5c16b903110c09d4bd9c5b061942535fe271d5d739a28e1aa7713",
+      "output": "Rust and TypeScript agree on both choice revisions, capability checks and exact ordinals."
+    }
+  },
+  "predecessorTestReceiptSha256": "7eeacdf29785d78a7677b9793b43e0178bebb1e01420794b9097f2b40e889a7b",
+  "libraryTests": [
+    "test file_profile::configured::tests::alternate_url_admission_is_rendered_from_policy ... ok",
+    "test file_profile::schema::configured_storage::tests::uses_declared_cursor_width_and_rejects_unknown_floor_column ... ok",
+    "test file_profile::schema::tests::rejects_undeclared_identifiers_and_projects_parameterized_rows ... ok",
+    "test http::corpus::tests::duplicate_key_escapes_supplementary_and_quoted_characters ... ok",
+    "test http::schema::tests::iri_fragments_escape_pointer_and_uri_syntax ... ok",
+    "test native_package::binary_tests::native_entrypoint_passes_process_exit_and_output ... ok",
+    "test native_package::git_sources_tests::admits_revision_pinned_https_only ... ok",
+    "test native_workspace::tests::sibling_patch_cannot_replace_the_fixed_byte_provider ... ok",
+    "test native_workspace::tests::workspace_accepts_agreeing_registry_pins_and_rejects_conflicts ... ok",
+    "test rust_roundtrip::import::tests::captures_package_rust_without_nested_packages_or_target_outputs ... ok",
+    "test rust_roundtrip::import::tests::rejects_a_symlink_to_rust_outside_the_package ... ok",
+    "test rust_roundtrip::parser::tests::preserves_ordered_trivia_and_compound_tokens ... ok",
+    "test rust_roundtrip::parser::tests::rejects_invalid_or_mislabeled_leaves ... ok"
+  ],
+  "node": "v22.22.2",
+  "typescript": "Version 5.9.3"
+}

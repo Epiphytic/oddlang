@@ -3,6 +3,7 @@ mod recover;
 mod root;
 
 pub use recover::recover;
+pub(crate) use recover::{imports, item_type_binding};
 pub use root::recover_root;
 
 use crate::shared_declarations::unique_map;
@@ -61,11 +62,12 @@ struct Field {
 }
 
 #[derive(Deserialize, Serialize)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "kebab-case")]
 enum Value {
     Bool,
     U32,
     U64,
+    PointerUnsigned,
     Text,
     Octets,
     Path,
@@ -77,6 +79,7 @@ impl Value {
             Self::Bool => "bool",
             Self::U32 => "u32",
             Self::U64 => "u64",
+            Self::PointerUnsigned => "::core::primitive::usize",
             Self::Text => "::std::string::String",
             Self::Octets => "::std::vec::Vec<u8>",
             Self::Path => "::std::path::PathBuf",

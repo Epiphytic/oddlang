@@ -151,4 +151,26 @@ with tempfile.TemporaryDirectory() as directory:
     for invalid,diagnostic in [("thumbnail_consumer::Mode","unresolved import"),("thumbnail_consumer::meter::STEP","private")]:
         (tests/"bad.rs").write_text(f"use {invalid};")
         run("cargo","+1.97.1","check","--locked","--offline","--test","bad",cwd=out,error=diagnostic)
+    explicit_default = copy.deepcopy(graph)
+    explicit_default["stringEnums"][0]["copy"] = True
+    default_out = project(explicit_default, binding, "explicit-default")
+    for file in ("shared.rs", "obligations.json", "projection.lock"):
+        assert (default_out/file).read_bytes() == (good/file).read_bytes()
+
+    clone_only = copy.deepcopy(graph)
+    clone_only["stringEnums"][0]["copy"] = False
+    clone_projection = project(clone_only, binding, "clone-only")
+    clone_cases = json.loads((clone_projection/"obligations.json").read_bytes())
+    assert clone_cases["declarations"][ref("mode")]["copy"] is False
+    component["graph"] = write(g, clone_only)
+    write(spec, package)
+    second = root/"clone-package"
+    run(CLI, "build", "native-package", "rust", spec, second)
+    checks = second/"tests"
+    checks.mkdir()
+    (checks/"oracle.rs").write_text(caller.replace("assert_eq!(Mode::Hot as u8,11);",
+        "let mode = Mode::Hot; assert_eq!(mode.clone(), mode); assert_eq!(mode as u8,11);"))
+    run("cargo", "+1.97.1", "test", "--offline", "--locked", "--test", "oracle", cwd=second)
+    (checks/"copy.rs").write_text("fn need<T: Copy>() {} #[test] fn copy() { need::<thumbnail_consumer::meter::Mode>(); }")
+    run("cargo", "+1.97.1", "check", "--offline", "--locked", "--test", "copy", cwd=second, error="E0277")
 print("Shared constants, errors, typed messages, aliases, native ordinals, serde wires and module visibility qualified.")
