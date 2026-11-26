@@ -49,6 +49,11 @@ fn run(args: &[String]) -> Result<(), String> {
         {
             oddlang::rust_recovery::recover(manifest.as_ref(), profile.as_ref(), output.as_ref())
         }
+        [group, kind, manifest, profile_flag, profile, out_flag, output]
+            if group == "recover" && kind == "rust-shapes" && profile_flag == "--profile" && out_flag == "--out" =>
+        {
+            oddlang::rust_recovery::recover_shapes(manifest.as_ref(), profile.as_ref(), output.as_ref())
+        }
         [group, kind, input, output, flag, package]
             if group == "recover" && kind == "validate-inventory" && flag == "--package" =>
         {
@@ -324,7 +329,7 @@ fn run(args: &[String]) -> Result<(), String> {
             oddlang::targets::build(&load_model(dir)?, std::path::Path::new(out))
                 .map_err(|e| e.to_string())
         }
-        _ => Err("usage: oddlang check PROJECT | impact PROJECT IRI | build PROJECT OUTPUT | recover rust MANIFEST --profile PROFILE --out OUTPUT | recover tagged-contract SOURCE SELECTION OVERLAY VARIANT OUTPUT | tagged-wire digest GRAPH | build tagged-wire TARGET GRAPH OUTPUT --graph-sha256 PIN | import rust-tree MANIFEST PACKAGE OUTPUT | build rust-tree BUNDLE OUTPUT --bundle-sha256 PIN".into()),
+        _ => Err("usage: oddlang check PROJECT | impact PROJECT IRI | build PROJECT OUTPUT | recover rust MANIFEST --profile PROFILE --out OUTPUT | recover rust-shapes MANIFEST --profile PROFILE --out OUTPUT | recover tagged-contract SOURCE SELECTION OVERLAY VARIANT OUTPUT | tagged-wire digest GRAPH | build tagged-wire TARGET GRAPH OUTPUT --graph-sha256 PIN | import rust-tree MANIFEST PACKAGE OUTPUT | build rust-tree BUNDLE OUTPUT --bundle-sha256 PIN".into()),
     }
 }
 fn main() -> ExitCode {

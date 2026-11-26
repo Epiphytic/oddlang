@@ -1,4 +1,6 @@
 //! Declaration-level, code-free Rust build inventory.
+#[path = "../../verification/rust-recovery/shape_model.rs"]
+mod shape_model;
 mod structure;
 pub mod tagged;
 
@@ -68,6 +70,19 @@ struct Pin<'a> {
 }
 
 pub fn recover(manifest: &Path, profile_path: &Path, output: &Path) -> Result<()> {
+    recover_profile(manifest, profile_path, output, false)
+}
+
+pub fn recover_shapes(manifest: &Path, profile_path: &Path, output: &Path) -> Result<()> {
+    recover_profile(manifest, profile_path, output, true)
+}
+
+fn recover_profile(
+    manifest: &Path,
+    profile_path: &Path,
+    output: &Path,
+    data_shapes: bool,
+) -> Result<()> {
     let manifest = manifest.canonicalize().map_err(|err| err.to_string())?;
     if manifest.file_name().and_then(|name| name.to_str()) != Some("Cargo.toml") {
         return Err("expected a Cargo.toml manifest".into());
@@ -201,7 +216,8 @@ pub fn recover(manifest: &Path, profile_path: &Path, output: &Path) -> Result<()
     } else {
         "no-default"
     };
-    let raw = run(Command::new(adapter)
+    let mut command = Command::new(adapter);
+    command
         .arg(&manifest)
         .args([
             pin.package,
@@ -210,7 +226,16 @@ pub fn recover(manifest: &Path, profile_path: &Path, output: &Path) -> Result<()
             pin.target_triple,
             features,
         ])
-        .args(pin.features))?;
+        .args(pin.features);
+    if data_shapes {
+        command.env("ODD_RECOVERY_DATA_SHAPES", "1");
+    } else {
+        command.env_remove("ODD_RECOVERY_DATA_SHAPES");
+    }
+    let raw = run(&mut command)?;
+    if data_shapes {
+        return publish_shapes(output, &raw, pin);
+    }
     let inventory = structure::Inventory::load(&raw)?;
     if inventory.crate_name != pin.target_name.replace('-', "_")
         || inventory.compiler.as_deref() != Some(pin.compiler_commit)
@@ -322,14 +347,6 @@ fn publish(
         gaps: usize,
         qualification: &'static str,
     }
-    if output.symlink_metadata().is_ok() {
-        return Err(format!("output already exists: {}", output.display()));
-    }
-    let parent = output
-        .parent()
-        .filter(|path| !path.as_os_str().is_empty())
-        .unwrap_or(Path::new("."));
-    let stage = tempfile::tempdir_in(parent).map_err(|err| format!("stage inventory: {err}"))?;
     let bytes = inventory.graph(package);
     let mut lock = serde_json::to_vec_pretty(&Lock {
         vocabulary: "oddlang-rust-structure-v1",
@@ -342,7 +359,61 @@ fn publish(
     })
     .map_err(|err| err.to_string())?;
     lock.push(b'\n');
-    fs::write(stage.path().join("structure.ttl"), bytes).map_err(|err| err.to_string())?;
-    fs::write(stage.path().join("structure.lock"), lock).map_err(|err| err.to_string())?;
-    fs::rename(stage.path(), output).map_err(|err| format!("publish inventory: {err}"))
+    publish_pair(output, "structure.ttl", bytes, "structure.lock", lock)
+}
+
+fn publish_pair(
+    output: &Path,
+    data_name: &str,
+    bytes: Vec<u8>,
+    lock_name: &str,
+    lock: Vec<u8>,
+) -> Result<()> {
+    if output.symlink_metadata().is_ok() {
+        return Err(format!("output already exists: {}", output.display()));
+    }
+    let parent = output
+        .parent()
+        .filter(|path| !path.as_os_str().is_empty())
+        .unwrap_or(Path::new("."));
+    let stage =
+        tempfile::tempdir_in(parent).map_err(|err| format!("stage recovery output: {err}"))?;
+    fs::write(stage.path().join(data_name), bytes).map_err(|err| err.to_string())?;
+    fs::write(stage.path().join(lock_name), lock).map_err(|err| err.to_string())?;
+    fs::rename(stage.path(), output).map_err(|err| format!("publish recovery output: {err}"))
+}
+
+fn publish_shapes(output: &Path, raw: &[u8], pin: Pin<'_>) -> Result<()> {
+    use shape_model::{Observation, VOCABULARY};
+
+    #[derive(Serialize)]
+    #[serde(rename_all = "camelCase")]
+    struct Lock<'a> {
+        vocabulary: &'static str,
+        pin: Pin<'a>,
+        shapes_sha256: String,
+        qualification: &'static str,
+    }
+
+    let observation: Observation =
+        serde_json::from_slice(raw).map_err(|err| format!("shape observation: {err}"))?;
+    if observation.crate_name != pin.target_name.replace('-', "_")
+        || observation.compiler != pin.compiler_commit
+    {
+        return Err("compiler adapter reported a different crate or compiler commit".into());
+    }
+    if observation.graph.vocabulary != VOCABULARY {
+        return Err("compiler adapter reported an unsupported data shape graph".into());
+    }
+    let mut bytes = serde_json::to_vec_pretty(&observation.graph).map_err(|err| err.to_string())?;
+    bytes.push(b'\n');
+    let mut lock = serde_json::to_vec_pretty(&Lock {
+        vocabulary: VOCABULARY,
+        pin,
+        shapes_sha256: sha256(&bytes),
+        qualification: "candidate",
+    })
+    .map_err(|err| err.to_string())?;
+    lock.push(b'\n');
+    publish_pair(output, "shapes.json", bytes, "shapes.lock", lock)
 }

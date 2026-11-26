@@ -8,6 +8,9 @@ extern crate rustc_middle;
 extern crate rustc_span;
 extern crate rustc_type_ir;
 
+mod shape_model;
+mod shapes;
+
 use std::collections::BTreeSet;
 use std::{env, fs, process};
 
@@ -595,6 +598,14 @@ struct Recovery;
 
 impl Callbacks for Recovery {
     fn after_analysis<'tcx>(&mut self, _compiler: &Compiler, tcx: TyCtxt<'tcx>) -> Compilation {
+        if env::var_os("ODD_RECOVERY_DATA_SHAPES").is_some() {
+            let compiler = env::var("ODD_RECOVERY_COMPILER").expect("compiler commit");
+            let output = env::var_os("ODD_RECOVERY_OUT").expect("shape observation destination");
+            let file = fs::File::create_new(output).expect("create shape observation");
+            serde_json::to_writer(file, &shapes::observe(tcx, compiler))
+                .expect("serialize shape observation");
+            return Compilation::Continue;
+        }
         let mut collector = Collector {
             tcx,
             report: Inventory {

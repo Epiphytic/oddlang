@@ -81,3 +81,40 @@ python3 -B verification/rust-recovery/release_rustdoc.py /path/to/workspace pack
 The semantic comparison uses enclosing declared names and normalized categories. It preserves collisions and counts observations with missing identity by original kind. Declaration witnesses carry each observer's file and starting line. The separate `spanEvidence` section retains the historical diagnostic method. Supply `--previous-spans PATH` with a prior `reconcile_rustdoc.py` report to track each original one-sided key.
 
 A path match verifies the presence of a named declaration at this ownership boundary. It does not qualify its type, layout, body or effects. The current mapping needs additional identity rules for impl-owned items, generic parameters and anonymous or synthetic items. Aliases are compared by name. Dependency instance and content reconciliation remains open. Cargo build scripts can observe their environment, and macro expansion differs between documentation and code-generation interfaces.
+## Ordered data shapes
+
+The same pinned Cargo profile can recover a candidate data shape graph.
+
+```sh
+cargo build --locked --offline --bin oddlang
+target/debug/oddlang recover rust-shapes /path/to/Cargo.toml \
+  --profile /path/to/profile.toml --out /tmp/data-shapes
+python3 verification/rust-recovery/test_shapes.py target/debug/oddlang
+```
+
+Use the `recover rust` profile format. For this adapter include
+`Cargo.toml`, `Cargo.lock`, `driver.rs`, `shapes.rs` and `shape_model.rs`
+in `adapterInputs` so the lock records all build inputs. The output consists
+of `shapes.json` and `shapes.lock`. The lock identifies the selected build and
+hashes the graph. Graph identities are scoped to that target. Named members
+keep their IDs when moved within the same owner. Tuple fields use positional
+identities. Declarations are sorted by ID and field, variant, parameter and
+argument positions are zero-based. Source positions are absent from the graph.
+
+The `oddlang-data-shapes-v1` vocabulary describes products, sums and unions
+through ordered members, nested types and nominal references. Fixed-width
+scalars carry widths in bits. Pointer-sized integers carry the selected
+target's width. References identify shared or exclusive borrowing and name
+early-bound lifetimes where available. Rust's compiler-recognized `Arc` and
+`Rc` contribute shared ownership and `Box` contributes exclusive ownership.
+Named types retain the compiler-resolved definition and bind each argument
+to its declared parameter. A graph consumer can use these observations to
+author a portable type contract and map nominal references to contract IDs.
+
+The graph reports owner-scoped gaps for array lengths, constant arguments,
+unsupported types and lifetimes, raw pointer provenance, explicit
+discriminants, union active fields and generic constraints or defaults. The
+candidate also leaves visibility, export paths, stable workspace package
+instances and native layout open. It covers local data declarations for
+the selected profile. Library type internals, behavioral effects, generic
+satisfaction and compatibility across profiles still require evidence.
