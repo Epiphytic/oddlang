@@ -26,3 +26,9 @@ bindings, named expression cycles and missing references, invalid phase
 rules and altered digests. It also assembles the same queue into a native
 library with a separately projected error enum; the caller uses its
 public module and explicit root reexport.
+
+This fixture observes the generated public operations. Two upstream window
+unit tests additionally rely on private Rust storage. One inspects the
+receive window's receipt container directly. The other constructs the send
+window with explicit produced and acknowledged fields. Those expressions
+need a native storage binding beyond the public method overlay.

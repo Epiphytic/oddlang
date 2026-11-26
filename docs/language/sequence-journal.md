@@ -122,3 +122,12 @@ The projection lock pins generated source and `obligations.json`.
 The latter enumerates ordered case identities per operation, named
 rejections and effect failures that must leave state unchanged. A
 portable scenario is still required to demonstrate each case.
+
+## Native storage scope
+
+The checked type uses one authoritative private journal store for its
+cursors, byte records, final marker and receipts. This version does not
+bind private fields individually. Compatibility investigations that depend
+on native field names, private receipt container inspection or direct
+cursor-field struct construction therefore need a separate storage
+binding and qualification.
