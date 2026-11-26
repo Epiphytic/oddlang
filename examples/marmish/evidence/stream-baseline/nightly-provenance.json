@@ -1,0 +1,79 @@
+{
+  "artifacts": {
+    "nightlyHir": {
+      "path": "/private/tmp/stream-experiment-baseline/nightly-hir.txt",
+      "sha256": "767022158aaf0ce1bbd7effd7ca99f6f7d875e2fce73dd767bf54ee29bc2d0d7"
+    },
+    "nightlyRustdoc": {
+      "path": "/private/tmp/stream-experiment-baseline/nightly-target/doc/marmish_stream.json",
+      "sha256": "e1acb13ec3375be67a3c6ad2c23c8d4f1a0ca338ae9b432135d6f1f6f6f1de3e"
+    },
+    "nightlyTest": {
+      "path": "/private/tmp/stream-experiment-baseline/nightly-test.stderr",
+      "sha256": "53ca9dacd8024cfb9d2c8cf0a2a39e82ab47fa7ebe0f0675fb30e0d81484abaa"
+    },
+    "stableTest": {
+      "path": "/private/tmp/stream-experiment-baseline/original-v3/test.stderr",
+      "sha256": "65e531cedc36057c7dca443d6ad1aaf076b8fa4876b7d28394dc58714796e264"
+    }
+  },
+  "changedCfg": [
+    {
+      "nightly": [
+        "feature=\"default\"",
+        "feature=\"proc-macro\"",
+        "proc_macro_span",
+        "proc_macro_span_file",
+        "proc_macro_span_location",
+        "wrap_proc_macro"
+      ],
+      "root": "/Users/newuser/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/proc-macro2-1.0.107/src/lib.rs",
+      "stable": [
+        "feature=\"default\"",
+        "feature=\"proc-macro\"",
+        "proc_macro_span_file",
+        "proc_macro_span_location",
+        "wrap_proc_macro"
+      ],
+      "test": false
+    },
+    {
+      "nightly": [
+        "error_generic_member_access",
+        "feature=\"default\"",
+        "feature=\"std\""
+      ],
+      "root": "/Users/newuser/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.21/src/lib.rs",
+      "stable": [
+        "feature=\"default\"",
+        "feature=\"std\""
+      ],
+      "test": false
+    }
+  ],
+  "compiler": "rustc 1.100.0-nightly (8925ea358 2026-08-20)\nbinary: rustc\ncommit-hash: 8925ea358a0f265ca61026aadc7ecc506c545cbe\ncommit-date: 2026-08-20\nhost: aarch64-apple-darwin\nrelease: 1.100.0-nightly\nLLVM version: 23.1.0\n",
+  "nightlyUniqueDepInfoInputs": 350,
+  "onlyNightlyInputs": [
+    "/Users/newuser/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/proc-macro2-1.0.107/src/probe/proc_macro_span.rs",
+    "/Users/newuser/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.21/src/provide.rs",
+    "/tmp/stream-experiment-baseline/nightly-test-target/debug/build/serde/171064885f54eaa5/out/private.rs",
+    "/tmp/stream-experiment-baseline/nightly-test-target/debug/build/serde_core/6d9d2636c3a7de8f/out/private.rs",
+    "/tmp/stream-experiment-baseline/nightly-test-target/debug/build/thiserror/1d5fa21470c26b86/out/private.rs"
+  ],
+  "onlyStableInputs": [
+    "/private/tmp/stream-experiment-baseline/original-v3/test-target/debug/build/serde-597e09be338a62c1/out/private.rs",
+    "/private/tmp/stream-experiment-baseline/original-v3/test-target/debug/build/serde_core-d4e0a0aa3230a01b/out/private.rs",
+    "/private/tmp/stream-experiment-baseline/original-v3/test-target/debug/build/thiserror-3654075c939667e9/out/private.rs"
+  ],
+  "rustdocAllIndexItems": 1262,
+  "rustdocFormat": 61,
+  "rustdocItemsWithProjectSpans": {
+    "crates/marmish-stream/src/codec.rs": 42,
+    "crates/marmish-stream/src/copy_protocol.rs": 342,
+    "crates/marmish-stream/src/lib.rs": 32,
+    "crates/marmish-stream/src/windows.rs": 42,
+    "crates/marmish-stream/src/wire.rs": 243
+  },
+  "scope": "Rustdoc JSON and HIR spike. No normalized typed call graph. Never used as stable build evidence.",
+  "stableUniqueDepInfoInputs": 348
+}
