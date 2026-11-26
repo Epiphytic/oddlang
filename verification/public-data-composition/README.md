@@ -22,3 +22,13 @@ python3 -B verification/public-data-composition/verify.py \
 The result records tool versions, fixture and compiler digests, and named
 library tests. The companion project maintains the separately pinned
 application workspace and downstream import evidence.
+
+The two `inherited-*.json` receipts replay the eight predecessor fixtures
+and the general plain-choice fixture against the same executable on each
+host. Retain the executable from the first run and supply its receipt.
+
+```sh
+python3 -B verification/public-data-composition/inherited.py \
+    "$RUNTIME_CHECKOUT" "$CARGO_TARGET_DIR/debug/oddlang" \
+    /tmp/public-data-composition.json /tmp/inherited.json
+```

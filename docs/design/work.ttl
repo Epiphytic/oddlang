@@ -1872,6 +1872,9 @@ w:combinedPublicDataCompiler a p:Task ;
     p:acceptance "One compiler per native ARM64 host passes record and choice fixtures and the predecessor library tests by name. The Darwin build also executes a TypeScript consumer." .
 w:combinedPublicDataDarwin a p:Artifact ; p:location "verification/public-data-composition/aarch64-apple-darwin.json" .
 w:combinedPublicDataLinux a p:Artifact ; p:location "verification/public-data-composition/aarch64-unknown-linux-gnu.json" .
+w:combinedPublicDataCompiler p:evidence w:inheritedPublicDataDarwin, w:inheritedPublicDataLinux .
+w:inheritedPublicDataDarwin a p:Artifact ; p:location "verification/public-data-composition/inherited-aarch64-apple-darwin.json" .
+w:inheritedPublicDataLinux a p:Artifact ; p:location "verification/public-data-composition/inherited-aarch64-unknown-linux-gnu.json" .
 w:combinedPublicDataWorkspace a p:Task ;
     rdfs:label "Compose the recovered public data shapes under one application lock" ;
     p:source w:wholeMarmishPlan ; p:milestone w:marmishMilestone ;
