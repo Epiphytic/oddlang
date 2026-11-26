@@ -279,13 +279,19 @@ fn resolve_globs(
     syntax_candidate: bool,
 ) -> Result<BTreeSet<String>> {
     let mut used = BTreeSet::new();
-    let mut unresolved = BTreeSet::new();
-    let locally_bound = |prefix: &str| {
-        file.items
-            .iter()
-            .any(|item| item_type_binding(item).is_some_and(|(name, _)| name.unraw() == prefix))
-            || imports_in_scope.iter().any(|import| import.name == prefix)
-    };
+    let mut unresolved = Vec::new();
+    let mut local_bindings: BTreeSet<_> = file
+        .items
+        .iter()
+        .filter_map(item_type_binding)
+        .map(|(name, _)| name.unraw().to_string())
+        .chain(
+            imports_in_scope
+                .iter()
+                .filter(|item| item.name != "*")
+                .map(|item| item.name.clone()),
+        )
+        .collect();
     for glob in imports_in_scope.iter().filter(|import| import.name == "*") {
         let child = match glob.path.as_slice() {
             [name] => name,
@@ -294,16 +300,10 @@ fn resolve_globs(
                 if syntax_candidate
                     && !tail.is_empty()
                     && !matches!(prefix.as_str(), "crate" | "self" | "super")
-                    && (glob.declaration.leading_colon.is_some() || !locally_bound(prefix))
                     && glob.path.iter().all(|part| symbol(part))
                     && glob.declaration.attrs.iter().all(is_doc) =>
             {
-                let absolute = if glob.declaration.leading_colon.is_some() {
-                    "::"
-                } else {
-                    ""
-                };
-                unresolved.insert(format!("{absolute}{}::*", glob.path.join("::")));
+                unresolved.push((prefix, glob));
                 continue;
             }
             _ => return Err("unsupported public record glob source".into()),
@@ -348,24 +348,42 @@ fn resolve_globs(
         for item in &scope.items {
             if let Some((name, vis)) = item_type_binding(item)
                 && !matches!(vis, Visibility::Inherited)
-                && reserved(name)
             {
-                return Err(format!("shadowed public record type through glob: {name}"));
+                if reserved(name) {
+                    return Err(format!("shadowed public record type through glob: {name}"));
+                }
+                local_bindings.insert(name.unraw().to_string());
             }
         }
-        if imports(&scope).iter().any(|import| {
-            !matches!(import.declaration.vis, Visibility::Inherited)
-                && (import.name == "*" || PRELUDE_NAMES.contains(&import.name.as_str()))
-        }) {
-            return Err(format!(
-                "unsupported public record glob re-export in child: {child}"
-            ));
+        for import in imports(&scope)
+            .into_iter()
+            .filter(|import| !matches!(import.declaration.vis, Visibility::Inherited))
+        {
+            if import.name == "*" || PRELUDE_NAMES.contains(&import.name.as_str()) {
+                return Err(format!(
+                    "unsupported public record glob re-export in child: {child}"
+                ));
+            }
+            local_bindings.insert(import.name);
         }
     }
     if used.len() != pins.len() {
         return Err("unused public record glob source pin".into());
     }
-    Ok(unresolved)
+    unresolved
+        .into_iter()
+        .map(|(root, glob)| {
+            let prefix = if glob.declaration.leading_colon.is_some() {
+                "::"
+            } else {
+                if local_bindings.contains(root) {
+                    return Err("unsupported public record glob source".into());
+                }
+                ""
+            };
+            Ok(format!("{prefix}{}::*", glob.path.join("::")))
+        })
+        .collect()
 }
 
 fn path_names(path: &syn::Path) -> Vec<String> {

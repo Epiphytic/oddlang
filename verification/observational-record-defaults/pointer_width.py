@@ -116,4 +116,13 @@ with tempfile.TemporaryDirectory(prefix="odd-pointer-module-") as tmp:
     module_recovery("#[cfg(unix)] " + extern_glob + SOURCE, "conditional-glob",
                     "unsupported public record glob source")
 
+    module_recovery("mod catalog {}\nuse ::catalog::shapes::*;\n" + SOURCE, "absolute")
+    absolute = json.loads((root / "absolute/recovery.lock").read_bytes())
+    assert absolute["unresolvedGlobBindings"] == {"contour": ["::catalog::shapes::*"]}
+    child = root / "src/local.rs"
+    child.write_text("pub mod catalog { pub mod shapes { pub type usize = u32; } }\n")
+    selection["modules"][0]["scopeGlobs"] = {"local": hashlib.sha256(child.read_bytes()).hexdigest()}
+    module_recovery(extern_glob + '#[path = "local.rs"] mod local; use local::*;\n' + SOURCE,
+                    "pinned-child-prefix", "unsupported public record glob source")
+
 print("Module candidates record unresolved qualified glob bindings and preserve strict controls.")
