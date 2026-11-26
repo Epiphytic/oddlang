@@ -68,6 +68,19 @@ with tempfile.TemporaryDirectory(prefix="integrity-block-") as directory:
     assert b"::flate2" not in identity_source
     (consumer / "src/stored.rs").write_bytes(identity_source)
 
+    all_messages = json.loads(graph.read_text())
+    all_messages["errorMessages"] = {
+        identity: "wire " + role for role, identity in all_messages["errors"].items()
+    }
+    full = root / "all-messages"
+    invoke("build", "integrity-block", "rust", write(root / "all-messages.json", all_messages), overlay, full)
+    (consumer / "src/all_messages.rs").write_bytes((full / "codec.rs").read_bytes())
+    invalid_binding = json.loads(overlay.read_text())
+    invalid_binding["blockType"] = "u64"
+    invoke("build", "integrity-block", "rust", graph,
+           write(root / "primitive-name.json", invalid_binding), root / "bad-rust",
+           failure="must not shadow a primitive")
+
     changed = json.loads(graph.read_text())
     changed["fields"][0]["wireName"] = "location"
     changed["bounds"]["offsetMaximum"] = 31
@@ -75,6 +88,12 @@ with tempfile.TemporaryDirectory(prefix="integrity-block-") as directory:
     output = root / "mutant"
     invoke("build", "integrity-block", "rust", write(root / "mutant.json", changed), overlay, output)
     shutil.copyfile(output / "codec.rs", consumer / "src/mutant.rs")
+
+    narrower = json.loads(graph.read_text())
+    narrower["bounds"]["encodedMaximum"] = 64
+    bounded = root / "narrower"
+    invoke("build", "integrity-block", "rust", write(root / "narrower.json", narrower), overlay, bounded)
+    (consumer / "src/narrower.rs").write_bytes((bounded / "codec.rs").read_bytes())
 
     malformed = json.loads(graph.read_text())
     malformed["fields"][1]["wireName"] = "position"

@@ -719,3 +719,8 @@ w:boundedIntegrityBlocks a p:Task ;
     p:evidence w:boundedIntegrityFixture .
 w:boundedIntegrityFixture a p:Artifact ; p:location "verification/integrity-block/README.md" .
 w:wholeMarmishProtocols p:dependsOn w:boundedIntegrityBlocks .
+
+w:boundedIntegrityProjectionReview a p:Finding ;
+    rdfs:label "Check native primitive name collisions, exhaustive wire diagnostics and encode size obligations" ;
+    p:source w:boundedIntegrityFixture .
+w:boundedIntegrityBlocks p:addresses w:boundedIntegrityProjectionReview .

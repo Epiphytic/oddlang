@@ -292,6 +292,32 @@ impl Overlay {
         {
             return Err("Rust binding must cover all field and representation roles".into());
         }
+        for name in [&self.block_type, &self.representation_type] {
+            if matches!(
+                name.as_str(),
+                "bool"
+                    | "char"
+                    | "str"
+                    | "i8"
+                    | "i16"
+                    | "i32"
+                    | "i64"
+                    | "i128"
+                    | "isize"
+                    | "u8"
+                    | "u16"
+                    | "u32"
+                    | "u64"
+                    | "u128"
+                    | "usize"
+                    | "f16"
+                    | "f32"
+                    | "f64"
+                    | "f128"
+            ) {
+                return Err("Rust binding type must not shadow a primitive".into());
+            }
+        }
         let names = [
             self.block_type.as_str(),
             &self.representation_type,

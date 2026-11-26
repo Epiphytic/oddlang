@@ -68,6 +68,11 @@ pub(super) fn for_graph(graph: &Graph) -> Value {
         ));
     }
     rows.extend([
+        obligations("raw-size", "encode", json!({"below": graph.bounds.raw_minimum, "above": graph.bounds.raw_maximum}),
+            json!({"error": graph.errors.size, "occursBefore": "identity construction"})),
+        obligations("identity-encoded-bound", "encode", json!({"rawWithin": [graph.bounds.raw_minimum, graph.bounds.raw_maximum],
+            "identityEncodedOutside": [graph.bounds.encoded_minimum, graph.bounds.encoded_maximum]}),
+            json!({"error": graph.errors.size, "when": "encoded-size is the first failing validation check; otherwise unreachable for identical bounds"})),
         obligations("record-shape", "wire", json!({"input": "object or positional tuple"}),
             json!({"accept": "exact required fields", "reject": ["unknown key","duplicate key","missing field","extra tuple element"]})),
         obligations("digest-text", "wire", json!({"input": "wrong length or non-lowercase-hex digest"}),

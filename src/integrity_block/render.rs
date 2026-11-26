@@ -267,12 +267,18 @@ pub fn {decode}(block: &{block}, {negotiation}: {mode}) -> ::core::result::Resul
                 .unwrap();
             }
         }
-        writeln!(
-            text,
-            r#"                other => D::Error::custom(super::__oddlang_integrity_fault(other)),
-            }})"#
-        )
-        .unwrap();
+        if graph
+            .errors
+            .roles()
+            .iter()
+            .any(|(_, id)| !graph.error_messages.contains_key(*id))
+        {
+            writeln!(
+                text,
+                "                other => D::Error::custom(super::__oddlang_integrity_fault(other)),"
+            ).unwrap();
+        }
+        text.push_str("            })\n");
     }
     text.push_str("    }\n");
     if helper.is_some() {

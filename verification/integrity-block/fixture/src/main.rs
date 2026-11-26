@@ -1,8 +1,10 @@
 use codec::{pack, unpack, Packing, Tile};
 use std::fmt::{Display, Formatter};
 
+mod all_messages;
 mod codec;
 mod mutant;
+mod narrower;
 mod stored;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -71,6 +73,28 @@ fn main() {
         Field("pixels"),
     );
     error(codec::field_codec::decode_pixels("!!!!!!!!", 1), Capacity);
+
+    let complete = all_messages::pack(0, &[4], all_messages::Packing::Stored).unwrap();
+    assert_eq!(complete.end(), Ok(1));
+    assert_eq!(
+        all_messages::unpack(&complete, all_messages::Packing::Stored).unwrap(),
+        [4]
+    );
+    assert!(
+        matches!(serde_json::from_str::<all_messages::Tile>(&invalid),
+                     Err(error) if error.to_string().starts_with("wire payloadSyntax"))
+    );
+
+    let small = narrower::pack(63, &[4], narrower::Packing::Stored).unwrap();
+    assert_eq!(small.end(), Ok(64));
+    assert_eq!(
+        narrower::unpack(&small, narrower::Packing::Stored).unwrap(),
+        [4]
+    );
+    error(
+        narrower::pack(0, &[42; 65], narrower::Packing::Deflated),
+        Capacity,
+    );
 
     let raw = [42; 128];
     let compressed = pack(0, &raw, Packing::Deflated).unwrap();
