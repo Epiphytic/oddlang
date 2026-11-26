@@ -1740,3 +1740,17 @@ w:typescriptExtendedChoiceConvergence a p:Task ;
     p:dependsOn w:fieldlessChoiceCapabilities, w:typescriptPlainChoices ;
     p:status p:planned ;
     p:acceptance "On a compiler with both targets, confirm an admitted copyable choice projects and that clone-only and derived-Debug choices fail without emitting TypeScript output unless their capabilities have independent conformance." .
+
+w:fieldlessChoiceSpanReview a p:Finding ;
+    rdfs:label "Distinguish whole-file recovery input from qualification-time source extraction" ;
+    p:source w:fieldlessChoiceSpanReviewSource .
+w:fieldlessChoiceSpanReviewSource a p:Artifact ;
+    p:location "Claude auto review of 8e3320aacb0106d543c3e21ab1faf60a02132c04" .
+w:fieldlessChoiceScopeDocumentation a p:Task ;
+    rdfs:label "Document the whole-file pin and exact declaration staging boundary" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:plainValueChoices ; p:status p:done ;
+    p:addresses w:fieldlessChoiceSpanReview ; p:evidence w:fieldlessChoiceScopeGuide ;
+    p:acceptance "Describe the recovery input digest, distinguish extraction from recovery, and require independent enclosing-library witnesses." .
+w:fieldlessChoiceScopeGuide a p:Artifact ;
+    p:location "docs/language/checked-values.md#clone-only-choices-and-derived-debug" .

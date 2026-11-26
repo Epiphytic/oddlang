@@ -116,3 +116,4 @@ The principal feasibility risk is recovering intended behavior where only incide
 - [ ] Recover fieldless choices with optional copying and derived Debug, preserving variant order, equality and the observed absence of Serde in the selected engine choices. Qualify real source mutations on both ARM64 hosts. [Checked values](../../language/checked-values.md#clone-only-choices-and-derived-debug)
 
 - [ ] When combining the TypeScript and extended fieldless-choice profiles, enforce the TypeScript capability boundary and run the [projection control](../../../verification/plain-value-choices/typescript_subset.py).
+- [x] Document the whole-file recovery pin and the separate staging of exact source spans for native conformance. [Checked values](../../language/checked-values.md#clone-only-choices-and-derived-debug)
