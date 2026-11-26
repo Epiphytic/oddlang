@@ -8,6 +8,10 @@ extern crate rustc_middle;
 extern crate rustc_span;
 extern crate rustc_type_ir;
 
+#[cfg(feature = "public-type-bindings")]
+mod export_model;
+#[cfg(feature = "public-type-bindings")]
+mod exports;
 mod shape_model;
 mod shapes;
 mod relations;
@@ -614,6 +618,17 @@ impl Callbacks for Recovery {
             let file = fs::File::create_new(output).expect("create field conjunction observation");
             serde_json::to_writer(file, &relations::observe(tcx, &compiler, &method))
                 .expect("serialize field conjunction observation");
+            return Compilation::Continue;
+        }
+        #[cfg(feature = "public-type-bindings")]
+        if env::var_os("ODD_RECOVERY_TYPE_EXPORTS").is_some() {
+            let compiler = env::var("ODD_RECOVERY_COMPILER").expect("compiler commit");
+            let output = env::var_os("ODD_RECOVERY_OUT").expect("export observation destination");
+            serde_json::to_writer(
+                fs::File::create_new(output).expect("create export observation"),
+                &exports::observe(tcx, compiler),
+            )
+            .expect("serialize export observation");
             return Compilation::Continue;
         }
         if env::var_os("ODD_RECOVERY_DATA_SHAPES").is_some() {
