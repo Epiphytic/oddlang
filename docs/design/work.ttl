@@ -1318,10 +1318,16 @@ w:fixedByteTypeScriptProjection a p:Task ;
     rdfs:label "Project checked fixed-width byte values into native Node TypeScript" ;
     p:milestone w:marmishMilestone ; p:source w:fixedByteValuesPlan ;
     p:dependsOn w:fixedByteRecovery, w:fixedByteVault ;
-    p:status p:active ;
+    p:status p:done ; p:evidence w:fixedByteTypeScriptFixture, w:fixedByteTypeScriptReceipt ;
     p:acceptance "Project from the portable graph alone. Verify exact widths and failure identities, independent copies and deterministic artifacts on unrelated and published 32-byte graphs. Record the unsupported on-drop erasure obligation." .
 
 w:fixedByteTypeScriptIdentityReview a p:Finding ;
     rdfs:label "Keep distinct value identities and handle intrinsically empty native byte arrays" ;
     p:source w:checkedValuesReview .
 w:fixedByteTypeScriptProjection p:addresses w:fixedByteTypeScriptIdentityReview .
+
+w:fixedByteTypeScriptFixture a p:Artifact ;
+    p:location "tests/checked_values_typescript.rs" .
+
+w:fixedByteTypeScriptReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/fa9de10662c45872036459d534e03559ec8311d9/verification/whole/vault-fixed-typescript/darwin-arm64/receipt.json> .
