@@ -15,3 +15,5 @@ Its receipt records structure, inferred policies and assumptions separately.
 - [x] Validate the three stimuli, reject inconsistent observations and preserve the authored route.
 - [x] Change the unrelated native implementation, confirm the recovered shape is invariant and replay both inferred graphs.
 - [x] Review and publish the independent framework branch.
+
+- [x] Replay the original and four changed implementations on both native ARM64 hosts. The [companion qualification](https://github.com/Epiphytic/marmish-oddlang/pull/80) preserves the selected shape and independently observes the changed policies.
