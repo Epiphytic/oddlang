@@ -2605,3 +2605,40 @@ w:leasedProfileSetup a p:Task ;
 w:leasedProfileSetupChecks a p:Artifact ;
     p:location "verification/file-profile/provisioning.md" .
 w:basicCommandInterop p:dependsOn w:leasedProfileSetup .
+
+w:basicMixedSetupAttempts a p:Artifact ;
+    rdfs:label "Both mixed peer attempts stopped during generated setup" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/8269da7f831da021f271d816586a51a7d666c061/verification/whole/basic-command-interop" .
+w:basicPeerObservation a p:Task ;
+    rdfs:label "Freeze an attributed upstream command reference" ;
+    p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
+    p:status p:active ;
+    p:acceptance "Publish digest-pinned inputs and expected results for the complete fixed corpus on isolated upstream peers, correlate results with server-side fixture receipts, and verify cleanup on success and failure." .
+w:basicReferenceForegroundExitReceipt a p:Artifact ;
+    rdfs:label "Sanitized reference foreground failure and cleanup receipt" ;
+    p:location "verification/basic-command-reference-blocked-macos-arm64.json" .
+w:basicReferenceForegroundExit a p:Finding ;
+    rdfs:label "The first reference command exited 255 without an attributed result" ;
+    p:source w:basicReferenceForegroundExitReceipt .
+w:basicSetupUnavailable a p:Finding ;
+    rdfs:label "Generated setup exited 125 in both mixed pairings" ;
+    p:source w:basicMixedSetupAttempts .
+w:basicPeerObservation p:addresses w:basicReferenceForegroundExit .
+w:basicPeerSetup a p:Task ;
+    rdfs:label "Generate isolated peer setup and verify admission" ;
+    p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
+    p:status p:active ; p:addresses w:basicSetupUnavailable ;
+    p:acceptance "Observe generated provisioning, restart and peer admission in both mixed directions and verify cleanup." .
+w:basicClientQualification a p:Task ;
+    rdfs:label "Verify generated client presentation against the mainline server" ;
+    p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
+    p:status p:planned ; p:dependsOn w:basicPeerObservation, w:basicPeerSetup ;
+    p:acceptance "A generated client submits the fixed cases to a mainline server and presents the attributed reference results." .
+w:basicServerQualification a p:Task ;
+    rdfs:label "Verify generated server completion against the mainline client" ;
+    p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
+    p:status p:planned ; p:dependsOn w:basicPeerObservation, w:basicPeerSetup ;
+    p:acceptance "A mainline client receives the expected results from the verified generated receiver for all fixed cases." .
+w:basicCommandInterop p:dependsOn w:basicClientQualification, w:basicServerQualification .
+
+w:basicPeerSetup p:dependsOn w:leasedProfileSetup .
