@@ -53,8 +53,9 @@ fn main() {
         assert_eq!(Sample::decode(&EXPECTED[..prefix]).err(),Some(Error::Bad(expected)));
     }
     let mut bad = EXPECTED.to_vec();
-    bad[14] = 9;
     bad[5] = 1;
+    assert_eq!(Sample::decode(&bad).err(), Some(Error::Bad("record")));
+    bad[14] = 9;
     assert_eq!(Sample::decode(&bad).err(), Some(Error::Bad("tag")));
     bad[14] = 2;
     bad.push(0);
