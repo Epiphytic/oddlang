@@ -28,9 +28,10 @@ has `copy: false`, and the overlay omits the copy trait. A choice with
 `debug: true` emits Rust's derived variant-name formatting. The original
 v1 recovery selector retains its copyable, no-Debug scope.
 
-Recover from a selected standalone declaration or a pinned exact source
-span. The enclosing library must independently establish public paths,
-trait resolution and any missing capabilities.
+Recover from a standalone declaration whose whole-file digest is pinned.
+A qualification may extract an exact declaration span and stage it as that
+file. It must independently establish the enclosing library's public paths,
+trait resolution and missing capabilities.
 
 The separate TypeScript plain-choice target promises copying and ordinal
 conversion. A combined compiler must reject a graph that requires
