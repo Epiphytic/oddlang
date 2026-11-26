@@ -63,7 +63,11 @@ fn package_edition(lib: &Path, pin: &str) -> Result<String> {
     }
     let text = std::str::from_utf8(&bytes).map_err(|e| e.to_string())?;
     let manifest: toml::Table = toml::from_str(text).map_err(|e| e.to_string())?;
-    if let Some(path) = manifest.get("lib").and_then(|library| library.get("path"))
+    let library = manifest.get("lib");
+    if library.and_then(|target| target.get("edition")).is_some() {
+        return Err("public record recovery does not support a library edition override".into());
+    }
+    if let Some(path) = library.and_then(|target| target.get("path"))
         && path.as_str() != Some("src/lib.rs")
     {
         return Err("public record recovery requires the default package library path".into());
