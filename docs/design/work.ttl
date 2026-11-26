@@ -1721,3 +1721,6 @@ w:structuralApplicationConvergence a p:Task ;
     p:dependsOn w:structuralProfileCompiler, w:vaultHelperChoice ;
     p:acceptance "Preserve and identify member contracts, qualify the cold native build and CLI, and measure actual import and named upstream test coverage on the composed workspace." ;
     p:status p:planned .
+
+w:wholeMarmishAgentGuide a p:Artifact ; p:location "AGENTS.md" .
+w:structuralApplicationConvergence p:source w:wholeMarmishAgentGuide .
