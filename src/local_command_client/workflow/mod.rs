@@ -339,6 +339,7 @@ fn load(
 pub(super) fn callback(graph: &[u8], binding: &[u8]) -> Result<Callback, String> {
     let (_, binding, arguments) = load(graph, binding)?;
     Ok(Callback {
+        local_arguments: None,
         operation: None,
         entry: binding.entry,
         arguments,
