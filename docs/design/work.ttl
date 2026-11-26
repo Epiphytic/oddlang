@@ -1732,8 +1732,17 @@ w:fieldlessChoiceCapabilities a p:Task ;
     rdfs:label "Recover optional copying and derived variant-name formatting for public fieldless choices" ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
     p:dependsOn w:plainValueChoices ; p:status p:done ;
-    p:evidence w:fieldlessChoicesDarwin, w:fieldlessChoicesLinux ;
+    p:evidence w:fieldlessChoicesDarwin, w:fieldlessChoicesLinux, w:fieldlessChoiceFixtureReceipt ;
+    p:addresses w:fieldlessChoiceFixtureEvidenceReview ;
     p:acceptance "Preserve historical copyable graph bytes, compare an unrelated Rust fixture, and verify unchanged consumers of pinned original and generated engine choices with real source order and trait mutations on both ARM64 hosts." .
+
+w:fieldlessChoiceFixtureReceipt a p:Artifact ;
+    p:location "verification/plain-value-choices/aarch64-apple-darwin.json" .
+w:fieldlessChoiceFixtureEvidenceReview a p:Finding ;
+    rdfs:label "Publish separate evidence for unrelated choice conformance and historical artifact bytes" ;
+    p:source w:fieldlessChoiceFixtureEvidenceReviewSource .
+w:fieldlessChoiceFixtureEvidenceReviewSource a p:Artifact ;
+    p:location "Claude auto review of ff7829a4d8c022c646bb80693834c70f37f17710" .
 
 w:fieldlessChoicesDarwin a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/blob/042f018252c9ed04bea97e10f7da1df16da1e0b0/verification/whole/engine-fieldless-choices/aarch64-apple-darwin.json> .
