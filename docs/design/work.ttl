@@ -2867,3 +2867,11 @@ w:sharedWireRecordCheckCoverageFinding a p:Finding ;
     p:source w:sharedWireRecordCheckReview .
 w:sharedWireRecordCheckReview a p:Artifact ;
     p:location "Claude auto review of the shared record check compiler and canonical wire fixture patch" .
+
+w:postPrepareLocalResponseFailure a p:Finding ;
+    rdfs:label "The source-denied client with room preparation exits 255 before a receiver receipt" ;
+    p:reason "The 32-byte stderr hash matches the declared local response diagnostic. Both owners activated and cleanup passed. The owner currently routes status and prepare; the client next requires submit." ;
+    p:source w:postPrepareMixedClientReceipt .
+w:postPrepareMixedClientReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/dd5f514e66a47ad7c8c168d3df3c72c92ae62eb7/verification/whole/basic-command-interop/bounded-prepare-mixed-foreground-generated-client-upstream-server-macos-arm64.json" .
+w:basicClientQualification p:addresses w:postPrepareLocalResponseFailure .
