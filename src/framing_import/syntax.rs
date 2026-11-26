@@ -7,6 +7,8 @@ use syn::{parse_quote, spanned::Spanned, visit::Visit, *};
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Coordinate {
+    pub byte_start: usize,
+    pub byte_end: usize,
     pub line: usize,
     pub column: usize,
     pub end_line: usize,
@@ -15,6 +17,8 @@ pub(super) struct Coordinate {
 impl From<Span> for Coordinate {
     fn from(s: Span) -> Self {
         Self {
+            byte_start: s.byte_range().start,
+            byte_end: s.byte_range().end,
             line: s.start().line,
             column: s.start().column + 1,
             end_line: s.end().line,
@@ -22,7 +26,7 @@ impl From<Span> for Coordinate {
         }
     }
 }
-type Locations = BTreeMap<String, Coordinate>;
+pub(super) type Locations = BTreeMap<String, Coordinate>;
 
 fn fail<T>(node: &impl Spanned, msg: &str) -> Result<T> {
     let s = node.span().start();
@@ -116,6 +120,7 @@ fn compare_steps(
     if f.block.stmts.len() != expected.len() {
         return fail(f, "unsupported framing statement count");
     }
+    locations.insert(format!("{}.signature", f.sig.ident), f.sig.span().into());
     let mut ids = Vec::new();
     for (stmt, (id, pattern)) in f.block.stmts.iter().zip(expected) {
         check(
@@ -429,9 +434,7 @@ pub(super) fn lower(source: &str) -> Result<(Framing, Locations)> {
     Ok((model, locations))
 }
 
-pub(super) fn validate_map(bytes: &[u8], model: &Framing) -> Result<()> {
-    let coords: Locations = serde_json::from_slice(bytes)
-        .map_err(|e| format!("invalid framing source coordinates: {e}"))?;
+pub(super) fn validate_locations(coords: &Locations, model: &Framing) -> Result<()> {
     let mut expected: BTreeSet<String> = [
         "base64",
         "serde",
@@ -450,6 +453,8 @@ pub(super) fn validate_map(bytes: &[u8], model: &Framing) -> Result<()> {
         "ProbeEnvelope.impl",
         "Limits.impl",
         "decode.encoded-bound",
+        "encode.signature",
+        "decode.signature",
     ]
     .into_iter()
     .map(str::to_owned)
@@ -462,7 +467,8 @@ pub(super) fn validate_map(bytes: &[u8], model: &Framing) -> Result<()> {
     }
     if expected.into_iter().ne(coords.keys().cloned())
         || coords.values().any(|v| {
-            v.line == 0
+            v.byte_start >= v.byte_end
+                || v.line == 0
                 || v.column == 0
                 || v.end_column == 0
                 || (v.end_line, v.end_column) < (v.line, v.column)

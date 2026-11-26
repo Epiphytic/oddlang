@@ -1,5 +1,6 @@
 use oddlang::assemble::assemble;
-use serde_json::json;
+use oddlang::{framing_import, framing_projection};
+use serde_json::Value;
 use sha2::{Digest, Sha256};
 use std::{
     collections::BTreeMap,
@@ -7,13 +8,45 @@ use std::{
     os::unix::fs::{PermissionsExt, symlink},
     path::PathBuf,
     process::Command,
+    sync::OnceLock,
 };
 
-const GENERATED: &str = "pub fn result() -> u32 { 42 }\n";
-const LIB: &str =
-    "[package]\nname='model'\nversion='0.1.0'\nedition='2024'\n[features]\nchecked=[]\n";
-const APP: &str = "[package]\nname='app'\nversion='0.1.0'\nedition='2024'\n[dependencies]\nmodel={path='../model'}\n";
-const LOCK: &str = "version = 4\n[[package]]\nname = \"app\"\nversion = \"0.1.0\"\ndependencies = [\"model\"]\n[[package]]\nname = \"model\"\nversion = \"0.1.0\"\n";
+const SOURCE: &str = "examples/rust-import/framing-independent";
+const FIXTURE_PATHS: [&str; 3] = ["import.lock", "source-map.json", "domain.ttl"];
+const APP: &str = "[package]\nname='app'\nversion='0.1.0'\nedition='2024'\n[dependencies]\nmodel={package='independent-framing',path='../model'}\n";
+
+#[derive(Clone, Debug)]
+struct Imported {
+    files: BTreeMap<String, String>,
+    receipt: String,
+    generated: String,
+}
+
+fn artifact() -> &'static Imported {
+    static CACHE: OnceLock<Imported> = OnceLock::new();
+    CACHE.get_or_init(|| {
+        let scratch = tempfile::tempdir().unwrap();
+        let semantic = scratch.path().join("semantic");
+        let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(SOURCE);
+        framing_import::import(
+            &source.join("Cargo.toml"),
+            &source.join("mapping.toml"),
+            &semantic,
+        )
+        .unwrap();
+        let files = FIXTURE_PATHS
+            .into_iter()
+            .map(|k| (k.to_owned(), fs::read_to_string(semantic.join(k)).unwrap()))
+            .collect();
+        let projection = scratch.path().join("projection");
+        framing_projection::build(&semantic, &projection).unwrap();
+        Imported {
+            files,
+            receipt: fs::read_to_string(projection.join("projection.json")).unwrap(),
+            generated: fs::read_to_string(projection.join("frame.rs")).unwrap(),
+        }
+    })
+}
 
 fn sha(data: impl AsRef<[u8]>) -> String {
     Sha256::digest(data.as_ref())
@@ -37,36 +70,70 @@ impl Fixture {
         let candidate = root.path().join("candidate");
         let manifest = root.path().join("project.toml");
         let hash = sha(generated);
-        let graph = sha(b"independent fixture graph");
-        let receipt = serde_json::to_vec(&json!({"version":1,"graphSha256":graph,
-                                                 "files":{"module.rs":hash}}))
-        .unwrap();
+        let graph =
+            serde_json::from_slice::<Value>(artifact().receipt.as_bytes()).unwrap()["graphSha256"]
+                .as_str()
+                .unwrap()
+                .to_owned();
+        let receipt = if generated == &artifact().generated {
+            artifact().receipt.clone()
+        } else {
+            let mut body: serde_json::Value = serde_json::from_str(&artifact().receipt).unwrap();
+            body["files"]["frame.rs"] = serde_json::Value::String(hash.clone());
+            serde_json::to_string_pretty(&body).unwrap() + "\n"
+        };
         let projection_hash = sha(&receipt);
         let projection = store.join("projections").join(&projection_hash);
         fs::create_dir_all(&projection).unwrap();
+        let import_hash = sha(&artifact().files["import.lock"]);
+        let import = store.join("imports").join(&import_hash);
+        fs::create_dir_all(&import).unwrap();
+        for (name, content) in &artifact().files {
+            fs::write(import.join(name), content).unwrap();
+        }
         fs::write(projection.join("projection.json"), receipt).unwrap();
-        fs::write(projection.join("module.rs"), generated).unwrap();
+        fs::write(projection.join("frame.rs"), generated).unwrap();
         fs::create_dir(store.join("retained")).unwrap();
+        let mut relative = toml::from_str::<toml::Value>(
+            std::fs::read_to_string(
+                std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                    .join(SOURCE)
+                    .join("Cargo.toml"),
+            )
+            .unwrap()
+            .as_str(),
+        )
+        .unwrap();
+        relative.as_table_mut().unwrap().remove("workspace");
+        let model = toml::to_string(&relative).unwrap() + "\n[features]\nchecked=[]\n";
+        let lock = fs::read_to_string(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join(SOURCE)
+                .join("Cargo.lock"),
+        )
+        .unwrap();
+        let lock = lock
+            + "\n[[package]]\nname = \"app\"\nversion = \"0.1.0\"\ndependencies = [\"independent-framing\"]\n";
         let mut retained = BTreeMap::from([
             (
                 "Cargo.toml",
                 "[workspace]\nmembers=['app','model']\nresolver='2'\n",
             ),
-            ("Cargo.lock", LOCK),
+            ("Cargo.lock", &*lock),
             ("app/Cargo.toml", APP),
             (
                 "app/src/main.rs",
-                "fn main() { println!(\"{}\", model::result()); }\n",
+                "fn main() { println!(\"{}\", model::ProbeEnvelope::decode(&model::ProbeEnvelope::encode(&[42]).unwrap()).unwrap()[0]); }\n",
             ),
-            ("model/Cargo.toml", LIB),
+            ("model/Cargo.toml", &*model),
             ("scripts/check", "#!/bin/sh\nexit 0\n"),
         ]);
         for &(name, content) in overrides {
             retained.insert(name, content);
         }
         let mut project = format!(
-            "version=1\ncrates=['app','model']\ntarget='aarch64-apple-darwin'\nfeatures=['model/checked']\ngraphSha256='{graph}'\nprojectionSha256='{projection_hash}'\ncargoLockSha256='{}'\n",
-            sha(LOCK)
+            "version=1\ncrates=['app','independent-framing']\ntarget='aarch64-apple-darwin'\nfeatures=['independent-framing/checked']\nimportSha256='{import_hash}'\ngraphSha256='{graph}'\nprojectionSha256='{projection_hash}'\ncargoLockSha256='{}'\n",
+            sha(&lock)
         );
         for (name, content) in retained {
             let h = sha(content);
@@ -80,7 +147,7 @@ impl Fixture {
                 "\n[[files]]\npath='{name}'\nmode='{mode}'\nproducer='retained'\nsha256='{h}'\n"
             ));
         }
-        project.push_str(&format!("\n[[files]]\npath='model/src/lib.rs'\nmode='100644'\nproducer='generated'\nmodule='module.rs'\nsha256='{hash}'\n"));
+        project.push_str(&format!("\n[[files]]\npath='model/src/lib.rs'\nmode='100644'\nproducer='generated'\nmodule='frame.rs'\nsha256='{hash}'\n"));
         fs::write(&manifest, project).unwrap();
         Self {
             root,
@@ -112,7 +179,7 @@ impl Fixture {
 
 #[test]
 fn publishes_empty_destination_and_compiles_independent_workspace_consumer() {
-    let f = Fixture::new(GENERATED, &[]);
+    let f = Fixture::new(&artifact().generated, &[]);
     fs::create_dir(&f.candidate).unwrap();
     let assembled = Command::new(env!("CARGO_BIN_EXE_oddlang"))
         .arg("assemble")
@@ -126,7 +193,7 @@ fn publishes_empty_destination_and_compiles_independent_workspace_consumer() {
     );
     assert_eq!(
         fs::read(f.candidate.join("model/src/lib.rs")).unwrap(),
-        GENERATED.as_bytes()
+        artifact().generated.as_bytes()
     );
     assert_eq!(
         fs::metadata(f.candidate.join("scripts/check"))
@@ -162,9 +229,9 @@ fn publishes_empty_destination_and_compiles_independent_workspace_consumer() {
 
 #[test]
 fn rejects_retained_fallback_symlinks_and_tampered_projection_without_publication() {
-    let f = Fixture::new(GENERATED, &[]);
-    let module = f.projection.join("module.rs");
-    let blob = f.store.join("retained").join(sha(GENERATED));
+    let f = Fixture::new(&artifact().generated, &[]);
+    let module = f.projection.join("frame.rs");
+    let blob = f.store.join("retained").join(sha(&artifact().generated));
     fs::rename(&module, &blob).unwrap();
     f.rejected("store entry");
     symlink(&blob, &module).unwrap();
@@ -206,9 +273,13 @@ fn rejects_collisions_escapes_undeclared_inputs_and_stale_lock_or_graph() {
             "path='.git/config'",
             "invalid portable",
         ),
-        ("model/checked", "model/missing", "unknown selected feature"),
+        (
+            "independent-framing/checked",
+            "independent-framing/absent",
+            "unknown selected feature",
+        ),
     ] {
-        let f = Fixture::new(GENERATED, &[]);
+        let f = Fixture::new(&artifact().generated, &[]);
         f.change(old, new);
         f.rejected(error);
     }
@@ -216,14 +287,14 @@ fn rejects_collisions_escapes_undeclared_inputs_and_stale_lock_or_graph() {
         ("graphSha256", "projection disagrees"),
         ("cargoLockSha256", "missing root"),
     ] {
-        let f = Fixture::new(GENERATED, &[]);
+        let f = Fixture::new(&artifact().generated, &[]);
         let mut doc: toml::Value =
             toml::from_str(&fs::read_to_string(&f.manifest).unwrap()).unwrap();
         doc[field] = sha(b"substitution").into();
         fs::write(&f.manifest, toml::to_string(&doc).unwrap()).unwrap();
         f.rejected(expected);
     }
-    let f = Fixture::new(GENERATED, &[]);
+    let f = Fixture::new(&artifact().generated, &[]);
     fs::write(f.store.join("retained").join(sha(b"extra")), "extra").unwrap();
     f.rejected("store entry");
 }
@@ -249,7 +320,7 @@ fn rejects_include_and_build_script_substitutions_and_keeps_existing_work() {
             "[package]\nname='model'\nversion='0.1.0'\nbuild='../../outside.rs'\n",
         ),
     ] {
-        let f = Fixture::new(GENERATED, &[(file, content)]);
+        let f = Fixture::new(&artifact().generated, &[(file, content)]);
         fs::write(f.root.path().join("outside.rs"), "fn main() {}").unwrap();
         let err = f.run().unwrap_err();
         assert!(
@@ -258,12 +329,7 @@ fn rejects_include_and_build_script_substitutions_and_keeps_existing_work() {
         );
         assert!(!f.candidate.exists());
     }
-    let f = Fixture::new(
-        "include!(\"../replacement.rs\");",
-        &[("model/replacement.rs", GENERATED)],
-    );
-    f.rejected("emitted module");
-    let f = Fixture::new(GENERATED, &[]);
+    let f = Fixture::new(&artifact().generated, &[]);
     fs::create_dir(&f.candidate).unwrap();
     fs::write(f.candidate.join("owned"), b"kept").unwrap();
     assert!(f.run().unwrap_err().contains("empty directory"));
@@ -272,7 +338,7 @@ fn rejects_include_and_build_script_substitutions_and_keeps_existing_work() {
 
 #[test]
 fn rejects_symlinked_inputs_and_output() {
-    let f = Fixture::new(GENERATED, &[]);
+    let f = Fixture::new(&artifact().generated, &[]);
     let faked = f.root.path().join("alias");
     symlink(&f.store, &faked).unwrap();
     assert!(assemble(&f.manifest, &faked, &f.candidate).is_err());
@@ -287,4 +353,36 @@ fn rejects_symlinked_inputs_and_output() {
     symlink(&external, &f.candidate).unwrap();
     assert!(f.run().unwrap_err().contains("empty directory"));
     assert!(fs::read_dir(&external).unwrap().next().is_none());
+}
+
+#[test]
+fn anchored_store_rejects_coherently_rehashed_projection() {
+    let fixture = Fixture::new(&format!("// altered bytes\n{}", artifact().generated), &[]);
+    let cached: serde_json::Value =
+        serde_json::from_slice(&fs::read(fixture.projection.join("projection.json")).unwrap())
+            .unwrap();
+    let bytes = fs::read_to_string(fixture.projection.join("projection.json")).unwrap();
+    let approved: Value = serde_json::from_str(&artifact().receipt).unwrap();
+    assert_eq!(
+        cached["files"]["frame.rs"],
+        sha(fs::read(fixture.projection.join("frame.rs")).unwrap())
+    );
+    assert_eq!(cached["graphSha256"], approved["graphSha256"]);
+    assert_eq!(
+        fixture.projection.file_name().unwrap().to_str().unwrap(),
+        sha(&bytes)
+    );
+    assert_ne!(cached["files"]["frame.rs"], approved["files"]["frame.rs"]);
+    fixture.rejected("projection receipt differs from the isolated emitter");
+}
+
+#[test]
+fn independently_pinned_release_digest_is_required() {
+    let data = artifact();
+    let lock = &data.files["import.lock"];
+    let f = Fixture::new(&data.generated, &[]);
+    let expected = f.store.join("imports").join(sha(lock));
+    fs::write(expected.join("import.lock"), lock.to_owned() + "\n").unwrap();
+    assert_eq!(f.run().unwrap_err(), "external framing import pin mismatch");
+    assert!(!f.candidate.exists());
 }

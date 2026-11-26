@@ -1,6 +1,7 @@
 //! Import and verify the closed framing-v1 Rust profile.
 mod cargo;
 mod graph;
+mod provenance;
 mod syntax;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -132,13 +133,13 @@ pub fn import(manifest: &Path, mapping: &Path, out: &Path) -> Result<()> {
         syntax::lower(std::str::from_utf8(&frame).map_err(|_| "source must be UTF-8")?)?;
     let build = cargo::check(&manifest, &map.package, &frame)?;
     let graph = f.graph();
-    let metadata = json(&coords)?;
+    let metadata = provenance::create(&f, &build, coords, &frame)?;
     let files = BTreeMap::from([
         ("domain.ttl".to_owned(), hash(graph.as_bytes())),
         ("source-map.json".to_owned(), hash(&metadata)),
     ]);
     let lock = Lock {
-        version: 1,
+        version: 2,
         profile: "framing-v1".into(),
         graph_sha256: files["domain.ttl"].clone(),
         files,
@@ -162,7 +163,18 @@ pub fn import(manifest: &Path, mapping: &Path, out: &Path) -> Result<()> {
     verify(temp.path())?;
     fs::rename(temp.path(), out).map_err(|e| e.to_string())
 }
+/// Check internal agreement of the closed import. Caller supplies provenance via load_pinned.
 pub fn load_verified(dir: &Path) -> Result<(Framing, String)> {
+    load_checked(dir, None)
+}
+/// Use a trusted external SHA-256 of the exact canonical import.lock bytes.
+pub fn load_pinned(dir: &Path, expected_lock_sha256: &str) -> Result<(Framing, String)> {
+    load_checked(dir, Some(expected_lock_sha256))
+}
+pub fn verify_pinned(dir: &Path, expected_lock_sha256: &str) -> Result<()> {
+    load_pinned(dir, expected_lock_sha256).map(|_| ())
+}
+fn load_checked(dir: &Path, pin: Option<&str>) -> Result<(Framing, String)> {
     let mut names = fs::read_dir(dir)
         .map_err(|e| e.to_string())?
         .map(|e| e.map(|f| f.file_name()))
@@ -172,8 +184,12 @@ pub fn load_verified(dir: &Path) -> Result<(Framing, String)> {
     if names != ["domain.ttl", "import.lock", "source-map.json"] {
         return Err("unexpected framing import inventory".into());
     }
-    let lock: Lock = serde_json::from_slice(&read(&dir.join("import.lock"))?)
-        .map_err(|e| format!("invalid framing lock: {e}"))?;
+    let lock_bytes = read(&dir.join("import.lock"))?;
+    if pin.is_some_and(|p| !valid_digest(p) || hash(&lock_bytes) != p) {
+        return Err("external framing import pin mismatch".into());
+    }
+    let lock: Lock =
+        serde_json::from_slice(&lock_bytes).map_err(|e| format!("invalid framing lock: {e}"))?;
     let bytes = read(&dir.join("domain.ttl"))?;
     let digest = hash(&bytes);
     let coords = read(&dir.join("source-map.json"))?;
@@ -182,7 +198,8 @@ pub fn load_verified(dir: &Path) -> Result<(Framing, String)> {
         ("source-map.json".to_owned(), hash(&coords)),
     ]);
     if lock.profile != "framing-v1"
-        || lock.version != 1
+        || lock.version != 2
+        || json(&lock)? != lock_bytes
         || files != lock.files
         || lock.graph_sha256 != digest
     {
@@ -193,7 +210,7 @@ pub fn load_verified(dir: &Path) -> Result<(Framing, String)> {
         return Err("invalid framing recognizer lock".into());
     }
     let model = Framing::from_graph(&bytes)?;
-    syntax::validate_map(&coords, &model)?;
+    provenance::verify(&coords, &model, &lock.build)?;
     Ok((model, digest))
 }
 pub fn load(dir: &Path) -> Result<Framing> {

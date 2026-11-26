@@ -19,6 +19,7 @@ struct Project {
     target: String,
     features: Vec<String>,
     graph_sha256: String,
+    import_sha256: String,
     projection_sha256: String,
     cargo_lock_sha256: String,
     files: Vec<Entry>,
@@ -415,6 +416,7 @@ pub fn assemble(manifest: &Path, store: &Path, dest: &Path) -> Result<()> {
     }
     for hash in [
         &project.graph_sha256,
+        &project.import_sha256,
         &project.projection_sha256,
         &project.cargo_lock_sha256,
     ] {
@@ -448,12 +450,9 @@ pub fn assemble(manifest: &Path, store: &Path, dest: &Path) -> Result<()> {
     directory(&store.join("projections"))?;
     directory(&store.join(&projection_dir))?;
     let receipt = projection_dir.join("projection.json");
-    let projection: Projection = serde_json::from_slice(&verified_file(
-        &store,
-        &receipt,
-        &project.projection_sha256,
-    )?)
-    .map_err(|e| format!("projection receipt: {e}"))?;
+    let receipt_bytes = verified_file(&store, &receipt, &project.projection_sha256)?;
+    let projection: Projection = serde_json::from_slice(&receipt_bytes)
+        .map_err(|e| format!("invalid projection receipt: {e}"))?;
     if projection.version != 1
         || projection.graph_sha256 != project.graph_sha256
         || projection.files.is_empty()
@@ -468,7 +467,10 @@ pub fn assemble(manifest: &Path, store: &Path, dest: &Path) -> Result<()> {
 
     let mut paths = BTreeMap::new();
     let mut modules = BTreeSet::new();
-    let mut inputs = vec![receipt];
+    let import_dir = Path::new("imports").join(&project.import_sha256);
+    let mut inputs = Vec::new();
+    let import_names = ["import.lock", "domain.ttl", "source-map.json"];
+
     let mut root_manifest = false;
     let mut locked = false;
     for row in &project.files {
@@ -505,13 +507,37 @@ pub fn assemble(manifest: &Path, store: &Path, dest: &Path) -> Result<()> {
     if !locked || !root_manifest || modules.len() != projection.files.len() {
         return Err("missing root Cargo manifest/lock or unconsumed projection module".into());
     }
-    check_store(&store, &inputs)?;
+    let mut expected_paths = vec![receipt];
+    expected_paths.extend(import_names.iter().map(|name| import_dir.join(name)));
+    expected_paths.extend(inputs.iter().cloned());
+    check_store(&store, &expected_paths)?;
+
+    // A cached projection or relocated source tree cannot supply any emitter inputs.
+    let scratch = tempfile::tempdir().map_err(|e| e.to_string())?;
+    let import = scratch.path().join("import");
+    fs::create_dir(&import).map_err(|e| e.to_string())?;
+    for name in import_names {
+        let bytes = regular_bytes(&store.join(import_dir.join(name)))?;
+        fs::write(import.join(name), bytes).map_err(|e| e.to_string())?;
+    }
+    let fresh = scratch.path().join("projection");
+    crate::framing_projection::build_pinned(&import, &project.import_sha256, &fresh)?;
+    if regular_bytes(&fresh.join("projection.json"))? != receipt_bytes {
+        return Err("projection receipt differs from the isolated emitter".into());
+    }
     let stage = tempfile::Builder::new()
         .prefix(".oddlang-assembly-")
         .tempdir_in(&parent)
         .map_err(|e| e.to_string())?;
-    for (row, input) in project.files.iter().zip(&inputs[1..]) {
+    for (row, input) in project.files.iter().zip(&inputs) {
         let bytes = verified_file(&store, input, &row.sha256)?;
+        if let Some(module) = &row.module
+            && regular_bytes(&fresh.join(module))? != bytes
+        {
+            return Err(format!(
+                "native module {module} disagrees with the isolated emitter"
+            ));
+        }
         let out = stage.path().join(&row.path);
         fs::create_dir_all(out.parent().unwrap()).map_err(|e| e.to_string())?;
         fs::write(&out, bytes).map_err(|e| e.to_string())?;

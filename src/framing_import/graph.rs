@@ -9,10 +9,12 @@ fn iri(id: &str) -> String {
     format!("<{NS}{id}>")
 }
 impl Framing {
-    pub(super) fn graph(&self) -> String {
-        let mut lines = Vec::new();
-        let mut triple =
-            |s: &str, p: &str, o: String| lines.push(format!("{} {} {o} .", iri(s), iri(p)));
+    /// A single traversal defines both canonical triples and their source witnesses.
+    pub(super) fn facts(&self) -> BTreeMap<String, Vec<String>> {
+        let mut facts = BTreeMap::new();
+        let mut triple = |s: &str, p: &str, o: String, sites: Vec<String>| {
+            facts.insert(format!("{} {} {o} .", iri(s), iri(p)), sites);
+        };
         for (s, p, o) in [
             ("codec", "profile", "framing-v1"),
             ("codec", "nativeType", "ProbeEnvelope"),
@@ -33,7 +35,35 @@ impl Framing {
             ("JSON_BYTES", "use", "enforced"),
             ("NDJSON_BYTES", "use", "declared"),
         ] {
-            triple(s, p, iri(o));
+            let sites: &[&str] = match (s, p) {
+                ("codec", "profile") => &["ProbeEnvelope.impl"],
+                ("codec", "nativeType") => &["ProbeEnvelope"],
+                ("codec", "errorType") => &["FrameError"],
+                ("codec", "limitsType") => &["Limits"],
+                ("codec", "wireRecord") | ("Envelope", _) | (_, "wireType") => &["Envelope"],
+                ("payload", "encoding") => &[
+                    "base64",
+                    "encode.json-encode-base64",
+                    "decode.base64-decode",
+                    "decode.canonical",
+                ],
+                ("encode", _) => &["encode.signature"],
+                ("decode", _) => &["decode.signature"],
+                ("RAW_BYTES", "use") => &[
+                    "Limits.RAW_BYTES",
+                    "encode.raw-limit",
+                    "decode.raw-limit",
+                    "decode.encoded-bound",
+                ],
+                ("JSON_BYTES", "use") => &[
+                    "Limits.JSON_BYTES",
+                    "encode.json-limit",
+                    "decode.json-limit",
+                ],
+                ("NDJSON_BYTES", "use") => &["Limits.NDJSON_BYTES"],
+                _ => unreachable!("static framing vocabulary"),
+            };
+            triple(s, p, iri(o), sites.iter().map(|s| s.to_string()).collect());
         }
         for (s, v) in [
             ("RAW_BYTES", self.raw_limit),
@@ -41,7 +71,12 @@ impl Framing {
             ("NDJSON_BYTES", self.ndjson_limit),
             ("version", u64::from(self.version)),
         ] {
-            triple(s, "value", Literal::from(v).to_string());
+            let sites = if s == "version" {
+                vec!["encode.json-encode-base64".into(), "decode.version".into()]
+            } else {
+                vec![format!("Limits.{s}")]
+            };
+            triple(s, "value", Literal::from(v).to_string(), sites);
         }
         for (name, msg) in [
             "SizeLimit",
@@ -52,18 +87,30 @@ impl Framing {
         .iter()
         .zip(&self.errors)
         {
-            triple(name, "display", Literal::from(msg.as_str()).to_string());
+            triple(
+                name,
+                "display",
+                Literal::from(msg.as_str()).to_string(),
+                vec![format!("FrameError.{name}")],
+            );
         }
         for (op, steps) in [
             ("encode", &self.encode_steps),
             ("decode", &self.decode_steps),
         ] {
             for (index, step) in steps.iter().enumerate() {
-                triple(op, &format!("step-{}", index + 1), iri(step));
+                triple(
+                    op,
+                    &format!("step-{}", index + 1),
+                    iri(step),
+                    vec![format!("{op}.{step}")],
+                );
             }
         }
-        lines.sort();
-        lines.join("\n") + "\n"
+        facts
+    }
+    pub(super) fn graph(&self) -> String {
+        self.facts().into_keys().collect::<Vec<_>>().join("\n") + "\n"
     }
     pub(super) fn from_graph(bytes: &[u8]) -> Result<Self> {
         let mut values = BTreeMap::new();

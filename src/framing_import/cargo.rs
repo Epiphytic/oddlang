@@ -33,7 +33,7 @@ pub(super) struct Build {
     package: String,
     edition: String,
     flags: Vec<String>,
-    inputs: BTreeMap<String, String>,
+    pub(super) inputs: BTreeMap<String, String>,
     workspace_manifest_sha256: String,
     cargo_lock_sha256: String,
     compiled_features: BTreeMap<String, Vec<String>>,

@@ -22,6 +22,16 @@ fn run(args: &[String]) -> Result<(), String> {
         [cmd, manifest, store, out] if cmd == "assemble" => {
             oddlang::assemble::assemble(manifest.as_ref(), store.as_ref(), out.as_ref())
         }
+        [cmd, kind, import, out, flag, pin]
+            if cmd == "build" && kind == "module" && flag == "--import-sha256" =>
+        {
+            oddlang::framing_projection::build_pinned(import.as_ref(), pin, out.as_ref())
+        }
+        [group, cmd, dir, flag, pin]
+            if group == "import" && cmd == "verify" && flag == "--import-sha256" =>
+        {
+            oddlang::framing_import::verify_pinned(dir.as_ref(), pin)
+        }
         [cmd, kind, import, out] if cmd == "build" && kind == "module" => {
             oddlang::framing_projection::build(import.as_ref(), out.as_ref())
         }

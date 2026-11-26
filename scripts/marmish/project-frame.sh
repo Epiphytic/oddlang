@@ -40,3 +40,4 @@ p.write_text(source.replace(version + size, size + version))
 MUTATE
 project "$scratch/mutant/crates/marmish-core/Cargo.toml" "$out/mutant-import" "$out/mutant-projection"
 scripts/marmish/frame.sh "$upstream" "$out/import" "$out/projection" "$out/observations" "$out/mutant-projection"
+scripts/marmish/assembled-pilot.sh "$upstream" "$out" "$bin"

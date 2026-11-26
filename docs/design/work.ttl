@@ -406,3 +406,9 @@ w:marmish-capability-os a p:Task ; rdfs:label "platform-specific library calls a
 
 w:marmishFramingEvidence a p:Artifact ; rdfs:label "Recovered framing contract, assembly and native and component observations" ; p:location "docs/design/marmish-framing.md" .
 w:marmishFeatures p:evidence w:marmishFramingEvidence, w:marmishGaps .
+
+w:marmishFramingEvidence a p:Artifact ; rdfs:label "Native and Wasm framing recovery and assembly evidence" ; p:location "docs/design/marmish-framing.md" .
+w:marmishFeatures p:evidence w:marmishFramingEvidence, w:marmishGaps .
+
+w:marmishProjectionReview a p:Finding ; rdfs:label "Anchor span provenance, regenerate during assembly, audit real compiler inputs and test the assembled upstream tree" ; p:source w:marmishFramingEvidence .
+w:marmishFeatures p:addresses w:marmishProjectionReview .

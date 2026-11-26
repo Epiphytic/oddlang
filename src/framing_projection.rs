@@ -92,7 +92,17 @@ fn module(model: &Framing) -> Result<String, String> {
 }
 
 pub fn build(import: &Path, output: &Path) -> Result<(), String> {
-    let (model, graph_hash) = load_verified(import)?;
+    write_projection(load_verified(import)?, output)
+}
+
+pub fn build_pinned(import: &Path, expected_lock: &str, output: &Path) -> Result<(), String> {
+    write_projection(
+        crate::framing_import::load_pinned(import, expected_lock)?,
+        output,
+    )
+}
+
+fn write_projection((model, graph_hash): (Framing, String), output: &Path) -> Result<(), String> {
     let rust = module(&model)?;
     if let Ok(meta) = fs::symlink_metadata(output) {
         if !meta.is_dir()
