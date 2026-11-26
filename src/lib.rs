@@ -1,5 +1,6 @@
 pub mod assemble;
 pub mod contracts;
+pub mod endpoint_set;
 pub mod evolution;
 pub mod facade;
 pub mod framing_import;

@@ -32,6 +32,8 @@ The independent stream comparison including macro expansions left 373 compiler-o
 
 
 - [x] Project a generic bounded JSON envelope into Rust. Verify exact ordered wire output, object and positional decode policies, resource bounds, and named error precedence with an unchanged unrelated caller. [Envelope profile and fixture](../../language/json-envelope.md)
+- [x] Project generic ordered endpoint normalization to a Rust free operation and a checked type. Verify syntax, precedence, IP and DNS boundaries, stable order, determinism and the external error binding against an unrelated consumer. [Endpoint contract](../../language/endpoint-set.md)
+
 - [x] Recover ordered native data declarations through a generic Rust compiler adapter. The shape projection preserves declaration order, applied types and ownership, and publishes gaps for unresolved identities, bounds and layout. Its unrelated fixture exercises ordering, type and feature mutations. Workspace-wide structural reconciliation remains part of phase 2. [Shape vocabulary and fixture](../../../verification/rust-recovery/README.md)
 - The phase 1 baseline now includes original dev and release stream observations on the three native platforms. The macOS and Linux ARM64 sealed observations are separately pinned. The companion tests record CLI parse behavior, v1 state reopen and corrupted-state rejection on macOS. These are original-side measurements. [Original release baseline](https://github.com/Epiphytic/marmish-oddlang/pull/4)
 
