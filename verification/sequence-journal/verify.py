@@ -118,6 +118,17 @@ with tempfile.TemporaryDirectory(prefix="sequence-journal-") as directory:
     op["cases"].pop()
     run(BINARY, "sequence-journal", "digest", write(work / "missing-final.json", invalid),
         error="exactly the final case")
+    for document, field, verb in ((raw, "limits", "digest"),
+                                  (raw, "expressions", "digest"),
+                                  (binding, "methods", "overlay-digest")):
+        path = work / f"duplicate-{field}.json"
+        marker = f'"{field}": {{'
+        key, value = next(iter(document[field].items()))
+        duplicate = json.dumps(key) + ": " + json.dumps(value) + ", "
+        path.write_text(json.dumps(document).replace(marker, marker + duplicate, 1),
+                        encoding="utf-8")
+        run(BINARY, "sequence-journal", verb, path, error="duplicate binding key")
+
     invalid_overlay = copy.deepcopy(binding)
     invalid_overlay["methods"].pop(PREFIX + "view")
     incomplete = write(work / "incomplete.json", invalid_overlay)

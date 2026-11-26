@@ -1,3 +1,4 @@
+use crate::shared_declarations::unique_map;
 use oxigraph::model::NamedNode;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::collections::{BTreeMap, BTreeSet};
@@ -58,11 +59,12 @@ pub(super) enum Limit {
 #[serde(deny_unknown_fields)]
 pub(super) struct Graph {
     pub format: String,
+    #[serde(deserialize_with = "unique_map")]
     pub limits: BTreeMap<String, Limit>,
     pub errors: Vec<String>,
     pub states: Vec<State>,
     pub operations: Vec<Operation>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "unique_map")]
     pub expressions: BTreeMap<String, Expr>,
 }
 
@@ -269,9 +271,12 @@ impl Effect {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(super) struct RustOverlay {
     pub format: String,
+    #[serde(deserialize_with = "unique_map")]
     pub types: BTreeMap<String, String>,
+    #[serde(deserialize_with = "unique_map")]
     pub methods: BTreeMap<String, String>,
     pub error_type: String,
+    #[serde(deserialize_with = "unique_map")]
     pub error_variants: BTreeMap<String, String>,
 }
 
