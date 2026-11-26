@@ -127,6 +127,8 @@ struct Binding {
     invalid_diagnostic: Option<String>,
     uncovered_exit: u8,
     operations: BTreeMap<String, String>,
+    #[serde(default)]
+    handlers: BTreeMap<String, Vec<String>>,
 }
 
 fn is_false(value: &bool) -> bool {
@@ -151,7 +153,11 @@ pub fn recover(source: &Path, selection: &Path, output: &Path) -> Result<(), Str
 }
 
 pub fn build(graph: &Path, binding: &Path, output: &Path) -> Result<(), String> {
-    write(output, rust::render(&read(graph)?, &read(binding)?)?)
+    let binding: Binding = read(binding)?;
+    if !binding.handlers.is_empty() {
+        return Err("native command handlers require native-package link validation".into());
+    }
+    write(output, rust::render(&read(graph)?, &binding)?)
 }
 
 pub(crate) fn build_package_component(
@@ -181,4 +187,54 @@ pub(crate) fn build_package_component(
     std::fs::create_dir(output).map_err(|error| error.to_string())?;
     write(&output.join("cli.rs"), source)?;
     write(&output.join("projection.lock"), format!("{lock:#}\n"))
+}
+
+pub(crate) fn validate_callbacks(
+    graph: &[u8],
+    overlay: &[u8],
+    callbacks: &BTreeMap<Vec<String>, &crate::local_command_client::Callback>,
+) -> Result<(), String> {
+    use crate::local_command_client::RequiredArgument;
+    let binding: Binding = serde_json::from_slice(overlay).map_err(|error| error.to_string())?;
+    if binding.handlers.is_empty() {
+        return Ok(());
+    }
+    let graph: Graph = serde_json::from_slice(graph).map_err(|error| error.to_string())?;
+    for (operation, path) in &binding.handlers {
+        let callback = callbacks.get(path).ok_or_else(|| {
+            format!("unresolved checked native command handler for {operation:?}")
+        })?;
+        for (name, expected) in &callback.arguments {
+            let arg = graph
+                .root
+                .arguments
+                .iter()
+                .find(|argument| argument.id == *name)
+                .ok_or_else(|| {
+                    format!("handler {operation:?} needs undeclared root argument {name:?}")
+                })?;
+            let kind_matches = match expected {
+                RequiredArgument::Flag => arg.kind.is_none(),
+                RequiredArgument::OptionalValue => {
+                    arg.kind.is_some() && !arg.required && arg.default_value.is_none()
+                }
+                RequiredArgument::String | RequiredArgument::RepeatedString => {
+                    matches!(arg.kind, Some(ValueKind::String))
+                }
+                RequiredArgument::Unsigned64 => matches!(arg.kind, Some(ValueKind::U64)),
+                RequiredArgument::Path => matches!(arg.kind, Some(ValueKind::Path)),
+            };
+            // Clap stores subcommand-local options on a different ArgMatches.
+            // Global inheritance prevents both ID and spelling shadowing.
+            if arg.repeated != matches!(expected, RequiredArgument::RepeatedString)
+                || !kind_matches
+                || ((!graph.root.subcommands.is_empty() || graph.external) && !arg.global)
+            {
+                return Err(format!(
+                    "handler {operation:?} has incompatible argument {name:?}"
+                ));
+            }
+        }
+    }
+    Ok(())
 }

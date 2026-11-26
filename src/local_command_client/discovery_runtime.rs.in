@@ -1,0 +1,129 @@
+
+#[allow(dead_code)]
+enum EndpointField {
+    Text,
+    NullableText,
+    UnsignedByte,
+    Strings(&'static [&'static str]),
+}
+
+#[allow(dead_code)]
+enum EndpointValue<'a> {
+    Text(&'a str),
+    UnsignedByte(u8),
+    Null,
+    Path(&'a Path),
+}
+
+#[allow(dead_code)]
+fn endpoint_equal(left: EndpointValue<'_>, right: EndpointValue<'_>) -> bool {
+    match (left, right) {
+        (EndpointValue::Text(l), EndpointValue::Text(r)) => l == r,
+        (EndpointValue::UnsignedByte(l), EndpointValue::UnsignedByte(r)) => l == r,
+        (EndpointValue::Path(l), EndpointValue::Path(r)) => l == r,
+        (EndpointValue::Path(path), EndpointValue::Text(text))
+        | (EndpointValue::Text(text), EndpointValue::Path(path)) => path == Path::new(text),
+        (EndpointValue::Null, EndpointValue::Null) => true,
+        _ => false,
+    }
+}
+
+#[allow(dead_code)]
+fn endpoint_lower_hex(value: EndpointValue<'_>, width: usize, nullable: bool) -> bool {
+    match value {
+        EndpointValue::Text(text) => text.len() == width
+            && text.bytes().all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b)),
+        EndpointValue::Null => nullable,
+        _ => false,
+    }
+}
+
+#[allow(dead_code)]
+fn endpoint_value<'a>(doc: &'a [(&str, serde_json::Value)], key: &str) -> EndpointValue<'a> {
+    match &doc.iter().find(|(name, _)| *name == key).expect("validated document field").1 {
+        serde_json::Value::String(value) => EndpointValue::Text(value),
+        serde_json::Value::Number(value) => EndpointValue::UnsignedByte(value.as_u64().expect("validated unsigned byte") as u8),
+        _ => EndpointValue::Null,
+    }
+}
+
+#[allow(dead_code)]
+fn endpoint_text<'a>(doc: &'a [(&str, serde_json::Value)], key: &str) -> &'a str {
+    match endpoint_value(doc, key) {
+        EndpointValue::Text(value) => value,
+        _ => unreachable!("validated runtime component type"),
+    }
+}
+
+fn endpoint_component(value: &str) -> bool {
+    use std::path::Component;
+    !value.is_empty() && !value.contains(['/', '\0']) && value != "." && value != ".."
+        && matches!(Path::new(value).components().next(), Some(Component::Normal(part)) if part == value)
+}
+
+fn endpoint_private_dir(path: &Path, uid: u32, mode: u32, invalid: Failure) -> Result<(), Failure> {
+    use std::os::unix::fs::MetadataExt as _;
+    let meta = std::fs::symlink_metadata(path).map_err(|_| IO)?;
+    if !meta.is_dir() || meta.uid() != uid || meta.mode() & 0o777 != mode { return Err(invalid); }
+    Ok(())
+}
+
+fn endpoint_document(
+    path: &Path, uid: u32, mode: u32, limit: u32, reject_overflow: bool,
+    missing: Failure, unsafe_file: Failure, invalid: Failure, schema: &[(&'static str, EndpointField)],
+) -> Result<Vec<(&'static str, serde_json::Value)>, Failure> {
+    use std::{io::Read as _, os::unix::fs::{MetadataExt as _, OpenOptionsExt as _}};
+    let file = std::fs::OpenOptions::new().read(true)
+        .custom_flags(libc::O_NOFOLLOW | libc::O_CLOEXEC | libc::O_NONBLOCK)
+        .open(path).map_err(|error| if error.kind() == std::io::ErrorKind::NotFound { missing } else { IO })?;
+    let meta = file.metadata().map_err(|_| IO)?;
+    if !meta.is_file() || meta.nlink() != 1 || meta.uid() != uid || meta.mode() & 0o777 != mode {
+        return Err(unsafe_file);
+    }
+    let mut bytes = Vec::new();
+    file.take(u64::from(limit) + 1).read_to_end(&mut bytes).map_err(|_| IO)?;
+    if reject_overflow && bytes.len() as u64 > u64::from(limit) { return Err(invalid); }
+    use serde::de::{Error as _, MapAccess, SeqAccess, Visitor};
+    struct Doc<'a>(&'a [(&'static str, EndpointField)]);
+    impl<'de> Visitor<'de> for Doc<'_> {
+        type Value = Vec<(&'static str, serde_json::Value)>;
+        fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { f.write_str("closed document") }
+        fn visit_map<M: MapAccess<'de>>(self, mut map: M) -> Result<Self::Value, M::Error> {
+            let mut values = vec![None; self.0.len()];
+            while let Some(key) = map.next_key::<String>()? {
+                let pos = self.0.iter().position(|(name, _)| *name == key).ok_or_else(|| M::Error::custom("unknown document field"))?;
+                if values[pos].is_some() { return Err(M::Error::custom("duplicate document field")); }
+                values[pos] = Some(map.next_value()?);
+            }
+            self.0.iter().zip(values).map(|((key, rule), value)| {
+                let value = value.or_else(|| matches!(rule, EndpointField::NullableText).then_some(serde_json::Value::Null))
+                    .ok_or_else(|| M::Error::custom("missing document field"))?;
+                endpoint_check_field(rule, &value).then_some((*key, value)).ok_or_else(|| M::Error::custom("invalid document field"))
+            }).collect()
+        }
+        fn visit_seq<S: SeqAccess<'de>>(self, mut seq: S) -> Result<Self::Value, S::Error> {
+            let mut values = Vec::with_capacity(self.0.len());
+            for (key, rule) in self.0 {
+                let value = seq.next_element()?.ok_or_else(|| S::Error::custom("missing positional document field"))?;
+                if !endpoint_check_field(rule, &value) { return Err(S::Error::custom("invalid document field")); }
+                values.push((*key, value));
+            }
+            if seq.next_element::<serde::de::IgnoredAny>()?.is_some() { return Err(S::Error::custom("extra document field")); }
+            Ok(values)
+        }
+    }
+    use serde::Deserializer as _;
+    let mut reader = serde_json::Deserializer::from_slice(&bytes);
+    let values = reader.deserialize_any(Doc(schema)).map_err(|_| invalid)?;
+    reader.end().map_err(|_| invalid)?;
+    Ok(values)
+}
+
+fn endpoint_check_field(rule: &EndpointField, value: &serde_json::Value) -> bool {
+    match rule {
+        EndpointField::Text => value.is_string(),
+        EndpointField::NullableText => value.is_string() || value.is_null(),
+        EndpointField::UnsignedByte => value.as_u64().is_some_and(|n| u8::try_from(n).is_ok()),
+        EndpointField::Strings(values) => value.as_str().is_some_and(|text| values.contains(&text)),
+    }
+}

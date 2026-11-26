@@ -1,0 +1,13 @@
+{
+  "profile": "command-surface-v1",
+  "package_name": "field-meter",
+  "version": "1.0.0",
+  "root": {
+    "name": "field-meter",
+    "arguments": [
+      {"id": "port", "long": "port", "value_name": "SOCKET", "kind": "path", "global": true},
+      {"id": "unit", "long": "unit", "value_name": "UNIT", "kind": "string", "global": true}
+    ],
+    "subcommands": [{"name": "read"}]
+  }
+}

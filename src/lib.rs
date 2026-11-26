@@ -1,9 +1,14 @@
 pub mod assemble;
+pub mod binary_frame;
+pub mod binary_record;
 pub mod command_surface;
 pub mod contracts;
 pub mod endpoint_set;
 pub mod evolution;
 pub mod facade;
+pub mod field_relation;
+pub mod file_profile;
+pub mod foreground_profile_owner;
 pub mod framing_import;
 pub mod framing_projection;
 pub mod http;
@@ -13,6 +18,8 @@ pub mod integrity_block;
 pub mod interpreter;
 pub mod json_envelope;
 pub mod language;
+pub mod local_command_client;
+pub mod local_status_owner;
 pub mod model;
 pub mod native_package;
 pub mod rust_recovery;
@@ -25,3 +32,4 @@ pub mod value_domain;
 pub mod wasm;
 
 pub mod native_workspace;
+pub mod wire_schema;

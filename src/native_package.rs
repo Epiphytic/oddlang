@@ -29,6 +29,8 @@ struct Manifest {
     edition: String,
     #[serde(default)]
     dependencies: BTreeMap<String, Dependency>,
+    #[serde(default)]
+    registry_patches: BTreeMap<String, GitSource>,
     cargo_lock: Pin,
     #[serde(default)]
     binaries: Vec<Binary>,
@@ -84,6 +86,38 @@ struct Dependency {
     version: String,
     #[serde(default)]
     features: Vec<String>,
+    #[serde(rename = "defaultFeatures", alias = "default_features")]
+    default_features: Option<bool>,
+    source: Option<GitSource>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct GitSource {
+    git: String,
+    revision: String,
+}
+
+impl GitSource {
+    fn cargo(&self) -> Result<serde_json::Value> {
+        if !self.git.strip_prefix("https://").is_some_and(|url| {
+            url.split_once('/')
+                .is_some_and(|(host, path)| !host.is_empty() && !path.is_empty())
+                && !url.chars().any(|ch| {
+                    ch.is_control() || ch.is_whitespace() || matches!(ch, '@' | '?' | '#')
+                })
+        }) || self.revision.len() != 40
+            || !self
+                .revision
+                .bytes()
+                .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+        {
+            return Err(
+                "git dependency requires an HTTPS repository and full lowercase revision".into(),
+            );
+        }
+        Ok(serde_json::json!({"git":self.git,"rev":self.revision}))
+    }
 }
 
 #[derive(Deserialize)]
@@ -128,6 +162,16 @@ enum Kind {
     SharedDeclarations,
     SequenceJournal,
     CliSurface,
+    LocalCommandClient,
+    WireSchema,
+    WireProtocol,
+    BinaryRecord,
+    BinaryFragment,
+    BinaryFrame,
+    FieldRelation,
+    LocalStatusOwner,
+    ForegroundProfileOwner,
+    FileProfile,
 }
 
 #[derive(Deserialize)]
@@ -137,12 +181,20 @@ struct Component {
     module: String,
     graph: Pin,
     overlay: Pin,
+    wire_shape: Option<WireShape>,
     reexports: Vec<String>,
     #[serde(default)]
     visibility: Visibility,
     root_reexports: Option<Vec<String>>,
     #[serde(default)]
     crate_reexports: Vec<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct WireShape {
+    graph: Pin,
+    overlay: Pin,
 }
 
 #[derive(Clone, Copy, Default, Deserialize, PartialEq)]
@@ -172,6 +224,9 @@ fn project(
     base: &Path,
     stage: &Path,
 ) -> Result<(Vec<u8>, serde_json::Value)> {
+    if component.wire_shape.is_some() && !matches!(component.kind, Kind::WireProtocol) {
+        return Err("wireShape is only valid for wire-protocol components".into());
+    }
     let graph = component.graph.read(base)?;
     let overlay = stage.join("rust.json");
     io(fs::write(&overlay, component.overlay.read(base)?))?;
@@ -198,6 +253,54 @@ fn project(
             crate::integrity_block::build(&path, &overlay, &output)?;
             "codec.rs"
         }
+        Kind::FieldRelation => {
+            let path = input.join("graph.json");
+            io(fs::write(&path, graph))?;
+            crate::field_relation::build(&path, &overlay, &output)?;
+            "relations.rs"
+        }
+        Kind::BinaryFrame => {
+            let path = input.join("graph.json");
+            io(fs::write(&path, graph))?;
+            crate::binary_frame::build(&path, &overlay, &output)?;
+            "frame.rs"
+        }
+        Kind::BinaryRecord | Kind::BinaryFragment => {
+            let path = input.join("graph.json");
+            io(fs::write(&path, graph))?;
+            if matches!(component.kind, Kind::BinaryFragment) {
+                crate::binary_record::build_bound_fragment(&path, &overlay, &output)?;
+            } else {
+                crate::binary_record::build(&path, &overlay, &output)?;
+            }
+            "record.rs"
+        }
+        Kind::WireSchema => {
+            let path = input.join("graph.json");
+            io(fs::write(&path, graph))?;
+            crate::wire_schema::build(&path, &overlay, &output)?;
+            "wire.rs"
+        }
+        Kind::WireProtocol => {
+            let shape = component
+                .wire_shape
+                .as_ref()
+                .ok_or("wire-protocol component requires wireShape")?;
+            let path = input.join("graph.json");
+            let shape_graph = input.join("shape.json");
+            let shape_overlay = input.join("shape-rust.json");
+            io(fs::write(&path, graph))?;
+            io(fs::write(&shape_graph, shape.graph.read(base)?))?;
+            io(fs::write(&shape_overlay, shape.overlay.read(base)?))?;
+            crate::wire_schema::protocol::build(
+                &shape_graph,
+                &shape_overlay,
+                &path,
+                &overlay,
+                &output,
+            )?;
+            "wire.rs"
+        }
         Kind::SharedDeclarations => {
             let path = input.join("graph.json");
             io(fs::write(&path, graph))?;
@@ -211,6 +314,26 @@ fn project(
             let binding = crate::endpoint_set::overlay_digest(&overlay)?;
             crate::endpoint_set::build(&path, &pin, Some((&overlay, &binding)), &output)?;
             "endpoint_set.rs"
+        }
+        Kind::ForegroundProfileOwner => {
+            crate::foreground_profile_owner::build_bytes(
+                &graph,
+                &io(fs::read(&overlay))?,
+                &output,
+            )?;
+            "foreground.rs"
+        }
+        Kind::LocalStatusOwner => {
+            crate::local_status_owner::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
+            "owner.rs"
+        }
+        Kind::FileProfile => {
+            crate::file_profile::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
+            "profile.rs"
+        }
+        Kind::LocalCommandClient => {
+            crate::local_command_client::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
+            "client.rs"
         }
         Kind::CliSurface => {
             crate::command_surface::build_package_component(
@@ -268,6 +391,86 @@ fn project(
     Ok((bytes, lock))
 }
 
+fn export_paths(component: &Component, entry: &str) -> Vec<Vec<String>> {
+    let entry = entry.to_owned();
+    let public = component.reexports.contains(&entry);
+    let mut paths = Vec::new();
+    if public || component.crate_reexports.contains(&entry) {
+        paths.push(vec![component.module.clone(), entry.clone()]);
+    }
+    if public
+        && component
+            .root_reexports
+            .as_ref()
+            .is_none_or(|roots| roots.contains(&entry))
+    {
+        paths.push(vec![entry]);
+    }
+    paths
+}
+
+fn validate_command_callbacks(components: &[Component], base: &Path) -> Result<()> {
+    let mut callbacks = Vec::new();
+    let status_owners = components
+        .iter()
+        .filter(|component| matches!(component.kind, Kind::LocalStatusOwner))
+        .flat_map(|component| export_paths(component, "BoundOwner"))
+        .collect::<BTreeSet<_>>();
+    let mut retained_stores = BTreeMap::new();
+    for component in components
+        .iter()
+        .filter(|component| matches!(component.kind, Kind::FileProfile))
+    {
+        if let Some(identity) = crate::file_profile::retained_stores(
+            &component.graph.read(base)?,
+            &component.overlay.read(base)?,
+        )? {
+            for path in export_paths(component, "open_retained_stores") {
+                if retained_stores.insert(path, identity.clone()).is_some() {
+                    return Err("duplicate retained store export".into());
+                }
+            }
+        }
+    }
+    for component in components {
+        let callback = match component.kind {
+            Kind::LocalCommandClient => crate::local_command_client::callback(
+                &component.graph.read(base)?,
+                &component.overlay.read(base)?,
+            )?,
+            Kind::ForegroundProfileOwner => crate::foreground_profile_owner::callback(
+                &component.graph.read(base)?,
+                &component.overlay.read(base)?,
+                &status_owners,
+                &retained_stores,
+            )?,
+            Kind::FileProfile => crate::file_profile::callback(
+                &component.graph.read(base)?,
+                &component.overlay.read(base)?,
+            )?,
+            _ => continue,
+        };
+        callbacks.push((component, callback));
+    }
+    let mut exports = BTreeMap::new();
+    for (component, callback) in &callbacks {
+        for path in export_paths(component, &callback.entry) {
+            exports.insert(path, callback);
+        }
+    }
+    for component in components
+        .iter()
+        .filter(|component| matches!(component.kind, Kind::CliSurface))
+    {
+        crate::command_surface::validate_callbacks(
+            &component.graph.read(base)?,
+            &component.overlay.read(base)?,
+            &exports,
+        )?;
+    }
+    Ok(())
+}
+
 fn cargo_manifest(manifest: &Manifest) -> Result<String> {
     let valid_name = |name: &str| {
         !name.is_empty()
@@ -289,7 +492,16 @@ fn cargo_manifest(manifest: &Manifest) -> Result<String> {
             return Err(format!("invalid dependency: {name}"));
         }
         semver::Version::parse(&dependency.version).map_err(|e| format!("{name} version: {e}"))?;
-        dependencies.insert(name, serde_json::json!({"version":format!("={}",dependency.version),"features":dependency.features}));
+        let mut record = match &dependency.source {
+            Some(source) => source.cargo()?,
+            None => serde_json::json!({}),
+        };
+        record["version"] = format!("={}", dependency.version).into();
+        record["features"] = serde_json::json!(dependency.features);
+        if let Some(default_features) = dependency.default_features {
+            record["default-features"] = default_features.into();
+        }
+        dependencies.insert(name, record);
     }
     if manifest
         .components
@@ -302,8 +514,18 @@ fn cargo_manifest(manifest: &Manifest) -> Result<String> {
     {
         return Err("cli-surface requires the pinned clap 4.6.7 provider".into());
     }
-    let cargo = serde_json::json!({"package":{"name":manifest.name,"version":manifest.version,
+    let mut cargo = serde_json::json!({"package":{"name":manifest.name,"version":manifest.version,
         "edition":manifest.edition,"publish":false},"dependencies":dependencies,"workspace":{}});
+    if !manifest.registry_patches.is_empty() {
+        let mut patches = BTreeMap::new();
+        for (name, source) in &manifest.registry_patches {
+            if !valid_name(name) {
+                return Err(format!("invalid registry patch crate: {name}"));
+            }
+            patches.insert(name, source.cargo()?);
+        }
+        cargo["patch"] = serde_json::json!({"crates-io":patches});
+    }
     toml::to_string_pretty(&cargo).map_err(|e| format!("Cargo manifest: {e}"))
 }
 
@@ -319,6 +541,7 @@ pub fn build(path: &Path, output: &Path) -> Result<()> {
 pub(super) fn build_pinned(raw: &[u8], base: &Path, output: &Path, standalone: bool) -> Result<()> {
     let manifest: Manifest =
         serde_json::from_slice(raw).map_err(|e| format!("package manifest: {e}"))?;
+    validate_command_callbacks(&manifest.components, base)?;
     let cargo = cargo_manifest(&manifest)?;
     let lock = manifest.cargo_lock.read(base)?;
     let parent = output
@@ -341,8 +564,21 @@ pub(super) fn build_pinned(raw: &[u8], base: &Path, output: &Path, standalone: b
     let mut records = Vec::new();
     let mut root_exports = String::new();
     for (index, component) in manifest.components.iter().enumerate() {
+        if matches!(component.kind, Kind::FieldRelation | Kind::BinaryFragment)
+            && (!component.reexports.is_empty()
+                || !component.crate_reexports.is_empty()
+                || component
+                    .root_reexports
+                    .as_ref()
+                    .is_some_and(|names| !names.is_empty()))
+        {
+            return Err("field relation or binary fragment component cannot reexport items".into());
+        }
+
         if !ident(&component.module)
-            || (component.reexports.is_empty() && component.crate_reexports.is_empty())
+            || (component.reexports.is_empty()
+                && component.crate_reexports.is_empty()
+                && !matches!(component.kind, Kind::FieldRelation | Kind::BinaryFragment))
         {
             return Err("invalid module or empty reexports".into());
         }
@@ -405,9 +641,16 @@ pub(super) fn build_pinned(raw: &[u8], base: &Path, output: &Path, standalone: b
             )
             .unwrap();
         }
-        records.push(serde_json::json!({"kind":component.kind,"module":component.module,"reexports":component.reexports,
+        let mut record = serde_json::json!({"kind":component.kind,"module":component.module,"reexports":component.reexports,
             "graphSha256":component.graph.sha256,"overlaySha256":component.overlay.sha256,
-            "sourceSha256":digest(&source),"projection":projection}));
+            "sourceSha256":digest(&source),"projection":projection});
+        if let Some(shape) = &component.wire_shape {
+            record["wireShape"] = serde_json::json!({
+                "graphSha256": shape.graph.sha256,
+                "overlaySha256": shape.overlay.sha256,
+            });
+        }
+        records.push(record);
     }
     let mut lib = String::new();
     for (
@@ -533,5 +776,37 @@ mod binary_tests {
             String::from_utf8_lossy(&run.stderr)
         );
         assert_eq!(run.stdout, b"ready\n");
+    }
+}
+
+#[cfg(test)]
+mod git_sources_tests {
+    use super::GitSource;
+
+    #[test]
+    fn admits_revision_pinned_https_only() {
+        let git = "https://example.invalid/team/library".to_owned();
+        let revision = "a".repeat(40);
+        let source = GitSource {
+            git: git.clone(),
+            revision: revision.clone(),
+        };
+        assert_eq!(source.cargo().unwrap()["rev"], revision);
+        for source in [
+            GitSource {
+                git: git.clone(),
+                revision: "main".into(),
+            },
+            GitSource {
+                git: "file:///checkout".into(),
+                revision: revision.clone(),
+            },
+            GitSource {
+                git: "https://secret@example.invalid/lib".into(),
+                revision,
+            },
+        ] {
+            assert!(source.cargo().is_err());
+        }
     }
 }

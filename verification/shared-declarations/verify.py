@@ -42,7 +42,7 @@ graph = {
         {"id":ref("count"),"payload":"u64","message":[{"payload":True},{"text":" cycles"}]},
         {"id":ref("flag"),"payload":"bool","message":[{"payload":True}]}
     ]}],
-    "stringEnums":[{"id":ref("mode"),"variants":[{"id":ref("hot"),"wire":"h.ot"},{"id":ref("cold"),"wire":"COLD"}]}]
+    "stringEnums":[{"id":ref("mode"),"numbers":{"tags":{ref("cold"):3,ref("hot"):11},"unknown":{"id":ref("label"),"argument":"mode code"}},"variants":[{"id":ref("hot"),"wire":"h.ot"},{"id":ref("cold"),"wire":"COLD"}]}]
 }
 binding = {
     "format":"oddlang-shared-rust-v1",
@@ -67,7 +67,11 @@ fn inspect() {
     assert_eq!(SensorError::Flag(true).to_string(), "true");
     assert_eq!(SensorError::Paused.to_string(), "paused");
     assert_eq!(format!("{:?}", std::mem::discriminant(&SensorError::Paused)), "Discriminant(3)");
-    assert_eq!(Mode::Hot as usize, 1);
+    assert_eq!(Mode::Hot as u8,11);
+    for b in 0u8..=255 {
+        let expected = match b {3=>Ok(Mode::Cold),11=>Ok(Mode::Hot),_=>Err(SensorError::Label("mode code"))};
+        assert_eq!(Mode::try_from(b),expected);
+    }
     assert_eq!(serde_json::to_string(&Mode::Hot).unwrap(), r#""h.ot""#);
     assert_eq!(serde_json::from_str::<Mode>(r#""COLD""#).unwrap(), Mode::Cold);
     assert!(serde_json::from_str::<Mode>(r#""cold""#).is_err());
@@ -96,6 +100,12 @@ with tempfile.TemporaryDirectory() as directory:
     assert rows[ref("period")]["unsignedDecimal"] == "51"
     assert rows[ref("label")]["examples"][0] == {"payloadCanonicalText":"", "display":"sensor {}"}
     assert rows[ref("hot")]["wireString"] == "h.ot"
+    assert rows[ref("mode")]["numberAdmission"]["display"] == "sensor {mode code}"
+    assert len(rows[ref("mode")]["numberAdmission"]["reject"]) == 254
+    outside=project(graph,dict(binding,externalErrorTypes={ref("fault"):"crate::provider::SensorError"}),"outside")
+    external=(outside/"shared.rs").read_text()
+    assert "pub enum SensorError" not in external and 'crate::provider::SensorError::Label("mode code")' in external
+
     assert rows[ref("mode")]["rejectWireString"] not in {"COLD","h.ot"}
     assert rows[ref("mode")]["nativeVariantOrder"] == [ref("cold"),ref("hot")]
     for f in ("shared.rs","projection.lock","obligations.json"):
@@ -107,6 +117,9 @@ with tempfile.TemporaryDirectory() as directory:
         ("missing",lambda g,b:g["results"][0].update(error=ref("absent")),"unresolved result error"),
         ("message",lambda g,b:g["errors"][0]["variants"][0].update(message=[{"payload":True}]),"typed display"),
         ("order",lambda g,b:b["variantOrder"][ref("mode")].append(ref("cold")),"variant order"),
+        ("tag",lambda g,b:g["stringEnums"][0]["numbers"]["tags"].update({ref("hot"):3}),"cover every variant uniquely"),
+        ("constructor",lambda g,b:g["stringEnums"][0]["numbers"]["unknown"].update(id=ref("absent")),"unresolved number error"),
+        ("constructor-payload",lambda g,b:g["stringEnums"][0]["numbers"]["unknown"].update(id=ref("count")),"number error payload"),
         ("wire",lambda g,b:g["stringEnums"][0]["variants"][1].update(wire="h.ot"),"wire spelling"),
         ("name",lambda g,b:b["names"].update({ref("mode"):"Bad; fn"}),"invalid Rust name"),
     ]:

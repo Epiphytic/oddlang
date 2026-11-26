@@ -1,0 +1,32 @@
+{
+  "format": "oddlang-local-command-client-v1",
+  "socket_argument": "port",
+  "transport": {
+    "framing": "u32_be_json_half_close",
+    "peer": "same_effective_uid",
+    "deadline_ms": 300,
+    "maximum_frame_bytes": 128
+  },
+  "guards": [
+    {"condition": "one_of", "argument": "unit", "values": ["celsius", "kelvin"], "rejected": {"exit": 4, "stderr": "invalid unit"}}
+  ],
+  "request": [{"key": "verb", "value": "read"}, {"key": "sensor", "value": 10}],
+  "response": {
+    "fields": [
+      {"key": "reading", "kind": "json", "presence": "nullable"},
+      {"key": "ready", "kind": "bool", "presence": "required"},
+      {"key": "notice", "kind": "string", "presence": "omit_null"}
+    ],
+    "success_field": "ready",
+    "success_exit": 0,
+    "failure_exit": 3
+  },
+  "errors": {
+    "binding": {"exit": 6, "stderr": "unbound sensor"},
+    "io": {"exit": 7, "stderr": "sensor I/O"},
+    "peer": {"exit": 8, "stderr": "untrusted sensor"},
+    "frame_size": {"exit": 9, "stderr": "invalid sensor frame size"},
+    "frame_json": {"exit": 10, "stderr": "invalid sensor response"},
+    "deadline": {"exit": 11, "stderr": "sensor timed out"}
+  }
+}

@@ -1,0 +1,36 @@
+async fn start(base: &Path, name: &str, backend: &str, endpoint: SocketAddr) -> Result<(), Failure> {
+    use tokio::signal::unix::{SignalKind, signal};
+    let mut interrupt = signal(SignalKind::interrupt()).map_err(|_| IO)?;
+    let mut terminate = signal(SignalKind::terminate()).map_err(|_| IO)?;
+    let initial = directory(base)?;
+    let canonical = base.canonicalize().map_err(|_| IO)?;
+    let resolved = directory(&canonical)?;
+    if (initial.dev(), initial.ino()) != (resolved.dev(), resolved.ino()) {
+        return Err(UNSAFE_DIRECTORY);
+    }
+    let root = canonical.join(name);
+    directory(&root)?;
+    let _lease = Lease::acquire(&root.join(LEASE_FILE))?;
+    let profile = checked_profile(&root, name, backend)?;
+    check_provider(&root, &profile)?;
+    let mut runtime = RuntimeDirectory::acquire(&profile, &root).await?;
+    let owner = StatusOwner::bind(&runtime.path.join(SOCKET_FILE)).map_err(|_| IO)?;
+    let mut activation_failure = None;
+    let outcome = owner.serve_until(async {
+        tokio::select! {
+            _ = interrupt.recv() => {},
+            _ = terminate.recv() => {},
+            failure = activate(endpoint) => activation_failure = Some(failure),
+        }
+    }).await.map_err(|_| CLEANUP);
+    let removed = runtime.remove();
+    outcome.and(removed).and(activation_failure.map_or(Ok(()), Err))
+}
+
+fn run(matches: &ArgMatches) -> Result<(), (u8, Failure)> {
+    let (base, name, backend) = arguments(matches)?;
+    let endpoint = relay(matches)?;
+    tokio::runtime::Builder::new_current_thread().enable_all().build()
+        .map_err(|_| (1, IO))?
+        .block_on(start(base, name, backend, endpoint)).map_err(|error| (1, error))
+}
