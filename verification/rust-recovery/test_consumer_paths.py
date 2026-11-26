@@ -17,7 +17,7 @@ here = Path(__file__).resolve().parent
 with tempfile.TemporaryDirectory() as directory:
     root = Path(directory)
     for name, text in {
-        "old": """pub struct Held; pub struct Gone; pub struct Hidden; pub struct Meter; pub struct Mac; pub struct Clash;
+        "old": """pub struct Held; pub struct Gone; pub struct Hidden; pub struct Meter; pub struct Mac; pub struct Clash; mod marker {pub trait Tag {}} pub use marker::Tag as _;
                 pub mod removed { pub struct Leaf; }""",
         "new": """pub struct Held; mod Hidden {} pub const Meter: u8 = 3;
                 #[macro_export] macro_rules! Mac { () => { 2 }; }
@@ -56,6 +56,7 @@ with tempfile.TemporaryDirectory() as directory:
         root / "new/Cargo.toml",
         root / "new-observed/native",
     )
+    assert result["expectedUnresolved"] == [["_"]]
     rows = {tuple(r["spelling"]): r for r in result["imports"]}
     assert rows["LocalType",]["importCompiles"] and rows["LocalType",]["subjectKind"] == "data"
     assert rows["Held",]["importCompiles"] and rows["Held",]["subjectKind"] == "data"

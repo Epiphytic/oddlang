@@ -1081,3 +1081,7 @@ w:nativePublicApiGap a p:Finding ; rdfs:label "All 36 original native library pu
 w:crossImportProfileReview a p:Finding ; rdfs:label "Bind downstream Cargo settings to the extraction profile and retain ambiguous and unresolved namespace observations" ;
     p:source w:publicTypeBindingPlan .
 w:publicTypeWorkspaceAudit p:addresses w:crossImportProfileReview .
+w:crossImportReferenceProvenance a p:Finding ;
+    rdfs:label "Retain the expected profile lock and disclose unspellable expected names alongside downstream compiler results" ;
+    p:source w:publicTypeBindingPlan .
+w:publicTypeWorkspaceAudit p:addresses w:crossImportReferenceProvenance .

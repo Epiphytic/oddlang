@@ -167,6 +167,12 @@ def probe(expected, subject, manifest, cache):
         compile_probe(["pub use observed as subject;"], temp, files[0], env)
     return {
         "expectedExportsSha256": sha(reference),
+        "expectedLockSha256": sha(expected.with_name("exports.lock").read_bytes()),
+        "expectedUnresolved": sorted(
+            list(row["path"]) + [name]
+            for row in reference_graph["modules"].values()
+            for name in row["unresolved"]
+        ),
         "subjectLockSha256": sha((subject / "exports.lock").read_bytes()),
         "subjectPackage": pin["package"],
         "subjectTargetName": pin["targetName"],
