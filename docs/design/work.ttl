@@ -2712,8 +2712,8 @@ w:localWorkflowDeliveryPlan a p:Artifact ;
 w:localWorkflowDelivery a p:Task ;
     rdfs:label "Project verified binary replies and local cursor consumption for native workflows" ;
     p:milestone w:marmishMilestone ; p:source w:localWorkflowDeliveryPlan, w:basicCommandInteropPlan ;
-    p:status p:active ; p:dependsOn w:localOwnerWorkflow, w:authorizedLocalCommandInputs ;
-    p:evidence w:localWorkflowDeliveryReference, w:checkedLocalReplyDeliveryReplay ;
+    p:status p:done ; p:dependsOn w:localOwnerWorkflow, w:authorizedLocalCommandInputs ;
+    p:evidence w:localWorkflowDeliveryReference, w:checkedLocalReplyDeliveryReplay, w:boundedLocalNativeClientCases ;
     p:addresses w:deliveryLegacyPathFinding, w:deliveryLegacyLiteralFinding, w:deliveryCatalogFinding ;
     p:acceptance "Validate canonical reply digest and delivery binding, preserve separate byte streams and compare write and consume behavior with an independent local oracle." .
 w:localWorkflowDeliveryReference a p:Artifact ;
@@ -2834,8 +2834,8 @@ w:collectionWireGuardsVerification a p:Artifact ;
 w:boundedLocalWorkflowProgress a p:Task ;
     rdfs:label "Preserve private command handles and bounded multi-poll delivery" ;
     p:milestone w:marmishMilestone ; p:source w:localWorkflowDeliveryPlan ;
-    p:status p:active ; p:dependsOn w:localWorkflowDelivery ;
-    p:evidence w:boundedLocalWorkflowProgressReplay ;
+    p:status p:done ; p:dependsOn w:localWorkflowDelivery ;
+    p:evidence w:boundedLocalWorkflowProgressReplay, w:boundedLocalNativeBuild, w:boundedLocalNativeClientCases, w:boundedLocalMainlineCases ;
     p:acceptance "Verify fresh request identity, prior and produced cursor bounds, typed reply guard, exact detached handle bytes, inline wait admission and named failures using independent Unix owner evidence." .
 w:basicCommandInterop p:dependsOn w:boundedLocalWorkflowProgress .
 w:wholeCommandReplyAdmission a p:Task ;
@@ -2924,3 +2924,13 @@ w:admittedRoomBindingReceipt a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/010b99ed4f2b15330b99165ea71c863753f58ec7/verification/whole/command-room-binding/aarch64-apple-darwin.json" .
 w:basicServerQualification p:dependsOn w:admittedRoomWireBinding .
 w:basicClientQualification p:dependsOn w:admittedRoomWireBinding .
+
+w:boundedLocalNativeBuild a p:Artifact ;
+    rdfs:label "Source-denied composed Marmish workspace and both executable digests" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/d3b1296165eff86f1f311a877e735486bbaa54d0/verification/whole/basic-command-interop/bounded-local-progress-build-aarch64-apple-darwin.json" .
+w:boundedLocalNativeClientCases a p:Artifact ;
+    rdfs:label "Eight equal local delivery observations and six candidate admission failures" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/d3b1296165eff86f1f311a877e735486bbaa54d0/verification/whole/basic-command-interop/bounded-local-progress-candidate-aarch64-apple-darwin.json" .
+w:boundedLocalMainlineCases a p:Artifact ;
+    rdfs:label "Eight exact native local owner observations from the pinned mainline client" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/d3b1296165eff86f1f311a877e735486bbaa54d0/verification/whole/basic-command-interop/upstream-local-progress-aarch64-apple-darwin.json" .
