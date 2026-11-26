@@ -49,6 +49,57 @@ class ReleaseComparison(unittest.TestCase):
             matched = [r["path"] for r in report["comparison"]["matched"]]
             self.assertIn(["cross_observer", "Reading"], matched)
 
+    def test_declared_access_survives_spelling_and_detects_restriction_changes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "src").mkdir()
+            (root / "Cargo.toml").write_text('[package]\nname="access-sample"\nversion="1.0.0"\nedition="2024"\n')
+            source = root / "src/lib.rs"
+            source.write_text("""
+fn local() {}
+mod outer {
+    pub mod inner {
+        pub struct Sample { hidden: u8, pub(super) limit: u8, pub(crate) count: u8, pub value: u8 }
+        pub(in crate::outer) fn observe() {}
+        pub enum State { Ready }
+    }
+}
+""")
+            subprocess.run(["cargo", "+1.97.1", "generate-lockfile", "--offline"], cwd=root, check=True)
+            options = (root, "access-sample", "lib", "access_sample", check.tool_identity()["host"], False, [])
+            with patch.object(check, "compare", wraps=check.compare) as capture:
+                before = check.collect(*options)["comparison"]["declaredAccess"]
+                original, doc, _ = capture.call_args.args
+            self.assertEqual(before["different"], [])
+            self.assertEqual(before["unresolved"], [])
+            rows = {row["path"][-1]: row["compiler"] for row in before["agreement"]}
+            self.assertEqual(rows["local"], {"within": ["access_sample"]})
+            self.assertEqual(rows["hidden"], {"within": ["access_sample", "outer", "inner"]})
+            self.assertEqual(rows["limit"], {"within": ["access_sample", "outer"]})
+            self.assertEqual(rows["observe"], rows["limit"])
+            self.assertEqual(rows["count"], rows["local"])
+            self.assertEqual(rows["value"], "public")
+            self.assertNotIn("Ready", rows)
+
+            # A missing compiler restriction must stay unknown even when rustdoc has a scope.
+            missing = copy.deepcopy(original)
+            field = next(row["id"] for row in missing["declarations"] if row["name"] == "limit")
+            missing["edges"] = [e for e in missing["edges"] if (e["from"], e["relation"]) != (field, "visibility-scope")]
+            unknown = check.compare(missing, doc, root)["declaredAccess"]["unresolved"]
+            self.assertEqual([row["path"][-1] for row in unknown], ["limit"])
+
+            source.write_text(source.read_text().replace("pub(super) limit", "pub(crate) limit"))
+            with patch.object(check, "compare", wraps=check.compare) as capture:
+                after = check.collect(*options)["comparison"]["declaredAccess"]
+                changed_doc = capture.call_args.args[1]
+            self.assertEqual(after["different"], [])
+            changed = check.compare(original, changed_doc, root)
+            difference, = changed["declaredAccess"]["different"]
+            self.assertEqual(difference["path"][-1], "limit")
+            self.assertEqual(difference["compiler"], rows["limit"])
+            self.assertEqual(difference["rustdoc"], rows["local"])
+            self.assertIn(difference["path"], [row["path"] for row in changed["matched"]])
+
     def test_profile_identity_and_mutations(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -1757,3 +1757,11 @@ w:directObserverBindings p:addresses w:observerDylibSuffix .
 w:observerDylibSuffix a p:Finding ;
     rdfs:label "Cargo can emit unhashed Rust dynamic library artifacts" ;
     p:source w:directObserverBindingFixture .
+
+w:releaseObservedVisibility a p:Task ;
+    rdfs:label "Reconcile declared visibility in the two release observers" ;
+    p:source w:wholeMarmishPlan ; p:milestone w:marmishMilestone ;
+    p:dependsOn w:directObserverBindings ;
+    p:acceptance "Resolve named module restrictions on both surfaces, expose missing scope evidence and detect a real field visibility mutation even when declaration paths agree." ;
+    p:status p:done ; p:evidence w:directObserverBindingFixture .
+w:wholeMarmishStructure p:dependsOn w:releaseObservedVisibility .
