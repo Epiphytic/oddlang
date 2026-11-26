@@ -396,6 +396,25 @@ impl Graph {
     }
 }
 
+pub(crate) fn validate_error_links(
+    overlay: &[u8],
+    providers: &BTreeMap<String, BTreeSet<String>>,
+) -> Result<()> {
+    let binding: Binding = serde_json::from_slice(overlay).map_err(|e| e.to_string())?;
+    for (id, fault) in binding.errors {
+        let path = fault.path();
+        if !providers
+            .get(&id)
+            .is_some_and(|paths| paths.contains(&path))
+        {
+            return Err(format!(
+                "checked value error {id} has no matching unit export at {path}"
+            ));
+        }
+    }
+    Ok(())
+}
+
 pub fn build(graph: &Path, overlay: &Path, output: &Path) -> Result<()> {
     let graph: Graph = json(graph)?;
     let mut bindings: Binding = json(overlay)?;
@@ -417,7 +436,7 @@ pub fn build(graph: &Path, overlay: &Path, output: &Path) -> Result<()> {
         }).collect::<Vec<_>>()
     }))?;
     let lock = encode(&json!({
-        "format":FORMAT,"graphSha256":digest(&encode(&graph)?),"overlaySha256":digest(&encode(&bindings)?),
+        "format":FORMAT,"domainSha256":digest(&encode(&graph)?),"bindingSha256":digest(&encode(&bindings)?),
         "sourceSha256":digest(source.as_bytes()),"obligationsSha256":digest(&obligations),
     }))?;
     let parent = output

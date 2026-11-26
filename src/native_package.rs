@@ -471,6 +471,43 @@ fn export_paths(component: &Component, entry: &str) -> Vec<Vec<String>> {
     paths
 }
 
+pub(crate) struct UnitErrorVariant {
+    pub id: String,
+    pub error_type: String,
+    pub variant: String,
+}
+
+fn validate_checked_value_errors(components: &[Component], base: &Path) -> Result<()> {
+    let checked: Vec<_> = components
+        .iter()
+        .filter(|component| matches!(component.kind, Kind::CheckedValues))
+        .collect();
+    if checked.is_empty() {
+        return Ok(());
+    }
+    let mut providers = BTreeMap::new();
+    for component in components {
+        let unit_variants = match component.kind {
+            Kind::SharedDeclarations => crate::shared_declarations::unit_error_variants,
+            Kind::FiniteErrorDomain => crate::finite_error_domain::unit_error_variants,
+            _ => continue,
+        };
+        for error in unit_variants(&component.graph.read(base)?, &component.overlay.read(base)?)? {
+            let paths = export_paths(component, &error.error_type)
+                .into_iter()
+                .map(|path| format!("crate::{}::{}", path.join("::"), error.variant))
+                .collect::<BTreeSet<_>>();
+            if providers.insert(error.id.clone(), paths).is_some() {
+                return Err(format!("ambiguous checked value error: {}", error.id));
+            }
+        }
+    }
+    for component in checked {
+        crate::checked_values::validate_error_links(&component.overlay.read(base)?, &providers)?;
+    }
+    Ok(())
+}
+
 fn validate_command_callbacks(components: &[Component], base: &Path) -> Result<()> {
     let mut callbacks = Vec::new();
     let status_owners = components
@@ -613,6 +650,7 @@ pub(super) fn build_pinned(
     let manifest: Manifest =
         serde_json::from_slice(raw).map_err(|e| format!("package manifest: {e}"))?;
     validate_command_callbacks(&manifest.components, base)?;
+    validate_checked_value_errors(&manifest.components, base)?;
     let cargo = cargo_manifest(&manifest)?;
     let lock = manifest.cargo_lock.read(base)?;
     let parent = output

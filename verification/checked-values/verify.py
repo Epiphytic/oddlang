@@ -93,10 +93,13 @@ def pin(path,root):
 def shared(root):
     type_id=n("fault")
     graph=dict(format="oddlang-shared-declarations-v1",id=n("faults"),
-               errors=[dict(id=type_id,variants=[dict(id=FAULT,payload="none",
-                    category="invalid",message=[{"text":"bad detector input"}])])])
-    bind=dict(format="oddlang-shared-rust-v1",names={type_id:"Fault",FAULT:"Invalid"},
-              variantOrder={type_id:[FAULT]},errorCategoryMethods={type_id:"kind"})
+               errors=[dict(id=type_id,variants=[
+                   dict(id=FAULT,payload="none",category="invalid",message=[{"text":"bad detector input"}]),
+                   dict(id=n("other-fault"),payload="none",category="other",message=[{"text":"different error"}]),
+               ])])
+    bind=dict(format="oddlang-shared-rust-v1",
+              names={type_id:"Fault",FAULT:"Invalid",n("other-fault"):"Other"},
+              variantOrder={type_id:[FAULT,n("other-fault")]},errorCategoryMethods={type_id:"kind"})
     return write(root/"errors.json",graph),write(root/"error-rust.json",bind)
 
 
@@ -129,6 +132,16 @@ def main():
         root=Path(work)
         g,r=fixture()
         assert assembled(root,exe,g,r,"baseline")==["true","true"]+["false"]*8+["true"]*2
+        package=json.loads((root/"baseline-package.json").read_bytes())
+        variant=dict(r["errors"][FAULT],variant="Other")
+        wrong=write(root/"misbound-rust.json",dict(r,errors={FAULT:variant}))
+        package["components"][1]["overlay"]=pin(wrong,root)
+        invalid=write(root/"misbound-package.json",package)
+        dest=root/"misbound"
+        result=subprocess.run([exe,"build","native-package","rust",invalid,dest],
+                              capture_output=True,text=True)
+        assert result.returncode and "has no matching unit export" in result.stderr
+        assert FAULT in result.stderr and "crate::Fault::Other" in result.stderr and not dest.exists()
         original_rust=write(root/"deterministic-rust.json",r)
         graph=write(root/"deterministic.json",g)
         run(exe,"build","checked-values","rust",graph,original_rust,root/"first")

@@ -1279,3 +1279,15 @@ w:processLimitStrictNoop a p:Finding ;
     rdfs:label "Reject contradictory or unknown fields on a no-op resource policy" ;
     p:source <../superpowers/plans/2026-11-26-process-limits.md> .
 w:processLimitOperation p:addresses w:processLimitStrictNoop .
+
+w:unifiedVaultEngineWorkspace a p:Task ;
+    rdfs:label "Compose pure vault and engine process limits with the unified native workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:checkedValueProductProjection, w:finiteErrorDomains, w:processLimitOperation ;
+    p:acceptance "Use only pinned portable inputs to build the combined Cargo workspace. Replay unchanged copy tests, native error and vault callers, and selected engine process limit and release report observations." ;
+    p:status p:active .
+
+w:checkedValueErrorLinkageReview a p:Finding ;
+    rdfs:label "Reject a checked constructor whose native error export has a different portable identity" ;
+    p:source w:checkedValuesFixture .
+w:unifiedVaultEngineWorkspace p:addresses w:checkedValueErrorLinkageReview .

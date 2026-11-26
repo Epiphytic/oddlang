@@ -461,6 +461,33 @@ impl Value {
     }
 }
 
+pub(crate) fn unit_error_variants(
+    graph: &[u8],
+    overlay: &[u8],
+) -> Result<Vec<crate::native_package::UnitErrorVariant>> {
+    let graph: Graph =
+        serde_json::from_slice(graph).map_err(|e| format!("shared declarations: {e}"))?;
+    let binding: Binding =
+        serde_json::from_slice(overlay).map_err(|e| format!("shared Rust binding: {e}"))?;
+    graph.validate(&binding)?;
+    let mut variants = Vec::new();
+    for error in graph.errors {
+        if binding.external_error_types.contains_key(&error.id) {
+            continue;
+        }
+        for variant in error.variants {
+            if variant.payload == Payload::None {
+                variants.push(crate::native_package::UnitErrorVariant {
+                    error_type: binding.name(&error.id)?.to_owned(),
+                    variant: binding.name(&variant.id)?.to_owned(),
+                    id: variant.id,
+                });
+            }
+        }
+    }
+    Ok(variants)
+}
+
 pub fn build(graph: &Path, overlay: &Path, output: &Path) -> Result<()> {
     let read = |path: &Path| fs::read(path).map_err(|err| format!("{}: {err}", path.display()));
     let mut graph: Graph =
