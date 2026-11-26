@@ -1,4 +1,5 @@
 pub mod assemble;
+pub mod command_surface;
 pub mod contracts;
 pub mod endpoint_set;
 pub mod evolution;
