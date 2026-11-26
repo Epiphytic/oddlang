@@ -230,35 +230,66 @@ pub(crate) fn validate_callbacks(
                 "native handler operation identity differs for {operation:?}"
             ));
         }
-        for (name, expected) in &callback.arguments {
-            let arg = graph
+        let mut arguments = vec![(&graph.root, &callback.arguments, true)];
+        if let Some((name, local)) = &callback.local_arguments {
+            let child = graph
                 .root
-                .arguments
+                .subcommands
                 .iter()
-                .find(|argument| argument.id == *name)
-                .ok_or_else(|| {
-                    format!("handler {operation:?} needs undeclared root argument {name:?}")
-                })?;
-            let kind_matches = match expected {
-                RequiredArgument::Flag => arg.kind.is_none(),
-                RequiredArgument::OptionalValue => {
-                    arg.kind.is_some() && !arg.required && arg.default_value.is_none()
-                }
-                RequiredArgument::String | RequiredArgument::RepeatedString => {
-                    matches!(arg.kind, Some(ValueKind::String))
-                }
-                RequiredArgument::Unsigned64 => matches!(arg.kind, Some(ValueKind::U64)),
-                RequiredArgument::Path => matches!(arg.kind, Some(ValueKind::Path)),
-            };
-            // Clap stores subcommand-local options on a different ArgMatches.
-            // Global inheritance prevents both ID and spelling shadowing.
-            if arg.repeated != matches!(expected, RequiredArgument::RepeatedString)
-                || !kind_matches
-                || ((!graph.root.subcommands.is_empty() || graph.external) && !arg.global)
-            {
+                .find(|cmd| &cmd.name == name)
+                .ok_or_else(|| format!("handler {operation:?} needs subcommand {name:?}"))?;
+            if binding.operations.get(name) != Some(operation) {
                 return Err(format!(
-                    "handler {operation:?} has incompatible argument {name:?}"
+                    "handler {operation:?} requires subcommand {name:?}"
                 ));
+            }
+            arguments.push((child, local, false));
+        }
+        for (command, required, root) in arguments {
+            for (name, expected) in required {
+                let arg = command
+                    .arguments
+                    .iter()
+                    .find(|argument| argument.id == *name)
+                    .ok_or_else(|| {
+                        let scope = if root { "root" } else { "subcommand" };
+                        format!("handler {operation:?} needs undeclared {scope} argument {name:?}")
+                    })?;
+                let kind_matches = match expected {
+                    RequiredArgument::Flag => arg.kind.is_none(),
+                    RequiredArgument::OptionalValue => {
+                        arg.kind.is_some() && !arg.required && arg.default_value.is_none()
+                    }
+                    RequiredArgument::String | RequiredArgument::RepeatedString => {
+                        matches!(arg.kind, Some(ValueKind::String))
+                    }
+                    RequiredArgument::Unsigned64 => matches!(arg.kind, Some(ValueKind::U64)),
+                    RequiredArgument::Path => matches!(arg.kind, Some(ValueKind::Path)),
+                };
+                // Clap stores subcommand-local options on a different ArgMatches.
+                // Global inheritance prevents both ID and spelling shadowing.
+                if !root
+                    && (arg.default_value.is_some()
+                        || graph
+                            .root
+                            .arguments
+                            .iter()
+                            .any(|global| global.global && global.id == *name))
+                {
+                    return Err(format!(
+                        "handler {operation:?} needs an explicit, unshadowed child argument {name:?}"
+                    ));
+                }
+                if arg.repeated != matches!(expected, RequiredArgument::RepeatedString)
+                    || !kind_matches
+                    || (root
+                        && (!graph.root.subcommands.is_empty() || graph.external)
+                        && !arg.global)
+                {
+                    return Err(format!(
+                        "handler {operation:?} has incompatible argument {name:?}"
+                    ));
+                }
             }
         }
     }

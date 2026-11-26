@@ -427,6 +427,7 @@ pub(crate) enum RequiredArgument {
 }
 
 pub(crate) struct Callback {
+    pub local_arguments: Option<(String, Vec<(String, RequiredArgument)>)>,
     pub operation: Option<String>,
     pub entry: String,
     pub arguments: Vec<(String, RequiredArgument)>,
@@ -444,6 +445,7 @@ pub(crate) fn callback(graph: &[u8], binding: &[u8]) -> Result<Callback, String>
     arguments.extend(graph.guards.iter().map(Guard::requirement));
     arguments.extend(graph.request_arguments().map(RequestArgument::requirement));
     Ok(Callback {
+        local_arguments: None,
         operation: None,
         entry: binding.entry,
         arguments,

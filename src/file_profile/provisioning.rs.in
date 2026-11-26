@@ -1,0 +1,356 @@
+struct ProvisionResult {
+    profile: String,
+    identifier: String,
+    config: serde_json::Value,
+    changed: bool,
+    created: bool,
+    opened: bool,
+    cleanup_complete: bool,
+}
+
+fn provision_strings(matches: &clap::ArgMatches, id: &str) -> Result<Vec<String>, Failure> {
+    Ok(matches
+        .try_get_many::<String>(id)
+        .map_err(|_| BINDING)?
+        .into_iter()
+        .flatten()
+        .cloned()
+        .collect())
+}
+
+fn provision_flag(matches: &clap::ArgMatches, id: &str) -> Result<bool, Failure> {
+    Ok(matches
+        .try_get_one::<bool>(id)
+        .map_err(|_| BINDING)?
+        .copied()
+        .unwrap_or(false))
+}
+
+fn provision_members(
+    values: &[String],
+    external: bool,
+) -> Result<std::collections::BTreeSet<String>, Failure> {
+    use nostr::nips::nip19::FromBech32;
+    if values.len() > PROVISION_MAX {
+        return Err(PROVISION_MEMBER);
+    }
+    values
+        .iter()
+        .map(|value| {
+            let key = if external && PROVISION_NIP19 {
+                if !value.starts_with("npub1") {
+                    return Err(PROVISION_MEMBER);
+                }
+                nostr::key::PublicKey::from_bech32(value).map_err(|_| PROVISION_MEMBER)?
+            } else {
+                if !is_hex(value, 32) {
+                    return Err(if external {
+                        PROVISION_MEMBER
+                    } else {
+                        CONFIG_FORMAT
+                    });
+                }
+                nostr::key::PublicKey::from_hex(value).map_err(|_| if external { PROVISION_MEMBER } else { CONFIG_FORMAT })?
+            };
+            Ok(key.to_hex())
+        })
+        .collect()
+}
+
+fn canonical_provision_relays(route: &str, values: &[String]) -> Result<Vec<String>, Failure> {
+    let mut canonical = std::collections::BTreeSet::new();
+    if !ROUTE_CHOICES.contains(&route) {
+        return Err(INVALID_ROUTE);
+    }
+    if values.is_empty() || values.len() > MAXIMUM_RELAYS {
+        return Err(CONFIGURATION);
+    }
+    for value in values {
+        let url = url::Url::parse(value).map_err(|_| INVALID_RELAY)?;
+        let host = url.host_str().ok_or(INVALID_RELAY)?;
+        if host.ends_with('.') {
+            return Err(INVALID_RELAY);
+        }
+        if let Some(label) = host.strip_suffix(".onion") {
+            use sha3::{Digest as _, Sha3_256};
+            if !PROVISION_ONION_ROUTES.contains(&route)
+                || !matches!(url.scheme(), "ws" | "wss")
+                || label.len() != 56
+                || !label
+                    .bytes()
+                    .all(|ch| matches!(ch,b'a'..=b'z' | b'2'..=b'7'))
+                || !url.username().is_empty()
+                || url.password().is_some()
+                || url.port() == Some(0)
+                || url.query().is_some()
+                || url.fragment().is_some()
+                || value.len() > RELAY_MAX_BYTES
+                || value.chars().any(|c| {
+                    c.is_control() || c.is_whitespace() || REJECTED_RELAY_CHARS.contains(c)
+                })
+            {
+                return Err(INVALID_RELAY);
+            }
+            let authority = value
+                .split_once("://")
+                .and_then(|(_, rest)| rest.split('/').next())
+                .ok_or(INVALID_RELAY)?;
+            if authority.ends_with(':')
+                || authority.contains('@')
+                || authority
+                    .rsplit_once(':')
+                    .is_some_and(|(_, port)| port.len() > 1 && port.starts_with('0'))
+            {
+                return Err(INVALID_RELAY);
+            }
+            let raw = data_encoding::BASE32_NOPAD
+                .decode(label.to_ascii_uppercase().as_bytes())
+                .map_err(|_| INVALID_RELAY)?;
+            if raw.len() != 35 || raw[34] != 3 {
+                return Err(INVALID_RELAY);
+            }
+            let mut hash = Sha3_256::new();
+            hash.update(b".onion checksum");
+            hash.update(&raw[..32]);
+            hash.update([3]);
+            if hash.finalize()[..2] != raw[32..34] {
+                return Err(INVALID_RELAY);
+            }
+        } else {
+            configured_direct_relays(route, std::slice::from_ref(value))?;
+        }
+        canonical.insert(url.to_string());
+    }
+    Ok(canonical.into_iter().collect())
+}
+
+fn validate_provision_fields(
+    fields: &serde_json::Map<String, serde_json::Value>,
+    defaults: &serde_json::Map<String, serde_json::Value>,
+) -> Result<(), Failure> {
+    if !fields.keys().eq(defaults.keys()) {
+        return Err(CONFIG_FORMAT);
+    }
+    let role = fields[PROVISION_ROLE_FIELD].as_str().ok_or(CONFIG_FORMAT)?;
+    if !PROVISION_ROLES
+        .iter()
+        .any(|(k, v)| *k == role && *v == role)
+    {
+        return Err(CONFIG_FORMAT);
+    }
+    for (key, default) in defaults {
+        if MEMBERSHIPS.iter().any(|set| set.0 == key) {
+            let values: Vec<String> =
+                serde_json::from_value(fields[key].clone()).map_err(|_| CONFIG_FORMAT)?;
+            if provision_members(&values, false)?.len() != values.len() {
+                return Err(CONFIG_FORMAT);
+            }
+        } else if key != PROVISION_ROLE_FIELD && fields[key] != *default {
+            return Err(CONFIGURATION);
+        }
+    }
+    Ok(())
+}
+
+fn provision_document(
+    root: &Path,
+    global: &clap::ArgMatches,
+    options: &clap::ArgMatches,
+) -> Result<(serde_json::Value, bool), Failure> {
+    use serde_json::Value;
+    let defaults: Value = serde_json::from_str(CONFIG_FIXED).map_err(|_| BINDING)?;
+    let previous = match open_existing(&root.join(CONFIGURED_LEAF), false)? {
+        None => None,
+        Some(file) => {
+            let mut bytes = Vec::new();
+            file.take(CONFIGURED_MAX as u64 + 1)
+                .read_to_end(&mut bytes)
+                .map_err(|_| IO)?;
+            if bytes.len() > CONFIGURED_MAX {
+                return Err(CONFIG_SIZE);
+            }
+            let StrictConfig(value) = serde_json::from_slice(&bytes).map_err(|_| CONFIG_FORMAT)?;
+            Some(value)
+        }
+    };
+    let mut document = previous.clone().unwrap_or_else(|| defaults.clone());
+    if let Some(old) = &previous {
+        let mut fields = old.as_object().ok_or(CONFIG_FORMAT)?.clone();
+        let route = fields.remove(CONFIG_ROUTE_FIELD).ok_or(CONFIG_FORMAT)?;
+        let relays = fields.remove(CONFIG_RELAY_FIELD).ok_or(CONFIG_FORMAT)?;
+        let values: Vec<String> = serde_json::from_value(relays).map_err(|_| CONFIG_FORMAT)?;
+        canonical_provision_relays(route.as_str().ok_or(CONFIG_FORMAT)?, &values)?;
+        validate_provision_fields(&fields, defaults.as_object().ok_or(BINDING)?)?;
+    }
+    let selected = options
+        .try_get_one::<String>(PROVISION_ROLE_ARG)
+        .map_err(|_| BINDING)?;
+    let role = selected
+        .map(String::as_str)
+        .or_else(|| {
+            previous
+                .as_ref()
+                .and_then(|v| v[PROVISION_ROLE_FIELD].as_str())
+        })
+        .unwrap_or(PROVISION_DEFAULT_ROLE);
+    let role = PROVISION_ROLES
+        .iter()
+        .find(|(name, _)| *name == role)
+        .map(|(_, role)| *role)
+        .ok_or(PROVISION_MEMBER)?;
+    document[PROVISION_ROLE_FIELD] = Value::from(role);
+    let route = global
+        .try_get_one::<String>(PROVISION_ROUTE)
+        .map_err(|_| BINDING)?
+        .map(String::as_str)
+        .or_else(|| {
+            previous
+                .as_ref()
+                .and_then(|v| v[CONFIG_ROUTE_FIELD].as_str())
+        })
+        .unwrap_or(DEFAULT_ROUTE);
+    let mut relays = provision_strings(global, PROVISION_RELAYS)?;
+    if relays.is_empty() {
+        relays = if let Some(old) = &previous {
+            serde_json::from_value(old[CONFIG_RELAY_FIELD].clone()).map_err(|_| CONFIG_FORMAT)?
+        } else {
+            PROVISION_DEFAULT_RELAYS
+                .iter()
+                .map(|s| s.to_string())
+                .collect()
+        };
+    }
+    canonical_provision_relays(route, &relays)?;
+    document[CONFIG_ROUTE_FIELD] = Value::from(route);
+    document[CONFIG_RELAY_FIELD] = serde_json::json!(relays);
+    for &(field, add, remove, choice, roles) in MEMBERSHIPS {
+        let old: Vec<String> =
+            serde_json::from_value(document[field].clone()).map_err(|_| CONFIG_FORMAT)?;
+        let mut set = provision_members(&old, false)?;
+        let before = set.clone();
+        let additions = provision_members(&provision_strings(options, add)?, true)?;
+        let removals = provision_members(&provision_strings(options, remove)?, true)?;
+        let empty = choice
+            .map(|flag| provision_flag(options, flag))
+            .transpose()?
+            .unwrap_or(false);
+        if !additions.is_disjoint(&removals)
+            || ((!roles.contains(&role) || empty) && !additions.is_empty())
+        {
+            return Err(PROVISION_MEMBER);
+        }
+        if previous.is_none()
+            && choice.is_some()
+            && roles.contains(&role)
+            && additions.is_empty()
+            && !empty
+        {
+            return Err(PROVISION_CHOICE);
+        }
+        set.extend(additions);
+        for key in removals {
+            set.remove(&key);
+        }
+        if empty && !set.is_empty() {
+            return Err(PROVISION_REMOVE);
+        }
+        if set.len() > PROVISION_MAX {
+            return Err(PROVISION_MEMBER);
+        }
+        if set != before {
+            document[field] = serde_json::json!(set);
+        }
+    }
+    let changed = previous.as_ref() != Some(&document);
+    if changed && previous.is_some() && !provision_flag(options, PROVISION_UPDATE)? {
+        return Err(PROVISION_EXISTS);
+    }
+    Ok((document, changed))
+}
+
+fn provision_profile(matches: &clap::ArgMatches) -> Result<ProvisionResult, Failure> {
+    use nostr::nips::nip19::ToBech32;
+    @GLOBAL_GUARDS@
+    let options = matches
+        .subcommand_matches(PROVISION_COMMAND)
+        .ok_or(BINDING)?;
+    if provision_flag(options, PROVISION_INTERACTIVE)? {
+        return Err(PROVISION_SCOPE);
+    }
+    let backend = matches
+        .try_get_one::<String>(PROVISION_BACKEND_ARG)
+        .map_err(|_| BINDING)?
+        .map(String::as_str);
+    if backend != Some(PROVISION_FILE) {
+        return Err(BACKEND_REQUIRED);
+    }
+    let base = selected_state(
+        matches
+            .try_get_one::<std::path::PathBuf>(PROVISION_STATE)
+            .map_err(|_| BINDING)?,
+    )?;
+    let label = matches
+        .try_get_one::<String>(PROVISION_PROFILE)
+        .map_err(|_| BINDING)?
+        .map(String::as_str)
+        .unwrap_or(PROVISION_DEFAULT_PROFILE);
+    let transaction = std::cell::OnceCell::new();
+    let profile = prepare(
+        &base,
+        label,
+        |root, record| {
+            if record.phase != READY && open_existing(&root.join(CONFIGURED_LEAF), false)?.is_some()
+            {
+                return Err(CONFIG_CONFLICT);
+            }
+            let (config, changed) = provision_document(root, matches, options)?;
+            let mut bytes = serde_json::to_vec(&config).map_err(|_| CONFIG_FORMAT)?;
+            bytes.push(b'\n');
+            if bytes.len() > CONFIGURED_MAX {
+                return Err(CONFIG_SIZE);
+            }
+            let ready = record.phase == READY;
+            transaction
+                .set((config, bytes, changed, record.public.is_none(), !ready))
+                .map_err(|_| BINDING)?;
+            Ok(())
+        },
+        |root, record, signing, storage| {
+            let (_, bytes, changed, _, opened) = transaction.get().ok_or(BINDING)?;
+            if *opened {
+                complete(
+                    root,
+                    record,
+                    signing,
+                    storage,
+                    configured_native_ready,
+                    |db, snapshot| configured_effects(db, snapshot, false),
+                )?;
+            }
+            if *changed && !committed(&root.join(CONFIGURED_LEAF), bytes, root, true)? {
+                return Err(IO);
+            }
+            Ok(())
+        },
+    )?;
+    let key = profile.record.public.as_deref().ok_or(IDENTITY_MISMATCH)?;
+    let identifier = if PROVISION_NIP19 {
+        nostr::key::PublicKey::from_hex(key)
+            .map_err(|_| IDENTITY_MISMATCH)?
+            .to_bech32()
+            .map_err(|_| IDENTITY_MISMATCH)?
+    } else {
+        key.to_owned()
+    };
+    let (config, _, changed, created, opened) = transaction.into_inner().ok_or(BINDING)?;
+    drop(profile);
+    Ok(ProvisionResult {
+        profile: label.to_owned(),
+        identifier,
+        config,
+        changed,
+        created,
+        opened,
+        cleanup_complete: true,
+    })
+}
