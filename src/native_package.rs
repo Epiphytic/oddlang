@@ -255,7 +255,7 @@ struct Group {
     exports: BTreeSet<String>,
 }
 
-fn ident(name: &str) -> bool {
+pub(crate) fn ident(name: &str) -> bool {
     name.bytes().next().is_some_and(|b| b.is_ascii_alphabetic())
         && name.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_')
         && name != "gen"
