@@ -1739,3 +1739,13 @@ w:canonicalDarwinTests a p:Artifact ;
 
 w:canonicalLinuxTests a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4744286ce98b89b8e712cfa2fe8618cb8959e7bd/verification/whole/suite/canonical-aarch64-unknown-linux-gnu.json" .
+
+w:pointerWidthRecordPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-pointer-width-records.md" .
+w:pointerWidthPublicRecords a p:Task ;
+    rdfs:label "Recover and project target pointer-width unsigned public record fields" ;
+    p:milestone w:marmishMilestone ; p:source w:pointerWidthRecordPlan ;
+    p:dependsOn w:observationalRecordDefaults ; p:status p:done ; p:evidence w:pointerWidthRecordFixture ;
+    p:acceptance "A native fixture observes the pointer-width primitive at zero and maximum and distinguishes a fixed-width source mutation and a shadowed type." .
+w:pointerWidthRecordFixture a p:Artifact ;
+    p:location "verification/observational-record-defaults/pointer_width.py" .
