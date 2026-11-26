@@ -1334,3 +1334,10 @@ w:fixedByteWorkspaceIntegration p:addresses w:fixedByteWorkspaceLockReview .
 
 w:fixedByteWorkspaceReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/blob/e54db134a2cf649c5cffcf3822f4e98b3439f141/verification/whole/unified-recovered-vault/darwin-arm64/receipt.json> .
+
+w:upstreamNamedWorkspaceHarnesses a p:Task ;
+    rdfs:label "Qualify three unchanged upstream harnesses on the prior five-member workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:unifiedVaultEngineWorkspace ;
+    p:status p:active ;
+    p:acceptance "Run the unchanged upstream core contracts, stream library and native process-limit harnesses against the pinned original and the prior five-member generated workspace on native macOS ARM64 and Linux ARM64. Record named tests and exact outcomes in pinned platform receipts." .
