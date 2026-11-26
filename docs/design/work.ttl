@@ -997,3 +997,13 @@ w:checkedValuesFidelityReview a p:Finding ;
 w:checkedValuesReview a p:Artifact ;
     p:location "docs/design/reviews/checked-value-domains.md" .
 w:wholeMarmishProtocols p:dependsOn w:checkedValueProductProjection .
+
+w:vaultValueDomainQualification a p:Task ;
+    rdfs:label "Qualify standalone vault public values and metadata" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:checkedValueProductProjection ;
+    p:acceptance "Compare Namespace, Purpose, KeyRef, Label, Metadata and Error through an unchanged native caller. Verify independent schema and privacy evidence, exact error outcomes, and a detectable source-only UTF-8 bound mutation with source denied during product builds." ;
+    p:evidence w:vaultValueDomainNativeReceipt .
+w:vaultValueDomainNativeReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/9d3a6caeb4700e49e9f21d72b2233a3b4a539894/verification/whole/vault-values/reference-aarch64-apple-darwin.json" .
+w:wholeMarmishProtocols p:dependsOn w:vaultValueDomainQualification .

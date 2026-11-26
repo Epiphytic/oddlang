@@ -93,3 +93,5 @@ The principal feasibility risk is recovering intended behavior where only incide
 - [x] Recover checked encoder delegation and ordered record fragments through compiler evidence. Compare both fragment source mutations and separately retain validator and decoder obligations. [Checked fragment recovery](../../language/binary-frames.md#compiler-backed-checked-record-fragments) · [Native fragment mutation receipt](https://github.com/Epiphytic/marmish-oddlang/pull/59)
 
 - [x] Define finite scalar views, typed checked products, and named error categories. Verify exact native value semantics, borrowed getters, private constructors and UTF-8 boundary behavior in an unrelated standalone package. [Checked value domains](../../language/checked-values.md)
+
+- [x] Qualify the standalone vault metadata and pure value API using original and generated native callers. Compare compiler shapes, private field admission and a UTF-8 byte-limit mutation. [Vault native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/63)
