@@ -329,7 +329,7 @@ w:componentExecution a p:Task ; rdfs:label "Exercise guest and host roles" ;
     p:acceptance "Verify real component calls, independent cases, directional evolution and mutation detection." .
 
 w:rustRecovery a p:Task ; rdfs:label "Import supported Rust into editable Oddlang" ;
-    p:milestone w:rustImportMilestone ; p:status p:planned ; p:source w:roundTripPlan ; p:dependsOn w:componentExecution ;
+    p:milestone w:rustImportMilestone ; p:status p:done ; p:source w:roundTripPlan ; p:dependsOn w:componentExecution ;
     p:acceptance "Compile a regenerated ledger from a deterministic import with explicit identities and fail-closed diagnostics." .
 
 w:rustValidation a p:Task ; rdfs:label "Validate original and regenerated ledger behavior" ;
@@ -368,3 +368,9 @@ w:componentRuntimeEvidence a p:Artifact ; rdfs:label "Ledger component execution
 w:componentExecution p:evidence w:componentRuntimeEvidence .
 w:componentUpperEndpoint a p:Finding ; rdfs:label "Detect a guest that rejects a credit exactly at the maximum signed balance" ; p:source w:componentRuntimeEvidence .
 w:componentExecution p:addresses w:componentUpperEndpoint .
+
+w:rustRecoveryEvidence a p:Artifact ; rdfs:label "Source recovery and native regeneration evidence" ;
+    p:location "docs/design/rust-recovery-evidence.md" .
+w:rustRecovery p:evidence w:rustRecoveryEvidence .
+w:rustCleanupBaseline a p:Finding ; rdfs:label "Bind cleanup acceptance to a separately frozen original tree" ; p:source w:rustRecoveryEvidence .
+w:rustRecovery p:addresses w:rustCleanupBaseline .

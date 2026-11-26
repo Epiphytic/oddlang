@@ -48,7 +48,7 @@ The setup scripts cache each Cargo registry/git closure using `cargo fetch --loc
 - Keep the work graph and plan synchronized. Store stable phase identifiers, implementation evidence and review findings in `docs/design/work.ttl`. Open PRs against the relevant base branch. Use an isolated pinned checkout for Marmish and keep upstream acceptance fixtures independently runnable.
 - [x] Phase 1 · component publication
 - [x] Phase 2 · component execution
-- [ ] Phase 3 · Rust source import and regeneration
+- [x] Phase 3 · Rust source import and regeneration
 - [ ] Phase 4 · translation validation
 - [ ] Phase 5 · Marmish baseline and inventory
 - [ ] Phase 6 · reusable features for Marmish
