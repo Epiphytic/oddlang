@@ -12,7 +12,7 @@ The package gate verifies the erasure provider and keeps the leaf private.
 - [x] Write an unrelated native fixture and reproduce the permissive public-module failure.
 - [x] Validate the selected compiler shape, layout, Rust binding and private provider contract.
 - [x] Compare independent native outputs for all eight transition combinations and verify a real source mutation.
-- [ ] Review and publish the framework branch with the exact evidence.
+- [x] Review and publish the framework branch with the exact evidence.
 
 ## Predecessor named-suite evidence
 
