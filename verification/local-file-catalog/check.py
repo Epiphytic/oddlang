@@ -5,13 +5,16 @@ import subprocess
 import sys
 import tempfile
 
+from assembly import verify
+
 CLI = Path(sys.argv[1]).resolve()
 HERE = Path(__file__).resolve().parent
 GRAPH = {
     "format": "oddlang-local-file-catalog-v1", "id": "urn:test:catalog:specimens",
     "manifestGrammar": "urn:test:catalog:line-grammar", "filePolicy": "urn:test:catalog:descriptor",
     "fixedCatalog": "catalog.txt", "prefixes": ["v1-report.", "v2-report."],
-    "suffix": ".idx", "namingAnchor": "record", "assetNames": ["record", "extra"], "maximumCatalogBytes": 75,
+    "candidateNameEncoding": "utf8", "attributeChecks": "fixed-owner-and-mode",
+    "suffix": ".idx", "namingAnchor": "record", "assetNames": ["record", "extra"], "maximumCatalogBytes": 256,
     "digest": "sha256",
     "guards": ["unique-name", "bounded-read", "catalog-digest", "parse",
                "canonical-name", "ordered-assets"],
@@ -55,6 +58,8 @@ with tempfile.TemporaryDirectory() as path:
         ("prefixes", ["v", "v1"]),
         ("assetNames", ["extra", "../record"]),
         ("guards", ["parse", "catalog-digest"]),
+        ("candidateNameEncoding", "raw-bytes"),
+        ("attributeChecks", "both"),
     ]:
         changed = dict(GRAPH, **{field: value})
         (root / "graph.json").write_text(json.dumps(changed))
@@ -63,3 +68,5 @@ with tempfile.TemporaryDirectory() as path:
              root / "rust.json", root / "refused"], capture_output=True, text=True)
         assert failure.returncode and "unsupported local file catalog policy" in failure.stderr
         assert not (root / "refused").exists()
+
+verify(CLI, GRAPH, BINDING)

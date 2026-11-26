@@ -17,6 +17,8 @@ pub(crate) struct Graph {
     pub file_policy: String,
     fixed_catalog: String,
     prefixes: Vec<String>,
+    candidate_name_encoding: String,
+    attribute_checks: String,
     suffix: String,
     naming_anchor: String,
     asset_names: Vec<String>,
@@ -100,6 +102,8 @@ pub(crate) fn parse(raw: &[u8], native: &[u8]) -> Result<(Graph, Binding)> {
     if graph.format != "oddlang-local-file-catalog-v1"
         || graph.maximum_catalog_bytes == 0
         || graph.digest != "sha256"
+        || graph.candidate_name_encoding != "utf8"
+        || graph.attribute_checks != "fixed-owner-and-mode"
         || graph.guards
             != [
                 "unique-name",

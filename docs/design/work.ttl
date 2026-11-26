@@ -1798,4 +1798,3 @@ w:verifiedLocalFileCatalog a p:Task ;
     p:acceptance "Run the unchanged original directory discovery test and typed guard comparisons on both ARM64 hosts using only inert files and a caller-supplied checksum." .
 w:verifiedLocalFileCatalogFixture a p:Artifact ;
     p:location "verification/local-file-catalog/check.py" .
-w:verifiedLocalFileCatalog p:evidence w:verifiedLocalFileCatalogFixture .

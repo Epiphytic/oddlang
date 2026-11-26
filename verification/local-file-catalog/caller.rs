@@ -56,7 +56,22 @@ mod reads {
         }
         Ok(data)
     }
-    pub fn verify(path: &Path, size: u64, _: u32, pin: &[u8; 32], _: bool) -> Result<(), Fault> {
+    pub fn verify(
+        path: &Path,
+        size: u64,
+        mode: u32,
+        pin: &[u8; 32],
+        fixed: bool,
+    ) -> Result<(), Fault> {
+        assert_eq!(mode, 0o600);
+        assert_eq!(
+            fixed,
+            path.file_name()
+                .unwrap()
+                .as_encoded_bytes()
+                .iter()
+                .all(|&b| b != b'.')
+        );
         let data = bounded(path, size)?;
         if data.len() as u64 != size || &<[u8; 32]>::from(Sha256::digest(&data)) != pin {
             return Err(Fault::Invalid("asset"));
@@ -87,6 +102,23 @@ fn catalog_discovery_and_guard_order() {
             .family,
         "v1"
     );
+    fs::remove_file(root.join("v1-report.extra")).unwrap();
+    fs::write(root.join("v1-report.record"), b"y").unwrap();
+    // The first asset fails before the missing second file can change the error.
+    assert!(matches!(
+        inspect_catalog(&root, Naming::Selected, pin),
+        Err(Fault::Invalid("asset"))
+    ));
+    fs::write(root.join("v1-report.record"), b"x").unwrap();
+    assert!(matches!(inspect_catalog(&root, Naming::Selected, pin),
+        Err(Fault::Io(error)) if error.kind() == std::io::ErrorKind::NotFound));
+    fs::write(root.join("v1-report.extra"), b"x").unwrap();
+    use std::os::unix::ffi::OsStrExt;
+    let non_utf8 = root.join(std::ffi::OsStr::from_bytes(b"v1-report.\xff.idx"));
+    if fs::write(&non_utf8, b"not a UTF-8 candidate").is_ok() {
+        inspect_catalog(&root, Naming::Selected, pin).unwrap();
+        fs::remove_file(non_utf8).unwrap();
+    }
     let decoy = root.join("v1-report.garbage.idx");
     fs::write(&decoy, b"malformed").unwrap();
     assert!(matches!(

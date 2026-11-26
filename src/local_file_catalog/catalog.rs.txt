@@ -18,6 +18,7 @@ pub(crate) fn @ENTRY@(
     let bad_path = || @ERROR@::@INVALID@("@BAD_PATH@");
     let basename = |name: &str| {
         !matches!(name, "" | "." | "..")
+            && name.len() <= 255
             && name.bytes().all(|b| b.is_ascii_alphanumeric() || matches!(b, b'.' | b'_' | b'-'))
     };
     let fixed = matches!(naming, @NAMING@::@FIXED@);

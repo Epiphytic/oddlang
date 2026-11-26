@@ -11,6 +11,7 @@ line grammar and compare the caller's expected digest before parsing.
   observations, and check the projected result.
 - [ ] Replay file admission, byte bounds, optional ownership and permission checks, digest
   verification and I/O error mapping using inert files on both native ARM64 hosts.
+- [x] Verify typed grammar and descriptor linkage on an unrelated native package.
 - [ ] Qualify a unique-candidate directory selector and read-only grammar composition.
   Credit the original named case only after it runs unchanged against the generated seam.
 
