@@ -1973,3 +1973,14 @@ w:observationalRecordDefaultsMutation a p:Artifact ;
 w:observationalRecordDefaultsCoverage a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/e8f4d14b185cec310c0a19a0e09d3b06f6a17545/verification/whole/engine-native-records/README.md" .
 w:observationalRecordDefaults p:evidence w:observationalRecordDefaultsDarwin, w:observationalRecordDefaultsLinux, w:observationalRecordDefaultsMutation, w:observationalRecordDefaultsCoverage .
+
+w:assembleRecoveredPublicData a p:Task ;
+    rdfs:label "Assemble checked recovered public data in native packages" ;
+    p:milestone w:marmishMilestone ;
+    p:source w:assembleRecoveredPublicDataPlan ;
+    p:dependsOn w:recoverSerdePublicRecords, w:serdeStringChoiceRecovery ;
+    p:acceptance "Derive checked native component declarations from pinned recovery output and explicit package policy, preserve generated native bytes, and reject ambiguous or unpinned links." ;
+    p:status p:active .
+
+w:assembleRecoveredPublicDataPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-assemble-recovered-public-data.md" .

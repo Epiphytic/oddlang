@@ -1,4 +1,5 @@
 //! Assemble a native library from pinned semantic components and Rust overlays.
+mod recovered;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
@@ -22,7 +23,7 @@ pub(super) fn digest(bytes: &[u8]) -> String {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct Manifest {
+struct Manifest<C = Component> {
     format: String,
     name: String,
     version: String,
@@ -34,7 +35,7 @@ struct Manifest {
     cargo_lock: Pin,
     #[serde(default)]
     binaries: Vec<Binary>,
-    components: Vec<Component>,
+    components: Vec<C>,
 }
 
 #[derive(Deserialize)]
@@ -235,6 +236,8 @@ struct Component {
     root_reexports: Option<Vec<String>>,
     #[serde(default)]
     crate_reexports: Vec<String>,
+    #[serde(skip)]
+    recovery: Option<recovered::Provenance>,
 }
 
 #[derive(Deserialize)]
@@ -404,6 +407,13 @@ fn project(
             "lines.rs"
         }
         Kind::SharedDeclarations => {
+            if component.recovery.is_some()
+                && !dependencies
+                    .get("serde")
+                    .is_some_and(|dep| dep.features.iter().any(|feature| feature == "derive"))
+            {
+                return Err("recovered string choice requires native serde with derive".into());
+            }
             let path = input.join("graph.json");
             io(fs::write(&path, graph))?;
             crate::shared_declarations::build(&path, &overlay, &output)?;
@@ -863,8 +873,9 @@ pub(super) fn build_pinned(
     output: &Path,
     siblings: Option<&BTreeSet<String>>,
 ) -> Result<BTreeSet<RegistryProvider>> {
-    let manifest: Manifest =
+    let input: Manifest<recovered::ComponentInput> =
         serde_json::from_slice(raw).map_err(|e| format!("package manifest: {e}"))?;
+    let manifest = input.resolve(base)?;
     validate_command_callbacks(&manifest.components, base)?;
     let required = validate_component_requirements(&manifest, base)?;
     validate_line_grammar_errors(&manifest.components, base)?;
@@ -1009,6 +1020,10 @@ pub(super) fn build_pinned(
                 "graphSha256": shape.graph.sha256,
                 "overlaySha256": shape.overlay.sha256,
             });
+        }
+        if let Some(provenance) = &component.recovery {
+            record["recoverySha256"] = serde_json::json!(provenance.sha256);
+            record["recoveredDeclaration"] = serde_json::json!(provenance.declaration);
         }
         records.push(record);
     }

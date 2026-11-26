@@ -498,6 +498,27 @@ pub(crate) fn string_choice_names(graph: &[u8], overlay: &[u8]) -> Result<Vec<(S
         .collect()
 }
 
+/// Return the one fieldless public choice emitted by the string-choice recovery profile.
+pub(crate) fn recovered_choice(graph: &[u8], overlay: &[u8]) -> Result<(String, String)> {
+    let graph: Graph =
+        serde_json::from_slice(graph).map_err(|e| format!("shared declarations: {e}"))?;
+    let binding: Binding =
+        serde_json::from_slice(overlay).map_err(|e| format!("shared Rust binding: {e}"))?;
+    graph.validate(&binding)?;
+    let [choice] = graph.string_enums.as_slice() else {
+        return Err("recovered string choice requires exactly one declaration".into());
+    };
+    if !graph.constants.is_empty()
+        || !graph.text_constants.is_empty()
+        || !graph.errors.is_empty()
+        || !graph.results.is_empty()
+        || choice.numbers.is_some()
+    {
+        return Err("recovered string choice must be a single passive string enum".into());
+    }
+    Ok((choice.id.clone(), binding.name(&choice.id)?.into()))
+}
+
 pub(crate) fn error_variants(
     graph: &[u8],
     overlay: &[u8],

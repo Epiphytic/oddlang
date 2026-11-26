@@ -220,6 +220,37 @@ pub(crate) fn external_choice_links(
     Ok(binding.external_types)
 }
 
+/// Resolve the flat module and exported record named by a checked recovery profile.
+pub(crate) fn recovered_component(
+    graph: &[u8],
+    overlay: &[u8],
+) -> Result<(String, String, String)> {
+    let graph: Graph = serde_json::from_slice(graph).map_err(|e| e.to_string())?;
+    let overlay: Overlay = serde_json::from_slice(overlay).map_err(|e| e.to_string())?;
+    render(&graph, &overlay, true)?;
+    let [module] = graph.modules.as_slice() else {
+        return Err("recovered public record requires a single module".into());
+    };
+    let [record] = module.records.as_slice() else {
+        return Err("recovered public record requires a single record".into());
+    };
+    if !overlay.flatten_module
+        || !module.aliases.is_empty()
+        || record.read_policy.is_none()
+        || !record.traits.contains(&Trait::Serialize)
+        || !record.traits.contains(&Trait::Deserialize)
+    {
+        return Err(
+            "recovered public record requires a flat module and an explicit read policy".into(),
+        );
+    }
+    Ok((
+        overlay.name(&module.id).into(),
+        overlay.name(&record.id).into(),
+        record.id.clone(),
+    ))
+}
+
 fn render(graph: &Graph, overlay: &Overlay, serde_available: bool) -> Result<String> {
     if graph.format != GRAPH || overlay.format != OVERLAY || graph.modules.is_empty() {
         return Err("invalid or empty public record contract".into());
