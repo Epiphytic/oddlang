@@ -422,3 +422,11 @@ w:marmishRemainingQualification a p:Task ; rdfs:label "Complete remaining Rust m
     p:dependsOn w:marmish-capability-native, w:marmish-capability-os, w:marmish-capability-wire, w:marmish-capability-config, w:marmish-capability-offset, w:marmish-capability-compression ;
     p:reason "The remaining 96 known runtime-source paths require further language and host capability specifications. Native Linux runtime evidence and complete compiler enumeration remain outstanding." ;
     p:acceptance "Resolve the compiled denominator and regenerate all first-party units. Record original and candidate results on all claimed platforms." .
+
+w:marmishQualificationProtocol a p:Artifact ; rdfs:label "Candidate comparison scope and native platform observations" ; p:location "docs/design/marmish-candidate-boundaries.md" .
+w:marmishQualification p:evidence w:marmishQualificationProtocol .
+
+w:marmishQualificationReview a p:Finding ; rdfs:label "Reject incomplete qualification evidence and bind named outcomes, residual counts and task status to the immutable candidate" ; p:source w:marmishQualificationEvidence .
+w:marmishQualification p:addresses w:marmishQualificationReview .
+w:marmishFacadeRelease a p:Artifact ; rdfs:label "Independent release pins for the Marmish public facade" ; p:location "examples/marmish/facade-release.json" .
+w:marmish-capability-modules p:evidence w:marmishFacadeRelease, w:marmishAssemblyTests .

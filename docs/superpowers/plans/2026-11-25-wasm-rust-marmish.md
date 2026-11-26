@@ -54,4 +54,6 @@ The setup scripts cache each Cargo registry/git closure using `cargo fetch --loc
 - [x] Phase 6 · reusable features for Marmish
 - [ ] Phase 7 · whole-project qualification
 
+Phase 7 reports the two recovered core modules separately from the unresolved full-project translation goal. Its [qualification record](../../design/marmish-qualification.md) identifies the source and candidate commits, the lexical denominator and the unobserved platforms.
+
 See the [plan review and dispositions](../../design/wasm-rust-marmish-plan-review.md).

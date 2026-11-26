@@ -38,6 +38,8 @@ The default local report covers only macOS Apple Silicon after its tests run. Re
 - [ ] **Coverage agent** drives the remaining project through the same loop after the framing pilot. Sort outstanding first-party units by dependency order, group by shared missing construct, implement and independently test each general capability in phase 6, then replace that native unit, rerun phase 7 and publish the changed counts. Keep a pinned capability boundary for external libraries and OS calls. When a unit cannot yet be expressed, publish its blocking example and keep full project translation open. A new port, behavioral change or scope reduction needs a recorded design decision with its effect on the denominator.
 - [ ] **Integration agent** runs `scripts/qualify-marmish.sh verify` from the locked inputs in a clean checkout, publishes the coverage table and traces, and updates the work graph. Claude CLI auto reviews the complete chain and verifies that each reported claim follows from the artifacts. Fix, repeat the affected matrix, then record final review disposition.
 
+The [qualification record](../../design/marmish-qualification.md) gives the observed rebuild and wire results, comparison units and residual counts. The two-profile run adds the core facade to framing and leaves six groups of language or platform capabilities open.
+
 ## Open language and target capabilities
 
 The [retained module register](../../../examples/marmish/gaps.json) maps each known module outside the pilot to a blocking capability. The work graph tracks their status.
