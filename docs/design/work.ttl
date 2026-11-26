@@ -785,3 +785,11 @@ w:typedHashIdentityReview a p:Finding ;
     rdfs:label "Reject hash tag case IRIs that alias a view, parameter or existing declaration" ;
     p:source w:typedHashViewsFixture .
 w:typedHashViews p:addresses w:typedHashIdentityReview .
+
+w:boundedBinaryRecords a p:Task ; rdfs:label "Project ordered bounded tagged binary records" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:nativePackageAssembly, w:sharedNumberedEnum ;
+    p:acceptance "Generate checked encoding and decoding for an ordered tagged record with declared lengths, validation, and typed errors. Verify bytes, limits and parse precedence against an independent native fixture." ;
+    p:evidence w:binaryRecordFixture .
+w:binaryRecordFixture a p:Artifact ; p:location "verification/binary-record/verify.py" .
+w:wholeMarmishProtocols p:dependsOn w:boundedBinaryRecords .

@@ -278,18 +278,18 @@ struct Fault {
     variant: String,
     argument: Option<String>,
 }
-fn symbol(name: &str) -> bool {
+pub(crate) fn symbol(name: &str) -> bool {
     name.as_bytes().first().is_some_and(u8::is_ascii_alphabetic)
         && name.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_')
         && name != "gen"
         && syn::parse_str::<syn::Ident>(name).is_ok()
 }
 
-fn type_symbol(name: &str) -> bool {
+pub(crate) fn type_symbol(name: &str) -> bool {
     symbol(name) && name.as_bytes()[0].is_ascii_uppercase()
 }
 
-fn native_path(path: &str) -> bool {
+pub(crate) fn native_path(path: &str) -> bool {
     let mut parts = path
         .strip_prefix("::")
         .unwrap_or(path)
@@ -308,7 +308,7 @@ fn native_path(path: &str) -> bool {
     !prefix
 }
 
-fn iri(value: &str) -> Result<()> {
+pub(crate) fn iri(value: &str) -> Result<()> {
     NamedNode::new(value)
         .map(|_| ())
         .map_err(|error| error.to_string())
@@ -655,16 +655,16 @@ fn io<T>(result: std::io::Result<T>) -> Result<T> {
     result.map_err(|error| error.to_string())
 }
 
-fn json<T: serde::de::DeserializeOwned>(path: &Path) -> Result<T> {
+pub(crate) fn json<T: serde::de::DeserializeOwned>(path: &Path) -> Result<T> {
     serde_json::from_slice(&io(fs::read(path))?)
         .map_err(|error| format!("{}: {error}", path.display()))
 }
 
-fn encode<T: Serialize>(value: &T) -> Result<Vec<u8>> {
+pub(crate) fn encode<T: Serialize>(value: &T) -> Result<Vec<u8>> {
     serde_json::to_vec_pretty(value).map_err(|error| error.to_string())
 }
 
-fn digest(bytes: &[u8]) -> String {
+pub(crate) fn digest(bytes: &[u8]) -> String {
     Sha256::digest(bytes)
         .iter()
         .map(|byte| format!("{byte:02x}"))

@@ -82,6 +82,7 @@ enum Kind {
     IntegrityBlock,
     SharedDeclarations,
     WireSchema,
+    BinaryRecord,
 }
 
 #[derive(Deserialize)]
@@ -151,6 +152,12 @@ fn project(
             io(fs::write(&path, graph))?;
             crate::integrity_block::build(&path, &overlay, &output)?;
             "codec.rs"
+        }
+        Kind::BinaryRecord => {
+            let path = input.join("graph.json");
+            io(fs::write(&path, graph))?;
+            crate::binary_record::build(&path, &overlay, &output)?;
+            "record.rs"
         }
         Kind::WireSchema => {
             let path = input.join("graph.json");
