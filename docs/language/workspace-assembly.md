@@ -143,6 +143,7 @@ A fieldwise Default initializes numeric fields to zero, booleans to false,
 and text, octet sequences and owned paths to empty values. A recovered
 bare PathBuf requires an explicit standard-library import. The value
 represents the path as owned native data and preserves its components.
+Serialize requires a portable wire rule for each field.
 
 The `oddlang-rust-selected-record-selection-v1` profile of
 `oddlang recover public-root-records FILE SELECTION OUTPUT` pins an explicit

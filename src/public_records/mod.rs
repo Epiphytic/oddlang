@@ -168,6 +168,14 @@ fn render(graph: &Graph, overlay: &Overlay, serde_available: bool) -> Result<Str
                     return Err("public record Serialize requires native serde with derive".into());
                 }
             }
+            if traits.contains(&Trait::Serialize)
+                && record
+                    .fields
+                    .iter()
+                    .any(|field| matches!(field.value, Value::Path))
+            {
+                return Err("serialized public path field has no portable wire rule".into());
+            }
             let mut fields = BTreeSet::new();
             for field in &record.fields {
                 claim(&field.id, &mut identities)?;

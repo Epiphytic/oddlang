@@ -86,4 +86,43 @@ with tempfile.TemporaryDirectory(prefix="odd-record-defaults-") as directory:
             expected="unresolved public path field")
     recover(root / "extra-impl", SOURCE + "\nimpl CartographicSample { pub fn extra() {} }",
             expected="unsupported macros, aliases or impls")
-    print("Unsigned record fields, defaults and path values matched through native Rust.")
+
+    serialized = "use serde::Serialize;\n" + SOURCE.replace("Debug, Default", "Debug, Default, Serialize")
+    recover(root / "serialized-path", serialized, expected="serialized public path field has no portable wire rule")
+    original = root / "baseline" / "recovered"
+    graph = json.loads((original / "graph.json").read_bytes())
+    graph["modules"][0]["records"][0]["traits"].append("serialize")
+    (root / "serialized.json").write_text(json.dumps(graph))
+    run(CLI, "build", "public-records", "rust", root / "serialized.json",
+        original / "rust.json", root / "invalid-wire", cwd=root,
+        expected="serialized public path field has no portable wire rule")
+
+    shadowed = SOURCE.replace("struct $name;", "#[derive(Clone, Debug, Default)] struct $name;")
+    shadowed = shadowed.replace("unit!(Hidden);", "unit!(u32);")
+    recover(root / "macro-shadow", shadowed)
+    work = root / "macro-shadow"
+    assert "macro expansion" in json.loads((work / "recovered/recovery.lock").read_bytes())["gap"]
+    nominal_width = "fn main() { let _: ::core::primitive::u32 = CartographicSample::default().waypoints; }"
+    (work / "native.rs").write_text(shadowed + nominal_width)
+    run("rustc", "--edition=2021", "native.rs", cwd=work, expected="mismatched types")
+
+    extra = SOURCE + """
+macro_rules! attach_equality {
+    () => {
+        impl PartialEq for CartographicSample {
+            fn eq(&self, other: &Self) -> bool { self.waypoints == other.waypoints }
+        }
+    };
+}
+attach_equality!();
+"""
+    recover(root / "macro-impl", extra)
+    work = root / "macro-impl"
+    comparison = "fn main() { assert_eq!(CartographicSample::default(), CartographicSample::default()); }"
+    (work / "native.rs").write_text(extra + comparison)
+    run("rustc", "--edition=2021", "native.rs", cwd=work)
+    run(CLI, "build", "public-records", "rust", "recovered/graph.json", "recovered/rust.json",
+        "projection", cwd=work)
+    (work / "projected.rs").write_text('include!("projection/records.rs");\n' + comparison)
+    run("rustc", "--edition=2021", "projected.rs", cwd=work, expected="binary operation")
+    print("Unsigned fields, fieldwise defaults, native paths and unresolved macro controls passed.")
