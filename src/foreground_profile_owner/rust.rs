@@ -216,6 +216,7 @@ fn render_lifecycle(
             relay.application_components
         )
         .unwrap();
+        out.push_str(include_str!("checked_relay_sink.rs.in"));
         out.push_str(include_str!("onion_transport.rs.in"));
         out.push_str(include_str!("key_package.rs.in"));
         let lifecycle = include_str!("active_lifecycle.rs.in");

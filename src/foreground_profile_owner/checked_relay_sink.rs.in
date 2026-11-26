@@ -1,0 +1,43 @@
+
+struct CheckedRelaySink<S, C> {
+    inner: std::pin::Pin<Box<S>>,
+    convert: C,
+}
+
+impl<S, C> CheckedRelaySink<S, C> {
+    fn new(inner: S, convert: C) -> Self {
+        Self { inner: Box::pin(inner), convert }
+    }
+}
+
+impl<S, C, Input, Output> futures_util::Sink<Input> for CheckedRelaySink<S, C>
+where
+    S: futures_util::Sink<Output>,
+    C: FnMut(Input) -> Result<Output, S::Error> + Unpin,
+{
+    type Error = S::Error;
+
+    fn poll_ready(self: std::pin::Pin<&mut Self>, cx: &mut std::task::Context<'_>)
+        -> std::task::Poll<Result<(), Self::Error>>
+    {
+        self.get_mut().inner.as_mut().poll_ready(cx)
+    }
+
+    fn start_send(self: std::pin::Pin<&mut Self>, frame: Input) -> Result<(), Self::Error> {
+        let sink = self.get_mut();
+        // Reject before placing the frame in the underlying sink.
+        sink.inner.as_mut().start_send((sink.convert)(frame)?)
+    }
+
+    fn poll_flush(self: std::pin::Pin<&mut Self>, cx: &mut std::task::Context<'_>)
+        -> std::task::Poll<Result<(), Self::Error>>
+    {
+        self.get_mut().inner.as_mut().poll_flush(cx)
+    }
+
+    fn poll_close(self: std::pin::Pin<&mut Self>, cx: &mut std::task::Context<'_>)
+        -> std::task::Poll<Result<(), Self::Error>>
+    {
+        self.get_mut().inner.as_mut().poll_close(cx)
+    }
+}
