@@ -82,6 +82,7 @@ enum Kind {
     IntegrityBlock,
     SharedDeclarations,
     WireSchema,
+    WireProtocol,
 }
 
 #[derive(Deserialize)]
@@ -91,12 +92,20 @@ struct Component {
     module: String,
     graph: Pin,
     overlay: Pin,
+    wire_shape: Option<WireShape>,
     reexports: Vec<String>,
     #[serde(default)]
     visibility: Visibility,
     root_reexports: Option<Vec<String>>,
     #[serde(default)]
     crate_reexports: Vec<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct WireShape {
+    graph: Pin,
+    overlay: Pin,
 }
 
 #[derive(Clone, Copy, Default, Deserialize, PartialEq)]
@@ -126,6 +135,9 @@ fn project(
     base: &Path,
     stage: &Path,
 ) -> Result<(Vec<u8>, serde_json::Value)> {
+    if component.wire_shape.is_some() && !matches!(component.kind, Kind::WireProtocol) {
+        return Err("wireShape is only valid for wire-protocol components".into());
+    }
     let graph = component.graph.read(base)?;
     let overlay = stage.join("rust.json");
     io(fs::write(&overlay, component.overlay.read(base)?))?;
@@ -156,6 +168,26 @@ fn project(
             let path = input.join("graph.json");
             io(fs::write(&path, graph))?;
             crate::wire_schema::build(&path, &overlay, &output)?;
+            "wire.rs"
+        }
+        Kind::WireProtocol => {
+            let shape = component
+                .wire_shape
+                .as_ref()
+                .ok_or("wire-protocol component requires wireShape")?;
+            let path = input.join("graph.json");
+            let shape_graph = input.join("shape.json");
+            let shape_overlay = input.join("shape-rust.json");
+            io(fs::write(&path, graph))?;
+            io(fs::write(&shape_graph, shape.graph.read(base)?))?;
+            io(fs::write(&shape_overlay, shape.overlay.read(base)?))?;
+            crate::wire_schema::protocol::build(
+                &shape_graph,
+                &shape_overlay,
+                &path,
+                &overlay,
+                &output,
+            )?;
             "wire.rs"
         }
         Kind::SharedDeclarations => {
@@ -335,9 +367,16 @@ pub fn build(path: &Path, output: &Path) -> Result<()> {
             )
             .unwrap();
         }
-        records.push(serde_json::json!({"kind":component.kind,"module":component.module,"reexports":component.reexports,
+        let mut record = serde_json::json!({"kind":component.kind,"module":component.module,"reexports":component.reexports,
             "graphSha256":component.graph.sha256,"overlaySha256":component.overlay.sha256,
-            "sourceSha256":digest(&source),"projection":projection}));
+            "sourceSha256":digest(&source),"projection":projection});
+        if let Some(shape) = &component.wire_shape {
+            record["wireShape"] = serde_json::json!({
+                "graphSha256": shape.graph.sha256,
+                "overlaySha256": shape.overlay.sha256,
+            });
+        }
+        records.push(record);
     }
     let mut lib = String::new();
     for (

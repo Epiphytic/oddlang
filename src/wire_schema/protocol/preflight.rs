@@ -148,6 +148,9 @@ impl<'a> Bounds<'a> {
                     )
                 }
             }
+            Shape::BoundedBase64 { policy } => {
+                format!("{indent}budget.binary({value}, {})?;\n", policy.max_bytes,)
+            }
             Shape::BoundedBase64List { policy } => format!(
                 "{indent}budget.binary_list({value}, {}, {}, {}, {})?;\n",
                 policy.max_items,
@@ -169,7 +172,10 @@ impl<'a> Bounds<'a> {
 fn has_bounds(definition: &Definition, checked: &BTreeSet<&str>) -> bool {
     fn needed(shape: &Shape, checked: &BTreeSet<&str>) -> bool {
         match shape {
-            Shape::Text {} | Shape::BoundedBase64List { .. } | Shape::List { .. } => true,
+            Shape::Text {}
+            | Shape::BoundedBase64 { .. }
+            | Shape::BoundedBase64List { .. }
+            | Shape::List { .. } => true,
             Shape::Optional { item } => needed(item, checked),
             Shape::Ref { id } => checked.contains(id.as_str()),
             _ => false,
@@ -233,6 +239,13 @@ impl __OddlangWireBudget {{
     fn take(&mut self, bytes: usize) -> ::core::result::Result<(), {ERROR}> {{
         self.0 = self.0.checked_sub(bytes).ok_or_else(|| {size})?;
         ::core::result::Result::Ok(())
+    }}
+
+    fn binary(&mut self, bytes: &[u8], maximum: u32) -> ::core::result::Result<(), {ERROR}> {{
+        if bytes.len() as u64 > u64::from(maximum) {{
+            return ::core::result::Result::Err({admission});
+        }}
+        self.take(bytes.len())
     }}
 
     fn binary_list(&mut self, items: &[::std::vec::Vec<u8>], max_items: u32, max_item: u32,

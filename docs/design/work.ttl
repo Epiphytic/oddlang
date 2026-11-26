@@ -761,6 +761,14 @@ w:canonicalWireShapeBoundsReview a p:Finding ;
     p:source w:canonicalWireFixture .
 w:jsonWireCanonicalOperations p:addresses w:canonicalWireShapeBoundsReview .
 w:wholeMarmishProtocols p:dependsOn w:jsonWireCanonicalOperations .
+w:canonicalWireNativePackage a p:Task ;
+    rdfs:label "Assemble canonical wire operations in pinned native packages" ;
+    p:milestone w:marmishMilestone ; p:source w:canonicalWirePlan ; p:status p:done ;
+    p:dependsOn w:jsonWireCanonicalOperations ;
+    p:acceptance "Pin the structural shape and overlay separately from the operation inputs, project a package module, preserve the pins in its lock, and compare the standalone native package with an external caller." ;
+    p:evidence w:canonicalWirePackageFixture .
+w:canonicalWirePackageFixture a p:Artifact ; p:location "verification/canonical-wire/package.py" .
+w:wholeMarmishProtocols p:dependsOn w:canonicalWireNativePackage .
 
 w:jsonWireSchemaReview a p:Finding ;
     rdfs:label "Verify lexical Serde declarations, transitive native derives and selected adapter witnesses" ;
