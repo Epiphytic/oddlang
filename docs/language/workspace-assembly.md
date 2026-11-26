@@ -193,3 +193,11 @@ and discard them, declare `readPolicy` with
 projection delegates the exact JSON diagnostics to the bound Serde provider.
 This policy applies only to the declared public data record. Closed protocol
 schemas and conservative Rust source recovery keep their existing behavior.
+
+`oddlang recover observed-buffered-input OBSERVATION STRUCTURAL_SELECTION TRACE OUTPUT`
+pairs the same compiler shape observation with controlled native evidence
+for the three existing policies. The structural selector supplies
+`declaration`, `id` and `fields`. The receipt distinguishes compiler-observed
+structure, trace-inferred policies and provider assumptions. The output
+graph and overlay use the existing buffered-input formats.
+See the [trace contract](../superpowers/specs/2026-11-26-observed-buffered-input.md).

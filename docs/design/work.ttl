@@ -2355,3 +2355,17 @@ w:fixedByteTypeScriptFixture a p:Artifact ;
 
 w:fixedByteTypeScriptReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/blob/fa9de10662c45872036459d534e03559ec8311d9/verification/whole/vault-fixed-typescript/darwin-arm64/receipt.json> .
+
+w:observedBufferedInputPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-observed-buffered-input.md" .
+w:observedBufferedInput a p:Task ;
+    rdfs:label "Infer bounded buffered-input policies from three controlled native traces" ;
+    p:milestone w:marmishMilestone ; p:source w:observedBufferedInputPlan ;
+    p:dependsOn w:privateBufferedInput ; p:status p:done ; p:evidence w:observedBufferedInputFixture, w:observedBufferedInputCompanion ;
+    p:acceptance "Infer only the declared empty-read, retirement and refill-error policy choices. Reject inconsistent observations, preserve observed structure and replay both a real source baseline and a shape-invariant behavior mutation." .
+
+w:observedBufferedInputFixture a p:Artifact ;
+    p:location "verification/observed-buffered-input/verify.py" .
+
+w:observedBufferedInputCompanion a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/80> .
