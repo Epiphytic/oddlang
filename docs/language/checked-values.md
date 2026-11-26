@@ -31,3 +31,14 @@ v1 recovery selector retains its copyable, no-Debug scope.
 Recover from a selected standalone declaration or a pinned exact source
 span. The enclosing library must independently establish public paths,
 trait resolution and any missing capabilities.
+
+The separate TypeScript plain-choice target promises copying and ordinal
+conversion. A combined compiler must reject a graph that requires
+clone-only semantics or derived Debug unless that target explicitly
+implements the capability. Run the projection control below after
+combining the targets. It first checks an admitted plain choice, then
+requires both unsupported graph inputs to fail without an output.
+
+```sh
+python3 verification/plain-value-choices/typescript_subset.py target/release/oddlang
+```

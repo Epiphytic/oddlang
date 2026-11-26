@@ -114,3 +114,5 @@ The principal feasibility risk is recovering intended behavior where only incide
 - [x] Bind the release grammar’s selected bytes to their pinned original module and exact span. Replay the released vectors in the original Rust module’s compiled scope and replay the source control in that same scope. Add only a test harness to expose the predicate. [Native receipt](https://github.com/Epiphytic/marmish-oddlang/blob/41f25a5ea27bcd0b707222da3605ba20bb982c4c/verification/whole/release-version-grammar/darwin-arm64/receipt.json)
 
 - [ ] Recover fieldless choices with optional copying and derived Debug, preserving variant order, equality and the observed absence of Serde in the selected engine choices. Qualify real source mutations on both ARM64 hosts. [Checked values](../../language/checked-values.md#clone-only-choices-and-derived-debug)
+
+- [ ] When combining the TypeScript and extended fieldless-choice profiles, enforce the TypeScript capability boundary and run the [projection control](../../../verification/plain-value-choices/typescript_subset.py).
