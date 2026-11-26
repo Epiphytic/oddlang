@@ -816,7 +816,7 @@ w:wholeMarmishProtocols p:dependsOn w:binaryMetadataRecords .
 
 w:typedFieldRelationReview a p:Finding ;
     rdfs:label "Require native equality and copy capabilities and compile assembled relation components" ;
-    p:source w:typedFieldRelationFixture .
+    p:source w:copyFieldRelationNativeReview .
 w:typedFieldRelations p:addresses w:typedFieldRelationReview .
 
 w:binaryMetadataErrorReview a p:Finding ;
@@ -842,7 +842,13 @@ w:copyCheckpointQualification a p:Task ; rdfs:label "Qualify a native copy Check
 w:wholeMarmishProtocols p:dependsOn w:copyCheckpointQualification .
 
 w:copyFieldRelationQualification a p:Task ; rdfs:label "Qualify native copy Manifest matching and helper consistency checks" ;
-    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:evidence w:copyFieldRelationNativeReceipt ;
     p:dependsOn w:copyManifestQualification, w:typedFieldRelations ;
     p:acceptance "Verify explicit field correspondence, checked helper start and build identity, and short-circuited error propagation against the pinned original." .
 w:wholeMarmishProtocols p:dependsOn w:copyFieldRelationQualification .
+
+w:copyFieldRelationNativeReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b7ffe42e9423b22a893057a950fb2364429a80d0/verification/whole/copy-field-relations/reference-aarch64-apple-darwin.json" .
+w:copyFieldRelationNativeReview a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b7ffe42e9423b22a893057a950fb2364429a80d0/docs/reviews/oddlang-copy-field-relations.md" .
