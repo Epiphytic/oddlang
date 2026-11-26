@@ -12,15 +12,15 @@ impl Failure {
     }
 }
 
-async fn exchange(path: &Path) -> Result<Response, Failure> {
+async fn exchange(path: &Path/*request_parameter*/) -> Result<Response, Failure> {
     let mut stream = tokio::net::UnixStream::connect(path).await.map_err(|_| IO)?;
     let credential = stream.peer_cred().map_err(|_| IO)?;
     // SAFETY: geteuid takes no arguments and returns the process credential.
     if credential.uid() != unsafe { libc::geteuid() } {
         return Err(PEER);
     }
-    stream.write_u32(REQUEST.len() as u32).await.map_err(|_| IO)?;
-    stream.write_all(REQUEST.as_bytes()).await.map_err(|_| IO)?;
+    stream.write_u32(/*request_length*/ as u32).await.map_err(|_| IO)?;
+    stream.write_all(/*request_bytes*/).await.map_err(|_| IO)?;
     stream.shutdown().await.map_err(|_| IO)?;
     let length = stream.read_u32().await.map_err(|_| IO)?;
     if length == 0 || length > FRAME_LIMIT {
@@ -31,10 +31,10 @@ async fn exchange(path: &Path) -> Result<Response, Failure> {
     serde_json::from_slice(&body).map_err(|_| FRAME_JSON)
 }
 
-fn perform(path: &Path) -> Result<Response, Failure> {
+fn perform(path: &Path/*request_parameter*/) -> Result<Response, Failure> {
     let runtime = tokio::runtime::Builder::new_current_thread().enable_all().build().map_err(|_| IO)?;
     runtime.block_on(async {
-        tokio::time::timeout(Duration::from_millis(DEADLINE_MS), exchange(path))
+        tokio::time::timeout(Duration::from_millis(DEADLINE_MS), exchange(path/*request_argument*/))
             .await.map_err(|_| DEADLINE)?
     })
 }
