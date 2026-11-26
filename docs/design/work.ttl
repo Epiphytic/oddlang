@@ -2377,3 +2377,16 @@ w:prototypePublicLimit a p:Task ;
     p:status p:done ; p:evidence w:prototypePublicLimitCompanion .
 w:prototypePublicLimitCompanion a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/87> .
+
+w:sevenMemberPublicImportAudit a p:Task ;
+    rdfs:label "Audit downstream public imports of the seven-member generated workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:publicTypeBindingPlan ;
+    p:dependsOn w:publicTypeWorkspaceAudit ;
+    p:status p:done ; p:evidence w:sevenMemberPublicImportReceipt ;
+    p:acceptance "On macOS ARM64, compile all 140 archived original type, alias and module spellings against actual libraries from the pinned clean generated workspace. Record every absent spelling and its compiler diagnostic. Separately compare the prototype's public constant and compile-only function-item coercion against native original and generated libraries." .
+
+w:sevenMemberPublicImportReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/aa6b367a3d934eb1164afd8136017abe80d9c320/verification/whole/seven-public-imports/darwin-arm64.json> .
+w:sevenMemberPublicImportGap a p:Finding ;
+    rdfs:label "The seven-member workspace imports 65 of 140 original spellings; prototype MAX_LINE and serve are absent" ;
+    p:source w:sevenMemberPublicImportReceipt .
