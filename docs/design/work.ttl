@@ -2256,3 +2256,38 @@ w:crossImportReferenceProvenance a p:Finding ;
     rdfs:label "Retain the expected profile lock and disclose unspellable expected names alongside downstream compiler results" ;
     p:source w:publicTypeBindingPlan .
 w:publicTypeWorkspaceAudit p:addresses w:crossImportReferenceProvenance .
+
+w:checkedValueGuards a p:Task ;
+    rdfs:label "Define finite membership, UTF-8 byte bounds and exact scalar admission" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Validate native outcomes at finite set and Unicode interval boundaries, including inputs with multiple rejections." ;
+    p:evidence w:checkedValuesFixture .
+w:checkedValueTables a p:Task ;
+    rdfs:label "Project scalar table views and unit error categories" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Compare exact admitted text and named errors, and preserve distinct error category and Display values." ;
+    p:evidence w:checkedValuesFixture .
+w:checkedValueProductProjection a p:Task ;
+    rdfs:label "Project checked Rust product types into a standalone package" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:checkedValueGuards, w:checkedValueTables ;
+    p:acceptance "Compile an unrelated consumer with borrowed inputs and getters and public metadata, reject bypassed constructors, and reproject a detectable byte limit mutation." ;
+    p:addresses w:checkedValuesFidelityReview ; p:evidence w:checkedValuesFixture .
+w:checkedValuesFixture a p:Artifact ;
+    p:location "verification/checked-values/verify.py" .
+w:checkedValuesFidelityReview a p:Finding ;
+    rdfs:label "Retain accessible product construction and getters, protect trait calls, and verify exact Cc and deterministic capabilities" ;
+    p:source w:checkedValuesReview .
+w:checkedValuesReview a p:Artifact ;
+    p:location "docs/design/reviews/checked-value-domains.md" .
+w:wholeMarmishProtocols p:dependsOn w:checkedValueProductProjection .
+
+w:vaultValueDomainQualification a p:Task ;
+    rdfs:label "Qualify standalone vault public values and metadata" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:checkedValueProductProjection ;
+    p:acceptance "Compare Namespace, Purpose, KeyRef, Label, Metadata and Error through an unchanged native caller. Verify independent schema and privacy evidence, exact error outcomes, and a detectable source-only UTF-8 bound mutation with source denied during product builds." ;
+    p:evidence w:vaultValueDomainNativeReceipt .
+w:vaultValueDomainNativeReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/9d3a6caeb4700e49e9f21d72b2233a3b4a539894/verification/whole/vault-values/reference-aarch64-apple-darwin.json" .
+w:wholeMarmishProtocols p:dependsOn w:vaultValueDomainQualification .
