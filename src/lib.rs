@@ -22,6 +22,7 @@ pub mod integrity_block;
 pub mod interpreter;
 pub mod json_envelope;
 pub mod language;
+pub mod line_grammar;
 pub mod local_command_client;
 pub mod local_status_owner;
 pub mod model;
@@ -35,6 +36,7 @@ pub mod sequence_journal;
 pub mod shared_declarations;
 pub mod tagged_wire;
 pub mod targets;
+pub mod text_grammar;
 pub mod value_domain;
 pub mod wasm;
 
