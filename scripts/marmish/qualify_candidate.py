@@ -208,6 +208,14 @@ def improvements(command_differences, tests):
     return fixed
 
 
+def sdk_diagnostics(data):
+    # xcrun uses mkstemp names when it reports denied writes to its host cache.
+    # Compare the exact diagnostic, errno, directory and multiplicity.
+    return re.sub(rb"(?m)^(xcrun: error: couldn't create cache file '/var/folders/"
+                  rb"[^/\n']+/[^/\n']+/T/xcrun_db-)[A-Za-z0-9]{8}"
+                  rb"(' \(errno=Operation not permitted\))$", rb"\1<RANDOM>\2", data)
+
+
 def listed_ignored(path):
     return sorted(line.removesuffix(": test") for line in path.read_text().splitlines() if line.endswith(": test"))
 
@@ -243,6 +251,7 @@ def compare_archived(directory, original_commit, candidate_commit, candidate_tre
     require(len(original_rows) == 22, "incomplete reference matrix")
     regressions = []
     command_differences = []
+    allowed_variations = []
     for name in sorted(set(original_rows) | set(candidate_rows)):
         left, right = original_rows.get(name), candidate_rows.get(name)
         if not left or not right:
@@ -258,7 +267,15 @@ def compare_archived(directory, original_commit, candidate_commit, candidate_tre
             regressions.append(f"timeout: {name}")
         if (name in ("cfg", "cargo", "clang", "git", "python", "rustc", "sdk", "uv") or
                 name.endswith("-help") or name.endswith("-version")):
-            if any(left[key] != right[key] for key in ("stdoutSha256", "stderrSha256", "exitCode")):
+            streams_match = left["stderrSha256"] == right["stderrSha256"]
+            if name == "sdk" and not streams_match:
+                streams_match = sdk_diagnostics((ori/"logs/sdk.stderr").read_bytes()) == sdk_diagnostics(
+                    (cand/"logs/sdk.stderr").read_bytes())
+                if streams_match:
+                    allowed_variations.append({"command": name, "stream": "stderr", "invariant":
+                        "Only the generated eight-character suffix of a denied xcrun cache file varies.",
+                        "originalSha256": left["stderrSha256"], "candidateSha256": right["stderrSha256"]})
+            if left["stdoutSha256"] != right["stdoutSha256"] or not streams_match or left["exitCode"] != right["exitCode"]:
                 regressions.append(f"public output or tool identity changed: {name}")
     if a["isolation"]["profileSha256"] != b["isolation"]["profileSha256"] or (
             baseline.sha(cand / "baseline-macos.sb") != b["isolation"]["profileSha256"]):
@@ -362,6 +379,7 @@ def compare_archived(directory, original_commit, candidate_commit, candidate_tre
               "historical": json.loads((ROOT / "examples/marmish/observations.json").read_bytes())["historical"],
               "isolatedInstalledDriverUnitTests": dict(cohorts), "currentFailures": failures,
               "commandDifferences": command_differences, "regressions": regressions,
+              "allowedVariations": allowed_variations,
               "improvements": improvements(command_differences, tests),
               "unobserved": ["release artifacts and installed multi-host cohorts", "native Linux x86-64 and ARM64",
                              "interactive Keychain and Tor", "remote dispatch"]}

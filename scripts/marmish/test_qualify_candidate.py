@@ -43,6 +43,13 @@ class CandidateObservations(unittest.TestCase):
                                  "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out;\n",
                                  "     Running tests/demo.rs (/tmp/demo-0123456789abcdef)\n")
 
+    def test_sdk_diagnostic_ignores_only_the_cache_suffix(self):
+        warning = b"xcrun: error: couldn't create cache file '/var/folders/aa/bb/T/xcrun_db-Ab123456' (errno=Operation not permitted)\n"
+        baseline = verify.sdk_diagnostics(warning)
+        self.assertEqual(baseline, verify.sdk_diagnostics(warning.replace(b"Ab123456", b"XY654321")))
+        for change in (warning.replace(b"not permitted", b"not found"), warning.replace(b"/aa/", b"/bb/"), warning * 2):
+            self.assertNotEqual(baseline, verify.sdk_diagnostics(change))
+
     def test_missing_or_new_case_is_explicit(self):
         delta = verify.deltas({"old": "ignored"}, {"new": "ok"})
         self.assertEqual([x["original"] for x in delta], ["unobserved", "ignored"])

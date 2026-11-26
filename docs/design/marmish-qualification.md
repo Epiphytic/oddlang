@@ -38,9 +38,11 @@ The `rebuild/rebuild.json` receipt records the locked assembly digest, each gene
 | macOS Apple Silicon source-build obligation | Frozen original | Candidate |
 | --- | --- | --- |
 | Workspace tests | 906 passed, 9 failed, 5 ignored | Identical outcomes for all 920 named tests |
-| Installed-feature tests | 907 passed, 8 failed, 3 ignored | Comparison pending |
-| Three release binaries | Built | Comparison pending |
-| Help and version for each binary | Six recorded exit statuses and stdout/stderr byte streams | Comparison pending |
+| Installed-feature tests | 907 passed, 8 failed, 3 ignored | Identical outcomes for all 918 named tests |
+| Three release binaries | Built | Built, with source-build SHA-256 for each binary |
+| Help and version for each binary | Six recorded exit statuses and stdout/stderr byte streams | All six matched exit, stdout and stderr |
+
+The comparison covered all 22 frozen commands. Both suites preserved every named test outcome and had zero improved command exits. The SDK diagnostic contained run-specific cache suffixes. Its comparison permits the recorded suffix variation. The additional candidate-only inactive-installation status scenario matched its expected output and preserved the fixture state.
 
 The original failures include three DNS fixture cases in the denied-network environment. The full list records test names for both suites. The release hashes identify the bytes of individual builds. Packaging, live multi-host installed scenarios, and Linux native execution each require their own evidence. [Frozen named outcomes](../../examples/marmish/evidence/original-results.json)
 
@@ -53,7 +55,7 @@ python3 -B -m unittest discover -s scripts/marmish -p 'test_phase7.py' -v
 cargo test --locked --offline --test workspace_assembly
 ```
 
-Five evidence checks passed. They reject a deleted generated file, a changed wire digest, a retained-file digest differing from the original inventory, an omitted platform row, and an incomplete wire direction or case set. All ten assembler tests passed, including compilation after deleting the original fixture inputs and store. Separate tests reject swapped producers and internally consistent rewritten facade receipts or locks.
+Nine evidence checks passed. They reject a deleted generated file, a changed wire digest, a retained-file digest differing from the original inventory, an omitted platform row, and an incomplete wire direction or case set. They also exercise a contradictory native exit status, a retained site outside an inventoried package, independently checked second-build artifacts, and coordinated rewrites of the candidate Git tree and commit. All ten assembler tests passed, including compilation after deleting the original fixture inputs and store. Separate tests reject swapped producers and internally consistent rewritten facade receipts or locks.
 
 ## Remaining language coverage
 
@@ -74,4 +76,4 @@ The Phase 6 framing pilot left 97 files and 5,832 lexical sites. Recovering the 
 
 Claude reviewed commit `957433a` before the native run finished and requested changes. The review identified missing negative evidence controls, insufficient checks on the native verdict and platform map, a stale residual register, and a need to link the task status and numerical claims to the archived receipts. It also flagged a duplicate snapshot helper and asked the native comparator to identify improved test outcomes when a failing suite exits successfully. The five negative checks above passed after the first review. The summary now recomputes the native comparison and validates the platform map. The outer command rejects a regression exit even when a comparison report exists. The current register removes the recovered facade, the inventory identifies each target/configuration pair, and the native comparator has one snapshot implementation.
 
-A second review at `0c40822` confirmed the source-site counts and rejected substitutions of generated code, locks, modes, retained digests and ontology logs. It also reproduced a coordinated rewrite of the claimed candidate commit that passed the then-current receipt comparison. The reviewer called for recomputation from Git objects, an explicit list of improved command exits, and a sealed-archive replay after native execution. The final review and archive verification gates remain open.
+A second review at `0c40822` confirmed the source-site counts and rejected substitutions of generated code, locks, modes, retained digests and ontology logs. It also reproduced a coordinated rewrite of the claimed candidate commit that passed the then-current receipt comparison. The reviewer called for recomputation from Git objects, an explicit list of improved command exits, and a sealed-archive replay after native execution. Commit `fd78d8e` binds the commit and tree IDs to Git object bytes and reports improved native outcomes by name. The new coordinated-rewrite regression test passed. The final review and archive verification gates remain open.
