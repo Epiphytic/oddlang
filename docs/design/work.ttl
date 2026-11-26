@@ -2759,3 +2759,24 @@ w:unitEnumWire a p:Task ;
     p:acceptance "Recover renamed unit cases with stable identities, compile their native projection, and compare its serialization and rejection behavior with an unrelated original enum." .
 w:unitEnumGarden a p:Artifact ; p:location "verification/wire-schema/README.md" .
 w:basicCommandInterop p:dependsOn w:unitEnumWire .
+
+w:mixedPrepareFailure a p:Finding ;
+    rdfs:label "Generated client exits 255 within about 15 ms before receiver attribution" ;
+    p:source w:mixedPrepareFailureReceipt .
+w:mixedPrepareFailureReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a502b9eba07ff64407655ee170edf381c4f1402f/verification/whole/basic-command-interop/composed-mixed-foreground-generated-client-upstream-server-macos-arm64.json" .
+w:basicClientQualification p:addresses w:mixedPrepareFailure .
+w:mixedReceiverFailure a p:Finding ;
+    rdfs:label "Mainline client waits for the generated receiver and exits 255 without a fixture receipt" ;
+    p:source w:mixedReceiverFailureReceipt .
+w:mixedReceiverFailureReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a502b9eba07ff64407655ee170edf381c4f1402f/verification/whole/basic-command-interop/composed-mixed-foreground-upstream-client-generated-server-macos-arm64.json" .
+w:basicServerQualification p:addresses w:mixedReceiverFailure .
+w:referenceHostMetadata a p:Finding ;
+    rdfs:label "Both reference controls and the generated-server attempt have an unresolved host Keychain directory metadata change" ;
+    p:source w:referenceHostMetadataReceipt, w:mixedReceiverFailureReceipt ;
+    p:reason "The later controls returned attributed results for all 24 observations per control. Host metadata verification remains open." .
+w:referenceHostMetadataReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a502b9eba07ff64407655ee170edf381c4f1402f/verification/whole/basic-command-interop/upstream-corpus-host-metadata-blocked-repeat-macos-arm64.json" .
+w:basicPeerObservation p:addresses w:referenceHostMetadata .
+w:basicServerQualification p:addresses w:referenceHostMetadata .
