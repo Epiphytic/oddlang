@@ -2240,3 +2240,19 @@ w:checkedFrameFragmentReviewArtifact a p:Artifact ;
     p:location "docs/design/reviews/rust-frame-fragments.md" .
 w:checkedCopyFragmentNativeReceipt a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/63a3b76980c347dc9414e3a9997c83cbd66fc776/verification/whole/source-copy-frame-fragments/reference-aarch64-apple-darwin.json" .
+
+w:publicTypeWorkspaceAudit a p:Task ; rdfs:label "Qualify upstream and generated workspace libraries and compile changed native import spellings" ;
+    p:milestone w:marmishMilestone ; p:source w:publicTypeBindingPlan ; p:dependsOn w:publicTypeBindingGraph ; p:status p:done ; p:evidence w:publicTypeWorkspaceReceipts ;
+    p:acceptance "Compare all available release libraries at a pinned default profile; compile each native public spelling against its counterpart, preserving differences in importability and type namespace." .
+
+w:publicTypeWorkspaceReceipts a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/58> .
+w:nativePublicApiGap a p:Finding ; rdfs:label "All 36 original native library public type imports fail against the generated v5 and v6 libraries" ;
+    p:source w:publicTypeWorkspaceReceipts .
+
+w:crossImportProfileReview a p:Finding ; rdfs:label "Bind downstream Cargo settings to the extraction profile and retain ambiguous and unresolved namespace observations" ;
+    p:source w:publicTypeBindingPlan .
+w:publicTypeWorkspaceAudit p:addresses w:crossImportProfileReview .
+w:crossImportReferenceProvenance a p:Finding ;
+    rdfs:label "Retain the expected profile lock and disclose unspellable expected names alongside downstream compiler results" ;
+    p:source w:publicTypeBindingPlan .
+w:publicTypeWorkspaceAudit p:addresses w:crossImportReferenceProvenance .

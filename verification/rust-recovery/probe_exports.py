@@ -34,8 +34,8 @@ ADAPTER = [
 ]
 
 
-def invoke(args, *, env=None, expect=True):
-    result = subprocess.run(args, env=env, text=True, capture_output=True, timeout=1800)
+def invoke(args, *, env=None, expect=True, cwd=None):
+    result = subprocess.run(args, env=env, cwd=cwd, text=True, capture_output=True, timeout=1800)
     if expect and result.returncode:
         raise RuntimeError(result.stderr[-15000:])
     return result
@@ -395,6 +395,7 @@ def qualification(args):
                     "--message-format=json",
                 ],
                 env=env,
+                cwd=manifest.parent,
             )
             doc_target = out / "rustdoc"
             rustdoc = executor.submit(
@@ -413,6 +414,7 @@ def qualification(args):
                     "json",
                 ],
                 env={**env, "RUSTC_BOOTSTRAP": "1"},
+                cwd=manifest.parent,
             )
             first.result()
             second.result()
