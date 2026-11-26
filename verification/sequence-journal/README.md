@@ -27,8 +27,14 @@ rules and altered digests. It also assembles the same queue into a native
 library with a separately projected error enum; the caller uses its
 public module and explicit root reexport.
 
-This fixture observes the generated public operations. Two upstream window
-unit tests additionally rely on private Rust storage. One inspects the
-receive window's receipt container directly. The other constructs the send
-window with explicit produced and acknowledged fields. Those expressions
-need a native storage binding beyond the public method overlay.
+This fixture observes the generated public operations. Three upstream window
+unit tests additionally rely on private Rust storage. Two inspect the receive
+window's receipt container directly. The third constructs the send window with
+explicit produced and acknowledged fields. Those expressions need a native
+storage binding beyond the public method overlay.
+
+Claude Code with Claude Opus 5.5 approved the implementation in auto permission
+mode and reran the journal, shared declarations and native-package
+qualifications. Its Rust name collision finding led to an early rejection
+for projected type names that shadow generated runtime names. The verifier
+covers that rejection.

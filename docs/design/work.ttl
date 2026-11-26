@@ -748,7 +748,7 @@ w:wholeMarmishProtocols p:dependsOn w:sequenceJournal .
 w:sequenceJournalPrivateStorage a p:Finding ;
     rdfs:label "Native window private field identity remains unbound" ;
     p:source w:sequenceJournalFixture ;
-    p:reason "Two white-box reference tests inspect the receipt container or use a struct literal for cursor fields. The journal target retains the authoritative state behind an internal store." .
+    p:reason "Three white-box reference tests need two private observations: the receipt container and a struct literal for cursor fields. The journal target retains the authoritative state behind an internal store." .
 w:wholeMarmishStructure p:addresses w:sequenceJournalPrivateStorage .
 
 w:sequenceJournalNativeStorage a p:Task ;
