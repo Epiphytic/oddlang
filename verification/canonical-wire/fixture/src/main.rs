@@ -201,4 +201,17 @@ fn main() {
             Err(Malformed("json-wire"))
         );
     }
+    for samples in [vec![vec![1; 3]; 2], vec![vec![]; 4]] {
+        let input = shape_only::Scan {
+            sequence: 0,
+            plan: shape_only::Sweep::Burst {
+                samples: samples.clone(),
+                sensor: None,
+                token,
+            },
+        };
+        let bytes = shape_only::encode_scan(&input).unwrap();
+        assert!(shape_only::decode_scan(&bytes).ok() == Some(input));
+        assert!(shape_only::burst_digest(&samples, None, token).is_ok());
+    }
 }

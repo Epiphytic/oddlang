@@ -745,7 +745,7 @@ w:canonicalWireReview a p:Finding ;
     p:source w:canonicalWireFixture .
 w:jsonWireCanonicalOperations p:addresses w:canonicalWireReview .
 w:canonicalWireShapeBoundsReview a p:Finding ;
-    rdfs:label "Apply checked byte shape limits before frame encoding and case hashing" ;
+    rdfs:label "Apply checked byte shape limits before encoding and namespace generated validation locals" ;
     p:source w:canonicalWireFixture .
 w:jsonWireCanonicalOperations p:addresses w:canonicalWireShapeBoundsReview .
 w:wholeMarmishProtocols p:dependsOn w:jsonWireCanonicalOperations .
