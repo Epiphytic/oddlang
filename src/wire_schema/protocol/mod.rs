@@ -34,7 +34,11 @@ struct Protocol {
     constants: Vec<Constant>,
     literals: BTreeMap<String, String>,
     endpoints: Vec<Endpoint>,
-    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    #[serde(
+        default,
+        skip_serializing_if = "BTreeMap::is_empty",
+        deserialize_with = "crate::shared_declarations::unique_map"
+    )]
     record_checks: BTreeMap<String, rules::RecordCheck>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     foreign: Vec<rules::Foreign>,
@@ -611,8 +615,10 @@ pub fn build(
         .as_array_mut()
         .expect("shape obligations");
     for (id, check) in &graph.record_checks {
-        rows.push(serde_json::json!({"declaration":id,"role":"record-check","owner":check.owner,
-            "qualification":"independent-witness-required"}));
+        rows.push(
+            serde_json::json!({"declaration":id,"role":"record-check","owner":check.owner,
+            "qualification":"independent-witness-required"}),
+        );
         for step in &check.steps {
             step.visit(&mut |item| rows.push(serde_json::json!({"declaration":item.id(),
                 "role":"admission","recordCheck":id,"step":item,"qualification":"independent-witness-required"})));
