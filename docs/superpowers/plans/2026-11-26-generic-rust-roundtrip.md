@@ -1,6 +1,6 @@
 # Generic Rust round-trip experiment implementation plan
 
-> Execute with subagents using superpowers:subagent-driven-development. Assign different owners to implementation and expected results. Use Claude CLI auto mode at each phase boundary.
+> Historical experiment. The current [contract recovery decision](../../design/contract-recovery.md) supersedes source fidelity as a product goal. The original execution instructions and checklist below describe the experiment as planned.
 
 The experiment asks whether the same Rust importer and emitter can regenerate all of `marmish-stream` and an unrelated crate with no per-library translation rules. Build on the [Marmish qualification](../../design/marmish-qualification.md) and keep the existing executable framing graph and portable tests available. Those artifacts provide context and independent evidence for the older pilot.
 
@@ -50,8 +50,5 @@ At each phase boundary, run the relevant locked tests and use `claude -p --safe-
 
 Claude CLI auto review requested stricter controls for inline tests, token validation, toolchain provenance and build isolation. The follow-up found no blockers. Its remaining clarifications are incorporated above. The [experiment record](../../design/marmish-stream-experiment.md) carries implementation receipts and phase review findings.
 
-## Follow-on work
 
-- [ ] Generate all remaining first-party Marmish Rust from sharded graphs.
-  Qualify multi-package assembly, standalone tools, assets and build scripts
-  in a source-free release checkout.
+The [contract recovery design](../../design/contract-recovery.md) supersedes the native source assembly follow-on.
