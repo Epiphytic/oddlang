@@ -1097,15 +1097,16 @@ w:boundedTaggedBinaryFrames a p:Task ; rdfs:label "Project bounded tagged binary
     p:acceptance "Verify exact envelope tags, header limits, ordered case checks, terminal bytes, nested fragments and incremental poisoned-input behavior against an independent native fixture." ;
     p:evidence w:binaryFrameFixture .
 w:binaryFrameFixture a p:Artifact ; p:location "verification/binary-frame/verify.py" .
-w:copyProtocolQualification a p:Task ; rdfs:label "Qualify the complete native copy protocol library surface" ;
-    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned ;
+w:copyProtocolQualification a p:Task ; rdfs:label "Qualify the complete native copy protocol library surface on macOS ARM64" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:evidence w:copyProtocolNativeReceipt, w:copyProtocolStructuralInventory ;
     p:dependsOn w:copyCheckpointQualification, w:boundedTaggedBinaryFrames ;
     p:acceptance "Compile the full source-free copy API and compare all original tests, exact error cases, frame payloads and public constants, with explicit structural gap accounting." .
 w:wholeMarmishProtocols p:dependsOn w:copyProtocolQualification .
 
 w:binaryFrameFragmentReview a p:Finding ;
     rdfs:label "Check borrowed and bound record fragments at both native call sites and enforce the consumed limit" ;
-    p:source w:binaryFrameFixture .
+    p:source w:copyProtocolNativeReview .
 w:boundedTaggedBinaryFrames p:addresses w:binaryFrameFragmentReview .
 
 w:copyCheckpointNativeReceipt a p:Artifact ;
@@ -1135,3 +1136,9 @@ w:workspaceRegistryPatchAgreement a p:Finding ;
     rdfs:label "Unify agreeing Cargo registry patch pins and reject conflicts before workspace publication" ;
     p:source w:provisionedNativeWorkspacePlan .
 w:provisionedNativeWorkspace p:addresses w:workspaceRegistryPatchAgreement .
+w:copyProtocolNativeReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4bb7977930c330143d9068b9dfb45143dcb524e9/verification/whole/copy-frame/reference-aarch64-apple-darwin.json" .
+w:copyProtocolNativeReview a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4bb7977930c330143d9068b9dfb45143dcb524e9/docs/reviews/oddlang-copy-frame.md" .
+w:copyProtocolStructuralInventory a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4bb7977930c330143d9068b9dfb45143dcb524e9/verification/whole/copy-frame/structural-gap.md" .
