@@ -1445,3 +1445,8 @@ w:terminalAuxiliaryCli a p:Task ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
     p:dependsOn w:commandSurface, w:wholeWorkspaceAssembly ; p:status p:active ;
     p:acceptance "Match independent original and generated help and usage in an unrelated native fixture and across both sealed release binary roles. Preserve the main parser and record non-leading selection and successful dispatch as uncovered." .
+
+w:terminalCliDispatchReview a p:Finding ;
+    rdfs:label "Prevent the auxiliary selector's primary aliases and prefixes from reaching a handler" ;
+    p:source w:wholeMarmishPlan .
+w:terminalAuxiliaryCli p:addresses w:terminalCliDispatchReview .

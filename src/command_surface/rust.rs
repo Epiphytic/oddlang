@@ -26,11 +26,18 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> Result<String, String>
     }
     validate(&graph.root, "", &[], &mut operations, 0)?;
     for (trigger, parser) in &graph.terminal_subparsers {
-        if !graph
+        let Some(child) = graph
             .root
             .subcommands
             .iter()
-            .any(|child| &child.name == trigger)
+            .find(|child| &child.name == trigger)
+        else {
+            return Err(format!("unknown terminal parser trigger {trigger:?}"));
+        };
+        if !child.aliases.is_empty()
+            || !child.visible_aliases.is_empty()
+            || !child.subcommands.is_empty()
+            || binding.operations.contains_key(trigger)
             || !parser.subcommands.is_empty()
             || parser.subcommand_required
             || parser.hidden

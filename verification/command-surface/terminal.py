@@ -99,8 +99,21 @@ with tempfile.TemporaryDirectory(prefix="oddlang-terminal-cli-") as scratch:
     generated.write_text(json.dumps(primary))
     reject = run(ODDLANG, "build", "cli-surface", "rust", generated, FIXTURE / "binding.json",
                  root / "src/cli.rs", check=False)
+    assert reject.returncode and b"unknown terminal parser trigger" in reject.stderr
+    del primary["terminal_subparsers"]["unregistered"]
+    generated.write_text(json.dumps(primary))
+    binding = root / "binding.json"
+    dispatch = json.loads((FIXTURE / "binding.json").read_bytes())
+    dispatch["operations"]["survey"] = "urn:observatory:survey"
+    binding.write_text(json.dumps(dispatch))
+    reject = run(ODDLANG, "build", "cli-surface", "rust", generated, binding, root / "src/cli.rs", check=False)
+    assert reject.returncode and b"invalid terminal parser" in reject.stderr
+    primary["root"]["subcommands"][-1]["aliases"] = ["inspect"]
+    generated.write_text(json.dumps(primary))
+    reject = run(ODDLANG, "build", "cli-surface", "rust", generated, FIXTURE / "binding.json",
+                 root / "src/cli.rs", check=False)
     assert reject.returncode and b"invalid terminal parser" in reject.stderr
     reference.write_text(SOURCE.replace("num_args = 1..", "num_args = 2.."))
     reject = run(ODDLANG, "recover", "cli-surface", reference, selection, auxiliary, check=False)
     assert reject.returncode and b"one-or-more variadic argument counts" in reject.stderr
-    print("Auxiliary parser matched six invocations in both fixture revisions and rejected two unsupported inputs.")
+    print("Auxiliary parser matched six invocations in both fixture revisions and rejected four unsupported inputs.")

@@ -21,7 +21,7 @@ python3 verification/command-surface/check.py target/debug/oddlang
 ```
 
 A graph may declare `terminal_subparsers`, keyed by canonical immediate
-subcommand name. When that token immediately follows the executable, the
+subcommand name. Its primary command must be an unbound leaf without aliases. When that token immediately follows the executable, the
 projection gives the remaining tokens to the independent, versionless parser
 under its own display name. Its grammar has no inherited global arguments and
 no child commands. Help and usage errors use the usual terminal response
