@@ -84,7 +84,7 @@ A path match verifies the presence of a named declaration at this ownership boun
 
 ### Declared visibility
 
-For uniquely paired module-level declarations and named struct or union fields, `comparison.declaredAccess` reports each observer’s declared access as public or restricted to a named module. Both `pub(super)` and a Rustdoc restriction referring to the same ancestor resolve to that module path. A missing scope stays unresolved. A declaration can match by name and differ in access. The report counts other uniquely matched declaration kinds outside the comparison. Rust re-exports and the visibility of enclosing items can further affect which paths an external caller can use; those require separate checks.
+For uniquely paired module-level declarations and struct or union fields (including tuple positions), `comparison.declaredAccess` reports each observer’s declared access as public or restricted to a named module. Both `pub(super)` and a Rustdoc restriction referring to the same ancestor resolve to that module path. A missing scope stays unresolved. A declaration can match by name and differ in access. The report counts other uniquely matched declaration kinds outside the comparison. Rust re-exports and the visibility of enclosing items can further affect which paths an external caller can use; those require separate checks.
 
 ## Ordered data shapes
 

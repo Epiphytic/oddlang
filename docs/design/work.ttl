@@ -1768,6 +1768,7 @@ w:wholeMarmishStructure p:dependsOn w:releaseObservedVisibility .
 
 w:coreDeclarationOwnership a p:Task ;
     rdfs:label "Compare original and source-free core declaration ownership on both ARM64 hosts" ;
-    p:status p:active ; p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:status p:done ; p:evidence <https://github.com/Epiphytic/marmish-oddlang/blob/10926d822bb9aa3a16b20ef35cfc63bebd586780/verification/whole/core-lexical/comparison.json> ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
     p:dependsOn w:releaseObservedVisibility ;
     p:acceptance "Publish both native observations, distinguish lexical owner paths from compiled import availability, and identify the projection component for each of the six public core type names." .

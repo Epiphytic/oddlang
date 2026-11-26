@@ -229,7 +229,7 @@ def module_access(rows, key, item_path):
 
 
 def access_comparison(compiler, document, left, right):
-    """Compare declared access for uniquely paired module items and named record/union fields."""
+    """Compare declared access for uniquely paired module items and record/union fields, including tuple positions."""
     comp_records = {r["id"]: r for r in compiler["declarations"]}
     doc_records = {r["id"]: r for r in document["index"].values() if r["crate_id"] == 0}
     restrictions = defaultdict(list)

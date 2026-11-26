@@ -61,6 +61,7 @@ mod outer {
     pub mod inner {
         pub struct Sample { hidden: u8, pub(super) limit: u8, pub(crate) count: u8, pub value: u8 }
         pub(in crate::outer) fn observe() {}
+        pub struct Pos(pub(super) u8, pub u8);
         pub enum State { Ready }
     }
 }
@@ -79,6 +80,10 @@ mod outer {
             self.assertEqual(rows["observe"], rows["limit"])
             self.assertEqual(rows["count"], rows["local"])
             self.assertEqual(rows["value"], "public")
+            positional = {tuple(row["path"]): row["compiler"] for row in before["agreement"]}
+            owner = ("access_sample", "outer", "inner", "Pos")
+            self.assertEqual(positional[owner + ("0",)], rows["limit"])
+            self.assertEqual(positional[owner + ("1",)], "public")
             self.assertNotIn("Ready", rows)
 
             # A missing compiler restriction must stay unknown even when rustdoc has a scope.
