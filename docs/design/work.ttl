@@ -1906,3 +1906,8 @@ w:recoverSerdePublicRecordsPlan a p:Artifact ;
 
 w:recoverSerdePublicRecordsReceipt a p:Artifact ;
     p:location "verification/public-records/receipts/serde-recovery-aarch64-apple-darwin.json" .
+
+w:serdePublicRecordRootShadow a p:Finding ;
+    rdfs:label "Private crate-root declarations can hide public glob exports" ;
+    p:source w:recoverSerdePublicRecordsReceipt .
+w:recoverSerdePublicRecords p:addresses w:serdePublicRecordRootShadow .
