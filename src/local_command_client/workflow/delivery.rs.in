@@ -21,13 +21,18 @@ fn decoded_bytes(reply: &Value, path: &[String], maximum: u32) -> Result<Vec<u8>
     Ok(bytes)
 }
 
-fn open_embedded(reply: &mut Value, embedded: &EmbeddedReply) -> Result<(), Failure> {
+fn open_embedded(step: &str, reply: &mut Value, embedded: &EmbeddedReply) -> Result<(), Failure> {
     if reply.get("$opened").is_some() {
         return Err(PROTOCOL);
     }
+    if let Some(tag) = &embedded.tagged {
+        if field_at(reply, &tag.path, true).and_then(Value::as_str) != Some(&tag.value) {
+            return Ok(());
+        }
+    }
     let bytes = decoded_bytes(reply, &embedded.bytes, embedded.maximum_bytes)?;
     let expected = field_at(reply, &embedded.sha256, true).and_then(Value::as_str).ok_or(PROTOCOL)?;
-    if native_digest(&bytes)? != expected {
+    if native_digest(&bytes)? != expected || !native_wire_valid(step, &bytes) {
         return Err(PROTOCOL);
     }
     let strict_json::Strict(decoded) = serde_json::from_slice(&bytes).map_err(|_| PROTOCOL)?;
@@ -35,12 +40,20 @@ fn open_embedded(reply: &mut Value, embedded: &EmbeddedReply) -> Result<(), Fail
     Ok(())
 }
 
-fn emit_outputs(reply: &Value, outputs: &[BinaryOutput]) -> Result<(), Failure> {
+fn emit_outputs(reply: &Value, outputs: &[BinaryOutput], captures: &BTreeMap<&str, Value>) -> Result<(), Failure> {
     let mut prepared = Vec::new();
     for output in outputs {
         let bytes = decoded_bytes(reply, &output.bytes, output.maximum_bytes)?;
         let cursor = field_at(reply, &output.cursor, true).and_then(Value::as_u64).ok_or(PROTOCOL)?;
-        if bytes.len() as u64 != cursor {
+        let start = match &output.start {
+            Some(name) => captures.get(name.as_str()).and_then(Value::as_u64).ok_or(PROTOCOL)?,
+            None => 0,
+        };
+        let upper = match &output.upper {
+            Some(path) => field_at(reply, path, true).and_then(Value::as_u64).ok_or(PROTOCOL)?,
+            None => u64::MAX,
+        };
+        if start.checked_add(bytes.len() as u64) != Some(cursor) || cursor > upper {
             return Err(PROTOCOL);
         }
         prepared.push((output.channel, bytes));

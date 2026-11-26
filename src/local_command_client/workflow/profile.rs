@@ -129,24 +129,59 @@ pub(super) fn validate<'a>(
         return Err("invalid input context argument identity".into());
     }
     let out = &policy.outputs;
-    let names = [
-        &out.remote,
-        &out.relays,
-        &out.argv,
-        &out.stdin,
-        &out.request,
-        &out.invocation,
-    ]
-    .into_iter()
-    .chain(out.selected_profile.iter())
-    .chain(out.followup_request.iter())
-    .map(String::as_str)
-    .collect::<BTreeSet<_>>();
-    if names.len()
-        != 6 + usize::from(out.selected_profile.is_some())
-            + usize::from(out.followup_request.is_some())
-        || names.iter().any(|name| !arg_id(name))
-    {
+    let mut names = vec![&out.remote, &out.invocation];
+    if let Some(resume) = &policy.resume {
+        identity(&resume.id, seen)?;
+        oxigraph::model::NamedNode::new(&resume.operation)
+            .map_err(|_| "invalid resume operation identity")?;
+        let keys = &resume.handle_fields;
+        let manifest = &resume.manifest;
+        let handle_keys = BTreeSet::from([
+            &keys.version_key,
+            &keys.profile,
+            &keys.remote,
+            &keys.session,
+            &keys.invocation,
+            &keys.digest,
+        ]);
+        let manifest_keys = BTreeSet::from([
+            &manifest.version_key,
+            &manifest.name_key,
+            &manifest.phase_key,
+            &manifest.account_key,
+        ]);
+        if !arg_id(&resume.command)
+            || !arg_id(&resume.handle_argument)
+            || !(1..=4096).contains(&resume.maximum_handle_bytes)
+            || handle_keys.len() != 6
+            || handle_keys.iter().any(|key| key.is_empty())
+            || manifest_keys.len() != 4
+            || manifest_keys.iter().any(|key| key.is_empty())
+            || !arg_id(&manifest.leaf.replace('.', "-"))
+            || matches!(manifest.leaf.as_str(), "." | "..")
+            || !(1..=65_536).contains(&manifest.maximum_bytes)
+            || manifest.ready.is_empty()
+            || out.selected_profile.is_none()
+            || out.followup_request.is_some()
+        {
+            return Err("invalid workflow resume policy".into());
+        }
+        names.extend([
+            &resume.local_account_output,
+            &resume.session_output,
+            &resume.digest_output,
+        ]);
+    } else {
+        names.extend([&out.relays, &out.argv, &out.stdin, &out.request]);
+    }
+    names.extend(out.selected_profile.iter());
+    names.extend(out.followup_request.iter());
+    let count = names.len();
+    let names = names
+        .into_iter()
+        .map(String::as_str)
+        .collect::<BTreeSet<_>>();
+    if names.len() != count || names.iter().any(|name| !arg_id(name)) {
         return Err("invalid or duplicate configured workflow output name".into());
     }
     Ok((arguments, names))
@@ -166,6 +201,7 @@ pub(super) fn reserved_entry(entry: &str) -> bool {
         "read_command_stdin",
         "load_profile_document",
         "context_values",
+        "resume_inputs",
     ]
     .contains(&entry)
 }

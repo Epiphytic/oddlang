@@ -18,6 +18,8 @@ use schema::{ArgumentKind, CaptureKind, Effect, Field, Source, Transition, Workf
 #[path = "../../strict_json.rs"]
 mod strict_json;
 
+const REQUEST_ID: CaptureKind = CaptureKind::LowerHex { bytes: 16 };
+
 const FORMAT: &str = "oddlang-local-command-workflow-v1";
 
 pub(super) fn matches_graph(graph: &[u8]) -> bool {
@@ -54,7 +56,19 @@ fn delivered(transition: &Transition) -> BTreeSet<&str> {
                 .iter()
                 .map(|capture| capture.name.as_str()),
         )
+        .chain(transition.fresh_id.as_deref())
         .collect()
+}
+
+fn record_identity(record: &schema::Record, seen: &mut BTreeSet<String>) -> Result<(), String> {
+    identity(&record.id, seen)?;
+    if record.prefix.is_empty()
+        || record.prefix.len() > 128
+        || record.prefix.chars().any(char::is_control)
+    {
+        return Err("invalid workflow record prefix".into());
+    }
+    Ok(())
 }
 
 fn minimum_request(fields: &[Field], captures: &BTreeMap<&str, &CaptureKind>) -> String {
@@ -243,14 +257,34 @@ fn validate(
                 || embedded.maximum_bytes > transport.maximum_frame_bytes
                 || !valid_reply_path(&embedded.bytes, false)
                 || !valid_reply_path(&embedded.sha256, false)
+                || embedded
+                    .tagged
+                    .as_ref()
+                    .is_some_and(|tag| !valid_reply_path(&tag.path, false))
             {
                 return Err(format!("invalid embedded workflow reply at {}", step.id));
+            }
+        }
+        if let Some(reject) = &step.reject {
+            identity(&reject.id, &mut seen)?;
+            if !workflow.delivery
+                || reject.diagnostic.exit == 0
+                || reject.diagnostic.stderr.is_empty()
+                || reject.diagnostic.stderr.chars().any(char::is_control)
+            {
+                return Err(format!("invalid workflow rejection at {}", step.id));
+            }
+            if let Some(record) = &reject.record {
+                record_identity(record, &mut seen)?;
             }
         }
         let allow_opened = !workflow.delivery || step.embedded.is_some();
         for (position, transition) in step.transitions.iter().enumerate() {
             identity(&transition.id, &mut seen)?;
-            if transition.when.is_empty() && position + 1 != step.transitions.len() {
+            if transition.when.is_empty()
+                && transition.flags.is_empty()
+                && position + 1 != step.transitions.len()
+            {
                 return Err(format!("workflow fallback must be last at {}", step.id));
             }
             if transition.when.iter().any(|predicate| {
@@ -258,7 +292,17 @@ fn validate(
                     || usize::from(predicate.equals.is_some())
                         + usize::from(predicate.equals_source.is_some())
                         + usize::from(predicate.equals_path.is_some())
+                        + usize::from(predicate.one_of.is_some())
                         != 1
+                    || predicate.one_of.as_ref().is_some_and(|values| {
+                        !workflow.delivery
+                            || values.is_empty()
+                            || values.iter().any(|value| {
+                                value.is_array()
+                                    || value.is_object()
+                                    || contains_fractional_literal(value)
+                            })
+                    })
                     || predicate.equals_path.as_ref().is_some_and(|path| {
                         !workflow.delivery || !valid_reply_path(path, allow_opened)
                     })
@@ -273,6 +317,21 @@ fn validate(
                     transition.id
                 ));
             }
+            if let Some(record) = &transition.record {
+                if !workflow.delivery {
+                    return Err("workflow records require delivery".into());
+                }
+                record_identity(record, &mut seen)?;
+            }
+            if !transition.flags.is_empty() && !workflow.delivery {
+                return Err("workflow flag predicates require delivery".into());
+            }
+            for name in transition.flags.keys() {
+                if !arg_id(name) {
+                    return Err(format!("invalid workflow predicate flag {name}"));
+                }
+                arguments.push((name.clone(), RequiredArgument::Flag));
+            }
             let mut output_channels = BTreeSet::new();
             for output in &transition.outputs {
                 identity(&output.id, &mut seen)?;
@@ -280,6 +339,10 @@ fn validate(
                     || !output_channels.insert(output.channel)
                     || !valid_reply_path(&output.bytes, allow_opened)
                     || !valid_reply_path(&output.cursor, allow_opened)
+                    || output
+                        .upper
+                        .as_ref()
+                        .is_some_and(|path| !valid_reply_path(path, allow_opened))
                     || output.maximum_bytes == 0
                     || output.maximum_bytes > transport.maximum_frame_bytes
                 {
@@ -293,9 +356,6 @@ fn validate(
                 if !arg_id(&capture.name)
                     || (!workflow.delivery && matches!(capture.value_kind, CaptureKind::ExitStatus))
                     || !valid_reply_path(&capture.path, allow_opened)
-                    || captures
-                        .insert(capture.name.as_str(), &capture.value_kind)
-                        .is_some()
                     || matches!(
                         capture.value_kind,
                         CaptureKind::LowerHex { bytes: 0 }
@@ -304,8 +364,29 @@ fn validate(
                 {
                     return Err(format!("invalid workflow capture {}", capture.name));
                 }
+                if let Some(previous) = captures.insert(capture.name.as_str(), &capture.value_kind)
+                {
+                    if !workflow.delivery || previous != &capture.value_kind {
+                        return Err(format!("incompatible workflow capture {}", capture.name));
+                    }
+                }
             }
-            if delivered(transition).len() != transition.carry.len() + transition.capture.len() {
+            if let Some(name) = &transition.fresh_id {
+                if !workflow.delivery
+                    || profile.is_none()
+                    || !arg_id(name)
+                    || captures
+                        .insert(name.as_str(), &REQUEST_ID)
+                        .is_some_and(|kind| kind != &REQUEST_ID)
+                {
+                    return Err(format!("invalid workflow fresh request ID {name}"));
+                }
+            }
+            if delivered(transition).len()
+                != transition.carry.len()
+                    + transition.capture.len()
+                    + usize::from(transition.fresh_id.is_some())
+            {
                 return Err(format!(
                     "duplicate workflow carry or capture at {}",
                     transition.id
@@ -398,7 +479,40 @@ fn validate(
                 "cannot carry workflow capture {missing} before assignment"
             ));
         }
+        if let Some(record) = step
+            .reject
+            .as_ref()
+            .and_then(|reject| reject.record.as_ref())
+        {
+            validate_source(
+                &record.source,
+                &mut seen,
+                &guaranteed,
+                &inputs,
+                &mut arguments,
+                workflow.delivery,
+            )?;
+        }
         for transition in &step.transitions {
+            if let Some(record) = &transition.record {
+                validate_source(
+                    &record.source,
+                    &mut seen,
+                    &guaranteed,
+                    &inputs,
+                    &mut arguments,
+                    workflow.delivery,
+                )?;
+            }
+            for output in &transition.outputs {
+                if let Some(name) = &output.start {
+                    if !guaranteed.contains(name.as_str())
+                        || !matches!(captures.get(name.as_str()), Some(CaptureKind::Unsigned64))
+                    {
+                        return Err(format!("undefined unsigned workflow cursor {name}"));
+                    }
+                }
+            }
             for source in transition
                 .when
                 .iter()
@@ -469,6 +583,10 @@ fn load(graph: &[u8], binding: &[u8]) -> Result<SelectedWorkflow, String> {
             "native_digest",
             "open_embedded",
             "emit_outputs",
+            "native_wire_valid",
+            "fresh_profile_id",
+            "report_record",
+            "reject_reply",
             "decoded_bytes",
             "initial_inputs",
             "choose_socket",
@@ -482,6 +600,22 @@ fn load(graph: &[u8], binding: &[u8]) -> Result<SelectedWorkflow, String> {
         (false, None) | (true, Some("base64-sha256"))
     ) {
         return Err("workflow delivery requires its pinned codec binding".into());
+    }
+    let checked_steps = workflow
+        .steps
+        .iter()
+        .filter(|step| step.embedded.as_ref().is_some_and(|rule| rule.wire_check))
+        .map(|step| &step.id)
+        .collect::<BTreeSet<_>>();
+    if checked_steps != binding.delivery_wire_checks.keys().collect::<BTreeSet<_>>()
+        || binding.delivery_wire_checks.values().any(|path| {
+            !(2..=8).contains(&path.len())
+                || path.iter().any(|segment| !super::valid_entry(segment))
+        })
+    {
+        return Err(
+            "workflow typed reply declarations and native decoder bindings must match".into(),
+        );
     }
     let profile = match (
         &workflow.profile_inputs,
@@ -519,9 +653,18 @@ fn load(graph: &[u8], binding: &[u8]) -> Result<SelectedWorkflow, String> {
 
 pub(super) fn callback(graph: &[u8], binding: &[u8]) -> Result<Callback, String> {
     let selected = load(graph, binding)?;
+    let resume = selected
+        .profile
+        .as_ref()
+        .and_then(|policy| policy.resume.as_ref());
     Ok(Callback {
-        local_arguments: None,
-        operation: None,
+        local_arguments: resume.map(|resume| {
+            (
+                resume.command.clone(),
+                vec![(resume.handle_argument.clone(), RequiredArgument::String)],
+            )
+        }),
+        operation: resume.map(|resume| resume.operation.clone()),
         entry: selected.binding.entry,
         arguments: selected.arguments,
     })
@@ -607,6 +750,11 @@ fn initial_inputs(workflow: &Workflow, matches: &ArgMatches) -> Result<BTreeMap<
     let policy = serde_json::from_value(raw.clone()).map_err(|_| PROTOCOL)?;
     context_values(&policy, matches)
 }
+fn fresh_profile_id(workflow: &Workflow) -> Result<String, Failure> {
+    let raw = workflow.profile_inputs.as_ref().ok_or(PROTOCOL)?;
+    let policy: ProfileInputs = serde_json::from_value(raw.clone()).map_err(|_| PROTOCOL)?;
+    timestamped_id(&policy.payload).ok_or(PROFILE_RANDOM)
+}
 "#);
     } else {
         source.push_str(
@@ -614,6 +762,7 @@ fn initial_inputs(workflow: &Workflow, matches: &ArgMatches) -> Result<BTreeMap<
 fn initial_inputs(_: &Workflow, _: &ArgMatches) -> Result<BTreeMap<String, Value>, Failure> {
     Ok(BTreeMap::new())
 }
+fn fresh_profile_id(_: &Workflow) -> Result<String, Failure> { Err(PROTOCOL) }
 "#,
         );
     }
@@ -653,13 +802,25 @@ fn choose_socket(_: &ArgMatches, explicit: Option<&PathBuf>) -> Result<PathBuf, 
         );
     }
     if workflow.delivery {
+        source.push_str(
+            "\nfn native_wire_valid(_step: &str, _bytes: &[u8]) -> bool { match _step {\n",
+        );
+        for (step, path) in &selected.binding.delivery_wire_checks {
+            writeln!(
+                source,
+                "    {step:?} => crate::{}(_bytes).is_ok(),",
+                path.join("::")
+            )
+            .unwrap();
+        }
+        source.push_str("    _ => true,\n} }\n");
         source.push_str(include_str!("delivery.rs.in"));
     } else {
         source.push_str(
             r#"
 fn native_digest(_: &[u8]) -> Result<String, Failure> { Err(PROTOCOL) }
-fn open_embedded(_: &mut Value, _: &schema::EmbeddedReply) -> Result<(), Failure> { Err(PROTOCOL) }
-fn emit_outputs(_: &Value, outputs: &[schema::BinaryOutput]) -> Result<(), Failure> {
+fn open_embedded(_: &str, _: &mut Value, _: &schema::EmbeddedReply) -> Result<(), Failure> { Err(PROTOCOL) }
+fn emit_outputs(_: &Value, outputs: &[schema::BinaryOutput], _: &BTreeMap<&str, Value>) -> Result<(), Failure> {
     if outputs.is_empty() { Ok(()) } else { Err(PROTOCOL) }
 }
 "#,
@@ -708,10 +869,13 @@ fn emit_outputs(_: &Value, outputs: &[schema::BinaryOutput]) -> Result<(), Failu
             "embeddedJson": "strict-json-without-duplicate-members",
             "replyArrayPaths": "canonical-unsigned-decimal-index-with-no-leading-zero",
             "comparePath": "structural-json-equality-with-both-paths-present",
+            "compareOneOf": "present reply value equals a declared scalar literal",
             "compareSource": "structural-json-equality-to-declared-literal-argument-input-capture-or-constructed-value",
             "binaryOutput": "validate-all-declared-streams-before-first-write-then-write-and-flush-in-declaration-order",
-            "cursorOrigin": 0,
-            "cursorAdvance": "equal-to-decoded-stream-length",
+            "cursorOrigin": "declared unsigned capture or zero",
+            "cursorAdvance": "checked prior cursor plus decoded stream length, bounded by declared upper cursor when configured",
+            "record": "write the declared prefix and compact ordered JSON to stderr, followed by a newline",
+            "freshRequestId": "generate a new configured timestamped identifier on the selected transition and carry it explicitly",
             "exitStatus": {"minimum": 0, "maximum": 255, "source": "validated-exit-status-capture"},
             "consume": "declared-as-a-subsequent-local-exchange",
         });

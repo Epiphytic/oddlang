@@ -2816,3 +2816,10 @@ w:collectionWireGuardsPlan a p:Artifact ;
 w:basicCommandInterop p:dependsOn w:collectionWireGuards .
 w:collectionWireGuardsVerification a p:Artifact ;
     p:location "verification/canonical-wire/README.md" .
+
+w:boundedLocalWorkflowProgress a p:Task ;
+    rdfs:label "Preserve private command handles and bounded multi-poll delivery" ;
+    p:milestone w:marmishMilestone ; p:source w:localWorkflowDeliveryPlan ;
+    p:status p:active ; p:dependsOn w:localWorkflowDelivery ;
+    p:acceptance "Verify fresh request identity, prior and produced cursor bounds, typed reply guard, exact detached handle bytes, inline wait admission and named failures using independent Unix owner evidence." .
+w:basicCommandInterop p:dependsOn w:boundedLocalWorkflowProgress .
