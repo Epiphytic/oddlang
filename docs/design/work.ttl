@@ -1790,7 +1790,7 @@ w:coreSemanticProjection a p:Artifact ;
 w:coreInherentNames a p:Task ;
     rdfs:label "Observe public inherent members on concrete local type declarations" ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
-    p:dependsOn w:coreDeclarationOwnership ; p:status p:done ; p:evidence w:coreInherentWitness ;
+    p:dependsOn w:coreDeclarationOwnership, w:coreSemanticLookup ; p:status p:done ; p:evidence w:coreInherentWitness ;
     p:acceptance "Measure names of methods and associated constants on concrete types, with explicit exclusions for specialized receivers. Compare core declarations against the pinned six-type ownership map and use independent native caller controls." .
 w:wholeMarmishStructure p:dependsOn w:coreInherentNames .
 w:coreInherentWitness a p:Artifact ;
