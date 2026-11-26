@@ -118,3 +118,9 @@ candidate also leaves visibility, export paths, stable workspace package
 instances and native layout open. It covers local data declarations for
 the selected profile. Library type internals, behavioral effects, generic
 satisfaction and compatibility across profiles still require evidence.
+
+### Compare a concrete public value API
+
+Build a public rustdoc JSON document for each library with the same pinned 1.97.1 toolchain, target and flags. Run `oddlang inspect native-value-api FILE.json` on each and compare the output. This independent native witness resolves private-module reexports to their public root names. It records the order of unit enum variants, private tuple arity, inherent method parameter/return types, receiver and borrow mode, associated constant types and non-blanket trait identities including auto traits. Parameter names and private module names can change without changing the comparison. The extractor rejects public shapes outside this small vocabulary. Public rustdoc omits callable items marked `#[doc(hidden)]`. The witness also omits trait associated types, trait method bodies and overrides, constant values, layout, blanket impls and attributes including `#[non_exhaustive]`. Equality covers the recorded observations only. Runtime obligations cover values and behavior.
+
+Run `python3 verification/rust-recovery/test_public_api.py /path/to/oddlang` for the unrelated native fixture. The numeric rustdoc references, source spans and code bodies never enter the witness.

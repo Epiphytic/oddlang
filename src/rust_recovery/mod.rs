@@ -1,4 +1,5 @@
 //! Declaration-level, code-free Rust build inventory.
+pub mod public_api;
 #[path = "../../verification/rust-recovery/shape_model.rs"]
 pub(crate) mod shape_model;
 mod structure;

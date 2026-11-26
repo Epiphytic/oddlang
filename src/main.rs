@@ -159,6 +159,12 @@ fn run(args: &[String]) -> Result<(), String> {
         [cmd, kind, target, root, overlay, out] if cmd == "build" && kind == "json-envelope" && target == "rust" => {
             oddlang::json_envelope::build(root.as_ref(), overlay.as_ref(), out.as_ref())
         }
+        [cmd, kind, doc] if cmd == "inspect" && kind == "native-value-api" => {
+            let witness = oddlang::rust_recovery::public_api::read(doc.as_ref())?;
+            println!("{}", serde_json::to_string_pretty(&witness).map_err(|e| e.to_string())?);
+            Ok(())
+        }
+
         [cmd, kind, target, root, overlay, release]
             if cmd == "verify" && kind == "value-domain" && target == "rust" => {
                 oddlang::value_domain::verify(root.as_ref(), Some(overlay.as_ref()), release.as_ref())

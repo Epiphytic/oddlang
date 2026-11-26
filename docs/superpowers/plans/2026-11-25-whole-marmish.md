@@ -60,6 +60,7 @@ The independent stream comparison including macro expansions left 373 compiler-o
 - [x] Generate shared constant, error, result and enum declarations, bind public and crate-private paths and ship declaration-keyed expectations. [Shared declarations and unrelated qualification fixture](../../language/shared-declarations.md)
 
 - [x] Assemble pinned semantic projections into a native library with private module groups, public type reexports, exact dependency closure and a separate offline consumer. [Native package contract and test](../../language/native-package.md)
+- [x] Compare the exported paths, ordered unit variants, documented inherent signatures and directly implemented trait identities of two independently compiled concrete value APIs. Run controls that alter each observed property. [Native witness fixture](../../../verification/rust-recovery/test_public_api.py)
 
 - [x] Archive ordered declaration candidates for all 72 workspace build profiles (24 per native platform). Twenty-five distinct graphs account for all cells. Reachable calls, cross-package identity and behavior still require qualification. [Reviewed archive](https://github.com/Epiphytic/marmish-oddlang/pull/8)
 - [x] Recover a checked nullable value and its public errors through the pinned Rust API, verify source provenance, and compare the native projections against an independent caller. [Recovery and projection](../../../docs/language/value-domains.md) · [Companion qualification](https://github.com/Epiphytic/marmish-oddlang/pull/7)
