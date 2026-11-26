@@ -1,0 +1,33 @@
+{
+  "format": "oddlang-sequence-journal-rust-v1",
+  "types": {
+    "urn:telemetry-queue:state": "TelemetryQueue",
+    "urn:telemetry-queue:near-cursor-limit": "BoundaryQueue"
+  },
+  "methods": {
+    "urn:telemetry-queue:usable": "usable",
+    "urn:telemetry-queue:buffered": "buffered",
+    "urn:telemetry-queue:remaining_bytes": "remaining_bytes",
+    "urn:telemetry-queue:record_count": "record_count",
+    "urn:telemetry-queue:end": "end",
+    "urn:telemetry-queue:oldest_receipt": "oldest_receipt",
+    "urn:telemetry-queue:latest_receipt": "latest_receipt",
+    "urn:telemetry-queue:ack": "ack",
+    "urn:telemetry-queue:close": "close",
+    "urn:telemetry-queue:view": "view",
+    "urn:telemetry-queue:post": "post",
+    "urn:telemetry-queue:probe_rollback": "probe_rollback",
+    "urn:telemetry-queue:probe_evict_rollback": "probe_evict_rollback",
+    "urn:telemetry-queue:boundary:at_limit": "at_limit",
+    "urn:telemetry-queue:boundary:write": "write"
+  },
+  "errorType": "super::QueueError",
+  "errorVariants": {
+    "urn:telemetry-queue:Bounds": "Bounds",
+    "urn:telemetry-queue:Cursor": "Cursor",
+    "urn:telemetry-queue:Gap": "Gap",
+    "urn:telemetry-queue:Conflict": "Conflict",
+    "urn:telemetry-queue:Stale": "Stale",
+    "urn:telemetry-queue:Closed": "Closed"
+  }
+}

@@ -618,7 +618,7 @@ w:wholeMarmishOperations a p:Task ; rdfs:label "Qualify all workspace and instal
     p:dependsOn w:wholeMarmishCommand ; p:acceptance "Close positive, error, state migration and failure cases for all applicable roles." .
 w:wholeMarmishDistribution a p:Task ; rdfs:label "Build and qualify the complete source-free distribution" ;
     p:dependsOn w:wholeMarmishOperations ; p:acceptance "Publish source-isolated builds and mixed-peer installation, upgrade and platform evidence." .
-w:wholeMarmishFreeze p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned .
+w:wholeMarmishFreeze p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:active .
 w:wholeMarmishStructure p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned .
 w:wholeMarmishProtocols p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned .
 w:wholeMarmishCommand p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned .
@@ -631,3 +631,1111 @@ w:wholeMarmishFreeze p:addresses w:wholeMarmishReview .
 w:wholeMarmishStructure p:addresses w:wholeMarmishReview .
 w:wholeMarmishCommand p:addresses w:wholeMarmishReview .
 w:wholeMarmishOperations p:addresses w:wholeMarmishReview .
+
+w:wholeReleaseInventory a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/5960f66f76650ad674e218fec443ca6fd9ac19b0/verification/whole-marmish/inventory" .
+w:wholeMarmishFreeze p:evidence w:wholeReleaseInventory .
+
+w:releaseObserverComparison a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/pull/4" .
+w:releaseObserverGaps a p:Finding ;
+    rdfs:label "Same-profile stream observers match 359 unique declaration keys and retain anonymous and unkeyed declarations" ;
+    p:source w:releaseObserverComparison .
+w:wholeMarmishStructure p:addresses w:releaseObserverGaps .
+w:wholeMarmishFreeze p:evidence w:releaseObserverComparison .
+
+w:wholeLinuxArmBaseline a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/aee0cb6755e5763466ea671fb0d2cfe541cae953/verification/whole/linux/aarch64-unknown-linux-gnu" .
+w:linuxBridgeLockProbe a p:Finding ;
+    rdfs:label "The Linux original holds an OFD lock while an independent BSD flock succeeds on the same inode. The Linux observer needs a conflicting byte-range lock." ;
+    p:source w:wholeLinuxArmBaseline .
+w:wholeMarmishFreeze p:addresses w:linuxBridgeLockProbe ; p:evidence w:wholeLinuxArmBaseline .
+
+w:wholeShapeProjection a p:Task ;
+    rdfs:label "Recover portable ordered records, variants and member types" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Recover typed shape declarations from a pinned Rust build, preserve member order and fail explicitly on incomplete types; detect type, order and feature mutations in unrelated inputs." ;
+    p:evidence w:wholeShapeFixture .
+w:wholeShapeFixture a p:Artifact ;
+    p:location "https://github.com/Epiphytic/oddlang/blob/5ec32f8177cf9d7b4ffcce0c192c5553af7f2042/verification/rust-recovery/test_shapes.py" .
+w:wholeMarmishStructure p:dependsOn w:wholeShapeProjection .
+w:wholeReferenceState a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/b54108d/verification/whole/state" .
+w:wholeReferenceCLI a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/e8633a2/verification/whole/cli" .
+w:wholeReferenceAMD64 a p:Artifact ;
+    p:location "https://github.com/Epiphytic/oddlang/actions/runs/45772674699" .
+w:wholeReferenceSealedLinux a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/69a766b/verification/whole/linux/aarch64-unknown-linux-gnu" .
+w:wholeMarmishFreeze p:evidence w:wholeReferenceState, w:wholeReferenceCLI, w:wholeReferenceAMD64, w:wholeReferenceSealedLinux .
+
+w:wholeNullableDomain a p:Task ; rdfs:label "Recover and project a checked optional unsigned value" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Recover the interval, default and public error observations from an isolated pinned native build. Reproduce the graph in Rust and TypeScript and reject an independent boundary mutant." ;
+    p:evidence w:wholeValueDomainSpec, w:wholeRetentionCaller .
+w:wholeValueDomainSpec a p:Artifact ; p:location "docs/language/value-domains.md" .
+w:wholeRetentionCaller a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/pull/7" .
+w:wholeWorkspaceShapeArchive a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/commit/f6f31b50ab34ca59c9d60aaeb4b29035a9726b8f" .
+w:wholeMarmishStructure p:evidence w:wholeWorkspaceShapeArchive .
+w:boundedJsonEnvelopeProjection a p:Task ;
+    rdfs:label "Project a generic bounded JSON envelope into a native Rust API" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Generate deterministic Rust from ordered envelope fields, wire bounds, shape policy and declared guards. An unrelated unchanged caller must detect field, size and precedence mutations and reject duplicate keys and noncanonical Base64." ;
+    p:evidence w:boundedJsonEnvelopeFixture .
+w:boundedJsonEnvelopeFixture a p:Artifact ; p:location "tests/json_envelope.rs" .
+w:wholeMarmishProtocols p:dependsOn w:boundedJsonEnvelopeProjection .
+
+w:boundedJsonEnvelopeBindingReview a p:Finding ;
+    rdfs:label "Reject native type names that collide with the generated module and verify public error ordinals" ;
+    p:source w:boundedJsonEnvelopeFixture .
+w:boundedJsonEnvelopeProjection p:addresses w:boundedJsonEnvelopeBindingReview .
+w:endpointSetNormalization a p:Task ;
+    rdfs:label "Project ordered endpoint-set normalization to native Rust" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:evidence w:endpointSetEvidence ;
+    p:acceptance "Build a deterministic checked native set with ordered errors and declared URL, DNS, IP and deduplication policy. Compile an unrelated consumer with an external error enum and exercise boundary cases." .
+
+w:endpointSetEvidence a p:Artifact ;
+    rdfs:label "Locked offline endpoint-set qualification with an unrelated Rust consumer" ;
+    p:location "verification/endpoint-set/README.md" .
+w:wholeMarmishProtocols p:dependsOn w:endpointSetNormalization .
+
+w:orderedEndpointPolicyReview a p:Finding ;
+    rdfs:label "Require typed address classification and explicit loopback opt-in before projection" ;
+    p:source w:orderedEndpointPolicyGuardFixture .
+w:orderedEndpointPolicyGuardFixture a p:Artifact ; p:location "verification/endpoint-set/verify.py" .
+w:endpointSetNormalization p:addresses w:orderedEndpointPolicyReview ; p:evidence w:orderedEndpointPolicyGuardFixture .
+w:nativePackageAssembly a p:Task ; rdfs:label "Assemble pinned semantic projections into a native Rust library" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Independently project two unrelated codecs into one private module, expose their selected public types, compile the consumer offline with its pinned dependency closure, and reject stale pins, inconsistent bindings and competing publication on the qualified hosts." ;
+    p:evidence w:nativePackageFixture .
+w:nativePackageFixture a p:Artifact ; p:location "verification/native-package/verify.py" .
+
+w:boundedIntegrityBlocks a p:Task ;
+    rdfs:label "Project positioned integrity blocks from portable semantics" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Generate bounded native identity and optional compression, preserve wire field shape and guard precedence, and reject malformed members, dictionaries, trailing data and incorrect digest in an unrelated caller." ;
+    p:evidence w:boundedIntegrityFixture .
+w:boundedIntegrityFixture a p:Artifact ; p:location "verification/integrity-block/README.md" .
+w:wholeMarmishProtocols p:dependsOn w:boundedIntegrityBlocks .
+
+w:boundedIntegrityProjectionReview a p:Finding ;
+    rdfs:label "Check native primitive name collisions, exhaustive wire diagnostics and encode size obligations" ;
+    p:source w:boundedIntegrityFixture .
+w:boundedIntegrityBlocks p:addresses w:boundedIntegrityProjectionReview .
+w:sharedTypedDeclarations a p:Task ; rdfs:label "Project typed constants, named errors, result aliases and wire enums into native package scopes" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:dependsOn w:nativePackageAssembly ; p:status p:done ;
+    p:acceptance "Qualify an unrelated native consumer against constant references and bounds, interpolated errors, native ordering, Serde wire values, and public and crate-private paths. Bind every declaration to a portable obligation." ;
+    p:evidence w:sharedTypedFixture .
+w:sharedTypedFixture a p:Artifact ; p:location "verification/shared-declarations/verify.py" .
+
+w:sharedFormatterReview a p:Finding ; rdfs:label "Forwarding outer formatter options into an embedded payload changes its observable text" ; p:source w:sharedTypedFixture .
+w:sharedTypedDeclarations p:addresses w:sharedFormatterReview .
+w:sequenceJournalPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-sequence-journal.md" .
+w:sequenceJournal a p:Task ;
+    rdfs:label "Project bounded byte journals and ordered receipt transitions" ;
+    p:milestone w:marmishMilestone ; p:source w:sequenceJournalPlan ; p:status p:done ;
+    p:dependsOn w:nativePackageAssembly, w:sharedTypedDeclarations ;
+    p:evidence w:sequenceJournalFixture ;
+    p:acceptance "An unrelated native caller exercises declared byte and record limits, partial acknowledgement, receipt eviction, ordered rejection and transaction rollback. The package assembler accepts the pinned semantic component." .
+
+w:sequenceJournalFixture a p:Artifact ;
+    p:location "verification/sequence-journal/README.md" .
+w:wholeMarmishProtocols p:dependsOn w:sequenceJournal .
+
+w:sequenceJournalPrivateStorage a p:Finding ;
+    rdfs:label "Native window private field identity remains unbound" ;
+    p:source w:sequenceJournalFixture ;
+    p:reason "Three white-box reference tests need two private observations: the receipt container and a struct literal for cursor fields. The journal target retains the authoritative state behind an internal store." .
+w:wholeMarmishStructure p:addresses w:sequenceJournalPrivateStorage .
+
+w:sequenceJournalNativeStorage a p:Task ;
+    rdfs:label "Bind authoritative private target storage for native window tests" ;
+    p:milestone w:marmishMilestone ; p:source w:sequenceJournalPlan ; p:status p:done ;
+    p:dependsOn w:sequenceJournal ; p:addresses w:sequenceJournalPrivateStorage ;
+    p:evidence w:sequenceJournalFixture ;
+    p:acceptance "Lexical child tests can construct native cursor fields and inspect the actual receipt queue. Downstream consumers cannot access the fields directly, and the public state behavior remains compatible." .
+
+w:commandSurface a p:Task ;
+    rdfs:label "Recover and project declarative native command grammars" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:status p:done ; p:dependsOn w:nativePackageAssembly ; p:evidence w:commandSurfaceFixture ;
+    p:acceptance "Compare independent derived and generated Rust executables on exact help, version, error, alias, requirement, default and parsed dispatch observations. Detect unsupported syntax and graph changes." .
+w:commandSurfaceFixture a p:Artifact ;
+    p:location "verification/command-surface/check.py" .
+
+w:wholeWorkspaceAssembly a p:Task ; rdfs:label "Compose native packages and link declared binary targets" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Generate two pinned packages into one locked Cargo workspace, compile a consumer across a declared local dependency, reject invalid members and run a native binary entry with its expected exit status." ;
+    p:evidence w:wholeWorkspaceIntegration .
+w:wholeWorkspaceIntegration a p:Artifact ; p:location "verification/native-workspace/verify.py" .
+w:wholeWindowQualification a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/commit/525301c5718b9d8831392a08c76cafeb781ded0f" .
+w:wholeErrorFormatting a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/commit/d34ce43674bbcd27232a36c62d8bffb1ddc51fbc" .
+w:wholeWireCandidates a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/commit/ddd27f3487759cd5c5939426be797608e7278697" .
+w:wholeMarmishStructure p:evidence w:wholeWindowQualification,w:wholeErrorFormatting,w:wholeWireCandidates .
+
+w:wholeWorkspaceAssembly p:evidence w:wholeProcessFixture, w:wholeCombinedWorkspace .
+w:wholeProcessFixture a p:Artifact ; p:location "verification/native-workspace/cli.py" .
+w:wholeCombinedWorkspace a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/commit/6a8becd1a4f712f5464604d640775a85c2d08b6c" .
+
+w:commandSurfaceValidationReview a p:Finding ;
+    rdfs:label "Preserve argument-carrier help and reject unsupported value help and malformed positional or default settings" ;
+    p:source w:commandSurfaceFixture .
+w:commandSurface p:addresses w:commandSurfaceValidationReview .
+
+w:commandSurfaceDispatchReview a p:Finding ;
+    rdfs:label "Distinguish external argv names from nested commands and verify inherited argument relationships" ;
+    p:source w:commandSurfaceFixture .
+w:commandSurface p:addresses w:commandSurfaceDispatchReview .
+
+w:localCommandClientPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-local-command-client.md" .
+w:localCommandClient a p:Task ;
+    rdfs:label "Project one same-user bounded local command exchange" ;
+    p:milestone w:marmishMilestone ; p:source w:localCommandClientPlan ;
+    p:status p:done ; p:dependsOn w:commandSurface, w:wholeWorkspaceAssembly ;
+    p:evidence w:localCommandClientFixture ;
+    p:acceptance "Generate a Rust operation with a bounded framed request, ordered preconditions, structured response, and finite diagnostics. Compare a generated command against an unrelated real Unix peer." .
+
+w:localCommandClientFixture a p:Artifact ;
+    p:location "verification/local-command-client/check.py" .
+
+w:localClientReleaseGuardFinding a p:Finding ;
+    rdfs:label "Reject release CLI bindings that would silently omit local client arguments" ;
+    p:source w:localCommandClientFixture .
+w:localCommandClient p:addresses w:localClientReleaseGuardFinding .
+
+w:sharedNumberedEnum a p:Task ; rdfs:label "Project numeric and Serde representations for one named enum" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:dependsOn w:sharedTypedDeclarations ;
+    p:status p:done ; p:acceptance "Bind sparse byte values and error constructors and compare all 256 inputs for an unrelated meter API." ; p:evidence w:sharedTypedFixture .
+
+w:jsonWireStructuralSchema a p:Task ;
+    rdfs:label "Recover and project ordered JSON records and adjacent tagged unions" ;
+    p:milestone w:marmishMilestone ; p:source w:jsonWireSchemaPlan ; p:status p:done ;
+    p:acceptance "Recover vetted source-pinned Serde shape and gaps. Project ordered record and case schemas, bounded native byte adapters and typed ordered guards. Verify both paths with an unrelated locked consumer." ;
+    p:evidence w:jsonWireSchemaFixture .
+w:jsonWireSchemaPlan a p:Artifact ; p:location "docs/superpowers/plans/2026-11-26-json-wire-schema.md" .
+w:jsonWireSchemaFixture a p:Artifact ; p:location "verification/wire-schema/README.md" .
+w:jsonWireCanonicalOperations a p:Task ;
+    rdfs:label "Project canonical JSON envelope operations and typed referenced guards" ;
+    p:milestone w:marmishMilestone ; p:source w:canonicalWirePlan ; p:status p:done ;
+    p:dependsOn w:jsonWireStructuralSchema ;
+    p:acceptance "Model direction-sensitive canonical envelope operations and typed cross-object validation. Exercise projection and errors with an independent native consumer." ;
+    p:evidence w:canonicalWireFixture .
+w:canonicalWirePlan a p:Artifact ; p:location "docs/superpowers/plans/2026-11-26-canonical-wire.md" .
+w:canonicalWireFixture a p:Artifact ; p:location "verification/canonical-wire/README.md" .
+w:canonicalWireReview a p:Finding ;
+    rdfs:label "Reject leaking internal frames and conflicting declaration identities, and verify optional, external, timed, and singleton validation" ;
+    p:source w:canonicalWireFixture .
+w:jsonWireCanonicalOperations p:addresses w:canonicalWireReview .
+w:canonicalWireShapeBoundsReview a p:Finding ;
+    rdfs:label "Apply checked byte shape limits before encoding and namespace generated validation locals" ;
+    p:source w:canonicalWireFixture .
+w:jsonWireCanonicalOperations p:addresses w:canonicalWireShapeBoundsReview .
+w:wholeMarmishProtocols p:dependsOn w:jsonWireCanonicalOperations .
+w:canonicalWireNativePackage a p:Task ;
+    rdfs:label "Assemble canonical wire operations in pinned native packages" ;
+    p:milestone w:marmishMilestone ; p:source w:canonicalWirePlan ; p:status p:done ;
+    p:dependsOn w:jsonWireCanonicalOperations ;
+    p:acceptance "Pin the structural shape and overlay separately from the operation inputs, project a package module, preserve the pins in its lock, and verify exact width and writer limits with an external native caller." ;
+    p:evidence w:canonicalWirePackageFixture .
+w:canonicalWirePackageFixture a p:Artifact ; p:location "verification/canonical-wire/package.py" .
+w:wholeMarmishProtocols p:dependsOn w:canonicalWireNativePackage .
+
+w:jsonWireSchemaReview a p:Finding ;
+    rdfs:label "Verify lexical Serde declarations, transitive native derives and selected adapter witnesses" ;
+    p:source w:jsonWireSchemaFixture .
+w:jsonWireStructuralSchema p:addresses w:jsonWireSchemaReview .
+
+w:jsonWireMacroScopeReview a p:Finding ;
+    rdfs:label "Preserve a structural gap for unexpanded macros and parser-verbatim module items" ;
+    p:source w:jsonWireMacroScopeEvidence .
+w:jsonWireMacroScopeEvidence a p:Artifact ; p:location "verification/wire-schema/verify.py" .
+w:jsonWireStructuralSchema p:addresses w:jsonWireMacroScopeReview ; p:evidence w:jsonWireMacroScopeEvidence .
+
+w:wireByteValues a p:Task ; rdfs:label "Recover bounded scalar byte fields and bind ordered guard failures to native errors" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Rebuild an unrelated byte field from a source-pinned selector, verify encoded and decoded bounds independently, and compile validation into a native result." ; p:evidence w:wireByteFixture .
+w:wireByteFixture a p:Artifact ; p:location "verification/wire-schema/byte_value.py" .
+w:numberedErrorResolution a p:Finding ; rdfs:label "A byte rejection must resolve to a typed variant and a portable display expectation" ; p:source w:sharedTypedFixture .
+w:sharedNumberedEnum p:addresses w:numberedErrorResolution .
+
+w:nativeWirePackage a p:Task ; rdfs:label "Assemble recovered wire schemas into native libraries" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:dependsOn w:wireByteValues, w:nativePackageAssembly, w:sharedTypedDeclarations ;
+    p:acceptance "Assemble an unrelated bounded byte record and compile it locked and offline." ;
+    p:status p:done ; p:evidence w:wireByteFixture .
+
+w:localStatusOracles a p:Task ; rdfs:label "Characterize the local status interface against a native owner and independent peers" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Pin the original executables, compare actual status, stdout, stderr and exit, and publish extended reply observations on macOS and Linux ARM64." ;
+    p:evidence w:localStatusBaseline, w:localReplyShapes .
+w:localStatusBaseline a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/20> .
+w:localReplyShapes a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/22> .
+w:combinedNativeRelease a p:Task ; rdfs:label "Compose the core, stream and partial client interfaces in one source-free workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ; p:evidence w:combinedNativeReceipt ;
+    p:dependsOn w:nativeWirePackage, w:localStatusOracles ;
+    p:acceptance "Generate three native packages from one locked root, build them together without original sources, then replay the unchanged core, wire, window and codec tests." .
+w:combinedNativeReceipt a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/25> .
+w:statusMixedNative a p:Task ; rdfs:label "Compare a generated status client to an activating original daemon on two native ARM64 targets" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ; p:dependsOn w:localStatusOracles ;
+    p:acceptance "Compare request, write EOF, exit, output streams, frame controls and daemon shutdown when paths are explicit." ; p:evidence w:statusMixedRelease .
+w:statusMixedRelease a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/23> .
+w:launchIdentityRelease a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/24> .
+w:launchIdentityQualification a p:Task ; rdfs:label "Qualify ordered hash and namespace identity views against native and independent byte oracles" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ; p:evidence w:launchIdentityRelease ;
+    p:acceptance "Compare the two declared views on macOS ARM64 and change field order to verify that the generated digest follows the contract." .
+w:typedLocalCommandReplies a p:Task ;
+    rdfs:label "Project declaration-driven nested local command reply shapes" ;
+    p:milestone w:marmishMilestone ; p:source w:typedLocalCommandRepliesPlan ; p:status p:done ;
+    p:dependsOn w:localCommandClient ;
+    p:acceptance "Generate typed named and ordered positional native reply admission with stable identity checks and independent Unix peer evidence." ;
+    p:evidence w:localCommandClientFixture, w:typedLocalCommandNativeReceipt .
+w:typedLocalCommandNativeReceipt a p:Artifact ;
+    p:location "companion:verification/whole/status/generated-typed-macos-arm64.json" .
+w:typedLocalReplySequenceDefaultReview a p:Finding ;
+    rdfs:label "Keep positional arity consistent with defaults and require stable identities for unsigned replies" ;
+    p:source w:localCommandClientFixture .
+w:typedLocalCommandReplies p:addresses w:typedLocalReplySequenceDefaultReview .
+w:typedLocalCommandRepliesPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-typed-local-command-replies.md" .
+
+w:localEndpointDiscovery a p:Task ;
+    rdfs:label "Discover private native command endpoints from pinned profile and runtime documents" ;
+    p:milestone w:marmishMilestone ; p:source w:localEndpointDiscoveryPlan ;
+    p:status p:done ;
+    p:dependsOn w:typedLocalCommandReplies ;
+    p:acceptance "Select state in declared priority, validate bounded private documents and binding, and verify endpoint results with a native independent provider and original daemon." ;
+    p:evidence w:localCommandClientFixture, w:localEndpointNativeReceipt .
+w:localEndpointDiscoveryPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-local-endpoint-discovery.md" .
+w:localEndpointNativeReceipt a p:Artifact ;
+    p:location "companion:verification/whole/status/discovery-macos-arm64.json" .
+w:typedHashViews a p:Task ; rdfs:label "Project ordered typed hashing and hexadecimal record views" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:wireByteValues, w:nativePackageAssembly ;
+    p:acceptance "Project independent SHA-256 views with portable field order, binary encodings, stable enum tag identities and named validation. Qualify an unrelated native consumer with independent expected bytes and negative controls." ;
+    p:evidence w:typedHashViewsFixture .
+w:typedHashViewsFixture a p:Artifact ; p:location "verification/wire-schema/hash_views.py" .
+w:wholeMarmishProtocols p:dependsOn w:typedHashViews .
+w:typedHashIdentityReview a p:Finding ;
+    rdfs:label "Reject hash tag case IRIs that alias a view, parameter or existing declaration" ;
+    p:source w:typedHashViewsFixture .
+w:typedHashViews p:addresses w:typedHashIdentityReview .
+
+w:boundedBinaryRecords a p:Task ; rdfs:label "Project ordered bounded tagged binary records" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:nativePackageAssembly, w:sharedNumberedEnum ;
+    p:acceptance "Generate checked encoding and decoding for an ordered tagged record with declared lengths, validation, and typed errors. Verify bytes, limits and parse precedence against an independent native fixture." ;
+    p:evidence w:binaryRecordFixture .
+w:binaryRecordFixture a p:Artifact ; p:location "verification/binary-record/verify.py" .
+w:wholeMarmishProtocols p:dependsOn w:boundedBinaryRecords .
+w:binaryRecordReview a p:Finding ;
+    rdfs:label "Disambiguate binary record errors and compile the native package composition" ;
+    p:source w:binaryRecordFixture .
+w:boundedBinaryRecords p:addresses w:binaryRecordReview .
+
+w:typedFieldRelations a p:Task ; rdfs:label "Project typed ordered cross-record relations" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:boundedBinaryRecords, w:typedHashViews ;
+    p:acceptance "Compare typed fields and arguments with explicit short-circuit order and propagate a checked operation error only when reached. Verify each outcome and reject invalid operands." ;
+    p:evidence w:typedFieldRelationFixture .
+w:typedFieldRelationFixture a p:Artifact ; p:location "verification/field-relation/verify.py" .
+w:wholeMarmishProtocols p:dependsOn w:typedFieldRelations .
+
+w:binaryMetadataRecords a p:Task ; rdfs:label "Project optional binary metadata and ordered constraints" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:boundedBinaryRecords, w:typedHashViews ;
+    p:acceptance "Check exact boolean and optional tags, signed inline records, typed metadata guards, early and deferred errors, and pure namespace views with an unrelated native fixture." ;
+    p:evidence w:binaryMetadataFixture .
+w:binaryMetadataFixture a p:Artifact ; p:location "verification/binary-record/metadata.py" .
+w:wholeMarmishProtocols p:dependsOn w:binaryMetadataRecords .
+
+w:typedFieldRelationReview a p:Finding ;
+    rdfs:label "Require native equality and copy capabilities and compile assembled relation components" ;
+    p:source w:copyFieldRelationNativeReview .
+w:typedFieldRelations p:addresses w:typedFieldRelationReview .
+
+w:binaryMetadataErrorReview a p:Finding ;
+    rdfs:label "Separate parse-time offsets and tags from deferred Manifest field and metadata errors" ;
+    p:source w:copyManifestNativeReview .
+w:binaryMetadataRecords p:addresses w:binaryMetadataErrorReview .
+w:copyManifestQualification a p:Task ; rdfs:label "Qualify a native copy Manifest and Mtime" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:evidence w:copyManifestNativeReceipt ;
+    p:dependsOn w:binaryMetadataRecords ;
+    p:acceptance "Compare source-free Manifest validation, binary encoding, decoding, namespace and canonical SHA-256 with the pinned original." .
+w:wholeMarmishProtocols p:dependsOn w:copyManifestQualification .
+w:orderedRecordWrites a p:Task ; rdfs:label "Recover ordered binary field writes from a pinned native encoder" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Observe native field order, encoding and width without storing source and compare an independent graph consumer with original and reordered native outputs." ;
+    p:evidence w:orderedWriterFixture .
+w:orderedWriterFixture a p:Artifact ; p:location "verification/record-writer/verify.py" .
+w:localStatusOwnerPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-local-status-owner.md" .
+w:localStatusOwner a p:Task ;
+    rdfs:label "Generate a read-only owner lifecycle and local status listener" ;
+    p:milestone w:marmishMilestone ; p:source w:localStatusOwnerPlan ;
+    p:status p:done ; p:dependsOn w:localCommandClient ;
+    p:evidence w:localStatusOwnerFixture ;
+    p:acceptance "Exercise private socket ownership, guarded state publication, bounded status requests, and process signal cleanup on an unrelated fixture." .
+
+w:localStatusOwnerFixture a p:Artifact ;
+    p:location "verification/local-status-owner/check.py" .
+
+w:localStatusOwnerShutdownReview a p:Finding ;
+    rdfs:label "Keep every lifecycle frame bounded and unlink the owned socket before releasing its descriptor" ;
+    p:source w:localStatusOwnerFixture .
+w:localStatusOwner p:addresses w:localStatusOwnerShutdownReview .
+
+w:copyManifestNativeReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/2926c6aefdaca70ff1370d31f3d670aa84fb5973/verification/whole/copy-manifest/reference-aarch64-apple-darwin.json" .
+w:copyManifestNativeReview a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/2926c6aefdaca70ff1370d31f3d670aa84fb5973/docs/reviews/oddlang-copy-manifest.md" .
+
+w:copyCheckpointQualification a p:Task ; rdfs:label "Qualify a native copy Checkpoint and its FileIdentity value" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:evidence w:copyCheckpointNativeReceipt ;
+    p:dependsOn w:copyManifestQualification ;
+    p:acceptance "Reproduce checked Checkpoint encoding and decoding, including native FileIdentity shapes and exact errors." .
+w:wholeMarmishProtocols p:dependsOn w:copyCheckpointQualification .
+
+w:copyFieldRelationQualification a p:Task ; rdfs:label "Qualify native copy Manifest matching and helper consistency checks" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:evidence w:copyFieldRelationNativeReceipt ;
+    p:dependsOn w:copyManifestQualification, w:typedFieldRelations ;
+    p:acceptance "Verify explicit field correspondence, checked helper start and build identity, and short-circuited error propagation against the pinned original." .
+w:wholeMarmishProtocols p:dependsOn w:copyFieldRelationQualification .
+
+w:copyFieldRelationNativeReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b7ffe42e9423b22a893057a950fb2364429a80d0/verification/whole/copy-field-relations/reference-aarch64-apple-darwin.json" .
+w:copyFieldRelationNativeReview a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b7ffe42e9423b22a893057a950fb2364429a80d0/docs/reviews/oddlang-copy-field-relations.md" .
+
+w:orderedRecordWrites p:evidence w:copyWriterRecovery, w:linuxCopyContractEvidence .
+w:copyWriterRecovery a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/29> .
+w:linuxCopyContractEvidence a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/31> .
+w:localStatusOwner p:evidence w:originalClientOwnerReceipt .
+w:originalClientOwnerReceipt a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/27> .
+w:localOwnerTlsOracle a p:Task ; rdfs:label "Freeze direct relay admission, activation and failed TLS cleanup" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Compare loopback plaintext rejection and private-certificate TLS rejection, exact status while the handshake is held and terminal output on both ARM64 hosts." ;
+    p:evidence w:localOwnerTlsReceipt .
+w:localOwnerTlsReceipt a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/34> .
+w:integratedNativeInterfaces a p:Task ; rdfs:label "Build one composed native release with current copy and status interfaces" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ; p:evidence w:integratedClientReceipt ;
+    p:dependsOn w:combinedNativeRelease, w:copyFieldRelationQualification ;
+    p:acceptance "Recover source-independent packages together from one root lock and run mixed discovery and upstream library cases on the resulting artifacts." .
+w:foregroundProfileOwnerPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-foreground-profile-owner.md" .
+w:foregroundProfileOwner a p:Task ;
+    rdfs:label "Bind a foreground daemon to a private existing profile and live owner lease" ;
+    p:milestone w:marmishMilestone ; p:source w:foregroundProfileOwnerPlan ;
+    p:status p:done ; p:dependsOn w:localStatusOwner ;
+    p:evidence w:foregroundProfileOwnerFixture ;
+    p:acceptance "Acquire and validate a native file-backed profile, bind a private discoverable runtime, and preserve source-free operation and explicit provider readiness scope." .
+
+w:foregroundProfileOwnerFixture a p:Artifact ;
+    p:location "verification/foreground-profile-owner/check.py" .
+
+w:foregroundProfileReview a p:Finding ;
+    rdfs:label "Recover a matching dead runtime under the lease and bind explicit backend choices" ;
+    p:source w:foregroundProfileOwnerFixture .
+w:foregroundProfileOwner p:addresses w:foregroundProfileReview .
+
+w:integratedClientReceipt a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/36> .
+w:combinedForegroundReceipt a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/40> .
+
+w:combinedForegroundPeers a p:Task ; rdfs:label "Qualify both foreground daemon and status client from one release" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ; p:evidence w:combinedForegroundReceipt ;
+    p:dependsOn w:integratedNativeInterfaces, w:localOwnerTlsOracle, w:foregroundProfileOwner ;
+    p:acceptance "Build both peers from the same portable workspace and exercise automatic discovery, live activation, lease contention, and crash recovery on both ARM64 hosts with original and generated processes." .
+
+w:nativeFileProfilePreparation a p:Task ;
+    rdfs:label "Prepare private file-backed profile credentials with native providers" ;
+    p:milestone w:marmishMilestone ; p:source w:nativeFileProfilePlan ; p:status p:done ;
+    p:dependsOn w:localEndpointDiscovery ;
+    p:acceptance "Project exclusive scope, random key generation, atomic no-replace publications, identity verification and pending metadata. Exercise representative native filesystem effects." ;
+    p:evidence w:nativeFileProfileFixture, w:nativeFileProfileReceipt .
+w:nativeFileProfileReceipt a p:Artifact ;
+    p:location "companion:verification/whole/status/file-profile-macos-arm64.json" .
+w:nativeFileProfileWitnessReview a p:Finding ;
+    rdfs:label "Witness pending resumption, filesystem rejections, exclusive leases and independent identity derivation" ;
+    p:source w:nativeFileProfileFixture .
+w:nativeFileProfilePreparation p:addresses w:nativeFileProfileWitnessReview .
+w:nativeFileProfilePlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-native-file-profile.md" .
+w:nativeFileProfileFixture a p:Artifact ;
+    p:location "verification/file-profile/check.py" .
+w:nativeFileProfileStores a p:Task ;
+    rdfs:label "Complete native initialization after encrypted storage opens and verified counts" ;
+    p:milestone w:marmishMilestone ; p:source w:nativeFileProfilePlan ; p:status p:done ;
+    p:dependsOn w:nativeFileProfilePreparation ;
+    p:acceptance "Initialize and reopen both native encrypted stores before publishing ready identity; independently verify schema versions and counts before either peer can repair a fresh or pristine current-format profile using explicit direct relay and file backing." ;
+    p:evidence w:nativeFileProfileStoreReceipt, w:nativeJournalSchemaFixture .
+w:nativeFileProfileStoreReceipt a p:Artifact ;
+    p:location "companion:verification/whole/status/encrypted-init-macos-arm64.json" .
+w:nativeJournalSchemaFixture a p:Artifact ;
+    p:location "src/file_profile/schema.rs" .
+w:nativeFileProfileExtendedInit a p:Task ;
+    rdfs:label "Extend initialization to config-selected routing and stored-state replay" ;
+    p:milestone w:marmishMilestone ; p:source w:nativeFileProfilePlan ; p:status p:planned ;
+    p:dependsOn w:nativeFileProfileStores ;
+    p:acceptance "Qualify OS-default state selection, persisted config, keychain, Tor and current or older nonempty storage with native replay and migration witnesses." .
+w:compositeBinaryRecords a p:Task ; rdfs:label "Project checked nested and checksummed composite binary records" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:binaryMetadataRecords ;
+    p:acceptance "Verify exact nested binary codecs, fixed records, typed checked timing and optional member checks, and integrity-domain ordering." ;
+    p:evidence w:binaryCompositeFixture .
+w:binaryCompositeFixture a p:Artifact ; p:location "verification/binary-record/composite.py" .
+w:copyCheckpointQualification p:dependsOn w:compositeBinaryRecords .
+
+w:boundedTaggedBinaryFrames a p:Task ; rdfs:label "Project bounded tagged binary frames and incremental parsers" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:compositeBinaryRecords, w:copyFieldRelationQualification ;
+    p:acceptance "Verify exact envelope tags, header limits, ordered case checks, terminal bytes, nested fragments and incremental poisoned-input behavior against an independent native fixture." ;
+    p:evidence w:binaryFrameFixture .
+w:binaryFrameFixture a p:Artifact ; p:location "verification/binary-frame/verify.py" .
+w:copyProtocolQualification a p:Task ; rdfs:label "Qualify the complete native copy protocol library surface on macOS ARM64" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:evidence w:copyProtocolNativeReceipt, w:copyProtocolStructuralInventory ;
+    p:dependsOn w:copyCheckpointQualification, w:boundedTaggedBinaryFrames ;
+    p:acceptance "Compile the full source-free copy API and compare all original tests, exact error cases, frame payloads and public constants, with explicit structural gap accounting." .
+w:wholeMarmishProtocols p:dependsOn w:copyProtocolQualification .
+
+w:binaryFrameFragmentReview a p:Finding ;
+    rdfs:label "Check borrowed and bound record fragments at both native call sites and enforce the consumed limit" ;
+    p:source w:copyProtocolNativeReview .
+w:boundedTaggedBinaryFrames p:addresses w:binaryFrameFragmentReview .
+
+w:copyCheckpointNativeReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/6f6fb441b8be647f40092ca3f76aedabe79040f1/verification/whole/copy-checkpoint/reference-aarch64-apple-darwin.json" .
+w:copyCheckpointNativeReview a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/6f6fb441b8be647f40092ca3f76aedabe79040f1/docs/reviews/oddlang-copy-checkpoint.md" .
+w:checkpointDecodePrecedenceReview a p:Finding ;
+    rdfs:label "Keep footer, complete-version reads, inner record errors and deferred Checkpoint validation in order" ;
+    p:source w:copyCheckpointNativeReview .
+w:compositeBinaryRecords p:addresses w:checkpointDecodePrecedenceReview .
+w:compositeExternalContractLinkage a p:Task ;
+    rdfs:label "Check composite slot bounds and member types against pinned external codec contracts" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned ;
+    p:dependsOn w:compositeBinaryRecords ;
+    p:acceptance "Verify external codec identities, independently declared inner limits and exact native types before emitting a composed package." .
+
+w:provisionedNativeWorkspacePlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-native-provisioned-workspace.md" .
+
+w:provisionedNativeWorkspace a p:Task ;
+    rdfs:label "Qualify the native workspace with encrypted init and the complete copy codec" ;
+    p:milestone w:marmishMilestone ; p:source w:provisionedNativeWorkspacePlan ;
+    p:status p:done ; p:evidence w:provisionedNativeWorkspaceReceipt ; p:dependsOn w:combinedForegroundPeers, w:nativeFileProfileStores, w:copyProtocolQualification ;
+    p:acceptance "Build one locked workspace in native ARM64 isolation, check all upstream stream tests and cross every initializer, foreground owner and status client choice on real local profiles." .
+
+w:workspaceRegistryPatchAgreement a p:Finding ;
+    rdfs:label "Unify agreeing Cargo registry patch pins and reject conflicts before workspace publication" ;
+    p:source w:provisionedNativeWorkspacePlan .
+w:provisionedNativeWorkspace p:addresses w:workspaceRegistryPatchAgreement .
+w:copyProtocolNativeReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4bb7977930c330143d9068b9dfb45143dcb524e9/verification/whole/copy-frame/reference-aarch64-apple-darwin.json" .
+w:copyProtocolNativeReview a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4bb7977930c330143d9068b9dfb45143dcb524e9/docs/reviews/oddlang-copy-frame.md" .
+w:copyProtocolStructuralInventory a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4bb7977930c330143d9068b9dfb45143dcb524e9/verification/whole/copy-frame/structural-gap.md" .
+
+w:provisionedNativeWorkspaceReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/46> .
+
+w:localProviderLifecyclePlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-local-provider-lifecycle.md" .
+
+w:localProviderLifecycle a p:Task ;
+    rdfs:label "Own real local providers during foreground activation and shutdown" ;
+    p:milestone w:marmishMilestone ; p:source w:localProviderLifecyclePlan ;
+    p:status p:done ; p:evidence w:localProviderReceipt, w:localProviderBarrierFixture ; p:dependsOn w:provisionedNativeWorkspace ;
+    p:acceptance "Retain checked encrypted stores and native account and relay owners under the lease. Replay held direct TLS termination and failures with exact local reports and independent durable-state observations." .
+
+w:localProviderReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/53> .
+
+w:localProviderBarrierFixture a p:Artifact ;
+    p:location "verification/foreground-profile-owner/stages.py" .
+
+w:localProviderBarrierReview a p:Finding ;
+    rdfs:label "Prove terminal account database release and join the native forwarder's delivery worker" ;
+    p:source w:localProviderBarrierFixture .
+
+w:localProviderObservationReview a p:Finding ;
+    rdfs:label "Confirm a held TLS dial before signaling and bind the actual generated manifest to the release receipt" ;
+    p:source w:localProviderReceipt .
+
+w:localProviderLifecycle p:addresses w:localProviderBarrierReview, w:localProviderObservationReview .
+
+w:nativeConfiguredProfileInit a p:Task ;
+    rdfs:label "Initialize a private file profile from saved configuration and current journal rows" ;
+    p:milestone w:marmishMilestone ; p:source w:nativeFileProfilePlan ; p:status p:done ;
+    p:dependsOn w:nativeFileProfileStores ;
+    p:acceptance "Verify state selection, private config reads, public reference binding, replay floor transitions and metrics before upstream can repair the candidate state." ;
+    p:evidence w:nativeConfiguredProfileInitReceipt .
+w:nativeConfiguredProfileInitReceipt a p:Artifact ;
+    p:location "companion:verification/whole/status/configured-init-macos-arm64.json" .
+
+w:nativeConfiguredRelayPolicyFinding a p:Finding ;
+    rdfs:label "Make URL restrictions part of the declared policy" ;
+    p:source w:nativeFileProfilePlan .
+w:nativeConfiguredProfileInit p:addresses w:nativeConfiguredRelayPolicyFinding .
+
+w:unifiedProfileWorkspacePlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-unified-native-profile-workspace.md" .
+
+w:unifiedProfileWorkspace a p:Task ;
+    rdfs:label "Qualify configured init and real local lifecycle in one release" ;
+    p:milestone w:marmishMilestone ; p:source w:unifiedProfileWorkspacePlan ;
+    p:status p:done ; p:evidence w:unifiedProfileWorkspaceReceipt ; p:dependsOn w:provisionedNativeWorkspace, w:nativeConfiguredProfileInit, w:localProviderLifecycle ;
+    p:acceptance "Build the same core and stream packages with both local profile roles. Replay their genuine original and generated processes and durable observations on both ARM64 hosts." .
+
+w:retainedReadbackComposition a p:Finding ;
+    rdfs:label "Bind retained journal validation without applying initialization effects" ;
+    p:source w:unifiedProfileWorkspacePlan .
+w:unifiedProfileWorkspace p:addresses w:retainedReadbackComposition .
+
+w:buildReportCommandPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-build-report.md" .
+w:buildReportCommand a p:Task ; rdfs:label "Project ordered native build metadata from the release contract" ;
+    p:milestone w:marmishMilestone ; p:source w:buildReportCommandPlan ; p:status p:done ; p:evidence w:buildReportCommandReceipt, w:buildReportFixture ;
+    p:acceptance "Verify actual Cargo target and package-version binding, explicit revision and format values and exact stdout, stderr and exit status with an independent program and the original and generated client and daemon on both ARM64 hosts." .
+
+w:buildReportCommand p:dependsOn w:unifiedProfileWorkspace .
+w:buildReportRevision a p:Decision ; rdfs:label "Pin the represented release revision and record the actual product and tool digests in the verifier receipt" ;
+    p:source w:buildReportCommandPlan ; p:reason "The native wire contract reports one source revision; the companion and its compiler have separate build identities." .
+w:buildReportSourceRecovery a p:Task ; rdfs:label "Recover the ordered profile, journal, engine, configuration and command format references from Rust" ;
+    p:milestone w:marmishMilestone ; p:source w:buildReportCommandPlan ; p:status p:done ;
+    p:evidence w:buildReportStructuralFixture, w:buildReportStructuralReceipt ;
+    p:dependsOn w:buildReportCommand ;
+    p:acceptance "Link the five source declarations to the report in order, verify widths and conversion rules, and demonstrate a mutation against an independently compiled observer." .
+w:unifiedProfileWorkspaceReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/56> .
+
+w:finiteErrorDomainsPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-finite-error-domains.md" .
+w:finiteErrorDomains a p:Task ;
+    rdfs:label "Recover and project finite nested Rust error categories" ;
+    p:milestone w:marmishMilestone ; p:source w:finiteErrorDomainsPlan ;
+    p:status p:done ; p:dependsOn w:unifiedProfileWorkspace ;
+    p:acceptance "Recover pinned named diagnostics, exhaustive category tables, and explicit error-source and conversion rules. Compile an independent caller against original and sealed generated native packages, and observe a source mutation through both." .
+w:finiteErrorDomainFixture a p:Artifact ;
+    p:location "verification/finite-error-domains/verify.py" .
+w:nativeErrorDomainReceipt a p:Artifact ;
+    p:location "companion:verification/whole/native-error/darwin-arm64/receipt.json" .
+w:finiteErrorDomains p:evidence w:finiteErrorDomainFixture, w:nativeErrorDomainReceipt .
+
+w:finiteErrorNameResolutionReview a p:Finding ;
+    rdfs:label "Reproduce Rust alias shadowing and qualify generated category helper calls" ;
+    p:source w:finiteErrorDomainFixture .
+w:finiteErrorDomains p:addresses w:finiteErrorNameResolutionReview .
+
+w:buildReportCommandReceipt a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/60> .
+
+w:checkedValueGuards a p:Task ;
+    rdfs:label "Define finite membership, UTF-8 byte bounds and exact scalar admission" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Validate native outcomes at finite set and Unicode interval boundaries, including inputs with multiple rejections." ;
+    p:evidence w:checkedValuesFixture .
+w:checkedValueTables a p:Task ;
+    rdfs:label "Project scalar table views and unit error categories" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Compare exact admitted text and named errors, and preserve distinct error category and Display values." ;
+    p:evidence w:checkedValuesFixture .
+w:checkedValueProductProjection a p:Task ;
+    rdfs:label "Project checked Rust product types into a standalone package" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:checkedValueGuards, w:checkedValueTables ;
+    p:acceptance "Compile an unrelated consumer with borrowed inputs and getters and public metadata, reject bypassed constructors, and reproject a detectable byte limit mutation." ;
+    p:addresses w:checkedValuesFidelityReview ; p:evidence w:checkedValuesFixture .
+w:checkedValuesFixture a p:Artifact ;
+    p:location "verification/checked-values/verify.py" .
+w:checkedValuesFidelityReview a p:Finding ;
+    rdfs:label "Retain accessible product construction and getters, protect trait calls, and verify exact Cc and deterministic capabilities" ;
+    p:source w:checkedValuesReview .
+w:checkedValuesReview a p:Artifact ;
+    p:location "docs/design/reviews/checked-value-domains.md" .
+w:wholeMarmishProtocols p:dependsOn w:checkedValueProductProjection .
+w:buildReportFixture a p:Artifact ;
+    p:location "verification/build-report/verify.py" .
+w:buildReportPlanReview a p:Finding ;
+    rdfs:label "Separate represented revision from compiled artifact provenance and check widths, formats and native guard precedence" ;
+    p:source w:buildReportCommandPlan .
+w:buildReportCommand p:addresses w:buildReportPlanReview .
+
+w:processLimitOperation a p:Task ;
+    rdfs:label "Project and qualify engine process limit initialization" ;
+    p:milestone w:marmishMilestone ;
+    p:source <../superpowers/plans/2026-11-26-process-limits.md> ;
+    p:dependsOn w:buildReportCommand ;
+    p:acceptance "A generated native operation and checked binary startup use reproduce selected upstream host process limits while preserving ownership of existing descriptors." ;
+    p:status p:done ; p:evidence w:processLimitCompanionRelease .
+w:processLimitStrictNoop a p:Finding ;
+    rdfs:label "Reject contradictory or unknown fields on a no-op resource policy" ;
+    p:source <../superpowers/plans/2026-11-26-process-limits.md> .
+w:processLimitOperation p:addresses w:processLimitStrictNoop .
+
+w:unifiedVaultEngineWorkspace a p:Task ;
+    rdfs:label "Compose pure vault and engine process limits with the unified native workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:checkedValueProductProjection, w:finiteErrorDomains, w:processLimitOperation ;
+    p:acceptance "Use only pinned portable inputs to build the combined Cargo workspace. Replay unchanged copy tests, native error and vault callers, and selected engine process limit and release report observations." ;
+    p:status p:done ; p:evidence w:unifiedVaultEngineReceipt .
+
+w:checkedValueErrorLinkageReview a p:Finding ;
+    rdfs:label "Reject a checked constructor whose native error export has a different portable identity" ;
+    p:source w:checkedValuesReview .
+w:checkedValueProductProjection p:addresses w:checkedValueErrorLinkageReview ; p:evidence w:checkedValuesFixture .
+
+w:fixedByteValuesPlan a p:Artifact ; p:location "docs/superpowers/plans/2026-11-26-fixed-byte-values.md" .
+w:fixedByteRecovery a p:Task ; rdfs:label "Recover erased, owned octet-array extents from a compiler shape" ;
+    p:milestone w:marmishMilestone ; p:source w:fixedByteValuesPlan ; p:status p:done ; p:evidence w:fixedByteFrameworkFixture ;
+    p:acceptance "Observe array owners and extents in baseline and changed unrelated Rust sources and project a source-free fixed-width contract." .
+w:fixedByteVault a p:Task ; rdfs:label "Qualify the upstream strict public values test against a generated vault package" ;
+    p:milestone w:marmishMilestone ; p:source w:fixedByteValuesPlan ; p:dependsOn w:fixedByteRecovery ; p:status p:done ; p:evidence w:fixedByteDarwin, w:fixedByteLinux ;
+    p:acceptance "Compile the unchanged pinned upstream test module against a source-isolated generated vault library and compare the exact native test with the original." .
+
+w:fixedByteWorkspaceIntegration a p:Task ; rdfs:label "Compose fixed-byte vault values and source-recovered release metadata with the five-member native workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:fixedByteValuesPlan ; p:status p:done ; p:evidence w:fixedByteWorkspaceReceipt ;
+    p:dependsOn w:fixedByteVault, w:buildReportSourceRecovery, w:unifiedVaultEngineWorkspace ;
+    p:acceptance "Generate one sealed workspace with the source-recovered release graph. Compare the unchanged vault value test, a direct array constructor holdout and the prior package and CLI contracts with the pinned original." .
+w:publicObservationalRecordsPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-public-records.md" .
+w:publicObservationalRecords a p:Task ;
+    rdfs:label "Recover and project native public records and re-export identities" ;
+    p:milestone w:marmishMilestone ;
+    p:source w:publicObservationalRecordsPlan ;
+    p:dependsOn w:unifiedVaultEngineWorkspace ;
+    p:acceptance "Named public records preserve ordered typed fields, supported traits and alias identity in a source-free package, verified against independently compiled baseline and mutated native callers." ;
+    p:status p:done ; p:evidence w:publicRecordFixture, w:publicJournalReceipt .
+w:processLimitCompanionRelease a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/65> .
+
+w:unifiedVaultEngineReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/aee87208cdfe403a77e652902f65d5b77804f42c/verification/whole/unified-vault/darwin-arm64/receipt.json> .
+
+w:fixedByteFrameworkFixture a p:Artifact ; p:location "verification/checked-values/fixed_bytes.py" .
+w:fixedByteDarwin a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/blob/2f5934a6cf01aa0316d76c1725d0ec885ae07cc0/verification/whole/vault-fixed-bytes/aarch64-apple-darwin.json> .
+w:fixedByteLinux a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/blob/2f5934a6cf01aa0316d76c1725d0ec885ae07cc0/verification/whole/vault-fixed-bytes/aarch64-unknown-linux-gnu.json> .
+
+w:buildReportBindingReview a p:Finding ;
+    rdfs:label "Reject direct primitive and compile-time macro shadowing, and verify native source types" ;
+    p:source w:buildReportCommandPlan .
+w:buildReportSourceRecovery p:addresses w:buildReportBindingReview .
+
+w:buildReportStructuralFixture a p:Artifact ;
+    p:location "verification/build-report-recovery/verify.py" .
+w:buildReportStructuralReceipt a p:Artifact ;
+    p:location "companion:verification/whole/release-info-structure/darwin-arm64/receipt.json" .
+w:buildReportRootMacroReview a p:Finding ;
+    rdfs:label "Reject crate-root reports where unselected modules may export a reserved macro" ;
+    p:source w:buildReportStructuralFixture .
+w:buildReportSourceRecovery p:addresses w:buildReportRootMacroReview .
+
+w:fixedByteWorkspaceLockReview a p:Finding ;
+    rdfs:label "Pin the successor workspace lock and compare the previously qualified member entries" ;
+    p:source w:checkedValuesReview .
+w:fixedByteWorkspaceIntegration p:addresses w:fixedByteWorkspaceLockReview .
+
+w:fixedByteWorkspaceReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/e54db134a2cf649c5cffcf3822f4e98b3439f141/verification/whole/unified-recovered-vault/darwin-arm64/receipt.json> .
+
+w:upstreamNamedWorkspaceHarnesses a p:Task ;
+    rdfs:label "Qualify three unchanged upstream harnesses on the prior five-member workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:unifiedVaultEngineWorkspace ;
+    p:status p:done ; p:evidence w:upstreamNamedDarwinReceipt, w:upstreamNamedLinuxReceipt ;
+    p:acceptance "Run the unchanged upstream core contracts, stream library and native process-limit harnesses against the pinned original and the prior five-member generated workspace on native macOS ARM64 and Linux ARM64. Record named tests and exact outcomes in pinned platform receipts. Match seven core, 29 stream and one process-limit test on each host." .
+
+w:upstreamNamedDarwinReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/862203ff9d50229624abaa582701627e156db9be/verification/whole/suite/combined-v7-aarch64-apple-darwin.json> .
+
+w:upstreamNamedLinuxReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/862203ff9d50229624abaa582701627e156db9be/verification/whole/suite/combined-v7-aarch64-unknown-linux-gnu.json> .
+w:publicRecordScopeResolution a p:Finding ;
+    rdfs:label "Require scoped source evidence for potential type shadows and reject conditional modules and unexpanded items" ;
+    p:source w:publicObservationalRecordsPlan .
+w:publicObservationalRecords p:addresses w:publicRecordScopeResolution .
+
+w:publicRecordEditionResolution a p:Finding ;
+    rdfs:label "Bind bare glob lookup to a pinned Cargo edition" ;
+    p:source w:publicObservationalRecordsPlan .
+w:publicObservationalRecords p:addresses w:publicRecordEditionResolution .
+
+w:publicRecordImportIdentity a p:Finding ;
+    rdfs:label "Check raw identifier and grouped self imports by their Rust binding identities" ;
+    p:source w:publicObservationalRecordsPlan .
+w:publicObservationalRecords p:addresses w:publicRecordImportIdentity .
+
+w:publicRecordFixture a p:Artifact ;
+    p:location "verification/public-records/verify.py" .
+w:publicJournalReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/71> .
+
+w:unifiedRecoveredVaultJournalPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-unified-recovered-vault-journal.md" .
+w:unifiedRecoveredVaultJournal a p:Task ;
+    rdfs:label "Qualify journal records with the recovered release report and fixed-width vault in one workspace" ;
+    p:milestone w:marmishMilestone ;
+    p:source w:unifiedRecoveredVaultJournalPlan ;
+    p:dependsOn w:fixedByteWorkspaceIntegration, w:publicObservationalRecords ;
+    p:acceptance "Rebuild a source-isolated workspace using one compiler and verify the recovered release CLI, fixed vault values and public journal record caller against the exact same build. Keep the core, stream and engine member pins." ;
+    p:status p:done ; p:evidence w:unifiedRecoveredVaultJournalReceipt .
+
+w:unifiedRecoveredVaultJournalReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/76> .
+
+w:rootPublicDataPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-root-public-data.md" .
+w:rootPublicData a p:Task ;
+    rdfs:label "Recover standalone public unit errors and Debug records at crate root" ;
+    p:milestone w:marmishMilestone ; p:source w:rootPublicDataPlan ; p:status p:done ;
+    p:dependsOn w:finiteErrorDomains, w:publicObservationalRecords ;
+    p:acceptance "Compare all seven MDK public error variants and the ordered public version record against original Rust. Change their pinned source and observe the exact Display and Debug changes through a native consumer." .
+w:rootPublicDataFixture a p:Artifact ;
+    p:location "verification/root-public-data/verify.py" .
+w:mdkPublicDataReceipt a p:Artifact ;
+    p:location "companion:verification/whole/mdk-public-data/darwin-arm64/receipt.json" .
+w:rootPublicData p:evidence w:rootPublicDataFixture, w:mdkPublicDataReceipt .
+
+w:rootPublicDataRawBindingReview a p:Finding ;
+    rdfs:label "Resolve raw and self imports by their native binding names" ;
+    p:source w:rootPublicDataFixture .
+w:rootPublicData p:addresses w:rootPublicDataRawBindingReview .
+
+w:sixMemberMdkDataPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-six-member-mdk-data.md" .
+w:sixMemberMdkData a p:Task ;
+    rdfs:label "Qualify pure MDK public data in the same sealed six-member workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:sixMemberMdkDataPlan ;
+    p:status p:done ; p:dependsOn w:unifiedRecoveredVaultJournal, w:rootPublicData ;
+    p:acceptance "Preserve all five predecessor member pins and edges. With one compiler, build the sealed six-member workspace on both ARM64 hosts and replay the report, vault, journal and pure MDK witnesses." .
+
+w:sixMemberMdkDarwin a p:Artifact ;
+    p:location "companion:verification/whole/unified-mdk/aarch64-apple-darwin.json" .
+w:sixMemberMdkLinux a p:Artifact ;
+    p:location "companion:verification/whole/unified-mdk/aarch64-unknown-linux-gnu.json" .
+w:sixMemberMdkData p:evidence w:sixMemberMdkDarwin, w:sixMemberMdkLinux .
+w:privateBufferedInputPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-buffered-input.md" .
+w:privateBufferedInput a p:Task ;
+    rdfs:label "Recover and project bounded private buffered input" ;
+    p:milestone w:marmishMilestone ; p:source w:privateBufferedInputPlan ;
+    p:dependsOn w:unifiedRecoveredVaultJournal ; p:status p:done ; p:evidence w:privateBufferedInputFixture ;
+    p:acceptance "Recover the compiler-observed fixed array and ordered fields. Verify all declared private buffer read, refill and erasure policies through an independently written native caller and detect source mutation." .
+
+w:recoveredWorkspaceNamedSuite a p:Task ;
+    rdfs:label "Qualify registered native named tests of the recovered five-member workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:privateBufferedInputPlan ;
+    p:dependsOn w:fixedByteWorkspaceIntegration ;
+    p:acceptance "Build the recovered five-member workspace with compiler 6e2d1ef on both ARM64 hosts. Classify named cases against the independently built original and reject a false success from an empty child test selection." ;
+    p:status p:done ; p:evidence w:recoveredWorkspaceNamedSuiteReceipt .
+w:recoveredWorkspaceNamedSuiteReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/75> .
+
+w:privateBufferedInputFixture a p:Artifact ;
+    p:location "verification/buffered-input/verify.py" .
+
+w:sevenMemberBufferedWorkspacePlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-seven-member-buffered-workspace.md" .
+w:sevenMemberBufferedWorkspace a p:Task ;
+    rdfs:label "Qualify the private buffered-input member in the sealed seven-member workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:sevenMemberBufferedWorkspacePlan ;
+    p:dependsOn w:sixMemberMdkData, w:privateBufferedInput ;
+    p:status p:done ;
+    p:acceptance "Keep every six-member predecessor lock row and add the dependency-pinned private buffered reader. Build the same sealed workspace on both ARM64 hosts and replay the private reader with the earlier report, vault, journal and MDK witnesses." .
+
+w:sevenMemberBufferedDarwin a p:Artifact ;
+    p:location "companion:verification/whole/unified-buffered/aarch64-apple-darwin.json" .
+w:sevenMemberBufferedLinux a p:Artifact ;
+    p:location "companion:verification/whole/unified-buffered/aarch64-unknown-linux-gnu.json" .
+w:sevenMemberBufferedWorkspace p:evidence w:sevenMemberBufferedDarwin, w:sevenMemberBufferedLinux .
+
+w:plainValueChoices a p:Task ;
+    rdfs:label "Recover and project plain closed value choices" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:checkedValueProductProjection ;
+    p:acceptance "Compare original and generated native exhaustiveness, exact capabilities and declaration-order casts. Reorder a pinned ordinary choice at its Rust source, and verify only the intended ordinal observations change." ;
+    p:evidence w:plainChoiceFixture, w:nativeBackendChoiceReceipt .
+w:plainChoiceFixture a p:Artifact ;
+    p:location "verification/plain-value-choices/verify.py" .
+w:nativeBackendChoiceReceipt a p:Artifact ;
+    p:location "companion:verification/whole/backend-choice/darwin-arm64/receipt.json" .
+
+w:plainChoiceBindingsReview a p:Finding ;
+    rdfs:label "Reject item macros and impl heads that mention the selected choice in any role" ;
+    p:source w:plainChoiceFixture .
+w:plainValueChoices p:addresses w:plainChoiceBindingsReview .
+
+w:plainChoiceAssociatedTypeReview a p:Finding ;
+    rdfs:label "Check associated-type aliases before projecting a plain choice" ;
+    p:source w:plainChoiceFixture .
+w:plainValueChoices p:addresses w:plainChoiceAssociatedTypeReview .
+
+w:typedFiniteErrorsPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-typed-finite-errors.md" .
+w:typedFiniteErrors a p:Task ;
+    rdfs:label "Recover finite error choices and typed product variants" ;
+    p:milestone w:marmishMilestone ; p:source w:typedFiniteErrorsPlan ;
+    p:dependsOn w:plainValueChoices, w:sevenMemberBufferedWorkspace ;
+    p:status p:done ;
+    p:acceptance "Qualify public error and alias, exact reason capability and variant membership, fixed-width named fields and Display/Debug/source through independently compiled original and generated consumers. Share process-limit error identity without changing the older standalone projection. Integrate the published native identity choice." .
+w:publicConstantPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-public-constant.md" .
+w:publicConstantRecovery a p:Task ;
+    rdfs:label "Recover public unsigned constant declarations and products" ;
+    p:milestone w:marmishMilestone ; p:source w:publicConstantPlan ;
+    p:dependsOn w:sharedTypedDeclarations ;
+
+    p:acceptance "Bind the declared public symbol to real Rust compiler evidence and preserve its literal or multiplication expression in the existing portable shared-declarations graph. Replay an unrelated baseline and changed source through downstream native callers." ;
+    p:status p:done ; p:evidence w:publicConstantFixture .
+w:publicConstantFixture a p:Artifact ;
+    p:location "verification/public-constant/verify.py" .
+
+w:publicApiConvergencePlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-public-api-convergence.md" .
+w:publicApiConvergence a p:Task ;
+    rdfs:label "Converge the prototype constant, typed engine errors and native choice in the same generated workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;
+    p:dependsOn w:publicConstantRecovery, w:typedFiniteErrors ;
+    p:status p:done ; p:evidence w:publicApiDarwin, w:publicApiLinux, w:publicImportAudit ;
+    p:acceptance "Qualify the combined compiler commands, preserve independently verified package members, replay public behaviors on both supported ARM64 hosts and rerun all 140 original Darwin imports against the combined workspace lock." .
+
+w:typedFiniteErrorPrimitiveShadow a p:Finding ;
+    rdfs:label "Reject local declarations that shadow a recovered primitive width" ;
+    p:source w:typedFiniteErrorsPlan .
+w:typedFiniteErrors p:addresses w:typedFiniteErrorPrimitiveShadow .
+
+w:terminalAuxiliaryCli a p:Task ;
+    rdfs:label "Project isolated auxiliary CLI help and usage metadata" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:commandSurface, w:sevenMemberBufferedWorkspace ; p:status p:done ;
+    p:evidence w:terminalCliFixture, w:terminalCliDarwin ;
+    p:acceptance "Match independent original and generated help and usage in an unrelated native fixture and across both sealed release binary roles. Preserve the main parser and record non-leading selection and successful dispatch as uncovered." .
+
+w:terminalCliDispatchReview a p:Finding ;
+    rdfs:label "Prevent the auxiliary selector's primary aliases and prefixes from reaching a handler" ;
+    p:source w:wholeMarmishPlan .
+w:terminalAuxiliaryCli p:addresses w:terminalCliDispatchReview .
+
+w:terminalCliFixture a p:Artifact ;
+    p:location "verification/command-surface/terminal.py" .
+w:terminalCliDarwin a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/b11a2040323ec134f51bb6827b64d4429bf79459/verification/whole/offline-cli/aarch64-apple-darwin.json> .
+w:terminalCliPrefixGap a p:Finding ;
+    rdfs:label "Leading global option policy still differs for two auxiliary parser probes per executable" ;
+    p:source w:terminalCliDarwin .
+
+w:structuredDiagnosticsProgram a p:Task ;
+    rdfs:label "Recover and project structured diagnostic state and ordered actions" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:nativePackageAssembly ; p:status p:done ;
+    p:evidence w:structuredDiagnosticsFixture ;
+    p:acceptance "Independently build Rust witnesses for two revisions, compile the recovered library from graph and overlay, and check flag visibility, repeated enable, caller updates, record bytes and sink errors. Reject unsupported source and graph shapes." .
+
+w:structuredDiagnosticsReview a p:Finding ;
+    rdfs:label "Reject JSON keyword shadowing and prove ignored broken-pipe writes" ;
+    p:source w:wholeMarmishPlan .
+w:structuredDiagnosticsProgram p:addresses w:structuredDiagnosticsReview .
+
+w:releaseVersionTextGrammar a p:Task ;
+    rdfs:label "Recover the pure release-version text grammar" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:wholeMarmishFreeze ;
+    p:status p:done ; p:evidence w:releaseVersionGrammarFixture, w:releaseVersionGrammarReceipt ;
+    p:acceptance "Recover ordered prefix choice, ASCII decimal bounds, optional delimited suffix and entire-input consumption from pinned source. Match released vectors and source mutations against a native witness and an unrelated grammar." .
+w:wholeMarmishDistribution p:dependsOn w:releaseVersionTextGrammar .
+
+w:releaseVersionMethodResolutionReview a p:Finding ;
+    rdfs:label "Reject source inputs that can rebind canonical decimal methods" ;
+    p:source w:releaseVersionRecoveryReview .
+w:releaseVersionRecoveryReview a p:Artifact ;
+    p:location "docs/design/reviews/text-grammar.md" .
+w:releaseVersionTextGrammar p:addresses w:releaseVersionMethodResolutionReview .
+
+w:releaseVersionNativeScope a p:Task ;
+    rdfs:label "Qualify release-version method and name resolution in its original native module" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:wholeMarmishFreeze ;
+    p:status p:done ; p:evidence w:releaseVersionGrammarReceipt ;
+    p:acceptance "Pin the source module digest and exact selection span. Exercise the released vectors and supported mutation through the selected predicates in the original native crate scope, with an added test harness and no production changes outside the declared mutation." .
+w:releaseVersionTextGrammar p:dependsOn w:releaseVersionNativeScope .
+
+w:releaseVersionGrammarFixture a p:Artifact ;
+    p:location "tests/text_grammar.rs" .
+
+w:releaseVersionGrammarReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/41f25a5ea27bcd0b707222da3605ba20bb982c4c/verification/whole/release-version-grammar/darwin-arm64/receipt.json> .
+
+w:orderedLineGrammarPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-ordered-line-grammar.md" .
+w:orderedLineGrammar a p:Task ;
+    rdfs:label "Project exact bounded line grammars with ordered typed captures" ;
+    p:milestone w:marmishMilestone ; p:source w:orderedLineGrammarPlan ;
+    p:acceptance "Emit native parsers for exact byte framing, rows, tokens and typed captures. Verify unrelated native typed capture and malformed boundary cases." ;
+    p:status p:done ; p:evidence w:orderedLineGrammarFixture .
+w:orderedLineGrammarFixture a p:Artifact ;
+    p:location "verification/line-grammar/verify.py" .
+w:checkedRecordGrammar a p:Task ;
+    rdfs:label "Project finite relations, aggregate limits and typed record results from line grammars" ;
+    p:milestone w:marmishMilestone ; p:source w:orderedLineGrammarPlan ;
+    p:dependsOn w:orderedLineGrammar ;
+    p:acceptance "Apply checked finite and aggregate constraints and construct native typed records, stable parse errors and controlled name formatters." ;
+    p:status p:done ; p:evidence w:checkedRecordGrammarFixture .
+w:checkedRecordGrammarFixture a p:Artifact ;
+    p:location "verification/line-grammar/verify_records.py" .
+w:pureReleaseManifestGrammar a p:Task ;
+    rdfs:label "Qualify native release manifest parsing and identifiers" ;
+    p:milestone w:marmishMilestone ; p:source w:orderedLineGrammarPlan ;
+    p:dependsOn w:checkedRecordGrammar, w:originalReleaseManifestOracle ;
+    p:acceptance "Use compiler evidence for the native source shapes, recover or verify one changed-source constraint, and compare all 224 independent pure cases and the source mutation." ;
+    p:status p:done ; p:evidence w:pureReleaseManifestCompanion .
+w:pureReleaseManifestCompanion a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/91> .
+
+w:lineGrammarLexicalReview a p:Finding ;
+    rdfs:label "Reject unused nested grammars and directly conflicting token literals" ;
+    p:source w:orderedLineGrammarPlan .
+w:orderedLineGrammar p:addresses w:lineGrammarLexicalReview .
+w:lineGrammarPayloadReview a p:Finding ;
+    rdfs:label "Check static text payload capability for native manifest error variants" ;
+    p:source w:orderedLineGrammarPlan .
+w:checkedRecordGrammar p:addresses w:lineGrammarPayloadReview .
+
+w:originalReleaseManifestOracle a p:Task ;
+    rdfs:label "Qualify the original pure release manifest and one boundary mutation" ;
+    p:milestone w:marmishMilestone ; p:source w:orderedLineGrammarPlan ;
+    p:acceptance "Confirm 224 boundary-weighted rows against the original on both ARM64 hosts, run both unchanged pure upstream tests, and identify the exact source mutation outcome." ;
+    p:status p:done ; p:evidence w:originalReleaseManifestCompanion .
+w:originalReleaseManifestCompanion a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/86> .
+
+w:convergedReleaseManifestPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-converged-release-manifest.md" .
+w:lineGrammarNativeSupport a p:Task ;
+    rdfs:label "Bind native names for reusable text predicates and finite choice arrays" ;
+    p:milestone w:marmishMilestone ; p:source w:convergedReleaseManifestPlan ;
+    p:dependsOn w:checkedRecordGrammar ;
+    p:acceptance "Compile ordered native text arrays and nested predicates from a selected graph with an unrelated crate-visible fixture. Reject unknown or colliding overlay bindings." ;
+    p:status p:done ; p:evidence w:lineGrammarNativeSupportFixture .
+w:lineGrammarNativeSupportFixture a p:Artifact ;
+    p:location "verification/line-grammar/verify_support.py" .
+w:convergedReleaseManifest a p:Task ;
+    rdfs:label "Qualify the pure parser inside the converged native package" ;
+    p:milestone w:marmishMilestone ; p:source w:convergedReleaseManifestPlan ;
+    p:dependsOn w:publicApiConvergence, w:pureReleaseManifestGrammar, w:lineGrammarNativeSupport ;
+    p:acceptance "On both native hosts, preserve prior generated files and package locks, use actual crate-private native records and errors, run the two original pure parser tests unchanged, and replay 224 independent original observations." ;
+    p:status p:active .
+w:choiceEqualityRecovery a p:Task ;
+    rdfs:label "Recover the comparison capabilities of copyable choices" ;
+    p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;
+    p:dependsOn w:plainValueChoices ; p:status p:done ; p:evidence w:choiceEqualityFixture ;
+    p:acceptance "Original and projected Rust types expose equal Copy, Clone, PartialEq and Eq bounds for unrelated choices with no, partial, or total equality, preserving the older graph and consumer behavior." .
+w:choiceEqualityFixture a p:Artifact ; p:location "verification/plain-value-choices/equality.py" .
+w:vaultHelperChoice a p:Task ;
+    rdfs:label "Qualify the public copy-only vault helper mode type" ;
+    p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;
+    p:dependsOn w:choiceEqualityRecovery ; p:status p:done ; p:evidence w:vaultModeDarwinReceipt, w:vaultModeLinuxReceipt ;
+    p:acceptance "Build the original and generated external caller on both native ARM64 hosts, qualify variant order and absence of unsupported traits, and distinguish the source-order mutation." .
+
+w:vaultModeDarwinReceipt a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b75be7c/verification/whole/vault-mode/aarch64-apple-darwin.json" .
+
+w:vaultModeLinuxReceipt a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b75be7c/verification/whole/vault-mode/aarch64-unknown-linux-gnu.json" .
+w:typedFiniteErrorsFixture a p:Artifact ;
+    p:location "verification/typed-finite-errors/verify.py" .
+w:typedFiniteErrorsDarwin a p:Artifact ;
+    p:location "companion:verification/whole/engine-public-error/aarch64-apple-darwin.json" .
+w:typedFiniteErrorsLinux a p:Artifact ;
+    p:location "companion:verification/whole/engine-public-error/aarch64-unknown-linux-gnu.json" .
+w:typedFiniteErrorsMutation a p:Artifact ;
+    p:location "companion:verification/whole/engine-public-error/source-mutation-aarch64-apple-darwin.json" .
+w:typedFiniteErrors p:evidence w:typedFiniteErrorsFixture, w:typedFiniteErrorsDarwin, w:typedFiniteErrorsLinux, w:typedFiniteErrorsMutation .
+
+w:observationalRecordDefaultsPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-observational-record-defaults.md" .
+w:observationalRecordDefaults a p:Task ;
+    rdfs:label "Recover public scalar records with fieldwise defaults and owned paths" ;
+    p:milestone w:marmishMilestone ; p:source w:observationalRecordDefaultsPlan ;
+    p:dependsOn w:typedFiniteErrors, w:publicObservationalRecords ;
+    p:status p:active ;
+    p:acceptance "Recover pinned engine and native records within one reusable profile. Compare independent native callers for field widths, exact traits, default values and exported paths. Show a source-only mutation and preserve preceding sealed workspace behavior." .
+
+w:observationalRecordDefaultsFixture a p:Artifact ;
+    p:location "verification/observational-record-defaults/verify.py" .
+w:observationalRecordDefaults p:evidence w:observationalRecordDefaultsFixture .
+
+w:observationalPathWireScope a p:Finding ;
+    rdfs:label "Require a declared wire rule before serializing an owned native path" ;
+    p:source w:observationalRecordDefaultsFixture .
+w:observationalRecordDefaults p:addresses w:observationalPathWireScope .
+w:publicApiDarwin a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4f39fe3da13635d66b5a09fbe55e52fe27d17962/verification/whole/converged-public-api/aarch64-apple-darwin.json" .
+
+w:publicApiLinux a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4f39fe3da13635d66b5a09fbe55e52fe27d17962/verification/whole/converged-public-api/aarch64-unknown-linux-gnu.json" .
+
+w:publicImportAudit a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4f39fe3da13635d66b5a09fbe55e52fe27d17962/verification/whole/converged-public-api/darwin-imports.json" .
+w:structuredDiagnosticsFixture a p:Artifact ;
+    p:location "verification/structured-diagnostics/check.py" .
+
+w:publicDiagnosticsCliConvergence a p:Task ;
+    rdfs:label "Converge qualified public imports, terminal CLI and structured diagnostics" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:publicApiConvergence, w:terminalAuxiliaryCli, w:structuredDiagnosticsProgram ;
+    p:status p:done ;
+    p:evidence w:publicDiagnosticsCliDarwin, w:publicDiagnosticsCliLinux ;
+    p:acceptance "Use a component-keyed merge to preserve all seven members and the public API, reject incompatible edits, compare the 132 archived Darwin help/version/usage cases and native Linux help/version observations, and account for every original Darwin public import." .
+
+w:publicDiagnosticsCliDarwin a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/37a5be63638cfc7a6796a7058313bc5c03be5519/verification/whole/converged-diagnostics-cli/aarch64-apple-darwin.json> .
+w:publicDiagnosticsCliLinux a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/37a5be63638cfc7a6796a7058313bc5c03be5519/verification/whole/converged-diagnostics-cli/aarch64-unknown-linux-gnu.json> .
+
+w:terminalPrefixCli a p:Task ;
+    rdfs:label "Recover and project leading-option policy for auxiliary terminal CLI responses" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:publicDiagnosticsCliConvergence ; p:status p:active ;
+    p:acceptance "Verify the original and generated terminal responses for long and short leading options, attached and separate values, root-help precedence and denial, on both ARM64 hosts. Keep successful operational paths outside the projection." .
+
+w:terminalPrefixDenialReview a p:Finding ;
+    rdfs:label "Keep a denied prefix terminal even when the auxiliary tail could parse" ;
+    p:source w:wholeMarmishPlan .
+w:terminalPrefixCli p:addresses w:terminalPrefixDenialReview .
+
+w:structuralProfileCompiler a p:Task ;
+    rdfs:label "Compile the private grammar, record, choice, terminal CLI and diagnostic profiles together" ;
+    p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;
+    p:dependsOn w:choiceEqualityRecovery, w:observationalRecordDefaults, w:terminalPrefixCli, w:lineGrammarNativeSupport, w:structuredDiagnosticsProgram ;
+    p:acceptance "All seven unrelated profile fixtures use the same compiler executable, and the thirteen Rust library tests pass." ;
+    p:status p:done ; p:evidence w:structuralProfileCompilerReceipt .
+w:structuralProfileCompilerReceipt a p:Artifact ;
+    p:location "verification/structural-profile-composition/aarch64-apple-darwin.json" .
+w:structuralApplicationConvergence a p:Task ;
+    rdfs:label "Qualify the combined seven-member workspace from the five generic compiler profiles" ;
+    p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;
+    p:dependsOn w:structuralProfileCompiler, w:vaultHelperChoice ;
+    p:acceptance "Preserve and identify member contracts, qualify the cold native build and CLI, and measure actual import and named upstream test coverage on the composed workspace." ;
+    p:status p:done ; p:evidence w:canonicalDarwinContracts, w:canonicalLinuxContracts, w:canonicalDarwinTests, w:canonicalLinuxTests .
+
+w:wholeMarmishAgentNavigation a p:Task ;
+    rdfs:label "Link the whole-project plans and explain scope when citing workspace evidence" ;
+    p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;
+    p:acceptance "The agent guide points to both plans and asks for the lock and native receipts supporting each reported count." ;
+    p:status p:done ; p:evidence w:guide .
+
+w:canonicalDarwinContracts a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/55da1b628138d48d1984f87f173a061886d48ea8/verification/whole/canonical-workspace/aarch64-apple-darwin.json" .
+
+w:canonicalLinuxContracts a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/55da1b628138d48d1984f87f173a061886d48ea8/verification/whole/canonical-workspace/aarch64-unknown-linux-gnu.json" .
+
+w:canonicalDarwinTests a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4744286ce98b89b8e712cfa2fe8618cb8959e7bd/verification/whole/suite/canonical-aarch64-apple-darwin.json" .
+
+w:canonicalLinuxTests a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4744286ce98b89b8e712cfa2fe8618cb8959e7bd/verification/whole/suite/canonical-aarch64-unknown-linux-gnu.json" .

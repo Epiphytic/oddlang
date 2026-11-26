@@ -1,0 +1,17 @@
+{
+  "vocabulary": "oddlang-integrity-block-rust-v1",
+  "blockType":"Tile",
+  "representationType":"Packing",
+  "fields":{"offset":"at","representation":"packing","rawLength":"width","digest":"fingerprint","payload":"pixels"},
+  "variants":{"identity":"Stored","compressed":"Deflated"},
+  "operations":{"end":"end","validate":"check","encode":"pack","decode":"unpack"},
+  "errorType":"crate::Failure",
+  "errorConstructors": {
+    "urn:terrain:size":{"variant":"Capacity"},
+    "urn:terrain:range":{"variant":"Position"},
+    "urn:terrain:damaged":{"variant":"Damaged"},
+    "urn:terrain:payload-syntax":{"variant":"Field","argument":"pixels"},
+    "urn:terrain:payload-decoded-size":{"variant":"Field","argument":"width"}
+  },
+  "payloadHelper":{"module":"field_codec","decode":"decode_pixels"}
+}

@@ -1,0 +1,45 @@
+use observed::{@TYPE@ as Value, @ERROR@ as Error};
+type Input = @INTEGER@;
+
+fn accept(n: Input) -> bool {
+    match Value::@CONSTRUCTOR@(Some(n)) {
+        Ok(value) => { assert_eq!(value.@ACCESSOR@(),Some(n)); true }
+        Err(Error::@RANGE@) => false,
+        Err(_) => panic!("unexpected named error"),
+    }
+}
+
+fn main() {
+@ORDINAL_CHECKS@    assert_eq!(Value::@CONSTRUCTOR@(None).unwrap().@ACCESSOR@(), None);
+    let default = Value::default().@ACCESSOR@().expect("expected present default");
+    let max: Input = Value::@MAX@;
+    assert!(accept(default) && accept(max) && default <= max);
+    let (mut low,mut high)=(0,default);
+    while low < high {
+        let mid=low+(high-low)/2;
+        if accept(mid) {high=mid;} else {low=mid+1;}
+    }
+    let min=low;
+    let check=|n|assert_eq!(accept(n),(min..=max).contains(&n));
+    for edge in [0,min,default,max,Input::MAX] {
+        check(edge);
+        if let Some(n)=edge.checked_add(1){check(n)}
+        if let Some(n)=edge.checked_sub(1){check(n)}
+    }
+    if Input::BITS<=16 {
+        for n in 0..=Input::MAX {check(n)}
+    } else {
+        let mut sample=0x93bc15d70da2u64;
+        for _ in 0..512 {
+            sample=sample.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+            check(sample as Input);
+            let width=max as u128-min as u128+1;
+            check((min as u128 + sample as u128 % width) as Input);
+        }
+    }
+    println!("{min} {max} {default}");
+    for error in [@VARIANTS@] {
+        for byte in error.to_string().bytes(){print!("{byte:02x}");}
+        println!();
+    }
+}

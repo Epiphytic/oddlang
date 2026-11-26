@@ -1,0 +1,78 @@
+{
+  "framework": "8a20ea283d0d43da42f054a7c7774eb9e6a20da7",
+  "rustc": [
+    "rustc 1.96.1 (31fca3adb 2026-06-26)",
+    "binary: rustc",
+    "commit-hash: 31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd",
+    "commit-date: 2026-06-26",
+    "host: aarch64-apple-darwin",
+    "release: 1.96.1",
+    "LLVM version: 22.1.2"
+  ],
+  "compilerSha256": "b5d232b7de40fb3a5fd3e4461cd125b4faec093ca2b8c21260531cc393919adf",
+  "fixtures": [
+    {
+      "fixture": "verification/line-grammar/verify_records.py",
+      "fixtureSha256": "09e67d27b9b70f60405896399cab5b16cd08da410c70aa42684264b26582f81a",
+      "stdout": "Typed records, finite relation, checked aggregate, and formatters passed"
+    },
+    {
+      "fixture": "verification/line-grammar/verify_support.py",
+      "fixtureSha256": "0a96762deed0e9f623986604bece10104d097c1672fd9ae5b37d26296c66d017",
+      "stdout": "Native crate-visible grammar and finite-choice declarations passed"
+    },
+    {
+      "fixture": "verification/line-grammar/verify.py",
+      "fixtureSha256": "ff3374ec4b3980a656027ef4cba0da1de59cdc8032292090d41e99e2be76a963",
+      "stdout": "Ordered line grammar native typed and malformed cases passed"
+    },
+    {
+      "fixture": "verification/observational-record-defaults/verify.py",
+      "fixtureSha256": "3b9196029bdd7b65d9a9c592444fa72196040cb2a0c10ffefc050b537580420b",
+      "stdout": "Unsigned fields, fieldwise defaults, native paths and unresolved macro controls passed."
+    },
+    {
+      "fixture": "verification/plain-value-choices/equality.py",
+      "fixtureSha256": "3a65953c5f7f8346da6aa24ec2a406cbf74138d9ad901a7134cd62fb1f1caae6",
+      "stdout": "Three original and generated choice equality contracts passed."
+    },
+    {
+      "fixture": "verification/structured-diagnostics/check.py",
+      "fixtureSha256": "6667bf0eeb3f102f630c4c57036e4c5efced6aafdb4db5e972365f445b0d7aeb",
+      "stdout": "Two native source revisions match deterministically, including repeated enable, closed sink and text update."
+    },
+    {
+      "fixture": "verification/command-surface/prefix.py",
+      "fixtureSha256": "d9bc38031e918c869e7d5c699a57b97b903fbbeaa983206fedbe9543192b6bb6",
+      "stdout": "13 terminal cases match in both source revisions; successful parsing stays unbound."
+    },
+    {
+      "fixture": "verification/typed-finite-errors/verify.py",
+      "fixtureSha256": "d2ad24acb7e156b0dfe4716fda0f020e1e643e4d3ff1eb62826a0f96b6a50079",
+      "stdout": "Unrelated typed enum, fixed-width product and diagnostic mutation passed."
+    }
+  ],
+  "cargoTests": {
+    "lib": [
+      "test native_package::git_sources_tests::admits_revision_pinned_https_only ... ok",
+      "test http::schema::tests::iri_fragments_escape_pointer_and_uri_syntax ... ok",
+      "test file_profile::schema::configured_storage::tests::uses_declared_cursor_width_and_rejects_unknown_floor_column ... ok",
+      "test http::corpus::tests::duplicate_key_escapes_supplementary_and_quoted_characters ... ok",
+      "test file_profile::configured::tests::alternate_url_admission_is_rendered_from_policy ... ok",
+      "test native_workspace::tests::sibling_patch_cannot_replace_the_fixed_byte_provider ... ok",
+      "test native_workspace::tests::workspace_accepts_agreeing_registry_pins_and_rejects_conflicts ... ok",
+      "test file_profile::schema::tests::rejects_undeclared_identifiers_and_projects_parameterized_rows ... ok",
+      "test rust_roundtrip::parser::tests::rejects_invalid_or_mislabeled_leaves ... ok",
+      "test rust_roundtrip::parser::tests::preserves_ordered_trivia_and_compound_tokens ... ok",
+      "test rust_roundtrip::import::tests::rejects_a_symlink_to_rust_outside_the_package ... ok",
+      "test rust_roundtrip::import::tests::captures_package_rust_without_nested_packages_or_target_outputs ... ok",
+      "test native_package::binary_tests::native_entrypoint_passes_process_exit_and_output ... ok",
+      "test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.28s"
+    ],
+    "text_grammar": [
+      "test recovers_ordered_choices_and_decimal_bounds_and_emits_a_native_grammar ... ok",
+      "test accepted_source_changes_move_the_boundary_and_unsupported_guards_fail_closed ... ok",
+      "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s"
+    ]
+  }
+}

@@ -885,6 +885,8 @@ dependencies = [
  "proc-macro2",
  "ra_ap_parser",
  "ra_ap_syntax",
+ "rustix",
+ "semver",
  "serde",
  "serde_json",
  "sha2",

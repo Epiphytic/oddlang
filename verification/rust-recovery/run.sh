@@ -68,12 +68,18 @@ RUSTC="$rustc" RUSTC_BOOTSTRAP=oddlang_rust_recovery_driver \
     --manifest-path "$adapter_dir/Cargo.toml" --target-dir "$output/driver" --target "$host" >&2
 
 cd "$(dirname "$manifest")"
+verbosity=(--quiet)
+if [[ ${ODD_RECOVERY_PROFILE_TRACE:-0} == 1 ]]; then
+    verbosity=(-vv)
+    # Both observers use this same virtual source root during reconciliation.
+    export CARGO_ENCODED_RUSTFLAGS="--remap-path-prefix=$(pwd -P)=/oddlang-workspace"
+fi
 RUSTC="$rustc" \
     RUSTC_WORKSPACE_WRAPPER="$output/driver/$host/debug/oddlang-rust-recovery-driver" \
     ODD_RECOVERY_PACKAGE="$package" ODD_RECOVERY_TARGET="$target_name" \
     ODD_RECOVERY_KIND="$target_kind" ODD_RECOVERY_OUT="$output/inventory.json" \
     ODD_RECOVERY_SYSROOT="$sysroot" ODD_RECOVERY_COMPILER="$compiler_commit" \
-    "$cargo" check --quiet --locked --offline --release \
+    "$cargo" check "${verbosity[@]}" --locked --offline --release \
     --manifest-path "$manifest" --target-dir "$output/target" \
     --target "$target_triple" --package "$package" "${target[@]}" >&2
 cat "$output/inventory.json"

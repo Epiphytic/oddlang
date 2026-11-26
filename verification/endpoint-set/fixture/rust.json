@@ -1,0 +1,16 @@
+{
+  "vocabulary": "oddlang-endpoint-set-rust-v1",
+  "typeName": "DownloadMirrors",
+  "constructor": "checked",
+  "getter": "urls",
+  "errorType": "super::ValidationError",
+  "errorVariants": {
+    "urn:download-mirrors:empty": "Empty",
+    "urn:download-mirrors:url": "Syntax",
+    "urn:download-mirrors:components": "Components",
+    "urn:download-mirrors:scheme": "Scheme",
+    "urn:download-mirrors:address": "Address",
+    "urn:download-mirrors:loopback": "LocalOnly"
+  },
+  "derives": ["Clone", "Debug", "PartialEq", "Eq"]
+}
