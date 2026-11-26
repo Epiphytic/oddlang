@@ -95,6 +95,23 @@ pub(super) fn validate(
     {
         return Err("hash views require exactly one Rust binding per distinct identity".into());
     }
+    let mut identities = ids.clone();
+    identities.extend(schema.guards.iter().map(|guard| guard.id.as_str()));
+    for view in &schema.hash_views {
+        iri(&view.id)?;
+        if !identities.insert(&view.id) {
+            return Err(format!("duplicate hash view identity: {}", view.id));
+        }
+        for parameter in &view.parameters {
+            iri(&parameter.id)?;
+            if !identities.insert(&parameter.id) {
+                return Err(format!(
+                    "duplicate hash parameter identity: {}",
+                    parameter.id
+                ));
+            }
+        }
+    }
     let mut tags = BTreeSet::new();
     for (id, table) in &schema.hash_tags {
         if !matches!(declared.get(id.as_str()), Some(Definition::External { .. }))
@@ -110,14 +127,15 @@ pub(super) fn validate(
         }
         for case in table.keys() {
             iri(case)?;
-            if !tags.insert(case)
+            if !identities.insert(case)
                 || !binding
                     .hash_variants
                     .get(case)
                     .is_some_and(|name| type_symbol(name))
             {
-                return Err(format!("invalid hash variant binding: {case}"));
+                return Err(format!("invalid hash variant binding or identity: {case}"));
             }
+            tags.insert(case);
         }
     }
     if !tags.into_iter().eq(binding.hash_variants.keys()) {
@@ -126,10 +144,6 @@ pub(super) fn validate(
     let mut methods = BTreeSet::new();
     let mut used_tables = BTreeSet::new();
     for view in &schema.hash_views {
-        iri(&view.id)?;
-        if ids.contains(view.id.as_str()) || schema.guards.iter().any(|g| g.id == view.id) {
-            return Err(format!("duplicate hash view identity: {}", view.id));
-        }
         let Some(Definition::Record { fields, .. }) = declared.get(view.owner.as_str()) else {
             return Err(format!("hash view requires a record owner: {}", view.id));
         };
@@ -185,7 +199,6 @@ pub(super) fn validate(
                     parameter,
                     encoding,
                 } => {
-                    iri(parameter)?;
                     let table = parameters
                         .get(parameter)
                         .filter(|id| schema.hash_tags.contains_key(**id));

@@ -781,3 +781,7 @@ w:typedHashViews a p:Task ; rdfs:label "Project ordered typed hashing and hexade
     p:evidence w:typedHashViewsFixture .
 w:typedHashViewsFixture a p:Artifact ; p:location "verification/wire-schema/hash_views.py" .
 w:wholeMarmishProtocols p:dependsOn w:typedHashViews .
+w:typedHashIdentityReview a p:Finding ;
+    rdfs:label "Reject hash tag case IRIs that alias a view, parameter or existing declaration" ;
+    p:source w:typedHashViewsFixture .
+w:typedHashViews p:addresses w:typedHashIdentityReview .

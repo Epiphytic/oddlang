@@ -105,7 +105,12 @@ fn main() {{
     for artifact in ("wire.rs", "obligations.json", "projection.lock"):
         assert (out / artifact).read_bytes() == (again / artifact).read_bytes()
 
+    def collide_tag(g, b):
+        g["hashTags"][tag][digest] = g["hashTags"][tag].pop(on)
+        b["hashVariants"][digest] = b["hashVariants"].pop(on)
+
     for change, diagnostic in [
+        (collide_tag, "invalid hash variant binding or identity"),
         (lambda g, b: g["hashViews"][0]["fields"][0].update(encoding="bool-u8"), "hash slot type"),
         (lambda g, b: g["hashViews"][0].update(validate=False), "unconditional count guard"),
         (lambda g, b: g["hashTags"][tag].update({off: 42}), "hash tag table"),
