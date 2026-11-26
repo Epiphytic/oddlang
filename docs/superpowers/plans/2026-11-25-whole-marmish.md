@@ -30,7 +30,7 @@ The independent stream comparison including macro expansions left 373 compiler-o
 - [x] Qualify Launch writer recovery and a changed upstream writer on both ARM64 hosts. [Changed source qualification](https://github.com/Epiphytic/marmish-oddlang/pull/29) · [Linux replay](https://github.com/Epiphytic/marmish-oddlang/pull/31)
 - [x] Observe native plaintext and TLS rejection with exact status, exit, shutdown and socket cleanup on both hosts. [Original transport evidence](https://github.com/Epiphytic/marmish-oddlang/pull/34)
 - [x] Build the copy relations and automatic status client in one native workspace. [Two-platform qualification](https://github.com/Epiphytic/marmish-oddlang/pull/36)
-- [ ] Assemble the foreground daemon and status client into the same native workspace. Exercise both generated peers together and the mixed pairs on both ARM64 platforms.
+- [x] Assemble the foreground daemon and status client into the same native workspace. Exercise both generated peers together and the mixed pairs on both ARM64 platforms.
 
 - [x] Freeze the original local status and extended reply observations on Darwin and Linux ARM64. [Live daemon and framing](https://github.com/Epiphytic/marmish-oddlang/pull/20) · [Extended reply corpus](https://github.com/Epiphytic/marmish-oddlang/pull/22)
 - [x] Build the core, stream and partial command surfaces together and replay 25 unchanged tests on Darwin and Linux ARM64. [Three-member workspace](https://github.com/Epiphytic/marmish-oddlang/pull/25)
@@ -93,5 +93,10 @@ The principal feasibility risk is recovering intended behavior where only incide
 
 - [x] Extend ordered binary records with nullable metadata, inline signed values, typed guards, and hexadecimal views. [Binary metadata](../../language/binary-records.md#binary-metadata)
 - [x] Qualify the copy Manifest and Mtime against the pinned native original. [Native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/32)
-- [ ] Qualify the copy Checkpoint and its FileIdentity record against the pinned native original.
+- [x] Qualify the copy Checkpoint and its FileIdentity record against the pinned native original. [Native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/39)
 - [x] Qualify Manifest matching and the helper start and build consistency checks against the pinned native original. [Native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/33)
+- [x] Project nested checked codecs, fixed record fields and checksum footers with independent timing and error precedence witnesses. [Composite records](../../language/binary-records.md#composite-binary-records)
+- [x] Project bounded tagged frame variants and a one-frame incremental decoder. [Binary frame profile](../../language/binary-frames.md)
+- [x] Qualify the complete copy protocol library against every unchanged pinned native test and exact frame error controls on macOS ARM64. [Native receipt and structural inventory](https://github.com/Epiphytic/marmish-oddlang/pull/42)
+
+- [ ] Check composite slot bounds and member types against pinned external codec contracts before package emission.

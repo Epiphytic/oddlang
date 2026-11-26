@@ -19,6 +19,8 @@ struct Graph {
     id: String,
     #[serde(default)]
     constants: Vec<Constant>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    text_constants: Vec<TextConstant>,
     #[serde(default)]
     errors: Vec<ErrorType>,
     #[serde(default)]
@@ -31,6 +33,12 @@ struct Graph {
 struct Constant {
     id: String,
     value: Value,
+}
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct TextConstant {
+    id: String,
+    value: String,
 }
 #[derive(Deserialize, Serialize)]
 #[serde(untagged, deny_unknown_fields)]
@@ -154,6 +162,7 @@ enum Width {
     U32,
     U64,
     Usize,
+    I64,
 }
 
 impl Graph {
@@ -212,6 +221,7 @@ impl Graph {
             .constants
             .iter()
             .map(|c| &c.id)
+            .chain(self.text_constants.iter().map(|c| &c.id))
             .chain(self.errors.iter().map(|e| &e.id))
             .chain(self.results.iter().map(|r| &r.id))
             .chain(self.string_enums.iter().map(|e| &e.id))
@@ -395,6 +405,7 @@ pub fn build(graph: &Path, overlay: &Path, output: &Path) -> Result<()> {
     let binding: Binding =
         serde_json::from_slice(&read(overlay)?).map_err(|e| format!("shared Rust binding: {e}"))?;
     graph.constants.sort_by(|a, b| a.id.cmp(&b.id));
+    graph.text_constants.sort_by(|a, b| a.id.cmp(&b.id));
     graph.results.sort_by(|a, b| a.id.cmp(&b.id));
     graph.errors.sort_by(|a, b| a.id.cmp(&b.id));
     graph.string_enums.sort_by(|a, b| a.id.cmp(&b.id));

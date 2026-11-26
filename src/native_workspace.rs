@@ -31,6 +31,21 @@ fn write(path: &Path, data: impl AsRef<[u8]>) -> Result<()> {
     fs::write(path, data).map_err(|e| e.to_string())
 }
 
+fn merge_registry_patches(target: &mut toml::Table, patches: toml::Table) -> Result<()> {
+    for (crate_name, patch) in patches {
+        match target.entry(crate_name) {
+            toml::map::Entry::Vacant(slot) => {
+                slot.insert(patch);
+            }
+            toml::map::Entry::Occupied(slot) if slot.get() != &patch => {
+                return Err(format!("conflicting crates.io patch: {}", slot.key()));
+            }
+            toml::map::Entry::Occupied(_) => {}
+        }
+    }
+    Ok(())
+}
+
 pub fn build(path: &Path, destination: &Path) -> Result<()> {
     let path = path.canonicalize().map_err(|e| e.to_string())?;
     let base = path.parent().ok_or("missing workspace directory")?;
@@ -52,6 +67,7 @@ pub fn build(path: &Path, destination: &Path) -> Result<()> {
     let mut records = BTreeMap::new();
     let mut members = vec![];
     let mut has_binaries = false;
+    let mut registry_patches = toml::Table::new();
     for (name, member) in &workspace.members {
         if name.eq_ignore_ascii_case("target")
             || !name.bytes().next().is_some_and(|c| c.is_ascii_alphabetic())
@@ -79,6 +95,13 @@ pub fn build(path: &Path, destination: &Path) -> Result<()> {
             .parse::<toml::Table>()
             .map_err(|e| e.to_string())?;
         cargo.remove("workspace");
+        if let Some(patch) = cargo.remove("patch") {
+            let selected = patch
+                .get("crates-io")
+                .and_then(toml::Value::as_table)
+                .ok_or("missing generated crates.io patches")?;
+            merge_registry_patches(&mut registry_patches, selected.clone())?;
+        }
         let deps = cargo
             .get_mut("dependencies")
             .and_then(toml::Value::as_table_mut)
@@ -114,8 +137,11 @@ pub fn build(path: &Path, destination: &Path) -> Result<()> {
     }
     let lock = workspace.cargo_lock.read(base)?;
     write(&root.join("Cargo.lock"), &lock)?;
-    let manifest = toml::to_string_pretty(&json!({"workspace":{"resolver":"2","members":members}}))
-        .map_err(|e| e.to_string())?;
+    let mut manifest = json!({"workspace":{"resolver":"2","members":members}});
+    if !registry_patches.is_empty() {
+        manifest["patch"] = json!({"crates-io": registry_patches});
+    }
+    let manifest = toml::to_string_pretty(&manifest).map_err(|e| e.to_string())?;
     write(&root.join("Cargo.toml"), &manifest)?;
     let result = Command::new("cargo")
         .args(["metadata", "--offline", "--locked", "--format-version", "1"])
@@ -155,4 +181,36 @@ pub fn build(path: &Path, destination: &Path) -> Result<()> {
         serde_json::to_vec_pretty(&receipt).map_err(|e| e.to_string())?,
     )?;
     native_package::publish(&root, destination)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn workspace_accepts_agreeing_registry_pins_and_rejects_conflicts() {
+        let a: toml::Table = r#"
+[packet-storage]
+git = "https://example.org/packet-storage"
+rev = "1111111111111111111111111111111111111111"
+"#
+        .parse()
+        .unwrap();
+        let mut merged = toml::Table::new();
+        merge_registry_patches(&mut merged, a.clone()).unwrap();
+        merge_registry_patches(&mut merged, a.clone()).unwrap();
+        assert_eq!(merged, a);
+        let b = toml::to_string(&a)
+            .unwrap()
+            .replace(
+                "1111111111111111111111111111111111111111",
+                "2222222222222222222222222222222222222222",
+            )
+            .parse()
+            .unwrap();
+        assert_eq!(
+            merge_registry_patches(&mut merged, b).unwrap_err(),
+            "conflicting crates.io patch: packet-storage"
+        );
+    }
 }

@@ -29,6 +29,8 @@ struct Manifest {
     edition: String,
     #[serde(default)]
     dependencies: BTreeMap<String, Dependency>,
+    #[serde(default)]
+    registry_patches: BTreeMap<String, GitSource>,
     cargo_lock: Pin,
     #[serde(default)]
     binaries: Vec<Binary>,
@@ -84,6 +86,38 @@ struct Dependency {
     version: String,
     #[serde(default)]
     features: Vec<String>,
+    #[serde(rename = "defaultFeatures", alias = "default_features")]
+    default_features: Option<bool>,
+    source: Option<GitSource>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct GitSource {
+    git: String,
+    revision: String,
+}
+
+impl GitSource {
+    fn cargo(&self) -> Result<serde_json::Value> {
+        if !self.git.strip_prefix("https://").is_some_and(|url| {
+            url.split_once('/')
+                .is_some_and(|(host, path)| !host.is_empty() && !path.is_empty())
+                && !url.chars().any(|ch| {
+                    ch.is_control() || ch.is_whitespace() || matches!(ch, '@' | '?' | '#')
+                })
+        }) || self.revision.len() != 40
+            || !self
+                .revision
+                .bytes()
+                .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+        {
+            return Err(
+                "git dependency requires an HTTPS repository and full lowercase revision".into(),
+            );
+        }
+        Ok(serde_json::json!({"git":self.git,"rev":self.revision}))
+    }
 }
 
 #[derive(Deserialize)]
@@ -132,8 +166,12 @@ enum Kind {
     WireSchema,
     WireProtocol,
     BinaryRecord,
+    BinaryFragment,
+    BinaryFrame,
     FieldRelation,
     LocalStatusOwner,
+    ForegroundProfileOwner,
+    FileProfile,
 }
 
 #[derive(Deserialize)]
@@ -221,10 +259,20 @@ fn project(
             crate::field_relation::build(&path, &overlay, &output)?;
             "relations.rs"
         }
-        Kind::BinaryRecord => {
+        Kind::BinaryFrame => {
             let path = input.join("graph.json");
             io(fs::write(&path, graph))?;
-            crate::binary_record::build(&path, &overlay, &output)?;
+            crate::binary_frame::build(&path, &overlay, &output)?;
+            "frame.rs"
+        }
+        Kind::BinaryRecord | Kind::BinaryFragment => {
+            let path = input.join("graph.json");
+            io(fs::write(&path, graph))?;
+            if matches!(component.kind, Kind::BinaryFragment) {
+                crate::binary_record::build_bound_fragment(&path, &overlay, &output)?;
+            } else {
+                crate::binary_record::build(&path, &overlay, &output)?;
+            }
             "record.rs"
         }
         Kind::WireSchema => {
@@ -267,9 +315,21 @@ fn project(
             crate::endpoint_set::build(&path, &pin, Some((&overlay, &binding)), &output)?;
             "endpoint_set.rs"
         }
+        Kind::ForegroundProfileOwner => {
+            crate::foreground_profile_owner::build_bytes(
+                &graph,
+                &io(fs::read(&overlay))?,
+                &output,
+            )?;
+            "foreground.rs"
+        }
         Kind::LocalStatusOwner => {
             crate::local_status_owner::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
             "owner.rs"
+        }
+        Kind::FileProfile => {
+            crate::file_profile::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
+            "profile.rs"
         }
         Kind::LocalCommandClient => {
             crate::local_command_client::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
@@ -331,36 +391,71 @@ fn project(
     Ok((bytes, lock))
 }
 
+fn export_paths(component: &Component, entry: &str) -> Vec<Vec<String>> {
+    let entry = entry.to_owned();
+    let public = component.reexports.contains(&entry);
+    let mut paths = Vec::new();
+    if public || component.crate_reexports.contains(&entry) {
+        paths.push(vec![component.module.clone(), entry.clone()]);
+    }
+    if public
+        && component
+            .root_reexports
+            .as_ref()
+            .is_none_or(|roots| roots.contains(&entry))
+    {
+        paths.push(vec![entry]);
+    }
+    paths
+}
+
 fn validate_command_callbacks(components: &[Component], base: &Path) -> Result<()> {
-    let callbacks = components
+    let mut callbacks = Vec::new();
+    let status_owners = components
         .iter()
-        .filter(|component| matches!(component.kind, Kind::LocalCommandClient))
-        .map(|component| {
-            let callback = crate::local_command_client::callback(
+        .filter(|component| matches!(component.kind, Kind::LocalStatusOwner))
+        .flat_map(|component| export_paths(component, "BoundOwner"))
+        .collect::<BTreeSet<_>>();
+    let mut retained_stores = BTreeMap::new();
+    for component in components
+        .iter()
+        .filter(|component| matches!(component.kind, Kind::FileProfile))
+    {
+        if let Some(identity) = crate::file_profile::retained_stores(
+            &component.graph.read(base)?,
+            &component.overlay.read(base)?,
+        )? {
+            for path in export_paths(component, "open_retained_stores") {
+                if retained_stores.insert(path, identity.clone()).is_some() {
+                    return Err("duplicate retained store export".into());
+                }
+            }
+        }
+    }
+    for component in components {
+        let callback = match component.kind {
+            Kind::LocalCommandClient => crate::local_command_client::callback(
                 &component.graph.read(base)?,
                 &component.overlay.read(base)?,
-            )?;
-            Ok((component, callback))
-        })
-        .collect::<Result<Vec<_>>>()?;
+            )?,
+            Kind::ForegroundProfileOwner => crate::foreground_profile_owner::callback(
+                &component.graph.read(base)?,
+                &component.overlay.read(base)?,
+                &status_owners,
+                &retained_stores,
+            )?,
+            Kind::FileProfile => crate::file_profile::callback(
+                &component.graph.read(base)?,
+                &component.overlay.read(base)?,
+            )?,
+            _ => continue,
+        };
+        callbacks.push((component, callback));
+    }
     let mut exports = BTreeMap::new();
     for (component, callback) in &callbacks {
-        if !component.reexports.contains(&callback.entry)
-            && !component.crate_reexports.contains(&callback.entry)
-        {
-            continue;
-        }
-        exports.insert(
-            vec![component.module.clone(), callback.entry.clone()],
-            callback,
-        );
-        if component.reexports.contains(&callback.entry)
-            && component
-                .root_reexports
-                .as_ref()
-                .is_none_or(|roots| roots.contains(&callback.entry))
-        {
-            exports.insert(vec![callback.entry.clone()], callback);
+        for path in export_paths(component, &callback.entry) {
+            exports.insert(path, callback);
         }
     }
     for component in components
@@ -397,7 +492,16 @@ fn cargo_manifest(manifest: &Manifest) -> Result<String> {
             return Err(format!("invalid dependency: {name}"));
         }
         semver::Version::parse(&dependency.version).map_err(|e| format!("{name} version: {e}"))?;
-        dependencies.insert(name, serde_json::json!({"version":format!("={}",dependency.version),"features":dependency.features}));
+        let mut record = match &dependency.source {
+            Some(source) => source.cargo()?,
+            None => serde_json::json!({}),
+        };
+        record["version"] = format!("={}", dependency.version).into();
+        record["features"] = serde_json::json!(dependency.features);
+        if let Some(default_features) = dependency.default_features {
+            record["default-features"] = default_features.into();
+        }
+        dependencies.insert(name, record);
     }
     if manifest
         .components
@@ -410,8 +514,18 @@ fn cargo_manifest(manifest: &Manifest) -> Result<String> {
     {
         return Err("cli-surface requires the pinned clap 4.6.7 provider".into());
     }
-    let cargo = serde_json::json!({"package":{"name":manifest.name,"version":manifest.version,
+    let mut cargo = serde_json::json!({"package":{"name":manifest.name,"version":manifest.version,
         "edition":manifest.edition,"publish":false},"dependencies":dependencies,"workspace":{}});
+    if !manifest.registry_patches.is_empty() {
+        let mut patches = BTreeMap::new();
+        for (name, source) in &manifest.registry_patches {
+            if !valid_name(name) {
+                return Err(format!("invalid registry patch crate: {name}"));
+            }
+            patches.insert(name, source.cargo()?);
+        }
+        cargo["patch"] = serde_json::json!({"crates-io":patches});
+    }
     toml::to_string_pretty(&cargo).map_err(|e| format!("Cargo manifest: {e}"))
 }
 
@@ -450,7 +564,7 @@ pub(super) fn build_pinned(raw: &[u8], base: &Path, output: &Path, standalone: b
     let mut records = Vec::new();
     let mut root_exports = String::new();
     for (index, component) in manifest.components.iter().enumerate() {
-        if matches!(component.kind, Kind::FieldRelation)
+        if matches!(component.kind, Kind::FieldRelation | Kind::BinaryFragment)
             && (!component.reexports.is_empty()
                 || !component.crate_reexports.is_empty()
                 || component
@@ -458,13 +572,13 @@ pub(super) fn build_pinned(raw: &[u8], base: &Path, output: &Path, standalone: b
                     .as_ref()
                     .is_some_and(|names| !names.is_empty()))
         {
-            return Err("field relation component cannot reexport items".into());
+            return Err("field relation or binary fragment component cannot reexport items".into());
         }
 
         if !ident(&component.module)
             || (component.reexports.is_empty()
                 && component.crate_reexports.is_empty()
-                && !matches!(component.kind, Kind::FieldRelation))
+                && !matches!(component.kind, Kind::FieldRelation | Kind::BinaryFragment))
         {
             return Err("invalid module or empty reexports".into());
         }
@@ -662,5 +776,37 @@ mod binary_tests {
             String::from_utf8_lossy(&run.stderr)
         );
         assert_eq!(run.stdout, b"ready\n");
+    }
+}
+
+#[cfg(test)]
+mod git_sources_tests {
+    use super::GitSource;
+
+    #[test]
+    fn admits_revision_pinned_https_only() {
+        let git = "https://example.invalid/team/library".to_owned();
+        let revision = "a".repeat(40);
+        let source = GitSource {
+            git: git.clone(),
+            revision: revision.clone(),
+        };
+        assert_eq!(source.cargo().unwrap()["rev"], revision);
+        for source in [
+            GitSource {
+                git: git.clone(),
+                revision: "main".into(),
+            },
+            GitSource {
+                git: "file:///checkout".into(),
+                revision: revision.clone(),
+            },
+            GitSource {
+                git: "https://secret@example.invalid/lib".into(),
+                revision,
+            },
+        ] {
+            assert!(source.cargo().is_err());
+        }
     }
 }

@@ -25,6 +25,11 @@ fn run(args: &[String]) -> Result<(), String> {
             oddlang::local_status_owner::build(graph.as_ref(), binding.as_ref(), out.as_ref())
         }
         [group, kind, target, graph, binding, out]
+           if group == "build" && kind == "file-profile" && target == "rust" =>
+       {
+           oddlang::file_profile::build(graph.as_ref(), binding.as_ref(), out.as_ref())
+        }
+        [group, kind, target, graph, binding, out]
             if group == "build" && kind == "local-command-client" && target == "rust" =>
         {
             oddlang::local_command_client::build(graph.as_ref(), binding.as_ref(), out.as_ref())
@@ -47,6 +52,11 @@ fn run(args: &[String]) -> Result<(), String> {
             if cmd == "build" && kind == "field-relation" && target == "rust" =>
         {
             oddlang::field_relation::build(graph.as_ref(), overlay.as_ref(), output.as_ref())
+        }
+        [cmd, kind, target, graph, overlay, output]
+            if cmd == "build" && kind == "binary-frame" && target == "rust" =>
+        {
+            oddlang::binary_frame::build(graph.as_ref(), overlay.as_ref(), output.as_ref())
         }
         [cmd, kind, target, graph, overlay, output]
             if cmd == "build" && kind == "binary-record" && target == "rust" =>
@@ -443,7 +453,7 @@ fn run(args: &[String]) -> Result<(), String> {
             oddlang::targets::build(&load_model(dir)?, std::path::Path::new(out))
                 .map_err(|e| e.to_string())
         }
-        _ => Err("usage: oddlang recover record-writer SOURCE SELECTION OUTPUT | recover wire-schema SOURCE SELECTION OUTPUT | build wire-schema rust GRAPH OVERLAY OUTPUT | build wire-protocol rust SHAPE SHAPE_BINDING GRAPH OVERLAY OUTPUT | check PROJECT | impact PROJECT IRI | build PROJECT OUTPUT | recover rust MANIFEST --profile PROFILE --out OUTPUT | recover rust-shapes MANIFEST --profile PROFILE --out OUTPUT | recover tagged-contract SOURCE SELECTION OVERLAY VARIANT OUTPUT | build binary-record rust GRAPH OVERLAY OUTPUT | build field-relation rust GRAPH OVERLAY OUTPUT | build shared-declarations rust GRAPH OVERLAY OUTPUT | build integrity-block rust GRAPH OVERLAY OUTPUT | build local-status-owner rust GRAPH BINDING OUTPUT | build local-command-client rust GRAPH BINDING OUTPUT | recover cli-surface SOURCE SELECTION GRAPH | build cli-surface rust GRAPH BINDING OUTPUT | build native-package rust MANIFEST OUTPUT | build native-workspace rust MANIFEST OUTPUT | build json-envelope rust GRAPH OVERLAY OUTPUT | sequence-journal digest GRAPH | sequence-journal overlay-digest OVERLAY | build sequence-journal rust GRAPH OVERLAY OUTPUT --graph-sha256 PIN --overlay-sha256 PIN | endpoint-set digest GRAPH | endpoint-set overlay-digest OVERLAY | build endpoint-set rust GRAPH [OVERLAY] OUTPUT --graph-sha256 PIN [--overlay-sha256 PIN] | tagged-wire digest GRAPH | build tagged-wire TARGET GRAPH OUTPUT --graph-sha256 PIN | import rust-tree MANIFEST PACKAGE OUTPUT | build rust-tree BUNDLE OUTPUT --bundle-sha256 PIN".into()),
+        _ => Err("usage: oddlang recover record-writer SOURCE SELECTION OUTPUT | recover wire-schema SOURCE SELECTION OUTPUT | build wire-schema rust GRAPH OVERLAY OUTPUT | build wire-protocol rust SHAPE SHAPE_BINDING GRAPH OVERLAY OUTPUT | check PROJECT | impact PROJECT IRI | build PROJECT OUTPUT | recover rust MANIFEST --profile PROFILE --out OUTPUT | recover rust-shapes MANIFEST --profile PROFILE --out OUTPUT | recover tagged-contract SOURCE SELECTION OVERLAY VARIANT OUTPUT | build binary-frame rust GRAPH OVERLAY OUTPUT | build file-profile rust GRAPH BINDING OUTPUT | build binary-record rust GRAPH OVERLAY OUTPUT | build field-relation rust GRAPH OVERLAY OUTPUT | build shared-declarations rust GRAPH OVERLAY OUTPUT | build integrity-block rust GRAPH OVERLAY OUTPUT | build local-status-owner rust GRAPH BINDING OUTPUT | build local-command-client rust GRAPH BINDING OUTPUT | recover cli-surface SOURCE SELECTION GRAPH | build cli-surface rust GRAPH BINDING OUTPUT | build native-package rust MANIFEST OUTPUT | build native-workspace rust MANIFEST OUTPUT | build json-envelope rust GRAPH OVERLAY OUTPUT | sequence-journal digest GRAPH | sequence-journal overlay-digest OVERLAY | build sequence-journal rust GRAPH OVERLAY OUTPUT --graph-sha256 PIN --overlay-sha256 PIN | endpoint-set digest GRAPH | endpoint-set overlay-digest OVERLAY | build endpoint-set rust GRAPH [OVERLAY] OUTPUT --graph-sha256 PIN [--overlay-sha256 PIN] | tagged-wire digest GRAPH | build tagged-wire TARGET GRAPH OUTPUT --graph-sha256 PIN | import rust-tree MANIFEST PACKAGE OUTPUT | build rust-tree BUNDLE OUTPUT --bundle-sha256 PIN".into()),
     }
 }
 fn main() -> ExitCode {

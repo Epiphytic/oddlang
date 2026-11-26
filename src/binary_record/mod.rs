@@ -1,5 +1,7 @@
 //! Ordered, bounded binary records with named decode and validation failures.
+mod composite;
 mod extension;
+use composite::{Constraint, ExternalRecord, Integrity, IntegrityBinding, RecordBinding};
 mod rust;
 use extension::{Guard, HashBinding, HashView, Payload, Record};
 
@@ -39,6 +41,19 @@ struct Graph {
         deserialize_with = "unique_map"
     )]
     hash_views: BTreeMap<String, HashView>,
+    #[serde(
+        rename = "externalRecords",
+        default,
+        skip_serializing_if = "BTreeMap::is_empty",
+        deserialize_with = "unique_map"
+    )]
+    external_records: BTreeMap<String, ExternalRecord>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    constraints: Vec<Constraint>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    integrity: Option<Integrity>,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    fragment: bool,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -64,6 +79,12 @@ enum Encoding {
     Literal {
         bytes: Vec<u8>,
         error: String,
+        #[serde(
+            rename = "requireFull",
+            default,
+            skip_serializing_if = "std::ops::Not::not"
+        )]
+        require_full: bool,
     },
     LengthPrefixedLiteral {
         bytes: Vec<u8>,
@@ -86,6 +107,17 @@ enum Encoding {
     },
     Bool {
         error: String,
+    },
+    SignedBe {
+        bits: u8,
+    },
+    Inline {
+        id: String,
+    },
+    Nested {
+        record: String,
+        maximum: u32,
+        overflow: String,
     },
     Optional {
         payload: Payload,
@@ -142,6 +174,8 @@ impl Encoding {
             | Self::AsciiAtom {
                 overflow, error, ..
             } => vec![overflow, error],
+            Self::Nested { overflow, .. } => vec![overflow],
+            Self::SignedBe { .. } | Self::Inline { .. } => Vec::new(),
             Self::Bytes {
                 overflow,
                 value_error,
@@ -183,6 +217,12 @@ impl Encoding {
                 fixed((*bits / 8).into())
             }
             Self::UnsignedBe { .. } => Err("invalid unsigned width or range".into()),
+            Self::SignedBe { bits } if matches!(bits, 8 | 16 | 32 | 64) => {
+                fixed((*bits / 8).into())
+            }
+            Self::SignedBe { .. } => Err("invalid signed integer width".into()),
+            Self::Inline { id } => fixed(Payload::Record { id: id.clone() }.width(records)?),
+            Self::Nested { maximum, .. } => framed(0, *maximum),
             Self::FixedBytes { size } if *size != 0 => fixed((*size).into()),
             Self::FixedBytes { .. } => Err("empty fixed byte array".into()),
             Self::Literal { bytes, .. } if !bytes.is_empty() => fixed(bytes.len() as u64),
@@ -232,6 +272,16 @@ struct Binding {
         deserialize_with = "unique_map"
     )]
     hash_views: BTreeMap<String, HashBinding>,
+    #[serde(
+        default,
+        skip_serializing_if = "BTreeMap::is_empty",
+        deserialize_with = "unique_map"
+    )]
+    external_records: BTreeMap<String, RecordBinding>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    integrity: Option<IntegrityBinding>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    existing_type: Option<String>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -273,6 +323,18 @@ impl Graph {
         {
             return Err("invalid binary record format, layout, or native declaration".into());
         }
+        if (self.fragment && self.integrity.is_some())
+            || binding.existing_type.as_deref().is_some_and(|path| {
+                !self.fragment
+                    || !absolute_path(path)
+                    || !self.hash_views.is_empty()
+                    || !self.records.is_empty()
+            })
+        {
+            return Err(
+                "prefix fragments require an unsealed layout and a qualified existing type".into(),
+            );
+        }
         iri(&self.id)?;
         let mut ids = BTreeSet::from([self.id.as_str()]);
         let mut names = BTreeSet::new();
@@ -287,6 +349,10 @@ impl Graph {
             self.errors.trailing.as_str(),
         ]);
         let (mut minimum, mut maximum) = (0u64, 0u64);
+        if self.integrity.is_some() {
+            minimum += 32;
+            maximum += 32;
+        }
         for slot in &self.layout {
             iri(&slot.id)?;
             if !ids.insert(&slot.id) {
@@ -353,6 +419,7 @@ impl Graph {
             }
         }
         extension::validate_checks(self, binding, &mut ids, &mut errors)?;
+        composite::validate(self, binding, &mut ids, &mut errors)?;
         if !errors
             .iter()
             .copied()
@@ -395,14 +462,31 @@ impl Graph {
         for (id, view) in &self.hash_views {
             obligations.push(json!({"declaration":id,"role":"typed-hash-view","qualification":witness,"expected":view}));
         }
+        for constraint in &self.constraints {
+            obligations.push(json!({"declaration":constraint.id,"role":"composite-binary-constraint","qualification":witness,"expected":constraint}));
+        }
+        if let Some(integrity) = &self.integrity {
+            obligations.push(json!({"declaration":self.id,"role":"binary-integrity","qualification":witness,"expected":integrity}));
+        }
         json!({"domain": self.id, "obligations": obligations})
     }
 }
 
 pub fn build(graph: &Path, binding: &Path, output: &Path) -> Result<()> {
+    build_record(graph, binding, output, false)
+}
+
+pub(crate) fn build_bound_fragment(graph: &Path, binding: &Path, output: &Path) -> Result<()> {
+    build_record(graph, binding, output, true)
+}
+
+fn build_record(graph: &Path, binding: &Path, output: &Path, require_bound: bool) -> Result<()> {
     let graph: Graph = json(graph)?;
     let binding: Binding = json(binding)?;
     graph.validate(&binding)?;
+    if require_bound && (!graph.fragment || binding.existing_type.is_none()) {
+        return Err("binary fragment components must bind an existing type".into());
+    }
     let source = rust::render(&graph, &binding);
     let obligations = encode(&graph.obligations())?;
     let lock = encode(&json!({
