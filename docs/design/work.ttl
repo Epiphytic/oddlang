@@ -1352,7 +1352,7 @@ w:releaseVersionTextGrammar a p:Task ;
     rdfs:label "Recover the pure release-version text grammar" ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
     p:dependsOn w:wholeMarmishFreeze ;
-    p:status p:active ;
+    p:status p:done ; p:evidence w:releaseVersionGrammarFixture, w:releaseVersionGrammarReceipt ;
     p:acceptance "Recover ordered prefix choice, ASCII decimal bounds, optional delimited suffix and entire-input consumption from pinned source. Match released vectors and source mutations against a native witness and an unrelated grammar." .
 w:wholeMarmishDistribution p:dependsOn w:releaseVersionTextGrammar .
 
@@ -1367,6 +1367,12 @@ w:releaseVersionNativeScope a p:Task ;
     rdfs:label "Qualify release-version method and name resolution in its original native module" ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
     p:dependsOn w:wholeMarmishFreeze ;
-    p:status p:active ;
+    p:status p:done ; p:evidence w:releaseVersionGrammarReceipt ;
     p:acceptance "Pin the source module digest and exact selection span. Exercise the released vectors and supported mutation through the selected predicates in the original native crate scope, with an added test harness and no production changes outside the declared mutation." .
 w:releaseVersionTextGrammar p:dependsOn w:releaseVersionNativeScope .
+
+w:releaseVersionGrammarFixture a p:Artifact ;
+    p:location "tests/text_grammar.rs" .
+
+w:releaseVersionGrammarReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/41f25a5ea27bcd0b707222da3605ba20bb982c4c/verification/whole/release-version-grammar/darwin-arm64/receipt.json> .
