@@ -1549,5 +1549,11 @@ w:publicDiagnosticsCliConvergence a p:Task ;
     rdfs:label "Converge qualified public imports, terminal CLI and structured diagnostics" ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
     p:dependsOn w:publicApiConvergence, w:terminalAuxiliaryCli, w:structuredDiagnosticsProgram ;
-    p:status p:active ;
+    p:status p:done ;
+    p:evidence w:publicDiagnosticsCliDarwin, w:publicDiagnosticsCliLinux ;
     p:acceptance "Use a component-keyed merge to preserve all seven members and the public API, reject incompatible edits, compare the 132 archived Darwin help/version/usage cases and native Linux help/version observations, and account for every original Darwin public import." .
+
+w:publicDiagnosticsCliDarwin a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/37a5be63638cfc7a6796a7058313bc5c03be5519/verification/whole/converged-diagnostics-cli/aarch64-apple-darwin.json> .
+w:publicDiagnosticsCliLinux a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/37a5be63638cfc7a6796a7058313bc5c03be5519/verification/whole/converged-diagnostics-cli/aarch64-unknown-linux-gnu.json> .
