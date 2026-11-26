@@ -525,3 +525,36 @@ w:contractRecoveryDecision a p:Decision ;
     p:source w:contractRecoveryClarification, w:contractRecoveryDesign ;
     p:supersedes w:losslessRustExperimentDecision ;
     p:reason "Stable contract structure and observable semantics enable native implementations across frameworks and languages. Compatibility is established at a declared boundary using independent evidence." .
+
+w:portableRustPlan a p:Artifact ; rdfs:label "Portable Rust recovery implementation plan" ; p:location "docs/superpowers/plans/2026-11-25-portable-rust-recovery.md" .
+
+w:portableRustBoundary a p:Task ; rdfs:label "Freeze project boundaries and independent observations" ;
+    p:milestone w:marmishMilestone ; p:source w:portableRustPlan ; p:status p:planned ;
+    p:acceptance "Pin inventory, applicable surfaces, vectors and holdouts. Verify oracle sensitivity on the original." .
+
+w:portableRustStructure a p:Task ; rdfs:label "Recover source-free structural inventory" ;
+    p:milestone w:marmishMilestone ; p:source w:portableRustPlan ; p:status p:planned ;
+    p:dependsOn w:portableRustBoundary ;
+    p:acceptance "Independently reconcile all selected declarations and relationship endpoints and detect a missing item and a misdirected edge." .
+
+w:portableRustSemantics a p:Task ; rdfs:label "Recover processing and interaction contracts" ;
+    p:milestone w:marmishMilestone ; p:source w:portableRustPlan ; p:status p:planned ;
+    p:dependsOn w:portableRustStructure ;
+    p:acceptance "Publish reviewed portable rules for wire, errors, CLI and state. Measure unresolved and manually authored rules." .
+
+w:portableRustTargets a p:Task ; rdfs:label "Build native targets from the portable contract" ;
+    p:milestone w:marmishMilestone ; p:source w:portableRustPlan ; p:status p:planned ;
+    p:dependsOn w:portableRustSemantics ;
+    p:acceptance "Build native Rust and Node targets without upstream inputs and qualify with hints removed and a library substitution." .
+
+w:portableRustQualification a p:Task ; rdfs:label "Qualify the slice and expand across the workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:portableRustPlan ; p:status p:planned ;
+    p:dependsOn w:portableRustTargets ;
+    p:acceptance "Publish per-surface evidence and expand until every promised project row passes source-independent build and consumer checks." .
+
+w:portableRustReviewRecord a p:Artifact ; p:location "docs/design/portable-rust-plan-review.md" .
+w:portableRustReview a p:Finding ; rdfs:label "Separate the public Rust binding, bound the rule vocabulary, model process channels, declare roles and test library substitution and graph pins" ; p:source w:portableRustReviewRecord .
+w:portableRustBoundary p:addresses w:portableRustReview .
+w:portableRustStructure p:addresses w:portableRustReview .
+w:portableRustSemantics p:addresses w:portableRustReview .
+w:portableRustTargets p:addresses w:portableRustReview .
