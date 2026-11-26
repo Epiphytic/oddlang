@@ -836,7 +836,8 @@ w:copyManifestNativeReview a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/2926c6aefdaca70ff1370d31f3d670aa84fb5973/docs/reviews/oddlang-copy-manifest.md" .
 
 w:copyCheckpointQualification a p:Task ; rdfs:label "Qualify a native copy Checkpoint and its FileIdentity value" ;
-    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:evidence w:copyCheckpointNativeReceipt ;
     p:dependsOn w:copyManifestQualification ;
     p:acceptance "Reproduce checked Checkpoint encoding and decoding, including native FileIdentity shapes and exact errors." .
 w:wholeMarmishProtocols p:dependsOn w:copyCheckpointQualification .
@@ -860,3 +861,17 @@ w:compositeBinaryRecords a p:Task ; rdfs:label "Project checked nested and check
     p:evidence w:binaryCompositeFixture .
 w:binaryCompositeFixture a p:Artifact ; p:location "verification/binary-record/composite.py" .
 w:copyCheckpointQualification p:dependsOn w:compositeBinaryRecords .
+
+w:copyCheckpointNativeReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/6f6fb441b8be647f40092ca3f76aedabe79040f1/verification/whole/copy-checkpoint/reference-aarch64-apple-darwin.json" .
+w:copyCheckpointNativeReview a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/6f6fb441b8be647f40092ca3f76aedabe79040f1/docs/reviews/oddlang-copy-checkpoint.md" .
+w:checkpointDecodePrecedenceReview a p:Finding ;
+    rdfs:label "Keep footer, complete-version reads, inner record errors and deferred Checkpoint validation in order" ;
+    p:source w:copyCheckpointNativeReview .
+w:compositeBinaryRecords p:addresses w:checkpointDecodePrecedenceReview .
+w:compositeExternalContractLinkage a p:Task ;
+    rdfs:label "Check composite slot bounds and member types against pinned external codec contracts" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned ;
+    p:dependsOn w:compositeBinaryRecords ;
+    p:acceptance "Verify external codec identities, independently declared inner limits and exact native types before emitting a composed package." .
