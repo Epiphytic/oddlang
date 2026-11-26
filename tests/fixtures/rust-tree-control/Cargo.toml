@@ -1,0 +1,16 @@
+[package]
+name = "rust-tree-control"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[lib]
+name = "roundtrip_contract_probe"
+
+[features]
+extra = []
+
+[dependencies]
+roundtrip_proc = { package = "bon", version = "=3.10.3" }
