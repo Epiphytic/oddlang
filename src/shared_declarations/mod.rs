@@ -59,6 +59,8 @@ struct ErrorVariant {
     id: String,
     payload: Payload,
     message: Vec<Segment>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    category: Option<String>,
 }
 #[derive(Deserialize, Serialize, Clone, Copy, PartialEq)]
 #[serde(rename_all = "lowercase")]
@@ -118,6 +120,12 @@ struct Binding {
         deserialize_with = "unique_map"
     )]
     external_error_types: BTreeMap<String, String>,
+    #[serde(
+        default,
+        skip_serializing_if = "BTreeMap::is_empty",
+        deserialize_with = "unique_map"
+    )]
+    error_category_methods: BTreeMap<String, String>,
     #[serde(deserialize_with = "unique_map")]
     names: BTreeMap<String, String>,
     #[serde(default, deserialize_with = "unique_map")]
@@ -286,12 +294,42 @@ impl Graph {
                 return Err(format!("unresolved result error: {}", alias.error));
             }
         }
+        let mut categorized = BTreeSet::new();
         for error in &self.errors {
+            if error
+                .variants
+                .iter()
+                .any(|variant| variant.category.is_some())
+            {
+                let method = binding
+                    .error_category_methods
+                    .get(&error.id)
+                    .ok_or_else(|| format!("missing native category method: {}", error.id))?;
+                if !checked_method_name(method)
+                    || binding.external_error_types.contains_key(&error.id)
+                    || error.variants.iter().any(|variant| {
+                        variant.payload != Payload::None
+                            || variant.category.as_ref().is_none_or(String::is_empty)
+                    })
+                {
+                    return Err(format!(
+                        "categories require a local exact unit error table: {}",
+                        error.id
+                    ));
+                }
+                categorized.insert(&error.id);
+            }
             for v in &error.variants {
                 if v.message.is_empty() || v.message.iter().any(|seg| matches!(seg, Segment::Payload {payload} if !payload || v.payload == Payload::None)) {
                     return Err(format!("invalid typed display message: {}",v.id));
                 }
             }
+        }
+        if !categorized
+            .into_iter()
+            .eq(binding.error_category_methods.keys())
+        {
+            return Err("native category methods must bind exactly the categorized errors".into());
         }
         for e in &self.string_enums {
             if let Some(numbering) = &e.numbers {
@@ -341,6 +379,22 @@ impl Graph {
     }
 }
 
+pub(crate) fn checked_method_name(name: &str) -> bool {
+    native_ident(name)
+        && !matches!(
+            name,
+            "clone"
+                | "clone_from"
+                | "eq"
+                | "ne"
+                | "hash"
+                | "fmt"
+                | "to_string"
+                | "source"
+                | "description"
+                | "cause"
+        )
+}
 fn native_ident(name: &str) -> bool {
     name.bytes()
         .next()

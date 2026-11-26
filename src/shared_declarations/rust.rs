@@ -81,6 +81,17 @@ pub(super) fn render(g: &Graph, b: &Binding) -> Result<String> {
             "        }}\n    }}\n}}\nimpl ::core::error::Error for {name} {{}}"
         )
         .unwrap();
+        if let Some(method) = b.error_category_methods.get(&e.id) {
+            writeln!(out, "impl {name} {{\n    pub fn {method}(self) -> &'static ::core::primitive::str {{\n        match self {{").unwrap();
+            for id in &b.variant_order[&e.id] {
+                let category = variants[id]
+                    .category
+                    .as_ref()
+                    .expect("validated error category");
+                writeln!(out, "            Self::{} => {category:?},", b.name(id)?).unwrap();
+            }
+            out.push_str("        }\n    }\n}\n");
+        }
     }
     for a in &g.results {
         writeln!(

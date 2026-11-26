@@ -19,6 +19,11 @@ fn import_has_profile(path: &str, profile: &str) -> bool {
 
 fn run(args: &[String]) -> Result<(), String> {
     match args {
+        [cmd, kind, target, graph, overlay, output]
+            if cmd == "build" && kind == "checked-values" && target == "rust" =>
+        {
+            oddlang::checked_values::build(graph.as_ref(), overlay.as_ref(), output.as_ref())
+        }
         [cmd, kind, root, source, evidence, selection, template, hints, output]
             if cmd == "recover" && kind == "frame-fragment" =>
         {
@@ -424,7 +429,7 @@ fn run(args: &[String]) -> Result<(), String> {
             oddlang::targets::build(&load_model(dir)?, std::path::Path::new(out))
                 .map_err(|e| e.to_string())
         }
-        _ => Err("usage: oddlang check PROJECT | impact PROJECT IRI | build PROJECT OUTPUT | recover rust MANIFEST --profile PROFILE --out OUTPUT | recover rust-shapes MANIFEST --profile PROFILE --out OUTPUT | recover tagged-contract SOURCE SELECTION OVERLAY VARIANT OUTPUT | recover frame-fragment CRATE_ROOT SOURCE EVIDENCE SELECTION TEMPLATE OVERLAY OUTPUT | recover frame-guards CRATE_ROOT SOURCE EVIDENCE SELECTION TEMPLATE OVERLAY GRAPH | recover tagged-frame CRATE_ROOT SOURCE EVIDENCE SELECTION TEMPLATE OVERLAY OUTPUT | recover field-conjunction CRATE_ROOT SOURCE EVIDENCE SELECTION TEMPLATE OVERLAY GRAPH | build field-relation rust GRAPH OVERLAY OUTPUT | build binary-frame rust GRAPH OVERLAY OUTPUT | build binary-record rust GRAPH OVERLAY OUTPUT | build shared-declarations rust GRAPH OVERLAY OUTPUT | build integrity-block rust GRAPH OVERLAY OUTPUT | build native-package rust MANIFEST OUTPUT | build json-envelope rust GRAPH OVERLAY OUTPUT | endpoint-set digest GRAPH | endpoint-set overlay-digest OVERLAY | build endpoint-set rust GRAPH [OVERLAY] OUTPUT --graph-sha256 PIN [--overlay-sha256 PIN] | tagged-wire digest GRAPH | build tagged-wire TARGET GRAPH OUTPUT --graph-sha256 PIN | import rust-tree MANIFEST PACKAGE OUTPUT | build rust-tree BUNDLE OUTPUT --bundle-sha256 PIN".into()),
+        _ => Err("usage: oddlang check PROJECT | impact PROJECT IRI | build PROJECT OUTPUT | recover rust MANIFEST --profile PROFILE --out OUTPUT | recover rust-shapes MANIFEST --profile PROFILE --out OUTPUT | recover tagged-contract SOURCE SELECTION OVERLAY VARIANT OUTPUT | recover frame-fragment CRATE_ROOT SOURCE EVIDENCE SELECTION TEMPLATE OVERLAY OUTPUT | recover frame-guards CRATE_ROOT SOURCE EVIDENCE SELECTION TEMPLATE OVERLAY GRAPH | recover tagged-frame CRATE_ROOT SOURCE EVIDENCE SELECTION TEMPLATE OVERLAY OUTPUT | recover field-conjunction CRATE_ROOT SOURCE EVIDENCE SELECTION TEMPLATE OVERLAY GRAPH | build checked-values rust GRAPH OVERLAY OUTPUT | build field-relation rust GRAPH OVERLAY OUTPUT | build binary-frame rust GRAPH OVERLAY OUTPUT | build binary-record rust GRAPH OVERLAY OUTPUT | build shared-declarations rust GRAPH OVERLAY OUTPUT | build integrity-block rust GRAPH OVERLAY OUTPUT | build native-package rust MANIFEST OUTPUT | build json-envelope rust GRAPH OVERLAY OUTPUT | endpoint-set digest GRAPH | endpoint-set overlay-digest OVERLAY | build endpoint-set rust GRAPH [OVERLAY] OUTPUT --graph-sha256 PIN [--overlay-sha256 PIN] | tagged-wire digest GRAPH | build tagged-wire TARGET GRAPH OUTPUT --graph-sha256 PIN | import rust-tree MANIFEST PACKAGE OUTPUT | build rust-tree BUNDLE OUTPUT --bundle-sha256 PIN".into()),
     }
 }
 fn main() -> ExitCode {

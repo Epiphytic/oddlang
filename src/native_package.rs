@@ -81,6 +81,7 @@ enum Kind {
     EndpointSet,
     IntegrityBlock,
     SharedDeclarations,
+    CheckedValues,
     WireSchema,
     BinaryRecord,
     BinaryFragment,
@@ -183,6 +184,12 @@ fn project(
             io(fs::write(&path, graph))?;
             crate::wire_schema::build(&path, &overlay, &output)?;
             "wire.rs"
+        }
+        Kind::CheckedValues => {
+            let path = input.join("graph.json");
+            io(fs::write(&path, graph))?;
+            crate::checked_values::build(&path, &overlay, &output)?;
+            "values.rs"
         }
         Kind::SharedDeclarations => {
             let path = input.join("graph.json");

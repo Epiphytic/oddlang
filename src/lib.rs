@@ -1,6 +1,7 @@
 pub mod assemble;
 pub mod binary_frame;
 pub mod binary_record;
+pub mod checked_values;
 pub mod contracts;
 pub mod endpoint_set;
 pub mod evolution;
