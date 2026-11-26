@@ -650,3 +650,21 @@ w:linuxBridgeLockProbe a p:Finding ;
     rdfs:label "The Linux original holds an OFD lock while an independent BSD flock succeeds on the same inode. The Linux observer needs a conflicting byte-range lock." ;
     p:source w:wholeLinuxArmBaseline .
 w:wholeMarmishFreeze p:addresses w:linuxBridgeLockProbe ; p:evidence w:wholeLinuxArmBaseline .
+
+w:wholeShapeProjection a p:Task ;
+    rdfs:label "Recover portable ordered records, variants and member types" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Recover typed shape declarations from a pinned Rust build, preserve member order and fail explicitly on incomplete types; detect type, order and feature mutations in unrelated inputs." ;
+    p:evidence w:wholeShapeFixture .
+w:wholeShapeFixture a p:Artifact ;
+    p:location "https://github.com/Epiphytic/oddlang/blob/5ec32f8177cf9d7b4ffcce0c192c5553af7f2042/verification/rust-recovery/test_shapes.py" .
+w:wholeMarmishStructure p:dependsOn w:wholeShapeProjection .
+w:wholeReferenceState a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/b54108d/verification/whole/state" .
+w:wholeReferenceCLI a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/e8633a2/verification/whole/cli" .
+w:wholeReferenceAMD64 a p:Artifact ;
+    p:location "https://github.com/Epiphytic/oddlang/actions/runs/45772674699" .
+w:wholeReferenceSealedLinux a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/69a766b/verification/whole/linux/aarch64-unknown-linux-gnu" .
+w:wholeMarmishFreeze p:evidence w:wholeReferenceState, w:wholeReferenceCLI, w:wholeReferenceAMD64, w:wholeReferenceSealedLinux .
