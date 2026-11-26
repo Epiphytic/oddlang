@@ -1339,5 +1339,11 @@ w:upstreamNamedWorkspaceHarnesses a p:Task ;
     rdfs:label "Qualify three unchanged upstream harnesses on the prior five-member workspace" ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
     p:dependsOn w:unifiedVaultEngineWorkspace ;
-    p:status p:active ;
-    p:acceptance "Run the unchanged upstream core contracts, stream library and native process-limit harnesses against the pinned original and the prior five-member generated workspace on native macOS ARM64 and Linux ARM64. Record named tests and exact outcomes in pinned platform receipts." .
+    p:status p:done ; p:evidence w:upstreamNamedDarwinReceipt, w:upstreamNamedLinuxReceipt ;
+    p:acceptance "Run the unchanged upstream core contracts, stream library and native process-limit harnesses against the pinned original and the prior five-member generated workspace on native macOS ARM64 and Linux ARM64. Record named tests and exact outcomes in pinned platform receipts. Match seven core, 29 stream and one process-limit test on each host." .
+
+w:upstreamNamedDarwinReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/862203ff9d50229624abaa582701627e156db9be/verification/whole/suite/combined-v7-aarch64-apple-darwin.json> .
+
+w:upstreamNamedLinuxReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/862203ff9d50229624abaa582701627e156db9be/verification/whole/suite/combined-v7-aarch64-unknown-linux-gnu.json> .
