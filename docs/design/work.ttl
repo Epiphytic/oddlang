@@ -1069,3 +1069,7 @@ w:publicTypeBindingCutFinding a p:Finding ;
     rdfs:label "Bound public module checking without discarding cycle edges" ;
     p:source w:publicTypeBindingPlan .
 w:publicTypeBindingGraph p:addresses w:publicTypeBindingCutFinding .
+
+w:publicTypeWorkspaceAudit a p:Task ; rdfs:label "Qualify upstream and generated workspace libraries and compile changed native import spellings" ;
+    p:milestone w:marmishMilestone ; p:source w:publicTypeBindingPlan ; p:dependsOn w:publicTypeBindingGraph ; p:status p:active ;
+    p:acceptance "Compare all available release libraries at a pinned default profile; compile each native public spelling against its counterpart, preserving differences in importability and type namespace." .

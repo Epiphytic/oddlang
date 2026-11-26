@@ -120,3 +120,7 @@ candidate also leaves visibility, export paths, stable workspace package
 instances and native layout open. It covers local data declarations for
 the selected profile. Library type internals, behavioral effects, generic
 satisfaction and compatibility across profiles still require evidence.
+
+### Cross-library imports
+
+Run `probe_consumer_paths.py EXPECTED_EXPORTS SUBJECT_GRAPH_DIRECTORY SUBJECT_CARGO_TOML TARGET_DIRECTORY RECEIPT` to compile independent downstream imports from one public type graph against a second library. Use an existing qualification's native Cargo target directory to reuse dependencies. The subject directory contains its `exports.json` and `exports.lock`. Each receipt records membership in the subject type namespace separately from whether a Rust import compiles. An import can succeed after replacement by a value. Other compiler failures outside missing paths, privacy and the ambiguity lint stop qualification. Callers responsible for a release qualification must also verify the checked-out or generated source tree against their source pin.

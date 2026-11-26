@@ -38,3 +38,8 @@ inputs. The legacy graph observations are compared byte-for-byte against the
 base adapter. New legacy recovery locks will record the updated adapter
 script, manifest, and driver hashes. Historical locks remain provenance for
 their original adapter revisions.
+
+## Cross-library public import qualification
+
+- [x] Compile one isolated downstream Rust import for every direct type spelling in the expected graph against the selected subject library. Capture the actual compiler result and error codes, the compiler pin, both graph hashes and the subject lock. Preserve the subject graph's classification so a successful import of a value-only replacement is distinguishable. An unrelated two-revision fixture covers unchanged, missing, private and value-only replacements.
+- [ ] Measure all seven original release libraries and the three generated members in v5 and v6 on native Darwin ARM64. Verify all member locks and run the portable type comparison for each pair. Exercise actual cross-library callers for the native library, including its generated-only spellings. Attach the reviewed companion receipts and record the open implementation gaps.
