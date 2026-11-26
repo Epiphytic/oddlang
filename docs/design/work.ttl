@@ -1753,8 +1753,11 @@ w:typescriptExtendedChoiceConvergence a p:Task ;
     rdfs:label "Preserve the TypeScript capability boundary when composing choice profiles" ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
     p:dependsOn w:fieldlessChoiceCapabilities, w:typescriptPlainChoices ;
-    p:status p:planned ;
+    p:status p:done ; p:evidence w:combinedChoiceTargetReceipt ;
     p:acceptance "On a compiler with both targets, confirm an admitted copyable choice projects and that clone-only and derived-Debug choices fail without emitting TypeScript output unless their capabilities have independent conformance." .
+
+w:combinedChoiceTargetReceipt a p:Artifact ;
+    p:location "verification/plain-value-choices/combined-aarch64-apple-darwin.json" .
 
 w:fieldlessChoiceSpanReview a p:Finding ;
     rdfs:label "Distinguish whole-file recovery input from qualification-time source extraction" ;
@@ -1781,3 +1784,20 @@ w:canonicalDarwinTests a p:Artifact ;
 
 w:canonicalLinuxTests a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4744286ce98b89b8e712cfa2fe8618cb8959e7bd/verification/whole/suite/canonical-aarch64-unknown-linux-gnu.json" .
+
+w:typescriptPlainChoices a p:Task ;
+    rdfs:label "Project closed copyable choices into TypeScript with explicit equality capabilities" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:plainValueChoices ; p:status p:done ;
+    p:evidence w:typescriptPlainChoiceFixture, w:typescriptVaultModeReceipt ;
+    p:acceptance "Project the existing ordered choice graph without Rust source or binding. Compare unrelated native Rust and Node witnesses in two revisions, compile TypeScript negative controls, preserve shared obligations, and replay a published data-only graph." .
+
+w:typescriptChoiceHostEquality a p:Finding ;
+    rdfs:label "Distinguish host strict comparison from a declared portable equality operation" ;
+    p:source w:wholeMarmishPlan .
+w:typescriptPlainChoices p:addresses w:typescriptChoiceHostEquality .
+
+w:typescriptPlainChoiceFixture a p:Artifact ;
+    p:location "verification/plain-value-choices/typescript.py" .
+w:typescriptVaultModeReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/8621f49d40217132c8d3842a54531e066e93dfec/verification/whole/vault-mode-typescript/receipt.json> .
