@@ -25,6 +25,11 @@ fn run(args: &[String]) -> Result<(), String> {
             oddlang::local_status_owner::build(graph.as_ref(), binding.as_ref(), out.as_ref())
         }
         [group, kind, target, graph, binding, out]
+           if group == "build" && kind == "file-profile" && target == "rust" =>
+       {
+           oddlang::file_profile::build(graph.as_ref(), binding.as_ref(), out.as_ref())
+        }
+        [group, kind, target, graph, binding, out]
             if group == "build" && kind == "local-command-client" && target == "rust" =>
         {
             oddlang::local_command_client::build(graph.as_ref(), binding.as_ref(), out.as_ref())

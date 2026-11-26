@@ -1050,3 +1050,35 @@ w:combinedForegroundPeers a p:Task ; rdfs:label "Qualify both foreground daemon 
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ; p:evidence w:combinedForegroundReceipt ;
     p:dependsOn w:integratedNativeInterfaces, w:localOwnerTlsOracle, w:foregroundProfileOwner ;
     p:acceptance "Build both peers from the same portable workspace and exercise automatic discovery, live activation, lease contention, and crash recovery on both ARM64 hosts with original and generated processes." .
+
+w:nativeFileProfilePreparation a p:Task ;
+    rdfs:label "Prepare private file-backed profile credentials with native providers" ;
+    p:milestone w:marmishMilestone ; p:source w:nativeFileProfilePlan ; p:status p:done ;
+    p:dependsOn w:localEndpointDiscovery ;
+    p:acceptance "Project exclusive scope, random key generation, atomic no-replace publications, identity verification and pending metadata. Exercise representative native filesystem effects." ;
+    p:evidence w:nativeFileProfileFixture, w:nativeFileProfileReceipt .
+w:nativeFileProfileReceipt a p:Artifact ;
+    p:location "companion:verification/whole/status/file-profile-macos-arm64.json" .
+w:nativeFileProfileWitnessReview a p:Finding ;
+    rdfs:label "Witness pending resumption, filesystem rejections, exclusive leases and independent identity derivation" ;
+    p:source w:nativeFileProfileFixture .
+w:nativeFileProfilePreparation p:addresses w:nativeFileProfileWitnessReview .
+w:nativeFileProfilePlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-native-file-profile.md" .
+w:nativeFileProfileFixture a p:Artifact ;
+    p:location "verification/file-profile/check.py" .
+w:nativeFileProfileStores a p:Task ;
+    rdfs:label "Complete native initialization after encrypted storage opens and verified counts" ;
+    p:milestone w:marmishMilestone ; p:source w:nativeFileProfilePlan ; p:status p:done ;
+    p:dependsOn w:nativeFileProfilePreparation ;
+    p:acceptance "Initialize and reopen both native encrypted stores before publishing ready identity; independently verify schema versions and counts before either peer can repair a fresh or pristine current-format profile using explicit direct relay and file backing." ;
+    p:evidence w:nativeFileProfileStoreReceipt, w:nativeJournalSchemaFixture .
+w:nativeFileProfileStoreReceipt a p:Artifact ;
+    p:location "companion:verification/whole/status/encrypted-init-macos-arm64.json" .
+w:nativeJournalSchemaFixture a p:Artifact ;
+    p:location "src/file_profile/schema.rs" .
+w:nativeFileProfileExtendedInit a p:Task ;
+    rdfs:label "Extend initialization to config-selected routing and stored-state replay" ;
+    p:milestone w:marmishMilestone ; p:source w:nativeFileProfilePlan ; p:status p:planned ;
+    p:dependsOn w:nativeFileProfileStores ;
+    p:acceptance "Qualify OS-default state selection, persisted config, keychain, Tor and current or older nonempty storage with native replay and migration witnesses." .
