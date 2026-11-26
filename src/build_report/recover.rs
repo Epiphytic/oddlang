@@ -101,42 +101,81 @@ fn literal(expr: &Expr, ty: Integer) -> Result<i128> {
     Ok(value)
 }
 
-fn import_may_bind(tree: &syn::UseTree, name: &str) -> bool {
-    match tree {
-        syn::UseTree::Path(path) => path_import_may_bind(&path.tree, name, Some(&path.ident)),
-        other => path_import_may_bind(other, name, None),
-    }
+fn denotes(ident: &syn::Ident, name: &str) -> bool {
+    let ident = ident.to_string();
+    ident.strip_prefix("r#").unwrap_or(&ident) == name
 }
 
-fn path_import_may_bind(tree: &syn::UseTree, name: &str, parent: Option<&syn::Ident>) -> bool {
+fn import_may_bind(
+    tree: &syn::UseTree,
+    name: &str,
+    parent: Option<&syn::Ident>,
+    glob_is_ambiguous: bool,
+) -> bool {
     match tree {
-        syn::UseTree::Path(path) => path_import_may_bind(&path.tree, name, Some(&path.ident)),
-        syn::UseTree::Name(value) if value.ident == "self" => {
-            parent.is_none_or(|parent| parent == name)
+        syn::UseTree::Path(path) => {
+            import_may_bind(&path.tree, name, Some(&path.ident), glob_is_ambiguous)
         }
-        syn::UseTree::Name(value) => value.ident == name,
-        syn::UseTree::Rename(value) => value.rename == name,
-        syn::UseTree::Glob(_) => true,
+        syn::UseTree::Name(value) if value.ident == "self" => {
+            parent.is_none_or(|parent| denotes(parent, name))
+        }
+        syn::UseTree::Name(value) => denotes(&value.ident, name),
+        syn::UseTree::Rename(value) => denotes(&value.rename, name),
+        syn::UseTree::Glob(_) => glob_is_ambiguous,
         syn::UseTree::Group(value) => value
             .items
             .iter()
-            .any(|tree| path_import_may_bind(tree, name, parent)),
+            .any(|tree| import_may_bind(tree, name, parent, glob_is_ambiguous)),
     }
 }
 
-fn local_qualifier(file: &syn::File, name: &str) -> bool {
-    file.items.iter().any(|item| match item {
-        Item::Mod(value) => value.ident == name,
-        Item::Use(value) => import_may_bind(&value.tree, name),
-        Item::ExternCrate(value) => {
+fn declared_name(item: &Item) -> Option<&syn::Ident> {
+    match item {
+        Item::Const(value) => Some(&value.ident),
+        Item::Enum(value) => Some(&value.ident),
+        Item::ExternCrate(value) => Some(
             value
                 .rename
                 .as_ref()
-                .map_or(&value.ident, |(_, rename)| rename)
-                == name
-        }
-        _ => false,
+                .map_or(&value.ident, |(_, rename)| rename),
+        ),
+        Item::Fn(value) => Some(&value.sig.ident),
+        Item::Macro(value) => value.ident.as_ref(),
+        Item::Mod(value) => Some(&value.ident),
+        Item::Static(value) => Some(&value.ident),
+        Item::Struct(value) => Some(&value.ident),
+        Item::Trait(value) => Some(&value.ident),
+        Item::TraitAlias(value) => Some(&value.ident),
+        Item::Type(value) => Some(&value.ident),
+        Item::Union(value) => Some(&value.ident),
+        _ => None,
+    }
+}
+
+fn binds(file: &syn::File, name: &str, glob_is_ambiguous: bool) -> bool {
+    file.items.iter().any(|item| {
+        declared_name(item).is_some_and(|ident| denotes(ident, name)) || matches!(item, Item::Use(value) if import_may_bind(&value.tree, name, None, glob_is_ambiguous))
     })
+}
+
+fn audit_scope(module: &syn::File, name: &str) -> Result<()> {
+    const RESERVED: &[&str] = &[
+        "u8", "u16", "u32", "u64", "i8", "i16", "i32", "i64", "str", "env",
+    ];
+    if let Some(symbol) = RESERVED.iter().find(|symbol| binds(module, symbol, false)) {
+        return Err(format!("local declaration of reserved {symbol} in {name}"));
+    }
+    for item in &module.items {
+        let attrs = match item {
+            Item::Mod(value) => &value.attrs,
+            Item::ExternCrate(value) => &value.attrs,
+            _ => continue,
+        };
+        if attrs.iter().any(|attr| attr.path().is_ident("macro_use")) {
+            return Err(format!("macro_use can bind reserved names in {name}"));
+        }
+    }
+    Ok(())
 }
 
 impl Sources {
@@ -216,7 +255,7 @@ impl Sources {
                     module,
                     false,
                 )?;
-                if local_qualifier(current, first) {
+                if binds(current, first, true) {
                     return Err(format!("local binding can shadow external crate {first}"));
                 }
                 (first.as_str(), rest.to_vec(), true)
@@ -374,6 +413,12 @@ fn record_fields(
     file: &syn::File,
     selection: &Selection,
 ) -> Result<Vec<(String, Type, String, Expr)>> {
+    if ["env", "str", "u8", "u16", "u32", "u64"]
+        .iter()
+        .any(|name| binds(file, name, true))
+    {
+        return Err("record module glob can bind reserved names".into());
+    }
     let mut found_records = file.items.iter().filter_map(|item| match item {
         Item::Struct(item) if item.ident == selection.record => Some(item),
         _ => None,
@@ -569,6 +614,7 @@ pub fn recover(base: &Path, selection: &Path, out: &Path) -> Result<()> {
                 pin.path
             ));
         }
+        audit_scope(&module, &pin.path)?;
         if sources.modules.insert(pin.path.clone(), module).is_some() {
             return Err("duplicate source pin".into());
         }
@@ -606,6 +652,7 @@ pub fn recover(base: &Path, selection: &Path, out: &Path) -> Result<()> {
         "selectionSha256": digest(&raw), "graphSha256": digest(&graph), "sources": pins,
         "values": values,
         "gaps": ["serde, external crate names and build environment role bindings require native replay",
+                 "Rust bindings introduced through macro expansion or globs require native type and output checks",
                  "CLI guard, invocation and output effects are selected separately"],
     }))?;
     let parent = out

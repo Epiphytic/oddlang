@@ -100,3 +100,26 @@ pub(crate) fn identification() -> Identification {
     declaration.write_text("use crate::format as library;\n" + declaration.read_text())
     rejected = recover(base / "shadow")
     assert rejected.returncode != 0 and "shadow external crate" in rejected.stderr
+    declaration.write_text(declaration.read_text().split("\n", 1)[1])
+    source = declaration.read_text()
+    for number, extra in enumerate((
+        "type u16 = u32;",
+        "mod u16 { pub fn from(_: u8) -> u16 { 42 } }",
+        'macro_rules! env { ($value:literal) => { "injected" }; }',
+        "use custom::alternate as env;",
+    )):
+        declaration.write_text(extra + "\n" + source)
+        rejected = recover(base / f"primitive-shadow-{number}")
+        assert rejected.returncode != 0 and "reserved" in rejected.stderr
+    declaration.write_text(source)
+    ancestor = base / "rover/lib.rs"
+    ancestor.write_text('macro_rules! env { ($value:literal) => { "injected" }; }\n' + ancestor.read_text())
+    rejected = recover(base / "env-ancestor")
+    assert rejected.returncode != 0 and "reserved" in rejected.stderr
+    ancestor.write_text(ancestor.read_text().split("\n", 1)[1])
+    declaration.write_text("use helpers::*;\n" + source)
+    rejected = recover(base / "record-glob")
+    assert rejected.returncode != 0 and "reserved" in rejected.stderr
+    declaration.write_text("use custom::alternate as r#env;\n" + source)
+    rejected = recover(base / "raw-env")
+    assert rejected.returncode != 0 and "reserved" in rejected.stderr

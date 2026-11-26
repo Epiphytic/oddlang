@@ -1223,3 +1223,8 @@ w:buildReportPlanReview a p:Finding ;
     rdfs:label "Separate represented revision from compiled artifact provenance and check widths, formats and native guard precedence" ;
     p:source w:buildReportCommandPlan .
 w:buildReportCommand p:addresses w:buildReportPlanReview .
+
+w:buildReportBindingReview a p:Finding ;
+    rdfs:label "Reject direct primitive and compile-time macro shadowing, and verify native source types" ;
+    p:source w:buildReportCommandPlan .
+w:buildReportSourceRecovery p:addresses w:buildReportBindingReview .

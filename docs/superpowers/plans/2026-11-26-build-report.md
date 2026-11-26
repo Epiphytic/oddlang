@@ -36,8 +36,10 @@ unsigned widening and modular cast rules. The renderer calculates the list
 from these facts. Legacy literal arrays continue to encode as before.
 
 Recovery records candidates and file hashes. Native compiler and runtime
-checks establish the external crate name and role binding for each selected
-release. They do not qualify arbitrary conditional Rust module graphs, build
+checks establish selected primitive types, external crate names and role
+bindings for each selected release. Direct shadows of reserved primitive and
+environment names fail recovery. Names introduced by arbitrary macro expansion
+or declaration-module globs require native confirmation. They do not qualify arbitrary conditional Rust module graphs, build
 scripts, serde customizations or other command behavior.
 
 - [x] Recover and render ordered declarations, and exercise a renamed fixture
