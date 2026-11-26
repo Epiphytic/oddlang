@@ -1259,3 +1259,19 @@ w:checkedValuesFidelityReview a p:Finding ;
 w:checkedValuesReview a p:Artifact ;
     p:location "docs/design/reviews/checked-value-domains.md" .
 w:wholeMarmishProtocols p:dependsOn w:checkedValueProductProjection .
+w:buildReportFixture a p:Artifact ;
+    p:location "verification/build-report/verify.py" .
+w:buildReportReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/60> .
+w:buildReportPlanReview a p:Finding ;
+    rdfs:label "Separate represented revision from compiled artifact provenance and check widths, formats and native guard precedence" ;
+    p:source w:buildReportCommandPlan .
+w:buildReportCommand p:addresses w:buildReportPlanReview .
+
+w:processLimitOperation a p:Task ;
+    rdfs:label "Project and qualify engine process limit initialization" ;
+    p:milestone w:marmishMilestone ;
+    p:source <../superpowers/plans/2026-11-26-process-limits.md> ;
+    p:dependsOn w:buildReportCommand ;
+    p:acceptance "A generated native operation and checked binary startup use reproduce selected upstream host process limits while preserving ownership of existing descriptors." ;
+    p:status p:active .

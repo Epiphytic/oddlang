@@ -88,7 +88,12 @@ pub fn build(path: &Path, destination: &Path) -> Result<()> {
             .canonicalize()
             .map_err(|e| e.to_string())?;
         let dir = root.join(name);
-        native_package::build_pinned(&data, member_base.parent().unwrap(), &dir, false)?;
+        native_package::build_pinned(
+            &data,
+            member_base.parent().unwrap(),
+            &dir,
+            Some(&member.dependencies),
+        )?;
         let cargo_file = dir.join("Cargo.toml");
         let mut cargo: toml::Table = std::str::from_utf8(&read(&cargo_file)?)
             .map_err(|e| e.to_string())?

@@ -61,3 +61,33 @@ projectionSha256 = "<digest of facade projection.json>"
 Each generated file row adds an `emitter` field naming its profile. Each retained row uses the version 1 fields. Both profiles use the store layout described above. Each import, graph and projection digest must differ between profiles. The import locks identify the package and target. Each generated file must occupy the named Cargo package’s `src/<module>` path. These rules allow the two profiles to contribute modules to the same package or separate packages.
 
 Assembly dispatches each pinned release to its named emitter in a fresh directory, checks the resulting receipt and compares the generated module bytes. The selected modules must consume both receipts in full. The project manifest supplies the independent release pins and must be authenticated by the caller.
+
+### Process limits at executable startup
+
+The `process-limit` native component accepts an `oddlang-process-limit-v1`
+graph. Its `id` and `failure` are distinct absolute IRIs. Select
+`resource: "open-descriptors"` and give `platforms.linux` and
+`platforms.macos` a policy. `{"kind":"no-op"}` returns success without
+calling libc. `{"kind":"lower-soft","ceiling":384}` requires an explicit
+`libc` dependency and a positive unsigned 32-bit ceiling. It reads both
+limits, sets the soft limit to the smaller of its current value and the
+ceiling when needed, then verifies both the resulting soft limit and the
+original hard limit. Existing descriptors and their flags are left alone.
+Run this process-global operation during single-threaded startup before
+other code mutates process limits.
+
+The Rust overlay names the public `entry` and an `error` with `id`,
+`type`, `variant`, `result`, and `display`. The stable error identity
+must match the graph. The emitted function returns the declared result
+alias with a unit success and the declared unit error on a syscall failure
+or readback mismatch. The scope of the generated error is this operation.
+
+An executable in a native workspace member may specify
+`"startup":{"dependency":"device-limits","entry":["initialize"],"exit":1,"stderr":"device limits unavailable"}`.
+The dependency must be a declared workspace edge and the named Rust
+operation must type-check as a zero-argument function returning
+`std::result::Result<(), E>`. On error, the wrapper writes the declared
+stderr line and returns the nonzero exit code. On success it calls the
+normally bound executable entry. The assembler checks both bindings with
+Cargo before publishing. The generated wrapper hash is part of its package
+lock.
