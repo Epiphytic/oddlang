@@ -1,0 +1,23 @@
+
+async fn stop_provider_stages(
+    deadline: Instant,
+    deactivation: impl std::future::Future<Output = bool>,
+    client_shutdown: impl std::future::Future<Output = bool>,
+    forwarding: Option<JoinHandle<()>>,
+    relay_shutdown: impl std::future::Future<Output = ()>,
+) -> bool {
+    let deactivated = timeout_at(deadline, deactivation).await.unwrap_or(false);
+    let client_stopped = timeout_at(deadline, client_shutdown).await.unwrap_or(false);
+    let task_stopped = if let Some(task) = forwarding {
+        task.abort();
+        match timeout_at(deadline, task).await {
+            Ok(Ok(())) => true,
+            Ok(Err(error)) => error.is_cancelled(),
+            Err(_) => false,
+        }
+    } else {
+        true
+    };
+    let relay_stopped = timeout_at(deadline, relay_shutdown).await.is_ok();
+    deactivated && client_stopped && task_stopped && relay_stopped
+}

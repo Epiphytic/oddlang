@@ -1,0 +1,46 @@
+
+/// Open an existing prepared profile while the caller retains its exclusive lease.
+pub(crate) fn open_retained_stores(
+    root: &Path, storage: &[u8; 32], identity: &str, slot: &str,
+) -> Result<(SqliteAccountStorage, rusqlite::Connection), (u8, &'static str)> {
+    let open = || -> Result<_, Failure> {
+        for entry in EXCLUDED_PROFILE_ENTRIES {
+            match root.join(entry).symlink_metadata() {
+                Ok(_) => return Err(RELOAD_UNSUPPORTED),
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound => (),
+                Err(_) => return Err(PREFLIGHT),
+            }
+        }
+        // SAFETY: this preparation runs before the foreground owner builds its asynchronous provider.
+        if unsafe { rusqlite::ffi::sqlite3_initialize() } != rusqlite::ffi::SQLITE_OK {
+            return Err(PREFLIGHT);
+        }
+        let account_path = root.join(ACCOUNT_LEAF);
+        let journal_path = root.join(JOURNAL_LEAF);
+        let account_key = storage_key(storage, ACCOUNT_ROLE)?;
+        let journal_key = storage_key(storage, JOURNAL_ROLE)?;
+        for path in [&account_path, &journal_path] {
+            // Keep the file-ownership error distinct from encrypted format errors.
+            if path.symlink_metadata().is_ok_and(|meta| meta.file_type().is_symlink()) {
+                return Err(UNSAFE_FILE);
+            }
+            open_existing(path, false)?.ok_or(PREFLIGHT)?;
+        }
+        preflight(&account_path, &account_key, ACCOUNT_VERSION, false)?;
+        preflight(&journal_path, &journal_key, JOURNAL_VERSION, false)?;
+        let account = || SqliteAccountStorage::open_encrypted(
+            &account_path, &SqlCipherKey::raw(*account_key),
+        ).map_err(|_| ACCOUNT);
+        drop(account()?);
+        let storage = account()?;
+        if !storage.key_package_lifecycle().map_err(|_| ACCOUNT)?
+            .is_some_and(|lifecycle| lifecycle.stable_slot_id == slot)
+        {
+            return Err(ACCOUNT);
+        }
+        journal(&journal_path, &journal_key, identity, false)?;
+        let journal = keyed_database(&journal_path, &journal_key, false, JOURNAL)?;
+        Ok((storage, journal))
+    };
+    open().map_err(|failure| (failure.0, failure.1))
+}

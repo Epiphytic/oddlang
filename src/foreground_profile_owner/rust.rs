@@ -97,7 +97,13 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
         ],
     );
     out.push_str("}\n");
-    out.push_str(include_str!("runtime.rs.in"));
+    out.push_str(include_str!("support.rs.in"));
+    out.push('\n');
+    if let (Some(lifecycle), Some(path)) = (&graph.lifecycle, &binding.retained_stores) {
+        render_lifecycle(&mut out, lifecycle, path);
+    } else {
+        out.push_str(include_str!("runtime.rs.in"));
+    }
     writeln!(
         out,
         r#"
@@ -121,4 +127,47 @@ fn fields<const N: usize>(out: &mut String, fields: [(&str, &str, &String); N]) 
     for (name, ty, wire) in fields {
         writeln!(out, "    #[serde(rename = {wire:?})]\n    {name}: {ty},").unwrap();
     }
+}
+
+fn render_lifecycle(out: &mut String, model: &Lifecycle, path: &[String]) {
+    writeln!(out, "use crate::{} as open_stores;", path.join("::")).unwrap();
+    writeln!(out, "const SHUTDOWN_MS: u64 = {};", model.shutdown_ms).unwrap();
+    writeln!(out, "const DIAL_MS: u64 = {};", model.dial_ms).unwrap();
+    writeln!(out, "const DIAL_ATTEMPTS: u8 = {};", model.dial_attempts).unwrap();
+    writeln!(out, "const REPORT_VERSION: u8 = {};", model.report_version).unwrap();
+    writeln!(
+        out,
+        "const PROVIDER_OPEN_FAILURE: &str = {:?};",
+        model.provider_open_failure
+    )
+    .unwrap();
+    writeln!(
+        out,
+        "const EXCLUDED_OWNER_FILES: &[&str] = &{:?};",
+        model.excluded_profile_entries,
+    )
+    .unwrap();
+    out.push_str("#[derive(serde::Serialize)]\nstruct TerminalReport {\n");
+    let names = &model.report_fields;
+    fields(
+        out,
+        [
+            ("schema", "u8", &names.schema),
+            ("engine_quiesced", "bool", &names.engine_quiesced),
+            ("engine_stop_complete", "bool", &names.engine_stop_complete),
+            (
+                "provider_stop_complete",
+                "bool",
+                &names.provider_stop_complete,
+            ),
+            (
+                "runtime_cleanup_complete",
+                "bool",
+                &names.runtime_cleanup_complete,
+            ),
+        ],
+    );
+    out.push_str("}\n");
+    out.push_str(include_str!("lifecycle.rs.in"));
+    out.push_str(include_str!("shutdown.rs.in"));
 }
