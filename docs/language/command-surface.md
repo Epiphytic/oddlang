@@ -19,3 +19,18 @@ The independent [observatory fixture](../../verification/command-surface/) compa
 cargo build --locked --offline
 python3 verification/command-surface/check.py target/debug/oddlang
 ```
+
+A graph may declare `terminal_subparsers`, keyed by canonical immediate
+subcommand name. Its primary command must be an unbound leaf without aliases. When that token immediately follows the executable, the
+projection gives the remaining tokens to the independent, versionless parser
+under its own display name. Its grammar has no inherited global arguments and
+no child commands. Help and usage errors use the usual terminal response
+binding. A successful auxiliary parse returns the uncovered outcome before
+dispatch. The root command's generated `help NAME` keeps using the primary
+grammar. Option-prefix routing and custom validation outside the declaration
+require separate rules and evidence.
+
+A recovery selection with an empty version expects a `Parser` derive without
+`#[command(version)]`; its recovered root can supply the terminal subparser
+grammar. Recovery preserves an explicit literal command name and supports the
+one-or-more trailing positional shape and hyphen-valued arguments.

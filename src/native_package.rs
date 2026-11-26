@@ -196,6 +196,7 @@ impl Pin {
 enum Kind {
     BufferedInput,
     BuildReport,
+    StructuredDiagnostics,
     ProcessLimit,
     PublicRecords,
     ValueDomain,
@@ -283,6 +284,13 @@ fn project(
         Kind::BufferedInput => {
             crate::buffered_input::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
             "buffer.rs"
+        }
+        Kind::StructuredDiagnostics => {
+            if !dependencies.contains_key("serde_json") {
+                return Err("structured-diagnostics requires a pinned serde_json dependency".into());
+            }
+            crate::structured_diagnostics::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
+            "diagnostics.rs"
         }
         Kind::BuildReport => {
             crate::build_report::build(&graph, &io(fs::read(&overlay))?, &output)?;

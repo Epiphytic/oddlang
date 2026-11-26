@@ -1509,3 +1509,34 @@ w:typedFiniteErrorPrimitiveShadow a p:Finding ;
     rdfs:label "Reject local declarations that shadow a recovered primitive width" ;
     p:source w:typedFiniteErrorsPlan .
 w:typedFiniteErrors p:addresses w:typedFiniteErrorPrimitiveShadow .
+
+w:terminalAuxiliaryCli a p:Task ;
+    rdfs:label "Project isolated auxiliary CLI help and usage metadata" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:commandSurface, w:sevenMemberBufferedWorkspace ; p:status p:done ;
+    p:evidence w:terminalCliFixture, w:terminalCliDarwin ;
+    p:acceptance "Match independent original and generated help and usage in an unrelated native fixture and across both sealed release binary roles. Preserve the main parser and record non-leading selection and successful dispatch as uncovered." .
+
+w:terminalCliDispatchReview a p:Finding ;
+    rdfs:label "Prevent the auxiliary selector's primary aliases and prefixes from reaching a handler" ;
+    p:source w:wholeMarmishPlan .
+w:terminalAuxiliaryCli p:addresses w:terminalCliDispatchReview .
+
+w:terminalCliFixture a p:Artifact ;
+    p:location "verification/command-surface/terminal.py" .
+w:terminalCliDarwin a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/b11a2040323ec134f51bb6827b64d4429bf79459/verification/whole/offline-cli/aarch64-apple-darwin.json> .
+w:terminalCliPrefixGap a p:Finding ;
+    rdfs:label "Leading global option policy still differs for two auxiliary parser probes per executable" ;
+    p:source w:terminalCliDarwin .
+
+w:structuredDiagnosticsProgram a p:Task ;
+    rdfs:label "Recover and project structured diagnostic state and ordered actions" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:nativePackageAssembly ; p:status p:active ;
+    p:acceptance "Independently build Rust witnesses for two revisions, compile the recovered library from graph and overlay, and check flag visibility, repeated enable, caller updates, record bytes and sink errors. Reject unsupported source and graph shapes." .
+
+w:structuredDiagnosticsReview a p:Finding ;
+    rdfs:label "Reject JSON keyword shadowing and prove ignored broken-pipe writes" ;
+    p:source w:wholeMarmishPlan .
+w:structuredDiagnosticsProgram p:addresses w:structuredDiagnosticsReview .

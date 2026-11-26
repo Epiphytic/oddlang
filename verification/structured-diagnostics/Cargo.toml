@@ -1,0 +1,10 @@
+[package]
+name = "station-observer"
+version = "3.4.5"
+edition = "2024"
+publish = false
+
+[dependencies]
+serde_json = "=1.0.154"
+
+[workspace]
