@@ -18,3 +18,16 @@ primitive state and ordered-case semantics.
   Rust 2021 and compare independently expected outcomes, guard-order controls,
   capacity mutations and deterministic replay. Update the work graph with
   evidence and run independent review before publication.
+
+## Native private storage follow-up
+
+- [ ] Add an optional storage-name overlay for cursor, final marker, record
+  and receipt fields. Emit the mapped native fields with private visibility.
+  Evaluate expressions using a borrowed view of those fields and commit
+  staged effects back to them only after the full transition succeeds.
+- [ ] Run an unrelated lexical child-module test that initializes private
+  cursor fields and reads its actual receipt queue. Confirm that a downstream
+  caller cannot access the fields directly.
+- [ ] Qualify both upstream private observations with the unchanged unit-test
+  module embedded beside the authoritative generated fields. Keep the
+  original test bytes in the verification stage after source-free generation.

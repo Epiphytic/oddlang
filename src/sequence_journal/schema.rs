@@ -370,7 +370,25 @@ impl RustOverlay {
         }
         let canon = |name: &String| name.trim_start_matches("r#").to_owned();
         let types: BTreeSet<_> = self.types.values().map(canon).collect();
-        if types.len() != self.types.len() || types.contains("__oddlang_journal") {
+        const RESERVED_TYPES: &[&str] = &[
+            "__oddlang_journal",
+            "bool",
+            "u8",
+            "u64",
+            "usize",
+            "std",
+            "Default",
+            "Err",
+            "None",
+            "Ok",
+            "Option",
+            "Result",
+            "Some",
+            "Vec",
+        ];
+        if types.len() != self.types.len()
+            || RESERVED_TYPES.iter().any(|name| types.contains(*name))
+        {
             return Err("duplicate or reserved journal Rust type".into());
         }
         let mut methods = BTreeSet::new();

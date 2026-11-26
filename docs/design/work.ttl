@@ -750,3 +750,9 @@ w:sequenceJournalPrivateStorage a p:Finding ;
     p:source w:sequenceJournalFixture ;
     p:reason "Two white-box reference tests inspect the receipt container or use a struct literal for cursor fields. The journal target retains the authoritative state behind an internal store." .
 w:wholeMarmishStructure p:addresses w:sequenceJournalPrivateStorage .
+
+w:sequenceJournalNativeStorage a p:Task ;
+    rdfs:label "Bind authoritative private target storage for native window tests" ;
+    p:milestone w:marmishMilestone ; p:source w:sequenceJournalPlan ; p:status p:planned ;
+    p:dependsOn w:sequenceJournal ; p:addresses w:sequenceJournalPrivateStorage ;
+    p:acceptance "Lexical child tests can construct native cursor fields and inspect the actual receipt queue. Downstream consumers cannot access the fields directly, and the public state behavior remains compatible." .

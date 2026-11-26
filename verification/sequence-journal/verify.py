@@ -139,6 +139,14 @@ with tempfile.TemporaryDirectory(prefix="sequence-journal-") as directory:
     run(BINARY, "build", "sequence-journal", "rust", graph, overlay, work / "bad-digest",
         "--graph-sha256", "0" * 64, "--overlay-sha256", overlay_pin, error="graph digest mismatch")
 
+    shadowed = copy.deepcopy(binding)
+    shadowed["types"][PREFIX + "state"] = "Result"
+    shadowed = write(work / "shadowed-rust.json", shadowed)
+    shadow_pin = run(BINARY, "sequence-journal", "overlay-digest", shadowed)
+    run(BINARY, "build", "sequence-journal", "rust", graph, shadowed, work / "shadowed",
+        "--graph-sha256", graph_pin, "--overlay-sha256", shadow_pin,
+        error="reserved journal Rust type")
+
     # Assemble the journal with a separately projected shared error type.
     inputs = work / "package-input"
     inputs.mkdir()
