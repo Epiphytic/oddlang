@@ -85,6 +85,22 @@ with tempfile.TemporaryDirectory() as scratch:
         source + "\nimpl From<Compass> for u8 { fn from(_: Compass) -> Self { 7 } }",
         source + "\nimpl PartialEq<Compass> for u8 { fn eq(&self, _: &Compass) -> bool { false } }",
         source + r"""
+trait Projection { type Choice; }
+impl Projection for () { type Choice = Compass; }
+impl ::core::fmt::Debug for <() as Projection>::Choice {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.write_str("compass")
+    }
+}
+""",
+        source + r"""
+trait Projection { type Choice; }
+impl Projection for () { type Choice = Compass; }
+impl From<<() as Projection>::Choice> for u8 {
+    fn from(_: <() as Projection>::Choice) -> Self { 7 }
+}
+""",
+        source + r"""
 macro_rules! display { () => {
     impl ::core::fmt::Debug for Compass {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {

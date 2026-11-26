@@ -1,6 +1,6 @@
 //! Structural recovery for ordinary fieldless choices.
 use super::*;
-use syn::{Fields, Item, Meta, UseTree, Visibility, punctuated::Punctuated, token::Comma};
+use syn::{Fields, Item, Meta, Type, UseTree, Visibility, punctuated::Punctuated, token::Comma};
 
 const CAPABILITIES: [&str; 4] = ["Clone", "Copy", "Eq", "PartialEq"];
 
@@ -103,6 +103,17 @@ fn additional_binding(file: &syn::File, name: &str) -> bool {
         name: &'a str,
         found: bool,
     }
+    impl Bindings<'_> {
+        fn check_alias(&mut self, ty: &Type) {
+            let mut alias = Reference {
+                name: self.name,
+                found: false,
+            };
+            alias.visit_type(ty);
+            self.found |= alias.found;
+        }
+    }
+
     impl<'ast> Visit<'ast> for Bindings<'_> {
         fn visit_item_impl(&mut self, item: &'ast syn::ItemImpl) {
             let mut head = Reference {
@@ -118,12 +129,15 @@ fn additional_binding(file: &syn::File, name: &str) -> bool {
             visit::visit_item_impl(self, item);
         }
         fn visit_item_type(&mut self, item: &'ast syn::ItemType) {
-            let mut alias = Reference {
-                name: self.name,
-                found: false,
-            };
-            alias.visit_type(&item.ty);
-            self.found |= alias.found;
+            self.check_alias(&item.ty);
+        }
+        fn visit_impl_item_type(&mut self, item: &'ast syn::ImplItemType) {
+            self.check_alias(&item.ty);
+        }
+        fn visit_trait_item_type(&mut self, item: &'ast syn::TraitItemType) {
+            if let Some((_, ty)) = &item.default {
+                self.check_alias(ty);
+            }
         }
         fn visit_use_rename(&mut self, item: &'ast syn::UseRename) {
             self.found |= names(&item.ident, self.name);

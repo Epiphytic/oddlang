@@ -1023,3 +1023,8 @@ w:plainChoiceBindingsReview a p:Finding ;
     rdfs:label "Reject item macros and impl heads that mention the selected choice in any role" ;
     p:source w:plainChoiceFixture .
 w:plainValueChoices p:addresses w:plainChoiceBindingsReview .
+
+w:plainChoiceAssociatedTypeReview a p:Finding ;
+    rdfs:label "Check associated-type aliases before projecting a plain choice" ;
+    p:source w:plainChoiceFixture .
+w:plainValueChoices p:addresses w:plainChoiceAssociatedTypeReview .
