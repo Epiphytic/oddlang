@@ -92,9 +92,23 @@ with tempfile.TemporaryDirectory() as path:
                               cwd=root, capture_output=True, text=True)
         assert call.returncode and reason in call.stderr and not (root / name).exists(), call
 
-    manifest["dependencies"]["serde_json"]["defaultFeatures"] = False
+    provider = manifest.pop("dependencies")
+    manifest["devDependencies"] = provider
+    pin("package.json", manifest)
+    run(CLI, "build", "native-package", "rust", "package.json", "test-product", cwd=root)
+    dev_root = root / "test-product"
+    normal = run("cargo", "+1.97.1", "tree", "--locked", "--offline", "-e", "normal", cwd=dev_root)
+    assert b"serde_json" not in normal
+    run("cargo", "+1.97.1", "build", "--release", "--locked", "--offline", cwd=dev_root)
+    with (dev_root / "src/group_1/__projection_1.rs").open("a") as out:
+        out.write(TEST)
+    assert b"1 passed" in run("cargo", "+1.97.1", "test", "--locked", "--offline", cwd=dev_root)
+    manifest["dependencies"] = provider
+    reject("duplicate-dependency", "normal and dev dependencies must have distinct names")
+    del manifest["dependencies"]
+    provider["serde_json"]["defaultFeatures"] = False
     reject("no-defaults", "default locked serde_json provider")
-    del manifest["dependencies"]["serde_json"]["defaultFeatures"]
+    del provider["serde_json"]["defaultFeatures"]
     binding["variants"]["urn:test:capacity"] = "Unknown"
     manifest["components"][-1]["overlay"] = pin("binding.json", binding)
     reject("unbound", "unresolved bounded JSON unit error")

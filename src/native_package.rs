@@ -31,6 +31,8 @@ struct Manifest<C = Component> {
     #[serde(default)]
     dependencies: BTreeMap<String, Dependency>,
     #[serde(default)]
+    dev_dependencies: BTreeMap<String, Dependency>,
+    #[serde(default)]
     registry_patches: BTreeMap<String, GitSource>,
     cargo_lock: Pin,
     #[serde(default)]
@@ -740,12 +742,17 @@ fn validate_component_requirements(
         .iter()
         .filter(|c| matches!(c.kind, Kind::BoundedJsonInput))
     {
-        if !manifest.dependencies.get("serde_json").is_some_and(|dep| {
-            dep.version == STRUCTURAL_JSON.version
-                && dep.features.is_empty()
-                && dep.source.is_none()
-                && dep.default_features != Some(false)
-        }) || manifest.registry_patches.contains_key("serde_json")
+        if !manifest
+            .dev_dependencies
+            .get("serde_json")
+            .or_else(|| manifest.dependencies.get("serde_json"))
+            .is_some_and(|dep| {
+                dep.version == STRUCTURAL_JSON.version
+                    && dep.features.is_empty()
+                    && dep.source.is_none()
+                    && dep.default_features != Some(false)
+            })
+            || manifest.registry_patches.contains_key("serde_json")
         {
             return Err(
                 "bounded JSON input requires the default locked serde_json provider 1.0.151".into(),
@@ -891,23 +898,18 @@ fn validate_nested_codecs(components: &[Component], base: &Path) -> Result<()> {
     crate::binary_record::linkage::validate(&codecs, &root_aliases)
 }
 
-fn cargo_manifest(manifest: &Manifest) -> Result<String> {
-    let valid_name = |name: &str| {
-        !name.is_empty()
-            && name
-                .bytes()
-                .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, b'_' | b'-'))
-    };
-    if manifest.format != "oddlang-native-package-v1"
-        || !valid_name(&manifest.name)
-        || !matches!(manifest.edition.as_str(), "2021" | "2024")
-        || manifest.components.is_empty()
-    {
-        return Err("invalid package format, name, edition or empty component list".into());
-    }
-    semver::Version::parse(&manifest.version).map_err(|e| format!("package version: {e}"))?;
+fn valid_name(name: &str) -> bool {
+    !name.is_empty()
+        && name
+            .bytes()
+            .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, b'_' | b'-'))
+}
+
+fn cargo_dependencies(
+    entries: &BTreeMap<String, Dependency>,
+) -> Result<BTreeMap<&String, serde_json::Value>> {
     let mut dependencies = BTreeMap::new();
-    for (name, dependency) in &manifest.dependencies {
+    for (name, dependency) in entries {
         if !valid_name(name) {
             return Err(format!("invalid dependency: {name}"));
         }
@@ -923,6 +925,26 @@ fn cargo_manifest(manifest: &Manifest) -> Result<String> {
         }
         dependencies.insert(name, record);
     }
+    Ok(dependencies)
+}
+
+fn cargo_manifest(manifest: &Manifest) -> Result<String> {
+    if manifest.format != "oddlang-native-package-v1"
+        || !valid_name(&manifest.name)
+        || !matches!(manifest.edition.as_str(), "2021" | "2024")
+        || manifest.components.is_empty()
+    {
+        return Err("invalid package format, name, edition or empty component list".into());
+    }
+    semver::Version::parse(&manifest.version).map_err(|e| format!("package version: {e}"))?;
+    if manifest
+        .dev_dependencies
+        .keys()
+        .any(|name| manifest.dependencies.contains_key(name))
+    {
+        return Err("normal and dev dependencies must have distinct names".into());
+    }
+    let dependencies = cargo_dependencies(&manifest.dependencies)?;
     if manifest
         .components
         .iter()
@@ -936,6 +958,10 @@ fn cargo_manifest(manifest: &Manifest) -> Result<String> {
     }
     let mut cargo = serde_json::json!({"package":{"name":manifest.name,"version":manifest.version,
         "edition":manifest.edition,"publish":false},"dependencies":dependencies,"workspace":{}});
+    if !manifest.dev_dependencies.is_empty() {
+        cargo["dev-dependencies"] =
+            serde_json::json!(cargo_dependencies(&manifest.dev_dependencies)?);
+    }
     if !manifest.registry_patches.is_empty() {
         let mut patches = BTreeMap::new();
         for (name, source) in &manifest.registry_patches {
