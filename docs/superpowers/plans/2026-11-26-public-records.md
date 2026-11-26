@@ -8,5 +8,7 @@
 
 - [x] Build the unrelated fixture first. Recover a record with each admitted field type and a renamed explicit re-export. Challenge conditional declarations, unknown field types, stale pins, duplicate identifiers, and unresolved aliases.
 - [x] Project a graph into one deterministic Rust definition and true re-exports. Compile native consumers that check trait, type, serialized field order and two-way assignability. Verify that deleting Rust input leaves graph-only generation viable.
-- [ ] Recover the three original native journal records and their existing MDK adapter paths. Check exact source byte pins on recovery and compare the sealed generated library with original callers.
-- [ ] Mutate a selected record's field order or type in a detached temporary source copy. Independently verify the changed graph and native behavior. Publish exact reviewed framework and companion evidence and preserve earlier release pins.
+- [x] Recover the three original native journal records and their existing MDK adapter paths. Check exact source byte pins on recovery and compare the sealed generated library with original callers.
+- [x] Mutate a selected record's field order or type in a detached temporary source copy. Independently verify the changed graph and native behavior. Publish exact reviewed framework and companion evidence and preserve earlier release pins.
+
+The [companion qualification](https://github.com/Epiphytic/marmish-oddlang/pull/71) records the combined macOS ARM64 and standalone Linux ARM64 native replays, the original mutation, and the source validation after checking raw and grouped self imports.

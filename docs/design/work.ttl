@@ -1300,7 +1300,7 @@ w:publicObservationalRecords a p:Task ;
     p:source w:publicObservationalRecordsPlan ;
     p:dependsOn w:unifiedVaultEngineWorkspace ;
     p:acceptance "Named public records preserve ordered typed fields, supported traits and alias identity in a source-free package, verified against independently compiled baseline and mutated native callers." ;
-    p:status p:active .
+    p:status p:done ; p:evidence w:publicRecordFixture, w:publicJournalReceipt .
 w:processLimitCompanionRelease a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/65> .
 
@@ -1321,3 +1321,8 @@ w:publicRecordImportIdentity a p:Finding ;
     rdfs:label "Check raw identifier and grouped self imports by their Rust binding identities" ;
     p:source w:publicObservationalRecordsPlan .
 w:publicObservationalRecords p:addresses w:publicRecordImportIdentity .
+
+w:publicRecordFixture a p:Artifact ;
+    p:location "verification/public-records/verify.py" .
+w:publicJournalReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/71> .
