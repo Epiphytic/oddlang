@@ -26,6 +26,9 @@ fn __nibble(byte: ::core::primitive::u8) -> __Option<::core::primitive::u8> {
     }
 }
 
+"#;
+
+const DECODE: &str = r#"
 fn __decoded<const N: ::core::primitive::usize>(token: &::core::primitive::str) -> __Option<[::core::primitive::u8; N]> {
     let mut bytes = [0; N];
     for (out, pair) in bytes.iter_mut().zip(token.as_bytes().chunks_exact(2)) {
@@ -42,6 +45,7 @@ struct Renderer<'a> {
     locals: usize,
     uses_decimal: bool,
     uses_hex: bool,
+    uses_decode: bool,
 }
 
 impl<'a> Renderer<'a> {
@@ -89,6 +93,7 @@ impl<'a> Renderer<'a> {
             }
             Token::Radix16 { capture, digits, decode } => {
                 self.uses_hex = true;
+                self.uses_decode |= *decode;
                 self.guard(format!("{input}.len() == {digits}"));
                 let rhs = if *decode {
                     format!("__decoded::<{}>({input})?", digits / 2)
@@ -131,6 +136,7 @@ pub(super) fn render(graph: &Graph, overlay: &Binding) -> Result<String> {
         locals: 0,
         uses_decimal: false,
         uses_hex: false,
+        uses_decode: false,
     };
     for (index, grammar) in graph.text_grammars.iter().enumerate() {
         writeln!(
@@ -140,27 +146,31 @@ pub(super) fn render(graph: &Graph, overlay: &Binding) -> Result<String> {
         )
         .unwrap();
     }
-    let (generic, lifetime) = if captures.values().any(|t| *t == Kind::Text) {
-        ("<'input>", "<'_>")
-    } else {
-        ("", "")
-    };
-    writeln!(render.source, "pub struct {}{generic} {{", overlay.record).unwrap();
-    for (capture, ty) in captures {
+    if let (Binding::Records(binding), Some(result)) = (overlay, &graph.record_result) {
+        result.declarations(binding, &mut render.source);
+    } else if let Binding::Captures(binding) = overlay {
+        let (generic, lifetime) = if captures.values().any(|t| *t == Kind::Text) {
+            ("<'input>", "<'_>")
+        } else {
+            ("", "")
+        };
+        writeln!(render.source, "pub struct {}{generic} {{", binding.record).unwrap();
+        for (capture, ty) in captures {
+            writeln!(
+                render.source,
+                "    pub {}: {},",
+                binding.capture_names[capture],
+                ty.rust_type()
+            )
+            .unwrap();
+        }
         writeln!(
             render.source,
-            "    pub {}: {},",
-            overlay.capture_names[capture],
-            ty.rust_type()
+            "}}\n\npub fn {}(input: &[::core::primitive::u8]) -> __Option<{}{lifetime}> {{",
+            binding.reader, binding.record
         )
         .unwrap();
     }
-    writeln!(
-        render.source,
-        "}}\n\npub fn {}(input: &[::core::primitive::u8]) -> __Option<{}{lifetime}> {{",
-        overlay.reader, overlay.record
-    )
-    .unwrap();
     render.guard(format!("input.len() <= {}", graph.max_bytes));
     render.guard("input.is_ascii()".into());
     if !graph.forbidden_bytes.is_empty() {
@@ -172,7 +182,8 @@ pub(super) fn render(graph: &Graph, overlay: &Binding) -> Result<String> {
     render.source.push_str(
         "    let text = ::core::str::from_utf8(input).ok()?.strip_suffix('\\n')?;\n    let mut rows = text.split('\\n');\n",
     );
-    for row in &graph.rows {
+    let mut constraints = graph.constraints.iter().peekable();
+    for (index, row) in graph.rows.iter().enumerate() {
         render
             .source
             .push_str("    let mut tokens = rows.next()?.split(' ');\n");
@@ -183,23 +194,40 @@ pub(super) fn render(graph: &Graph, overlay: &Binding) -> Result<String> {
             render.token(token, "token");
         }
         render.guard("tokens.next().is_none()".into());
+        while let Some(constraint) = constraints.next_if(|constraint| constraint.row() == index + 1)
+        {
+            render.guard(constraint.rust_condition(&render.captures));
+        }
     }
     render.guard("rows.next().is_none()".into());
-    writeln!(render.source, "    __Some({} {{", overlay.record).unwrap();
-    for (capture, index) in &render.captures {
+    if let (Binding::Records(binding), Some(result)) = (overlay, &graph.record_result) {
         writeln!(
             render.source,
-            "        {}: __capture_{index},",
-            overlay.capture_names[*capture]
+            "    __Some({})",
+            result.root(binding, &render.captures)
         )
         .unwrap();
+    } else if let Binding::Captures(binding) = overlay {
+        writeln!(render.source, "    __Some({} {{", binding.record).unwrap();
+        for (capture, index) in &render.captures {
+            writeln!(
+                render.source,
+                "        {}: __capture_{index},",
+                binding.capture_names[*capture]
+            )
+            .unwrap();
+        }
+        render.source.push_str("    })\n");
     }
-    render.source.push_str("    })\n}\n");
+    render.source.push_str("}\n");
     if render.uses_decimal {
         render.source.push_str(DECIMAL);
     }
     if render.uses_hex {
         render.source.push_str(HEX);
+    }
+    if render.uses_decode {
+        render.source.push_str(DECODE);
     }
     Ok(render.source)
 }

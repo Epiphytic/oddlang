@@ -1,4 +1,5 @@
 """Run an unrelated typed native inventory record through the line grammar."""
+import copy
 import hashlib
 import json
 import os
@@ -79,9 +80,58 @@ with tempfile.TemporaryDirectory(prefix="odd-line-fixture-") as tmp:
         env=dict(os.environ, GENERATED=str(out / "lines.rs")))
     run(program)
 
-    graph["rows"][3].append(decimal(32, 1, capture="amount"))
-    g.write_text(json.dumps(graph))
-    failure = stage / "rejected"
-    assert "duplicate capture" in run(CLI, "build", "line-grammar", "rust", g, r, failure, success=False)
-    assert not failure.exists()
+    for tag, change, message in [
+        ("format", lambda g, r: g.update(format="else"), "invalid bounded"),
+        ("zero", lambda g, r: g.update(maxBytes=0), "invalid bounded"),
+        ("rows", lambda g, r: g.update(rows=[]), "invalid bounded"),
+        ("empty row", lambda g, r: g["rows"].append([]), "invalid bounded"),
+        ("LF", lambda g, r: g["forbiddenBytes"].append(10), "invalid bounded"),
+        ("non-ASCII", lambda g, r: g["forbiddenBytes"].append(255), "invalid bounded"),
+        ("duplicate byte", lambda g, r: g["forbiddenBytes"].append(9), "invalid bounded"),
+        ("space", lambda g, r: g["forbiddenBytes"].append(32), "invalid bounded"),
+        ("forbidden literal", lambda g, r: g["forbiddenBytes"].append(ord("k")), "literal token"),
+        ("forbidden grammar text", lambda g, r: g["forbiddenBytes"].append(ord("v")), "admissible token"),
+        ("unused", lambda g, r: g["rows"][1][1].pop("grammar"), "unused nested"),
+        ("unresolved", lambda g, r: g["rows"][1][1].update(grammar="urn:missing"), "unresolved nested"),
+        ("duplicate grammar", lambda g, r: g["textGrammars"].extend(g["textGrammars"]), "duplicate nested"),
+        ("decimal bounds", lambda g, r: g["rows"][3][-1].update(bits=8, maximum=256), "decimal bounds"),
+        ("odd hex", lambda g, r: g["rows"][3][3].update(digits=3), "hexadecimal extent"),
+        ("boolean", lambda g, r: g["rows"][4][1].update(trueToken="no"), "boolean encoding"),
+        ("integer width", lambda g, r: g["rows"][3][4].update(bits=8), "integer-valued"),
+        ("capture duplicate", lambda g, r: g["rows"][3].append(decimal(32, 1, capture="amount")), "duplicate capture"),
+        ("overlay missing", lambda g, r: r["captureNames"].pop("batch"), "distinct valid names"),
+        ("overlay extra", lambda g, r: r["captureNames"].update(extra="extra"), "distinct valid names"),
+        ("overlay invalid", lambda g, r: r["captureNames"].update(batch="new-batch"), "distinct valid names"),
+        ("overlay duplicate", lambda g, r: r["captureNames"].update(batch="item"), "distinct valid names"),
+        ("overlay collision", lambda g, r: r.update(reader="Report"), "distinct valid names"),
+    ]:
+        wrong_g, wrong_r = copy.deepcopy(graph), copy.deepcopy(overlay)
+        change(wrong_g, wrong_r)
+        g.write_text(json.dumps(wrong_g))
+        r.write_text(json.dumps(wrong_r))
+        rejected = stage / "rejected"
+        output = run(CLI, "build", "line-grammar", "rust", g, r, rejected, success=False)
+        assert message in output and not rejected.exists(), (tag, output)
+
+    g.write_text(json.dumps({
+        "format": graph["format"], "id": "urn:inventory:largest-count", "maxBytes": 32,
+        "forbiddenBytes": [9, 13],
+        "rows": [[decimal(64, 0, capture="large")]],
+    }))
+    r.write_text(json.dumps({"format": overlay["format"], "reader": "largest", "record": "Maximum",
+                             "captureNames": {"large": "large"}}))
+    run(CLI, "build", "line-grammar", "rust", g, r, stage / "static-record")
+    g.write_text(json.dumps({
+        "format": graph["format"], "id": "urn:inventory:hex-and-text", "maxBytes": 32,
+        "forbiddenBytes": [9, 13],
+        "rows": [[{"kind": "radix16", "digits": 2, "decode": False, "capture": "hex"},
+                  {"kind": "text", "capture": "marker"}]],
+    }))
+    r.write_text(json.dumps({"format": overlay["format"], "reader": "lookup", "record": "Option",
+                             "captureNames": {"hex": "hex", "marker": "marker"}}))
+    run(CLI, "build", "line-grammar", "rust", g, r, stage / "text-record")
+    run("rustc", "+1.97.1", "--edition=2021", "-Dwarnings", HERE / "extras.rs", "-o", program,
+        env=dict(os.environ, STATIC=str(stage / "static-record/lines.rs"),
+                 TEXT=str(stage / "text-record/lines.rs")))
+    run(program)
 print("Ordered line grammar native typed and malformed cases passed")

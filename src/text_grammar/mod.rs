@@ -71,6 +71,13 @@ impl Grammar {
         &self.id
     }
 
+    pub(crate) fn lexical_parts(&self) -> impl Iterator<Item = &str> {
+        self.prefixes
+            .iter()
+            .map(String::as_str)
+            .chain(self.suffix.iter().map(|suffix| suffix.delimiter.as_str()))
+    }
+
     pub(crate) fn validate(&self) -> Result<()> {
         iri(&self.id)?;
         if self.format != FORMAT

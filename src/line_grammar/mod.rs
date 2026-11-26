@@ -1,5 +1,7 @@
 //! Project strict bounded ASCII lines and typed captures to native Rust.
+mod constraints;
 mod model;
+mod records;
 mod rust;
 
 use crate::{
@@ -28,4 +30,12 @@ pub fn build(graph: &Path, binding: &Path, output: &Path) -> Result<()> {
     fs::write(stage.path().join("lines.rs"), source).map_err(|e| e.to_string())?;
     fs::write(stage.path().join("projection.lock"), lock).map_err(|e| e.to_string())?;
     publish(stage.path(), output)
+}
+
+pub(crate) fn error_link(binding: &[u8]) -> Result<Option<records::NativeError>> {
+    let parsed = serde_json::from_slice(binding).map_err(|e| e.to_string())?;
+    Ok(match parsed {
+        Binding::Records(record) => Some(record.error),
+        Binding::Captures(_) => None,
+    })
 }

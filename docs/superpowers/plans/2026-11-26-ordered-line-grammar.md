@@ -16,7 +16,7 @@ decimal text subgrammars remain reusable.
 - [x] Generate byte framing and typed ordered row captures from
       `src/line_grammar/model.rs` and `src/line_grammar/rust.rs`.
       Check malformed schemas, pin deterministic output, and replay the fixture.
-- [ ] Add finite constraints and typed native output records, including
+- [x] Add finite constraints and typed native output records, including
       fixed arrays, bounded by-source vectors, stable native errors, and
       text formatters. Exercise each with independent native callers.
 - [ ] Corroborate the application record shapes and limit mutation with

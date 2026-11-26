@@ -31,5 +31,7 @@ fn main() {
     }
     assert!(read_report(&[0xff, b'\n']).is_none());
     let boundary = b"stock 1\nbatch v5.2\ntrack east=4.16\nunit probe B=7 af42 0664 16\nready no\nend\n";
-    assert_eq!(read_report(boundary).unwrap().amount, 16);
+    let boundary = read_report(boundary).unwrap();
+    assert_eq!(boundary.amount, 16);
+    assert!(!boundary.ready);
 }

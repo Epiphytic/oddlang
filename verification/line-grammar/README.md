@@ -22,3 +22,23 @@ Rust 1.97.1. The unrelated fixture compiles the generated Rust and reads
 its actual typed output. It also rejects malformed framed inputs, radix
 spelling, a noncanonical version or decimal, duplicate captures, and
 values outside their declared bounds.
+
+The record overlay `oddlang-line-record-rust-v1` maps declared output
+records to native types and fields. It has a parser entry name, crate or
+public visibility, a stable error ID and a native error variant with a
+static text payload. Native package assembly checks that the referenced
+error declaration is an existing matching export. Its `line-grammar`
+component accepts the same pinned graph and overlay as the standalone
+route.
+
+A graph may validate finite tuples of captured scalars or checked sums
+of captured unsigned integers at explicit one-based row positions. The
+result layer constructs owned or static text, booleans, unsigned fields,
+fixed arrays, and vectors of declared records from named captures. It
+also binds simple formatters made from literal text, selected record text
+fields and an optional textual argument.
+
+Run `python3 -B verification/line-grammar/verify_records.py /path/to/oddlang`
+to compile and exercise an unrelated result with exact error and record
+types, distinct finite-table and overflow failures, and checked package
+error linkage.

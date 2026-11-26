@@ -1391,10 +1391,12 @@ w:checkedRecordGrammar a p:Task ;
     p:milestone w:marmishMilestone ; p:source w:orderedLineGrammarPlan ;
     p:dependsOn w:orderedLineGrammar ;
     p:acceptance "Apply checked finite and aggregate constraints and construct native typed records, stable parse errors and controlled name formatters." ;
-    p:status p:planned .
+    p:status p:done ; p:evidence w:checkedRecordGrammarFixture .
+w:checkedRecordGrammarFixture a p:Artifact ;
+    p:location "verification/line-grammar/verify_records.py" .
 w:pureReleaseManifestGrammar a p:Task ;
     rdfs:label "Qualify native release manifest parsing and identifiers" ;
     p:milestone w:marmishMilestone ; p:source w:orderedLineGrammarPlan ;
     p:dependsOn w:checkedRecordGrammar ;
     p:acceptance "Use compiler evidence for the native source shapes, recover or verify one changed-source constraint, and compare all 224 independent pure cases and the source mutation." ;
-    p:status p:planned .
+    p:status p:active .
