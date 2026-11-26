@@ -1,5 +1,7 @@
 //! Compiler observations of an exhaustive enum encoder with a fresh byte buffer.
+mod fragments;
 mod guards;
+pub use fragments::observe_fragments;
 pub use guards::observe_guards;
 
 use rustc_ast::LitKind;
@@ -23,7 +25,7 @@ pub fn observe(tcx: TyCtxt<'_>, compiler: &str, selected: &str) -> Value {
     let mut evidence = json!({"format":"oddlang-rust-tagged-frame-v1",
         "compiler":compiler, "method":selected, "unresolved":[]});
     let result = super::relations::method_evidence(tcx, selected, &mut evidence)
-        .and_then(|def| Observer::new(tcx, def).inspect(def, None));
+        .and_then(|def| Observer::new(tcx, def).inspect(def, None, None));
     match result {
         Ok((maximum, cases, _)) => {
             evidence["maximum"] = json!(maximum);
@@ -51,6 +53,7 @@ impl<'tcx> Observer<'tcx> {
         &self,
         def: LocalDefId,
         guards: Option<&BTreeSet<String>>,
+        fragments: Option<&BTreeSet<String>>,
     ) -> Result<(u32, Vec<Value>, BTreeMap<String, Value>)> {
         let sig = self.tcx.fn_sig(def).instantiate_identity().skip_binder();
         let [receiver] = sig.inputs() else {
@@ -138,12 +141,21 @@ impl<'tcx> Observer<'tcx> {
                 let proof = self
                     .guard_plan(stmts, &fields, &shape, sig.output())
                     .map_err(|why| format!("{variant}: {why}"))?;
+                recovered_guards.insert(variant.clone(), proof);
+            }
+            if fragments.is_some_and(|cases| cases.contains(&variant)) {
+                let proof = self
+                    .fragment_plan(stmts, payload, &fields, &shape, sig.output())
+                    .map_err(|why| format!("{variant}: {why}"))?;
                 recovered_guards.insert(variant, proof);
             }
             cases.push(shape);
         }
-        if guards.is_some_and(|chosen| !chosen.iter().eq(recovered_guards.keys())) {
-            return Err("selected guard case lacks an observed variant".into());
+        if guards
+            .or(fragments)
+            .is_some_and(|chosen| !chosen.iter().eq(recovered_guards.keys()))
+        {
+            return Err("selected proof case lacks an observed variant".into());
         }
         Ok((maximum, cases, recovered_guards))
     }
