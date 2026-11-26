@@ -9,8 +9,16 @@ Portability means sharing versioned data and API contracts among native backends
 - Read the [ledger design](docs/superpowers/specs/2026-11-25-ledger.md) for the current semantics, scope and success criteria. The original chat is available in the author's local PDF export named in the work graph. The design captures the agreed prototype for anyone working from a fresh clone.
 - Follow the [implementation plan](docs/superpowers/plans/2026-11-25-ledger.md) for task details, fixtures and verification commands.
 - Read the [HTTP conformance design](docs/superpowers/specs/2026-11-25-http-conformance.md) and [phased plan](docs/superpowers/plans/2026-11-25-http-conformance.md) for the shipped HTTP implementation.
-- Follow the [WebAssembly, Rust round-trip and Marmish plan](docs/superpowers/plans/2026-11-25-wasm-rust-marmish.md) for the seven phase gates and their compatibility claims. The [Marmish qualification report](docs/design/marmish-qualification.md) gives reproduction commands, the scope of the two regenerated Rust files and the outstanding platform and language obligations.
+- Use the [WebAssembly, Rust round-trip and Marmish plan](docs/superpowers/plans/2026-11-25-wasm-rust-marmish.md) for the seven phase gates and their compatibility claims. The [Marmish qualification report](docs/design/marmish-qualification.md) gives reproduction commands, the scope of the two regenerated Rust files and the outstanding platform and language obligations.
 - Consult the [process vocabulary](docs/design/process.ttl) and [work graph](docs/design/work.ttl) for decisions, review findings, dependencies, progress and evidence. These describe work on Oddlang. The [ledger core contract](docs/language/ledger-core.md) defines the prototype's executable vocabulary.
+
+## Recover portable contracts from existing software
+
+The authoritative ontology describes the software's contract-level structure and behavior. Use stable identities for components, interfaces, roles, data types, dependencies between contracts, and operations. Record preconditions, state transitions, named errors, wire rules, and observable effects as applicable. Recover these facts from source, interfaces, tests, and observed behavior. Keep provenance and identify any facts that still need review or evidence.
+
+A target can generate or implement the same contract using its own language, framework, libraries, and compiler. Require deterministic checks against shared, independently established expectations. Scope compatibility to the declared boundary and role. For a drop-in binary, include its applicable ABI, CLI, wire protocol, or platform requirements. Contract-required bytes such as fixed wire tags are part of that boundary. Source equality and binary checksum equality serve provenance or build reproducibility checks when explicitly required.
+
+Use [the contract recovery decision](docs/design/contract-recovery.md) when choosing what to recover and how to qualify a replacement.
 
 ## Build conformance into every contract
 

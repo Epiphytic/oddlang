@@ -1,6 +1,6 @@
 # Generic Rust round-trip experiment implementation plan
 
-> Execute with subagents using superpowers:subagent-driven-development. Assign different owners to implementation and expected results. Use Claude CLI auto mode at each phase boundary.
+> Historical experiment. The current [contract recovery decision](../../design/contract-recovery.md) supersedes source fidelity as a product goal. The original execution instructions and checklist below describe the experiment as planned.
 
 The experiment asks whether the same Rust importer and emitter can regenerate all of `marmish-stream` and an unrelated crate with no per-library translation rules. Build on the [Marmish qualification](../../design/marmish-qualification.md) and keep the existing executable framing graph and portable tests available. Those artifacts provide context and independent evidence for the older pilot.
 
@@ -48,4 +48,4 @@ The experiment asks whether the same Rust importer and emitter can regenerate al
 
 At each phase boundary, run the relevant locked tests and use `claude -p --safe-mode --permission-mode auto` in a disposable checkout. Ask Claude to try falsifying the claimed coverage and explicitly look for source passthrough, hidden fixture rules, missing compiler inputs, and a comparison using the wrong binary. Resolve any finding that could invalidate acceptance, or record a reproducible check that disproves it before proceeding. Record commit, review verdict, evidence and blockers in `docs/design/work.ttl`.
 
-Claude CLI auto review requested stricter controls for inline tests, token validation, toolchain provenance and build isolation. The follow-up found no blockers. Its remaining clarifications are incorporated above. The review assessed the plan, and implementation evidence is pending.
+Claude CLI auto review requested stricter controls for inline tests, token validation, toolchain provenance and build isolation. The follow-up found no blockers. Its remaining clarifications are incorporated above. The [experiment report at the pinned implementation commit](https://github.com/Epiphytic/oddlang/blob/e5af0cc48e386806a21a54765ef9318284b281be/docs/design/marmish-stream-experiment.md) records the results and their scope.
