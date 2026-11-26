@@ -115,6 +115,16 @@ fn recovers_ordered_choices_and_decimal_bounds_and_emits_a_native_grammar() {
     assert_eq!(graph["suffix"]["delimiter"], "/probe/");
     assert_eq!(graph["suffix"]["body"]["minimum"], 0);
     assert_eq!(graph["consumption"], "entire-input");
+    let lock: Value =
+        serde_json::from_slice(&fs::read(work.path().join("baseline/recovery.lock")).unwrap())
+            .unwrap();
+    assert_eq!(lock["sourceScope"], "two-selected-functions");
+    assert_eq!(
+        lock["unresolved"],
+        json!([
+            "method and name resolution in the original enclosing module requires a native witness"
+        ])
+    );
     observe(
         work.path(),
         "baseline",

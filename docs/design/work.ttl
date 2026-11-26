@@ -1362,3 +1362,11 @@ w:releaseVersionMethodResolutionReview a p:Finding ;
 w:releaseVersionRecoveryReview a p:Artifact ;
     p:location "docs/design/reviews/text-grammar.md" .
 w:releaseVersionTextGrammar p:addresses w:releaseVersionMethodResolutionReview .
+
+w:releaseVersionNativeScope a p:Task ;
+    rdfs:label "Qualify release-version method and name resolution in its original native module" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:wholeMarmishFreeze ;
+    p:status p:active ;
+    p:acceptance "Pin the source module digest and exact selection span. Exercise the released vectors and supported mutation through the selected predicates in the original native crate scope, with an added test harness and no production changes outside the declared mutation." .
+w:releaseVersionTextGrammar p:dependsOn w:releaseVersionNativeScope .
