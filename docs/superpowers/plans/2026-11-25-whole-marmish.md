@@ -97,3 +97,5 @@ The principal feasibility risk is recovering intended behavior where only incide
 - [x] Qualify Manifest matching and the helper start and build consistency checks against the pinned native original. [Native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/33)
 
 - [x] Recover typed array elements, fixed extents and const-parameter identity in the structural graph. Verify nested, empty, symbolic and source-mutated arrays in the [compiler fixture](../../../verification/rust-recovery/test_shapes.py).
+- [x] Reconcile the ARM64 stream array refinement against the v1 release and independently compare rustdoc-visible element types and extents. [63 resolved fields and scoped evidence](https://github.com/Epiphytic/marmish-oddlang/pull/45)
+- [x] Inventory named runnable and ignored cases for all compiled default release harnesses on the two ARM64 hosts. [Named reference suites](https://github.com/Epiphytic/marmish-oddlang/pull/43)
