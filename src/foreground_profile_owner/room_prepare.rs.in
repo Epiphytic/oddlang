@@ -1,7 +1,8 @@
 
 use base64::{Engine as _, engine::general_purpose::STANDARD};
 use cgka_traits::{GroupId, app_components::{AppComponentData, NOSTR_ROUTING_COMPONENT_ID,
-    NostrRoutingV1, encode_nostr_routing_v1}, engine::{CreateGroupRequest, KeyPackage, KeyPackageSource}};
+    NostrRoutingV1, encode_nostr_routing_v1}, engine::{CreateGroupRequest, KeyPackage, KeyPackageSource},
+    message::MessageState, storage::MessageStorage};
 use nostr::{filter::Filter, key::PublicKey};
 use nostr_sdk::{client::ReqTarget, relay::{AcquisitionEnd, AcquisitionLimits}};
 use rusqlite::OptionalExtension;
@@ -216,6 +217,13 @@ async fn prepare_room(
                 return Ok(session);
             }
             queue.authorization(remote)?;
+            let message = providers.room_storage.get_message(&welcome).map_err(|_| uncertain)?;
+            if message.group_id != group { return Err(uncertain); }
+            match message.state {
+                MessageState::Processed => return mark_ready(providers, queue, remote, session, &group, &welcome),
+                MessageState::Sent => (),
+                _ => return Err(uncertain),
+            }
             let effects = providers.runtime.redeliver_welcome(&welcome).await.map_err(|_| uncertain)?;
             return complete_prepare(providers, queue, remote, session, &group, &welcome, &effects);
         }
@@ -290,9 +298,11 @@ fn bind_pending_room(providers: &ActiveProviders, session: &str, group: &GroupId
 
 fn verify_delivered_room(providers: &ActiveProviders, group: &GroupId, welcome: &MessageId) -> Result<(), Failure> {
     let uncertain = PREPARE_CATEGORIES[2];
+    let message = providers.room_storage.get_message(welcome).map_err(|_| uncertain)?;
     let pending = providers.runtime.outstanding_welcome_deliveries().map_err(|_| uncertain)?;
     let tracked = providers.runtime.tracked_outbound_welcome_ids().map_err(|_| uncertain)?;
-    if !tracked.contains(welcome) || pending.iter().any(|(candidate, _)| candidate == group)
+    if &message.group_id != group || message.state != MessageState::Processed
+        || !tracked.contains(welcome) || pending.iter().any(|(candidate, _)| candidate == group)
         || providers.runtime.has_pending_outbound_fanouts(group).map_err(|_| uncertain)?
         || providers.runtime.has_queued_outbound_intents(group).map_err(|_| uncertain)?
     {
@@ -314,6 +324,14 @@ fn complete_prepare(
     {
         return Err(uncertain);
     }
+    mark_ready(providers, queue, remote, session, group, welcome)
+}
+
+fn mark_ready(
+    providers: &ActiveProviders, queue: &RoomPrepareQueue, remote: &str, session: String,
+    group: &GroupId, welcome: &MessageId,
+) -> Result<String, Failure> {
+    let uncertain = PREPARE_CATEGORIES[2];
     verify_delivered_room(providers, group, welcome)?;
     queue.authorization(remote)?;
     let updated = providers.journal.execute(

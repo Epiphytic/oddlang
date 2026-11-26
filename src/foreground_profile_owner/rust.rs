@@ -223,6 +223,26 @@ fn render_lifecycle(
             render_room_prepare(out, prepare);
             let patches = [
                 (
+                    "    storage_closer: storage_sqlite::DatabaseCloser,",
+                    "    storage_closer: storage_sqlite::DatabaseCloser,\n    room_storage: storage_sqlite::SqliteAccountStorage,",
+                ),
+                (
+                    "let storage_closer = storage.closer();",
+                    "let storage_closer = storage.closer();\n        let room_storage = storage.clone();",
+                ),
+                (
+                    "Ok(Self { runtime, journal, storage_closer, identity,",
+                    "Ok(Self { runtime, journal, storage_closer, room_storage, identity,",
+                ),
+                (
+                    "let Self { runtime, journal, storage_closer, identity,",
+                    "let Self { runtime, journal, storage_closer, room_storage, identity,",
+                ),
+                (
+                    "        drop(runtime);",
+                    "        drop(runtime);\n        drop(room_storage);",
+                ),
+                (
                     "let routing = StaticTransportRouting::new(vec![endpoint.clone()]);",
                     "let routing = room_routing(root, profile, &endpoint).map_err(|failure| (1, failure))?;",
                 ),
