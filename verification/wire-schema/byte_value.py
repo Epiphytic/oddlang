@@ -67,19 +67,31 @@ fn main() {
 ''')
     run("cargo","+1.97.1","run","--quiet","--locked","--offline",cwd=crate)
     # Exercise the same graph through the complete source-free package builder.
-    del b["nativeValidation"]
     def pin(path):
         return {"path":path.name,"sha256":hashlib.sha256(path.read_bytes()).hexdigest()}
     shutil.copyfile(fixture/"Cargo.lock",root/"Cargo.lock")
     component=dict(kind="wire-schema",module="readings",visibility="public",reexports=["Sample"],
                    graph=pin(write(root/"graph.json",g)),overlay=pin(write(root/"rust.json",b)))
+    failure="urn:probe:failure"
+    variant="urn:probe:invalid"
+    errors={"format":"oddlang-shared-declarations-v1","id":"urn:probe:outcome","errors":[
+        {"id":failure,"variants":[{"id":variant,"payload":"text","message":[{"payload":True}]}]}]}
+    names={"format":"oddlang-shared-rust-v1","names":{failure:"Failure",variant:"Invalid"},
+           "variantOrder":{failure:[variant]}}
+    shared=dict(kind="shared-declarations",module="outcomes",reexports=["Failure"],
+                graph=pin(write(root/"errors.json",errors)),overlay=pin(write(root/"names.json",names)))
     manifest=dict(format="oddlang-native-package-v1",name="irrigation-schema-fixture",
                   version="0.0.0",edition="2021",dependencies={
                       "base64":{"version":"0.22.1"},"serde":{"version":"1.0.229","features":["derive"]},
-                      "serde_json":{"version":"1.0.154"}},cargoLock=pin(root/"Cargo.lock"),components=[component])
+                      "serde_json":{"version":"1.0.154"}},cargoLock=pin(root/"Cargo.lock"),components=[shared,component])
     package=root/"assembled"
     run(cli,"build","native-package","rust",write(root/"package.json",manifest),package)
-    run("cargo","+1.97.1","check","--locked","--offline",cwd=package)
+    # A Cargo example is a distinct crate linked against the assembled library's public API.
+    (package/"examples").mkdir()
+    native=(crate/"src/main.rs").read_text().split("fn main()",1)[1]
+    native=native.replace("use wire::Sample;", "use irrigation_schema_fixture::readings::Sample;")
+    (package/"examples/probe.rs").write_text("use irrigation_schema_fixture::Failure;\nfn main()"+native)
+    run("cargo","+1.97.1","run","--quiet","--locked","--offline","--example","probe",cwd=package)
     b["nativeValidation"]={owner:{"method":"check","typePath":"crate::Failure","errors":{}}}
     project(root/"bad",err="invalid native validation binding")
     g["guards"][1]["require"]["field"]=owner+":field:seq"
