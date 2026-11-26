@@ -173,7 +173,12 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
                  b'{"ready":true,"reading":{"mode":"scan","digest":"face","rows":[{"value":256,"reference":[1,2]}]}}',
                  b'{"ready":true,"reading":{"mode":"scan","digest":"face","rows":[{"value":255,"reference":[1]}]}}'):
         exchange(typed_bin, path, reply(body), (10, b"", b"invalid sensor response\n"))
+    def unspecified_default(graph):
+        del graph["response"]["ordered_sequence_minimum"]
+        graph["response"]["fields"][-1]["default"] = True
+
     for name, mutate, error in (
+        ("unspecified-default", unspecified_default, b"reply field default requires ordered_sequence_minimum"),
         ("sequence", lambda graph: graph["response"].update(ordered_sequence_minimum=1), b"invalid nullable suffix"),
         ("dangling", lambda graph: graph["response"]["fields"][0]["kind"].update(id="urn:field:missing"), b"unknown reply type"),
         ("identity", lambda graph: graph["response"]["fields"][0].update(id="urn:field:reading"), b"duplicate reply declaration"),
@@ -230,4 +235,4 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
     assert mutant.returncode and b"constant request exceeds frame limit" in mutant.stderr
     assert not (root / "invalid").exists()
 
-print("field-meter IPC: nine framed interactions, three local errors, and five graph or linking rejections, and typed nested and sequence replies passed")
+print("field-meter IPC: nine framed interactions, three local errors, five graph or linking rejections, and typed nested and sequence replies passed")

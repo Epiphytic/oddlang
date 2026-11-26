@@ -199,6 +199,11 @@ pub(super) fn validate(response: &Response) -> Result<(), String> {
         )?;
     }
     validate_fields(&response.fields, typed, &mut identities)?;
+    if response.ordered_sequence_minimum.is_none()
+        && response.fields.iter().any(|field| field.default)
+    {
+        return Err("reply field default requires ordered_sequence_minimum".into());
+    }
     if let Some(minimum) = response.ordered_sequence_minimum {
         if minimum > response.fields.len()
             || response.fields.iter().enumerate().any(|(index, field)| {

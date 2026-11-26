@@ -12,7 +12,7 @@ Use `u32_be_json_half_close` framing and `same_effective_uid` peer verification.
 
 ## Typed replies
 
-Typed responses have a root IRI in `response.id` and an IRI for every field, nested declaration, and variant. Field order determines both the sequence input order and the JSON object output order. `ordered_sequence_minimum` declares how many leading positions a positional reply must provide. Its remaining fields must be nullable. Map inputs still accept omitted nullable fields. `default: true` mirrors a nullable nested member that also defaults when its positional record omits it.
+Typed responses have a root IRI in `response.id` and an IRI for every field, nested declaration, and variant. Field order determines both the sequence input order and the JSON object output order. `ordered_sequence_minimum` declares how many leading positions a positional reply must provide. Its remaining fields must be nullable. A root field default requires an explicit sequence minimum. Map inputs still accept omitted nullable fields. `default: true` mirrors a nullable nested member that also defaults when its positional record omits it.
 
 `response.declarations` supplies the types reached by explicit `{"kind":"ref","id":"…"}` references. Supported declarations include closed ordered records, closed string enumerations, and tagged enumerations with unit or ordered named cases. A tag alone denotes an internally tagged enumeration. An additional `content` key denotes an adjacent tagged representation. Internally tagged unit cases discard extra payload fields, while named cases reject unknown fields. Nullable fields serialize as null or are omitted according to `presence`.
 

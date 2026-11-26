@@ -812,6 +812,12 @@ w:typedLocalCommandReplies a p:Task ;
     p:milestone w:marmishMilestone ; p:source w:typedLocalCommandRepliesPlan ; p:status p:done ;
     p:dependsOn w:localCommandClient ;
     p:acceptance "Generate typed named and ordered positional native reply admission with stable identity checks and independent Unix peer evidence." ;
-    p:evidence w:localCommandClientFixture .
+    p:evidence w:localCommandClientFixture, w:typedLocalCommandNativeReceipt .
+w:typedLocalCommandNativeReceipt a p:Artifact ;
+    p:location "companion:verification/whole/status/generated-typed-macos-arm64.json" .
+w:typedLocalReplySequenceDefaultReview a p:Finding ;
+    rdfs:label "Keep the declared positional arity consistent with nullable default fields" ;
+    p:source w:localCommandClientFixture .
+w:typedLocalCommandReplies p:addresses w:typedLocalReplySequenceDefaultReview .
 w:typedLocalCommandRepliesPlan a p:Artifact ;
     p:location "docs/superpowers/plans/2026-11-26-typed-local-command-replies.md" .
