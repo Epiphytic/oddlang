@@ -388,11 +388,20 @@ pub(crate) fn checked_method_name(name: &str) -> bool {
                 | "eq"
                 | "ne"
                 | "hash"
+                | "hash_slice"
                 | "fmt"
                 | "to_string"
                 | "source"
                 | "description"
                 | "cause"
+                | "to_owned"
+                | "borrow"
+                | "borrow_mut"
+                | "type_id"
+                | "into"
+                | "try_into"
+                | "from"
+                | "try_from"
         )
 }
 fn native_ident(name: &str) -> bool {

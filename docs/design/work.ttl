@@ -992,7 +992,7 @@ w:checkedValueProductProjection a p:Task ;
 w:checkedValuesFixture a p:Artifact ;
     p:location "verification/checked-values/verify.py" .
 w:checkedValuesFidelityReview a p:Finding ;
-    rdfs:label "Retain accessible product construction, exact Cc semantics and deterministic capability bindings" ;
+    rdfs:label "Retain accessible product construction and getters, protect trait calls, and verify exact Cc and deterministic capabilities" ;
     p:source w:checkedValuesReview .
 w:checkedValuesReview a p:Artifact ;
     p:location "docs/design/reviews/checked-value-domains.md" .
