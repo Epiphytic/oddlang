@@ -1,6 +1,6 @@
 use schema::{ArgumentKind, BinaryOutput, CaptureKind, Effect, EmbeddedReply, Field, Source, Workflow};
 use serde_json::Value;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 type Response = strict_json::Strict;
 
@@ -101,6 +101,26 @@ fn capture_is_valid(value: &Value, kind: &CaptureKind) -> bool {
     }
 }
 
+fn report_record(
+    record: &schema::Record, matches: &ArgMatches, captured: &BTreeMap<&str, Value>,
+    inputs: &BTreeMap<String, Value>,
+) -> Result<(), Failure> {
+    let bytes = source_bytes(&record.source, matches, captured, inputs)?;
+    let mut stderr = std::io::stderr().lock();
+    stderr.write_all(record.prefix.as_bytes()).and_then(|_| stderr.write_all(&bytes))
+        .and_then(|_| stderr.write_all(b"\n")).and_then(|_| stderr.flush()).map_err(|_| IO)
+}
+
+fn reject_reply(
+    step: &schema::Step, matches: &ArgMatches, captured: &BTreeMap<&str, Value>,
+    inputs: &BTreeMap<String, Value>,
+) -> Result<u8, Failure> {
+    let reject = step.reject.as_ref().ok_or(PROTOCOL)?;
+    if let Some(record) = &reject.record { report_record(record, matches, captured, inputs)?; }
+    writeln!(std::io::stderr().lock(), "{}", reject.diagnostic.stderr).map_err(|_| IO)?;
+    Ok(reject.diagnostic.exit)
+}
+
 async fn run_workflow(
     workflow: &Workflow,
     path: &Path,
@@ -109,18 +129,34 @@ async fn run_workflow(
 ) -> Result<u8, Failure> {
     let mut state = workflow.entry.as_str();
     let mut captured = BTreeMap::new();
+    let mut issued = BTreeSet::new();
     for exchange_index in 0..workflow.transport.maximum_exchanges {
         let step = workflow.steps.iter().find(|step| step.id == state).ok_or(PROTOCOL)?;
         let mut body = Vec::new();
         request(&mut body, &step.request, matches, &captured, inputs)?;
         let strict_json::Strict(mut reply) = exchange(path, &body).await?;
         if let Some(embedded) = &step.embedded {
-            open_embedded(&mut reply, embedded)?;
+            if open_embedded(state, &mut reply, embedded).is_err() {
+                return reject_reply(step, matches, &captured, inputs);
+            }
         }
         let mut transition = None;
         for selected in &step.transitions {
             let mut matches_all = true;
+            for (name, expected) in &selected.flags {
+                let flag = matches.try_get_one::<bool>(name).map_err(|_| BINDING)?
+                    .filter(|_| explicit_argument(matches, name)).copied().unwrap_or(false);
+                if flag != *expected { matches_all = false; break; }
+            }
+            if !matches_all { continue; }
             for predicate in &selected.when {
+                if let Some(values) = &predicate.one_of {
+                    if !field_at(&reply, &predicate.path, workflow.delivery).is_some_and(|value| values.contains(value)) {
+                        matches_all = false;
+                        break;
+                    }
+                    continue;
+                }
                 let expected = if let Some(source) = &predicate.equals_source {
                     serde_json::from_slice(&source_bytes(source, matches, &captured, inputs)?)
                         .map_err(|_| FRAME_JSON)?
@@ -143,11 +179,13 @@ async fn run_workflow(
                 break;
             }
         }
-        let transition = transition.ok_or(PROTOCOL)?;
+        let Some(transition) = transition else {
+            return reject_reply(step, matches, &captured, inputs);
+        };
         let mut transferred = BTreeMap::new();
         for name in &transition.carry {
-            let value = captured.remove(name.as_str()).ok_or(PROTOCOL)?;
-            transferred.insert(name.as_str(), value);
+            let value = captured.get(name.as_str()).ok_or(PROTOCOL)?;
+            transferred.insert(name.as_str(), value.clone());
         }
         for field in &transition.capture {
             let value = field_at(&reply, &field.path, workflow.delivery)
@@ -155,9 +193,15 @@ async fn run_workflow(
                 .ok_or(PROTOCOL)?;
             transferred.insert(field.name.as_str(), value.clone());
         }
-        captured = transferred;
+        if let Some(name) = &transition.fresh_id {
+            let id = fresh_profile_id(workflow)?;
+            if inputs.values().any(|value| value.as_str() == Some(&id)) || !issued.insert(id.clone()) {
+                return Err(PROTOCOL);
+            }
+            transferred.insert(name.as_str(), Value::String(id));
+        }
         let captured_exit = match &transition.effect {
-            Effect::ExitCaptured { name } => Some(captured.get(name.as_str())
+            Effect::ExitCaptured { name } => Some(transferred.get(name.as_str())
                 .and_then(Value::as_u64).and_then(|n| u8::try_from(n).ok()).ok_or(PROTOCOL)?),
             _ => None,
         };
@@ -166,7 +210,14 @@ async fn run_workflow(
         {
             return Err(BUDGET);
         }
-        emit_outputs(&reply, &transition.outputs)?;
+        match emit_outputs(&reply, &transition.outputs, &captured) {
+            Err(error) if error.0 == PROTOCOL.0 && error.1 == PROTOCOL.1 => {
+                return reject_reply(step, matches, &captured, inputs);
+            }
+            value => value?,
+        }
+        if let Some(record) = &transition.record { report_record(record, matches, &captured, inputs)?; }
+        captured = transferred;
         match &transition.effect {
             Effect::Continue { step, delay_ms } => {
                 state = step;

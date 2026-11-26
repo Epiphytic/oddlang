@@ -18,24 +18,28 @@ def encode(value):
 
 
 def wrap(payload, *, digest=None):
-    return body({'encoded': encode(payload), 'digest': digest or sha256(payload).hexdigest()})
+    return body({'encoded': encode(payload), 'digest': digest or sha256(payload).hexdigest(), 'state': 'answer'})
 
 
 def main():
     stdout, stderr = b'measurement\x00', b'warning\xff'
     sample = {'type': 'measurement', 'indexes': [8, 9], 'binding': sha256(b'{"scale":"C","precision":2}').hexdigest(),
-              'stdout': encode(stdout), 'stderr': encode(stderr), 'outCursor': len(stdout),
-              'errCursor': len(stderr), 'produced': len(stdout), 'exit': 7}
+              'stdout': encode(stdout), 'stderr': encode(stderr), 'outCursor': len(stdout) + 5,
+              'errCursor': len(stderr), 'retained': len(stdout) + 5, 'produced': len(stdout) + 5, 'exit': 7}
     graph = {
         'format': 'oddlang-local-command-workflow-v1', 'id': 'urn:meter:workflow',
         'socket_argument': 'port', 'delivery': True,
-        'transport': {'deadline_ms': 1500, 'maximum_frame_bytes': 1024, 'maximum_exchanges': 2},
+        'transport': {'deadline_ms': 1500, 'maximum_frame_bytes': 1024, 'maximum_exchanges': 3},
         'errors': {name: {'exit': code, 'stderr': name} for code, name in enumerate(
             ('binding', 'io', 'peer', 'frame_size', 'frame_json', 'deadline', 'protocol', 'budget'), 6)},
-        'entry': SUFFIX + 'step:read',
+        'entry': SUFFIX + 'step:cursor',
         'steps': [
+            {'id': SUFFIX + 'step:cursor', 'request': [field('cursor', literal('lookup'))],
+             'transitions': [go('read', [when('ready', True)], 'read', capture=[
+                 {'name': 'previous', 'path': ['previous'], 'value_kind': {'kind': 'unsigned64'}}])]},
             {'id': SUFFIX + 'step:read', 'request': [field('action', literal('read'))],
-             'embedded': {'id': SUFFIX + 'embedded', 'bytes': ['encoded'], 'sha256': ['digest'], 'maximum_bytes': 512},
+             'embedded': {'id': SUFFIX + 'embedded', 'bytes': ['encoded'], 'sha256': ['digest'], 'maximum_bytes': 512,
+                          'tagged': {'path': ['state'], 'value': 'answer'}},
              'transitions': [
                  go('ack', [when('$opened.type', 'measurement'),
                             when('$opened.indexes.1', 9),
@@ -46,7 +50,7 @@ def main():
                               'value_kind': {'kind': 'exit_status'}}]) | {
                          'outputs': [{'id': SUFFIX + 'output:' + channel, 'channel': channel,
                                       'bytes': ['$opened', channel], 'cursor': ['$opened', cursor],
-                                      'maximum_bytes': 32}
+                                      'maximum_bytes': 32} | ({'start': 'previous', 'upper': ['$opened', 'retained']} if channel == 'stdout' else {})
                                      for channel, cursor in [('stdout', 'outCursor'), ('stderr', 'errCursor')]],
                     }]},
             {'id': SUFFIX + 'step:ack', 'request': [field('confirm', literal('measurement'))],
@@ -91,11 +95,12 @@ tokio = { version = "=1.54.1", features = ["io-util", "net", "rt", "time"] }
         checked('cargo', '+1.97.1', 'build', '--offline', '--locked', '--release', cwd=root)
         binary = root / 'target/release/field-meter'
         path = root / 'sock'
+        start = [(b'{"cursor":"lookup"}', b'{"ready":true,"previous":5}')]
         read = b'{"action":"read"}'
         confirm = b'{"confirm":"measurement"}'
-        serve(binary, path, [(read, wrap(body(sample))), (confirm, b'{"confirmed":true}')],
+        serve(binary, path, start + [(read, wrap(body(sample))), (confirm, b'{"confirmed":true}')],
               (7, stdout, stderr), unit=False)
-        serve(binary, path, [(read, wrap(body(sample))), (confirm, b'{"confirmed":false}')],
+        serve(binary, path, start + [(read, wrap(body(sample))), (confirm, b'{"confirmed":false}')],
               (12, stdout, stderr + b'protocol\n'), unit=False)
         for reply in (wrap(body(sample), digest='0' * 64),
                       wrap(body(sample | {'binding': '0' * 64})),
@@ -103,17 +108,20 @@ tokio = { version = "=1.54.1", features = ["io-util", "net", "rt", "time"] }
                       wrap(body(sample | {'stderr': '!!!!'})),
                       wrap(body(sample | {'exit': 256})),
                       wrap(body(sample | {'produced': len(stdout) + 1})),
+                      wrap(body(sample | {'outCursor': len(stdout) + 4, 'produced': len(stdout) + 4})),
+                      wrap(body(sample | {'retained': len(stdout) + 4})),
+                      body(json.loads(wrap(body(sample))) | {'state': 'other'}),
                       wrap(body(sample | {'indexes': [8]})),
                       wrap(body(sample), digest=sha256(body(sample)).hexdigest().upper()),
                       body(json.loads(wrap(body(sample))) | {'$opened': sample}),
                       body(json.loads(wrap(body(sample))) | {'encoded': 'YR=='}),
                       wrap(b'x' * 513),
                       wrap(body(sample)[:-1] + b',"exit":7}')):
-            serve(binary, path, [(read, reply)], (12, b'', b'protocol\n'), unit=False)
+            serve(binary, path, start + [(read, reply)], (12, b'', b'protocol\n'), unit=False)
         obligations = (product / 'workflow-obligations.json').read_bytes()
         pin = json.loads((product / 'projection.lock').read_bytes())
         assert pin['workflowObligationsSha256'] == sha256(obligations).hexdigest()
-        assert json.loads(obligations)['delivery']['cursorOrigin'] == 0
+        assert json.loads(obligations)['delivery']['cursorOrigin'] == 'declared unsigned capture or zero'
     print('field-meter checked nested binding, binary output, cursor and acknowledgement passed')
 
 

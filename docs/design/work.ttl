@@ -2831,6 +2831,13 @@ w:basicCommandInterop p:dependsOn w:collectionWireGuards .
 w:collectionWireGuardsVerification a p:Artifact ;
     p:location "verification/canonical-wire/README.md" .
 
+w:boundedLocalWorkflowProgress a p:Task ;
+    rdfs:label "Preserve private command handles and bounded multi-poll delivery" ;
+    p:milestone w:marmishMilestone ; p:source w:localWorkflowDeliveryPlan ;
+    p:status p:active ; p:dependsOn w:localWorkflowDelivery ;
+    p:evidence w:boundedLocalWorkflowProgressReplay ;
+    p:acceptance "Verify fresh request identity, prior and produced cursor bounds, typed reply guard, exact detached handle bytes, inline wait admission and named failures using independent Unix owner evidence." .
+w:basicCommandInterop p:dependsOn w:boundedLocalWorkflowProgress .
 w:wholeCommandReplyAdmission a p:Task ;
     rdfs:label "Compare generated response wire admission and canonical output to pinned mainline" ;
     p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
@@ -2868,6 +2875,8 @@ w:sharedWireRecordCheckCoverageFinding a p:Finding ;
 w:sharedWireRecordCheckReview a p:Artifact ;
     p:location "Claude auto review of the shared record check compiler and canonical wire fixture patch" .
 
+w:boundedLocalWorkflowProgressReplay a p:Artifact ;
+    p:location "verification/local-owner-workflow/progress-verification.md" .
 w:postPrepareLocalResponseFailure a p:Finding ;
     rdfs:label "The source-denied client with room preparation exits 255 before a receiver receipt" ;
     p:reason "The 32-byte stderr hash matches the declared local response diagnostic. Both owners activated and cleanup passed. The owner currently routes status and prepare; the client next requires submit." ;
