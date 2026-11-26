@@ -36,8 +36,8 @@ def reference(id):
 u32 = src("unsigned", bits=32)
 envelope, version, sequence, selector, union, variant, endpoint, number, request_seq, error = map(
     identity, ("envelope", "format", "seq", "packet", "direction", "upload", "send", "count", "send-seq", "error"))
-payload, label = identity("bytes"), identity("label")
-mapped_bytes, mapped_label = identity("native-bytes"), identity("native-label")
+payload, label, samples = map(identity, ("bytes", "label", "samples"))
+mapped_bytes, mapped_label, mapped_samples = map(identity, ("native-bytes", "native-label", "native-samples"))
 binary = src("bounded-base64", policy={
     "maxBytes": 4, "encodedLimitMessage": "encoded weather bytes",
     "decodedLimitMessage": "decoded weather bytes", "syntaxMessage": "weather byte format",
@@ -53,6 +53,7 @@ data = {
         {"kind": "adjacent", "id": union, "tag": "tag", "content": "data", "variants": [
             {"id": variant, "name": "upload", "payload": src("record", fields=[
                 field(number, "count", u32), field(payload, "bytes", binary), field(label, "label", text),
+                field(samples, "samples", src("list", item=src("list", item=text))),
             ])},
         ]},
     ],
@@ -61,7 +62,7 @@ names = {
     "format": "oddlang-json-wire-schema-rust-v1", "derives": {}, "externals": {},
     "names": dict(zip((envelope, version, sequence, selector, union, variant),
                       ("Frame", "revision", "sequence", "message", "Direction", "Upload"))) | {
-                          number: "count", payload: "bytes", label: "label",
+                          number: "count", payload: "bytes", label: "label", samples: "samples",
                       },
 }
 native_count = identity("native-count")
@@ -69,7 +70,7 @@ revision, limit, invalid, limit_variant, bad_variant = map(
     identity, ("revision", "limit", "invalid", "symbol:limit", "symbol:invalid"))
 graph = {
     "format": "oddlang-json-wire-protocol-v1", "id": identity("protocol"), "envelope": envelope,
-    "selector": selector, "maximumWireBytes": 115, "sizeError": limit, "admissionError": invalid,
+    "selector": selector, "maximumWireBytes": 136, "sizeError": limit, "admissionError": invalid,
     "errors": {limit: {"variant": limit_variant}, invalid: {"variant": bad_variant}},
     "constants": [{"id": revision, "value": 2, "type": u32}], "literals": {version: revision},
     "endpoints": [{"id": endpoint, "variant": variant, "guards": [], "fields": [
@@ -77,12 +78,45 @@ graph = {
         {"id": native_count, "from": src("case-field", field=number)},
         {"id": mapped_bytes, "from": src("case-field", field=payload)},
         {"id": mapped_label, "from": src("case-field", field=label)},
+        {"id": mapped_samples, "from": src("case-field", field=samples)},
     ]}],
 }
+def operand(scope, *fields):
+    return {"scope": scope, "fields": list(fields)}
+
+
+def require(name, predicate, error=invalid):
+    return src("require", id=identity(name), predicate=predicate, error=error)
+
+
+def compare(left, operator, value):
+    return src("compare", left=left, operator=operator, right=src("constant", value=value))
+
+
+def sample(name, **kwargs):
+    return src(name, value=operand("sample"), **kwargs)
+
+
+byte_length = src("length", value=operand("value", mapped_bytes))
+steps = [
+    require("byte-length", src("all", items=[
+        compare(byte_length, "at-least", 1), compare(byte_length, "at-most", 4),
+    ])),
+    src("for-each", id=identity("each-batch"), value=operand("value", mapped_samples), bind="batch", steps=[
+        src("for-each", id=identity("each-sample"), value=operand("batch"), bind="sample", steps=[
+            require("sample-name", src("any", items=[
+                sample("text-equal", text="hail"), sample("text-prefix", text="rain:"),
+            ])),
+            require("sample-nul", sample("text-excludes-nul")),
+            require("sample-json-size", compare(sample("json-string-length"), "at-most", 16), error=limit),
+        ]),
+    ]),
+]
+graph["endpoints"][0]["steps"] = steps
 target = {
     "format": "oddlang-json-wire-protocol-rust-v1", "errorType": "crate::Failure",
     "errors": {limit_variant: "Limit", bad_variant: "Invalid"},
-    "constants": {revision: "FORMAT"}, "fields": {native_count: "count", request_seq: "sequence", mapped_bytes: "bytes", mapped_label: "label"},
+    "constants": {revision: "FORMAT"}, "fields": {native_count: "count", request_seq: "sequence", mapped_bytes: "bytes", mapped_label: "label", mapped_samples: "samples"},
     "internalEnvelope": True,
     "endpoints": {endpoint: {"type": "Upload", "encode": "encode_upload", "decode": "decode_upload",
                              "derives": ["Clone", "PartialEq", "Eq"]}},
@@ -159,6 +193,23 @@ with tempfile.TemporaryDirectory(prefix="canonical-wire-package-") as directory:
                     f"radio_frame_consumer={native / 'libradio_frame_consumer.rlib'}",
                     "-o", binary), check=True)
     subprocess.run((binary,), check=True)
+    traversal = steps[1]
+    nested = traversal["steps"][0]
+    inner = nested["steps"][0]
+    mutations = (
+        (traversal, "value", operand("value", mapped_label), "guard iteration requires a typed list"),
+        (nested, "bind", "batch", "empty or shadowed guard scope name"),
+        (nested, "id", inner["id"], "duplicate wire declaration"),
+        (inner["predicate"]["items"][0], "value", operand("batch"), "guard expects text"),
+        (nested["steps"][2]["predicate"]["left"], "value", operand("batch"), "guard expects text"),
+    )
+    for index, (node, key, value, message) in enumerate(mutations):
+        previous = node[key]
+        node[key] = value
+        protocol["graph"] = pin("protocol.json", graph)
+        build(root / f"invalid-guard-{index}", message)
+        node[key] = previous
+    protocol["graph"] = pin("protocol.json", graph)
     del protocol["wireShape"]
     build(root / "missing", "wire-protocol component requires wireShape")
     protocol["wireShape"] = shape
