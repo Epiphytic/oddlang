@@ -12,10 +12,12 @@ if [[ $(git -C "$upstream" rev-parse HEAD) != "$revision" ]]; then
     echo "Expected Marmish revision $revision in $upstream" >&2
     exit 1
 fi
-cd "$upstream"
-rustc -Vv
-cargo fetch --locked
-uv sync --locked --python 3.12 --project tools/code-ontology
+(
+    cd "$upstream"
+    rustc -Vv
+    cargo fetch --locked
+    uv sync --locked --python 3.12 --project tools/code-ontology
+)
 cargo +1.97.1 fetch --locked --manifest-path examples/rust-import/framing-independent/Cargo.toml
 cargo +1.97.1 fetch --locked --manifest-path examples/wasm/framing/Cargo.toml
 cargo +1.97.1 fetch --locked --manifest-path examples/wasm/framing/Cargo.toml --target wasm32-unknown-unknown
