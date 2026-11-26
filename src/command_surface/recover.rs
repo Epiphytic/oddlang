@@ -31,6 +31,7 @@ pub(super) fn extract(source: &str, selection: Selection) -> Result<Graph, Strin
         root: Command::default(),
         external: false,
         terminal_subparsers: BTreeMap::new(),
+        terminal_prefixes: BTreeMap::new(),
         gaps: selection.gaps,
     };
     graph.root.name = graph.package_name.clone();

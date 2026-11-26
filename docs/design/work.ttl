@@ -1533,7 +1533,8 @@ w:terminalCliPrefixGap a p:Finding ;
 w:structuredDiagnosticsProgram a p:Task ;
     rdfs:label "Recover and project structured diagnostic state and ordered actions" ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
-    p:dependsOn w:nativePackageAssembly ; p:status p:active ;
+    p:dependsOn w:nativePackageAssembly ; p:status p:done ;
+    p:evidence w:structuredDiagnosticsFixture ;
     p:acceptance "Independently build Rust witnesses for two revisions, compile the recovered library from graph and overlay, and check flag visibility, repeated enable, caller updates, record bytes and sink errors. Reject unsupported source and graph shapes." .
 
 w:structuredDiagnosticsReview a p:Finding ;
@@ -1679,3 +1680,29 @@ w:publicApiLinux a p:Artifact ;
 
 w:publicImportAudit a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4f39fe3da13635d66b5a09fbe55e52fe27d17962/verification/whole/converged-public-api/darwin-imports.json" .
+w:structuredDiagnosticsFixture a p:Artifact ;
+    p:location "verification/structured-diagnostics/check.py" .
+
+w:publicDiagnosticsCliConvergence a p:Task ;
+    rdfs:label "Converge qualified public imports, terminal CLI and structured diagnostics" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:publicApiConvergence, w:terminalAuxiliaryCli, w:structuredDiagnosticsProgram ;
+    p:status p:done ;
+    p:evidence w:publicDiagnosticsCliDarwin, w:publicDiagnosticsCliLinux ;
+    p:acceptance "Use a component-keyed merge to preserve all seven members and the public API, reject incompatible edits, compare the 132 archived Darwin help/version/usage cases and native Linux help/version observations, and account for every original Darwin public import." .
+
+w:publicDiagnosticsCliDarwin a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/37a5be63638cfc7a6796a7058313bc5c03be5519/verification/whole/converged-diagnostics-cli/aarch64-apple-darwin.json> .
+w:publicDiagnosticsCliLinux a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/37a5be63638cfc7a6796a7058313bc5c03be5519/verification/whole/converged-diagnostics-cli/aarch64-unknown-linux-gnu.json> .
+
+w:terminalPrefixCli a p:Task ;
+    rdfs:label "Recover and project leading-option policy for auxiliary terminal CLI responses" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:publicDiagnosticsCliConvergence ; p:status p:active ;
+    p:acceptance "Verify the original and generated terminal responses for long and short leading options, attached and separate values, root-help precedence and denial, on both ARM64 hosts. Keep successful operational paths outside the projection." .
+
+w:terminalPrefixDenialReview a p:Finding ;
+    rdfs:label "Keep a denied prefix terminal even when the auxiliary tail could parse" ;
+    p:source w:wholeMarmishPlan .
+w:terminalPrefixCli p:addresses w:terminalPrefixDenialReview .

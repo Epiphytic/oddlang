@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, path::Path};
 
+mod prefix;
 mod recover;
 mod rust;
 
@@ -16,6 +17,8 @@ struct Graph {
     external: bool,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     terminal_subparsers: BTreeMap<String, Command>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    terminal_prefixes: BTreeMap<String, prefix::Prefix>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     gaps: Vec<String>,
@@ -155,6 +158,14 @@ pub fn recover(source: &Path, selection: &Path, output: &Path) -> Result<(), Str
     let source = std::fs::read_to_string(source).map_err(|error| error.to_string())?;
     let graph = recover::extract(&source, selection)?;
     let json = serde_json::to_string_pretty(&graph).map_err(|error| error.to_string())?;
+    write(output, json + "\n")
+}
+
+pub fn recover_prefix(source: &Path, selection: &Path, output: &Path) -> Result<(), String> {
+    let source = std::fs::read_to_string(source).map_err(|error| error.to_string())?;
+    let selection = std::fs::read(selection).map_err(|error| error.to_string())?;
+    let policy = prefix::recover(&source, &selection)?;
+    let json = serde_json::to_string_pretty(&policy).map_err(|error| error.to_string())?;
     write(output, json + "\n")
 }
 

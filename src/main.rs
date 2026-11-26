@@ -197,6 +197,9 @@ fn run(args: &[String]) -> Result<(), String> {
                 graph.as_ref(), graph_pin, Some((overlay.as_ref(), overlay_pin)), output.as_ref(),
             )
         }
+        [cmd, kind, source, selection, out] if cmd == "recover" && kind == "cli-terminal-prefix" => {
+            oddlang::command_surface::recover_prefix(source.as_ref(), selection.as_ref(), out.as_ref())
+        }
         [group, kind, source, selection, out] if group == "recover" && kind == "cli-surface" => {
             oddlang::command_surface::recover(source.as_ref(), selection.as_ref(), out.as_ref())
         }

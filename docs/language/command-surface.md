@@ -34,3 +34,30 @@ A recovery selection with an empty version expects a `Parser` derive without
 `#[command(version)]`; its recovered root can supply the terminal subparser
 grammar. Recovery preserves an explicit literal command name and supports the
 one-or-more trailing positional shape and hyphen-valued arguments.
+
+A terminal leaf can additionally declare `terminal_prefixes`. Each policy is
+keyed by the canonical leaf name and supplies allowed global option IDs and
+a finite denial diagnostic. The renderer reads the primary grammar's global
+long and short spellings and single-token value arities. It recognizes
+attached and separate option values. Built-in root help and version retain
+their precedence.
+
+A denied prefix returns its terminal diagnostic before auxiliary parsing.
+A permitted prefix contributes a response only when the auxiliary parser
+returns help or a usage error. Successful auxiliary parsing continues through
+the existing unbound primary path. Unrecognized options, prefix clusters
+and separate option values that look like flags stay with the primary parser.
+A permitted prefix with a trailing separator does too. The profile does
+not project arbitrary pre-parser behavior.
+
+```sh
+oddlang recover cli-terminal-prefix MODULE.rs SELECTION.json POLICY.json
+```
+
+The selection names the literal allowlist function, direct rejection branch,
+raw error formatter and bound option identifiers. Recovery checks those
+bounded source shapes. The lexical prefix scan and its stopping rules are
+authored profile semantics, qualified against independently compiled native
+observations. Rust name resolution outside the selected source requires its
+own evidence. An unrelated two-revision fixture changes one allowed option
+in source and observes the resulting help-versus-denial change.
