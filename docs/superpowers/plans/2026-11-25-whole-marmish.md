@@ -29,6 +29,10 @@ The independent stream comparison including macro expansions left 373 compiler-o
 
 - [x] Recover a declarative CLI grammar and generate the Rust parser boundary. Compare exact help, version, diagnostics and dispatch against an unrelated native fixture. [Command surface profile](../../language/command-surface.md)
 
+- [x] Compose separately pinned native package contracts into one Cargo workspace with a root dependency lock. Compile a downstream caller of two generated crates and verify native binary return status. [Composition fixture](../../../verification/native-workspace/verify.py)
+- [x] Qualify acknowledged stream windows with all five upstream tests unchanged, including the three tests that inspect private storage. Compare 13,031 public observations and reject the retry-conflict mutation on Darwin ARM64. [Companion window qualification](https://github.com/Epiphytic/marmish-oddlang/pull/15)
+
+
 - [x] Project bounded positioned integrity blocks. Exercise identity, optional zlib, checked offsets, canonical serialization and declared error precedence with an unrelated native consumer. [Block profile and fixture](../../language/integrity-block.md)
 - [x] Generate shared constant, error, result and enum declarations, bind public and crate-private paths and ship declaration-keyed expectations. [Shared declarations and unrelated qualification fixture](../../language/shared-declarations.md)
 

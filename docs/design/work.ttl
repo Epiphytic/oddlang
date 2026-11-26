@@ -765,3 +765,13 @@ w:commandSurface a p:Task ;
     p:acceptance "Compare independent derived and generated Rust executables on exact help, version, error, alias, requirement, default and parsed dispatch observations. Detect unsupported syntax and graph changes." .
 w:commandSurfaceFixture a p:Artifact ;
     p:location "verification/command-surface/check.py" .
+
+w:wholeWorkspaceAssembly a p:Task ; rdfs:label "Compose native packages and link declared binary targets" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Generate two pinned packages into one locked Cargo workspace, compile a consumer across a declared local dependency, reject invalid members and run a native binary entry with its expected exit status." ;
+    p:evidence w:wholeWorkspaceIntegration .
+w:wholeWorkspaceIntegration a p:Artifact ; p:location "verification/native-workspace/verify.py" .
+w:wholeWindowQualification a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/commit/525301c5718b9d8831392a08c76cafeb781ded0f" .
+w:wholeErrorFormatting a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/commit/d34ce43674bbcd27232a36c62d8bffb1ddc51fbc" .
+w:wholeWireCandidates a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/commit/ddd27f3487759cd5c5939426be797608e7278697" .
+w:wholeMarmishStructure p:evidence w:wholeWindowQualification,w:wholeErrorFormatting,w:wholeWireCandidates .
