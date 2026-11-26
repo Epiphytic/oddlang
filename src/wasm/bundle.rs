@@ -135,39 +135,39 @@ pub struct VerifiedBundle {
 
 #[derive(Clone, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(deny_unknown_fields)]
-struct Coverage {
-    declaration: String,
-    role: String,
+pub(super) struct Coverage {
+    pub(super) declaration: String,
+    pub(super) role: String,
 }
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
-struct Call {
-    function: String,
-    arguments: Vec<Value>,
-    expected: Value,
+pub(super) struct Call {
+    pub(super) function: String,
+    pub(super) arguments: Vec<Value>,
+    pub(super) expected: Value,
 }
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
-struct HostCall {
-    function: String,
-    arguments: Vec<Value>,
-    returns: Value,
+pub(super) struct HostCall {
+    pub(super) function: String,
+    pub(super) arguments: Vec<Value>,
+    pub(super) returns: Value,
 }
 
 #[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct Scenario {
-    case_id: String,
-    covers: Vec<Coverage>,
+pub(super) struct Scenario {
+    pub(super) case_id: String,
+    pub(super) covers: Vec<Coverage>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    constraints: Vec<String>,
-    imports: Vec<HostCall>,
-    calls: Vec<Call>,
+    pub(super) constraints: Vec<String>,
+    pub(super) imports: Vec<HostCall>,
+    pub(super) calls: Vec<Call>,
 }
 
-fn digest(bytes: &[u8]) -> String {
+pub(super) fn digest(bytes: &[u8]) -> String {
     Sha256::digest(bytes)
         .iter()
         .map(|b| format!("{b:02x}"))
@@ -480,7 +480,7 @@ fn verify_release(root: &Path, pin: &Pin, workspace: &Pins) -> Result<(Manifest,
     Ok((manifest, files))
 }
 
-fn checked(root: &Path, lock_file: &Path) -> Result<(VerifiedBundle, Files), String> {
+pub(super) fn checked(root: &Path, lock_file: &Path) -> Result<(VerifiedBundle, Files), String> {
     let workspace = lock(lock_file)?;
     let header: Manifest = decode(&read(&contained(root, "manifest.json")?)?, "manifest.json")?;
     let pin = workspace

@@ -39,7 +39,9 @@ check_hybrid_tools "$hybrid"
 scratch=$(mktemp -d target/http-verify.XXXXXX)
 trap 'rm -f "$scratch/start" "$scratch/go.lock.json"; rmdir "$scratch"' EXIT
 touch "$scratch/start"
-cargo test --locked --offline
+# The real component execution test has a separate toolchain and offline gate.
+# Include all other tests automatically, including newly added test targets.
+cargo test --locked --offline -- --skip exercise_released_components_and_reject_counterexamples
 
 bundle_root=contracts/cache/http/485a90a817494ba1aa137cb9777c3d07c338735720df475c1c113b8fe0217dc4
 receipts=target/http-conformance

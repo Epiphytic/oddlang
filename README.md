@@ -25,6 +25,8 @@ Each publication includes WIT, a manifest, a workspace lock and conformance case
 
 Run `scripts/setup-wasm.sh` once with network access. Then run `scripts/verify-wasm-spike.sh` to compile the pure echo guest, inspect its imports and call it from an empty Wasmtime linker offline.
 
+Run `scripts/verify-wasm.sh` for ledger execution. It publishes fresh bundles, builds handwritten and generated Rust components in two directories, and runs portable cases against Wasmtime, Node and headless Chromium. Its output directory holds release pins, Rust source, component binaries, host observations and a build digest comparison. Ledger guests use `wasm32-unknown-unknown` with Component Model bindings. The integer echo uses `wasm32-wasip2`.
+
 ## Integration tests
 
 The full suite uses a Rust toolchain with edition 2024 support, PostgreSQL 16.6, Node.js and npm for the TypeScript client, and Go 1.22 or newer for the independent client. The client builds were exercised with Node.js 22 and npm 10. While online, cache the database image, both locked Rust dependency sets and the pinned TypeScript compiler.

@@ -1,0 +1,163 @@
+{
+  "hosts": {
+    "generated-ledger-chromium": {
+      "caseCount": 4,
+      "host": "chromium",
+      "version": "145.0.7632.6",
+      "componentSha256": "045ac8b323be378729eb85200b519a4a0b1eadb072d6748f7fd03832e1a4bfe2",
+      "releaseSha256": "0f904daaf6c497b172eafee950cc08faf33cc6316cc872400bac85c8fa5a24b5",
+      "jcoVersion": "1.42.0"
+    },
+    "generated-ledger-node": {
+      "caseCount": 4,
+      "host": "node",
+      "version": "v22.22.2",
+      "componentSha256": "045ac8b323be378729eb85200b519a4a0b1eadb072d6748f7fd03832e1a4bfe2",
+      "releaseSha256": "0f904daaf6c497b172eafee950cc08faf33cc6316cc872400bac85c8fa5a24b5",
+      "jcoVersion": "1.42.0"
+    },
+    "generated-ledger-test-chromium": {
+      "caseCount": 5,
+      "host": "chromium",
+      "version": "145.0.7632.6",
+      "componentSha256": "2511bfe18ed5462a20c5217521d2976c577744e145fc07c0ccbd1c2f29a1d55a",
+      "releaseSha256": "cf58efbe237149fe2b901628e973ebd9dea0b8771d39a7eaa338a1c105c5818d",
+      "jcoVersion": "1.42.0"
+    },
+    "generated-ledger-test-node": {
+      "caseCount": 5,
+      "host": "node",
+      "version": "v22.22.2",
+      "componentSha256": "2511bfe18ed5462a20c5217521d2976c577744e145fc07c0ccbd1c2f29a1d55a",
+      "releaseSha256": "cf58efbe237149fe2b901628e973ebd9dea0b8771d39a7eaa338a1c105c5818d",
+      "jcoVersion": "1.42.0"
+    },
+    "manual-ledger-chromium": {
+      "caseCount": 4,
+      "host": "chromium",
+      "version": "145.0.7632.6",
+      "componentSha256": "5ccfc0c61fb9bb11fd8d9f3d8f4e1271c8a40f359c66509587f03f8138f3c38d",
+      "releaseSha256": "0f904daaf6c497b172eafee950cc08faf33cc6316cc872400bac85c8fa5a24b5",
+      "jcoVersion": "1.42.0"
+    },
+    "manual-ledger-node": {
+      "caseCount": 4,
+      "host": "node",
+      "version": "v22.22.2",
+      "componentSha256": "5ccfc0c61fb9bb11fd8d9f3d8f4e1271c8a40f359c66509587f03f8138f3c38d",
+      "releaseSha256": "0f904daaf6c497b172eafee950cc08faf33cc6316cc872400bac85c8fa5a24b5",
+      "jcoVersion": "1.42.0"
+    },
+    "manual-ledger-test-chromium": {
+      "caseCount": 5,
+      "host": "chromium",
+      "version": "145.0.7632.6",
+      "componentSha256": "33803972ec143be3bf2727378318df927c9d786da7cb6b6f48775b21761bb398",
+      "releaseSha256": "cf58efbe237149fe2b901628e973ebd9dea0b8771d39a7eaa338a1c105c5818d",
+      "jcoVersion": "1.42.0"
+    },
+    "manual-ledger-test-node": {
+      "caseCount": 5,
+      "host": "node",
+      "version": "v22.22.2",
+      "componentSha256": "33803972ec143be3bf2727378318df927c9d786da7cb6b6f48775b21761bb398",
+      "releaseSha256": "cf58efbe237149fe2b901628e973ebd9dea0b8771d39a7eaa338a1c105c5818d",
+      "jcoVersion": "1.42.0"
+    }
+  },
+  "builds": {
+    "double-import.wasm": {
+      "first": "5685df1daa741076baf249c3b86386bd7a6a05984feb21a8b6de14a97b3a3035",
+      "second": "5685df1daa741076baf249c3b86386bd7a6a05984feb21a8b6de14a97b3a3035",
+      "identical": true
+    },
+    "echo-import.wasm": {
+      "first": "fb1f63dbb5548c5f76111aa4bb7011e07ba1ff4a5fde617e3ff53b7ba89b9e85",
+      "second": "fb1f63dbb5548c5f76111aa4bb7011e07ba1ff4a5fde617e3ff53b7ba89b9e85",
+      "identical": true
+    },
+    "echo-rename.wasm": {
+      "first": "18d367e6e1ac297449233fff092c458e78ac00b7bca8c844fc427467795850bc",
+      "second": "18d367e6e1ac297449233fff092c458e78ac00b7bca8c844fc427467795850bc",
+      "identical": true
+    },
+    "echo-tags.wasm": {
+      "first": "73827af54ac2d8314c9603f7b024713187e89c81f249d251a6b2051303f64167",
+      "second": "73827af54ac2d8314c9603f7b024713187e89c81f249d251a6b2051303f64167",
+      "identical": true
+    },
+    "echo.wasm": {
+      "first": "aaac6937047319b56feafbf0a09e64cab1f2cc85efa08021c3922abd633c05c9",
+      "second": "aaac6937047319b56feafbf0a09e64cab1f2cc85efa08021c3922abd633c05c9",
+      "identical": true
+    },
+    "generated-ledger-test.wasm": {
+      "first": "2511bfe18ed5462a20c5217521d2976c577744e145fc07c0ccbd1c2f29a1d55a",
+      "second": "2511bfe18ed5462a20c5217521d2976c577744e145fc07c0ccbd1c2f29a1d55a",
+      "identical": true
+    },
+    "generated-ledger.wasm": {
+      "first": "045ac8b323be378729eb85200b519a4a0b1eadb072d6748f7fd03832e1a4bfe2",
+      "second": "045ac8b323be378729eb85200b519a4a0b1eadb072d6748f7fd03832e1a4bfe2",
+      "identical": true
+    },
+    "manual-ledger-test.wasm": {
+      "first": "33803972ec143be3bf2727378318df927c9d786da7cb6b6f48775b21761bb398",
+      "second": "33803972ec143be3bf2727378318df927c9d786da7cb6b6f48775b21761bb398",
+      "identical": true
+    },
+    "manual-ledger.wasm": {
+      "first": "5ccfc0c61fb9bb11fd8d9f3d8f4e1271c8a40f359c66509587f03f8138f3c38d",
+      "second": "5ccfc0c61fb9bb11fd8d9f3d8f4e1271c8a40f359c66509587f03f8138f3c38d",
+      "identical": true
+    },
+    "max-exclusive.wasm": {
+      "first": "a425863918eda82e615fa86e8dfc6d6a7c19036b7ddecd68ccceb94c702d7c99",
+      "second": "a425863918eda82e615fa86e8dfc6d6a7c19036b7ddecd68ccceb94c702d7c99",
+      "identical": true
+    },
+    "probe.wasm": {
+      "first": "3ce378b8c86feb095e2e7ab72d0f4dbe69b8808831a64e0070a634bdac299aee",
+      "second": "3ce378b8c86feb095e2e7ab72d0f4dbe69b8808831a64e0070a634bdac299aee",
+      "identical": true
+    },
+    "trap.wasm": {
+      "first": "377cdbdd80c0b49a98a990787f508fe6e7714df0500b62558710f44bcab4de91",
+      "second": "377cdbdd80c0b49a98a990787f508fe6e7714df0500b62558710f44bcab4de91",
+      "identical": true
+    }
+  },
+  "trap": {
+    "case": "ordered-guards-and-wide-transfer",
+    "call": {
+      "arguments": [
+        "missing",
+        "missing",
+        "-1"
+      ],
+      "function": "transfer",
+      "trap": "error while executing at wasm backtrace:\n    0:   0x2165 - ledger_guest.wasm!transfer: wasm trap: wasm `unreachable` instruction executed"
+    }
+  },
+  "doubleImport": {
+    "case": "balance-lower-bound",
+    "observedFunctions": [
+      "initial-state",
+      "initial-state"
+    ]
+  },
+  "upperEndpoint": {
+    "case": "exact-destination-headroom",
+    "call": {
+      "arguments": [
+        "a",
+        "b",
+        "1"
+      ],
+      "function": "transfer",
+      "result": {
+        "err": "destination-overflow"
+      }
+    }
+  }
+}

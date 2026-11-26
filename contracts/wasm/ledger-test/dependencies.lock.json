@@ -3,7 +3,7 @@
     {
       "identity": "urn:oddlang:ledger:wasm:package",
       "version": "1.0.0",
-      "manifestSha256": "11b91c3884df55fe828a0cfd42779e4d257b29c4781329cd5ecb871f3f23fb1d"
+      "manifestSha256": "0f904daaf6c497b172eafee950cc08faf33cc6316cc872400bac85c8fa5a24b5"
     }
   ]
 }
