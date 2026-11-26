@@ -25,6 +25,8 @@ struct Protocol {
     id: String,
     envelope: String,
     selector: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    layout: Option<Layout>,
     maximum_wire_bytes: u32,
     size_error: String,
     admission_error: String,
@@ -40,6 +42,12 @@ struct Protocol {
     digests: Vec<digests::Digest>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     hex_exports: Vec<digests::HexExport>,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case")]
+enum Layout {
+    FlatSorted,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -127,6 +135,7 @@ struct NativeEndpoint {
 struct View<'a> {
     envelope: &'a [Field],
     union: &'a str,
+    flat: Option<(&'a str, &'a str, &'a str)>,
     union_cases: usize,
     endpoints: Vec<EndpointView<'a>>,
 }
@@ -324,13 +333,29 @@ impl Protocol {
         let Shape::Ref { id: selector_type } = &selector.shape else {
             return Err("envelope selector must refer to an adjacent union".into());
         };
-        let Some(Definition::Adjacent { variants, .. }) = schema
+        let Some(Definition::Adjacent {
+            variants,
+            tag,
+            content,
+            ..
+        }) = schema
             .types
             .iter()
             .find(|definition| definition.id() == selector_type)
         else {
             return Err("envelope selector must refer to an adjacent union".into());
         };
+        let flat = self
+            .layout
+            .as_ref()
+            .map(|_| (selector.name.as_str(), tag.as_str(), content.as_str()));
+        if flat.is_some()
+            && envelope
+                .iter()
+                .any(|f| &f.name == tag || &f.name == content)
+        {
+            return Err("flat wire field collision".into());
+        }
         self.validate_visibility(schema, native, selector_type)?;
         let mut names: BTreeSet<_> = schema
             .types
@@ -524,6 +549,7 @@ impl Protocol {
         Ok(View {
             envelope,
             union: selector_type,
+            flat,
             union_cases: variants.len(),
             endpoints,
         })
@@ -584,6 +610,17 @@ pub fn build(
             "admissionError":graph.admission_error,
             "qualification":"independent-witness-required",
         }));
+        if let Some(layout) = &graph.layout {
+            let frame = rows.last_mut().expect("frame obligation");
+            frame["layout"] = serde_json::json!(layout);
+            frame["encoding"] = serde_json::json!({
+                "objects": "recursive-utf8-key-order",
+                "json": "compact-utf8-serde-json-escaping",
+                "selector": "promote-tag-and-content",
+                "rejectNestedSelector": true,
+                "caseDigests": "independent-declared-order"
+            });
+        }
         for (phase, steps) in [("admission", &endpoint.steps), ("clock", &endpoint.timed)] {
             for step in steps {
                 step.visit(&mut |step| {

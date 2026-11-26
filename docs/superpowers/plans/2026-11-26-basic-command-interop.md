@@ -16,6 +16,8 @@
 - [ ] Classify the earliest mismatch against independent reference observations. Track CLI request and response shape, peer identity and authorization outcomes, command lifecycle, output framing, error mapping and exit status as distinct obligations. Record unknowns explicitly. Give each observed gap a stable ontology ID and a failing fixture before changing the projection.
 - [ ] Keep project behavior and test cases in the companion ontology. Extend the Rust Oddlang compiler only for a reusable missing primitive, with an unrelated fixture. Keep library choices in target bindings and preserve existing authorization checks. Regenerate the candidate cleanly and rerun the baseline and both mixed directions after each change. Review each phase with Claude CLI in auto mode.
 
+- [x] Support a canonical JSON frame whose selector and content are siblings of the peer identity fields. The unrelated radio fixture verifies exact wire bytes, rejection cases and the byte limit. [Verification](../../../verification/canonical-wire/flat-sorted-verification.md)
+
 ### 3. Decide compatibility from repeatable observations
 
 - [ ] In each direction run the full corpus once with fresh identities and rooms, then three more times reusing the established pairing. One cold and three warm repetitions follow upstream benchmark practice. Every case must agree with the pinned oracle in every run, and teardown must pass. Any failure voids the attempt. Preserve all attempted outcomes and require a full fresh cold/warm series for qualification.

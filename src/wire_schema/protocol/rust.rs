@@ -43,8 +43,27 @@ pub(super) fn render(
     let admission = error(graph, native, &graph.admission_error);
     let limit = graph.maximum_wire_bytes;
     let bounds = preflight::Bounds::new(schema);
-    text.push_str(&preflight::runtime(limit, &size, &admission));
+    text.push_str(&preflight::runtime(
+        limit,
+        &size,
+        &admission,
+        view.flat.is_some(),
+    ));
     text.push_str(&bounds.emit(schema, binding));
+    let (decode, encode) = if let Some((selector, tag, content)) = view.flat {
+        text.push_str(&flat_adapter(
+            env_type, selector, tag, content, &size, &admission,
+        ));
+        (
+            "__oddlang_from_flat(bytes)?".to_owned(),
+            "__oddlang_to_flat",
+        )
+    } else {
+        (
+            format!("::serde_json::from_slice(bytes).map_err(|_| {admission})?"),
+            "__oddlang_serialize_frame",
+        )
+    };
     writeln!(
         text,
         r#"
@@ -52,7 +71,7 @@ fn __oddlang_decode_frame(bytes: &[u8]) -> ::core::result::Result<{env_type}, {E
     if bytes.len() > {limit} {{
         return ::core::result::Result::Err({size});
     }}
-    let value: {env_type} = ::serde_json::from_slice(bytes).map_err(|_| {admission})?;"#
+    let value: {env_type} = {decode};"#
     )
     .unwrap();
     for (field, id) in &graph.literals {
@@ -67,7 +86,7 @@ fn __oddlang_decode_frame(bytes: &[u8]) -> ::core::result::Result<{env_type}, {E
     }
     writeln!(
         text,
-        r#"    if __oddlang_serialize_frame(&value)?.as_slice() != bytes {{
+        r#"    if {encode}(&value)?.as_slice() != bytes {{
         return ::core::result::Result::Err({admission});
     }}
     ::core::result::Result::Ok(value)
@@ -98,6 +117,11 @@ fn emit_endpoint(
     bounds: &preflight::Bounds<'_>,
 ) {
     let name = &endpoint.target.ty;
+    let encode_envelope = if view.flat.is_some() {
+        "__oddlang_to_flat"
+    } else {
+        "__oddlang_serialize_frame"
+    };
     let encode = &endpoint.target.encode;
     let decode = &endpoint.target.decode;
     let env = &binding.names[&graph.envelope];
@@ -232,7 +256,7 @@ pub fn {encode}(value: &{name}) -> ::core::result::Result<::std::vec::Vec<u8>, {
     writeln!(
         text,
         r#"    }};
-    __oddlang_serialize_frame(&envelope)
+    {encode_envelope}(&envelope)
 }}
 
 pub fn {decode}(bytes: &[u8]) -> ::core::result::Result<{name}, {ERROR}> {{
@@ -284,4 +308,51 @@ pub fn {decode}(bytes: &[u8]) -> ::core::result::Result<{name}, {ERROR}> {{
         "    }};\n{validation}    ::core::result::Result::Ok(value)\n}}"
     )
     .unwrap();
+}
+
+fn flat_adapter(
+    env: &str,
+    selector: &str,
+    tag: &str,
+    content: &str,
+    size: &str,
+    admission: &str,
+) -> String {
+    // The intermediate nested representation adds a quoted name, colon and two braces.
+    let overhead = serde_json::to_vec(selector)
+        .expect("string serializes")
+        .len()
+        + 3;
+    format!(
+        r#"
+fn __oddlang_to_flat(value: &{env}) -> ::core::result::Result<::std::vec::Vec<u8>, {ERROR}> {{
+    let mut writer = __OddlangWireBytes {{
+        limit: __ODDLANG_MAX_WIRE_BYTES.saturating_add({overhead}),
+        bytes: ::std::vec::Vec::new(),
+        overflow: false,
+    }};
+    let status = ::serde_json::to_writer(&mut writer, value);
+    if writer.overflow {{ return ::core::result::Result::Err({size}); }}
+    status.map_err(|_| {admission})?;
+    let mut frame: ::serde_json::Value = ::serde_json::from_slice(&writer.bytes).map_err(|_| {admission})?;
+    let fields = frame.as_object_mut().ok_or_else(|| {admission})?;
+    let choice = fields.remove({selector:?}).ok_or_else(|| {admission})?;
+    let ::serde_json::Value::Object(entries) = choice else {{ return ::core::result::Result::Err({admission}); }};
+    fields.extend(entries);
+    frame.sort_all_objects();
+    __oddlang_serialize_frame(&frame)
+}}
+
+fn __oddlang_from_flat(bytes: &[u8]) -> ::core::result::Result<{env}, {ERROR}> {{
+    let mut frame: ::serde_json::Value = ::serde_json::from_slice(bytes).map_err(|_| {admission})?;
+    let fields = frame.as_object_mut().ok_or_else(|| {admission})?;
+    if fields.contains_key({selector:?}) {{ return ::core::result::Result::Err({admission}); }}
+    let mut choice = ::serde_json::Map::new();
+    choice.insert({tag:?}.into(), fields.remove({tag:?}).ok_or_else(|| {admission})?);
+    if let Some(value) = fields.remove({content:?}) {{ choice.insert({content:?}.into(), value); }}
+    fields.insert({selector:?}.into(), ::serde_json::Value::Object(choice));
+    ::serde_json::from_value(frame).map_err(|_| {admission})
+}}
+"#
+    )
 }

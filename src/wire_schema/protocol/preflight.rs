@@ -198,19 +198,29 @@ fn has_bounds(definition: &Definition, checked: &BTreeSet<&str>) -> bool {
     }
 }
 
-pub(super) fn runtime(limit: u32, size: &str, admission: &str) -> String {
+pub(super) fn runtime(limit: u32, size: &str, admission: &str, flat: bool) -> String {
+    // Keep existing projections byte-stable, including their pinned source hashes.
+    let (extra, capacity, init) = if flat {
+        (
+            "    limit: usize,\n",
+            "self.limit",
+            "limit: __ODDLANG_MAX_WIRE_BYTES, ",
+        )
+    } else {
+        ("", "__ODDLANG_MAX_WIRE_BYTES", "")
+    };
     format!(
         r#"
 const __ODDLANG_MAX_WIRE_BYTES: usize = {limit}usize;
 
 struct __OddlangWireBytes {{
-    bytes: ::std::vec::Vec<u8>,
+{extra}    bytes: ::std::vec::Vec<u8>,
     overflow: bool,
 }}
 
 impl ::std::io::Write for __OddlangWireBytes {{
     fn write(&mut self, bytes: &[u8]) -> ::std::io::Result<usize> {{
-        if bytes.len() > __ODDLANG_MAX_WIRE_BYTES - self.bytes.len() {{
+        if bytes.len() > {capacity} - self.bytes.len() {{
             self.overflow = true;
             return ::core::result::Result::Err(::std::io::Error::other("canonical wire budget"));
         }}
@@ -225,7 +235,7 @@ impl ::std::io::Write for __OddlangWireBytes {{
 fn __oddlang_serialize_frame<T: ::serde::Serialize>(
     value: &T,
 ) -> ::core::result::Result<::std::vec::Vec<u8>, {ERROR}> {{
-    let mut writer = __OddlangWireBytes {{ bytes: ::std::vec::Vec::new(), overflow: false }};
+    let mut writer = __OddlangWireBytes {{ {init}bytes: ::std::vec::Vec::new(), overflow: false }};
     let status = ::serde_json::to_writer(&mut writer, value);
     if writer.overflow {{
         return ::core::result::Result::Err({size});

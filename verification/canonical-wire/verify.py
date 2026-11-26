@@ -299,8 +299,27 @@ with tempfile.TemporaryDirectory(prefix="canonical-wire-") as directory:
     shape_only_graph["digests"][-1]["steps"] = []
     shape_only = temp / "shape-only"
     run(*common, write(temp / "shape-only-protocol.json", shape_only_graph), overlay, shape_only)
+    flat = temp / "flat"
+    flat_graph = {**protocol, "layout": "flat-sorted"}
+    run(*common, write(temp / "flat.json", flat_graph), overlay, flat)
+    flat_obligations = json.loads((flat / "obligations.json").read_bytes())["obligations"]
+    frames = [row for row in flat_obligations if row["role"] == "canonical-frame"]
+    assert len(frames) == len(protocol["endpoints"])
+    assert all(row["layout"] == "flat-sorted" for row in frames)
+    run(*common, write(temp / "unknown.json", {**protocol, "layout":"unsorted"}), overlay,
+        temp / "unknown", failure="unknown variant")
+    flat_limit = temp / "flat-limit"
+    at_limit = b'{"dir":"send","payload":{"gain":13},"protocol":"radio","sequence":5,"version":7}'
+    run(*common, write(temp / "flat-limit.json", {**flat_graph, "maximumWireBytes":len(at_limit)}),
+        overlay, flat_limit)
+    collision = json.loads(shape_path.read_bytes())
+    next(item for item in collision["types"] if item["id"] == message)["tag"] = "sequence"
+    run("build", "wire-protocol", "rust", write(temp / "collision.json", collision), shape_binding,
+        temp / "flat.json", overlay, temp / "collision", failure="flat wire field collision")
     consumer = temp / "consumer"
     shutil.copytree(ROOT / "fixture", consumer)
+    shutil.copyfile(flat_limit / "wire.rs", consumer / "src/flat_limit.rs")
+    shutil.copyfile(flat / "wire.rs", consumer / "src/flat.rs")
     shutil.copyfile(output / "wire.rs", consumer / "src/generated.rs")
     shutil.copyfile(singleton / "wire.rs", consumer / "src/singleton.rs")
     shutil.copyfile(shape_only / "wire.rs", consumer / "src/shape_only.rs")
