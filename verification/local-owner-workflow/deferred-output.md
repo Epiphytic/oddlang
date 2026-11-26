@@ -15,3 +15,9 @@ python3 -B verification/local-owner-workflow/delivery.py "$ODDLANG" --deferred
 python3 -B verification/local-owner-workflow/delivery.py "$ODDLANG"
 python3 -B verification/local-owner-workflow/check.py "$ODDLANG"
 ```
+
+All three fixture runs passed. The deferred case rejected a matching request
+hash paired with bad cursor arithmetic, an oversized retained object and a
+zero object bound. The Rust 1.97.1 release library suite passed 19 tests after
+integrating the authorized local submit compiler change. Both Turtle files
+parsed and the ready-work query ran.

@@ -3,6 +3,7 @@
 from base64 import b64encode
 from hashlib import sha256
 import json
+import subprocess
 import sys
 from pathlib import Path
 import tempfile
@@ -67,7 +68,7 @@ def main():
         initial['when'].pop()
         initial['capture'].extend([
             {'name': 'retained-reply', 'path': ['$opened'],
-             'value_kind': {'kind': 'json_object', 'maximum_bytes': 512}},
+             'value_kind': {'kind': 'json_object', 'maximum_bytes': len(body(sample))}},
             {'name': 'request-hash', 'path': ['$opened', 'binding'],
              'value_kind': {'kind': 'lower_hex', 'bytes': 32}},
         ])
@@ -131,10 +132,21 @@ tokio = { version = "=1.54.1", features = ["io-util", "net", "rt", "time"] }
                   (7, stdout, stderr), unit=False)
             serve(binary, path, [(read, wrap(body(sample | {'binding': '0' * 64}))), *start],
                   (12, b'', b'protocol\n'), unit=False)
-            serve(binary, path, [(read, wrap(body(sample))),
+            changed = sample | {'binding': sha256(b'{"previous":6}').hexdigest()}
+            serve(binary, path, [(read, wrap(body(changed))),
                                  (start[0][0], b'{"ready":true,"previous":6}')],
                   (12, b'', b'protocol\n'), unit=False)
-            print('field-meter deferred output waits for the retained hash and current cursor')
+            oversized = sample | {'padding': 'x' * 16}
+            serve(binary, path, [(read, wrap(body(oversized)))],
+                  (12, b'', b'protocol\n'), unit=False)
+            initial['capture'][-2]['value_kind']['maximum_bytes'] = 0
+            (root / 'invalid.json').write_bytes(body(graph))
+            invalid = subprocess.run(
+                [ODDLANG, 'build', 'local-command-client', 'rust', root / 'invalid.json',
+                 root / 'rust.json', root / 'invalid'], capture_output=True, timeout=120,
+            )
+            assert invalid.returncode and b'invalid workflow capture retained-reply' in invalid.stderr
+            print('field-meter deferred output enforced digest, cursor arithmetic and object bounds')
             return
         serve(binary, path, start + [(read, wrap(body(sample))), (confirm, b'{"confirmed":true}')],
               (7, stdout, stderr), unit=False)
