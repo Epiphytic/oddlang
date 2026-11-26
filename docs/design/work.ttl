@@ -2477,3 +2477,32 @@ w:boundedJsonSuiteDarwin a p:Artifact ;
 
 w:boundedJsonSuiteLinux a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/c8d1fd024e8f59c72cc4a1935b7cc4c1ca04d118/verification/whole/suite/canonical-mdk-aarch64-unknown-linux-gnu.json" .
+
+w:releaseObservedVisibility a p:Task ;
+    rdfs:label "Reconcile declared visibility in the two release observers" ;
+    p:source w:wholeMarmishPlan ; p:milestone w:marmishMilestone ;
+    p:dependsOn w:directObserverBindings ;
+    p:acceptance "Resolve named module restrictions on both surfaces, expose missing scope evidence and detect a real field visibility mutation even when declaration paths agree." ;
+    p:status p:done ; p:evidence w:directObserverBindingFixture .
+w:wholeMarmishStructure p:dependsOn w:releaseObservedVisibility .
+
+w:coreDeclarationOwnership a p:Task ;
+    rdfs:label "Compare original and source-free core declaration ownership on both ARM64 hosts" ;
+    p:status p:done ; p:evidence w:coreDeclarationComparison ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:releaseObservedVisibility ;
+    p:acceptance "Publish both native observations, distinguish lexical owner paths from compiled import availability, and identify the projection component for each of the six public core type names." .
+w:coreDeclarationComparison a p:Artifact ;
+    rdfs:label "Two-host core declaration comparison" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/10926d822bb9aa3a16b20ef35cfc63bebd586780/verification/whole/core-lexical/comparison.json" .
+w:wholeMarmishStructure p:dependsOn w:coreDeclarationOwnership .
+
+w:coreSemanticLookup a p:Task ;
+    rdfs:label "Resolve portable core types to component semantics independently of native bindings" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:coreDeclarationOwnership ; p:status p:done ; p:evidence w:coreSemanticProjection ;
+    p:acceptance "Resolve six stable type IDs through a neutral query to their pinned domains, error cases and limit parameters. Remove all native binding nodes and reject a substituted aggregate-error component." .
+w:wholeMarmishStructure p:dependsOn w:coreSemanticLookup .
+w:coreSemanticProjection a p:Artifact ;
+    rdfs:label "TypeScript retention projection selected by portable identity" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a1f0de219d60d2baa962a8f7fa5403525ac7f7f5/verification/whole/core-ownership/retention-node.json" .

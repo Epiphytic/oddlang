@@ -186,41 +186,113 @@ def doc_rows(document):
         yield key, owner, row["name"], kind, normalized, relative.get("filename"), (relative.get("begin") or [None])[0]
 
 
+def declaration_path(rows, key):
+    path = []
+    seen = set()
+    while key in rows and key not in seen:
+        seen.add(key)
+        _, key, name, _, kind, _, _ = rows[key]
+        if not name or not kind:
+            break
+        path.append(name)
+        if kind == "package":
+            return tuple(reversed(path))
+    return None
+
+
 def observations(rows, root):
     rows = {row[0]: row for row in rows}
     mapped = defaultdict(list)
+    ids = defaultdict(list)
     omitted = Counter()
-    for key, parent, name, original_kind, kind, file, line in rows.values():
-        path = []
-        current = key
-        while current in rows:
-            identity, current, segment, _, category, _, _ = rows[current]
-            if not segment or not category:
-                break
-            path.append(segment)
-            if category == "package":
-                name_key = tuple(reversed(path)), kind
-                if file:
-                    file = str(file).removeprefix("/oddlang-workspace/").removeprefix(str(root) + "/")
-                mapped[name_key].append({"file": file, "line": line})
-                break
-        else:
-            category = None
-        if not path or category != "package":
+    for key, _, _, original_kind, kind, file, line in rows.values():
+        path = declaration_path(rows, key)
+        if path is None:
             omitted[original_kind] += 1
-    return mapped, dict(sorted(omitted.items()))
+            continue
+        name_key = (path, kind)
+        if file:
+            file = str(file).removeprefix("/oddlang-workspace/").removeprefix(str(root) + "/")
+        mapped[name_key].append({"file": file, "line": line})
+        ids[name_key].append(key)
+    return mapped, dict(sorted(omitted.items())), rows, ids
+
+
+def module_access(rows, key, item_path):
+    scope = rows.get(key)
+    if scope is None or scope[4] not in {"package", "module"}:
+        return None
+    path = declaration_path(rows, key)
+    if path is None or item_path[:len(path)] != path or len(path) >= len(item_path):
+        return None
+    return {"within": list(path)}
+
+
+def access_comparison(compiler, document, left, right):
+    """Compare declared access for uniquely paired module items and record/union fields, including tuple positions."""
+    comp_records = {r["id"]: r for r in compiler["declarations"]}
+    doc_records = {r["id"]: r for r in document["index"].values() if r["crate_id"] == 0}
+    restrictions = defaultdict(list)
+    for edge in compiler["edges"]:
+        if edge["relation"] == "visibility-scope":
+            restrictions[edge["from"]].append(edge["to"])
+    comp_rows, comp_ids = left
+    doc_rows, doc_ids = right
+    result = {"agreement": [], "different": [], "unresolved": []}
+    outside_scope = Counter()
+    for key in sorted(comp_ids.keys() & doc_ids.keys()):
+        if len(comp_ids[key]) != 1 or len(doc_ids[key]) != 1:
+            continue
+        cid, = comp_ids[key]
+        did, = doc_ids[key]
+        parent = comp_rows.get(comp_rows[cid][1])
+        other_parent = doc_rows.get(doc_rows[did][1])
+        if not parent or not other_parent or parent[4] != other_parent[4]:
+            outside_scope[key[1]] += 1
+            continue
+        path, kind = key
+        module_item = parent[4] in {"module", "package"} and kind in {
+            "module", "record", "union", "sum", "interface", "operation", "static", "constant", "type-alias"}
+        if not module_item and not (kind == "field" and parent[4] in {"record", "union"}):
+            outside_scope[kind] += 1
+            continue
+        cv = comp_records[cid]["visibility"]
+        compiler_access = None
+        if cv == "public":
+            compiler_access = "public"
+        elif cv == "crate":
+            compiler_access = {"within": [path[0]]}
+        elif cv == "private":
+            compiler_access = module_access(comp_rows, parent[0], path)
+        elif cv == "restricted" and len(restrictions[cid]) == 1:
+            compiler_access = module_access(comp_rows, restrictions[cid][0], path)
+
+        dv = doc_records[did]["visibility"]
+        rustdoc_access = None
+        if dv == "public":
+            rustdoc_access = "public"
+        elif dv == "crate":
+            rustdoc_access = {"within": [path[0]]}
+        elif isinstance(dv, dict) and "restricted" in dv:
+            rustdoc_access = module_access(doc_rows, dv["restricted"]["parent"], path)
+        status = ("unresolved" if compiler_access is None or rustdoc_access is None else
+                  "agreement" if compiler_access == rustdoc_access else "different")
+        result[status].append({"path": list(path), "kind": kind, "compiler": compiler_access,
+                               "rustdoc": rustdoc_access})
+    return dict(result, outsideScopeMatchedByKind=dict(sorted(outside_scope.items())))
 
 
 def compare(compiler, document, root):
-    left, left_skipped = observations(compiler_rows(compiler), root)
-    right, right_skipped = observations(doc_rows(document), root)
+    left, left_skipped, comp_rows, comp_ids = observations(compiler_rows(compiler), root)
+    right, right_skipped, doc_rows_index, doc_ids = observations(doc_rows(document), root)
     groups = {key: [] for key in ("matched", "compilerOnly", "rustdocOnly", "ambiguous")}
     for key in sorted(left.keys() | right.keys()):
         comp, doc = left.get(key, []), right.get(key, [])
         group = ("ambiguous" if len(comp) > 1 or len(doc) > 1 else
                  "matched" if comp and doc else "compilerOnly" if comp else "rustdocOnly")
         groups[group].append({"path": list(key[0]), "kind": key[1], "compiler": comp, "rustdoc": doc})
-    return dict(groups, unkeyedCompilerByKind=left_skipped, unkeyedRustdocByKind=right_skipped)
+    return dict(groups, unkeyedCompilerByKind=left_skipped, unkeyedRustdocByKind=right_skipped,
+                declaredAccess=access_comparison(compiler, document, (comp_rows, comp_ids), (doc_rows_index, doc_ids)))
 
 
 def span_evidence(compiler, document, root, previous):
