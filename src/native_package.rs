@@ -30,6 +30,8 @@ struct Manifest {
     #[serde(default)]
     dependencies: BTreeMap<String, Dependency>,
     #[serde(default)]
+    dev_dependencies: BTreeMap<String, Dependency>,
+    #[serde(default)]
     registry_patches: BTreeMap<String, GitSource>,
     cargo_lock: Pin,
     #[serde(default)]
@@ -195,6 +197,7 @@ impl Pin {
 #[serde(rename_all = "kebab-case")]
 enum Kind {
     BufferedInput,
+    BoundedJsonInput,
     BuildReport,
     StructuredDiagnostics,
     ProcessLimit,
@@ -288,10 +291,16 @@ fn project(
         }
         Kind::StructuredDiagnostics => {
             if !dependencies.contains_key("serde_json") {
-                return Err("structured-diagnostics requires a pinned serde_json dependency".into());
+                return Err(
+                    "structured-diagnostics requires a pinned serde_json dependency".into(),
+                );
             }
             crate::structured_diagnostics::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
             "diagnostics.rs"
+        }
+        Kind::BoundedJsonInput => {
+            crate::bounded_json_input::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
+            "metadata.rs"
         }
         Kind::BuildReport => {
             crate::build_report::build(&graph, &io(fs::read(&overlay))?, &output)?;
@@ -530,6 +539,12 @@ pub(super) const ZEROIZE: RegistryProvider = RegistryProvider {
     checksum: "e13084392c5e4bc371903e2935a5eaeed24905a7511356b883835e18a78f6879",
 };
 
+const STRUCTURAL_JSON: RegistryProvider = RegistryProvider {
+    name: "serde_json",
+    version: "1.0.151",
+    checksum: "c841b55ecdae098c80dcae9cf767f6f8a0c2cdb3416bbef72181df4d0fe73f14",
+};
+
 impl RegistryProvider {
     pub fn verify_lock(&self, bytes: &[u8]) -> Result<()> {
         let lock = std::str::from_utf8(bytes)
@@ -647,7 +662,34 @@ fn validate_component_requirements(
             limits.push(error);
         }
     }
-    if checked.is_empty() && limits.is_empty() {
+    let mut json_inputs = Vec::new();
+    for component in components
+        .iter()
+        .filter(|c| matches!(c.kind, Kind::BoundedJsonInput))
+    {
+        if !manifest
+            .dev_dependencies
+            .get("serde_json")
+            .or_else(|| manifest.dependencies.get("serde_json"))
+            .is_some_and(|dep| {
+                dep.version == STRUCTURAL_JSON.version
+                    && dep.features.is_empty()
+                    && dep.source.is_none()
+                    && dep.default_features != Some(false)
+            })
+            || manifest.registry_patches.contains_key("serde_json")
+        {
+            return Err(
+                "bounded JSON input requires the default locked serde_json provider 1.0.151".into(),
+            );
+        }
+        required.insert(STRUCTURAL_JSON);
+        json_inputs.extend(crate::bounded_json_input::error_paths(
+            &component.graph.read(base)?,
+            &component.overlay.read(base)?,
+        )?);
+    }
+    if checked.is_empty() && limits.is_empty() && json_inputs.is_empty() {
         return Ok(required);
     }
     let mut providers = BTreeMap::new();
@@ -677,6 +719,14 @@ fn validate_component_requirements(
     }
     for error in limits {
         error.validate_link(&providers)?;
+    }
+    for (id, path) in json_inputs {
+        if !providers
+            .get(&id)
+            .is_some_and(|paths| paths.contains(&path))
+        {
+            return Err(format!("unresolved bounded JSON unit error: {id}"));
+        }
     }
     Ok(required)
 }
@@ -747,23 +797,11 @@ fn validate_command_callbacks(components: &[Component], base: &Path) -> Result<(
     Ok(())
 }
 
-fn cargo_manifest(manifest: &Manifest) -> Result<String> {
-    let valid_name = |name: &str| {
-        !name.is_empty()
-            && name
-                .bytes()
-                .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, b'_' | b'-'))
-    };
-    if manifest.format != "oddlang-native-package-v1"
-        || !valid_name(&manifest.name)
-        || !matches!(manifest.edition.as_str(), "2021" | "2024")
-        || manifest.components.is_empty()
-    {
-        return Err("invalid package format, name, edition or empty component list".into());
-    }
-    semver::Version::parse(&manifest.version).map_err(|e| format!("package version: {e}"))?;
+fn cargo_dependencies(
+    entries: &BTreeMap<String, Dependency>,
+) -> Result<BTreeMap<&String, serde_json::Value>> {
     let mut dependencies = BTreeMap::new();
-    for (name, dependency) in &manifest.dependencies {
+    for (name, dependency) in entries {
         if !valid_name(name) {
             return Err(format!("invalid dependency: {name}"));
         }
@@ -779,6 +817,32 @@ fn cargo_manifest(manifest: &Manifest) -> Result<String> {
         }
         dependencies.insert(name, record);
     }
+    Ok(dependencies)
+}
+
+fn cargo_manifest(manifest: &Manifest) -> Result<String> {
+    let valid_name = |name: &str| {
+        !name.is_empty()
+            && name
+                .bytes()
+                .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, b'_' | b'-'))
+    };
+    if manifest.format != "oddlang-native-package-v1"
+        || !valid_name(&manifest.name)
+        || !matches!(manifest.edition.as_str(), "2021" | "2024")
+        || manifest.components.is_empty()
+    {
+        return Err("invalid package format, name, edition or empty component list".into());
+    }
+    semver::Version::parse(&manifest.version).map_err(|e| format!("package version: {e}"))?;
+    if manifest
+        .dev_dependencies
+        .keys()
+        .any(|name| manifest.dependencies.contains_key(name))
+    {
+        return Err("normal and dev dependencies must have distinct names".into());
+    }
+    let dependencies = cargo_dependencies(&manifest.dependencies)?;
     if manifest
         .components
         .iter()
@@ -792,6 +856,10 @@ fn cargo_manifest(manifest: &Manifest) -> Result<String> {
     }
     let mut cargo = serde_json::json!({"package":{"name":manifest.name,"version":manifest.version,
         "edition":manifest.edition,"publish":false},"dependencies":dependencies,"workspace":{}});
+    if !manifest.dev_dependencies.is_empty() {
+        cargo["dev-dependencies"] =
+            serde_json::json!(cargo_dependencies(&manifest.dev_dependencies)?);
+    }
     if !manifest.registry_patches.is_empty() {
         let mut patches = BTreeMap::new();
         for (name, source) in &manifest.registry_patches {
@@ -866,7 +934,7 @@ pub(super) fn build_pinned(
     let mut records = Vec::new();
     let mut root_exports = String::new();
     for (index, component) in manifest.components.iter().enumerate() {
-        if matches!(component.kind, Kind::BufferedInput)
+        if matches!(component.kind, Kind::BufferedInput | Kind::BoundedJsonInput)
             && (component.visibility != Visibility::Private
                 || !component.reexports.is_empty()
                 || !component.crate_reexports.is_empty()
@@ -875,7 +943,12 @@ pub(super) fn build_pinned(
                     .as_ref()
                     .is_some_and(|names| !names.is_empty()))
         {
-            return Err("buffered-input must stay private".into());
+            let name = if matches!(component.kind, Kind::BufferedInput) {
+                "buffered-input"
+            } else {
+                "bounded-json-input"
+            };
+            return Err(format!("{name} must stay private"));
         }
         if matches!(component.kind, Kind::FieldRelation | Kind::BinaryFragment)
             && (!component.reexports.is_empty()
@@ -893,7 +966,10 @@ pub(super) fn build_pinned(
                 && component.crate_reexports.is_empty()
                 && !matches!(
                     component.kind,
-                    Kind::FieldRelation | Kind::BinaryFragment | Kind::BufferedInput
+                    Kind::FieldRelation
+                        | Kind::BinaryFragment
+                        | Kind::BufferedInput
+                        | Kind::BoundedJsonInput
                 ))
         {
             return Err("invalid module or empty reexports".into());

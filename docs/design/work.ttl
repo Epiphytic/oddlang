@@ -1661,7 +1661,7 @@ w:observationalRecordDefaults a p:Task ;
     rdfs:label "Recover public scalar records with fieldwise defaults and owned paths" ;
     p:milestone w:marmishMilestone ; p:source w:observationalRecordDefaultsPlan ;
     p:dependsOn w:typedFiniteErrors, w:publicObservationalRecords ;
-    p:status p:active ;
+    p:status p:done ;
     p:acceptance "Recover pinned engine and native records within one reusable profile. Compare independent native callers for field widths, exact traits, default values and exported paths. Show a source-only mutation and preserve preceding sealed workspace behavior." .
 
 w:observationalRecordDefaultsFixture a p:Artifact ;
@@ -1719,3 +1719,25 @@ w:structuralApplicationConvergence a p:Task ;
     p:dependsOn w:structuralProfileCompiler, w:vaultHelperChoice ;
     p:acceptance "Preserve and identify member contracts, qualify the cold native build and CLI, and measure actual import and named upstream test coverage on the composed workspace." ;
     p:status p:planned .
+
+w:observationalRecordDefaultsDarwin a p:Artifact ;
+    p:location "companion:verification/whole/engine-native-records/aarch64-apple-darwin.json" .
+w:observationalRecordDefaultsLinux a p:Artifact ;
+    p:location "companion:verification/whole/engine-native-records/aarch64-unknown-linux-gnu.json" .
+w:observationalRecordDefaultsMutation a p:Artifact ;
+    p:location "companion:verification/whole/engine-native-records/source-mutation-aarch64-apple-darwin.json" .
+w:observationalRecordDefaultsCoverage a p:Artifact ;
+    p:location "companion:verification/whole/engine-native-records/README.md" .
+w:observationalRecordDefaults p:evidence w:observationalRecordDefaultsDarwin, w:observationalRecordDefaultsLinux, w:observationalRecordDefaultsMutation, w:observationalRecordDefaultsCoverage .
+
+w:boundedJsonInputPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-bounded-json-input.md" .
+w:boundedJsonInput a p:Task ;
+    rdfs:label "Qualify declared bounded local JSON input" ;
+    p:milestone w:marmishMilestone ; p:source w:boundedJsonInputPlan ; p:status p:active ;
+    p:dependsOn w:rootPublicData ;
+    p:acceptance "Recover a pure byte parser contract with explicit bounds and error precedence, detect a source mutation, and execute the unchanged private native parser case." .
+
+w:boundedJsonInputFixture a p:Artifact ;
+    p:location "verification/bounded-json-input/verify.py" .
+w:boundedJsonInput p:evidence w:boundedJsonInputFixture .

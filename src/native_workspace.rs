@@ -108,6 +108,20 @@ pub fn build(path: &Path, destination: &Path) -> Result<()> {
                 .ok_or("missing generated crates.io patches")?;
             merge_registry_patches(&mut registry_patches, selected.clone())?;
         }
+        if cargo
+            .get("dev-dependencies")
+            .and_then(toml::Value::as_table)
+            .is_some_and(|dev| {
+                member
+                    .dependencies
+                    .iter()
+                    .any(|name| dev.contains_key(name))
+            })
+        {
+            return Err(format!(
+                "workspace edge collides with external dev dependency for {name}"
+            ));
+        }
         let deps = cargo
             .get_mut("dependencies")
             .and_then(toml::Value::as_table_mut)
