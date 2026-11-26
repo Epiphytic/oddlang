@@ -52,6 +52,8 @@ struct Graph {
     constraints: Vec<Constraint>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     integrity: Option<Integrity>,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    fragment: bool,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -278,6 +280,8 @@ struct Binding {
     external_records: BTreeMap<String, RecordBinding>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     integrity: Option<IntegrityBinding>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    existing_type: Option<String>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -318,6 +322,18 @@ impl Graph {
             || self.layout.is_empty()
         {
             return Err("invalid binary record format, layout, or native declaration".into());
+        }
+        if (self.fragment && self.integrity.is_some())
+            || binding.existing_type.as_deref().is_some_and(|path| {
+                !self.fragment
+                    || !absolute_path(path)
+                    || !self.hash_views.is_empty()
+                    || !self.records.is_empty()
+            })
+        {
+            return Err(
+                "prefix fragments require an unsealed layout and a qualified existing type".into(),
+            );
         }
         iri(&self.id)?;
         let mut ids = BTreeSet::from([self.id.as_str()]);
@@ -457,9 +473,20 @@ impl Graph {
 }
 
 pub fn build(graph: &Path, binding: &Path, output: &Path) -> Result<()> {
+    build_record(graph, binding, output, false)
+}
+
+pub(crate) fn build_bound_fragment(graph: &Path, binding: &Path, output: &Path) -> Result<()> {
+    build_record(graph, binding, output, true)
+}
+
+fn build_record(graph: &Path, binding: &Path, output: &Path, require_bound: bool) -> Result<()> {
     let graph: Graph = json(graph)?;
     let binding: Binding = json(binding)?;
     graph.validate(&binding)?;
+    if require_bound && (!graph.fragment || binding.existing_type.is_none()) {
+        return Err("binary fragment components must bind an existing type".into());
+    }
     let source = rust::render(&graph, &binding);
     let obligations = encode(&graph.obligations())?;
     let lock = encode(&json!({

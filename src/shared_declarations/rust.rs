@@ -12,6 +12,7 @@ pub(super) fn render(g: &Graph, b: &Binding) -> Result<String> {
             Width::U32 => ("u32", u32::MAX as u64),
             Width::U64 => ("u64", u64::MAX),
             Width::Usize => ("usize", u64::MAX),
+            Width::I64 => ("i64", i64::MAX as u64),
         };
         if value > max {
             return Err(format!("constant exceeds native type: {}", c.id));
@@ -20,6 +21,15 @@ pub(super) fn render(g: &Graph, b: &Binding) -> Result<String> {
             out,
             "pub const {}: ::core::primitive::{ty} = {value};",
             b.name(&c.id)?
+        )
+        .unwrap();
+    }
+    for constant in &g.text_constants {
+        writeln!(
+            out,
+            "pub const {}: &'static ::core::primitive::str = {:?};",
+            b.name(&constant.id)?,
+            constant.value
         )
         .unwrap();
     }
