@@ -1,0 +1,42 @@
+# Rust import profile framing-v1
+
+Select this profile with `profile = "framing-v1"` in the import mapping. Supply the selected package's Cargo manifest, including when that package belongs to a larger workspace. The profile maps the Rust module `src/frame.rs` to a closed-record codec, its native symbol names and a stable operation vocabulary. Ordinary comments, literal documentation strings on the unit structs, formatting and supported local renames do not contribute to graph bytes. [Marmish mapping](../../examples/marmish/framing.toml) · [Independent fixture](../../examples/rust-import/framing-independent/src/frame.rs)
+
+## Accepted declarations
+
+The module imports the standard base64 engine and its `Engine` trait, Serde's `Serialize` and `Deserialize` derives, and thiserror's `Error`. Each import resolves to its direct registry dependency under the package and compiler checks below. The named globals, fields, error variants and public method names are fixed for this profile. The enclosing library declares `mod frame;` and exports `FrameError`, `Limits` and `ProbeEnvelope`. The pinned Marmish workspace additionally retains the digest-verified configuration module and its three exports.
+
+* `Limits` is a public unit struct deriving Clone, Copy, Debug and Default. Its inherent impl defines three public usize constants. Recognized initializers use unsuffixed nonnegative integer literals and checked multiplication. RAW_BYTES bounds decoded octets. JSON_BYTES bounds both encoded output and input record bytes. NDJSON_BYTES is a declared public constant. Bounds and the padded length ceiling must fit the 32-bit Wasm target.
+* `FrameError` is a public enum deriving Debug, Error, PartialEq and Eq. In declaration order, its four unit variants are SizeLimit, InvalidJson, InvalidVersion and InvalidEncoding. Each has one literal thiserror display attribute, bounded to 96 ASCII letters, digits, spaces or profile punctuation.
+* `ProbeEnvelope` is a public unit struct. The internal `Envelope` has named fields `version: u32` and `payload: String` in wire serialization order, derives Serialize and Deserialize, and carries the single Serde container attribute `deny_unknown_fields`.
+* Both public inherent methods take one immutable byte slice and return `Result<Vec<u8>, FrameError>`. Syn checks the entire signature, each expression, the immutable bindings, operators, arguments, call paths, receiver and return statements. The Cargo compiler checks the recognized items in their real package context.
+
+## Recognized operation steps
+
+Encode first tests the raw slice length against RAW_BYTES. It constructs the record with the source's fixed u32 version and standard base64 payload, serializes compact JSON, checks the resulting byte length against JSON_BYTES, then returns that vector. The encoder's expression uses a single named-error closure and `?` to convert serialization failures to InvalidJson.
+
+Decode checks input byte length, deserializes exactly one closed record, checks its version and the encoded payload length, decodes base64, checks raw byte length, checks that re-encoding reproduces the supplied string, then returns the bytes. The encoded-length ceiling expression is `RAW_BYTES.div_ceil(3) * 4`. The version check and the ceiling computation/check may exchange order as a pair. The graph preserves source priority for overlapping failures. The comparison literal must match the encode version. Closures take an ignored parameter and return exactly the specified unit variant. Extra operations, alternate closures, alias imports, cfg selection, shadow declarations and unchecked custom derives are outside this grammar.
+
+| Resolved primitive | Package or compiler | Interpretation |
+| --- | --- | --- |
+| STANDARD and Engine::encode/decode | base64 0.22.1 with alloc, default, std | Padded RFC 4648 standard alphabet. Reject malformed padding, invalid bytes and nonzero unused bits. Decode failures become InvalidEncoding. |
+| Serialize and Deserialize derives | serde and serde_derive 1.0.229 | Compact serialization follows field declaration order. The closed record requires both fields, rejects unknown and duplicate fields, and requires a representable u32 version and string payload. |
+| serde_json::to_vec / from_slice | serde_json 1.0.151 with default, std | Encode UTF-8 bytes, accept JSON whitespace and field reordering on read. Syntax, trailing content and record/type errors become InvalidJson. |
+| Error derive and error literals | thiserror and thiserror-impl 2.0.21 | Rust Error and Display for four typed unit variants using the source messages. |
+| Associated constant evaluation, checked widened ceiling, byte lengths, equality, Vec, String, Result, map_err, `?`, standard derives | rustc 1.97.1, commit `8bab26f4f68e0e26f0bb7960be334d5b520ea452` | Built-in usize arithmetic and slice/string lengths, exact byte/string equality, deterministic first-error return. Allocation success is an execution assumption. |
+
+## Dependency and provenance checks
+
+The importer runs Cargo metadata and a fresh library compilation offline with the workspace lock, selected package, native host and explicit overflow checks. Supported direct dependencies are the four primitives and the upstream configuration module's optional use of url as a package dependency. The profile checks crate identities, normal dependency kind, features, registry provenance, active transitive package checksums, actual compiler artifact features and the compiler commit. A recognized method or derive is trusted through this pinned native implementation. Cargo workspace path/registry replacements, custom library roots, package build scripts, local Cargo configuration and changes to primitive feature sets fail closed. The audited upstream workspace manifest has an unrelated SQLCipher dependency override; its exact digest is recognized. [Registry input checksums](../../src/framing_import/registry.json)
+
+The import publishes canonical UTF-8 N-Triples, a Turtle subset, to `domain.ttl`. Named subjects in `urn:oddlang:framing:` record ABI, field order and types, closed-record policy, padded encoding, three bounds and their enforcement, wire version, error messages and ordered operation steps. The verifier reconstructs the typed model and checks canonical graph bytes.
+
+## Source witnesses and external import identity
+
+The v2 source map contains the source filename, the SHA-256 of the selected file, its byte length and the digest of the complete Cargo build record. Each recognized declaration or operation step has line and column coordinates, a zero-based half-open UTF-8 byte range and SHA-256 of the original bytes in that range. Its contents carry no original Rust text. Each canonical RDF statement has a witness keyed by the SHA-256 of the statement bytes excluding the newline. The witness binds its declaration or operation step IDs, coordinates, source span digests, build digest, file digest and exact typed statement. The wire version has witnesses in both encoder and decoder. Error messages and constants use the individual variant or constant declaration.
+
+The v2 `import.lock` records the mapping, canonical graph, source map, source closure, Cargo manifests, Cargo.lock, compiler, target and package features. Verification decodes the closed graph and recalculates every statement witness against the source map and build record. Editing a limit and updating just the graph hashes fails this check. Source replay with the original checkout can additionally regenerate the recorded byte-range hashes.
+
+The independent import identity is the lowercase SHA-256 of the exact canonical `import.lock` bytes, including its trailing newline. Preserve this digest in a trusted assembly manifest as `importSha256` before discarding the original checkout. `framing_import::load_pinned` and `verify_pinned` compare this expected digest with the same bytes they parse. The pin commits the full chain of graph, source witnesses and Cargo build identities. The standalone `verify` operation checks internal agreement. A separately recreated, fully self-consistent import can pass standalone verification; it fails verification against the original external pin. The caller establishes the provenance of the assembly manifest through its own review or authentication process.
+
+The independent seven-byte fixture exercises the same closed grammar with different constants, wire version, display messages, local names and check priority. The two fixtures establish reuse within that measured profile.

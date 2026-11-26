@@ -1,7 +1,45 @@
 use oddlang::model::load_model;
 use std::{env, process::ExitCode};
+fn is_framing_mapping(path: &str) -> bool {
+    std::fs::read_to_string(path)
+        .ok()
+        .and_then(|text| toml::from_str::<toml::Table>(&text).ok())
+        .and_then(|table| table.get("profile")?.as_str().map(str::to_owned))
+        .as_deref()
+        == Some("framing-v1")
+}
+
+fn is_framing_import(path: &str) -> bool {
+    let lock = std::path::Path::new(path).join("import.lock");
+    std::fs::read(lock)
+        .ok()
+        .and_then(|bytes| serde_json::from_slice::<serde_json::Value>(&bytes).ok())
+        .is_some_and(|value| value["profile"] == "framing-v1")
+}
+
 fn run(args: &[String]) -> Result<(), String> {
     match args {
+        [cmd, manifest, store, out] if cmd == "assemble" => {
+            oddlang::assemble::assemble(manifest.as_ref(), store.as_ref(), out.as_ref())
+        }
+        [cmd, kind, import, out, flag, pin]
+            if cmd == "build" && kind == "module" && flag == "--import-sha256" =>
+        {
+            oddlang::framing_projection::build_pinned(import.as_ref(), pin, out.as_ref())
+        }
+        [group, cmd, dir, flag, pin]
+            if group == "import" && cmd == "verify" && flag == "--import-sha256" =>
+        {
+            oddlang::framing_import::verify_pinned(dir.as_ref(), pin)
+        }
+        [cmd, kind, import, out] if cmd == "build" && kind == "module" => {
+            oddlang::framing_projection::build(import.as_ref(), out.as_ref())
+        }
+        [group, cmd, manifest, mapping, out]
+            if group == "import" && cmd == "rust" && is_framing_mapping(mapping) =>
+        {
+            oddlang::framing_import::import(manifest.as_ref(), mapping.as_ref(), out.as_ref())
+        }
         [group, cmd, manifest, mapping, out] if group == "import" && cmd == "rust" => {
             oddlang::import_rust::import(manifest.as_ref(), mapping.as_ref(), out.as_ref(), None)
         }
@@ -26,6 +64,22 @@ fn run(args: &[String]) -> Result<(), String> {
                 out.as_ref(),
                 Some((receipt.as_ref(), pin.as_ref())),
             )
+        }
+        [group, cmd, dir, output]
+            if group == "import" && cmd == "verify-build" && is_framing_import(dir) =>
+        {
+            oddlang::framing_projection::verify_build(dir.as_ref(), output.as_ref())
+        }
+        [group, cmd, dir] if group == "import" && cmd == "verify" && is_framing_import(dir) => {
+            oddlang::framing_import::verify(dir.as_ref())
+        }
+        [group, cmd, manifest, mapping, dir]
+            if group == "import" && cmd == "replay" && is_framing_mapping(mapping) =>
+        {
+            let fresh = tempfile::tempdir().map_err(|e| e.to_string())?;
+            let output = fresh.path().join("import");
+            oddlang::framing_import::import(manifest.as_ref(), mapping.as_ref(), &output)?;
+            oddlang::framing_projection::compare_directories(&output, dir.as_ref())
         }
         [group, cmd, dir, output] if group == "import" && cmd == "verify-build" => {
             oddlang::import_rust::verify_build(dir.as_ref(), output.as_ref())

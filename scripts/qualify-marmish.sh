@@ -4,8 +4,8 @@ cd "$(dirname "$0")/.."
 root=$PWD
 mode=${1:-}
 case "$mode" in
-    baseline) ;;
-    *) echo 'usage: scripts/qualify-marmish.sh baseline [UPSTREAM [EMPTY_OUTPUT]]' >&2; exit 2 ;;
+    baseline|frame) ;;
+    *) echo 'usage: scripts/qualify-marmish.sh {baseline|frame} [UPSTREAM [EMPTY_OUTPUT]]' >&2; exit 2 ;;
 esac
 upstream=${2:-${ODDLANG_MARMISH_SOURCE:-$root/target/marmish/upstream}}
 mkdir -p target/marmish
@@ -24,6 +24,11 @@ revision=49fc705408a230bd0ad896248d08dbdd2faad05a
 git -C "$upstream" diff --quiet HEAD -- || { echo 'Marmish tracked inputs differ from the pinned tree' >&2; exit 1; }
 [[ -z "$(git -C "$upstream" ls-files --others --exclude-standard)" ]] || { echo 'Untracked Marmish inputs present' >&2; exit 1; }
 export CARGO_NET_OFFLINE=true RUSTUP_AUTO_INSTALL=0 UV_OFFLINE=1 PYTHONDONTWRITEBYTECODE=1
+if [[ $mode == frame ]]; then
+    scripts/marmish/project-frame.sh "$upstream" "$report"
+    echo "Marmish framing observations recorded in $report"
+    exit 0
+fi
 scripts/marmish/offline.sh python3 scripts/marmish/inventory.py "$upstream" "$report/inventory"
 python3 - "$report/inventory/inventory-summary.json" <<'CHECK_INVENTORY'
 import json, sys

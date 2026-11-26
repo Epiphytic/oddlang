@@ -1,0 +1,37 @@
+{
+  "installed": {
+    "counts": {
+      "failed": 8,
+      "ignored": 3,
+      "passed": 907
+    },
+    "failedTests": [
+      "command_srv::tests::local_dns_is_absolute_uncached_and_runtime_closes_sockets_on_success",
+      "command_srv::tests::original_deadline_stops_dns_and_closes_runtime_socket_on_timeout",
+      "command_srv::tests::raw_pool_never_queries_response_directed_names",
+      "mdk_adapter::installed_check::autoexit::socket_tests::real_profile_socket_uses_child_tmpdir_and_authenticated_status",
+      "mdk_adapter::installed_check::autoexit::socket_tests::socket_matches_adjacent_product_runtime_path_bounds",
+      "mdk_adapter::installed_check::autoexit::socket_tests::socket_rejects_invalid_ids_and_names_and_separates_prepared_profiles",
+      "mdk_adapter::installed_check::autoexit::socket_tests::socket_rejects_nonprivate_and_symlink_child_tmpdirs",
+      "mdk_adapter::installed_check::benchmark::tests::cli_child_deadline_and_cancellation_are_owned_and_bounded"
+    ]
+  },
+  "workspace": {
+    "counts": {
+      "failed": 9,
+      "ignored": 5,
+      "passed": 906
+    },
+    "failedTests": [
+      "command_srv::tests::local_dns_is_absolute_uncached_and_runtime_closes_sockets_on_success",
+      "command_srv::tests::original_deadline_stops_dns_and_closes_runtime_socket_on_timeout",
+      "command_srv::tests::raw_pool_never_queries_response_directed_names",
+      "tests::environment_is_exactly_empty_even_when_ambient_is_poisoned",
+      "tests::explicit_executable_and_version_only",
+      "tests::fixture_runner_refuses_paths_outside_owned_directory",
+      "tests::network_plans_are_inert_and_gated_before_any_spawn",
+      "tests::nonzero_exit_and_diagnostic_control_bytes_are_rejected",
+      "tests::timeout_reaps_direct_child"
+    ]
+  }
+}
