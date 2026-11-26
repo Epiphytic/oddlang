@@ -6,7 +6,7 @@ publish = false
 default-run = "empty-linker"
 
 [dependencies]
-wasmtime = { version = "=45.0.0", default-features = false, features = ["anyhow", "component-model", "cranelift", "runtime", "std"] }
+wasmtime = { version = "=48.0.7", default-features = false, features = ["anyhow", "component-model", "cranelift", "runtime", "std"] }
 
 [[bin]]
 name = "framing-host"

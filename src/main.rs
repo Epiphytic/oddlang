@@ -19,6 +19,14 @@ fn import_has_profile(path: &str, profile: &str) -> bool {
 
 fn run(args: &[String]) -> Result<(), String> {
     match args {
+        [command, kind, manifest, package, output] if command == "import" && kind == "rust-tree" => {
+            oddlang::rust_roundtrip::capture(manifest.as_ref(), package, output.as_ref())
+        }
+        [command, kind, bundle, output, flag, pin]
+            if command == "build" && kind == "rust-tree" && flag == "--bundle-sha256" =>
+        {
+            oddlang::rust_roundtrip::build(bundle.as_ref(), output.as_ref(), pin)
+        }
         [group, cmd, manifest, mapping, out]
             if group == "import"
                 && cmd == "rust"
@@ -278,7 +286,7 @@ fn run(args: &[String]) -> Result<(), String> {
             oddlang::targets::build(&load_model(dir)?, std::path::Path::new(out))
                 .map_err(|e| e.to_string())
         }
-        _ => Err("usage: oddlang check PROJECT | impact PROJECT IRI | build PROJECT OUTPUT".into()),
+        _ => Err("usage: oddlang check PROJECT | impact PROJECT IRI | build PROJECT OUTPUT | import rust-tree MANIFEST PACKAGE OUTPUT | build rust-tree BUNDLE OUTPUT --bundle-sha256 PIN".into()),
     }
 }
 fn main() -> ExitCode {
