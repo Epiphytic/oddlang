@@ -1313,3 +1313,10 @@ w:unifiedVaultEngineReceipt a p:Artifact ;
 w:fixedByteFrameworkFixture a p:Artifact ; p:location "verification/checked-values/fixed_bytes.py" .
 w:fixedByteDarwin a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/blob/2f5934a6cf01aa0316d76c1725d0ec885ae07cc0/verification/whole/vault-fixed-bytes/aarch64-apple-darwin.json> .
 w:fixedByteLinux a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/blob/2f5934a6cf01aa0316d76c1725d0ec885ae07cc0/verification/whole/vault-fixed-bytes/aarch64-unknown-linux-gnu.json> .
+
+w:fixedByteTypeScriptProjection a p:Task ;
+    rdfs:label "Project checked fixed-width byte values into native Node TypeScript" ;
+    p:milestone w:marmishMilestone ; p:source w:fixedByteValuesPlan ;
+    p:dependsOn w:fixedByteRecovery, w:fixedByteVault ;
+    p:status p:active ;
+    p:acceptance "Project from the portable graph alone. Verify exact widths and failure identities, independent copies and deterministic artifacts on unrelated and published 32-byte graphs. Record the unsupported on-drop erasure obligation." .

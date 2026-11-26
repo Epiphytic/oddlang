@@ -17,3 +17,5 @@ The Rust package must select the crates.io zeroize 1.9.1 provider and lock its d
 - [ ] Compose the qualified vault package into the next five-member release. The separately pinned earlier five-member workspace keeps its existing acceptance evidence.
 
 The [companion qualification](https://github.com/Epiphytic/marmish-oddlang/pull/68) records identical semantic, package and dependency seals for macOS and Linux ARM64. Each host passed the original test in both libraries. A changed array length gave E0277 when compiling the unchanged test module.
+
+- [ ] Project the fixed-width value graph into a native Node TypeScript module. Confirm portable widths and failure identities, independent input and output copies, and deterministic artifacts on an unrelated fixture and the published 32-byte graph. Record on-drop erasure as unsupported on this target.

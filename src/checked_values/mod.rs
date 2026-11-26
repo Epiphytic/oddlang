@@ -1,7 +1,9 @@
 //! Portable checked value records and finite representation tables.
 mod fixed_recovery;
 pub use fixed_recovery::recover_fixed_bytes;
+pub use typescript::build as build_typescript;
 mod rust;
+mod typescript;
 
 use crate::{
     native_package::publish,

@@ -13,3 +13,11 @@ The native package assembler resolves every checked error binding against a unit
 An opaque `fixed-bytes` type declares an unsigned 32-bit `length`, a `failure` IRI for length mismatch, and `onDrop: "erase"`. Its native binding supplies a by-value constructor, a checked sequence constructor and a read-only array view through the `constructor`, `parse` and `view` keys. Supply empty `order` and omit fields and traits. The owner stores its own bytes, has a private backing field and exposes a borrow tied to its lifetime. The Rust backend uses the locked registry provider zeroize 1.9.1. Its destruction guarantee covers the object's current storage on drop. There is no requirement to clear a caller's separate input or copies left behind by moves.
 
 Run `oddlang recover fixed-bytes OBSERVATION SELECTION OUTPUT` on a v2 rustc shape observation. Select the source declaration identity, domain IRI, output value IRI and failure IRI in the JSON keys `source`, `domain`, `value` and `failure`. Recovery reads the monomorphic tuple member, provider type, element and extent. The failure mapping and the public construction and borrowing interface require independent caller qualification. The resulting graph contains no source syntax or provider path. Run `python3 -B verification/checked-values/fixed_bytes.py /path/to/oddlang` to exercise an independent source-width change.
+
+## TypeScript on Node.js
+
+Run `oddlang build checked-values typescript GRAPH OUTPUT` for a graph of fixed-byte declarations. The command accepts the portable graph and output path. It emits `values.mts`, `obligations.json` and `projection.lock`. The lock hashes the canonical graph, emitted module and obligation catalog.
+
+`fromBytes(id, input)` takes a declared value IRI and a native Node `Uint8Array`. Different widths raise `FixedBytesError` with the declared failure IRI in its `id` field. Node buffers and byte arrays from other realms use their intrinsic width. Construction takes an owned copy and `copyBytes()` returns a fresh copy. Unknown declaration identities and values of a different native type use ordinary JavaScript errors.
+
+The TypeScript projection exposes the width and copying semantics. The catalog records the portable on-drop erasure obligation as unsupported on Node.js.
