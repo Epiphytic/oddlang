@@ -866,3 +866,14 @@ w:nativeWirePackage a p:Task ; rdfs:label "Assemble recovered wire schemas into 
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:dependsOn w:wireByteValues, w:nativePackageAssembly, w:sharedTypedDeclarations ;
     p:acceptance "Assemble an unrelated bounded byte record and compile it locked and offline." ;
     p:status p:done ; p:evidence w:wireByteFixture .
+
+w:localStatusOracles a p:Task ; rdfs:label "Characterize the local status interface against a native owner and independent peers" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Pin the original executables, compare actual status, stdout, stderr and exit, and publish extended reply observations on macOS and Linux ARM64." ;
+    p:evidence w:localStatusBaseline, w:localReplyShapes .
+w:localStatusBaseline a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/20> .
+w:localReplyShapes a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/22> .
+w:combinedNativeRelease a p:Task ; rdfs:label "Compose the core, stream and partial client interfaces in one source-free workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:active ;
+    p:dependsOn w:nativeWirePackage, w:localStatusOracles ;
+    p:acceptance "Generate three native packages from one locked root, build them together without original sources, then replay the unchanged core, wire, window and codec tests." .
