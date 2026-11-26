@@ -19,11 +19,22 @@ fn import_has_profile(path: &str, profile: &str) -> bool {
 
 fn run(args: &[String]) -> Result<(), String> {
     match args {
+        [cmd, kind, target, root, overlay, release]
+            if cmd == "verify" && kind == "value-domain" && target == "rust" => {
+                oddlang::value_domain::verify(root.as_ref(), Some(overlay.as_ref()), release.as_ref())
+        }
+        [cmd, kind, target, root, release]
+            if cmd == "verify" && kind == "value-domain" && target == "typescript" => {
+                oddlang::value_domain::verify(root.as_ref(), None, release.as_ref())
+        }
+        [cmd, kind, manifest, selection, out] if cmd == "recover" && kind == "value-domain" => {
+            oddlang::value_domain::recover::recover(manifest.as_ref(), selection.as_ref(), out.as_ref())
+        }
         [cmd, kind, target, root, out] if cmd == "build" && kind == "value-domain" && target == "typescript" => {
-            oddlang::value_domain::build_typescript(root.as_ref(),out.as_ref())
+            oddlang::value_domain::build_typescript(root.as_ref(), out.as_ref())
         }
         [cmd, kind, target, root, overlay, out] if cmd == "build" && kind == "value-domain" && target == "rust" => {
-            oddlang::value_domain::build(root.as_ref(),overlay.as_ref(),out.as_ref())
+            oddlang::value_domain::build(root.as_ref(), overlay.as_ref(), out.as_ref())
         }
         [group, kind, source, selection, overlay, variant, output]
             if group == "recover" && kind == "tagged-contract" =>

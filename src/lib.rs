@@ -14,5 +14,5 @@ pub mod rust_recovery;
 pub mod rust_roundtrip;
 pub mod tagged_wire;
 pub mod targets;
-pub mod wasm;
 pub mod value_domain;
+pub mod wasm;

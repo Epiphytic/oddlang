@@ -12,6 +12,7 @@ use std::{
 };
 
 type Result<T> = std::result::Result<T, String>;
+pub mod recover;
 mod rust;
 mod typescript;
 
@@ -116,6 +117,7 @@ fn check_names(names: &[&str]) -> Result<()> {
     for name in names {
         if !name.bytes().next().is_some_and(|v| v.is_ascii_alphabetic())
             || !name.bytes().all(|v| v.is_ascii_alphanumeric() || v == b'_')
+            || *name == "gen"
             || syn::parse_str::<syn::Ident>(name).is_err()
             || !seen.insert(name)
         {
@@ -123,6 +125,43 @@ fn check_names(names: &[&str]) -> Result<()> {
         }
     }
     Ok(())
+}
+
+impl Binding {
+    fn validate(&self) -> Result<()> {
+        check_names(&[&self.type_name, &self.error_type])?;
+        check_names(&[&self.constructor, &self.accessor, &self.maximum_constant])?;
+        check_names(
+            &self
+                .variants
+                .values()
+                .map(String::as_str)
+                .collect::<Vec<_>>(),
+        )?;
+        for name in [&self.type_name, &self.error_type]
+            .into_iter()
+            .chain(self.variants.values())
+        {
+            if !name.as_bytes()[0].is_ascii_uppercase() || name.contains('_') {
+                return Err(format!(
+                    "expected a Rust type or variant name in UpperCamelCase: {name}"
+                ));
+            }
+        }
+        for name in [&self.constructor, &self.accessor] {
+            if name == "default" || name.bytes().any(|b| b.is_ascii_uppercase()) {
+                return Err(format!("invalid Rust value operation name: {name}"));
+            }
+        }
+        if self
+            .maximum_constant
+            .bytes()
+            .any(|b| b.is_ascii_lowercase())
+        {
+            return Err("expected an uppercase Rust maximum constant".into());
+        }
+        Ok(())
+    }
 }
 
 impl Domain {
@@ -173,19 +212,7 @@ pub fn build(root: &Path, binding_path: &Path, output: &Path) -> Result<()> {
     if binding.domain != domain.id || !binding.variants.keys().eq(domain.errors.keys()) {
         return Err("binding must name every semantic declaration exactly".into());
     }
-    check_names(&[&binding.type_name, &binding.error_type])?;
-    check_names(&[
-        &binding.constructor,
-        &binding.accessor,
-        &binding.maximum_constant,
-    ])?;
-    check_names(
-        &binding
-            .variants
-            .values()
-            .map(String::as_str)
-            .collect::<Vec<_>>(),
-    )?;
+    binding.validate()?;
     let source = rust::render(&domain, &binding);
     let binding = serde_json::to_vec(&binding).map_err(|e| e.to_string())?;
     publish(&domain, "value.rs", source, Some(digest(&binding)), output)
@@ -233,4 +260,25 @@ fn publish(
         return Err("output already exists".into());
     }
     fs::rename(tmp.path(), output).map_err(|e| e.to_string())
+}
+
+/// Rebuild in a private directory and compare the published semantic lock and artifacts.
+pub fn verify(root: &Path, rust_binding: Option<&Path>, release: &Path) -> Result<()> {
+    let stage = tempfile::tempdir().map_err(|e| e.to_string())?;
+    let out = stage.path().join("expected");
+    let artifact = if let Some(binding) = rust_binding {
+        build(root, binding, &out)?;
+        "value.rs"
+    } else {
+        build_typescript(root, &out)?;
+        "value.mts"
+    };
+    for name in ["projection.lock", "obligations.json", artifact] {
+        let expected = fs::read(out.join(name)).map_err(|e| e.to_string())?;
+        let actual = fs::read(release.join(name)).map_err(|e| format!("{name}: {e}"))?;
+        if actual != expected {
+            return Err(format!("value-domain release differs at {name}"));
+        }
+    }
+    Ok(())
 }
