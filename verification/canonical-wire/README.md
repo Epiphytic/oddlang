@@ -19,3 +19,11 @@ python3 -B verification/canonical-wire/package.py target/debug/oddlang
 A protocol can set `"layout": "flat-sorted"` to put an adjacent union's tag and content directly in its enclosing JSON object. Its UTF-8 wire form uses compact JSON with object keys sorted recursively. Arrays retain their order. The declaration is rejected when the promoted names collide with envelope field names. The radio fixture checks exact bytes, round trips, duplicate keys and noncanonical field order. The default encoding retains the nested selector.
 
 Flat frames order keys by UTF-8 byte order and use serde_json compact string escaping. The packaged Rust fixture pins serde_json 1.0.154. Case digest declarations keep their own declared field order. Exact-limit and one-byte-over fixtures exercise the wire bound after flattening.
+
+Typed protocol steps can use `for-each` with a list `value` path, a lexical `bind` name and nested `steps`. Borrowed items are checked in list order. The first failing condition determines the error. An empty list runs no nested steps. The binding can select a named record member or use an empty field path for the item itself.
+
+The numeric `length` expression counts decoded bytes for `bounded-base64`. Text paths support `text-equal` and `text-prefix` with a literal `text` argument, along with `text-excludes-nul`. The numeric `json-string-length` expression counts the compact JSON string's UTF-8 bytes including enclosing quotes and escaping. It makes one pass without constructing an encoded string and uses saturating unsigned 64-bit arithmetic.
+
+The weather fixture checks nested lists, first-failure order, exact text and prefix checks, Unicode and JSON escape lengths, NUL exclusion and decoded byte counts. It also rejects mistyped operands, a shadowed binding and a duplicate nested declaration.
+
+The typed collection and text guard increment passed both fixture commands above on macOS ARM64 with Rust 1.97.1. The compiler library suite passed all 18 tests with a locked offline build. The process vocabulary and work graph passed Turtle parsing, and the ready-work query ran successfully.
