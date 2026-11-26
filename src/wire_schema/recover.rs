@@ -444,7 +444,7 @@ impl Observer<'_> {
     }
 }
 
-fn item_attrs(item: &Item) -> &[Attribute] {
+pub(super) fn item_attrs(item: &Item) -> &[Attribute] {
     match item {
         Item::Const(item) => &item.attrs,
         Item::Enum(item) => &item.attrs,
@@ -545,7 +545,7 @@ fn scan_imports(
     }
 }
 
-fn lexical_scope(file: &syn::File) -> (BTreeMap<String, String>, BTreeSet<String>, Vec<String>) {
+pub(super) fn lexical_scope(file: &syn::File) -> (BTreeMap<String, String>, BTreeSet<String>, Vec<String>) {
     let mut imports = BTreeMap::new();
     let mut locals = BTreeSet::new();
     let mut gaps = Vec::new();
