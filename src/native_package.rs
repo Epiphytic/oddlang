@@ -13,7 +13,7 @@ type Result<T> = std::result::Result<T, String>;
 fn io<T>(result: std::io::Result<T>) -> Result<T> {
     result.map_err(|error| error.to_string())
 }
-fn digest(bytes: &[u8]) -> String {
+pub(super) fn digest(bytes: &[u8]) -> String {
     Sha256::digest(bytes)
         .iter()
         .map(|b| format!("{b:02x}"))
@@ -30,9 +30,54 @@ struct Manifest {
     #[serde(default)]
     dependencies: BTreeMap<String, Dependency>,
     cargo_lock: Pin,
+    #[serde(default)]
+    binaries: Vec<Binary>,
     components: Vec<Component>,
 }
 
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Binary {
+    name: String,
+    entry: Vec<String>,
+}
+
+fn entrypoints(
+    src: &Path,
+    package: &str,
+    binaries: &[Binary],
+    files: &mut BTreeMap<String, String>,
+) -> Result<()> {
+    if binaries.is_empty() {
+        return Ok(());
+    }
+    let library = package.replace('-', "_");
+    if !ident(&library) {
+        return Err("invalid native library import for executable".into());
+    }
+    io(fs::create_dir(src.join("bin")))?;
+    for binary in binaries {
+        if !ident(&binary.name.replace('-', "_"))
+            || binary.entry.is_empty()
+            || !binary.entry.iter().all(|s| ident(s))
+        {
+            return Err("invalid binary target or entry binding".into());
+        }
+        let entry = binary.entry.join("::");
+        let source = format!(
+            "fn main() -> ::std::process::ExitCode {{\n    let run: fn() -> ::std::process::ExitCode = ::{library}::{entry};\n    run()\n}}\n"
+        );
+        let rel = format!("bin/{}.rs", binary.name);
+        if files
+            .insert(format!("src/{rel}"), digest(source.as_bytes()))
+            .is_some()
+        {
+            return Err(format!("duplicate binary target {}", binary.name));
+        }
+        io(fs::write(src.join(rel), source))?;
+    }
+    Ok(())
+}
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Dependency {
@@ -43,13 +88,13 @@ struct Dependency {
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Pin {
-    path: String,
+pub(super) struct Pin {
+    pub(super) path: String,
     sha256: String,
 }
 
 impl Pin {
-    fn read(&self, base: &Path) -> Result<Vec<u8>> {
+    pub(super) fn read(&self, base: &Path) -> Result<Vec<u8>> {
         let path = Path::new(&self.path);
         if path.as_os_str().is_empty()
             || path
@@ -249,8 +294,11 @@ pub fn build(path: &Path, output: &Path) -> Result<()> {
     let path = io(path.canonicalize())?;
     let base = path.parent().ok_or("missing manifest directory")?;
     let raw = io(fs::read(&path))?;
+    build_pinned(&raw, base, output, true)
+}
+pub(super) fn build_pinned(raw: &[u8], base: &Path, output: &Path, standalone: bool) -> Result<()> {
     let manifest: Manifest =
-        serde_json::from_slice(&raw).map_err(|e| format!("package manifest: {e}"))?;
+        serde_json::from_slice(raw).map_err(|e| format!("package manifest: {e}"))?;
     let cargo = cargo_manifest(&manifest)?;
     let lock = manifest.cargo_lock.read(base)?;
     let parent = output
@@ -371,6 +419,25 @@ pub fn build(path: &Path, output: &Path) -> Result<()> {
     lib.push_str(&root_exports);
     generated_files.insert("src/lib.rs".into(), digest(lib.as_bytes()));
     io(fs::write(src.join("lib.rs"), lib))?;
+    entrypoints(
+        &src,
+        &manifest.name,
+        &manifest.binaries,
+        &mut generated_files,
+    )?;
+    if standalone && !manifest.binaries.is_empty() {
+        let checked = io(Command::new("cargo")
+            .args(["check", "--bins", "--locked", "--offline", "--target-dir"])
+            .arg(work.path().join("bin-check"))
+            .current_dir(&package)
+            .output())?;
+        if !checked.status.success() {
+            return Err(format!(
+                "invalid binary entry binding: {}",
+                String::from_utf8_lossy(&checked.stderr)
+            ));
+        }
+    }
     // Cargo validates the dependency closure and resolves the exact external crates without building.
     let result = io(Command::new("cargo")
         .args(["metadata", "--locked", "--offline", "--format-version", "1"])
@@ -401,5 +468,50 @@ pub(crate) fn publish(package: &Path, output: &Path) -> Result<()> {
     #[cfg(not(any(target_os = "linux", target_os = "macos")))]
     {
         io(fs::rename(package, output))
+    }
+}
+
+#[cfg(test)]
+mod binary_tests {
+    use super::*;
+
+    #[test]
+    fn native_entrypoint_passes_process_exit_and_output() {
+        let tmp = tempfile::tempdir().unwrap();
+        let src = tmp.path().join("src");
+        fs::create_dir(&src).unwrap();
+        fs::write(
+            tmp.path().join("Cargo.toml"),
+            "[package]\nname='sensor-engine'\nversion='0.1.0'\nedition='2021'\n[workspace]\n",
+        )
+        .unwrap();
+        fs::write(src.join("lib.rs"),"pub mod cli { pub fn status()->std::process::ExitCode { println!(\"ready\"); std::process::ExitCode::from(7) } }").unwrap();
+        let mut files = BTreeMap::new();
+        entrypoints(
+            &src,
+            "sensor-engine",
+            &[Binary {
+                name: "meter-check".into(),
+                entry: vec!["cli".into(), "status".into()],
+            }],
+            &mut files,
+        )
+        .unwrap();
+        assert_eq!(
+            files["src/bin/meter-check.rs"],
+            digest(&fs::read(src.join("bin/meter-check.rs")).unwrap())
+        );
+        let run = Command::new("cargo")
+            .args(["run", "--offline", "--quiet", "--bin", "meter-check"])
+            .current_dir(tmp.path())
+            .output()
+            .unwrap();
+        assert_eq!(
+            run.status.code(),
+            Some(7),
+            "{}",
+            String::from_utf8_lossy(&run.stderr)
+        );
+        assert_eq!(run.stdout, b"ready\n");
     }
 }
