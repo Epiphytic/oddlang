@@ -1,0 +1,15 @@
+{
+  "authoredCorpusSha256": "70f2e1e5b46278244c106d55b97c72462bed4f2e96467a94fe478f30c8d33cf3",
+  "holdout": {
+    "cases": 128,
+    "corpusSha256": "36af5ca913e14c7979b9488180a5728c48ec282d98aaf418fad4a6ae859ed8a9",
+    "fileSha256": "afd52185d31bd660ac6a83df554cfeb53e450dfa7ced9a74398994eebbfdb939"
+  },
+  "priorCorpusSha256": "8bf576e1223d9cd916be67595b94ae4064aa7f3c87365a977bc5dd303273ec52",
+  "revision": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+  "schema": 1,
+  "seed": "afafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafaf",
+  "seedAlgorithm": "SHA-256(seed || big-endian u64 counter), starting at counter 0",
+  "seededCorpusSha256": "2a467a7b3f663df4fff58a2f64b60150ee18c376b379a0376bd8f2b922892b29",
+  "seededRounds": 32
+}

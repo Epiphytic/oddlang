@@ -1,0 +1,110 @@
+Original source commit and tree
+49fc705408a230bd0ad896248d08dbdd2faad05a
+c78b36ae6720565170bc6dce578531f58ab671c7
+9c5f7dde5c0f7d340e22dbefaa8a1c6ddb94c119011ba3e49ac8044c9b4cb0b3  Cargo.lock
+24a5037a8f0a264369ef37bb46e019ade6c524beaead1c28f77a429f856a066b  rust-toolchain.toml
+rustc 1.97.1 (8bab26f4f 2026-07-14)
+binary: rustc
+commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452
+commit-date: 2026-07-14
+host: aarch64-apple-darwin
+release: 1.97.1
+LLVM version: 22.1.6
+cargo 1.97.1 (c980f4866 2026-06-30)
+ProductName:		macOS
+ProductVersion:		26.6
+BuildVersion:		25G72
+Darwin 25.6.0 arm64
+Xcode 27.2
+Build version 27B52
+27.2
+Apple clang version 21.0.0 (clang-2100.4.1.1)
+Target: arm64-apple-darwin25.6.0
+Thread model: posix
+InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+Python 3.14.5
+Effective uid: 501
+Fresh Cargo output directory: /tmp/oddlang-bridge-build.3MiR0e
+cargo +1.97.1 build --locked --offline --release --target aarch64-apple-darwin -p marmish-prototype --bin marmish-engine-bridge -p marmish-engine --bin marmish-engine-worker --target-dir "$build_dir"
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.26
+   Compiling quote v1.0.47
+   Compiling stable_deref_trait v1.2.1
+   Compiling version_check v0.9.5
+   Compiling find-msvc-tools v0.1.13
+   Compiling shlex v2.0.1
+   Compiling libc v0.2.189
+   Compiling litemap v0.8.3
+   Compiling typenum v1.20.1
+   Compiling writeable v0.6.4
+   Compiling icu_normalizer_data v2.3.0
+   Compiling utf8_iter v1.0.4
+   Compiling icu_properties_data v2.3.0
+   Compiling pkg-config v0.3.34
+   Compiling vcpkg v0.2.15
+   Compiling smallvec v1.16.1
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling subtle v2.6.1
+   Compiling cc v1.4.7
+   Compiling cfg-if v1.0.5
+   Compiling serde v1.0.229
+   Compiling thiserror v2.0.21
+   Compiling serde_json v1.0.151
+   Compiling crc32fast v1.5.4
+   Compiling percent-encoding v2.3.2
+   Compiling generic-array v0.14.7
+   Compiling itoa v1.0.18
+   Compiling simd-adler32 v0.3.10
+   Compiling memchr v2.8.3
+   Compiling adler2 v2.0.1
+   Compiling form_urlencoded v1.2.2
+   Compiling base64 v0.22.1
+   Compiling getrandom v0.3.4
+   Compiling fallible-streaming-iterator v0.1.9
+   Compiling bitflags v2.13.2
+   Compiling miniz_oxide v0.9.1
+   Compiling fallible-iterator v0.3.0
+   Compiling zeroize v1.9.1
+   Compiling openssl-src v300.6.1+3.6.3
+   Compiling syn v3.0.6
+   Compiling syn v2.0.119
+   Compiling cpufeatures v0.2.17
+   Compiling libsqlite3-sys v0.38.1 (https://github.com/rusqlite/rusqlite.git?rev=5ae7fdf83085c595fd54f977b3a56ccacabaf16b#5ae7fdf8)
+   Compiling openssl-sys v0.9.117
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling flate2 v1.1.10
+   Compiling digest v0.10.7
+   Compiling hmac v0.12.1
+   Compiling sha2 v0.10.9
+   Compiling hkdf v0.12.4
+   Compiling synstructure v0.13.2
+   Compiling synstructure v0.14.0
+   Compiling zerovec-derive v0.11.6
+   Compiling displaydoc v0.2.7
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.21
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.2
+   Compiling zerofrom v0.1.8
+   Compiling yoke v0.8.3
+   Compiling zerovec v0.11.8
+   Compiling zerotrie v0.2.5
+   Compiling tinystr v0.8.4
+   Compiling potential_utf v0.1.6
+   Compiling icu_collections v2.3.0
+   Compiling icu_locale_core v2.3.0
+   Compiling icu_provider v2.3.1
+   Compiling marmish-stream v0.2.3 (/private/tmp/oddlang-marmish-plan/crates/marmish-stream)
+   Compiling icu_properties v2.3.0
+   Compiling icu_normalizer v2.3.0
+   Compiling idna_adapter v1.2.2
+   Compiling idna v1.1.0
+   Compiling url v2.5.8
+   Compiling marmish-core v0.1.0 (/private/tmp/oddlang-marmish-plan/crates/marmish-core)
+   Compiling rusqlite v0.40.1
+   Compiling marmish-engine v0.1.0 (/private/tmp/oddlang-marmish-plan/crates/marmish-engine)
+   Compiling marmish-prototype v0.1.0 (/private/tmp/oddlang-marmish-plan/crates/marmish-prototype)
+    Finished `release` profile [optimized] target(s) in 29.05s
+5 bridge CLI cases passed. Changed status and output channel rejected.

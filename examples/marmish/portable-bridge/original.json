@@ -1,0 +1,413 @@
+{
+  "binary_sha256": {
+    "bridge": "58e01c6a8089bd4221aeeb1424e7cc4003d4fb4413c923835c865fd36f93be08",
+    "worker": "7cf1278eed465f9dce9527f9ae12c30a68458c0a6ad8f082234edf6f8aff689f"
+  },
+  "cases": [
+    {
+      "args": [
+        "--help"
+      ],
+      "cwd": "/private/tmp/oddlang-bridge-9q3jk2c2/cwd",
+      "exchanges": [],
+      "final_state": {
+        "entries": {
+          "cwd": {
+            "mode": "0700",
+            "type": "dir"
+          }
+        },
+        "frontend_lock": "absent"
+      },
+      "id": "argument-rejection",
+      "initial_state": {
+        "entries": {
+          "cwd": {
+            "mode": "0700",
+            "type": "dir"
+          }
+        },
+        "frontend_lock": "absent"
+      },
+      "key_retained_after_eof": null,
+      "status": 1,
+      "stderr": "",
+      "stdin_before_eof": "",
+      "stdout_after_eof": ""
+    },
+    {
+      "args": [],
+      "cwd": "/private/tmp/oddlang-bridge-t3o2yqkv/cwd",
+      "exchanges": [],
+      "final_state": {
+        "entries": {
+          "cwd": {
+            "mode": "0700",
+            "type": "dir"
+          }
+        },
+        "frontend_lock": "absent"
+      },
+      "id": "clean-eof",
+      "initial_state": {
+        "entries": {
+          "cwd": {
+            "mode": "0700",
+            "type": "dir"
+          }
+        },
+        "frontend_lock": "absent"
+      },
+      "key_retained_after_eof": null,
+      "status": 0,
+      "stderr": "",
+      "stdin_before_eof": "",
+      "stdout_after_eof": ""
+    },
+    {
+      "args": [],
+      "cwd": "/private/tmp/oddlang-bridge-y7uu44y6/cwd",
+      "exchanges": [],
+      "final_state": {
+        "entries": {
+          "cwd": {
+            "mode": "0700",
+            "type": "dir"
+          }
+        },
+        "frontend_lock": "absent"
+      },
+      "id": "partial-frame-at-eof",
+      "initial_state": {
+        "entries": {
+          "cwd": {
+            "mode": "0700",
+            "type": "dir"
+          }
+        },
+        "frontend_lock": "absent"
+      },
+      "key_retained_after_eof": null,
+      "status": 0,
+      "stderr": "",
+      "stdin_before_eof": "{",
+      "stdout_after_eof": "{\"error\":{\"code\":\"invalid_framing\"},\"id\":null,\"ok\":false}\n"
+    },
+    {
+      "args": [],
+      "cwd": "/private/tmp/oddlang-bridge-_2wwkx6d/cwd",
+      "exchanges": [
+        {
+          "state": {
+            "entries": {
+              "cwd": {
+                "mode": "0700",
+                "type": "dir"
+              },
+              "state": {
+                "mode": "0700",
+                "type": "dir"
+              },
+              "state/engine.key": {
+                "bytes": 40,
+                "magic": "MRMSKEY1",
+                "mode": "0600",
+                "type": "file"
+              },
+              "state/engine.sqlite3": {
+                "bytes": 4096,
+                "mode": "0600",
+                "type": "file"
+              },
+              "state/engine.sqlite3-shm": {
+                "bytes": 32768,
+                "mode": "0600",
+                "type": "file"
+              },
+              "state/engine.sqlite3-wal": {
+                "bytes": 41232,
+                "mode": "0600",
+                "type": "file"
+              },
+              "state/frontend.lock": {
+                "bytes": 0,
+                "mode": "0600",
+                "type": "file"
+              },
+              "state/jobs": {
+                "mode": "0700",
+                "type": "dir"
+              }
+            },
+            "frontend_lock": "held"
+          },
+          "stdin": "{\"id\":\"1234567890abcdef1234567890abcdef\",\"op\":\"init\",\"version\":1,\"state_root\":\"/private/tmp/oddlang-bridge-_2wwkx6d/state\",\"worker_executable\":\"/private/tmp/oddlang-bridge-build.3MiR0e/aarch64-apple-darwin/release/marmish-engine-worker\",\"server\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"allowed_principals\":[\"2222222222222222222222222222222222222222222222222222222222222222\"],\"cwd\":\"/private/tmp/oddlang-bridge-_2wwkx6d/cwd\"}\n",
+          "stdout": "{\"id\":\"1234567890abcdef1234567890abcdef\",\"ok\":true,\"result\":{\"version\":1}}\n"
+        }
+      ],
+      "final_state": {
+        "entries": {
+          "cwd": {
+            "mode": "0700",
+            "type": "dir"
+          },
+          "state": {
+            "mode": "0700",
+            "type": "dir"
+          },
+          "state/engine.key": {
+            "bytes": 40,
+            "magic": "MRMSKEY1",
+            "mode": "0600",
+            "type": "file"
+          },
+          "state/engine.sqlite3": {
+            "bytes": 40960,
+            "mode": "0600",
+            "type": "file"
+          },
+          "state/frontend.lock": {
+            "bytes": 0,
+            "mode": "0600",
+            "type": "file"
+          },
+          "state/jobs": {
+            "mode": "0700",
+            "type": "dir"
+          }
+        },
+        "frontend_lock": "available"
+      },
+      "id": "version-1-init-before-eof",
+      "initial_state": {
+        "entries": {
+          "cwd": {
+            "mode": "0700",
+            "type": "dir"
+          }
+        },
+        "frontend_lock": "absent"
+      },
+      "key_retained_after_eof": true,
+      "status": 0,
+      "stderr": "",
+      "stdin_before_eof": "",
+      "stdout_after_eof": ""
+    },
+    {
+      "args": [],
+      "cwd": "/private/tmp/oddlang-bridge-nfe17y_h/cwd",
+      "exchanges": [
+        {
+          "state": {
+            "entries": {
+              "cwd": {
+                "mode": "0700",
+                "type": "dir"
+              }
+            },
+            "frontend_lock": "absent"
+          },
+          "stdin": "{\"id\":\"1234567890abcdef1234567890abcdef\",\"op\":\"init\",\"version\":0,\"state_root\":\"/private/tmp/oddlang-bridge-nfe17y_h/state\",\"worker_executable\":\"/private/tmp/oddlang-bridge-build.3MiR0e/aarch64-apple-darwin/release/marmish-engine-worker\",\"server\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"allowed_principals\":[\"2222222222222222222222222222222222222222222222222222222222222222\"],\"cwd\":\"/private/tmp/oddlang-bridge-nfe17y_h/cwd\"}\n",
+          "stdout": "{\"error\":{\"code\":\"invalid_request\"},\"id\":\"1234567890abcdef1234567890abcdef\",\"ok\":false}\n"
+        },
+        {
+          "state": {
+            "entries": {
+              "cwd": {
+                "mode": "0700",
+                "type": "dir"
+              },
+              "state": {
+                "mode": "0700",
+                "type": "dir"
+              },
+              "state/engine.key": {
+                "bytes": 40,
+                "magic": "MRMSKEY1",
+                "mode": "0600",
+                "type": "file"
+              },
+              "state/engine.sqlite3": {
+                "bytes": 4096,
+                "mode": "0600",
+                "type": "file"
+              },
+              "state/engine.sqlite3-shm": {
+                "bytes": 32768,
+                "mode": "0600",
+                "type": "file"
+              },
+              "state/engine.sqlite3-wal": {
+                "bytes": 41232,
+                "mode": "0600",
+                "type": "file"
+              },
+              "state/frontend.lock": {
+                "bytes": 0,
+                "mode": "0600",
+                "type": "file"
+              },
+              "state/jobs": {
+                "mode": "0700",
+                "type": "dir"
+              }
+            },
+            "frontend_lock": "held"
+          },
+          "stdin": "{\"id\":\"1234567890abcdef1234567890abcdef\",\"op\":\"init\",\"version\":1,\"state_root\":\"/private/tmp/oddlang-bridge-nfe17y_h/state\",\"worker_executable\":\"/private/tmp/oddlang-bridge-build.3MiR0e/aarch64-apple-darwin/release/marmish-engine-worker\",\"server\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"allowed_principals\":[\"2222222222222222222222222222222222222222222222222222222222222222\"],\"cwd\":\"/private/tmp/oddlang-bridge-nfe17y_h/cwd\"}\n",
+          "stdout": "{\"id\":\"1234567890abcdef1234567890abcdef\",\"ok\":true,\"result\":{\"version\":1}}\n"
+        },
+        {
+          "contents_unchanged": true,
+          "state": {
+            "entries": {
+              "cwd": {
+                "mode": "0700",
+                "type": "dir"
+              },
+              "state": {
+                "mode": "0700",
+                "type": "dir"
+              },
+              "state/engine.key": {
+                "bytes": 40,
+                "magic": "MRMSKEY1",
+                "mode": "0600",
+                "type": "file"
+              },
+              "state/engine.sqlite3": {
+                "bytes": 4096,
+                "mode": "0600",
+                "type": "file"
+              },
+              "state/engine.sqlite3-shm": {
+                "bytes": 32768,
+                "mode": "0600",
+                "type": "file"
+              },
+              "state/engine.sqlite3-wal": {
+                "bytes": 41232,
+                "mode": "0600",
+                "type": "file"
+              },
+              "state/frontend.lock": {
+                "bytes": 0,
+                "mode": "0600",
+                "type": "file"
+              },
+              "state/jobs": {
+                "mode": "0700",
+                "type": "dir"
+              }
+            },
+            "frontend_lock": "held"
+          },
+          "stdin": "{\"id\":\"1234567890abcdef1234567890abcdef\",\"op\":\"init\",\"version\":1,\"state_root\":\"/private/tmp/oddlang-bridge-nfe17y_h/state\",\"worker_executable\":\"/private/tmp/oddlang-bridge-build.3MiR0e/aarch64-apple-darwin/release/marmish-engine-worker\",\"server\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"allowed_principals\":[\"2222222222222222222222222222222222222222222222222222222222222222\"],\"cwd\":\"/private/tmp/oddlang-bridge-nfe17y_h/cwd\"}\n",
+          "stdout": "{\"error\":{\"code\":\"invalid_request\"},\"id\":\"1234567890abcdef1234567890abcdef\",\"ok\":false}\n"
+        }
+      ],
+      "final_state": {
+        "entries": {
+          "cwd": {
+            "mode": "0700",
+            "type": "dir"
+          },
+          "state": {
+            "mode": "0700",
+            "type": "dir"
+          },
+          "state/engine.key": {
+            "bytes": 40,
+            "magic": "MRMSKEY1",
+            "mode": "0600",
+            "type": "file"
+          },
+          "state/engine.sqlite3": {
+            "bytes": 40960,
+            "mode": "0600",
+            "type": "file"
+          },
+          "state/frontend.lock": {
+            "bytes": 0,
+            "mode": "0600",
+            "type": "file"
+          },
+          "state/jobs": {
+            "mode": "0700",
+            "type": "dir"
+          }
+        },
+        "frontend_lock": "available"
+      },
+      "id": "retry-after-rejected-version-and-double-init",
+      "initial_state": {
+        "entries": {
+          "cwd": {
+            "mode": "0700",
+            "type": "dir"
+          }
+        },
+        "frontend_lock": "absent"
+      },
+      "key_retained_after_eof": true,
+      "status": 0,
+      "stderr": "",
+      "stdin_before_eof": "",
+      "stdout_after_eof": ""
+    }
+  ],
+  "controls": {
+    "expected_status": "rejected",
+    "wrong_channel": "rejected"
+  },
+  "environment": {
+    "LANG": "C",
+    "PATH": "/usr/bin:/bin"
+  },
+  "fixture_sha256": "08dd1637bc59b9b17571f269d538b8ef07e1ed931f8a78e558b2c88e60ee7272",
+  "format": 1,
+  "startup_limits": {
+    "AS": [
+      9223372036854775807,
+      9223372036854775807
+    ],
+    "CORE": [
+      0,
+      9223372036854775807
+    ],
+    "CPU": [
+      9223372036854775807,
+      9223372036854775807
+    ],
+    "DATA": [
+      9223372036854775807,
+      9223372036854775807
+    ],
+    "FSIZE": [
+      9223372036854775807,
+      9223372036854775807
+    ],
+    "MEMLOCK": [
+      9223372036854775807,
+      9223372036854775807
+    ],
+    "NOFILE": [
+      256,
+      256
+    ],
+    "NPROC": [
+      10666,
+      16000
+    ],
+    "RSS": [
+      9223372036854775807,
+      9223372036854775807
+    ],
+    "STACK": [
+      8372224,
+      67092480
+    ]
+  },
+  "umask": "0077"
+}

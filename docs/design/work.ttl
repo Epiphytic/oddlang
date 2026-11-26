@@ -529,11 +529,11 @@ w:contractRecoveryDecision a p:Decision ;
 w:portableRustPlan a p:Artifact ; rdfs:label "Portable Rust recovery implementation plan" ; p:location "docs/superpowers/plans/2026-11-25-portable-rust-recovery.md" .
 
 w:portableRustBoundary a p:Task ; rdfs:label "Freeze project boundaries and independent observations" ;
-    p:milestone w:marmishMilestone ; p:source w:portableRustPlan ; p:status p:planned ;
+    p:milestone w:marmishMilestone ; p:source w:portableRustPlan ; p:status p:done ; p:evidence w:portableRustBoundaryRecord ;
     p:acceptance "Pin inventory, applicable surfaces, vectors and holdouts. Verify oracle sensitivity on the original." .
 
 w:portableRustStructure a p:Task ; rdfs:label "Recover source-free structural inventory" ;
-    p:milestone w:marmishMilestone ; p:source w:portableRustPlan ; p:status p:planned ;
+    p:milestone w:marmishMilestone ; p:source w:portableRustPlan ; p:status p:active ;
     p:dependsOn w:portableRustBoundary ;
     p:acceptance "Independently reconcile all selected declarations and relationship endpoints and detect a missing item and a misdirected edge." .
 
@@ -558,3 +558,14 @@ w:portableRustBoundary p:addresses w:portableRustReview .
 w:portableRustStructure p:addresses w:portableRustReview .
 w:portableRustSemantics p:addresses w:portableRustReview .
 w:portableRustTargets p:addresses w:portableRustReview .
+
+
+w:portableRustBoundaryRecord a p:Artifact ;
+    p:location "docs/design/portable-rust-boundary.md" .
+w:portableRustImplementationReviews a p:Artifact ;
+    p:location "docs/design/portable-rust-implementation-review.md" .
+w:portableRustOpenFileLimit a p:Finding ;
+    rdfs:label "Bridge worker validation depended on the replay process open-file limit" ;
+    p:source w:portableRustImplementationReviews .
+w:portableRustBoundary p:addresses w:portableRustOpenFileLimit ;
+    p:evidence w:portableRustImplementationReviews .
