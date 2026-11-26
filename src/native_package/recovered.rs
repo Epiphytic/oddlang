@@ -13,6 +13,8 @@ pub(super) enum ComponentInput {
 pub(super) struct RecoveredInput {
     recovery: Pin,
     module: Option<String>,
+    #[serde(rename = "sourceApi")]
+    source_api: Option<Pin>,
 }
 
 #[derive(Deserialize)]
@@ -30,6 +32,7 @@ struct RecoveryReceipt {
 pub(super) struct Provenance {
     pub(super) sha256: String,
     pub(super) declaration: String,
+    pub(super) source_api: Option<Pin>,
 }
 
 fn sha256_digest(pin: &str) -> bool {
@@ -83,6 +86,9 @@ impl RecoveredInput {
                 (Kind::PublicRecords, module, name, identity)
             }
             "oddlang-rust-serde-string-choice-recovery-v1" => {
+                if self.source_api.is_some() {
+                    return Err("sourceApi is only valid for recovered public records".into());
+                }
                 let module = self.module.ok_or(
                     "syntax-only choice recovery requires explicit module placement and root publication policy",
                 )?;
@@ -110,6 +116,7 @@ impl RecoveredInput {
             recovery: Some(Provenance {
                 sha256: self.recovery.sha256,
                 declaration: identity,
+                source_api: self.source_api,
             }),
         })
     }

@@ -306,9 +306,16 @@ fn project(
             let serde_available = dependencies
                 .get("serde")
                 .is_some_and(|dep| dep.features.iter().any(|feature| feature == "derive"));
+            let assertion = component
+                .recovery
+                .as_ref()
+                .and_then(|recovery| recovery.source_api.as_ref())
+                .map(|pin| pin.read(base))
+                .transpose()?;
             crate::public_records::build_bytes(
                 &graph,
                 &io(fs::read(&overlay))?,
+                assertion.as_deref(),
                 &output,
                 serde_available,
             )?;
@@ -1024,6 +1031,9 @@ pub(super) fn build_pinned(
         if let Some(provenance) = &component.recovery {
             record["recoverySha256"] = serde_json::json!(provenance.sha256);
             record["recoveredDeclaration"] = serde_json::json!(provenance.declaration);
+            if let Some(assertion) = &provenance.source_api {
+                record["sourceApiSha256"] = serde_json::json!(assertion.sha256);
+            }
         }
         records.push(record);
     }

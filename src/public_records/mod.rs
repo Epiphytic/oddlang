@@ -143,7 +143,7 @@ struct Alias {
     target: String,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Eq, PartialEq)]
 #[serde(deny_unknown_fields)]
 struct Overlay {
     format: String,
@@ -166,7 +166,7 @@ struct Overlay {
     source_api: Option<SourceApi>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Eq, PartialEq)]
 #[serde(deny_unknown_fields)]
 struct SourceApi {
     role: SourceApiRole,
@@ -174,13 +174,13 @@ struct SourceApi {
     fields: BTreeMap<String, SourceField>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 enum SourceApiRole {
     RustDropInSourceApi,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Eq, PartialEq)]
 #[serde(deny_unknown_fields)]
 struct SourceField {
     name: String,
@@ -189,7 +189,7 @@ struct SourceField {
     value: Value,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 enum SourceVisibility {
     Public,
@@ -225,6 +225,21 @@ impl SourceApi {
 }
 
 impl Overlay {
+    fn select_source_api(&mut self, mut assertion: Self) -> Result<()> {
+        if self.source_api.is_some() {
+            return Err("recovered binding already has a source API assertion".into());
+        }
+        let source_api = assertion
+            .source_api
+            .take()
+            .ok_or("separate assertion requires sourceApi")?;
+        if *self != assertion {
+            return Err("source API overlay differs from recovered binding".into());
+        }
+        self.source_api = Some(source_api);
+        Ok(())
+    }
+
     fn name(&self, identity: &str) -> &str {
         &self.identifiers[identity]
     }
@@ -493,24 +508,39 @@ fn emit(out: &Path, files: &[(&str, &[u8])]) -> Result<()> {
 }
 
 pub fn build(graph: &Path, overlay: &Path, out: &Path) -> Result<()> {
-    build_bytes(&io(fs::read(graph))?, &io(fs::read(overlay))?, out, true)
+    build_bytes(
+        &io(fs::read(graph))?,
+        &io(fs::read(overlay))?,
+        None,
+        out,
+        true,
+    )
 }
 
 pub(crate) fn build_bytes(
     graph: &[u8],
     overlay: &[u8],
+    source_api: Option<&[u8]>,
     out: &Path,
     serde_available: bool,
 ) -> Result<()> {
     let model = serde_json::from_slice(graph).map_err(|e| e.to_string())?;
-    let binding = serde_json::from_slice(overlay).map_err(|e| e.to_string())?;
+    let mut binding: Overlay = serde_json::from_slice(overlay).map_err(|e| e.to_string())?;
+    if let Some(assertion) = source_api {
+        let assertion: Overlay = serde_json::from_slice(assertion).map_err(|e| e.to_string())?;
+        binding.select_source_api(assertion)?;
+    }
     let code = render(&model, &binding, serde_available)?;
-    let lock = encode(&serde_json::json!({
+    let mut lock = serde_json::json!({
         "format":"oddlang-public-record-projection-lock-v1",
         "graphSha256":digest(graph),
         "overlaySha256":digest(overlay),
         "sourceSha256":digest(code.as_bytes()),
-    }))?;
+    });
+    if let Some(assertion) = source_api {
+        lock["sourceApiSha256"] = serde_json::json!(digest(assertion));
+    }
+    let lock = encode(&lock)?;
     emit(
         out,
         &[("records.rs", code.as_bytes()), ("projection.lock", &lock)],
