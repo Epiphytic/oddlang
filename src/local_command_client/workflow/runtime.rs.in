@@ -4,9 +4,14 @@ use std::collections::BTreeMap;
 
 type Response = strict_json::Strict;
 
-fn field_at<'a>(root: &'a Value, path: &[String]) -> Option<&'a Value> {
+fn field_at<'a>(root: &'a Value, path: &[String], delivery: bool) -> Option<&'a Value> {
     path.iter().try_fold(root, |value, key| {
-        if let Some(array) = value.as_array() {
+        if let Some(array) = value.as_array().filter(|_| delivery) {
+            if !key.bytes().all(|byte| byte.is_ascii_digit())
+                || (key.len() > 1 && key.starts_with('0'))
+            {
+                return None;
+            }
             array.get(key.parse::<usize>().ok()?)
         } else {
             value.get(key)
@@ -120,7 +125,7 @@ async fn run_workflow(
                     serde_json::from_slice(&source_bytes(source, matches, &captured, inputs)?)
                         .map_err(|_| FRAME_JSON)?
                 } else if let Some(path) = &predicate.equals_path {
-                    let Some(value) = field_at(&reply, path) else {
+                    let Some(value) = field_at(&reply, path, workflow.delivery) else {
                         matches_all = false;
                         break;
                     };
@@ -128,7 +133,7 @@ async fn run_workflow(
                 } else {
                     predicate.equals.as_ref().ok_or(PROTOCOL)?.clone()
                 };
-                if field_at(&reply, &predicate.path) != Some(&expected) {
+                if field_at(&reply, &predicate.path, workflow.delivery) != Some(&expected) {
                     matches_all = false;
                     break;
                 }
@@ -145,7 +150,7 @@ async fn run_workflow(
             transferred.insert(name.as_str(), value);
         }
         for field in &transition.capture {
-            let value = field_at(&reply, &field.path)
+            let value = field_at(&reply, &field.path, workflow.delivery)
                 .filter(|value| capture_is_valid(value, &field.value_kind))
                 .ok_or(PROTOCOL)?;
             transferred.insert(field.name.as_str(), value.clone());

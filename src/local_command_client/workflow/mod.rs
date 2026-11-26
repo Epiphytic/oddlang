@@ -158,8 +158,8 @@ fn valid_path(path: &[String]) -> bool {
     !path.is_empty() && path.iter().all(|segment| !segment.is_empty())
 }
 
-fn valid_reply_path(path: &[String], embedded: bool) -> bool {
-    valid_path(path) && (embedded || path.first().is_none_or(|field| field != "$opened"))
+fn valid_reply_path(path: &[String], allow_opened: bool) -> bool {
+    valid_path(path) && (allow_opened || path.first().is_none_or(|field| field != "$opened"))
 }
 
 fn diagnostics() -> [(&'static str, &'static str); 8] {
@@ -247,24 +247,25 @@ fn validate(
                 return Err(format!("invalid embedded workflow reply at {}", step.id));
             }
         }
+        let allow_opened = !workflow.delivery || step.embedded.is_some();
         for (position, transition) in step.transitions.iter().enumerate() {
             identity(&transition.id, &mut seen)?;
             if transition.when.is_empty() && position + 1 != step.transitions.len() {
                 return Err(format!("workflow fallback must be last at {}", step.id));
             }
             if transition.when.iter().any(|predicate| {
-                !valid_reply_path(&predicate.path, step.embedded.is_some())
+                !valid_reply_path(&predicate.path, allow_opened)
                     || usize::from(predicate.equals.is_some())
                         + usize::from(predicate.equals_source.is_some())
                         + usize::from(predicate.equals_path.is_some())
                         != 1
                     || predicate.equals_path.as_ref().is_some_and(|path| {
-                        !workflow.delivery || !valid_reply_path(path, step.embedded.is_some())
+                        !workflow.delivery || !valid_reply_path(path, allow_opened)
                     })
-                    || predicate
-                        .equals
-                        .as_ref()
-                        .is_some_and(contains_fractional_literal)
+                    || predicate.equals.as_ref().is_some_and(|value| {
+                        contains_fractional_literal(value)
+                            || (!workflow.delivery && (value.is_array() || value.is_object()))
+                    })
                     || (!workflow.delivery && predicate.equals_source.is_some())
             }) {
                 return Err(format!(
@@ -277,8 +278,8 @@ fn validate(
                 identity(&output.id, &mut seen)?;
                 if !workflow.delivery
                     || !output_channels.insert(output.channel)
-                    || !valid_reply_path(&output.bytes, step.embedded.is_some())
-                    || !valid_reply_path(&output.cursor, step.embedded.is_some())
+                    || !valid_reply_path(&output.bytes, allow_opened)
+                    || !valid_reply_path(&output.cursor, allow_opened)
                     || output.maximum_bytes == 0
                     || output.maximum_bytes > transport.maximum_frame_bytes
                 {
@@ -290,7 +291,8 @@ fn validate(
             }
             for capture in &transition.capture {
                 if !arg_id(&capture.name)
-                    || !valid_reply_path(&capture.path, step.embedded.is_some())
+                    || (!workflow.delivery && matches!(capture.value_kind, CaptureKind::ExitStatus))
+                    || !valid_reply_path(&capture.path, allow_opened)
                     || captures
                         .insert(capture.name.as_str(), &capture.value_kind)
                         .is_some()
@@ -676,29 +678,45 @@ fn emit_outputs(_: &Value, outputs: &[schema::BinaryOutput]) -> Result<(), Failu
             json!({"declaration": step.id, "role": "workflow-step", "request": ordered_fields})
         })
         .collect::<Vec<_>>();
-    let obligations = format!(
-        "{:#}\n",
-        json!({
-            "format": "oddlang-local-workflow-obligations-v1",
-            "declaration": workflow.id,
-            "role": "same-user-local-command-client",
-            "qualification": "independent-witness-required",
-            "framing": "u32_be_json_half_close",
-            "encoding": "compactUtf8Json",
-            "objectOrder": "declarationOrder",
-            "literalObjectOrder": "lexicographicUtf8Keys",
-            "literalNumberEncoding": "signedOrUnsignedDecimalInteger",
-            "stringEscaping": {
-                "quote": "backslash", "reverseSolidus": "backslash", "solidus": "raw",
-                "controlRange": "U+0000-U+001F", "shortControls": ["b", "t", "n", "f", "r"],
-                "otherControls": "lowercase-u00xx", "nonAscii": "rawUtf8",
-            },
-            "replyDuplicateMembers": "reject",
-            "captureLifetime": "nextStepUnlessExplicitlyCarried",
-            "effects": policy,
-            "obligations": rows,
-        })
-    );
+    let mut catalog = json!({
+        "format": "oddlang-local-workflow-obligations-v1",
+        "declaration": workflow.id,
+        "role": "same-user-local-command-client",
+        "qualification": "independent-witness-required",
+        "framing": "u32_be_json_half_close",
+        "encoding": "compactUtf8Json",
+        "objectOrder": "declarationOrder",
+        "literalObjectOrder": "lexicographicUtf8Keys",
+        "literalNumberEncoding": "signedOrUnsignedDecimalInteger",
+        "stringEscaping": {
+            "quote": "backslash", "reverseSolidus": "backslash", "solidus": "raw",
+            "controlRange": "U+0000-U+001F", "shortControls": ["b", "t", "n", "f", "r"],
+            "otherControls": "lowercase-u00xx", "nonAscii": "rawUtf8",
+        },
+        "replyDuplicateMembers": "reject",
+        "captureLifetime": "nextStepUnlessExplicitlyCarried",
+        "effects": policy,
+        "obligations": rows,
+    });
+    if workflow.delivery {
+        catalog["delivery"] = json!({
+            "base64": "canonical-padded-standard-alphabet",
+            "sizeLimits": "bound-encoded-length-before-decode-and-check-decoded-byte-limit",
+            "embeddedDigest": "sha256-lowercase-hex-over-decoded-bytes",
+            "openedField": "$opened",
+            "openedFieldFromPeer": "reject",
+            "embeddedJson": "strict-json-without-duplicate-members",
+            "replyArrayPaths": "canonical-unsigned-decimal-index-with-no-leading-zero",
+            "comparePath": "structural-json-equality-with-both-paths-present",
+            "compareSource": "structural-json-equality-to-declared-literal-argument-input-capture-or-constructed-value",
+            "binaryOutput": "validate-all-declared-streams-before-first-write-then-write-and-flush-in-declaration-order",
+            "cursorOrigin": 0,
+            "cursorAdvance": "equal-to-decoded-stream-length",
+            "exitStatus": {"minimum": 0, "maximum": 255, "source": "validated-exit-status-capture"},
+            "consume": "declared-as-a-subsequent-local-exchange",
+        });
+    }
+    let obligations = format!("{catalog:#}\n");
     use crate::wire_schema::digest;
     let mut lock = json!({
         "format": "oddlang-local-command-workflow-lock-v1",

@@ -191,6 +191,8 @@ def main():
              b"cannot carry workflow capture slot before assignment"),
             (lambda doc: doc["steps"][2]["transitions"][0].update(carry=["ghost"]),
              b"undeclared workflow capture ghost"),
+            (lambda doc: doc["steps"][0]["transitions"][0]["when"][0].update(equals={}),
+             b"invalid workflow reply predicate"),
             (lambda doc: doc["transport"].update(maximum_frame_bytes=2),
              b"minimum workflow request exceeds frame limit"),
         ):

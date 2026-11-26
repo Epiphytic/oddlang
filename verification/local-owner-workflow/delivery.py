@@ -23,7 +23,7 @@ def wrap(payload, *, digest=None):
 
 def main():
     stdout, stderr = b'measurement\x00', b'warning\xff'
-    sample = {'type': 'measurement', 'binding': sha256(b'{"scale":"C","precision":2}').hexdigest(),
+    sample = {'type': 'measurement', 'indexes': [8, 9], 'binding': sha256(b'{"scale":"C","precision":2}').hexdigest(),
               'stdout': encode(stdout), 'stderr': encode(stderr), 'outCursor': len(stdout),
               'errCursor': len(stderr), 'produced': len(stdout), 'exit': 7}
     graph = {
@@ -38,6 +38,7 @@ def main():
              'embedded': {'id': SUFFIX + 'embedded', 'bytes': ['encoded'], 'sha256': ['digest'], 'maximum_bytes': 512},
              'transitions': [
                  go('ack', [when('$opened.type', 'measurement'),
+                            when('$opened.indexes.1', 9),
                             {'path': ['$opened', 'outCursor'], 'equals_path': ['$opened', 'produced']},
                             {'path': ['$opened', 'binding'], 'equals_source': {'kind': 'sha256', 'fields': [
                                 field('scale', literal('C')), field('precision', literal(2))]}}], 'ack',
@@ -94,17 +95,25 @@ tokio = { version = "=1.54.1", features = ["io-util", "net", "rt", "time"] }
         confirm = b'{"confirm":"measurement"}'
         serve(binary, path, [(read, wrap(body(sample))), (confirm, b'{"confirmed":true}')],
               (7, stdout, stderr), unit=False)
+        serve(binary, path, [(read, wrap(body(sample))), (confirm, b'{"confirmed":false}')],
+              (12, stdout, stderr + b'protocol\n'), unit=False)
         for reply in (wrap(body(sample), digest='0' * 64),
                       wrap(body(sample | {'binding': '0' * 64})),
                       wrap(body(sample | {'errCursor': len(stderr) + 1})),
                       wrap(body(sample | {'stderr': '!!!!'})),
                       wrap(body(sample | {'exit': 256})),
                       wrap(body(sample | {'produced': len(stdout) + 1})),
+                      wrap(body(sample | {'indexes': [8]})),
+                      wrap(body(sample), digest=sha256(body(sample)).hexdigest().upper()),
+                      body(json.loads(wrap(body(sample))) | {'$opened': sample}),
+                      body(json.loads(wrap(body(sample))) | {'encoded': 'YR=='}),
+                      wrap(body(sample | {'padding': 'x' * 512})),
                       wrap(body(sample)[:-1] + b',"exit":7}')):
             serve(binary, path, [(read, reply)], (12, b'', b'protocol\n'), unit=False)
         obligations = (product / 'workflow-obligations.json').read_bytes()
         pin = json.loads((product / 'projection.lock').read_bytes())
         assert pin['workflowObligationsSha256'] == sha256(obligations).hexdigest()
+        assert json.loads(obligations)['delivery']['cursorOrigin'] == 0
     print('field-meter checked nested binding, binary output, cursor and acknowledgement passed')
 
 

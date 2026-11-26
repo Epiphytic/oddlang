@@ -10,7 +10,7 @@ fn native_digest(bytes: &[u8]) -> Result<String, Failure> {
 
 fn decoded_bytes(reply: &Value, path: &[String], maximum: u32) -> Result<Vec<u8>, Failure> {
     use base64::{Engine as _, engine::general_purpose::STANDARD};
-    let text = field_at(reply, path).and_then(Value::as_str).ok_or(PROTOCOL)?;
+    let text = field_at(reply, path, true).and_then(Value::as_str).ok_or(PROTOCOL)?;
     if text.len() > (maximum as usize).div_ceil(3) * 4 {
         return Err(PROTOCOL);
     }
@@ -26,7 +26,7 @@ fn open_embedded(reply: &mut Value, embedded: &EmbeddedReply) -> Result<(), Fail
         return Err(PROTOCOL);
     }
     let bytes = decoded_bytes(reply, &embedded.bytes, embedded.maximum_bytes)?;
-    let expected = field_at(reply, &embedded.sha256).and_then(Value::as_str).ok_or(PROTOCOL)?;
+    let expected = field_at(reply, &embedded.sha256, true).and_then(Value::as_str).ok_or(PROTOCOL)?;
     if native_digest(&bytes)? != expected {
         return Err(PROTOCOL);
     }
@@ -39,7 +39,7 @@ fn emit_outputs(reply: &Value, outputs: &[BinaryOutput]) -> Result<(), Failure> 
     let mut prepared = Vec::new();
     for output in outputs {
         let bytes = decoded_bytes(reply, &output.bytes, output.maximum_bytes)?;
-        let cursor = field_at(reply, &output.cursor).and_then(Value::as_u64).ok_or(PROTOCOL)?;
+        let cursor = field_at(reply, &output.cursor, true).and_then(Value::as_u64).ok_or(PROTOCOL)?;
         if bytes.len() as u64 != cursor {
             return Err(PROTOCOL);
         }
