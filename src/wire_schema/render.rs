@@ -228,9 +228,11 @@ fn union_guards(
         let Payload::Record { fields } = &variant.payload else {
             unreachable!("validated guard owner");
         };
+        let singleton = variants.len() == 1;
+        let pattern = if singleton { "let" } else { "if let" };
         writeln!(
             text,
-            "        if let Self::{} {{",
+            "        {pattern} Self::{} {{",
             binding.names[&variant.id]
         )
         .unwrap();
@@ -252,9 +254,14 @@ fn union_guards(
                 selectors.insert(field.id.as_str(), (format!("__field_{index}"), true));
             }
         }
-        text.push_str("            ..\n        } = self {\n");
-        write_guards(text, &guards, &selectors, "            ");
-        text.push_str("        }\n");
+        if singleton {
+            text.push_str("            ..\n        } = self;\n");
+            write_guards(text, &guards, &selectors, "        ");
+        } else {
+            text.push_str("            ..\n        } = self {\n");
+            write_guards(text, &guards, &selectors, "            ");
+            text.push_str("        }\n");
+        }
     }
     guard_end(text);
 }

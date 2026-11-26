@@ -568,6 +568,10 @@ fn lexical_scope(file: &syn::File) -> (BTreeMap<String, String>, BTreeSet<String
             Item::TraitAlias(item) => Some(&item.ident),
             Item::Mod(item) => Some(&item.ident),
             Item::ExternCrate(item) => Some(item.rename.as_ref().map_or(&item.ident, |(_, id)| id)),
+            Item::Verbatim(_) => {
+                gaps.push("unparsed source item needs compiler evidence".into());
+                None
+            }
             Item::Macro(item) if item.ident.is_none() => {
                 gaps.push(format!(
                     "unexpanded source item macro {}",

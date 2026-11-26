@@ -76,6 +76,8 @@ with tempfile.TemporaryDirectory(prefix="wire-schema-test-") as directory:
          "unvetted Rust attribute serde_with::skip_serializing_none"),
         ("item-macro", source.read_text() + "\nmacro_rules! shadow { () => { type u16 = u8; }; } shadow!();\n",
          "unexpanded source item macro shadow"),
+        ("verbatim", source.read_text() + "\n#[other::emit] fn incomplete();\n",
+         "unparsed source item needs compiler evidence"),
         ("unselected-macro", source.read_text() + "\n#[other::emit] struct Different;\n",
          "source item has unvetted Rust attribute other::emit"),
         ("derive", source.read_text().replace("use serde::{Deserialize, Serialize};",
@@ -133,6 +135,17 @@ with tempfile.TemporaryDirectory(prefix="wire-schema-test-") as directory:
     consumer = root / "consumer"
     shutil.copytree(FIXTURE, consumer)
     shutil.copyfile(generated / "wire.rs", consumer / "src/projected.rs")
+    singleton = json.loads(path.read_bytes())
+    single_event = next(row for row in singleton["types"] if row["id"] == event["id"])
+    single_event["variants"] = [adjust]
+    singleton_binding = json.loads((recovered / "rust.json").read_bytes())
+    for variant in event["variants"]:
+        if variant["id"] != adjust["id"]:
+            del singleton_binding["names"][variant["id"]]
+    single_output = root / "single"
+    run("build", "wire-schema", "rust", write(root / "single.json", singleton),
+        write(root / "single-rust.json", singleton_binding), single_output)
+    shutil.copyfile(single_output / "wire.rs", consumer / "src/single.rs")
     subprocess.run(("cargo", "+1.97.1", "run", "--locked", "--offline", "--quiet"), cwd=consumer,
                    check=True, env={**os.environ, "CARGO_ENCODED_RUSTFLAGS": "-Dwarnings"})
 

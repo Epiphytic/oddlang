@@ -1,6 +1,8 @@
 #[path = "../input.rs"]
 mod original;
 mod projected;
+#[allow(dead_code)]
+mod single;
 
 use projected::{Irrigation, Packet, Sensor};
 
@@ -44,6 +46,12 @@ fn main() {
         assert!(serde_json::from_str::<Irrigation>(bad).is_err(), "{bad}");
     }
     assert_eq!(adjust.validate_wire(), Ok(()));
+    let singleton = single::Irrigation::AdjustRate {
+        enabled: true,
+        flow: 0,
+        tags: vec![7],
+    };
+    assert_eq!(singleton.validate_wire(), Err("urn:garden:flow"));
     let enabled = Irrigation::AdjustRate {
         enabled: true,
         flow: 0,

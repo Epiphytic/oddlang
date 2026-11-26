@@ -743,3 +743,9 @@ w:jsonWireSchemaReview a p:Finding ;
     rdfs:label "Verify lexical Serde declarations, transitive native derives and selected adapter witnesses" ;
     p:source w:jsonWireSchemaFixture .
 w:jsonWireStructuralSchema p:addresses w:jsonWireSchemaReview .
+
+w:jsonWireMacroScopeReview a p:Finding ;
+    rdfs:label "Preserve a structural gap for unexpanded macros and parser-verbatim module items" ;
+    p:source w:jsonWireMacroScopeEvidence .
+w:jsonWireMacroScopeEvidence a p:Artifact ; p:location "verification/wire-schema/verify.py" .
+w:jsonWireStructuralSchema p:addresses w:jsonWireMacroScopeReview ; p:evidence w:jsonWireMacroScopeEvidence .
