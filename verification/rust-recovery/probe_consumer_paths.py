@@ -8,13 +8,60 @@ import tempfile
 from probe_exports import bindings, compile_probe, invoke, pinned_environment, sha, spelling
 
 
+def verify_configs(pin, entry, env):
+    actual = {}
+
+    def collect(role, directory):
+        for name in ("config", "config.toml"):
+            path = directory / name
+            if path.exists():
+                actual[f"{role}/{name}"] = sha(path.read_bytes())
+
+    for role, directory in (("project", entry.parent), ("driver", Path.cwd().resolve())):
+        for depth, ancestor in enumerate((directory, *directory.parents)):
+            collect(f"{role}-{depth}", ancestor / ".cargo")
+    home = env.get("CARGO_HOME") or (Path(env["HOME"]) / ".cargo" if "HOME" in env else None)
+    if home is not None:
+        collect("cargo-home", Path(home))
+    if actual != pin["cargoConfigSha256"]:
+        raise ValueError("Cargo configuration differs from subject export lock")
+
+
+def locked_graph(path):
+    raw = path.read_bytes()
+    graph = json.loads(raw)
+    lock = json.loads(path.with_name("exports.lock").read_bytes())
+    if (
+        lock["exportsSha256"] != sha(raw)
+        or graph["vocabulary"] != "oddlang-public-type-bindings-v1"
+        or lock["vocabulary"] != graph["vocabulary"]
+        or lock["pin"]["targetKind"] != "lib"
+    ):
+        raise ValueError("expected digest-pinned library type graph")
+    return raw, graph, lock
+
+
 def probe(expected, subject, manifest, cache):
-    raw = (subject / "exports.json").read_bytes()
-    lock = json.loads((subject / "exports.lock").read_bytes())
+    raw, graph, lock = locked_graph(subject / "exports.json")
+    reference, reference_graph, reference_lock = locked_graph(expected)
     pin = lock["pin"]
-    if lock["exportsSha256"] != sha(raw) or pin["packageManifestSha256"] != sha(manifest.read_bytes()):
-        raise ValueError("subject graph or package manifest differs from the export lock")
+    if pin["packageManifestSha256"] != sha(manifest.read_bytes()):
+        raise ValueError("package manifest differs from subject export lock")
+    if any(pin[key] != reference_lock["pin"][key] for key in ("compilerCommit", "targetTriple")):
+        raise ValueError("reference and subject need the same compiler and target")
     env = pinned_environment()
+    entry = next(
+        (
+            directory / "Cargo.toml"
+            for directory in manifest.parents
+            if (directory / "Cargo.toml").is_file()
+            and sha((directory / "Cargo.toml").read_bytes()) == pin["manifestSha256"]
+        ),
+        None,
+    )
+    if entry is None:
+        raise ValueError("workspace entry manifest differs from subject export lock")
+    verify_configs(pin, entry, env)
     version = invoke(["rustc", "+1.97.1", "-vV"], env=env).stdout
     if (
         f"commit-hash: {pin['compilerCommit']}\n" not in version
@@ -24,7 +71,9 @@ def probe(expected, subject, manifest, cache):
     opts = ["--manifest-path", manifest, "--locked", "--offline"]
     metadata = json.loads(
         invoke(
-            ["cargo", "+1.97.1", "metadata", "--no-deps", "--format-version", "1", *opts], env=env
+            ["cargo", "+1.97.1", "metadata", "--no-deps", "--format-version", "1", *opts],
+            env=env,
+            cwd=entry.parent,
         ).stdout
     )
     workspace = Path(metadata["workspace_root"])
@@ -34,13 +83,22 @@ def probe(expected, subject, manifest, cache):
         or sha((workspace / "Cargo.lock").read_bytes()) != pin["cargoLockSha256"]
     ):
         raise ValueError("package selection or Cargo.lock differs from subject lock")
+    if pin["sourceRevision"] is not None:
+        revision = invoke(["git", "-C", workspace, "rev-parse", "HEAD"], env=env).stdout.strip()
+        clean = invoke(
+            ["git", "-C", workspace, "status", "--porcelain", "--untracked-files=all"], env=env
+        ).stdout
+        if revision != pin["sourceRevision"] or clean:
+            raise ValueError("source revision differs from subject export lock")
     opts.extend(["--target", pin["targetTriple"], "--lib", "--package", pin["package"], "--release"])
     if not pin["defaultFeatures"]:
         opts.append("--no-default-features")
     for feature in pin["features"]:
         opts.extend(["--features", feature])
     output = invoke(
-        ["cargo", "+1.97.1", "check", *opts, "--target-dir", cache, "--message-format=json"], env=env
+        ["cargo", "+1.97.1", "check", *opts, "--target-dir", cache, "--message-format=json"],
+        env=env,
+        cwd=entry.parent,
     )
     rows = [json.loads(line) for line in output.stdout.splitlines()]
     files = [
@@ -55,13 +113,17 @@ def probe(expected, subject, manifest, cache):
     ]
     if len(files) != 1:
         raise ValueError("expected one selected library metadata artifact")
-    reference = expected.read_bytes()
-    edges = bindings(json.loads(reference), "bindings")
-    known = bindings(json.loads(raw), "bindings")
+    edges = bindings(reference_graph, "bindings")
+    known = bindings(graph, "bindings")
+    expected_ambiguous = bindings(reference_graph, "ambiguous")
+    subject_ambiguous = bindings(graph, "ambiguous")
+    unresolved = {
+        tuple(row["path"]) + (name,) for row in graph["modules"].values() for name in row["unresolved"]
+    }
     observations = []
     with tempfile.TemporaryDirectory() as directory:
         temp = Path(directory)
-        for path in sorted(edges):
+        for path in sorted(edges.keys() | expected_ambiguous.keys()):
             result = compile_probe(
                 [f"pub use {spelling(('observed',) + path)} as witness;"],
                 temp,
@@ -89,12 +151,18 @@ def probe(expected, subject, manifest, cache):
             observations.append(
                 {
                     "spelling": list(path),
-                    "expectedKind": edges[path]["kind"],
+                    "expectedKind": edges[path]["kind"] if path in edges else "ambiguous",
                     "subjectKind": known[path]["kind"] if path in known else None,
                     "importCompiles": result.returncode == 0,
                     "errorCodes": codes,
                 }
             )
+            if path in expected_ambiguous:
+                observations[-1]["expectedAmbiguity"] = expected_ambiguous[path]
+            if path in subject_ambiguous:
+                observations[-1]["subjectAmbiguity"] = subject_ambiguous[path]
+            if path in unresolved:
+                observations[-1]["subjectUnresolved"] = True
         # A subject with no shared spellings must still resolve under its external alias.
         compile_probe(["pub use observed as subject;"], temp, files[0], env)
     return {

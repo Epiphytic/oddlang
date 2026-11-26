@@ -1077,3 +1077,7 @@ w:publicTypeWorkspaceAudit a p:Task ; rdfs:label "Qualify upstream and generated
 w:publicTypeWorkspaceReceipts a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/58> .
 w:nativePublicApiGap a p:Finding ; rdfs:label "All 36 original native library public type imports fail against the generated v5 and v6 libraries" ;
     p:source w:publicTypeWorkspaceReceipts .
+
+w:crossImportProfileReview a p:Finding ; rdfs:label "Bind downstream Cargo settings to the extraction profile and retain ambiguous and unresolved namespace observations" ;
+    p:source w:publicTypeBindingPlan .
+w:publicTypeWorkspaceAudit p:addresses w:crossImportProfileReview .
