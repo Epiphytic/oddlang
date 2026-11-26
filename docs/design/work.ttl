@@ -1728,6 +1728,51 @@ w:wholeMarmishAgentNavigation a p:Task ;
     p:acceptance "The agent guide points to both plans and asks for the lock and native receipts supporting each reported count." ;
     p:status p:done ; p:evidence w:guide .
 
+w:fieldlessChoiceCapabilities a p:Task ;
+    rdfs:label "Recover optional copying and derived variant-name formatting for public fieldless choices" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:plainValueChoices ; p:status p:done ;
+    p:evidence w:fieldlessChoicesDarwin, w:fieldlessChoicesLinux, w:fieldlessChoiceFixtureReceipt ;
+    p:addresses w:fieldlessChoiceFixtureEvidenceReview ;
+    p:acceptance "Preserve historical copyable graph bytes, compare an unrelated Rust fixture, and verify unchanged consumers of pinned original and generated engine choices with real source order and trait mutations on both ARM64 hosts." .
+
+w:fieldlessChoiceFixtureReceipt a p:Artifact ;
+    p:location "verification/plain-value-choices/aarch64-apple-darwin.json" .
+w:fieldlessChoiceFixtureEvidenceReview a p:Finding ;
+    rdfs:label "Publish separate evidence for unrelated choice conformance and historical artifact bytes" ;
+    p:source w:fieldlessChoiceFixtureEvidenceReviewSource .
+w:fieldlessChoiceFixtureEvidenceReviewSource a p:Artifact ;
+    p:location "Claude auto review of ff7829a4d8c022c646bb80693834c70f37f17710" .
+
+w:fieldlessChoicesDarwin a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/042f018252c9ed04bea97e10f7da1df16da1e0b0/verification/whole/engine-fieldless-choices/aarch64-apple-darwin.json> .
+w:fieldlessChoicesLinux a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/042f018252c9ed04bea97e10f7da1df16da1e0b0/verification/whole/engine-fieldless-choices/aarch64-unknown-linux-gnu.json> .
+
+w:typescriptExtendedChoiceConvergence a p:Task ;
+    rdfs:label "Preserve the TypeScript capability boundary when composing choice profiles" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:fieldlessChoiceCapabilities, w:typescriptPlainChoices ;
+    p:status p:done ; p:evidence w:combinedChoiceTargetReceipt ;
+    p:acceptance "On a compiler with both targets, confirm an admitted copyable choice projects and that clone-only and derived-Debug choices fail without emitting TypeScript output unless their capabilities have independent conformance." .
+
+w:combinedChoiceTargetReceipt a p:Artifact ;
+    p:location "verification/plain-value-choices/combined-aarch64-apple-darwin.json" .
+
+w:fieldlessChoiceSpanReview a p:Finding ;
+    rdfs:label "Distinguish whole-file recovery input from qualification-time source extraction" ;
+    p:source w:fieldlessChoiceSpanReviewSource .
+w:fieldlessChoiceSpanReviewSource a p:Artifact ;
+    p:location "Claude auto review of 8e3320aacb0106d543c3e21ab1faf60a02132c04" .
+w:fieldlessChoiceScopeDocumentation a p:Task ;
+    rdfs:label "Document the whole-file pin and exact declaration staging boundary" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:plainValueChoices ; p:status p:done ;
+    p:addresses w:fieldlessChoiceSpanReview ; p:evidence w:fieldlessChoiceScopeGuide ;
+    p:acceptance "Describe the recovery input digest, distinguish extraction from recovery, and require independent enclosing-library witnesses." .
+w:fieldlessChoiceScopeGuide a p:Artifact ;
+    p:location "docs/language/checked-values.md#clone-only-choices-and-derived-debug" .
+
 w:canonicalDarwinContracts a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/55da1b628138d48d1984f87f173a061886d48ea8/verification/whole/canonical-workspace/aarch64-apple-darwin.json" .
 
@@ -1739,6 +1784,23 @@ w:canonicalDarwinTests a p:Artifact ;
 
 w:canonicalLinuxTests a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4744286ce98b89b8e712cfa2fe8618cb8959e7bd/verification/whole/suite/canonical-aarch64-unknown-linux-gnu.json" .
+
+w:typescriptPlainChoices a p:Task ;
+    rdfs:label "Project closed copyable choices into TypeScript with explicit equality capabilities" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:plainValueChoices ; p:status p:done ;
+    p:evidence w:typescriptPlainChoiceFixture, w:typescriptVaultModeReceipt ;
+    p:acceptance "Project the existing ordered choice graph without Rust source or binding. Compare unrelated native Rust and Node witnesses in two revisions, compile TypeScript negative controls, preserve shared obligations, and replay a published data-only graph." .
+
+w:typescriptChoiceHostEquality a p:Finding ;
+    rdfs:label "Distinguish host strict comparison from a declared portable equality operation" ;
+    p:source w:wholeMarmishPlan .
+w:typescriptPlainChoices p:addresses w:typescriptChoiceHostEquality .
+
+w:typescriptPlainChoiceFixture a p:Artifact ;
+    p:location "verification/plain-value-choices/typescript.py" .
+w:typescriptVaultModeReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/8621f49d40217132c8d3842a54531e066e93dfec/verification/whole/vault-mode-typescript/receipt.json> .
 
 w:pointerWidthRecordPlan a p:Artifact ;
     p:location "docs/superpowers/plans/2026-11-26-pointer-width-records.md" .
@@ -1753,8 +1815,3 @@ w:pointerWidthLocalGlobReview a p:Finding ;
     rdfs:label "Keep locally bound glob prefixes out of the unresolved dependency path" ;
     p:source w:pointerWidthRecordFixture .
 w:pointerWidthPublicRecords p:addresses w:pointerWidthLocalGlobReview .
-w:fieldlessChoiceCapabilities a p:Task ;
-    rdfs:label "Recover optional copying and derived variant-name formatting for public fieldless choices" ;
-    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
-    p:dependsOn w:plainValueChoices ; p:status p:active ;
-    p:acceptance "Preserve historical copyable graph bytes, compare an unrelated Rust fixture, and verify unchanged consumers of pinned original and generated engine choices with real source order and trait mutations on both ARM64 hosts." .
