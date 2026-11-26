@@ -45,3 +45,5 @@ their original adapter revisions.
 - [x] Measure all seven original release libraries and the three generated members in v5 and v6 on native Darwin ARM64. Verify all member locks and run the portable type comparison for each pair. Exercise actual cross-library callers for the native library, including its generated-only spellings. Attach the reviewed companion receipts and record the open implementation gaps.
 
 On Darwin ARM64 the original native library exposes 36 public type spellings and both candidates expose two. All 36 upstream imports failed against each candidate. Engine, MDK, prototype and vault have no generated member in those releases. [Paired workspace receipts](https://github.com/Epiphytic/marmish-oddlang/pull/58)
+
+- [ ] Audit the 140 original import spellings across all seven generated libraries on macOS ARM64 and archive their exact diagnostics. Check the prototype constant and compile-only signature separately. Keep type identity, behavior and source compatibility as separate obligations.
