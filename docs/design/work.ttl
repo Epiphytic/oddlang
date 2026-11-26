@@ -1262,8 +1262,6 @@ w:checkedValuesReview a p:Artifact ;
 w:wholeMarmishProtocols p:dependsOn w:checkedValueProductProjection .
 w:buildReportFixture a p:Artifact ;
     p:location "verification/build-report/verify.py" .
-w:buildReportReceipt a p:Artifact ;
-    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/60> .
 w:buildReportPlanReview a p:Finding ;
     rdfs:label "Separate represented revision from compiled artifact provenance and check widths, formats and native guard precedence" ;
     p:source w:buildReportCommandPlan .
@@ -1302,7 +1300,7 @@ w:fixedByteVault a p:Task ; rdfs:label "Qualify the upstream strict public value
     p:acceptance "Compile the unchanged pinned upstream test module against a source-isolated generated vault library and compare the exact native test with the original." .
 
 w:fixedByteWorkspaceIntegration a p:Task ; rdfs:label "Compose fixed-byte vault values and source-recovered release metadata with the five-member native workspace" ;
-    p:milestone w:marmishMilestone ; p:source w:fixedByteValuesPlan ; p:status p:active ;
+    p:milestone w:marmishMilestone ; p:source w:fixedByteValuesPlan ; p:status p:done ; p:evidence w:fixedByteWorkspaceReceipt ;
     p:dependsOn w:fixedByteVault, w:buildReportSourceRecovery, w:unifiedVaultEngineWorkspace ;
     p:acceptance "Generate one sealed workspace with the source-recovered release graph. Compare the unchanged vault value test, a direct array constructor holdout and the prior package and CLI contracts with the pinned original." .
 w:processLimitCompanionRelease a p:Artifact ;
@@ -1328,3 +1326,11 @@ w:buildReportRootMacroReview a p:Finding ;
     rdfs:label "Reject crate-root reports where unselected modules may export a reserved macro" ;
     p:source w:buildReportStructuralFixture .
 w:buildReportSourceRecovery p:addresses w:buildReportRootMacroReview .
+
+w:fixedByteWorkspaceLockReview a p:Finding ;
+    rdfs:label "Pin the successor workspace lock and compare the previously qualified member entries" ;
+    p:source w:checkedValuesReview .
+w:fixedByteWorkspaceIntegration p:addresses w:fixedByteWorkspaceLockReview .
+
+w:fixedByteWorkspaceReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/e54db134a2cf649c5cffcf3822f4e98b3439f141/verification/whole/unified-recovered-vault/darwin-arm64/receipt.json> .
