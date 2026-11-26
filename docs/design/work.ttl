@@ -2316,3 +2316,24 @@ w:combinedBuildReportErrorApi a p:Task ;
     p:status p:done ; p:evidence w:combinedBuildReportErrorReceipt .
 w:combinedBuildReportErrorReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/blob/28d05aeb20175dfa7da58e9ede1b8f4d10687971/verification/whole/native-error/darwin-arm64/combined.json> .
+
+w:plainValueChoices a p:Task ;
+    rdfs:label "Recover and project plain closed value choices" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:checkedValueProductProjection ;
+    p:acceptance "Compare original and generated native exhaustiveness, exact capabilities and declaration-order casts. Reorder a pinned ordinary choice at its Rust source, and verify only the intended ordinal observations change." ;
+    p:evidence w:plainChoiceFixture, w:nativeBackendChoiceReceipt .
+w:plainChoiceFixture a p:Artifact ;
+    p:location "verification/plain-value-choices/verify.py" .
+w:nativeBackendChoiceReceipt a p:Artifact ;
+    p:location "companion:verification/whole/backend-choice/darwin-arm64/receipt.json" .
+
+w:plainChoiceBindingsReview a p:Finding ;
+    rdfs:label "Reject item macros and impl heads that mention the selected choice in any role" ;
+    p:source w:plainChoiceFixture .
+w:plainValueChoices p:addresses w:plainChoiceBindingsReview .
+
+w:plainChoiceAssociatedTypeReview a p:Finding ;
+    rdfs:label "Check associated-type aliases before projecting a plain choice" ;
+    p:source w:plainChoiceFixture .
+w:plainValueChoices p:addresses w:plainChoiceAssociatedTypeReview .
