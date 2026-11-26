@@ -47,3 +47,7 @@ scripts, serde customizations or other command behavior.
   visibility and namespace controls.
 - [x] Compare native original and generated client and daemon outputs, and
   mutate the original engine declaration behind its public alias.
+
+## Composition with the recovered native error API
+
+- [x] Generate both native binaries and the public error library from one workspace, stage only its declared product inputs, and compare the CLI and library to the pinned Darwin ARM64 observations. The [combined receipt](https://github.com/Epiphytic/marmish-oddlang/blob/28d05aeb20175dfa7da58e9ede1b8f4d10687971/verification/whole/native-error/darwin-arm64/combined.json) records the input seals, 16 invocations per release binary and a 32-row debug caller. The complete v7 suite on both ARM64 platforms applies to the [earlier v7 composition](https://github.com/Epiphytic/marmish-oddlang/pull/60).

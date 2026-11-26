@@ -2307,3 +2307,12 @@ w:processLimitFixture a p:Artifact ;
     p:location "verification/process-limits/verify.py" .
 w:processLimitReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/65> .
+
+w:combinedBuildReportErrorApi a p:Task ;
+    rdfs:label "Build native error API and both build-report executables together" ;
+    p:milestone w:marmishMilestone ; p:source w:buildReportCommandPlan ;
+    p:dependsOn w:finiteErrorDomains, w:buildReportCommand ;
+    p:acceptance "Build from the declared workspace closure without an original checkout, replay the 32 Darwin ARM64 native release-info invocations, and compile and run the unchanged 32-observation error caller against the same generated workspace." ;
+    p:status p:done ; p:evidence w:combinedBuildReportErrorReceipt .
+w:combinedBuildReportErrorReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/28d05aeb20175dfa7da58e9ede1b8f4d10687971/verification/whole/native-error/darwin-arm64/combined.json> .
