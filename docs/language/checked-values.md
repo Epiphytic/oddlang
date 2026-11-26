@@ -18,6 +18,6 @@ Run `oddlang recover fixed-bytes OBSERVATION SELECTION OUTPUT` on a v2 rustc sha
 
 Run `oddlang build checked-values typescript GRAPH OUTPUT` for a graph of fixed-byte declarations. The command accepts the portable graph and output path. It emits `values.mts`, `obligations.json` and `projection.lock`. The lock hashes the canonical graph, emitted module and obligation catalog.
 
-`fromBytes(id, input)` takes a declared value IRI and a native Node `Uint8Array`. Different widths raise `FixedBytesError` with the declared failure IRI in its `id` field. Node buffers and byte arrays from other realms use their intrinsic width. Construction takes an owned copy and `copyBytes()` returns a fresh copy. Unknown declaration identities and values of a different native type use ordinary JavaScript errors.
+`fromBytes(id, input)` takes a declared value IRI and a native Node `Uint8Array`. Different widths raise `FixedBytesError` with the declared failure IRI in its `id` field. Node buffers and byte arrays from other realms use their intrinsic width. Construction takes an owned copy. The value keeps the declaration IRI in its read-only `id` and `copyBytes()` returns a fresh copy. Unknown declaration identities and values of a different native type use ordinary JavaScript errors.
 
 The TypeScript projection exposes the width and copying semantics. The catalog records the portable on-drop erasure obligation as unsupported on Node.js.

@@ -12,7 +12,7 @@ use std::{
 
 const RUNTIME: &str = r#"
 export type FixedBytesId = keyof typeof definitions;
-export type FixedBytes = Readonly<{ copyBytes(): Uint8Array }>;
+export type FixedBytes<Id extends FixedBytesId> = Readonly<{ id: Id; copyBytes(): Uint8Array }>;
 
 export class FixedBytesError extends Error {
     readonly id: string;
@@ -28,20 +28,24 @@ const nativeLength = Object.getOwnPropertyDescriptor(
     Object.getPrototypeOf(Uint8Array.prototype), "length"
 )!.get!;
 
-export function fromBytes(id: FixedBytesId, input: Uint8Array): FixedBytes {
-    if (!Object.hasOwn(definitions, id)) throw new RangeError("unknown fixed-byte identity");
+export function fromBytes<Id extends FixedBytesId>(id: Id, input: Uint8Array): FixedBytes<Id> {
+    if (typeof id !== "string" || !Object.hasOwn(definitions, id)) {
+        throw new RangeError("unknown fixed-byte identity");
+    }
     if (!types.isUint8Array(input)) throw new TypeError("expected a Uint8Array");
 
     const { length, failure } = definitions[id];
     if (nativeLength.call(input) !== length) throw new FixedBytesError(failure);
     const owned = new Uint8Array(length);
-    try {
-        owned.set(input);
-    } catch (error) {
-        if (error instanceof RangeError) throw new FixedBytesError(failure);
-        throw error;
+    if (length !== 0) {
+        try {
+            owned.set(input);
+        } catch (error) {
+            if (error instanceof RangeError) throw new FixedBytesError(failure);
+            throw error;
+        }
     }
-    return Object.freeze({ copyBytes: () => new Uint8Array(owned) });
+    return Object.freeze({ id, copyBytes: () => new Uint8Array(owned) });
 }
 "#;
 

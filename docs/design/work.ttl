@@ -1320,3 +1320,8 @@ w:fixedByteTypeScriptProjection a p:Task ;
     p:dependsOn w:fixedByteRecovery, w:fixedByteVault ;
     p:status p:active ;
     p:acceptance "Project from the portable graph alone. Verify exact widths and failure identities, independent copies and deterministic artifacts on unrelated and published 32-byte graphs. Record the unsupported on-drop erasure obligation." .
+
+w:fixedByteTypeScriptIdentityReview a p:Finding ;
+    rdfs:label "Keep distinct value identities and handle intrinsically empty native byte arrays" ;
+    p:source w:checkedValuesReview .
+w:fixedByteTypeScriptProjection p:addresses w:fixedByteTypeScriptIdentityReview .
