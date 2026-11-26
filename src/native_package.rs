@@ -525,9 +525,6 @@ pub(super) fn build_pinned(raw: &[u8], base: &Path, output: &Path, standalone: b
     let manifest: Manifest =
         serde_json::from_slice(raw).map_err(|e| format!("package manifest: {e}"))?;
     validate_command_callbacks(&manifest.components, base)?;
-    if !standalone && !manifest.registry_patches.is_empty() {
-        return Err("registry patches require standalone native package assembly".into());
-    }
     let cargo = cargo_manifest(&manifest)?;
     let lock = manifest.cargo_lock.read(base)?;
     let parent = output
