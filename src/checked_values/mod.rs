@@ -1,5 +1,7 @@
 //! Portable checked value records and finite representation tables.
+mod recover_choice;
 mod rust;
+pub use recover_choice::recover;
 
 use crate::{
     native_package::publish,
@@ -29,6 +31,9 @@ struct Graph {
 #[derive(Deserialize, Serialize)]
 #[serde(tag = "kind", rename_all = "lowercase", deny_unknown_fields)]
 enum Definition {
+    Choice {
+        cases: Vec<String>,
+    },
     Enum {
         #[serde(deserialize_with = "unique_map")]
         values: BTreeMap<String, Literal>,
@@ -247,6 +252,31 @@ impl Graph {
                 return Err(format!("invalid checked type name or traits: {id}"));
             }
             match definition {
+                Definition::Choice { cases } => {
+                    if cases.is_empty()
+                        || native.order != *cases
+                        || native.traits != [Derived::Copy]
+                        || native.view.is_some()
+                        || native.parse.is_some()
+                        || native.shape.is_some()
+                        || native.constructor.is_some()
+                        || !native.members.is_empty()
+                    {
+                        return Err(format!("invalid plain choice native binding: {id}"));
+                    }
+                    let mut labels = BTreeSet::new();
+                    for case in cases {
+                        declare(&mut ids, case)?;
+                        variants.insert(case);
+                        if !bindings
+                            .variants
+                            .get(case)
+                            .is_some_and(|name| type_symbol(name) && labels.insert(name))
+                        {
+                            return Err(format!("invalid or duplicate plain choice case: {case}"));
+                        }
+                    }
+                }
                 Definition::Enum { values, failure } => {
                     if values.is_empty()
                         || !order(values.keys().cloned(), &native.order)
@@ -314,10 +344,14 @@ impl Graph {
                         {
                             return Err(format!("invalid checked field binding: {field_id}"));
                         }
-                        if let Field::Named { id } = field
-                            && !self.types.contains_key(id)
-                        {
-                            return Err(format!("unresolved checked field type: {id}"));
+                        if let Field::Named { id } = field {
+                            match self.types.get(id) {
+                                None => return Err(format!("unresolved checked field type: {id}")),
+                                Some(Definition::Choice { .. }) => {
+                                    return Err(format!("checked record field lacks Debug: {id}"));
+                                }
+                                _ => {}
+                            }
                         }
                         for capability in &native.traits {
                             let supports = match field {
@@ -408,6 +442,10 @@ pub fn build(graph: &Path, overlay: &Path, output: &Path) -> Result<()> {
         "format":FORMAT,"domain":graph.id,
         "obligations":graph.types.iter().map(|(id,definition)| {
             let expected = match definition {
+                Definition::Choice { cases } => json!({
+                    "orderedCases":cases,"copy":true,"equality":"case-identity",
+                    "externalRepresentation":null, "targetOrdinals":"zero-based-declaration-order"
+                }),
                 Definition::Enum { values, failure } => json!({"values":values,"failure":failure}),
                 Definition::Record { fields, constructor, guards } =>
                     json!({"fields":fields,"constructor":constructor,"orderedGuards":guards}),

@@ -282,23 +282,38 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
     let mut out = String::new();
     for (id, definition) in &graph.types {
         let target = &binding.types[id];
-        derives(&mut out, target);
         match definition {
+            Definition::Choice { cases } => {
+                writeln!(
+                    out,
+                    "#[derive(Clone, Copy, PartialEq, Eq)]\npub enum {} {{",
+                    target.name
+                )
+                .unwrap();
+                for case in cases {
+                    writeln!(out, "    {},", binding.variants[case]).unwrap();
+                }
+                out.push_str("}\n");
+            }
             Definition::Enum { values, failure } => {
+                derives(&mut out, target);
                 enumeration(&mut out, values, failure.as_deref(), binding, target)
             }
             Definition::Record {
                 fields,
                 constructor,
                 guards,
-            } => record(
-                &mut out,
-                fields,
-                constructor.as_deref(),
-                guards,
-                binding,
-                target,
-            ),
+            } => {
+                derives(&mut out, target);
+                record(
+                    &mut out,
+                    fields,
+                    constructor.as_deref(),
+                    guards,
+                    binding,
+                    target,
+                );
+            }
         }
     }
     out

@@ -1007,3 +1007,14 @@ w:vaultValueDomainQualification a p:Task ;
 w:vaultValueDomainNativeReceipt a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/9d3a6caeb4700e49e9f21d72b2233a3b4a539894/verification/whole/vault-values/reference-aarch64-apple-darwin.json" .
 w:wholeMarmishProtocols p:dependsOn w:vaultValueDomainQualification .
+
+w:plainValueChoices a p:Task ;
+    rdfs:label "Recover and project plain closed value choices" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:checkedValueProductProjection ;
+    p:acceptance "Compare original and generated native exhaustiveness, exact capabilities and declaration-order casts. Reorder a pinned ordinary choice at its Rust source, and verify only the intended ordinal observations change." ;
+    p:evidence w:plainChoiceFixture, w:nativeBackendChoiceReceipt .
+w:plainChoiceFixture a p:Artifact ;
+    p:location "verification/plain-value-choices/verify.py" .
+w:nativeBackendChoiceReceipt a p:Artifact ;
+    p:location "companion:verification/whole/backend-choice/darwin-arm64/receipt.json" .

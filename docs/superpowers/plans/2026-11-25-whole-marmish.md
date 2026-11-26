@@ -95,3 +95,22 @@ The principal feasibility risk is recovering intended behavior where only incide
 - [x] Define finite scalar views, typed checked products, and named error categories. Verify exact native value semantics, borrowed getters, private constructors and UTF-8 boundary behavior in an unrelated standalone package. [Checked value domains](../../language/checked-values.md)
 
 - [x] Qualify the standalone vault metadata and pure value API using original and generated native callers. Compare compiler shapes, private field admission and a UTF-8 byte-limit mutation. [Vault native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/63)
+
+### Plain closed value choices
+
+- [x] Recover a pinned ordinary public fieldless enum into ordered case
+  identities. Project the choice as a Rust enum with declaration-order casts,
+  copyable values and case equality. Keep representation tables and wire
+  formats outside this choice profile.
+- [x] Compare native original and generated consumers of the standalone
+  identity choice, including a source-only order mutation, exhaustive matches,
+  trait checks and forbidden capabilities. Repeat the projection with an
+  unrelated source fixture.
+
+The structural profile admits only an ordinary public, non-generic Rust enum
+with implicit discriminants and the standard Clone, Copy, PartialEq and Eq
+derives. Inline cases with fields, explicit representation, additional traits,
+and conditional variants are unsupported. Recovery records file provenance and
+a native name-resolution and trait witness obligation. Existing checked records
+derive Debug and cannot embed this kind of choice without another record
+capability profile.
