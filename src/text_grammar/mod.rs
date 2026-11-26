@@ -16,7 +16,7 @@ const FORMAT: &str = "oddlang-text-grammar-v1";
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
-struct Grammar {
+pub(crate) struct Grammar {
     format: String,
     id: String,
     prefixes: Vec<String>,
@@ -67,7 +67,18 @@ impl Decimal {
 }
 
 impl Grammar {
-    fn validate(&self) -> Result<()> {
+    pub(crate) fn id(&self) -> &str {
+        &self.id
+    }
+
+    pub(crate) fn lexical_parts(&self) -> impl Iterator<Item = &str> {
+        self.prefixes
+            .iter()
+            .map(String::as_str)
+            .chain(self.suffix.iter().map(|suffix| suffix.delimiter.as_str()))
+    }
+
+    pub(crate) fn validate(&self) -> Result<()> {
         iri(&self.id)?;
         if self.format != FORMAT
             || self.prefixes.is_empty()
@@ -115,23 +126,29 @@ fn decimal_in(text: &str, (minimum, maximum): (u64, u64)) -> bool {
 }
 "#;
 
+impl Grammar {
+    pub(crate) fn render(&self) -> Result<String> {
+        self.validate()?;
+        let body = self.body.bounds()?;
+        let suffix = if let Some(suffix) = &self.suffix {
+            format!(
+                "Some(({:?}, {:?}))",
+                suffix.delimiter,
+                suffix.body.bounds()?
+            )
+        } else {
+            "None".into()
+        };
+        Ok(format!(
+            "const PREFIXES: &[&str] = &{:?};\nconst BODY: (u64, u64) = {body:?};\nconst SUFFIX: Option<(&str, (u64, u64))> = {suffix};\n{RUST}",
+            self.prefixes
+        ))
+    }
+}
+
 pub fn build(path: &Path, output: &Path) -> Result<()> {
     let grammar: Grammar = json(path)?;
-    grammar.validate()?;
-    let body = grammar.body.bounds()?;
-    let suffix = if let Some(suffix) = &grammar.suffix {
-        format!(
-            "Some(({:?}, {:?}))",
-            suffix.delimiter,
-            suffix.body.bounds()?
-        )
-    } else {
-        "None".into()
-    };
-    let source = format!(
-        "const PREFIXES: &[&str] = &{:?};\nconst BODY: (u64, u64) = {body:?};\nconst SUFFIX: Option<(&str, (u64, u64))> = {suffix};\n{RUST}",
-        grammar.prefixes
-    );
+    let source = grammar.render()?;
     let obligations = encode(&json!({
         "declaration": grammar.id,
         "role": "text-grammar",
