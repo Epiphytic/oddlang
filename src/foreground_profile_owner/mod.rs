@@ -21,6 +21,37 @@ struct Graph {
     provider: Provider,
     activation: Activation,
     diagnostics: Diagnostics,
+    lifecycle: Option<Lifecycle>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Lifecycle {
+    storage_profile: String,
+    engine: EngineRole,
+    excluded_profile_entries: Vec<String>,
+    shutdown_ms: u64,
+    dial_ms: u64,
+    dial_attempts: u8,
+    report_version: u8,
+    report_fields: ReportFields,
+    provider_open_failure: String,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum EngineRole {
+    Absent,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ReportFields {
+    schema: String,
+    engine_quiesced: String,
+    engine_stop_complete: String,
+    provider_stop_complete: String,
+    runtime_cleanup_complete: String,
 }
 
 #[derive(Deserialize)]
@@ -147,10 +178,53 @@ struct Binding {
     format: String,
     entry: String,
     status_owner: Vec<String>,
+    retained_stores: Option<Vec<String>>,
 }
 
 impl Graph {
     fn validate(&self, binding: &Binding) -> Result<(), String> {
+        match (&self.lifecycle, &binding.retained_stores) {
+            (Some(lifecycle), Some(path)) => {
+                let fields = &lifecycle.report_fields;
+                let EngineRole::Absent = lifecycle.engine;
+                let excludes = &lifecycle.excluded_profile_entries;
+                if oxigraph::model::NamedNode::new(&lifecycle.storage_profile).is_err()
+                    || !binding_path(path)
+                    || excludes.is_empty()
+                    || !excludes.iter().all(|leaf| filename(leaf))
+                    || excludes.iter().collect::<BTreeSet<_>>().len() != excludes.len()
+                    || excludes.iter().any(|leaf| {
+                        [
+                            &self.profile.document,
+                            &self.profile.lock,
+                            &self.provider.directory,
+                        ]
+                        .contains(&leaf)
+                    })
+                    || !(1..=30_000).contains(&lifecycle.shutdown_ms)
+                    || !(1..=60_000).contains(&lifecycle.dial_ms)
+                    || lifecycle.dial_ms > self.activation.deadline_ms
+                    || !(1..=10).contains(&lifecycle.dial_attempts)
+                    || lifecycle.report_version == 0
+                    || !plain(&lifecycle.provider_open_failure)
+                    || !unique([
+                        &fields.schema,
+                        &fields.engine_quiesced,
+                        &fields.engine_stop_complete,
+                        &fields.provider_stop_complete,
+                        &fields.runtime_cleanup_complete,
+                    ])
+                {
+                    return Err("invalid foreground provider lifecycle".into());
+                }
+            }
+            (None, None) => (),
+            _ => {
+                return Err(
+                    "foreground lifecycle requires an explicit retained store binding".into(),
+                );
+            }
+        }
         let Activation {
             kind: ActivationKind::LoopbackWebPkiTls,
             route_value,
@@ -179,11 +253,7 @@ impl Graph {
                 "relay",
             ]
             .contains(&binding.entry.as_str())
-            || binding.status_owner.is_empty()
-            || !binding
-                .status_owner
-                .iter()
-                .all(|value| value != "gen" && syn::parse_str::<syn::Ident>(value).is_ok())
+            || !binding_path(&binding.status_owner)
         {
             return Err("invalid foreground owner binding".into());
         }
@@ -319,6 +389,12 @@ fn ident(value: &str) -> bool {
         && value != "gen"
         && syn::parse_str::<syn::Ident>(value).is_ok()
 }
+fn binding_path(value: &[String]) -> bool {
+    !value.is_empty()
+        && value
+            .iter()
+            .all(|part| part != "gen" && syn::parse_str::<syn::Ident>(part).is_ok())
+}
 fn plain(value: &str) -> bool {
     !value.is_empty() && !value.chars().any(char::is_control)
 }
@@ -353,10 +429,22 @@ pub(crate) fn callback(
     graph: &[u8],
     binding: &[u8],
     status_owners: &BTreeSet<Vec<String>>,
+    retained_stores: &BTreeMap<Vec<String>, String>,
 ) -> Result<Callback, String> {
     let (graph, binding) = load(graph, binding)?;
     if !status_owners.contains(&binding.status_owner) {
         return Err("foreground startup requires a linked local status owner".into());
+    }
+    if let Some(lifecycle) = graph.lifecycle
+        && binding
+            .retained_stores
+            .as_ref()
+            .and_then(|path| retained_stores.get(path))
+            != Some(&lifecycle.storage_profile)
+    {
+        return Err(
+            "foreground retained store binding differs from its pinned storage profile".into(),
+        );
     }
     let args = graph.arguments;
     Ok(Callback {

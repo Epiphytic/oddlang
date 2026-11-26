@@ -1,0 +1,221 @@
+use std::{
+    fs::{self, File, OpenOptions},
+    io::{Read, Write},
+    os::unix::fs::{DirBuilderExt, MetadataExt, OpenOptionsExt},
+    path::Path,
+};
+use zeroize::Zeroizing;
+
+#[derive(Clone, Copy)]
+struct Failure(u8, &'static str);
+
+impl Failure {
+    fn report(self) -> std::process::ExitCode {
+        let _ = writeln!(std::io::stderr().lock(), "{}", self.1);
+        std::process::ExitCode::from(self.0)
+    }
+}
+
+struct Prepared {
+    _lease: File,
+    record: Record,
+}
+
+impl Drop for Prepared {
+    fn drop(&mut self) {
+        // The descriptor was opened close-on-exec and the lease ends with the command.
+        let _ = unsafe { libc::flock(std::os::fd::AsRawFd::as_raw_fd(&self._lease), libc::LOCK_UN) };
+    }
+}
+
+fn atom(value: &str) -> bool {
+    !value.is_empty() && value.len() <= NAME_MAX as usize && value != "." && value != ".."
+        && value.bytes().all(|byte| byte.is_ascii_alphanumeric() || PUNCTUATION.as_bytes().contains(&byte))
+}
+
+fn uid() -> u32 {
+    // SAFETY: geteuid has no arguments and returns the native effective user.
+    unsafe { libc::geteuid() }
+}
+
+fn check_directory(path: &Path) -> Result<(), Failure> {
+    let meta = fs::symlink_metadata(path).map_err(|_| IO)?;
+    if !meta.is_dir() || meta.uid() != uid() || meta.mode() & 0o777 != DIR_MODE { return Err(UNSAFE_DIRECTORY); }
+    Ok(())
+}
+
+fn directory(path: &Path) -> Result<(), Failure> {
+    match fs::DirBuilder::new().mode(DIR_MODE).create(path) {
+        Ok(()) => (),
+        Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => (),
+        Err(_) => return Err(IO),
+    }
+    check_directory(path)
+}
+
+fn open_existing(path: &Path, create: bool) -> Result<Option<File>, Failure> {
+    let file = match OpenOptions::new().read(true).write(create).create(create).truncate(false)
+        .mode(FILE_MODE).custom_flags(libc::O_NOFOLLOW | libc::O_CLOEXEC | libc::O_NONBLOCK).open(path)
+    {
+        Ok(file) => file,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound && !create => return Ok(None),
+        Err(_) => return Err(IO),
+    };
+    let meta = file.metadata().map_err(|_| IO)?;
+    if !meta.is_file() || meta.nlink() != 1 || meta.uid() != uid() || meta.mode() & 0o777 != FILE_MODE {
+        return Err(UNSAFE_FILE);
+    }
+    Ok(Some(file))
+}
+
+fn lower_hex(data: &[u8]) -> String {
+    data.iter().map(|value| format!("{value:02x}")).collect()
+}
+
+fn random_hex<const N: usize>() -> Result<String, Failure> {
+    let mut data = Zeroizing::new([0; N]);
+    getrandom::fill(&mut *data).map_err(|_| RANDOM)?;
+    Ok(lower_hex(data.as_ref()))
+}
+
+fn is_hex(text: &str, bytes: usize) -> bool {
+    text.len() == 2 * bytes && text.bytes().all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+}
+
+fn read_manifest(root: &Path, name: &str) -> Result<Option<Record>, Failure> {
+    let Some(file) = open_existing(&root.join(MANIFEST), false)? else { return Ok(None); };
+    let mut data = Vec::new();
+    file.take(u64::from(MANIFEST_MAX) + 1).read_to_end(&mut data).map_err(|_| IO)?;
+    if data.len() > MANIFEST_MAX as usize { return Err(INVALID_MANIFEST); }
+    let record: Record = serde_json::from_slice(&data).map_err(|_| INVALID_MANIFEST)?;
+    if (record.phase != PENDING && record.phase != READY)
+        || (record.backend != FILES && !OTHER_BACKENDS.contains(&record.backend.as_str()))
+    {
+        return Err(INVALID_MANIFEST);
+    }
+    if record.version != VERSION { return Err(WRONG_VERSION); }
+    if record.name != name || !is_hex(&record.profile, 16) || !is_hex(&record.transaction, 16)
+        || !is_hex(&record.signer, 32) || !is_hex(&record.storage, 32) || record.signer == record.storage
+        || !is_hex(&record.slot, 16) || record.public.as_ref().is_some_and(|value| !is_hex(value, 32))
+        || (record.phase == READY && record.public.is_none())
+    {
+        return Err(INVALID_MANIFEST);
+    }
+    Ok(Some(record))
+}
+
+fn committed(path: &Path, bytes: &[u8], parent: &Path, replace: bool) -> Result<bool, Failure> {
+    let file_name = format!("{TRANSACTION_PREFIX}{}", random_hex::<16>()?);
+    let provisional = parent.join(file_name);
+    let mut file = OpenOptions::new().write(true).create_new(true).mode(FILE_MODE)
+        .custom_flags(libc::O_NOFOLLOW | libc::O_CLOEXEC).open(&provisional).map_err(|_| IO)?;
+    let result = (|| {
+        file.write_all(bytes).map_err(|_| IO)?;
+        file.sync_all().map_err(|_| IO)?;
+        if replace {
+            fs::rename(&provisional, path).map_err(|_| IO)?;
+        } else {
+            use rustix::fs::{CWD, RenameFlags, renameat_with};
+            match renameat_with(CWD, &provisional, CWD, path, RenameFlags::NOREPLACE) {
+                Ok(()) => (),
+                Err(error) if error == rustix::io::Errno::EXIST => return Ok(false),
+                Err(_) => return Err(IO),
+            }
+        }
+        File::open(parent).and_then(|directory| directory.sync_all()).map_err(|_| IO)?;
+        Ok(true)
+    })();
+    if !matches!(result, Ok(true)) { let _ = fs::remove_file(&provisional); }
+    result
+}
+
+fn save_manifest(root: &Path, record: &Record, replace: bool) -> Result<(), Failure> {
+    let bytes = serde_json::to_vec(record).map_err(|_| INVALID_MANIFEST)?;
+    if bytes.len() > MANIFEST_MAX as usize { return Err(INVALID_MANIFEST); }
+    if !committed(&root.join(MANIFEST), &bytes, root, replace)? { return Err(IO); }
+    Ok(())
+}
+
+fn secret(path: &Path) -> Result<Option<Zeroizing<[u8; 32]>>, Failure> {
+    let Some(file) = open_existing(path, false)? else { return Ok(None); };
+    let mut data = Zeroizing::new(Vec::with_capacity(33));
+    file.take(33).read_to_end(&mut data).map_err(|_| IO)?;
+    let bytes = data.as_slice().try_into().map_err(|_| INVALID_SECRET)?;
+    Ok(Some(Zeroizing::new(bytes)))
+}
+
+fn public_for(data: &[u8; 32]) -> Result<String, Failure> {
+    let mut secret = secp256k1::SecretKey::from_byte_array(data).map_err(|_| INVALID_SIGNING_KEY)?;
+    let mut key = secp256k1::Keypair::from_secret_key(&secp256k1::Secp256k1::new(), &secret);
+    secret.non_secure_erase();
+    let result = lower_hex(&key.x_only_public_key().0.serialize());
+    key.non_secure_erase();
+    Ok(result)
+}
+
+fn load_or_create(root: &Path, leaf: &str, allow_missing: bool, signing: bool) -> Result<Zeroizing<[u8; 32]>, Failure> {
+    let path = root.join(leaf);
+    if let Some(existing) = secret(&path)? { return Ok(existing); }
+    if !allow_missing { return Err(MISSING_SECRET); }
+    let mut generated = Zeroizing::new([0; 32]);
+    loop {
+        getrandom::fill(&mut *generated).map_err(|_| RANDOM)?;
+        if !signing || public_for(&generated).is_ok() { break; }
+    }
+    committed(&path, generated.as_ref(), root, false)?;
+    let existing = secret(&path)?.ok_or(MISSING_SECRET)?;
+    if *existing != *generated { return Err(KEY_READBACK); }
+    Ok(existing)
+}
+
+fn prepare(
+    base: &Path,
+    name: &str,
+    before_credentials: impl Fn(&Path, &Record) -> Result<(), Failure>,
+    after_credentials: impl FnOnce(&Path, &mut Record, &[u8; 32], &[u8; 32]) -> Result<(), Failure>,
+) -> Result<Prepared, Failure> {
+    fs::DirBuilder::new().mode(DIR_MODE).recursive(true).create(base).map_err(|_| IO)?;
+    if !atom(name) { return Err(INVALID_PROFILE); }
+    check_directory(base)?;
+    let root = base.canonicalize().map_err(|_| IO)?.join(name);
+    directory(&root)?;
+    let lease = open_existing(&root.join(OWNER), true)?.ok_or(IO)?;
+    // SAFETY: the descriptor is valid for the duration of the lease and the operation is nonblocking.
+    if unsafe { libc::flock(std::os::fd::AsRawFd::as_raw_fd(&lease), libc::LOCK_EX | libc::LOCK_NB) } != 0 {
+        return Err(IN_USE);
+    }
+    let existing = read_manifest(&root, name)?;
+    let fresh = existing.is_none();
+    let mut record = match existing {
+        Some(record) => record,
+        None => {
+            let record = Record {
+                version: VERSION, profile: random_hex::<16>()?, name: name.to_owned(),
+                transaction: random_hex::<16>()?, phase: PENDING.into(), backend: FILES.into(),
+                signer: random_hex::<32>()?, storage: random_hex::<32>()?, slot: random_hex::<16>()?,
+                public: None,
+            };
+            record
+        }
+    };
+    if record.backend != FILES { return Err(WRONG_BACKEND); }
+    before_credentials(&root, &record)?;
+    if fresh { save_manifest(&root, &record, false)?; }
+    let keys = root.join(KEYS);
+    directory(&keys)?;
+    let pending = record.phase == PENDING;
+    let signing = load_or_create(&keys, &format!("{SIGNING_PREFIX}{}", record.signer), pending && record.public.is_none(), true)?;
+    let public = public_for(&signing)?;
+    match &record.public {
+        Some(previous) if previous != &public => return Err(IDENTITY_MISMATCH),
+        Some(_) => (),
+        None => {
+            record.public = Some(public);
+            save_manifest(&root, &record, true)?;
+        }
+    }
+    let storage = load_or_create(&keys, &format!("{STORAGE_PREFIX}{}", record.storage), pending, false)?;
+    for name in EXTRA_DIRS { directory(&root.join(name))?; }
+    after_credentials(&root, &mut record, &signing, &storage)?;
+    Ok(Prepared { _lease: lease, record })
+}

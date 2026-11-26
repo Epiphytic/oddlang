@@ -31,29 +31,16 @@ pub(super) fn render(graph: &Graph, entry: &str) -> Result<String, String> {
     ] {
         writeln!(out, "const {name}: Failure = {};", failure(diagnostic)).unwrap();
     }
-    out.push_str("\n#[derive(serde::Deserialize, serde::Serialize)]\n#[serde(deny_unknown_fields)]\nstruct Response {\n");
-    let mut success_field = None;
-    for (index, field) in graph.response.fields.iter().enumerate() {
-        if field.key == graph.response.success_field {
-            success_field = Some(index);
-        }
-        let ty = match field.kind {
-            ValueType::Bool => "bool",
-            ValueType::String => "String",
-            ValueType::Json => "serde_json::Value",
-            ValueType::Null => "()",
-        };
-        writeln!(out, "    #[serde(rename = {:?})]", field.key).unwrap();
-        match field.presence {
-            Presence::Required => writeln!(out, "    value_{index}: {ty},").unwrap(),
-            Presence::Nullable => writeln!(out, "    value_{index}: Option<{ty}>,").unwrap(),
-            Presence::OmitNull => {
-                out.push_str("    #[serde(skip_serializing_if = \"Option::is_none\")]\n");
-                writeln!(out, "    value_{index}: Option<{ty}>,").unwrap();
-            }
-        }
+    if let Some(discovery) = &graph.discovery {
+        discovery.render(&mut out);
     }
-    write!(out, "}}\n\npub fn {entry}(matches: ArgMatches) -> ExitCode {{\n    match run_inner(&matches) {{\n        Ok(code) => ExitCode::from(code),\n        Err(error) => error.report(),\n    }}\n}}\n").unwrap();
+    replies::render(&graph.response, &mut out);
+    let success_field = graph
+        .response
+        .fields
+        .iter()
+        .position(|field| field.key == graph.response.success_field);
+    write!(out, "\npub fn {entry}(matches: ArgMatches) -> ExitCode {{\n    match run_inner(&matches) {{\n        Ok(code) => ExitCode::from(code),\n        Err(error) => error.report(),\n    }}\n}}\n").unwrap();
     out.push_str("\nfn run_inner(matches: &ArgMatches) -> Result<u8, Failure> {\n");
     for guard in &graph.guards {
         let (condition, rejected) = match guard {
@@ -91,8 +78,14 @@ pub(super) fn render(graph: &Graph, entry: &str) -> Result<String, String> {
         )
         .unwrap();
     }
-    writeln!(out, "    let path = matches.try_get_one::<PathBuf>({:?}).map_err(|_| BINDING)?.ok_or(BINDING)?;", graph.socket_argument).unwrap();
-    out.push_str("    let response = perform(path)?;\n    let text = serde_json::to_string(&response).map_err(|_| FRAME_JSON)?;\n    writeln!(std::io::stdout().lock(), \"{}\", text).map_err(|_| IO)?;\n");
+    if graph.discovery.is_some() {
+        writeln!(out, "    let explicit = matches.try_get_one::<PathBuf>({:?}).map_err(|_| BINDING)?;\n    let path = discover_endpoint(matches, explicit)?;", graph.socket_argument).unwrap();
+        out.push_str("    let response = perform(&path)?;\n");
+    } else {
+        writeln!(out, "    let path = matches.try_get_one::<PathBuf>({:?}).map_err(|_| BINDING)?.ok_or(BINDING)?;", graph.socket_argument).unwrap();
+        out.push_str("    let response = perform(path)?;\n");
+    }
+    out.push_str("    let text = serde_json::to_string(&response).map_err(|_| FRAME_JSON)?;\n    writeln!(std::io::stdout().lock(), \"{}\", text).map_err(|_| IO)?;\n");
     writeln!(
         out,
         "    Ok(if response.value_{} {{ {} }} else {{ {} }})\n}}",
@@ -104,6 +97,6 @@ pub(super) fn render(graph: &Graph, entry: &str) -> Result<String, String> {
     Ok(out)
 }
 
-fn failure(diagnostic: &Diagnostic) -> String {
+pub(super) fn failure(diagnostic: &Diagnostic) -> String {
     format!("Failure({}, {:?})", diagnostic.exit, diagnostic.stderr)
 }
