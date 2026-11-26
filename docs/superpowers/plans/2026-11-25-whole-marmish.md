@@ -100,4 +100,4 @@ The principal feasibility risk is recovering intended behavior where only incide
 - [x] Qualify the complete copy protocol library against every unchanged pinned native test and exact frame error controls on macOS ARM64. [Native receipt and structural inventory](https://github.com/Epiphytic/marmish-oddlang/pull/42)
 
 - [ ] Check composite slot bounds and member types against pinned external codec contracts before package emission.
-- [ ] Build from the graph and an initially empty Cargo home using only the locked third-party dependencies, then rebuild offline and compare the workspace lock.
+- [x] Build from the graph and an initially empty Cargo home using only the locked third-party dependencies, then rebuild offline and compare the workspace lock. Both ARM64 hosts regenerated the same v5 workspace from 55 pinned inputs and passed 34 parser cases per role. [Clean-build receipts](https://github.com/Epiphytic/marmish-oddlang/pull/50)
