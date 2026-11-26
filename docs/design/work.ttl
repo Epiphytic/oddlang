@@ -1425,7 +1425,7 @@ w:privateBufferedInputPlan a p:Artifact ;
 w:privateBufferedInput a p:Task ;
     rdfs:label "Recover and project bounded private buffered input" ;
     p:milestone w:marmishMilestone ; p:source w:privateBufferedInputPlan ;
-    p:dependsOn w:unifiedRecoveredVaultJournal ; p:status p:active ;
+    p:dependsOn w:unifiedRecoveredVaultJournal ; p:status p:done ; p:evidence w:privateBufferedInputFixture ;
     p:acceptance "Recover the compiler-observed fixed array and ordered fields. Verify all declared private buffer read, refill and erasure policies through an independently written native caller and detect source mutation." .
 
 w:recoveredWorkspaceNamedSuite a p:Task ;
@@ -1436,3 +1436,6 @@ w:recoveredWorkspaceNamedSuite a p:Task ;
     p:status p:done ; p:evidence w:recoveredWorkspaceNamedSuiteReceipt .
 w:recoveredWorkspaceNamedSuiteReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/75> .
+
+w:privateBufferedInputFixture a p:Artifact ;
+    p:location "verification/buffered-input/verify.py" .
