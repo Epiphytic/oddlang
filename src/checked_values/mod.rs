@@ -5,9 +5,11 @@ pub use fixed_recovery::recover_fixed_bytes;
 pub(crate) use recover_choice::{additional_binding, plain_choice_cases};
 pub use recover_choice::recover;
 pub(crate) use rust::render_plain_choice;
+pub use typescript::build as build_typescript;
 mod rust;
 mod typescript;
 pub use typescript::build as build_typescript;
+mod typescript;
 
 use crate::{
     native_package::publish,
