@@ -177,7 +177,9 @@ fn validate(graph: &Graph) -> Result<()> {
             return Err(format!("invalid or duplicate function {}", function.name));
         }
         for parameter in &function.parameters {
+            // json! interprets this unqualified token as a null before resolving an argument.
             if !symbol(&parameter.name)
+                || parameter.name == "null"
                 || parameter.name == graph.flag.name
                 || parameters
                     .insert(parameter.name.as_str(), parameter.writable)

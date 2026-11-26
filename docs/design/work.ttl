@@ -1480,3 +1480,8 @@ w:structuredDiagnosticsProgram a p:Task ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
     p:dependsOn w:nativePackageAssembly ; p:status p:active ;
     p:acceptance "Independently build Rust witnesses for two revisions, compile the recovered library from graph and overlay, and check flag visibility, repeated enable, caller updates, record bytes and sink errors. Reject unsupported source and graph shapes." .
+
+w:structuredDiagnosticsReview a p:Finding ;
+    rdfs:label "Reject JSON keyword shadowing and prove ignored broken-pipe writes" ;
+    p:source w:wholeMarmishPlan .
+w:structuredDiagnosticsProgram p:addresses w:structuredDiagnosticsReview .

@@ -1,4 +1,5 @@
 """Run an independent Rust witness and a source-free diagnostic library."""
+import errno
 import hashlib
 import json
 import os
@@ -42,10 +43,16 @@ def caller(root, library):
     executable = root / "target/debug/station-caller"
     reference = run(executable)
     read, writer = os.pipe()
+    os.close(read)
     try:
-        failed_sink = run(executable, stderr=read)
+        try:
+            os.write(writer, b"probe")
+        except OSError as error:
+            assert error.errno == errno.EPIPE
+        else:
+            raise AssertionError("broken pipe did not report EPIPE")
+        failed_sink = run(executable, stderr=writer)
     finally:
-        os.close(read)
         os.close(writer)
     assert failed_sink.stdout == reference.stdout == b"after\n"
     return reference.stderr
@@ -123,6 +130,8 @@ with tempfile.TemporaryDirectory(prefix="oddlang-diagnostic-fixture-") as tempor
         (source.replace('"code": 7', '"code": 7, "code": 8'), b"duplicate record field"),
         (source.replace("fn observation(point:", "fn observation(observation:"),
          b"expected read-only text parameter"),
+        (source.replace("observation(point:", "observation(null:").replace('"point": point', '"point": null'),
+         b"invalid or duplicate parameter null"),
         (source.replace('observation(new, "initial', 'mark(new, "initial'), b"earlier compatible text function"),
     )):
         path = root / f"invalid-{index}.rs"
@@ -137,6 +146,14 @@ with tempfile.TemporaryDirectory(prefix="oddlang-diagnostic-fixture-") as tempor
     result = run(COMPILER, "build", "structured-diagnostics", "rust", duplicates,
                  inputs / "binding.json", root / "duplicate-graph", check=False)
     assert result.returncode and b"duplicate record field code" in result.stderr
+    source_name = baseline_graph["functions"][1]["parameters"][0]["name"]
+    baseline_graph["functions"][1]["parameters"][0]["name"] = "null"
+    shadow = root / "shadow.json"
+    write(shadow, baseline_graph)
+    result = run(COMPILER, "build", "structured-diagnostics", "rust", shadow,
+                 inputs / "binding.json", root / "shadow-graph", check=False)
+    assert result.returncode and b"invalid or duplicate parameter null" in result.stderr
+    baseline_graph["functions"][1]["parameters"][0]["name"] = source_name
     baseline_graph["functions"][2]["actions"][0]["target"] = "new"
     bad_graph = root / "bad.json"
     write(bad_graph, baseline_graph)
