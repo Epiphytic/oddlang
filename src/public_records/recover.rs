@@ -645,6 +645,7 @@ pub fn recover(lib: &Path, selection: &Path, out: &Path) -> Result<()> {
         flatten_module: false,
         identifiers: bindings,
         external_types: BTreeMap::new(),
+        source_api: None,
     };
     render(&graph, &overlay, true)?;
     let graph = encode(&graph)?;

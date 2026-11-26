@@ -1973,3 +1973,14 @@ w:observationalRecordDefaultsMutation a p:Artifact ;
 w:observationalRecordDefaultsCoverage a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/e8f4d14b185cec310c0a19a0e09d3b06f6a17545/verification/whole/engine-native-records/README.md" .
 w:observationalRecordDefaults p:evidence w:observationalRecordDefaultsDarwin, w:observationalRecordDefaultsLinux, w:observationalRecordDefaultsMutation, w:observationalRecordDefaultsCoverage .
+
+w:publicRecordRustSourceApi a p:Task ;
+    rdfs:label "Check Rust drop-in source API requirements for public record fields" ;
+    p:milestone w:marmishMilestone ;
+    p:source w:publicRecordRustSourceApiPlan ;
+    p:dependsOn w:recoverSerdePublicRecords ;
+    p:acceptance "Consume explicit field name, visibility and native type requirements during Rust projection, reject mismatches and preserve the portable wire role and legacy bytes." ;
+    p:status p:active .
+
+w:publicRecordRustSourceApiPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-public-record-native-field-requirements.md" .
