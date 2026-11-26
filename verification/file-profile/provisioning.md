@@ -11,3 +11,5 @@ python3 verification/file-profile/check.py target/debug/oddlang
 ```
 
 On macOS ARM64 the library suite passed 17 tests and the unrelated executable fixture passed. The Marmish consumer separately compares generated and mainline setup over isolated temporary state. This page covers local profile operations only.
+
+Membership sets declare the roles that can add entries. A role change preserves existing entries. An ordered report column with `active_role_only` counts members only in an allowed role. The downstream fixture changes a granted server to a client, attempts a forbidden grant, then changes back to a server. It compares complete reports and private configuration digests at every step for two relay spellings. The receiver must independently check role and authorization before dispatch. [Thirty-case receipt](https://github.com/Epiphytic/marmish-oddlang/blob/7fa56586df8e13253f3347a27ed157a0a3dfad31/verification/whole/basic-command-interop/local-profile-setup-aarch64-apple-darwin.json)

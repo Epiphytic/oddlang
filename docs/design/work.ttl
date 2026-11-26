@@ -2686,3 +2686,12 @@ w:localWorkflowCaptureLifetimeFinding a p:Finding ;
     rdfs:label "Reject workflow capture use without assignment on every incoming path" ;
     p:source w:localOwnerWorkflowVerification .
 w:localOwnerWorkflow p:addresses w:localWorkflowCaptureLifetimeFinding .
+
+w:roleScopedMembershipReport a p:Decision ;
+    rdfs:label "Keep stored membership across role changes and derive active membership from the selected role" ;
+    p:source w:basicCommandInteropPlan ;
+    p:reason "A role change deactivates inbound grants in client mode and preserves them for an explicit return to server mode. A separate receiver-side authorization check is required before dispatch." .
+w:profileRoleSwitchCases a p:Artifact ;
+    rdfs:label "Thirty local cases including grant retention, forbidden additions and reactivation" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/7fa56586df8e13253f3347a27ed157a0a3dfad31/verification/whole/basic-command-interop/local-profile-setup-aarch64-apple-darwin.json" .
+w:leasedProfileSetup p:source w:roleScopedMembershipReport ; p:evidence w:profileRoleSwitchCases .
