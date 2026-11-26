@@ -1768,5 +1768,11 @@ w:boundedJsonSuiteConvergence a p:Task ;
     rdfs:label "Bind the private bounded JSON test to the canonical workspace" ;
     p:milestone w:marmishMilestone ; p:source w:boundedJsonInputPlan ;
     p:dependsOn w:boundedJsonInput, w:structuralApplicationConvergence ;
-    p:status p:active ;
+    p:status p:done ; p:evidence w:boundedJsonSuiteDarwin, w:boundedJsonSuiteLinux ;
     p:acceptance "Verify the canonical successor's named suite on both ARM64 hosts, reject an exact filter selecting zero tests, and keep the test dependency out of MDK's ordinary build." .
+
+w:boundedJsonSuiteDarwin a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/c8d1fd024e8f59c72cc4a1935b7cc4c1ca04d118/verification/whole/suite/canonical-mdk-aarch64-apple-darwin.json" .
+
+w:boundedJsonSuiteLinux a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/c8d1fd024e8f59c72cc4a1935b7cc4c1ca04d118/verification/whole/suite/canonical-mdk-aarch64-unknown-linux-gnu.json" .
