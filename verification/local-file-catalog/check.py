@@ -51,7 +51,7 @@ with tempfile.TemporaryDirectory() as path:
     (root / "src/lib.rs").write_bytes((HERE / "caller.rs").read_bytes())
     (root / "src/catalog.rs").write_bytes((out / "catalog.rs").read_bytes())
     run("cargo", "+1.97.1", "generate-lockfile", "--offline", cwd=root)
-    run("cargo", "+1.97.1", "test", "--offline", "--locked", cwd=root)
+    run("cargo", "+1.97.1", "test", "--offline", "--locked", "--", "--nocapture", cwd=root)
     for field, value in [
         ("fixedCatalog", "../outside"),
         ("suffix", "/metadata"),

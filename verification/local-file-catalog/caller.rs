@@ -115,9 +115,13 @@ fn catalog_discovery_and_guard_order() {
     fs::write(root.join("v1-report.extra"), b"x").unwrap();
     use std::os::unix::ffi::OsStrExt;
     let non_utf8 = root.join(std::ffi::OsStr::from_bytes(b"v1-report.\xff.idx"));
-    if fs::write(&non_utf8, b"not a UTF-8 candidate").is_ok() {
+    if cfg!(target_os = "linux") {
+        fs::write(&non_utf8, b"not a UTF-8 candidate").unwrap();
         inspect_catalog(&root, Naming::Selected, pin).unwrap();
         fs::remove_file(non_utf8).unwrap();
+        println!("Observed UTF-8 candidate exclusion on Linux");
+    } else {
+        println!("Linux-only non-UTF-8 fixture omitted on this filesystem");
     }
     let decoy = root.join("v1-report.garbage.idx");
     fs::write(&decoy, b"malformed").unwrap();
