@@ -125,7 +125,17 @@ impl ActiveProviders {
         let deadline = Instant::now() + Duration::from_millis(SHUTDOWN_MS);
         let closed = stop_provider_stages(
             deadline,
-            async { adapter.deactivate_account(&identity).await.is_ok() },
+            async {
+                match client.relay(connector.relay.as_str()).await {
+                    Ok(None) => true,
+                    Ok(Some(bound)) => {
+                        !bound.status().is_connected()
+                            || adapter.deactivate_account(&identity).await.is_ok()
+                            || !bound.status().is_connected()
+                    }
+                    Err(_) => false,
+                }
+            },
             async { let _ = stop.send(true); client.shutdown().await; client.is_shutdown() },
             forwarder,
             relay.shutdown(),
