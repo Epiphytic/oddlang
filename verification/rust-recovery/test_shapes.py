@@ -134,6 +134,33 @@ cargoLockSha256 = "{digest}"
                 json.loads(original)["gaps"],
             )
 
+            # Replay a pinned older adapter observation and reject the same
+            # vocabulary label when a nested field actually uses v2 arrays.
+            fake = root / "legacy.py"
+            payload = root / "legacy.json"
+            fake.write_text("#!/usr/bin/env python3\nfrom pathlib import Path\nprint(Path(__file__).with_suffix('.json').read_text())\n")
+            fake.chmod(0o755)
+            legacy = json.loads(original)
+            legacy["vocabulary"] = "oddlang-data-shapes-v1"
+            profile.write_text(base.replace(str(HERE / 'run.sh'), str(fake)).replace(
+                '["Cargo.toml", "Cargo.lock", "driver.rs", "shapes.rs", "shape_model.rs"]', '["legacy.json"]'))
+            def replay(name):
+                payload.write_text(json.dumps(dict(graph=legacy, crateName="observatory",
+                                  compiler="8bab26f4f68e0e26f0bb7960be334d5b520ea452")))
+                return subprocess.run([BINARY, "recover", "rust-shapes", manifest, "--profile",
+                                       profile, "--out", root / name], capture_output=True, text=True)
+            forged = replay("mislabeled")
+            self.assertNotEqual(forged.returncode, 0)
+            self.assertIn("array shape requires", forged.stderr)
+            self.assertFalse((root / "mislabeled").exists())
+            historical = next(d for d in legacy["declarations"] if d["name"] == "Frame")
+            next(f for f in historical["fields"] if f["name"] == "array")["type"] = {
+                "kind": "unresolved", "reason": "array-length"}
+            old = replay("valid-old")
+            self.assertEqual(old.returncode, 0, old.stderr)
+            self.assertEqual(json.loads((root / "valid-old/shapes.lock").read_bytes())["vocabulary"],
+                             "oddlang-data-shapes-v1")
+
             reformatted, _ = extract(SOURCE.replace("struct Marker;", "\n\nstruct Marker;"), "reformat")
             self.assertEqual(original, reformatted)
 
