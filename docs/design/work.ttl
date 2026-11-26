@@ -1201,3 +1201,21 @@ w:unifiedProfileWorkspace p:addresses w:retainedReadbackComposition .
 
 w:unifiedProfileWorkspaceReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/56> .
+
+w:finiteErrorDomainsPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-finite-error-domains.md" .
+w:finiteErrorDomains a p:Task ;
+    rdfs:label "Recover and project finite nested Rust error categories" ;
+    p:milestone w:marmishMilestone ; p:source w:finiteErrorDomainsPlan ;
+    p:status p:done ; p:dependsOn w:unifiedProfileWorkspace ;
+    p:acceptance "Recover pinned named diagnostics, exhaustive category tables, and explicit error-source and conversion rules. Compile an independent caller against original and sealed generated native packages, and observe a source mutation through both." .
+w:finiteErrorDomainFixture a p:Artifact ;
+    p:location "verification/finite-error-domains/verify.py" .
+w:nativeErrorDomainReceipt a p:Artifact ;
+    p:location "companion:verification/whole/native-error/darwin-arm64/receipt.json" .
+w:finiteErrorDomains p:evidence w:finiteErrorDomainFixture, w:nativeErrorDomainReceipt .
+
+w:finiteErrorNameResolutionReview a p:Finding ;
+    rdfs:label "Reproduce Rust alias shadowing and qualify generated category helper calls" ;
+    p:source w:finiteErrorDomainFixture .
+w:finiteErrorDomains p:addresses w:finiteErrorNameResolutionReview .
