@@ -2539,6 +2539,23 @@ w:readOnlyFileLinux a p:Artifact ;
 w:verifiedLocalFileCatalog a p:Task ;
     rdfs:label "Qualify pinned directory catalogs against a typed parser and descriptor policy" ;
     p:milestone w:marmishMilestone ; p:source w:readOnlyFileIntegrityPlan ;
-    p:dependsOn w:readOnlyFileIntegrity, w:structuralProfileCompiler ;
-    p:status p:planned ;
+    p:dependsOn w:readOnlyFileIntegrity, w:localFileCatalogLinkage ;
+    p:status p:done ; p:evidence w:localFileCatalogDarwin, w:localFileCatalogLinux ;
     p:acceptance "Run the unchanged original directory discovery test and typed guard comparisons on both ARM64 hosts using only inert files and a caller-supplied checksum." .
+w:localFileCatalogLinkage a p:Task ;
+    rdfs:label "Verify typed native links in an unrelated local file catalog" ;
+    p:milestone w:marmishMilestone ; p:source w:readOnlyFileIntegrityPlan ;
+    p:dependsOn w:structuralProfileCompiler ;
+    p:status p:done ; p:evidence w:verifiedLocalFileCatalogFixture, w:localFileCatalogAssemblyFixture ;
+    p:acceptance "Compile and run a linked grammar and descriptor catalog, then refuse six incompatible native compositions." .
+
+w:localFileCatalogAssemblyFixture a p:Artifact ;
+    p:location "verification/local-file-catalog/assembly.py" .
+w:verifiedLocalFileCatalogFixture a p:Artifact ;
+    p:location "verification/local-file-catalog/check.py" .
+
+w:localFileCatalogDarwin a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/88a771e63032b98ee62a97f9a09a2786692dcf6c/verification/whole/local-file-catalog/aarch64-apple-darwin.json" .
+
+w:localFileCatalogLinux a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/88a771e63032b98ee62a97f9a09a2786692dcf6c/verification/whole/local-file-catalog/aarch64-unknown-linux-gnu.json" .

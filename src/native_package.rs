@@ -200,6 +200,7 @@ enum Kind {
     BufferedInput,
     BoundedJsonInput,
     ReadOnlyFile,
+    LocalFileCatalog,
     BuildReport,
     StructuredDiagnostics,
     ProcessLimit,
@@ -301,6 +302,12 @@ fn project(
             }
             crate::structured_diagnostics::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
             "diagnostics.rs"
+        }
+        Kind::LocalFileCatalog => {
+            let graph_path = input.join("graph.json");
+            io(fs::write(&graph_path, &graph))?;
+            crate::local_file_catalog::build(&graph_path, &overlay, &output)?;
+            "catalog.rs"
         }
         Kind::ReadOnlyFile => {
             let graph_path = input.join("graph.json");
@@ -729,6 +736,81 @@ fn validate_public_record_links(components: &[Component], base: &Path) -> Result
     Ok(())
 }
 
+fn validate_local_catalogs(components: &[Component], base: &Path) -> Result<()> {
+    for catalog in components
+        .iter()
+        .filter(|component| matches!(component.kind, Kind::LocalFileCatalog))
+    {
+        let (graph, binding) = crate::local_file_catalog::parse(
+            &catalog.graph.read(base)?,
+            &catalog.overlay.read(base)?,
+        )?;
+        if catalog.visibility != Visibility::Private
+            || !catalog.reexports.is_empty()
+            || catalog
+                .root_reexports
+                .as_ref()
+                .is_some_and(|names| !names.is_empty())
+            || catalog
+                .crate_reexports
+                .iter()
+                .any(|name| !binding.exports().contains(&name.as_str()))
+        {
+            return Err("local file catalog needs private crate-scoped bindings".into());
+        }
+        let mut grammars = components.iter().filter(|component| {
+            matches!(component.kind, Kind::LineGrammar)
+                && binding.record.module[1..] == [component.module.as_str()]
+                && component.crate_reexports.contains(&binding.record.r#type)
+        });
+        let grammar = grammars
+            .next()
+            .ok_or("local file catalog needs its bound line grammar")?;
+        if grammars.next().is_some() {
+            return Err("local file catalog line grammar is ambiguous".into());
+        }
+        crate::line_grammar::validate_catalog_record(
+            &grammar.graph.read(base)?,
+            &grammar.overlay.read(base)?,
+            &graph,
+            &binding,
+        )?;
+        let mut providers = components.iter().filter(|component| {
+            matches!(component.kind, Kind::ReadOnlyFile)
+                && binding.file.module[1..] == [component.module.as_str()]
+                && [binding.file.read.as_str(), binding.file.verify.as_str()]
+                    .iter()
+                    .all(|name| {
+                        component
+                            .crate_reexports
+                            .iter()
+                            .any(|actual| actual == name)
+                    })
+        });
+        let provider = providers
+            .next()
+            .ok_or("local file catalog needs its bound read-only file policy")?;
+        if providers.next().is_some() {
+            return Err("local file catalog read-only file policy is ambiguous".into());
+        }
+        let raw = provider.graph.read(base)?;
+        let native = provider.overlay.read(base)?;
+        let ([_, read, verify], [io, invalid]) =
+            crate::read_only_file::native_links(&raw, &native)?;
+        if crate::read_only_file::identity(&raw)? != graph.file_policy
+            || read != binding.file.read
+            || verify != binding.file.verify
+            || io.error != binding.error
+            || io.variant != binding.io_variant
+            || invalid.id != graph.error_id()
+            || invalid.variant != binding.invalid_variant
+        {
+            return Err("local file catalog file and error identities or scopes differ".into());
+        }
+    }
+    Ok(())
+}
+
 fn validate_component_requirements(
     manifest: &Manifest,
     base: &Path,
@@ -1120,6 +1202,7 @@ pub(super) fn build_pinned(
     validate_line_grammar_errors(&manifest.components, base)?;
     validate_public_record_links(&manifest.components, base)?;
     validate_nested_codecs(&manifest.components, base)?;
+    validate_local_catalogs(&manifest.components, base)?;
     let cargo = cargo_manifest(&manifest)?;
     let lock = manifest.cargo_lock.read(base)?;
     for provider in &required {
@@ -1198,6 +1281,7 @@ pub(super) fn build_pinned(
                         | Kind::BufferedInput
                         | Kind::BoundedJsonInput
                         | Kind::ReadOnlyFile
+                        | Kind::LocalFileCatalog
                 ))
         {
             return Err("invalid module or empty reexports".into());

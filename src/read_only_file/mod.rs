@@ -163,6 +163,11 @@ pub(crate) struct NativeLink {
     pub io: bool,
 }
 
+pub(crate) fn identity(raw: &[u8]) -> Result<String> {
+    let graph: Graph = serde_json::from_slice(raw).map_err(|error| error.to_string())?;
+    Ok(graph.profile.id)
+}
+
 pub(crate) fn native_links(graph: &[u8], binding: &[u8]) -> Result<([String; 3], [NativeLink; 2])> {
     let graph: Graph = serde_json::from_slice(graph).map_err(|error| error.to_string())?;
     let binding: Binding = serde_json::from_slice(binding).map_err(|error| error.to_string())?;

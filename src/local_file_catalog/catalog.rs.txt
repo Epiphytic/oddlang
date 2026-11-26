@@ -1,0 +1,70 @@
+#[allow(dead_code)]
+#[derive(Clone, Copy)]
+pub(crate) enum @NAMING@ {
+    @SELECTED@,
+    @FIXED@,
+}
+
+#[allow(dead_code)]
+pub(crate) const @NAMES@: [&str; @ASSET_COUNT@] = @ASSET_NAMES@;
+
+#[allow(dead_code)]
+pub(crate) fn @ENTRY@(
+    root: &::std::path::Path,
+    naming: @NAMING@,
+    pin: [u8; 32],
+) -> ::core::result::Result<@MANIFEST@, @ERROR@> {
+    use ::sha2::Digest;
+    let bad_path = || @ERROR@::@INVALID@("@BAD_PATH@");
+    let basename = |name: &str| {
+        !matches!(name, "" | "." | "..")
+            && name.bytes().all(|b| b.is_ascii_alphanumeric() || matches!(b, b'.' | b'_' | b'-'))
+    };
+    let fixed = matches!(naming, @NAMING@::@FIXED@);
+    let catalog = if fixed {
+        root.join(@FIXED_NAME@)
+    } else {
+        let mut matches = 0u8;
+        let mut candidate = None;
+        for entry in ::std::fs::read_dir(root).map_err(@ERROR@::@IO@)? {
+            let entry = entry.map_err(@ERROR@::@IO@)?;
+            if entry.file_name().to_str().is_some_and(|name| {
+                @PREFIXES@.iter().any(|prefix| name.starts_with(prefix)) && name.ends_with(@SUFFIX@)
+            }) {
+                matches = matches.saturating_add(1);
+                if matches == 1 {
+                    candidate = Some(entry.path());
+                }
+            }
+        }
+        if matches != 1 {
+            return Err(bad_path());
+        }
+        candidate.ok_or_else(bad_path)?
+    };
+
+    let bytes = @READ@(&catalog, @LIMIT@)?;
+    if <[u8; 32]>::from(::sha2::Sha256::digest(&bytes)) != pin {
+        return Err(@ERROR@::@INVALID@("@BAD_DIGEST@"));
+    }
+    let parsed = @MANIFEST@::@PARSE@(&bytes)?;
+    if !fixed {
+        let mut name = parsed.@NAMER@(@ANCHOR@);
+        name.push_str(@SUFFIX@);
+        if !basename(&name) || catalog != root.join(name) {
+            return Err(bad_path());
+        }
+    }
+    for asset in &parsed.@ASSETS@ {
+        let name = if fixed {
+            ::std::string::String::from(asset.@NAME@)
+        } else {
+            parsed.@NAMER@(asset.@NAME@)
+        };
+        if !basename(&name) {
+            return Err(bad_path());
+        }
+        @VERIFY@(&root.join(name), asset.@BYTES@, asset.@MODE@, &asset.@DIGEST@, fixed)?;
+    }
+    Ok(parsed)
+}

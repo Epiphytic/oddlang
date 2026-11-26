@@ -245,6 +245,84 @@ fn names_are_valid<'a>(names: impl Iterator<Item = &'a String>) -> bool {
 }
 
 impl RecordResult {
+    pub(super) fn validate_catalog_roles(
+        &self,
+        graph: &Graph,
+        source: &RecordBinding,
+        target: &crate::local_file_catalog::Record,
+        names: &[String],
+    ) -> Result<()> {
+        let root = &self.entry.record;
+        let root_binding = &source.records[root];
+        let formatter = self.formatters.iter().any(|formatter| {
+            formatter.argument && source.formatters.get(&formatter.id) == Some(&target.asset_name)
+        });
+        if root_binding.name != target.r#type || source.parser != target.parse || !formatter {
+            return Err("local file catalog record type, parser or formatter differs".into());
+        }
+        let assets = self.records[root]
+            .iter()
+            .find(|field| root_binding.fields.get(&field.id) == Some(&target.assets))
+            .ok_or("local file catalog asset vector is missing")?;
+        let FieldType::RecordVector { record } = &assets.r#type else {
+            return Err("local file catalog assets must be a typed record vector".into());
+        };
+        let nested = &source.records[record];
+        let fields = &self.records[record];
+        let lookup = |name: &str| {
+            fields.iter().find(|field| {
+                nested
+                    .fields
+                    .get(&field.id)
+                    .is_some_and(|candidate| candidate == name)
+            })
+        };
+        let Some(name_field) = lookup(&target.name) else {
+            return Err("local file catalog asset name is missing".into());
+        };
+        if !matches!(name_field.r#type, FieldType::StaticText)
+            || !lookup(&target.bytes)
+                .is_some_and(|field| matches!(field.r#type, FieldType::Unsigned { bits: 64 }))
+            || !lookup(&target.mode)
+                .is_some_and(|field| matches!(field.r#type, FieldType::Unsigned { bits: 32 }))
+            || !lookup(&target.digest)
+                .is_some_and(|field| matches!(field.r#type, FieldType::Bytes { length: 32 }))
+        {
+            return Err("local file catalog asset field types differ".into());
+        }
+        let Some(Value::Vector { items }) = self.entry.fields.get(&assets.id) else {
+            return Err("local file catalog asset construction order is missing".into());
+        };
+        let expected = items
+            .iter()
+            .map(|item| {
+                let Some(Value::Capture { id }) = item.fields.get(&name_field.id) else {
+                    return Err("local file catalog asset name must use a fixed capture");
+                };
+                graph
+                    .rows
+                    .iter()
+                    .flatten()
+                    .find_map(|token| match token {
+                        super::model::Token::Literal {
+                            text,
+                            capture: Some(capture),
+                        } if capture == id => Some(text.as_str()),
+                        _ => None,
+                    })
+                    .ok_or("local file catalog asset name must use a literal capture")
+            })
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+        if !expected
+            .iter()
+            .copied()
+            .eq(names.iter().map(String::as_str))
+        {
+            return Err("local file catalog asset names differ from the grammar".into());
+        }
+        Ok(())
+    }
+
     pub(super) fn validate(&self, binding: &RecordBinding, captures: &Captures<'_>) -> Result<()> {
         iri(&self.failure.id)?;
         if self.failure.id != binding.error.id

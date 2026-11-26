@@ -221,3 +221,14 @@ Native package manifests may bind an offline test-only library through
 `dependencies` and renders as Cargo's `[dev-dependencies]`. Names cannot
 collide with ordinary dependencies or declared workspace siblings. A bounded
 JSON component can bind its pinned provider as a development dependency.
+
+A local file catalog may bind the typed result of a bounded line grammar
+and a crate-private read-only descriptor policy. The graph declares basename
+families, their suffix, the fixed catalog name, the naming anchor, the ordered
+literal artifact names and the caller-supplied SHA-256 check. The selector
+counts matching UTF-8 names before it reads or parses one, including names
+whose bytes would fail the grammar. Ownership and low-mode checks apply to
+the fixed-name branch. Native bindings select
+the typed parser, asset fields and file policy. Assembly checks the grammar
+and policy identities, constructor order, field widths, error roles and
+private exports. The contract operates on inert local files.

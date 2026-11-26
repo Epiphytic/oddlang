@@ -11,7 +11,8 @@ line grammar and compare the caller's expected digest before parsing.
   observations, and check the projected result.
 - [x] Replay file admission, byte bounds, optional ownership and permission checks, digest
   verification and I/O error mapping using inert files on both native ARM64 hosts.
-- [ ] Qualify a unique-candidate directory selector and read-only grammar composition.
+- [x] Verify typed grammar and descriptor linkage on an unrelated native package.
+- [x] Qualify a unique-candidate directory selector and read-only grammar composition.
   Credit the original named case only after it runs unchanged against the generated seam.
 
 Use pinned SHA-256 and Unix descriptor providers. Open files read-only and perform no
@@ -36,3 +37,14 @@ baseline workspace lock is
 `24f1bda8604bfc74da3584f707538ff8b27997ccabc5f169139da5a4ed5c95b3`.
 [macOS ARM64](https://github.com/Epiphytic/marmish-oddlang/blob/d27146eee73937d147b9db32d3210d515220be04/verification/whole/local-file-integrity/aarch64-apple-darwin.json)
 · [Linux ARM64](https://github.com/Epiphytic/marmish-oddlang/blob/d27146eee73937d147b9db32d3210d515220be04/verification/whole/local-file-integrity/aarch64-unknown-linux-gnu.json)
+
+The original and generated native test harnesses ran the unchanged directory
+discovery case once per host and matched twelve independent observations.
+The removed-family mutation failed at the exact ambiguity assertion. Both
+native receipts use baseline lock
+`6cc00cdb304db004d4fc7ca7433155442dc7c34170123441904ab696a9d9551c`.
+[macOS ARM64](https://github.com/Epiphytic/marmish-oddlang/blob/88a771e63032b98ee62a97f9a09a2786692dcf6c/verification/whole/local-file-catalog/aarch64-apple-darwin.json)
+· [Linux ARM64](https://github.com/Epiphytic/marmish-oddlang/blob/88a771e63032b98ee62a97f9a09a2786692dcf6c/verification/whole/local-file-catalog/aarch64-unknown-linux-gnu.json)
+
+The unrelated encoding test exercised a non-UTF-8 filename on Linux ARM64.
+The Darwin fixture skips that path, which the test filesystem cannot create.
