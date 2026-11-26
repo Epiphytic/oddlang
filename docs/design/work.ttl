@@ -1741,3 +1741,10 @@ w:boundedJsonInput a p:Task ;
 w:boundedJsonInputFixture a p:Artifact ;
     p:location "verification/bounded-json-input/verify.py" .
 w:boundedJsonInput p:evidence w:boundedJsonInputFixture .
+
+w:boundedJsonSuiteConvergence a p:Task ;
+    rdfs:label "Bind the private bounded JSON test to the canonical workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:boundedJsonInputPlan ;
+    p:dependsOn w:boundedJsonInput, w:structuralApplicationConvergence ;
+    p:status p:active ;
+    p:acceptance "Verify the canonical successor's named suite on both ARM64 hosts, reject an exact filter selecting zero tests, and keep the test dependency out of MDK's ordinary build." .
