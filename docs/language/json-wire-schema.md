@@ -24,3 +24,21 @@ The locked Rust 2021 fixture compares original and generated wire bytes, rejects
 A `bounded-base64` field maps one byte vector to standard padded Base64. Its `policy` specifies `maxBytes`, `encodedLimitMessage`, `decodedLimitMessage` and `syntaxMessage`. Parsing checks encoded length, decoding, decoded length and canonical re-encoding in that order. Encoding represents the supplied bytes; semantic guards run separately. `count` applies to the decoded byte count and `excludes-byte` forbids one byte in a scalar or fixed byte field.
 
 A Rust binding can specify `nativeValidation` per guard owner, with a native `method`, error `typePath`, and a map from every guard error IRI to its native `variant` and optional static text `argument`. This replaces the default IRI-returning method for that owner. The graph still determines which guard runs first. The unrelated scalar-byte test exercises the typed API, checksum-independent wire rules and validation separately. [Scalar-byte fixture](../../verification/wire-schema/byte_value.py)
+
+## Typed hash views
+
+A record can declare named `hashViews`. Each view supplies its stable `id`, record `owner`, `algorithm` (`sha256`), a byte array `domain`, an ordered list of `fields` slots, and an `output`. The hash input begins with the domain bytes, followed by the encoded slots in the order given. A slot selects a field IRI or a parameter IRI and one encoding.
+
+| Encoding | Input | Bytes |
+| --- | --- | --- |
+| `unsigned-be` | Unsigned integer | Big-endian bytes at the declared width |
+| `bool-u8` | Boolean | Zero for false and one for true |
+| `fixed-bytes` | Fixed lowercase-hex wire field | Raw fixed-width byte array |
+| `u32-be-length-prefixed-bytes` | Scalar Base64 wire field | Big-endian 32-bit byte length and raw bytes |
+| `external-tag-u8` | External enum field or parameter | Byte assigned by the external type's `hashTags` table |
+
+The optional `parameters` array supplies ordered `{id, external}` declarations for native inputs. A `hashTags` map keys each table by external enum IRI, and the table keys its distinct byte tags by variant IRI. The Rust binding's `hashVariants` maps those variant IRIs to native enum constructors. Exhaustive native matches require a binding for every variant. Project owners qualify numeric assignments independently of their binding.
+
+A view with `validate: true` runs its owner's normal validator first and returns its first error. Length-prefixed byte slots require that validation and an unconditional count guard to bound directly constructed values before the length conversion. The `bytes` output returns the digest array. The `lower-hex` output returns its literal `prefix` followed by 64 lowercase hexadecimal digits.
+
+The Rust binding's `hashViews` map supplies each view's `method`, `library` (`sha2`), and a map of parameter IRIs to native names when the view takes arguments. The native package pins the selected provider. The projection derives independent-witness obligations for each view and each numeric tag. View declaration order is canonicalized by IRI. Slot order and parameter order remain observable. [Independent byte-level fixture](../../verification/wire-schema/hash_views.py)

@@ -131,6 +131,8 @@ enum Kind {
     LocalCommandClient,
     WireSchema,
     WireProtocol,
+    BinaryRecord,
+    FieldRelation,
 }
 
 #[derive(Deserialize)]
@@ -211,6 +213,18 @@ fn project(
             io(fs::write(&path, graph))?;
             crate::integrity_block::build(&path, &overlay, &output)?;
             "codec.rs"
+        }
+        Kind::FieldRelation => {
+            let path = input.join("graph.json");
+            io(fs::write(&path, graph))?;
+            crate::field_relation::build(&path, &overlay, &output)?;
+            "relations.rs"
+        }
+        Kind::BinaryRecord => {
+            let path = input.join("graph.json");
+            io(fs::write(&path, graph))?;
+            crate::binary_record::build(&path, &overlay, &output)?;
+            "record.rs"
         }
         Kind::WireSchema => {
             let path = input.join("graph.json");
@@ -431,8 +445,21 @@ pub(super) fn build_pinned(raw: &[u8], base: &Path, output: &Path, standalone: b
     let mut records = Vec::new();
     let mut root_exports = String::new();
     for (index, component) in manifest.components.iter().enumerate() {
+        if matches!(component.kind, Kind::FieldRelation)
+            && (!component.reexports.is_empty()
+                || !component.crate_reexports.is_empty()
+                || component
+                    .root_reexports
+                    .as_ref()
+                    .is_some_and(|names| !names.is_empty()))
+        {
+            return Err("field relation component cannot reexport items".into());
+        }
+
         if !ident(&component.module)
-            || (component.reexports.is_empty() && component.crate_reexports.is_empty())
+            || (component.reexports.is_empty()
+                && component.crate_reexports.is_empty()
+                && !matches!(component.kind, Kind::FieldRelation))
         {
             return Err("invalid module or empty reexports".into());
         }

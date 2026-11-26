@@ -8,6 +8,8 @@ use std::{
     path::Path,
 };
 
+mod hash_view;
+pub(crate) use hash_view::{sha256_begin, sha256_enum, sha256_hex};
 mod obligations;
 pub mod protocol;
 pub mod recover;
@@ -24,6 +26,14 @@ struct Schema {
     id: String,
     types: Vec<Definition>,
     guards: Vec<Guard>,
+    #[serde(rename = "hashViews", default, skip_serializing_if = "Vec::is_empty")]
+    hash_views: Vec<hash_view::View>,
+    #[serde(
+        rename = "hashTags",
+        default,
+        skip_serializing_if = "BTreeMap::is_empty"
+    )]
+    hash_tags: BTreeMap<String, BTreeMap<String, u8>>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     unresolved: Vec<String>,
 }
@@ -238,6 +248,18 @@ struct Binding {
     native_validation: BTreeMap<String, NativeValidation>,
     externals: BTreeMap<String, String>,
     #[serde(
+        rename = "hashViews",
+        default,
+        skip_serializing_if = "BTreeMap::is_empty"
+    )]
+    hash_views: BTreeMap<String, hash_view::ViewBinding>,
+    #[serde(
+        rename = "hashVariants",
+        default,
+        skip_serializing_if = "BTreeMap::is_empty"
+    )]
+    hash_variants: BTreeMap<String, String>,
+    #[serde(
         rename = "externalDerives",
         default,
         skip_serializing_if = "BTreeMap::is_empty"
@@ -258,14 +280,14 @@ struct Fault {
     variant: String,
     argument: Option<String>,
 }
-fn symbol(name: &str) -> bool {
+pub(crate) fn symbol(name: &str) -> bool {
     name.as_bytes().first().is_some_and(u8::is_ascii_alphabetic)
         && name.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_')
         && name != "gen"
         && syn::parse_str::<syn::Ident>(name).is_ok()
 }
 
-fn type_symbol(name: &str) -> bool {
+pub(crate) fn type_symbol(name: &str) -> bool {
     symbol(name) && name.as_bytes()[0].is_ascii_uppercase()
 }
 
@@ -288,7 +310,7 @@ fn native_path(path: &str) -> bool {
     !prefix
 }
 
-fn iri(value: &str) -> Result<()> {
+pub(crate) fn iri(value: &str) -> Result<()> {
     NamedNode::new(value)
         .map(|_| ())
         .map_err(|error| error.to_string())
@@ -473,7 +495,7 @@ impl Schema {
                 return Err(format!("invalid native validation binding: {owner}"));
             }
         }
-        Ok(())
+        hash_view::validate(self, binding, &declared, &ids)
     }
 }
 
@@ -635,16 +657,16 @@ fn io<T>(result: std::io::Result<T>) -> Result<T> {
     result.map_err(|error| error.to_string())
 }
 
-fn json<T: serde::de::DeserializeOwned>(path: &Path) -> Result<T> {
+pub(crate) fn json<T: serde::de::DeserializeOwned>(path: &Path) -> Result<T> {
     serde_json::from_slice(&io(fs::read(path))?)
         .map_err(|error| format!("{}: {error}", path.display()))
 }
 
-fn encode<T: Serialize>(value: &T) -> Result<Vec<u8>> {
+pub(crate) fn encode<T: Serialize>(value: &T) -> Result<Vec<u8>> {
     serde_json::to_vec_pretty(value).map_err(|error| error.to_string())
 }
 
-fn digest(bytes: &[u8]) -> String {
+pub(crate) fn digest(bytes: &[u8]) -> String {
     Sha256::digest(bytes)
         .iter()
         .map(|byte| format!("{byte:02x}"))
@@ -669,6 +691,9 @@ fn publish(output: &Path, files: &[(&str, &[u8])]) -> Result<()> {
 pub fn build(graph: &Path, binding: &Path, destination: &Path) -> Result<()> {
     let mut graph: Schema = json(graph)?;
     graph.types.sort_by(|left, right| left.id().cmp(right.id()));
+    graph
+        .hash_views
+        .sort_by(|left, right| left.id.cmp(&right.id));
     let binding: Binding = json(binding)?;
     graph.validate(&binding)?;
     let source = render::project(&graph, &binding);

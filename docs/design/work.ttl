@@ -912,3 +912,57 @@ w:localEndpointDiscoveryPlan a p:Artifact ;
     p:location "docs/superpowers/plans/2026-11-26-local-endpoint-discovery.md" .
 w:localEndpointNativeReceipt a p:Artifact ;
     p:location "companion:verification/whole/status/discovery-macos-arm64.json" .
+w:typedHashViews a p:Task ; rdfs:label "Project ordered typed hashing and hexadecimal record views" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:wireByteValues, w:nativePackageAssembly ;
+    p:acceptance "Project independent SHA-256 views with portable field order, binary encodings, stable enum tag identities and named validation. Qualify an unrelated native consumer with independent expected bytes and negative controls." ;
+    p:evidence w:typedHashViewsFixture .
+w:typedHashViewsFixture a p:Artifact ; p:location "verification/wire-schema/hash_views.py" .
+w:wholeMarmishProtocols p:dependsOn w:typedHashViews .
+w:typedHashIdentityReview a p:Finding ;
+    rdfs:label "Reject hash tag case IRIs that alias a view, parameter or existing declaration" ;
+    p:source w:typedHashViewsFixture .
+w:typedHashViews p:addresses w:typedHashIdentityReview .
+
+w:boundedBinaryRecords a p:Task ; rdfs:label "Project ordered bounded tagged binary records" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:nativePackageAssembly, w:sharedNumberedEnum ;
+    p:acceptance "Generate checked encoding and decoding for an ordered tagged record with declared lengths, validation, and typed errors. Verify bytes, limits and parse precedence against an independent native fixture." ;
+    p:evidence w:binaryRecordFixture .
+w:binaryRecordFixture a p:Artifact ; p:location "verification/binary-record/verify.py" .
+w:wholeMarmishProtocols p:dependsOn w:boundedBinaryRecords .
+w:binaryRecordReview a p:Finding ;
+    rdfs:label "Disambiguate binary record errors and compile the native package composition" ;
+    p:source w:binaryRecordFixture .
+w:boundedBinaryRecords p:addresses w:binaryRecordReview .
+
+w:typedFieldRelations a p:Task ; rdfs:label "Project typed ordered cross-record relations" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:boundedBinaryRecords, w:typedHashViews ;
+    p:acceptance "Compare typed fields and arguments with explicit short-circuit order and propagate a checked operation error only when reached. Verify each outcome and reject invalid operands." ;
+    p:evidence w:typedFieldRelationFixture .
+w:typedFieldRelationFixture a p:Artifact ; p:location "verification/field-relation/verify.py" .
+w:wholeMarmishProtocols p:dependsOn w:typedFieldRelations .
+
+w:binaryMetadataRecords a p:Task ; rdfs:label "Project optional binary metadata and ordered constraints" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:boundedBinaryRecords, w:typedHashViews ;
+    p:acceptance "Check exact boolean and optional tags, signed inline records, typed metadata guards, early and deferred errors, and pure namespace views with an unrelated native fixture." ;
+    p:evidence w:binaryMetadataFixture .
+w:binaryMetadataFixture a p:Artifact ; p:location "verification/binary-record/metadata.py" .
+w:wholeMarmishProtocols p:dependsOn w:binaryMetadataRecords .
+
+w:typedFieldRelationReview a p:Finding ;
+    rdfs:label "Require native equality and copy capabilities and compile assembled relation components" ;
+    p:source w:typedFieldRelationFixture .
+w:typedFieldRelations p:addresses w:typedFieldRelationReview .
+
+w:binaryMetadataErrorReview a p:Finding ;
+    rdfs:label "Separate parse-time offsets and tags from deferred Manifest field and metadata errors" ;
+    p:source w:binaryMetadataFixture .
+w:binaryMetadataRecords p:addresses w:binaryMetadataErrorReview .
+w:copyManifestQualification a p:Task ; rdfs:label "Qualify a native copy Manifest and Mtime" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned ;
+    p:dependsOn w:binaryMetadataRecords ;
+    p:acceptance "Compare source-free Manifest validation, binary encoding, decoding, namespace and canonical SHA-256 with the pinned original." .
+w:wholeMarmishProtocols p:dependsOn w:copyManifestQualification .

@@ -78,3 +78,12 @@ No source text, AST dump, MIR instruction stream, original executable, vendored 
 The principal feasibility risk is recovering intended behavior where only incidental implementation details are visible. Budget the effort by families of protocols, state machines and OS effects, then recalibrate after the installed command in phase 4 using actual authoring time, unresolved obligations and porting effort. If that checkpoint requires copying upstream implementation logic into provider shims or adding project knowledge to Oddlang, reopen the semantic design before expanding coverage. A finite qualification suite supports a versioned compatibility claim for tested profiles. Universal behavioral equivalence for arbitrary Rust remains unproven.
 
 - [x] Compose recovered JSON wire schemas with shared declarations in pinned native libraries. Compile the independent bounded-byte sensor fixture through the assembled crate.
+
+- [x] Project ordered typed hashing and namespaced hexadecimal record views. Check byte encodings, first-error validation and invalid bindings with an independent native fixture. [Typed hash views](../../language/json-wire-schema.md#typed-hash-views)
+
+- [x] Project ordered tagged binary records. Check field bounds, ordered structural failures and validation after parsing with an independent consumer. [Binary records](../../language/binary-records.md)
+
+- [x] Project typed cross-record equality, ordered prechecks and checked result comparisons. [Field relations](../../language/field-relations.md)
+
+- [x] Extend ordered binary records with nullable metadata, inline signed values, typed guards, and hexadecimal views. [Binary metadata](../../language/binary-records.md#binary-metadata)
+- [ ] Qualify the copy Manifest and Mtime against the pinned native original. Checkpoint owns the separate FileIdentity record witness.
