@@ -1007,10 +1007,14 @@ fn validate_command_callbacks(components: &[Component], base: &Path) -> Result<(
                 &status_owners,
                 &retained_stores,
             )?,
-            Kind::FileProfile => crate::file_profile::callback(
-                &component.graph.read(base)?,
-                &component.overlay.read(base)?,
-            )?,
+            Kind::FileProfile => {
+                let graph = component.graph.read(base)?;
+                let overlay = component.overlay.read(base)?;
+                if let Some(callback) = crate::file_profile::provisioning_callback(&graph, &overlay)? {
+                    callbacks.push((component, callback));
+                }
+                crate::file_profile::callback(&graph, &overlay)?
+            }
             _ => continue,
         };
         callbacks.push((component, callback));

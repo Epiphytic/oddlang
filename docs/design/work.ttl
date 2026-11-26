@@ -2595,3 +2595,13 @@ w:localCommandArgumentCatalogFinding a p:Finding ;
     rdfs:label "Declare exact field encodings and avoid implicit CLI defaults in request obligations" ;
     p:source w:localCommandArgumentsVerification .
 w:localCommandArguments p:addresses w:localCommandArgumentCatalogFinding .
+
+w:leasedProfileSetup a p:Task ;
+    rdfs:label "Project role and membership edits under the private profile lease" ;
+    p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
+    p:status p:done ;
+    p:acceptance "Bind typed child arguments to the declared provisioning operation, enforce declared role and membership constraints, and preserve signer identity and existing initialization behavior." ;
+    p:evidence w:leasedProfileSetupChecks .
+w:leasedProfileSetupChecks a p:Artifact ;
+    p:location "verification/file-profile/provisioning.md" .
+w:basicCommandInterop p:dependsOn w:leasedProfileSetup .
