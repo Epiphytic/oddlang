@@ -1158,7 +1158,7 @@ w:nativeWorkspaceColdStartLockProbe a p:Artifact ;
     p:location <https://github.com/Epiphytic/oddlang/blob/e2ec7338dcf141f95d2f1e24d9bee20cc1cec44b/verification/native-workspace/bootstrap.py> .
 
 w:nestedCodecPackageFixture a p:Artifact ;
-    p:location <https://github.com/Epiphytic/oddlang/blob/00af3dab60da87ef5a5f5b9ce84813c4051eed79/verification/binary-record/verify.py> .
+    p:location <https://github.com/Epiphytic/oddlang/blob/70821c898cabe15a5d0483dc9425e51aae883932/verification/binary-record/verify.py> .
 w:nestedCodecManifestReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/52> .
 
