@@ -19,6 +19,14 @@ fn import_has_profile(path: &str, profile: &str) -> bool {
 
 fn run(args: &[String]) -> Result<(), String> {
     match args {
+        [cmd, kind, source, selection, output]
+            if cmd == "recover" && kind == "wire-schema" => {
+                oddlang::wire_schema::recover::from_source(source.as_ref(), selection.as_ref(), output.as_ref())
+            }
+        [cmd, kind, target, graph, overlay, output]
+            if cmd == "build" && kind == "wire-schema" && target == "rust" => {
+                oddlang::wire_schema::build(graph.as_ref(), overlay.as_ref(), output.as_ref())
+            }
         [cmd, kind, target, graph, overlay, output]
             if cmd == "build" && kind == "integrity-block" && target == "rust" => {
                 oddlang::integrity_block::build(graph.as_ref(), overlay.as_ref(), output.as_ref())
