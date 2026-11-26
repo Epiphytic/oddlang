@@ -204,6 +204,7 @@ enum Kind {
     EndpointSet,
     IntegrityBlock,
     SharedDeclarations,
+    LineGrammar,
     CheckedValues,
     FiniteErrorDomain,
     SequenceJournal,
@@ -258,7 +259,7 @@ struct Group {
     exports: BTreeSet<String>,
 }
 
-fn ident(name: &str) -> bool {
+pub(crate) fn ident(name: &str) -> bool {
     name.bytes().next().is_some_and(|b| b.is_ascii_alphabetic())
         && name.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_')
         && name != "gen"
@@ -394,6 +395,12 @@ fn project(
             crate::checked_values::build(&path, &overlay, &output)?;
             "values.rs"
         }
+        Kind::LineGrammar => {
+            let path = input.join("graph.json");
+            io(fs::write(&path, graph))?;
+            crate::line_grammar::build(&path, &overlay, &output)?;
+            "lines.rs"
+        }
         Kind::SharedDeclarations => {
             let path = input.join("graph.json");
             io(fs::write(&path, graph))?;
@@ -507,6 +514,7 @@ pub(crate) struct ErrorVariantExport {
     pub error_type: String,
     pub variant: String,
     pub unit: bool,
+    pub static_text: bool,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -561,6 +569,53 @@ fn require_erasing_storage(manifest: &Manifest, component: &str) -> Result<()> {
         return Err(format!(
             "{component} requires the locked registry provider zeroize 1.9.1"
         ));
+    }
+    Ok(())
+}
+
+fn validate_line_grammar_errors(components: &[Component], base: &Path) -> Result<()> {
+    for parser in components
+        .iter()
+        .filter(|component| matches!(component.kind, Kind::LineGrammar))
+    {
+        let Some(link) = crate::line_grammar::error_link(&parser.overlay.read(base)?)? else {
+            continue;
+        };
+        let mut matches = 0;
+        for component in components {
+            let error_variants = match component.kind {
+                Kind::SharedDeclarations => crate::shared_declarations::error_variants,
+                Kind::FiniteErrorDomain => crate::finite_error_domain::error_variants,
+                _ => continue,
+            };
+            for error in
+                error_variants(&component.graph.read(base)?, &component.overlay.read(base)?)?
+            {
+                if error.id != link.id {
+                    continue;
+                }
+                let paths = export_paths(component, &error.error_type);
+                if !error.static_text
+                    || error.variant != link.variant
+                    || !paths.iter().any(|path| {
+                        link.r#type.first().is_some_and(|root| root == "crate")
+                            && link.r#type[1..] == path[..]
+                    })
+                {
+                    return Err(format!(
+                        "line grammar error binding does not match a native export: {}",
+                        link.id
+                    ));
+                }
+                matches += 1;
+            }
+        }
+        if matches != 1 {
+            return Err(format!(
+                "line grammar requires exactly one bound native error export: {}",
+                link.id
+            ));
+        }
     }
     Ok(())
 }
@@ -769,6 +824,7 @@ pub(super) fn build_pinned(
         serde_json::from_slice(raw).map_err(|e| format!("package manifest: {e}"))?;
     validate_command_callbacks(&manifest.components, base)?;
     let required = validate_component_requirements(&manifest, base)?;
+    validate_line_grammar_errors(&manifest.components, base)?;
     let cargo = cargo_manifest(&manifest)?;
     let lock = manifest.cargo_lock.read(base)?;
     for provider in &required {

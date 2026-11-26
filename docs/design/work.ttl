@@ -1540,3 +1540,92 @@ w:structuredDiagnosticsReview a p:Finding ;
     rdfs:label "Reject JSON keyword shadowing and prove ignored broken-pipe writes" ;
     p:source w:wholeMarmishPlan .
 w:structuredDiagnosticsProgram p:addresses w:structuredDiagnosticsReview .
+
+w:releaseVersionTextGrammar a p:Task ;
+    rdfs:label "Recover the pure release-version text grammar" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:wholeMarmishFreeze ;
+    p:status p:done ; p:evidence w:releaseVersionGrammarFixture, w:releaseVersionGrammarReceipt ;
+    p:acceptance "Recover ordered prefix choice, ASCII decimal bounds, optional delimited suffix and entire-input consumption from pinned source. Match released vectors and source mutations against a native witness and an unrelated grammar." .
+w:wholeMarmishDistribution p:dependsOn w:releaseVersionTextGrammar .
+
+w:releaseVersionMethodResolutionReview a p:Finding ;
+    rdfs:label "Reject source inputs that can rebind canonical decimal methods" ;
+    p:source w:releaseVersionRecoveryReview .
+w:releaseVersionRecoveryReview a p:Artifact ;
+    p:location "docs/design/reviews/text-grammar.md" .
+w:releaseVersionTextGrammar p:addresses w:releaseVersionMethodResolutionReview .
+
+w:releaseVersionNativeScope a p:Task ;
+    rdfs:label "Qualify release-version method and name resolution in its original native module" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:wholeMarmishFreeze ;
+    p:status p:done ; p:evidence w:releaseVersionGrammarReceipt ;
+    p:acceptance "Pin the source module digest and exact selection span. Exercise the released vectors and supported mutation through the selected predicates in the original native crate scope, with an added test harness and no production changes outside the declared mutation." .
+w:releaseVersionTextGrammar p:dependsOn w:releaseVersionNativeScope .
+
+w:releaseVersionGrammarFixture a p:Artifact ;
+    p:location "tests/text_grammar.rs" .
+
+w:releaseVersionGrammarReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/blob/41f25a5ea27bcd0b707222da3605ba20bb982c4c/verification/whole/release-version-grammar/darwin-arm64/receipt.json> .
+
+w:orderedLineGrammarPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-ordered-line-grammar.md" .
+w:orderedLineGrammar a p:Task ;
+    rdfs:label "Project exact bounded line grammars with ordered typed captures" ;
+    p:milestone w:marmishMilestone ; p:source w:orderedLineGrammarPlan ;
+    p:acceptance "Emit native parsers for exact byte framing, rows, tokens and typed captures. Verify unrelated native typed capture and malformed boundary cases." ;
+    p:status p:done ; p:evidence w:orderedLineGrammarFixture .
+w:orderedLineGrammarFixture a p:Artifact ;
+    p:location "verification/line-grammar/verify.py" .
+w:checkedRecordGrammar a p:Task ;
+    rdfs:label "Project finite relations, aggregate limits and typed record results from line grammars" ;
+    p:milestone w:marmishMilestone ; p:source w:orderedLineGrammarPlan ;
+    p:dependsOn w:orderedLineGrammar ;
+    p:acceptance "Apply checked finite and aggregate constraints and construct native typed records, stable parse errors and controlled name formatters." ;
+    p:status p:done ; p:evidence w:checkedRecordGrammarFixture .
+w:checkedRecordGrammarFixture a p:Artifact ;
+    p:location "verification/line-grammar/verify_records.py" .
+w:pureReleaseManifestGrammar a p:Task ;
+    rdfs:label "Qualify native release manifest parsing and identifiers" ;
+    p:milestone w:marmishMilestone ; p:source w:orderedLineGrammarPlan ;
+    p:dependsOn w:checkedRecordGrammar, w:originalReleaseManifestOracle ;
+    p:acceptance "Use compiler evidence for the native source shapes, recover or verify one changed-source constraint, and compare all 224 independent pure cases and the source mutation." ;
+    p:status p:done ; p:evidence w:pureReleaseManifestCompanion .
+w:pureReleaseManifestCompanion a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/91> .
+
+w:lineGrammarLexicalReview a p:Finding ;
+    rdfs:label "Reject unused nested grammars and directly conflicting token literals" ;
+    p:source w:orderedLineGrammarPlan .
+w:orderedLineGrammar p:addresses w:lineGrammarLexicalReview .
+w:lineGrammarPayloadReview a p:Finding ;
+    rdfs:label "Check static text payload capability for native manifest error variants" ;
+    p:source w:orderedLineGrammarPlan .
+w:checkedRecordGrammar p:addresses w:lineGrammarPayloadReview .
+
+w:originalReleaseManifestOracle a p:Task ;
+    rdfs:label "Qualify the original pure release manifest and one boundary mutation" ;
+    p:milestone w:marmishMilestone ; p:source w:orderedLineGrammarPlan ;
+    p:acceptance "Confirm 224 boundary-weighted rows against the original on both ARM64 hosts, run both unchanged pure upstream tests, and identify the exact source mutation outcome." ;
+    p:status p:done ; p:evidence w:originalReleaseManifestCompanion .
+w:originalReleaseManifestCompanion a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/86> .
+
+w:convergedReleaseManifestPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-converged-release-manifest.md" .
+w:lineGrammarNativeSupport a p:Task ;
+    rdfs:label "Bind native names for reusable text predicates and finite choice arrays" ;
+    p:milestone w:marmishMilestone ; p:source w:convergedReleaseManifestPlan ;
+    p:dependsOn w:checkedRecordGrammar ;
+    p:acceptance "Compile ordered native text arrays and nested predicates from a selected graph with an unrelated crate-visible fixture. Reject unknown or colliding overlay bindings." ;
+    p:status p:done ; p:evidence w:lineGrammarNativeSupportFixture .
+w:lineGrammarNativeSupportFixture a p:Artifact ;
+    p:location "verification/line-grammar/verify_support.py" .
+w:convergedReleaseManifest a p:Task ;
+    rdfs:label "Qualify the pure parser inside the converged native package" ;
+    p:milestone w:marmishMilestone ; p:source w:convergedReleaseManifestPlan ;
+    p:dependsOn w:publicApiConvergence, w:pureReleaseManifestGrammar, w:lineGrammarNativeSupport ;
+    p:acceptance "On both native hosts, preserve prior generated files and package locks, use actual crate-private native records and errors, run the two original pure parser tests unchanged, and replay 224 independent original observations." ;
+    p:status p:active .
