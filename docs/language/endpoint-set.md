@@ -26,7 +26,10 @@ order. A failure in any input discards the result.
 Rules run in array order. A graph has one `parse` rule. Input rules precede
 it and URL rules follow it. A `loopback-opt-in` rule requires a preceding
 `host-policy` rule and may occur once. At most one host policy runs per
-endpoint.
+endpoint. A host policy requires an earlier allowed-schemes rule limited to
+`ftp`, `http`, `https`, `ws` and `wss`, so WHATWG parsing classifies
+numeric hosts as IP addresses. A host policy that declares loopback prefixes
+or DNS suffixes requires the subsequent opt-in rule.
 
 | Rule | Graph fields and operation |
 | --- | --- |
@@ -52,7 +55,8 @@ take precedence and classify before each family's `deny` and `allow` lists.
 The deny list takes precedence over the allow list. A literal outside those
 lists follows `defaultAllow`. CIDRs use canonical textual network addresses
 with all host bits zero. The IPv4 and IPv6 lists accept only their matching
-address family. All lists may be empty.
+address family. IPv4-mapped IPv6 literals follow the IPv6 policy. All lists
+may be empty.
 
 ## Rust projection
 

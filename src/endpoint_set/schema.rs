@@ -40,7 +40,7 @@ pub(super) struct ProviderHint {
 #[derive(Deserialize, Serialize)]
 #[serde(tag = "kind", rename_all = "kebab-case", deny_unknown_fields)]
 pub(super) enum Empty {
-    Allow,
+    Allow {},
     Reject { error: String },
 }
 
@@ -289,6 +289,8 @@ impl Graph {
         }
         let mut parsed = false;
         let mut classified = false;
+        let mut special_network_schemes = false;
+        let mut classifies_loopback = false;
         let mut opted_in = false;
         for rule in &self.rules {
             let error = match rule {
@@ -310,10 +312,16 @@ impl Graph {
                     if schemes.iter().any(|scheme| !valid_scheme(scheme)) {
                         return Err("invalid canonical scheme".into());
                     }
+                    special_network_schemes |= schemes.iter().all(|scheme| {
+                        matches!(scheme.as_str(), "ftp" | "http" | "https" | "ws" | "wss")
+                    });
                     error
                 }
                 Rule::UrlComponents { error, .. } => error,
                 Rule::HostPolicy { dns, ip, error } => {
+                    if !special_network_schemes {
+                        return Err("host-policy requires a preceding allowed-schemes rule limited to WHATWG special network schemes".into());
+                    }
                     if classified {
                         return Err("endpoint-set accepts one host-policy rule".into());
                     }
@@ -327,6 +335,8 @@ impl Graph {
                     check_error(&dns.rewrite_error)?;
                     ip.validate()?;
                     classified = true;
+                    classifies_loopback =
+                        !dns.loopback_suffixes.is_empty() || !ip.loopback.is_empty();
                     error
                 }
                 Rule::LoopbackOptIn { error } => {
@@ -341,6 +351,9 @@ impl Graph {
         }
         if !parsed {
             return Err("endpoint-set requires exactly one parse rule".into());
+        }
+        if classifies_loopback && !opted_in {
+            return Err("loopback classification requires loopback-opt-in".into());
         }
         Ok(())
     }

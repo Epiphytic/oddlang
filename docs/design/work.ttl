@@ -700,3 +700,9 @@ w:endpointSetEvidence a p:Artifact ;
     rdfs:label "Locked offline endpoint-set qualification with an unrelated Rust consumer" ;
     p:location "verification/endpoint-set/README.md" .
 w:wholeMarmishProtocols p:dependsOn w:endpointSetNormalization .
+
+w:orderedEndpointPolicyReview a p:Finding ;
+    rdfs:label "Require typed address classification and explicit loopback opt-in before projection" ;
+    p:source w:orderedEndpointPolicyGuardFixture .
+w:orderedEndpointPolicyGuardFixture a p:Artifact ; p:location "verification/endpoint-set/verify.py" .
+w:endpointSetNormalization p:addresses w:orderedEndpointPolicyReview ; p:evidence w:orderedEndpointPolicyGuardFixture .

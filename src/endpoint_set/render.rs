@@ -5,7 +5,7 @@ pub(super) fn rust(graph: &Graph, overlay: Option<&RustOverlay>) -> String {
     let mut implementation = include_str!("native.rs").to_owned();
     implementation.push_str(include_str!("dns.rs"));
     let empty = match &graph.empty {
-        Empty::Allow => "None".to_owned(),
+        Empty::Allow {} => "None".to_owned(),
         Empty::Reject { error } => format!("Some({error:?})"),
     };
     writeln!(

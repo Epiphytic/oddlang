@@ -82,6 +82,21 @@ with tempfile.TemporaryDirectory(prefix="endpoint-set-qualify-") as temp:
     oddlang("endpoint-set", "digest", write(root / "wrong-error.json", bad_graph),
             expected="undeclared error")
 
+    bad_graph = json.loads(graph.read_bytes())
+    bad_graph["rules"][3]["schemes"].append("git")
+    oddlang("endpoint-set", "digest", write(root / "opaque-host.json", bad_graph),
+            expected="host-policy requires a preceding allowed-schemes")
+
+    bad_graph = json.loads(graph.read_bytes())
+    bad_graph["rules"].pop()
+    oddlang("endpoint-set", "digest", write(root / "missing-opt-in.json", bad_graph),
+            expected="loopback classification requires loopback-opt-in")
+
+    bad_graph = json.loads(graph.read_bytes())
+    bad_graph["empty"] = {"kind": "allow", "error": "urn:download-mirrors:empty"}
+    oddlang("endpoint-set", "digest", write(root / "extra-empty-field.json", bad_graph),
+            expected="unknown field")
+
     bad_overlay = json.loads(overlay.read_bytes())
     del bad_overlay["errorVariants"]["urn:download-mirrors:empty"]
     incomplete = write(root / "incomplete.json", bad_overlay)
