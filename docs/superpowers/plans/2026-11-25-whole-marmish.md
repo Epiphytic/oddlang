@@ -27,8 +27,13 @@ The independent stream comparison including macro expansions left 373 compiler-o
 
 ## Implementation evidence
 
+- [x] Recover the ordered field encodings of supported record writers, qualify source reordering and reject unsupported helpers. [Record writer profile](../../language/ordered-record-writes.md)
+
 - [x] Bind explicit byte discriminants and exhaustive conversion outcomes for string enums. [Shared declaration profile](../../language/shared-declarations.md)
 
+- [x] Recover scalar byte adapters and bind ordered wire guard failures to typed native error constructors. [Wire schema profile](../../language/json-wire-schema.md)
+
+- [x] Recover and project ordered closed JSON records and adjacent unions. Verify vetted Serde adapters, typed ordered guards and explicit unsupported recovery evidence. [JSON wire schema plan](2026-11-26-json-wire-schema.md)
 - [x] Project bounded positioned integrity blocks. Exercise identity, optional zlib, checked offsets, canonical serialization and declared error precedence with an unrelated native consumer. [Block profile and fixture](../../language/integrity-block.md)
 - [x] Generate shared constant, error, result and enum declarations, bind public and crate-private paths and ship declaration-keyed expectations. [Shared declarations and unrelated qualification fixture](../../language/shared-declarations.md)
 
@@ -62,3 +67,7 @@ The framework team owns generic extraction, vocabulary, validation and native lo
 No source text, AST dump, MIR instruction stream, original executable, vendored first-party crate or project-specific generator hook counts as a recovered contract. Keep provenance separately. Use normal third-party dependencies and audited OS/crypto providers. LLMs may propose missing rules or bindings for review. Each normative declaration must generate a test obligation with its stable ID, evaluator and result, including declared protocol errors and side effects. A missing rule, provider or test yields an explicit gap.
 
 The principal feasibility risk is recovering intended behavior where only incidental implementation details are visible. Budget the effort by families of protocols, state machines and OS effects, then recalibrate after the installed command in phase 4 using actual authoring time, unresolved obligations and porting effort. If that checkpoint requires copying upstream implementation logic into provider shims or adding project knowledge to Oddlang, reopen the semantic design before expanding coverage. A finite qualification suite supports a versioned compatibility claim for tested profiles. Universal behavioral equivalence for arbitrary Rust remains unproven.
+
+- [x] Compose recovered JSON wire schemas with shared declarations in pinned native libraries. Compile the independent bounded-byte sensor fixture through the assembled crate.
+
+- [x] Project ordered typed hashing and namespaced hexadecimal record views. Check byte encodings, first-error validation and invalid bindings with an independent native fixture. [Typed hash views](../../language/json-wire-schema.md#typed-hash-views)
