@@ -42,10 +42,11 @@ The default local report covers only macOS Apple Silicon after its tests run. Re
 
 The [retained module register](../../../examples/marmish/gaps.json) maps each known module outside the pilot to a blocking capability. The work graph tracks their status.
 
-- [ ] Implement public module and re-export resolution. Extract and test two modules re-export a checked type.
+- [x] Implement public module and re-export resolution. Extract and test two modules re-export a checked type.
 - [ ] Implement URL normalization and configuration validators. Extract and test a two-entry relay list.
 - [ ] Implement numbered Rust enum tags and checked binary cursors. Extract and test a one-tag record with bounded length.
 - [ ] Implement bounded offsets and ordered window transitions. Extract and test a checkpoint with one byte pending.
 - [ ] Implement bounded external compression primitive. Extract and test a length-limited block codec.
 - [ ] Implement general Rust bodies and native dependency resolution. Extract and test a public function from the listed file isolated with its resolved imports.
 - [ ] Implement platform-specific library calls and observable OS effects. Extract and test a local fixture with a capability supplied by the caller.
+- [ ] Close the full-project claim when the remaining compiled units and platform observations satisfy the [qualification boundary](../../design/marmish-qualification.md).

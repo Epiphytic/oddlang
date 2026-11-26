@@ -345,7 +345,7 @@ w:marmishFeatures a p:Task ; rdfs:label "Implement reusable Oddlang features req
     p:acceptance "Exercise inventory-driven compiler and conformance extensions with independent positive and negative fixtures." .
 
 w:marmishQualification a p:Task ; rdfs:label "Rebuild and qualify pinned Marmish" ;
-    p:milestone w:marmishMilestone ; p:status p:planned ; p:source w:roundTripPlan, w:marmishSource ; p:dependsOn w:marmishFeatures ;
+    p:milestone w:marmishMilestone ; p:status p:active ; p:source w:roundTripPlan, w:marmishSource ; p:dependsOn w:marmishFeatures ;
     p:acceptance "Report fresh native and regenerated build comparisons, preserved native code, coverage, proof scope and remaining gaps." .
 
 w:roundTripBoundaries a p:Finding ; rdfs:label "Separate toolchains, production worlds and independent runtime evidence" ; p:source w:roundTripReview .
@@ -396,7 +396,7 @@ w:marmishBaselineReview a p:Finding ; rdfs:label "Freeze all six CLI observation
 w:marmishInventory p:addresses w:marmishBaselineReview .
 
 w:marmishGaps a p:Artifact ; rdfs:label "Retained module register and reduction fixtures" ; p:location "examples/marmish/gaps.json" .
-w:marmish-capability-modules a p:Task ; rdfs:label "public module and re-export resolution" ; p:source w:marmishGaps ; p:milestone w:marmishMilestone ; p:status p:blocked ; p:reason "The current closed Rust profiles cannot establish these input and effect semantics." ; p:acceptance "public path and type identity agree; reject an ambiguous or cfg-dependent re-export." .
+w:marmish-capability-modules a p:Task ; rdfs:label "public module and re-export resolution" ; p:source w:marmishGaps ; p:milestone w:marmishMilestone ; p:status p:done ; p:evidence w:marmishQualificationEvidence ; p:acceptance "public path and type identity agree; reject an ambiguous or cfg-dependent re-export." .
 w:marmish-capability-config a p:Task ; rdfs:label "URL normalization and configuration validators" ; p:source w:marmishGaps ; p:milestone w:marmishMilestone ; p:status p:blocked ; p:reason "The current closed Rust profiles cannot establish these input and effect semantics." ; p:acceptance "valid inputs have the same normalized values; reject invalid URLs with the same first error." .
 w:marmish-capability-wire a p:Task ; rdfs:label "numbered Rust enum tags and checked binary cursors" ; p:source w:marmishGaps ; p:milestone w:marmishMilestone ; p:status p:blocked ; p:reason "The current closed Rust profiles cannot establish these input and effect semantics." ; p:acceptance "encode and decode exact original bytes; reject unknown tags and truncated input." .
 w:marmish-capability-offset a p:Task ; rdfs:label "bounded offsets and ordered window transitions" ; p:source w:marmishGaps ; p:milestone w:marmishMilestone ; p:status p:blocked ; p:reason "The current closed Rust profiles cannot establish these input and effect semantics." ; p:acceptance "resume at the admissible offset; preserve the original error on a gap or overflow." .
@@ -412,3 +412,13 @@ w:marmishFeatures p:evidence w:marmishFramingEvidence, w:marmishGaps .
 
 w:marmishProjectionReview a p:Finding ; rdfs:label "Anchor span provenance, regenerate during assembly, audit real compiler inputs and test the assembled upstream tree" ; p:source w:marmishFramingEvidence .
 w:marmishFeatures p:addresses w:marmishProjectionReview .
+
+w:marmishQualificationEvidence a p:Artifact ; rdfs:label "Reconstructed project, immutable candidate and named native comparisons" ; p:location "docs/design/marmish-qualification.md" .
+w:marmishQualification p:evidence w:marmishQualificationEvidence .
+w:marmishAssemblyTests a p:Artifact ; rdfs:label "Two-producer workspace assembly and rejection tests" ; p:location "tests/workspace_assembly.rs" .
+w:marmishQualification p:evidence w:marmishAssemblyTests .
+w:marmishRemainingQualification a p:Task ; rdfs:label "Complete remaining Rust module recovery and native platform qualification" ;
+    p:milestone w:marmishMilestone ; p:status p:blocked ; p:source w:roundTripPlan ; p:evidence w:marmishQualificationEvidence ;
+    p:dependsOn w:marmish-capability-native, w:marmish-capability-os, w:marmish-capability-wire, w:marmish-capability-config, w:marmish-capability-offset, w:marmish-capability-compression ;
+    p:reason "The remaining 96 known runtime-source paths require further language and host capability specifications. Native Linux runtime evidence and complete compiler enumeration remain outstanding." ;
+    p:acceptance "Resolve the compiled denominator and regenerate all first-party units. Record original and candidate results on all claimed platforms." .

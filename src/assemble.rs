@@ -18,9 +18,10 @@ struct Project {
     crates: Vec<String>,
     target: String,
     features: Vec<String>,
-    graph_sha256: String,
-    import_sha256: String,
-    projection_sha256: String,
+    graph_sha256: Option<String>,
+    import_sha256: Option<String>,
+    projection_sha256: Option<String>,
+    emitters: Option<Vec<Emitter>>,
     cargo_lock_sha256: String,
     files: Vec<Entry>,
 }
@@ -33,6 +34,68 @@ struct Entry {
     producer: Producer,
     sha256: String,
     module: Option<String>,
+    emitter: Option<Profile>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Ord, PartialOrd)]
+enum Profile {
+    #[serde(rename = "framing-v1")]
+    Framing,
+    #[serde(rename = "rust-facade-v1")]
+    Facade,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct Emitter {
+    profile: Profile,
+    package: String,
+    graph_sha256: String,
+    import_sha256: String,
+    projection_sha256: String,
+}
+
+impl Project {
+    fn emitters(&mut self) -> Result<Vec<Emitter>> {
+        match (
+            self.version,
+            self.graph_sha256.take(),
+            self.import_sha256.take(),
+            self.projection_sha256.take(),
+            self.emitters.take(),
+        ) {
+            (1, Some(graph_sha256), Some(import_sha256), Some(projection_sha256), None) => {
+                Ok(vec![Emitter {
+                    profile: Profile::Framing,
+                    package: String::new(),
+                    graph_sha256,
+                    import_sha256,
+                    projection_sha256,
+                }])
+            }
+            (2, None, None, None, Some(pins)) if pins.len() == 2 => {
+                let (a, b) = (&pins[0], &pins[1]);
+                if a.profile == b.profile
+                    || a.graph_sha256 == b.graph_sha256
+                    || a.import_sha256 == b.import_sha256
+                    || a.projection_sha256 == b.projection_sha256
+                    || pins.iter().any(|e| !self.crates.contains(&e.package))
+                {
+                    return Err("expected distinct pinned emitters for selected packages".into());
+                }
+                Ok(pins)
+            }
+            _ => Err("invalid version or assembly emitter declarations".into()),
+        }
+    }
+
+    fn profile(&self, row: &Entry) -> Result<Profile> {
+        match (self.version, row.emitter) {
+            (1, None) => Ok(Profile::Framing),
+            (2, Some(profile)) => Ok(profile),
+            _ => Err(format!("invalid emitter selection for {}", row.path)),
+        }
+    }
 }
 
 #[derive(Deserialize, PartialEq)]
@@ -399,11 +462,10 @@ fn checked_sources(project: &Project, root: &Path) -> Result<()> {
 
 pub fn assemble(manifest: &Path, store: &Path, dest: &Path) -> Result<()> {
     let manifest_bytes = regular_bytes(manifest)?;
-    let project: Project =
+    let mut project: Project =
         toml::from_str(std::str::from_utf8(&manifest_bytes).map_err(|e| e.to_string())?)
             .map_err(|e| format!("assembly manifest: {e}"))?;
-    if project.version != 1
-        || project.crates.is_empty()
+    if project.crates.is_empty()
         || project.target.is_empty()
         || !project
             .target
@@ -414,14 +476,8 @@ pub fn assemble(manifest: &Path, store: &Path, dest: &Path) -> Result<()> {
     {
         return Err("invalid assembly version or build selection".into());
     }
-    for hash in [
-        &project.graph_sha256,
-        &project.import_sha256,
-        &project.projection_sha256,
-        &project.cargo_lock_sha256,
-    ] {
-        digest(hash)?;
-    }
+    let pins = project.emitters()?;
+    digest(&project.cargo_lock_sha256)?;
 
     directory(store)?;
     let store = store.canonicalize().map_err(|e| e.to_string())?;
@@ -446,31 +502,42 @@ pub fn assemble(manifest: &Path, store: &Path, dest: &Path) -> Result<()> {
         _ => return Err("destination must be absent or an empty directory".into()),
     }
 
-    let projection_dir = Path::new("projections").join(&project.projection_sha256);
+    let mut receipts = BTreeMap::new();
+    let mut expected_paths = Vec::new();
+    let import_names = ["import.lock", "domain.ttl", "source-map.json"];
     directory(&store.join("projections"))?;
-    directory(&store.join(&projection_dir))?;
-    let receipt = projection_dir.join("projection.json");
-    let receipt_bytes = verified_file(&store, &receipt, &project.projection_sha256)?;
-    let projection: Projection = serde_json::from_slice(&receipt_bytes)
-        .map_err(|e| format!("invalid projection receipt: {e}"))?;
-    if projection.version != 1
-        || projection.graph_sha256 != project.graph_sha256
-        || projection.files.is_empty()
-    {
-        return Err("projection disagrees with the pinned graph or has no modules".into());
+    for pin in &pins {
+        for hash in [
+            &pin.import_sha256,
+            &pin.projection_sha256,
+            &pin.graph_sha256,
+        ] {
+            digest(hash)?;
+        }
+        let projection_dir = Path::new("projections").join(&pin.projection_sha256);
+        directory(&store.join(&projection_dir))?;
+        let receipt = projection_dir.join("projection.json");
+        let bytes = verified_file(&store, &receipt, &pin.projection_sha256)?;
+        let projection: Projection = serde_json::from_slice(&bytes)
+            .map_err(|e| format!("invalid projection receipt: {e}"))?;
+        if projection.version != 1
+            || projection.graph_sha256 != pin.graph_sha256
+            || projection.files.is_empty()
+        {
+            return Err("projection disagrees with the pinned graph or has no modules".into());
+        }
+        let mut projection_paths = BTreeMap::new();
+        for name in projection.files.keys() {
+            register_path(&mut projection_paths, name)?;
+        }
+        expected_paths.push(receipt);
+        let import = Path::new("imports").join(&pin.import_sha256);
+        expected_paths.extend(import_names.iter().map(|name| import.join(name)));
+        receipts.insert(pin.profile, (projection, bytes, projection_dir));
     }
-
-    let mut projection_paths = BTreeMap::new();
-    for name in projection.files.keys() {
-        register_path(&mut projection_paths, name)?;
-    }
-
     let mut paths = BTreeMap::new();
     let mut modules = BTreeSet::new();
-    let import_dir = Path::new("imports").join(&project.import_sha256);
     let mut inputs = Vec::new();
-    let import_names = ["import.lock", "domain.ttl", "source-map.json"];
-
     let mut root_manifest = false;
     let mut locked = false;
     for row in &project.files {
@@ -480,13 +547,17 @@ pub fn assemble(manifest: &Path, store: &Path, dest: &Path) -> Result<()> {
             return Err(format!("unsupported mode for {}", row.path));
         }
         let source = match (&row.producer, &row.module) {
-            (Producer::Retained, None) => Path::new("retained").join(&row.sha256),
+            (Producer::Retained, None) if row.emitter.is_none() => {
+                Path::new("retained").join(&row.sha256)
+            }
             (Producer::Generated, Some(name)) => {
+                let profile = project.profile(row)?;
+                let (projection, _, projection_dir) = &receipts[&profile];
                 portable(name)?;
                 if !name.ends_with(".rs")
                     || !row.path.ends_with(".rs")
                     || row.mode != "100644"
-                    || !modules.insert(name)
+                    || !modules.insert((profile, name))
                     || projection.files.get(name) != Some(&row.sha256)
                 {
                     return Err(format!("unverified or reused emitted module {name}"));
@@ -504,26 +575,52 @@ pub fn assemble(manifest: &Path, store: &Path, dest: &Path) -> Result<()> {
         locked |= row.path == "Cargo.lock" && row.sha256 == project.cargo_lock_sha256;
         inputs.push(source);
     }
-    if !locked || !root_manifest || modules.len() != projection.files.len() {
+    if !locked
+        || !root_manifest
+        || modules.len()
+            != receipts
+                .values()
+                .map(|(p, _, _)| p.files.len())
+                .sum::<usize>()
+    {
         return Err("missing root Cargo manifest/lock or unconsumed projection module".into());
     }
-    let mut expected_paths = vec![receipt];
-    expected_paths.extend(import_names.iter().map(|name| import_dir.join(name)));
     expected_paths.extend(inputs.iter().cloned());
     check_store(&store, &expected_paths)?;
 
-    // A cached projection or relocated source tree cannot supply any emitter inputs.
+    // Each emitter receives only its own independently pinned semantic release.
     let scratch = tempfile::tempdir().map_err(|e| e.to_string())?;
-    let import = scratch.path().join("import");
-    fs::create_dir(&import).map_err(|e| e.to_string())?;
-    for name in import_names {
-        let bytes = regular_bytes(&store.join(import_dir.join(name)))?;
-        fs::write(import.join(name), bytes).map_err(|e| e.to_string())?;
-    }
-    let fresh = scratch.path().join("projection");
-    crate::framing_projection::build_pinned(&import, &project.import_sha256, &fresh)?;
-    if regular_bytes(&fresh.join("projection.json"))? != receipt_bytes {
-        return Err("projection receipt differs from the isolated emitter".into());
+    let mut fresh = BTreeMap::new();
+    for pin in &pins {
+        let import = scratch.path().join(&pin.import_sha256);
+        fs::create_dir(&import).map_err(|e| e.to_string())?;
+        for name in import_names {
+            let bytes = regular_bytes(&store.join("imports").join(&pin.import_sha256).join(name))?;
+            fs::write(import.join(name), bytes).map_err(|e| e.to_string())?;
+        }
+        let output = scratch
+            .path()
+            .join(format!("projection-{}", pin.projection_sha256));
+        match pin.profile {
+            Profile::Framing => {
+                crate::framing_projection::build_pinned(&import, &pin.import_sha256, &output)?
+            }
+            Profile::Facade => crate::facade::build_pinned(&import, &pin.import_sha256, &output)?,
+        }
+        if project.version == 2 {
+            let lock: serde_json::Value =
+                serde_json::from_slice(&regular_bytes(&import.join("import.lock"))?)
+                    .map_err(|e| e.to_string())?;
+            if lock["build"]["package"].as_str() != Some(pin.package.as_str())
+                || lock["build"]["target"].as_str() != Some(project.target.as_str())
+            {
+                return Err("emitter package or target disagrees with pinned import".into());
+            }
+        }
+        if regular_bytes(&output.join("projection.json"))? != receipts[&pin.profile].1 {
+            return Err("projection receipt differs from the isolated emitter".into());
+        }
+        fresh.insert(pin.profile, output);
     }
     let stage = tempfile::Builder::new()
         .prefix(".oddlang-assembly-")
@@ -532,7 +629,7 @@ pub fn assemble(manifest: &Path, store: &Path, dest: &Path) -> Result<()> {
     for (row, input) in project.files.iter().zip(&inputs) {
         let bytes = verified_file(&store, input, &row.sha256)?;
         if let Some(module) = &row.module
-            && regular_bytes(&fresh.join(module))? != bytes
+            && regular_bytes(&fresh[&project.profile(row)?].join(module))? != bytes
         {
             return Err(format!(
                 "native module {module} disagrees with the isolated emitter"
@@ -545,5 +642,33 @@ pub fn assemble(manifest: &Path, store: &Path, dest: &Path) -> Result<()> {
         fs::set_permissions(out, fs::Permissions::from_mode(mode)).map_err(|e| e.to_string())?;
     }
     checked_sources(&project, stage.path())?;
+    if project.version == 2 {
+        for row in project
+            .files
+            .iter()
+            .filter(|r| r.producer == Producer::Generated)
+        {
+            let profile = project.profile(row)?;
+            let package = &pins.iter().find(|p| p.profile == profile).unwrap().package;
+            let mut owned = false;
+            for ancestor in Path::new(&row.path).ancestors().skip(1) {
+                let path = stage.path().join(ancestor).join("Cargo.toml");
+                if path.is_file() {
+                    let config: toml::Value =
+                        toml::from_str(&fs::read_to_string(path).map_err(|e| e.to_string())?)
+                            .map_err(|e| e.to_string())?;
+                    if let Some(p) = config.get("package") {
+                        let module = row.module.as_ref().unwrap();
+                        owned = p.get("name").and_then(toml::Value::as_str) == Some(package)
+                            && Path::new(&row.path) == ancestor.join("src").join(module);
+                        break;
+                    }
+                }
+            }
+            if !owned {
+                return Err(format!("invalid emitter destination {}", row.path));
+            }
+        }
+    }
     fs::rename(stage.path(), dest).map_err(|e| format!("publish assembled workspace: {e}"))
 }

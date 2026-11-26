@@ -28,8 +28,8 @@ def output(args):
     return subprocess.check_output(args, text=True).strip()
 
 
-def run(upstream, report, tmp):
-    if output(["git", "-C", upstream, "rev-parse", "HEAD"]) != PIN:
+def run(upstream, report, tmp, *, revision=PIN, after_release=None):
+    if output(["git", "-C", upstream, "rev-parse", "HEAD"]) != revision:
         raise SystemExit("upstream revision does not match pinned Marmish")
     source = tmp / "source"
     home = tmp / "home"
@@ -41,7 +41,7 @@ def run(upstream, report, tmp):
     subprocess.run(["git", "-c", "init.templateDir=", "clone", "--no-local", "--quiet",
                     "--no-checkout", str(upstream), str(source)], check=True)
     subprocess.run(["git", "-C", source, "-c", "core.hooksPath=/dev/null", "checkout",
-                    "--quiet", "--detach", PIN], check=True)
+                    "--quiet", "--detach", revision], check=True)
     tools = {"cargo": Path(output(["rustup", "which", "--toolchain", TOOLCHAIN, "cargo"])),
              "uv": Path(shutil.which("uv")).resolve()}
     personal = Path.home().resolve()
@@ -79,7 +79,7 @@ def run(upstream, report, tmp):
                UV_PYTHON_DOWNLOADS="never", UV_LINK_MODE="copy",
                SDKROOT=output(["xcrun", "--show-sdk-path"]), GIT_CONFIG_NOSYSTEM="1", LC_ALL="C", TZ="UTC",
                RUST_TEST_THREADS="1", GIT_CONFIG_GLOBAL="/dev/null")
-    state = dict(revision=PIN, tree=output(["git", "-C", source, "rev-parse", "HEAD^{tree}"]),
+    state = dict(revision=revision, tree=output(["git", "-C", source, "rev-parse", "HEAD^{tree}"]),
                  host=TARGET, osVersion=platform.mac_ver()[0], tools={}, commands=[], binaries={},
                  platforms={TARGET: "observed", "aarch64-unknown-linux-gnu": "unobserved",
                             "x86_64-unknown-linux-gnu": "unobserved"},
@@ -162,6 +162,8 @@ def run(upstream, report, tmp):
             state["binaries"][binary] = {"sha256": sha(path), "size": path.stat().st_size}
             for flag in ("version", "help"):
                 observe(f"{binary}-{flag}", [path, "--" + flag])
+        if after_release is not None:
+            after_release(tmp, policy, env, report, state)
     save()
 
 
