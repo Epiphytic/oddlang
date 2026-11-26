@@ -1,4 +1,5 @@
 pub mod assemble;
+pub mod binary_frame;
 pub mod binary_record;
 pub mod contracts;
 pub mod endpoint_set;

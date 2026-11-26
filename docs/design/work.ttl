@@ -860,3 +860,15 @@ w:compositeBinaryRecords a p:Task ; rdfs:label "Project checked nested and check
     p:evidence w:binaryCompositeFixture .
 w:binaryCompositeFixture a p:Artifact ; p:location "verification/binary-record/composite.py" .
 w:copyCheckpointQualification p:dependsOn w:compositeBinaryRecords .
+
+w:boundedTaggedBinaryFrames a p:Task ; rdfs:label "Project bounded tagged binary frames and incremental parsers" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:compositeBinaryRecords, w:copyFieldRelationQualification ;
+    p:acceptance "Verify exact envelope tags, header limits, ordered case checks, terminal bytes, nested fragments and incremental poisoned-input behavior against an independent native fixture." ;
+    p:evidence w:binaryFrameFixture .
+w:binaryFrameFixture a p:Artifact ; p:location "verification/binary-frame/verify.py" .
+w:copyProtocolQualification a p:Task ; rdfs:label "Qualify the complete native copy protocol library surface" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned ;
+    p:dependsOn w:copyCheckpointQualification, w:boundedTaggedBinaryFrames ;
+    p:acceptance "Compile the full source-free copy API and compare all original tests, exact error cases, frame payloads and public constants, with explicit structural gap accounting." .
+w:wholeMarmishProtocols p:dependsOn w:copyProtocolQualification .

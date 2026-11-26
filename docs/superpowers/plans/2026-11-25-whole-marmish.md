@@ -79,3 +79,5 @@ The principal feasibility risk is recovering intended behavior where only incide
 - [ ] Qualify the copy Checkpoint and its FileIdentity record against the pinned native original.
 - [x] Qualify Manifest matching and the helper start and build consistency checks against the pinned native original. [Native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/33)
 - [x] Project nested checked codecs, fixed record fields and checksum footers with independent timing and error precedence witnesses. [Composite records](../../language/binary-records.md#composite-binary-records)
+- [x] Project bounded tagged frame variants and a one-frame incremental decoder. [Binary frame profile](../../language/binary-frames.md)
+- [ ] Qualify the complete copy protocol library against every unchanged pinned native test and exact frame error controls.
