@@ -1519,5 +1519,9 @@ w:choiceEqualityFixture a p:Artifact ; p:location "verification/plain-value-choi
 w:vaultHelperChoice a p:Task ;
     rdfs:label "Qualify the public copy-only vault helper mode type" ;
     p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;
-    p:dependsOn w:choiceEqualityRecovery ; p:status p:active ;
+    p:dependsOn w:choiceEqualityRecovery ; p:status p:done ; p:evidence w:vaultModeDarwinReceipt, w:vaultModeLinuxReceipt ;
     p:acceptance "Build the original and generated external caller on both native ARM64 hosts, qualify variant order and absence of unsupported traits, and distinguish the source-order mutation." .
+
+w:vaultModeDarwinReceipt a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b75be7c/verification/whole/vault-mode/aarch64-apple-darwin.json" .
+
+w:vaultModeLinuxReceipt a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b75be7c/verification/whole/vault-mode/aarch64-unknown-linux-gnu.json" .
