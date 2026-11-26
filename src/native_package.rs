@@ -80,16 +80,37 @@ enum Kind {
     JsonEnvelope,
     EndpointSet,
     IntegrityBlock,
+    SharedDeclarations,
 }
 
 #[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct Component {
     kind: Kind,
     module: String,
     graph: Pin,
     overlay: Pin,
     reexports: Vec<String>,
+    #[serde(default)]
+    visibility: Visibility,
+    root_reexports: Option<Vec<String>>,
+    #[serde(default)]
+    crate_reexports: Vec<String>,
+}
+
+#[derive(Clone, Copy, Default, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
+enum Visibility {
+    #[default]
+    Private,
+    Public,
+}
+
+struct Group {
+    directory: String,
+    declarations: String,
+    visibility: Visibility,
+    exports: BTreeSet<String>,
 }
 
 fn ident(name: &str) -> bool {
@@ -130,6 +151,12 @@ fn project(
             crate::integrity_block::build(&path, &overlay, &output)?;
             "codec.rs"
         }
+        Kind::SharedDeclarations => {
+            let path = input.join("graph.json");
+            io(fs::write(&path, graph))?;
+            crate::shared_declarations::build(&path, &overlay, &output)?;
+            "shared.rs"
+        }
         Kind::EndpointSet => {
             let path = input.join("graph.json");
             io(fs::write(&path, graph))?;
@@ -144,25 +171,36 @@ fn project(
         .map_err(|e| format!("projection lock: {e}"))?;
     let parsed = syn::parse_file(std::str::from_utf8(&bytes).map_err(|e| e.to_string())?)
         .map_err(|e| e.to_string())?;
-    let public: BTreeSet<_> = parsed
-        .items
-        .iter()
-        .filter_map(|item| match item {
-            syn::Item::Struct(item) if matches!(item.vis, syn::Visibility::Public(_)) => {
-                Some(item.ident.to_string())
+    let mut public = BTreeSet::new();
+    let mut crate_visible = BTreeSet::new();
+    for item in &parsed.items {
+        let (vis, id) = match item {
+            syn::Item::Struct(i) => (&i.vis, &i.ident),
+            syn::Item::Enum(i) => (&i.vis, &i.ident),
+            syn::Item::Const(i) => (&i.vis, &i.ident),
+            syn::Item::Type(i) => (&i.vis, &i.ident),
+            syn::Item::Mod(i) => (&i.vis, &i.ident),
+            syn::Item::Fn(i) => (&i.vis, &i.sig.ident),
+            _ => continue,
+        };
+        match vis {
+            syn::Visibility::Public(_) => {
+                public.insert(id.to_string());
+                crate_visible.insert(id.to_string());
             }
-            syn::Item::Enum(item) if matches!(item.vis, syn::Visibility::Public(_)) => {
-                Some(item.ident.to_string())
+            syn::Visibility::Restricted(v) if v.path.is_ident("crate") => {
+                crate_visible.insert(id.to_string());
             }
-            _ => None,
-        })
-        .collect();
-    if let Some(missing) = component
-        .reexports
-        .iter()
-        .find(|name| !public.contains(*name))
-    {
-        return Err(format!("unknown public projected type: {missing}"));
+            _ => {}
+        }
+    }
+    for (names, available, scope) in [
+        (&component.reexports, &public, "public"),
+        (&component.crate_reexports, &crate_visible, "crate-visible"),
+    ] {
+        if let Some(missing) = names.iter().find(|name| !available.contains(*name)) {
+            return Err(format!("unknown {scope} projected type or item: {missing}"));
+        }
     }
     Ok((bytes, lock))
 }
@@ -216,7 +254,7 @@ pub fn build(path: &Path, output: &Path) -> Result<()> {
     io(fs::create_dir_all(&src))?;
     io(fs::write(package.join("Cargo.toml"), &cargo))?;
     io(fs::write(package.join("Cargo.lock"), &lock))?;
-    let mut groups = BTreeMap::<String, (String, String)>::new();
+    let mut groups = BTreeMap::<String, Group>::new();
     let mut exports: BTreeSet<_> = manifest
         .components
         .iter()
@@ -226,11 +264,36 @@ pub fn build(path: &Path, output: &Path) -> Result<()> {
     let mut records = Vec::new();
     let mut root_exports = String::new();
     for (index, component) in manifest.components.iter().enumerate() {
-        if !ident(&component.module) || component.reexports.is_empty() {
+        if !ident(&component.module)
+            || (component.reexports.is_empty() && component.crate_reexports.is_empty())
+        {
             return Err("invalid module or empty reexports".into());
         }
-        for name in &component.reexports {
-            if !ident(name) || !exports.insert(name.clone()) {
+        let group = groups
+            .entry(component.module.clone())
+            .or_insert_with(|| Group {
+                directory: format!("group_{index}"),
+                declarations: String::new(),
+                visibility: component.visibility,
+                exports: BTreeSet::new(),
+            });
+        if group.visibility != component.visibility {
+            return Err(format!(
+                "inconsistent group visibility: {}",
+                component.module
+            ));
+        }
+        let root_names = component
+            .root_reexports
+            .as_ref()
+            .unwrap_or(&component.reexports);
+        for name in component.reexports.iter().chain(&component.crate_reexports) {
+            if !ident(name) || !group.exports.insert(name.clone()) {
+                return Err(format!("invalid or conflicting reexport: {name}"));
+            }
+        }
+        for name in root_names {
+            if !component.reexports.contains(name) || !exports.insert(name.clone()) {
                 return Err(format!("invalid or conflicting reexport: {name}"));
             }
         }
@@ -238,23 +301,58 @@ pub fn build(path: &Path, output: &Path) -> Result<()> {
         let stage = work.path().join(&leaf);
         io(fs::create_dir(&stage))?;
         let (source, projection) = project(component, base, &stage)?;
-        let (directory, declarations) = groups
-            .entry(component.module.clone())
-            .or_insert_with(|| (format!("group_{index}"), String::new()));
-        let module = src.join(&*directory);
+        let directory = &group.directory;
+        let module = src.join(directory);
         io(fs::create_dir_all(&module))?;
         io(fs::write(module.join(format!("{leaf}.rs")), &source))?;
         generated_files.insert(format!("src/{directory}/{leaf}.rs"), digest(&source));
         let names = component.reexports.join(", ");
-        writeln!(declarations, "mod {leaf};\npub use {leaf}::{{{names}}};").unwrap();
-        writeln!(root_exports, "pub use {}::{{{names}}};", component.module).unwrap();
+        writeln!(group.declarations, "mod {leaf};").unwrap();
+        if !names.is_empty() {
+            writeln!(group.declarations, "pub use {leaf}::{{{names}}};").unwrap();
+        }
+        if !component.crate_reexports.is_empty() {
+            writeln!(
+                group.declarations,
+                "pub(crate) use {leaf}::{{{}}};",
+                component.crate_reexports.join(", ")
+            )
+            .unwrap();
+        }
+        if !root_names.is_empty() {
+            writeln!(
+                root_exports,
+                "pub use {}::{{{}}};",
+                component.module,
+                root_names.join(", ")
+            )
+            .unwrap();
+        }
         records.push(serde_json::json!({"kind":component.kind,"module":component.module,"reexports":component.reexports,
             "graphSha256":component.graph.sha256,"overlaySha256":component.overlay.sha256,
             "sourceSha256":digest(&source),"projection":projection}));
     }
     let mut lib = String::new();
-    for (group, (directory, declarations)) in groups {
-        writeln!(lib, "#[path = \"{directory}/mod.rs\"]\nmod {group};").unwrap();
+    for (
+        group,
+        Group {
+            directory,
+            declarations,
+            visibility,
+            ..
+        },
+    ) in groups
+    {
+        let prefix = if visibility == Visibility::Public {
+            "pub "
+        } else {
+            ""
+        };
+        writeln!(
+            lib,
+            "#[path = \"{directory}/mod.rs\"]\n{prefix}mod {group};"
+        )
+        .unwrap();
         generated_files.insert(
             format!("src/{directory}/mod.rs"),
             digest(declarations.as_bytes()),
@@ -281,11 +379,14 @@ pub fn build(path: &Path, output: &Path) -> Result<()> {
         package.join("package.lock"),
         serde_json::to_vec_pretty(&receipt).map_err(|e| e.to_string())?,
     ))?;
+    publish(&package, output)
+}
+pub(crate) fn publish(package: &Path, output: &Path) -> Result<()> {
     // A competing creator can insert even an empty directory after the initial check.
     #[cfg(any(target_os = "linux", target_os = "macos"))]
     {
         use rustix::fs::{CWD, RenameFlags, renameat_with};
-        renameat_with(CWD, &package, CWD, output, RenameFlags::NOREPLACE)
+        renameat_with(CWD, package, CWD, output, RenameFlags::NOREPLACE)
             .map_err(|error| format!("publish fresh package: {error}"))
     }
     #[cfg(not(any(target_os = "linux", target_os = "macos")))]

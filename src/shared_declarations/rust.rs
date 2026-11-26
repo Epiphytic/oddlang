@@ -1,0 +1,96 @@
+use super::*;
+use std::fmt::Write as _;
+
+pub(super) fn render(g: &Graph, b: &Binding) -> Result<String> {
+    let values = g.constants()?;
+    let mut out = String::new();
+    for c in &g.constants {
+        let value = values[c.id.as_str()];
+        let (ty, max) = match b.constant_types[&c.id] {
+            Width::U8 => ("u8", u8::MAX as u64),
+            Width::U16 => ("u16", u16::MAX as u64),
+            Width::U32 => ("u32", u32::MAX as u64),
+            Width::U64 => ("u64", u64::MAX),
+            Width::Usize => ("usize", u64::MAX),
+        };
+        if value > max {
+            return Err(format!("constant exceeds native type: {}", c.id));
+        }
+        writeln!(
+            out,
+            "pub const {}: ::core::primitive::{ty} = {value};",
+            b.name(&c.id)?
+        )
+        .unwrap();
+    }
+    for e in &g.errors {
+        let name = b.name(&e.id)?;
+        writeln!(
+            out,
+            "#[derive(Debug, Clone, Copy, PartialEq, Eq)]\npub enum {name} {{"
+        )
+        .unwrap();
+        let variants: BTreeMap<_, _> = e.variants.iter().map(|v| (&v.id, v)).collect();
+        for id in &b.variant_order[&e.id] {
+            let payload = match variants[id].payload {
+                Payload::None => "",
+                Payload::Text => "(&'static ::core::primitive::str)",
+                Payload::Bool => "(::core::primitive::bool)",
+                Payload::U64 => "(::core::primitive::u64)",
+            };
+            writeln!(out, "    {}{payload},", b.name(id)?).unwrap();
+        }
+        writeln!(out,"}}\nimpl ::core::fmt::Display for {name} {{\n    fn fmt(&self, __formatter: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {{\n        match self {{").unwrap();
+        for id in &b.variant_order[&e.id] {
+            let v = variants[id];
+            let arg = if v.payload == Payload::None {
+                ""
+            } else {
+                "(_payload)"
+            };
+            writeln!(out, "            Self::{}{arg} => {{", b.name(id)?).unwrap();
+            for segment in &v.message {
+                match segment {
+                    Segment::Text { text } => {
+                        writeln!(out, "                __formatter.write_str({text:?})?;").unwrap()
+                    }
+                    Segment::Payload { .. } => writeln!(
+                        out,
+                        "                ::core::fmt::Display::fmt(_payload, __formatter)?;"
+                    )
+                    .unwrap(),
+                }
+            }
+            out.push_str("                ::core::result::Result::Ok(())\n            }\n");
+        }
+        writeln!(
+            out,
+            "        }}\n    }}\n}}\nimpl ::core::error::Error for {name} {{}}"
+        )
+        .unwrap();
+    }
+    for a in &g.results {
+        writeln!(
+            out,
+            "pub type {}<__Value> = ::core::result::Result<__Value, {}>;",
+            b.name(&a.id)?,
+            b.name(&a.error)?
+        )
+        .unwrap();
+    }
+    for e in &g.string_enums {
+        writeln!(out,"#[derive(Debug, Clone, Copy, PartialEq, Eq, ::serde::Serialize, ::serde::Deserialize)]\npub enum {} {{",b.name(&e.id)?).unwrap();
+        let variants: BTreeMap<_, _> = e.variants.iter().map(|v| (&v.id, v)).collect();
+        for id in &b.variant_order[&e.id] {
+            writeln!(
+                out,
+                "    #[serde(rename = {:?})]\n    {},",
+                variants[id].wire,
+                b.name(id)?
+            )
+            .unwrap();
+        }
+        out.push_str("}\n");
+    }
+    Ok(out)
+}

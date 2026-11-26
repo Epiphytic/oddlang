@@ -28,6 +28,8 @@ The independent stream comparison including macro expansions left 373 compiler-o
 ## Implementation evidence
 
 - [x] Project bounded positioned integrity blocks. Exercise identity, optional zlib, checked offsets, canonical serialization and declared error precedence with an unrelated native consumer. [Block profile and fixture](../../language/integrity-block.md)
+- [x] Generate shared constant, error, result and enum declarations, bind public and crate-private paths and ship declaration-keyed expectations. [Shared declarations and unrelated qualification fixture](../../language/shared-declarations.md)
+
 - [x] Assemble pinned semantic projections into a native library with private module groups, public type reexports, exact dependency closure and a separate offline consumer. [Native package contract and test](../../language/native-package.md)
 
 - [x] Archive ordered declaration candidates for all 72 workspace build profiles (24 per native platform). Twenty-five distinct graphs account for all cells. Reachable calls, cross-package identity and behavior still require qualification. [Reviewed archive](https://github.com/Epiphytic/marmish-oddlang/pull/8)

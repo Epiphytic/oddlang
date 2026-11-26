@@ -724,3 +724,8 @@ w:boundedIntegrityProjectionReview a p:Finding ;
     rdfs:label "Check native primitive name collisions, exhaustive wire diagnostics and encode size obligations" ;
     p:source w:boundedIntegrityFixture .
 w:boundedIntegrityBlocks p:addresses w:boundedIntegrityProjectionReview .
+w:sharedTypedDeclarations a p:Task ; rdfs:label "Project typed constants, named errors, result aliases and wire enums into native package scopes" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:dependsOn w:nativePackageAssembly ; p:status p:done ;
+    p:acceptance "Qualify an unrelated native consumer against constant references and bounds, interpolated errors, native ordering, Serde wire values, and public and crate-private paths. Bind every declaration to a portable obligation." ;
+    p:evidence w:sharedTypedFixture .
+w:sharedTypedFixture a p:Artifact ; p:location "verification/shared-declarations/verify.py" .

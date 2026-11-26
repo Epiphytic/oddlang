@@ -23,6 +23,9 @@ fn run(args: &[String]) -> Result<(), String> {
             if cmd == "build" && kind == "integrity-block" && target == "rust" => {
                 oddlang::integrity_block::build(graph.as_ref(), overlay.as_ref(), output.as_ref())
             }
+        [cmd, kind, target, graph, overlay, output] if cmd == "build" && kind == "shared-declarations" && target == "rust" => {
+            oddlang::shared_declarations::build(graph.as_ref(), overlay.as_ref(), output.as_ref())
+        }
         [cmd, kind, target, manifest, output] if cmd == "build" && kind == "native-package" && target == "rust" => {
             oddlang::native_package::build(manifest.as_ref(), output.as_ref())
         }
@@ -378,7 +381,7 @@ fn run(args: &[String]) -> Result<(), String> {
             oddlang::targets::build(&load_model(dir)?, std::path::Path::new(out))
                 .map_err(|e| e.to_string())
         }
-        _ => Err("usage: oddlang check PROJECT | impact PROJECT IRI | build PROJECT OUTPUT | recover rust MANIFEST --profile PROFILE --out OUTPUT | recover rust-shapes MANIFEST --profile PROFILE --out OUTPUT | recover tagged-contract SOURCE SELECTION OVERLAY VARIANT OUTPUT | build integrity-block rust GRAPH OVERLAY OUTPUT | build native-package rust MANIFEST OUTPUT | build json-envelope rust GRAPH OVERLAY OUTPUT | endpoint-set digest GRAPH | endpoint-set overlay-digest OVERLAY | build endpoint-set rust GRAPH [OVERLAY] OUTPUT --graph-sha256 PIN [--overlay-sha256 PIN] | tagged-wire digest GRAPH | build tagged-wire TARGET GRAPH OUTPUT --graph-sha256 PIN | import rust-tree MANIFEST PACKAGE OUTPUT | build rust-tree BUNDLE OUTPUT --bundle-sha256 PIN".into()),
+        _ => Err("usage: oddlang check PROJECT | impact PROJECT IRI | build PROJECT OUTPUT | recover rust MANIFEST --profile PROFILE --out OUTPUT | recover rust-shapes MANIFEST --profile PROFILE --out OUTPUT | recover tagged-contract SOURCE SELECTION OVERLAY VARIANT OUTPUT | build shared-declarations rust GRAPH OVERLAY OUTPUT | build integrity-block rust GRAPH OVERLAY OUTPUT | build native-package rust MANIFEST OUTPUT | build json-envelope rust GRAPH OVERLAY OUTPUT | endpoint-set digest GRAPH | endpoint-set overlay-digest OVERLAY | build endpoint-set rust GRAPH [OVERLAY] OUTPUT --graph-sha256 PIN [--overlay-sha256 PIN] | tagged-wire digest GRAPH | build tagged-wire TARGET GRAPH OUTPUT --graph-sha256 PIN | import rust-tree MANIFEST PACKAGE OUTPUT | build rust-tree BUNDLE OUTPUT --bundle-sha256 PIN".into()),
     }
 }
 fn main() -> ExitCode {
