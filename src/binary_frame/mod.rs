@@ -351,7 +351,11 @@ impl Graph {
                 // All unbounded input fields have checked encode guards before allocation.
                 let target = &slot.id;
                 let required = match slot.encoding {
-                    Encoding::Unsigned { .. } => Some(false),
+                    Encoding::Unsigned { bits, maximum, .. }
+                        if maximum < u64::MAX >> (64 - bits) =>
+                    {
+                        Some(false)
+                    }
                     Encoding::Rest { .. } => Some(true),
                     _ => None,
                 };
@@ -397,12 +401,32 @@ pub fn build(graph: &Path, binding: &Path, output: &Path) -> Result<()> {
     let binding: Binding = json(binding)?;
     graph.validate(&binding)?;
     let source = rust::render(&graph, &binding);
-    let obligations = encode(&json!({
-        "domain":graph.id,
-        "obligations":graph.cases.iter().map(|(id,case)|json!({
-            "declaration":id,"role":"binary-frame-case","expected":case,"qualification":"independent-witness-required",
-        })).collect::<Vec<_>>()
-    }))?;
+    let witness = "independent-witness-required";
+    let mut rows = vec![json!({
+        "declaration":graph.id,"role":"binary-frame-header","qualification":witness,
+        "expected":{"maximum":graph.maximum,"errors":graph.errors}
+    })];
+    for (id, case) in &graph.cases {
+        rows.push(json!({"declaration":id,"role":"binary-frame-case","expected":case,"qualification":witness}));
+        for (position, slot) in case.slots.iter().enumerate() {
+            rows.push(
+                json!({"declaration":slot.id,"role":"binary-frame-slot","qualification":witness,
+                "expected":{"position":position,"encoding":slot.encoding}}),
+            );
+        }
+        for (role, guards) in [
+            ("encode-guard", &case.encode_guards),
+            ("decode-guard", &case.decode_guards),
+        ] {
+            for (position, guard) in guards.iter().enumerate() {
+                rows.push(
+                    json!({"declaration":guard.id,"role":role,"qualification":witness,
+                    "expected":{"position":position,"guard":guard}}),
+                );
+            }
+        }
+    }
+    let obligations = encode(&json!({"domain":graph.id,"obligations":rows}))?;
     let lock = encode(&json!({
         "format":FORMAT,"graphSha256":digest(&encode(&graph)?),"bindingSha256":digest(&encode(&binding)?),
         "frameSha256":digest(source.as_bytes()),"obligationsSha256":digest(&obligations),

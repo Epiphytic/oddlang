@@ -124,6 +124,15 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
         let arm = pattern(case, binding, name, |i| format!("__field_{i}"));
         writeln!(out, "            {arm} => {{").unwrap();
         for guard in &case.encode_guards {
+            if let Predicate::Range { field } = &guard.require {
+                if case.slots.iter().any(|slot| {
+                    slot.id == *field
+                        && matches!(slot.encoding,
+                    Encoding::Unsigned {bits,maximum,..} if maximum==u64::MAX>>(64-bits))
+                }) {
+                    continue;
+                }
+            }
             writeln!(
                 out,
                 "                if !({}) {{ return ::core::result::Result::Err({}); }}",
@@ -132,6 +141,25 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
             )
             .unwrap();
         }
+        let limit = fault(binding, &graph.errors.limit);
+        let mut sizes = Vec::new();
+        for (i, slot) in case.slots.iter().enumerate() {
+            match &slot.encoding {
+                Encoding::Fragment { .. } => {
+                    writeln!(
+                        out,
+                        "                let __fragment_{i} = __field_{i}.__oddlang_encode()?;"
+                    )
+                    .unwrap();
+                    sizes.push(format!("__fragment_{i}.len()"));
+                }
+                Encoding::Rest { .. } => sizes.push(format!("__field_{i}.len()")),
+                Encoding::Unsigned { bits, .. } => sizes.push((bits / 8).to_string()),
+                Encoding::Fixed { size } => sizes.push(size.to_string()),
+                Encoding::Enum { .. } | Encoding::Literal { .. } => sizes.push("1".into()),
+            }
+        }
+        writeln!(out,"                let __size = [{}].into_iter().try_fold(0usize, usize::checked_add).filter(|size| *size <= {maximum}).ok_or_else(|| {limit})?;\n                __wire.reserve_exact(__size);",sizes.join(", ")).unwrap();
         for (i, slot) in case.slots.iter().enumerate() {
             let var = format!("__field_{i}");
             match &slot.encoding {
@@ -145,7 +173,7 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
                 }
                 Encoding::Fragment { .. } => writeln!(
                     out,
-                    "                __wire.extend_from_slice(&{var}.__oddlang_encode()?);"
+                    "                __wire.extend_from_slice(&__fragment_{i});"
                 )
                 .unwrap(),
                 Encoding::Literal { value, .. } => {
@@ -171,13 +199,24 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
         }
         writeln!(out, "                {}u8\n            }}", case.tag).unwrap();
     }
-    let limit = fault(binding, &graph.errors.limit);
-    writeln!(out,"        }};\n        if __wire.len() > {maximum} {{ return ::core::result::Result::Err({limit}); }}\n        let mut __out = ::std::vec::Vec::with_capacity(5 + __wire.len());\n        __out.push(__tag);\n        __out.extend_from_slice(&(__wire.len() as u32).to_be_bytes());\n        __out.extend_from_slice(&__wire);\n        ::core::result::Result::Ok(__out)\n    }}").unwrap();
+    writeln!(out,"        }};\n        let mut __out = ::std::vec::Vec::with_capacity(5 + __wire.len());\n        __out.push(__tag);\n        __out.extend_from_slice(&(__wire.len() as u32).to_be_bytes());\n        __out.extend_from_slice(&__wire);\n        ::core::result::Result::Ok(__out)\n    }}").unwrap();
     let header = fault(binding, &graph.errors.header);
     let limit = fault(binding, &graph.errors.limit);
     let length = fault(binding, &graph.errors.length);
     let truncated = fault(binding, &graph.errors.truncated);
-    writeln!(out,"    pub fn decode(input: &[u8]) -> ::core::result::Result<Self,{err}> {{\n        if input.len() < 5 {{ return ::core::result::Result::Err({header}); }}\n        let __length = u32::from_be_bytes(input[1..5].try_into().expect(\"header width\")) as usize;\n        if __length > {maximum} {{ return ::core::result::Result::Err({limit}); }}\n        if input.len() != __length + 5 {{ return ::core::result::Result::Err({length}); }}\n        let mut __rest = &input[5..];\n        fn __take<'a>(input: &mut &'a [u8], size: usize) -> ::core::result::Result<&'a [u8],{err}> {{\n           let ::core::option::Option::Some((head,tail)) = input.split_at_checked(size) else {{ return ::core::result::Result::Err({truncated}); }};\n           *input=tail;\n           ::core::result::Result::Ok(head)\n        }}\n        let __value = match input[0] {{").unwrap();
+    let reader = if graph
+        .cases
+        .values()
+        .flat_map(|case| &case.slots)
+        .any(|slot| !matches!(slot.encoding, Encoding::Fragment { .. }))
+    {
+        format!(
+            "        fn __take<'a>(input: &mut &'a [u8], size: usize) -> ::core::result::Result<&'a [u8],{err}> {{\n           let ::core::option::Option::Some((head,tail)) = input.split_at_checked(size) else {{ return ::core::result::Result::Err({truncated}); }};\n           *input=tail;\n           ::core::result::Result::Ok(head)\n        }}\n"
+        )
+    } else {
+        String::new()
+    };
+    writeln!(out,"    pub fn decode(input: &[u8]) -> ::core::result::Result<Self,{err}> {{\n        if input.len() < 5 {{ return ::core::result::Result::Err({header}); }}\n        let __length = u32::from_be_bytes(input[1..5].try_into().expect(\"header width\")) as usize;\n        if __length > {maximum} {{ return ::core::result::Result::Err({limit}); }}\n        if input.len() != __length + 5 {{ return ::core::result::Result::Err({length}); }}\n        let mut __rest = &input[5..];\n{reader}        let __value = match input[0] {{").unwrap();
     for (id, case) in &graph.cases {
         writeln!(out, "            {} => {{", case.tag).unwrap();
         for (i, slot) in case.slots.iter().enumerate() {
