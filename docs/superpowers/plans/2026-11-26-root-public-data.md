@@ -17,7 +17,7 @@ external name resolution and verify the concrete public capabilities.
 - [x] Compile an unrelated projected unit error and Debug-only record and
   reject malformed source shapes. Preserve prior finite-error and public
   record projections.
-- [ ] Compare the pinned original and the source-free MDK package
+- [x] Compare the pinned original and the source-free MDK package
   through one native caller. Change a source diagnostic and the declared
   field order, and check each expected output change. Retain negative
   evidence for the result alias and additional public traits.
