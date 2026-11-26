@@ -169,4 +169,77 @@ serde = { version = "=1.0.229", features = ["derive"] }
     )
     run("cargo", "+1.97.1", "run", "--locked", "--offline", "--example", "witness", cwd=package)
 
+    # The package assembler sees both pins and can check a reference even if
+    # the incorrect Rust binding happens to name another valid field.
+    header_id, field_id = id("header"), id("reading")
+    header = deepcopy(graph)
+    header.update(id=header_id, maximum=16, fragment=True, layout=[
+        dict(id=field_id, encoding=dict(kind="unsigned-be", bits=32, minimum=0, maximum=100))
+    ])
+    header_binding = dict(binding, name="Header", names={field_id:"reading"}, externals={},
+                          errors={k:binding["errors"][k] for k in header["errors"].values()})
+    packet = deepcopy(header)
+    packet.update(id=id("packet"), layout=[dict(id=id("nested"), encoding=dict(
+        kind="nested", record=header_id, maximum=8, overflow=graph["errors"]["value"]
+    ))], externalRecords={header_id:dict(fields={field_id:dict(kind="unsigned", bits=32)})})
+    packet_binding = dict(header_binding, name="Packet", names={id("nested"):"nested"},
+                          externalRecords={header_id:dict(path="crate::Header", fields={field_id:"reading"})})
+    def append_record(g, b):
+        index = len(manifest["components"])
+        component = dict(kind="binary-record", module="packets", reexports=[b["name"]],
+                         graph=pin(write(f"record-{index}.json", g)), overlay=pin(write(f"binding-{index}.json", b)))
+        manifest["components"].append(component)
+        return component
+    append_record(header, header_binding)
+    consumer = append_record(packet, packet_binding)
+    def assemble(name, diagnostic=None):
+        consumer["graph"] = pin(write("packet.json", packet))
+        consumer["overlay"] = pin(write("packet-rust.json", packet_binding))
+        destination = root/name
+        run(CLI, "build", "native-package", "rust", write("manifest.json", manifest), destination, error=diagnostic)
+        assert destination.exists() == (diagnostic is None)
+    assemble("nested-valid")
+    run("cargo", "+1.97.1", "check", "--locked", "--offline", cwd=root/"nested-valid")
+    declaration = packet["externalRecords"][header_id]
+    declaration["fields"][field_id]["bits"] = 16
+    assemble("wrong-member-kind", "nested codec member")
+    declaration["fields"][field_id]["bits"] = 32
+    declaration["codecMaximum"] = 15
+    assemble("wrong-codec-bound", "nested codec maximum")
+    declaration["codecMaximum"] = 16
+    assemble("distinct-slot-and-codec-limits")
+    packet["layout"][0]["encoding"]["maximum"] = 3
+    assemble("uninhabitable-slot", "nested codec minimum")
+    packet["layout"][0]["encoding"]["maximum"] = 8
+    packet_binding["externalRecords"][header_id]["path"] = "crate::Sample"
+    assemble("wrong-codec-binding", "nested codec identity")
+
+    packet_binding["externalRecords"][header_id]["path"] = "crate::packets::Header"
+    packet_binding["externalRecords"][header_id]["fields"][field_id] = "other"
+    assemble("wrong-member-name", "nested codec member")
+    packet_binding["externalRecords"][header_id]["fields"][field_id] = "reading"
+    packet["maximum"] = 7
+    assemble("uninhabitable-container", "nested codec minimum exceeds record")
+
+    packet["maximum"] = 16
+    inner_ref = packet["layout"][0]["encoding"]
+    envelope = deepcopy(packet)
+    envelope["id"] = id("envelope")
+    envelope["layout"][0]["encoding"].update(record=packet["id"], maximum=8)
+    envelope["externalRecords"] = {packet["id"]: dict(fields={})}
+    envelope_binding = dict(packet_binding, name="Envelope",
+                            externalRecords={packet["id"]: dict(path="crate::Packet", fields={})})
+    wrapper = append_record(envelope, envelope_binding)
+    assemble("three-level-valid")
+    # The middle record needs four length bytes plus its four-byte child.
+    envelope["layout"][0]["encoding"]["maximum"] = 7
+    wrapper["graph"] = pin(write("envelope.json", envelope))
+    assemble("three-level-too-small", "nested codec minimum exceeds slot")
+    envelope["layout"][0]["encoding"]["maximum"] = 8
+    wrapper["graph"] = pin(write("envelope.json", envelope))
+    inner_ref["record"] = id("envelope")
+    packet["externalRecords"] = {id("envelope"): dict(fields={})}
+    packet_binding["externalRecords"] = {id("envelope"): dict(path="crate::Envelope", fields={})}
+    assemble("cycle", "cyclic required nested codec slots")
+
 print("Portable tagged record agrees with independent bytes, bounds and named errors.")

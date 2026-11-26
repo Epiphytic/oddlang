@@ -9,13 +9,19 @@ use std::collections::{BTreeMap, BTreeSet};
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct ExternalRecord {
+    #[serde(
+        rename = "codecMaximum",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub(super) codec_maximum: Option<u32>,
     #[serde(deserialize_with = "unique_map")]
-    fields: BTreeMap<String, Primitive>,
+    pub(super) fields: BTreeMap<String, Primitive>,
 }
 
 #[derive(Clone, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(tag = "kind", rename_all = "kebab-case", deny_unknown_fields)]
-enum Primitive {
+pub(super) enum Primitive {
     Signed { bits: u8 },
     Unsigned { bits: u8 },
     FixedBytes { size: u32 },
@@ -26,7 +32,7 @@ enum Primitive {
 pub(super) struct RecordBinding {
     pub(super) path: String,
     #[serde(deserialize_with = "unique_map")]
-    fields: BTreeMap<String, String>,
+    pub(super) fields: BTreeMap<String, String>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -105,6 +111,15 @@ enum Operand {
 }
 
 impl Primitive {
+    pub(super) fn from_encoding(encoding: &Encoding) -> Option<Self> {
+        match encoding {
+            Encoding::UnsignedBe { bits, .. } => Some(Self::Unsigned { bits: *bits }),
+            Encoding::SignedBe { bits } => Some(Self::Signed { bits: *bits }),
+            Encoding::FixedBytes { size } => Some(Self::FixedBytes { size: *size }),
+            _ => None,
+        }
+    }
+
     fn valid(&self) -> bool {
         match self {
             Self::Signed { bits } | Self::Unsigned { bits } => matches!(bits, 8 | 16 | 32 | 64),
@@ -124,12 +139,7 @@ fn field<'a>(graph: &'a Graph, id: &str) -> Option<&'a Encoding> {
 impl Operand {
     fn kind(&self, graph: &Graph) -> Option<Primitive> {
         match self {
-            Self::Field { id } => match field(graph, id)? {
-                Encoding::UnsignedBe { bits, .. } => Some(Primitive::Unsigned { bits: *bits }),
-                Encoding::SignedBe { bits } => Some(Primitive::Signed { bits: *bits }),
-                Encoding::FixedBytes { size } => Some(Primitive::FixedBytes { size: *size }),
-                _ => None,
-            },
+            Self::Field { id } => Primitive::from_encoding(field(graph, id)?),
             Self::Member { field: owner, id } => {
                 let Encoding::Nested { record, .. } = field(graph, owner)? else {
                     return None;

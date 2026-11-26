@@ -555,6 +555,18 @@ pub(super) fn build_pinned(
     let manifest: Manifest =
         serde_json::from_slice(raw).map_err(|e| format!("package manifest: {e}"))?;
     validate_command_callbacks(&manifest.components, base)?;
+    let mut codecs = Vec::new();
+    for component in &manifest.components {
+        if matches!(component.kind, Kind::BinaryRecord | Kind::BinaryFragment) {
+            let record = crate::binary_record::linkage::Record::read(
+                &component.graph.read(base)?,
+                &component.overlay.read(base)?,
+            )?;
+            let paths = export_paths(component, record.name());
+            codecs.push((record, paths));
+        }
+    }
+    crate::binary_record::linkage::validate(&codecs)?;
     let cargo = cargo_manifest(&manifest)?;
     let lock = manifest.cargo_lock.read(base)?;
     let parent = output

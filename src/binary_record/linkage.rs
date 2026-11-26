@@ -1,0 +1,110 @@
+//! Check how a package's nested slots and concrete codec declarations fit together.
+use super::{Binding, Encoding, Graph, Result, composite::Primitive};
+use std::collections::BTreeMap;
+
+pub(crate) struct Record {
+    graph: Graph,
+    binding: Binding,
+}
+
+impl Record {
+    pub(crate) fn read(graph: &[u8], overlay: &[u8]) -> Result<Self> {
+        let graph: Graph = serde_json::from_slice(graph).map_err(|e| e.to_string())?;
+        let binding: Binding = serde_json::from_slice(overlay).map_err(|e| e.to_string())?;
+        graph.validate(&binding)?;
+        Ok(Self { graph, binding })
+    }
+
+    pub(crate) fn name(&self) -> &str {
+        &self.binding.name
+    }
+
+    fn check_reference(&self, id: &str, provider: &Self) -> Result<()> {
+        if provider.graph.id != id || provider.binding.existing_type.is_some() {
+            return Err(format!("nested codec identity mismatch: {id}"));
+        }
+        let expected = &self.graph.external_records[id];
+        if expected
+            .codec_maximum
+            .is_some_and(|limit| limit != provider.graph.maximum)
+        {
+            return Err(format!("nested codec maximum mismatch: {id}"));
+        }
+        for (member, kind) in &expected.fields {
+            let slot = provider.graph.layout.iter().find(|slot| slot.id == *member);
+            let actual = slot.and_then(|slot| Primitive::from_encoding(&slot.encoding));
+            let name = &self.binding.external_records[id].fields[member];
+            if actual.as_ref() != Some(kind) || provider.binding.names.get(member) != Some(name) {
+                return Err(format!("nested codec member mismatch: {id} / {member}"));
+            }
+        }
+        Ok(())
+    }
+}
+
+pub(crate) fn validate(records: &[(Record, Vec<Vec<String>>)]) -> Result<()> {
+    let mut by_path = BTreeMap::new();
+    for (index, (_, paths)) in records.iter().enumerate() {
+        for path in paths {
+            let path = format!("crate::{}", path.join("::"));
+            if by_path.insert(path.clone(), index).is_some() {
+                return Err(format!("ambiguous codec export: {path}"));
+            }
+        }
+    }
+    let mut dependencies = Vec::new();
+    let mut minima = Vec::new();
+    for (consumer, _) in records {
+        let mut minimum = if consumer.graph.integrity.is_some() {
+            32
+        } else {
+            0
+        };
+        let mut slots = Vec::new();
+        for slot in &consumer.graph.layout {
+            minimum += slot.encoding.width(&consumer.graph.records)?.0;
+            if let Encoding::Nested {
+                record, maximum, ..
+            } = &slot.encoding
+            {
+                let path = &consumer.binding.external_records[record].path;
+                let index = *by_path.get(path).ok_or_else(|| {
+                    format!("nested codec identity has no pinned package export: {record} ({path})")
+                })?;
+                consumer.check_reference(record, &records[index].0)?;
+                slots.push((index, *maximum, &slot.id));
+            }
+        }
+        dependencies.push(slots);
+        minima.push(minimum);
+    }
+    // Children contribute their complete minimum payload. Prefixes and checksums
+    // were already counted by the enclosing graph. No recursive Rust calls.
+    let mut complete = vec![false; records.len()];
+    while complete.contains(&false) {
+        let mut progress = false;
+        for (index, slots) in dependencies.iter().enumerate() {
+            if complete[index] || slots.iter().any(|(child, _, _)| !complete[*child]) {
+                continue;
+            }
+            for (child, limit, id) in slots {
+                if minima[*child] > u64::from(*limit) {
+                    return Err(format!("nested codec minimum exceeds slot: {id}"));
+                }
+                minima[index] += minima[*child];
+            }
+            if minima[index] > u64::from(records[index].0.graph.maximum) {
+                return Err(format!(
+                    "nested codec minimum exceeds record: {}",
+                    records[index].0.graph.id
+                ));
+            }
+            complete[index] = true;
+            progress = true;
+        }
+        if !progress {
+            return Err("cyclic required nested codec slots".into());
+        }
+    }
+    Ok(())
+}

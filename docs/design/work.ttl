@@ -1119,7 +1119,7 @@ w:checkpointDecodePrecedenceReview a p:Finding ;
 w:compositeBinaryRecords p:addresses w:checkpointDecodePrecedenceReview .
 w:compositeExternalContractLinkage a p:Task ;
     rdfs:label "Check composite slot bounds and member types against pinned external codec contracts" ;
-    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:active ;
     p:dependsOn w:compositeBinaryRecords ;
     p:acceptance "Verify external codec identities, independently declared inner limits and exact native types before emitting a composed package." .
 
