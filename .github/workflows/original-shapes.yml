@@ -44,6 +44,11 @@ jobs:
           set -euxo pipefail
           export RUSTUP_TOOLCHAIN=1.97.1
           export CARGO_BUILD_JOBS=3
+          # Linux packages the compiler's LLVM library in the toolchain root.
+          sysroot="$(rustc +1.97.1 --print sysroot)"
+          test -f "$sysroot/lib/libLLVM-22-rust-1.97.1-stable.so"
+          export LIBRARY_PATH="$sysroot/lib${LIBRARY_PATH:+:$LIBRARY_PATH}"
+          export LD_LIBRARY_PATH="$sysroot/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
           framework="$RUNNER_TEMP/framework"
           reference="$RUNNER_TEMP/reference"
           artifacts="$RUNNER_TEMP/graphs"
