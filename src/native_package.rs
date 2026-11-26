@@ -574,7 +574,17 @@ fn validate_component_requirements(
         require_erasing_storage(manifest, "buffered-input")?;
         required.insert(ZEROIZE);
     }
-    if checked.is_empty() {
+    let mut limits = Vec::new();
+    for component in components
+        .iter()
+        .filter(|component| matches!(component.kind, Kind::ProcessLimit))
+    {
+        let overlay = component.overlay.read(base)?;
+        if let Some(error) = crate::process_limit::declared_error(&overlay)? {
+            limits.push(error);
+        }
+    }
+    if checked.is_empty() && limits.is_empty() {
         return Ok(required);
     }
     let mut providers = BTreeMap::new();
@@ -591,7 +601,7 @@ fn validate_component_requirements(
                 .map(|path| format!("crate::{}::{}", path.join("::"), error.variant))
                 .collect::<BTreeSet<_>>();
             if providers.insert(error.id.clone(), paths).is_some() {
-                return Err(format!("ambiguous checked value error: {}", error.id));
+                return Err(format!("ambiguous native error declaration: {}", error.id));
             }
         }
     }
@@ -601,6 +611,9 @@ fn validate_component_requirements(
             required.insert(ZEROIZE);
         }
         crate::checked_values::validate_error_links(&component.overlay.read(base)?, &providers)?;
+    }
+    for error in limits {
+        error.validate_link(&providers)?;
     }
     Ok(required)
 }

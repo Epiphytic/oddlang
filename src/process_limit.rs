@@ -1,7 +1,12 @@
 //! Lower a declared process resource policy to the native libc boundary.
 use crate::wire_schema::{digest, encode, iri, symbol};
 use serde::Deserialize;
-use std::{fmt::Write as _, fs, path::Path};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    fmt::Write as _,
+    fs,
+    path::Path,
+};
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -41,8 +46,60 @@ struct Binding {
 }
 
 #[derive(Deserialize)]
+#[serde(untagged)]
+enum ErrorBinding {
+    Local(LocalError),
+    Declared(DeclaredError),
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(crate) struct DeclaredError {
+    id: String,
+    type_path: Vec<String>,
+    variant: String,
+}
+
+impl DeclaredError {
+    fn type_path(&self) -> Option<String> {
+        (!self.type_path.is_empty()
+            && self.type_path.iter().all(|part| symbol(part))
+            && symbol(&self.variant))
+        .then(|| format!("crate::{}", self.type_path.join("::")))
+    }
+
+    pub(crate) fn validate_link(
+        &self,
+        providers: &BTreeMap<String, BTreeSet<String>>,
+    ) -> Result<(), String> {
+        let ty = self
+            .type_path()
+            .ok_or("invalid declared process limit type path")?;
+        let variant = format!("{ty}::{}", self.variant);
+        if !providers
+            .get(&self.id)
+            .is_some_and(|paths| paths.contains(&variant))
+        {
+            return Err(format!(
+                "unresolved declared process limit error: {}",
+                self.id
+            ));
+        }
+        Ok(())
+    }
+}
+
+pub(crate) fn declared_error(overlay: &[u8]) -> Result<Option<DeclaredError>, String> {
+    let binding: Binding = serde_json::from_slice(overlay).map_err(|e| e.to_string())?;
+    Ok(match binding.error {
+        ErrorBinding::Declared(error) => Some(error),
+        ErrorBinding::Local(_) => None,
+    })
+}
+
+#[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-struct ErrorBinding {
+struct LocalError {
     id: String,
     #[serde(rename = "type")]
     type_name: String,
@@ -64,31 +121,39 @@ pub(crate) fn build(
     }
     iri(&policy.id)?;
     iri(&policy.failure)?;
-    let ErrorBinding {
-        id,
-        type_name,
-        variant,
-        result,
-        display,
-    } = binding.error;
-    if id != policy.failure || id == policy.id {
-        return Err("invalid process limit failure identity".into());
-    }
-    if ![&binding.entry, &type_name, &variant, &result]
-        .into_iter()
-        .all(|name| symbol(name))
-        || type_name == result
-        || display.is_empty()
-        || display.chars().any(char::is_control)
-    {
-        return Err("invalid process limit Rust binding".into());
-    }
     let constant = match policy.resource {
         Resource::OpenDescriptors => "::libc::RLIMIT_NOFILE",
     };
     let entry = binding.entry;
-    let mut source = format!(
-        r#"#[derive(Debug)]
+    let id = match &binding.error {
+        ErrorBinding::Local(error) => &error.id,
+        ErrorBinding::Declared(error) => &error.id,
+    };
+    if *id != policy.failure || id == &policy.id {
+        return Err("invalid process limit failure identity".into());
+    }
+    if !symbol(&entry) {
+        return Err("invalid process limit Rust binding".into());
+    }
+    let (mut source, result, failure) = match binding.error {
+        ErrorBinding::Local(LocalError {
+            type_name,
+            variant,
+            result,
+            display,
+            ..
+        }) => {
+            if ![&type_name, &variant, &result]
+                .into_iter()
+                .all(|name| symbol(name))
+                || type_name == result
+                || display.is_empty()
+                || display.chars().any(char::is_control)
+            {
+                return Err("invalid process limit Rust binding".into());
+            }
+            let source = format!(
+                r#"#[derive(Debug)]
 pub enum {type_name} {{
     {variant},
 }}
@@ -102,9 +167,29 @@ impl ::std::fmt::Display for {type_name} {{
 impl ::std::error::Error for {type_name} {{}}
 pub type {result}<T> = ::std::result::Result<T, {type_name}>;
 
-#[cfg(not(any(target_os = "linux", target_os = "macos")))]
-compile_error!("process limit policy supports Linux and macOS only");
 "#
+            );
+            (
+                source,
+                format!("{result}<()>"),
+                format!("{type_name}::{variant}"),
+            )
+        }
+        ErrorBinding::Declared(error) => {
+            let ty = error
+                .type_path()
+                .ok_or("invalid declared process limit type path")?;
+            (
+                String::new(),
+                format!("::core::result::Result<(), {ty}>"),
+                format!("{ty}::{}", error.variant),
+            )
+        }
+    };
+    source.push_str(
+        r#"#[cfg(not(any(target_os = "linux", target_os = "macos")))]
+compile_error!("process limit policy supports Linux and macOS only");
+"#,
     );
     for (os, platform) in [
         ("linux", policy.platforms.linux),
@@ -112,7 +197,7 @@ compile_error!("process limit policy supports Linux and macOS only");
     ] {
         writeln!(
             source,
-            "#[cfg(target_os = {os:?})]\npub fn {entry}() -> {result}<()> {{"
+            "#[cfg(target_os = {os:?})]\npub fn {entry}() -> {result} {{"
         )
         .unwrap();
         match platform {
@@ -126,7 +211,7 @@ compile_error!("process limit policy supports Linux and macOS only");
                 }
                 writeln!(
                     source,
-                    r#"    let unavailable = || {type_name}::{variant};
+                    r#"    let unavailable = || {failure};
     let read = || {{
         let mut limit = ::libc::rlimit {{ rlim_cur: 0, rlim_max: 0 }};
         if unsafe {{ ::libc::getrlimit({constant}, &mut limit) }} != 0 {{
