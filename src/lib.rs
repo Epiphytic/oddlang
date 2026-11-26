@@ -33,6 +33,7 @@ pub mod rust_recovery;
 pub mod rust_roundtrip;
 pub mod sequence_journal;
 pub mod shared_declarations;
+pub mod structured_diagnostics;
 pub mod tagged_wire;
 pub mod targets;
 pub mod value_domain;
