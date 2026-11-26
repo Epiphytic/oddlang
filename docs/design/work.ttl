@@ -1980,7 +1980,10 @@ w:assembleRecoveredPublicData a p:Task ;
     p:source w:assembleRecoveredPublicDataPlan ;
     p:dependsOn w:recoverSerdePublicRecords, w:serdeStringChoiceRecovery ;
     p:acceptance "Derive checked native component declarations from pinned recovery output and explicit package policy, preserve generated native bytes, and reject ambiguous or unpinned links." ;
-    p:status p:active .
+    p:status p:done ; p:evidence w:assembleRecoveredPublicDataReceipt .
 
 w:assembleRecoveredPublicDataPlan a p:Artifact ;
     p:location "docs/superpowers/plans/2026-11-26-assemble-recovered-public-data.md" .
+
+w:assembleRecoveredPublicDataReceipt a p:Artifact ;
+    p:location "verification/recovered-public-data/receipts/aarch64-apple-darwin.json" .
