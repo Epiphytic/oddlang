@@ -954,15 +954,16 @@ w:wholeMarmishProtocols p:dependsOn w:binaryMetadataRecords .
 
 w:typedFieldRelationReview a p:Finding ;
     rdfs:label "Require native equality and copy capabilities and compile assembled relation components" ;
-    p:source w:typedFieldRelationFixture .
+    p:source w:copyFieldRelationNativeReview .
 w:typedFieldRelations p:addresses w:typedFieldRelationReview .
 
 w:binaryMetadataErrorReview a p:Finding ;
     rdfs:label "Separate parse-time offsets and tags from deferred Manifest field and metadata errors" ;
-    p:source w:binaryMetadataFixture .
+    p:source w:copyManifestNativeReview .
 w:binaryMetadataRecords p:addresses w:binaryMetadataErrorReview .
 w:copyManifestQualification a p:Task ; rdfs:label "Qualify a native copy Manifest and Mtime" ;
-    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:evidence w:copyManifestNativeReceipt ;
     p:dependsOn w:binaryMetadataRecords ;
     p:acceptance "Compare source-free Manifest validation, binary encoding, decoding, namespace and canonical SHA-256 with the pinned original." .
 w:wholeMarmishProtocols p:dependsOn w:copyManifestQualification .
@@ -987,3 +988,41 @@ w:localStatusOwnerShutdownReview a p:Finding ;
     rdfs:label "Keep every lifecycle frame bounded and unlink the owned socket before releasing its descriptor" ;
     p:source w:localStatusOwnerFixture .
 w:localStatusOwner p:addresses w:localStatusOwnerShutdownReview .
+
+w:copyManifestNativeReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/2926c6aefdaca70ff1370d31f3d670aa84fb5973/verification/whole/copy-manifest/reference-aarch64-apple-darwin.json" .
+w:copyManifestNativeReview a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/2926c6aefdaca70ff1370d31f3d670aa84fb5973/docs/reviews/oddlang-copy-manifest.md" .
+
+w:copyCheckpointQualification a p:Task ; rdfs:label "Qualify a native copy Checkpoint and its FileIdentity value" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned ;
+    p:dependsOn w:copyManifestQualification ;
+    p:acceptance "Reproduce checked Checkpoint encoding and decoding, including native FileIdentity shapes and exact errors." .
+w:wholeMarmishProtocols p:dependsOn w:copyCheckpointQualification .
+
+w:copyFieldRelationQualification a p:Task ; rdfs:label "Qualify native copy Manifest matching and helper consistency checks" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:evidence w:copyFieldRelationNativeReceipt ;
+    p:dependsOn w:copyManifestQualification, w:typedFieldRelations ;
+    p:acceptance "Verify explicit field correspondence, checked helper start and build identity, and short-circuited error propagation against the pinned original." .
+w:wholeMarmishProtocols p:dependsOn w:copyFieldRelationQualification .
+
+w:copyFieldRelationNativeReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b7ffe42e9423b22a893057a950fb2364429a80d0/verification/whole/copy-field-relations/reference-aarch64-apple-darwin.json" .
+w:copyFieldRelationNativeReview a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b7ffe42e9423b22a893057a950fb2364429a80d0/docs/reviews/oddlang-copy-field-relations.md" .
+
+w:orderedRecordWrites p:evidence w:copyWriterRecovery, w:linuxCopyContractEvidence .
+w:copyWriterRecovery a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/29> .
+w:linuxCopyContractEvidence a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/31> .
+w:localStatusOwner p:evidence w:originalClientOwnerReceipt .
+w:originalClientOwnerReceipt a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/27> .
+w:localOwnerTlsOracle a p:Task ; rdfs:label "Freeze direct relay admission, activation and failed TLS cleanup" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Compare loopback plaintext rejection and private-certificate TLS rejection, exact status while the handshake is held and terminal output on both ARM64 hosts." ;
+    p:evidence w:localOwnerTlsReceipt .
+w:localOwnerTlsReceipt a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/34> .
+w:integratedNativeInterfaces a p:Task ; rdfs:label "Build one composed native release with current copy and status interfaces" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:active ;
+    p:dependsOn w:combinedNativeRelease, w:copyFieldRelationQualification ;
+    p:acceptance "Recover source-independent packages together from one root lock and run mixed discovery and upstream library cases on the resulting artifacts." .

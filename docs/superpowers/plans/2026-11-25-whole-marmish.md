@@ -27,6 +27,10 @@ The independent stream comparison including macro expansions left 373 compiler-o
 
 ## Implementation evidence
 
+- [x] Qualify Launch writer recovery and a changed upstream writer on both ARM64 hosts. [Changed source qualification](https://github.com/Epiphytic/marmish-oddlang/pull/29) · [Linux replay](https://github.com/Epiphytic/marmish-oddlang/pull/31)
+- [x] Observe native plaintext and TLS rejection with exact status, exit, shutdown and socket cleanup on both hosts. [Original transport evidence](https://github.com/Epiphytic/marmish-oddlang/pull/34)
+- [ ] Rebuild the expanded copy and status interfaces in a single native workspace release.
+
 - [x] Freeze the original local status and extended reply observations on Darwin and Linux ARM64. [Live daemon and framing](https://github.com/Epiphytic/marmish-oddlang/pull/20) · [Extended reply corpus](https://github.com/Epiphytic/marmish-oddlang/pull/22)
 - [x] Build the core, stream and partial command surfaces together and replay 25 unchanged tests on Darwin and Linux ARM64. [Three-member workspace](https://github.com/Epiphytic/marmish-oddlang/pull/25)
 - [x] Qualify the explicit-socket status client against an activating original daemon. [Mixed native status](https://github.com/Epiphytic/marmish-oddlang/pull/23)
@@ -87,4 +91,6 @@ The principal feasibility risk is recovering intended behavior where only incide
 - [x] Project typed cross-record equality, ordered prechecks and checked result comparisons. [Field relations](../../language/field-relations.md)
 
 - [x] Extend ordered binary records with nullable metadata, inline signed values, typed guards, and hexadecimal views. [Binary metadata](../../language/binary-records.md#binary-metadata)
-- [ ] Qualify the copy Manifest and Mtime against the pinned native original. Checkpoint owns the separate FileIdentity record witness.
+- [x] Qualify the copy Manifest and Mtime against the pinned native original. [Native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/32)
+- [ ] Qualify the copy Checkpoint and its FileIdentity record against the pinned native original.
+- [x] Qualify Manifest matching and the helper start and build consistency checks against the pinned native original. [Native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/33)
