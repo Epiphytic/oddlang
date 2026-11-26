@@ -1,5 +1,6 @@
 """Compile a graph-only credential tool and test its effects with unrelated names."""
 
+import fcntl
 import hashlib
 import json
 import os
@@ -111,6 +112,65 @@ with tempfile.TemporaryDirectory(prefix="file-profile-") as tmp:
     assert (bad.returncode, bad.stdout, bad.stderr) == (3, b"", b"unsafe file\n")
     assert digest(occupied) == before[str(occupied)][1]
     assert os.stat(profile).st_mode & 0o777 == 0o700
+    occupied.chmod(0o600)
+
+    def decline(args, message):
+        bad = subprocess.run(args, capture_output=True, timeout=5)
+        assert (bad.returncode, bad.stdout, bad.stderr) == (3, b"", message + b"\n"), bad.stderr
+
+    with (profile / "lease").open("rb") as lease:
+        fcntl.flock(lease, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        decline(arguments, b"in use")
+    link = profile / "credentials/copy"
+    link.hardlink_to(occupied)
+    decline(arguments, b"unsafe file")
+    link.unlink()
+    referenced = profile / "lease"
+    old = profile / "previous-lease"
+    referenced.rename(old)
+    referenced.symlink_to(old)
+    decline(arguments, b"io")
+    assert referenced.is_symlink() and old.read_bytes() == b""
+    referenced.unlink()
+    old.rename(referenced)
+
+    def selected(name):
+        return (binary, "--station", state, "--medium", "local", "--name", name, "prepare")
+
+    def ready_document(name, **changes):
+        folder = state / name
+        folder.mkdir(mode=0o700)
+        keys = folder / "credentials"
+        keys.mkdir(mode=0o700)
+        manifest = folder / "record.json"
+        manifest.write_text(json.dumps({**document, "label": name, **changes}))
+        manifest.chmod(0o600)
+        return folder, keys, manifest
+
+    folder, keys, manifest = ready_document("resume", attestation=None)
+    declared_signing = keys / ("signature-" + document["sign"])
+    declared_signing.write_bytes((1).to_bytes(32, "big"))
+    declared_signing.chmod(0o600)
+    known_inode = declared_signing.stat().st_ino
+    observed = json.loads(run(*selected("resume")).stdout)
+    assert observed["identity"] == "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+    assert json.loads(manifest.read_bytes())["stage"] == "proposed"
+    assert (keys / ("vault-" + document["locker"])).is_file()
+    assert declared_signing.stat().st_ino == known_inode
+    declared_signing.unlink()
+    decline(selected("resume"), b"missing secret")
+    declared_signing.write_bytes((2).to_bytes(32, "big"))
+    declared_signing.chmod(0o600)
+    decline(selected("resume"), b"identity mismatch")
+
+    folder, keys, manifest = ready_document("initial", attestation=None)
+    run(*selected("initial"))
+    assert len(tuple(keys.iterdir())) == 2
+    assert json.loads(manifest.read_bytes())["stage"] == "proposed"
+    unsafe = root / "unsafe"
+    unsafe.mkdir(mode=0o755)
+    decline((binary, "--station", unsafe, "--medium", "local", "prepare"), b"unsafe directory")
+    assert not any(unsafe.iterdir())
     graph["layout"]["owner"] = "../lease"
     pin("invalid.json", graph)
     bad = subprocess.run([CLI, "build", "file-profile", "rust", root / "invalid.json",

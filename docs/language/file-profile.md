@@ -1,6 +1,6 @@
 # Native file-backed credential preparation
 
-A file-profile policy names filesystem layout, private permission modes, CLI arguments, stable manifest field roles and finite diagnostics. The Rust binding selects the OS random provider and secp256k1 x-only public-key derivation.
+The Linux and macOS projection uses a file-profile policy that names filesystem layout, private permission modes, CLI arguments, stable manifest field roles and finite diagnostics. The Rust binding selects the OS random provider and secp256k1 x-only public-key derivation.
 
 ```sh
 oddlang build file-profile rust GRAPH.json RUST.json OUTPUT

@@ -146,10 +146,9 @@ fn secret(path: &Path) -> Result<Option<Zeroizing<[u8; 32]>>, Failure> {
 
 fn public_for(data: &[u8; 32]) -> Result<String, Failure> {
     let mut secret = secp256k1::SecretKey::from_byte_array(data).map_err(|_| INVALID_SIGNING_KEY)?;
-    let key = secp256k1::Keypair::from_secret_key(&secp256k1::Secp256k1::new(), &secret);
+    let mut key = secp256k1::Keypair::from_secret_key(&secp256k1::Secp256k1::new(), &secret);
     secret.non_secure_erase();
     let result = lower_hex(&key.x_only_public_key().0.serialize());
-    let mut key = key;
     key.non_secure_erase();
     Ok(result)
 }
