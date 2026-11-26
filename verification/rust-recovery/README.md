@@ -145,3 +145,18 @@ Run `probe_consumer_paths.py EXPECTED_EXPORTS SUBJECT_GRAPH_DIRECTORY SUBJECT_CA
 The observer verifies the adjacent export locks, compiler and native target. For the subject it checks package selection, workspace entry, recorded Cargo configuration and optional source revision. It builds in the same Cargo configuration directory used by extraction. Ambiguous candidates are reported separately; an ordinary import may resolve in another namespace even when the subject graph has no corresponding type. Constructor and pattern access require separate consumers.
 
 The receipt pins both export locks. Unresolved expected spellings, including anonymous imports that cannot be named by an ordinary downstream caller, are listed separately from the imports that were compiled.
+
+Pass `--public-inherent` to include `rustdocPublicInherent` in the release
+report. It records declared-public functions, associated constants and
+associated types on concrete local records, enums and unions. Each entry
+has the declaring type's lexical owner path, the Rustdoc kind and the item
+name. The default report is unchanged. Inspect the separate declaration and
+downstream import evidence to determine which type names are reachable.
+
+Trait implementations belong to a different surface. Generic definitions,
+specialized receivers, constrained implementations and receivers without a
+local nominal declaration path are excluded from this observation. The
+report counts excluded local inherent implementations present in the Rustdoc index. A separate Rustdoc pass includes private and documentation-hidden declarations. Rustdoc sets `cfg(doc)` and can omit block-local and nonnominal implementations entirely. The counts describe this index. Item
+names alone do not establish signature or behavioral equivalence. The
+independent fixture compiles a caller and checks rustc's rejection of a
+private method and a method used with the wrong type argument.

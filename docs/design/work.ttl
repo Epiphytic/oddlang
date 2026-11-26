@@ -2506,3 +2506,13 @@ w:wholeMarmishStructure p:dependsOn w:coreSemanticLookup .
 w:coreSemanticProjection a p:Artifact ;
     rdfs:label "TypeScript retention projection selected by portable identity" ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a1f0de219d60d2baa962a8f7fa5403525ac7f7f5/verification/whole/core-ownership/retention-node.json" .
+
+w:coreInherentNames a p:Task ;
+    rdfs:label "Observe public inherent members on concrete local type declarations" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:coreDeclarationOwnership, w:coreSemanticLookup ; p:status p:done ; p:evidence w:coreInherentWitness ;
+    p:acceptance "Measure names of methods and associated constants on concrete types, with explicit exclusions for specialized receivers. Compare core declarations against the pinned six-type ownership map and use independent native caller controls." .
+w:wholeMarmishStructure p:dependsOn w:coreInherentNames .
+w:coreInherentWitness a p:Artifact ;
+    rdfs:label "Six concrete core function-pointer checks and four associated constant type checks on both ARM64 hosts" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/9caf478ba084416195fbf7f3279eb516d44478a3/verification/whole/core-inherent" .
