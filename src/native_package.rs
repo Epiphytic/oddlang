@@ -196,6 +196,7 @@ impl Pin {
 enum Kind {
     BuildReport,
     ProcessLimit,
+    PublicRecords,
     ValueDomain,
     JsonEnvelope,
     EndpointSet,
@@ -266,7 +267,7 @@ fn project(
     component: &Component,
     base: &Path,
     stage: &Path,
-    has_libc: bool,
+    dependencies: &BTreeMap<String, Dependency>,
 ) -> Result<(Vec<u8>, serde_json::Value)> {
     if component.wire_shape.is_some() && !matches!(component.kind, Kind::WireProtocol) {
         return Err("wireShape is only valid for wire-protocol components".into());
@@ -282,8 +283,25 @@ fn project(
             crate::build_report::build(&graph, &io(fs::read(&overlay))?, &output)?;
             "report.rs"
         }
+        Kind::PublicRecords => {
+            let serde_available = dependencies
+                .get("serde")
+                .is_some_and(|dep| dep.features.iter().any(|feature| feature == "derive"));
+            crate::public_records::build_bytes(
+                &graph,
+                &io(fs::read(&overlay))?,
+                &output,
+                serde_available,
+            )?;
+            "records.rs"
+        }
         Kind::ProcessLimit => {
-            crate::process_limit::build(&graph, &io(fs::read(&overlay))?, &output, has_libc)?;
+            crate::process_limit::build(
+                &graph,
+                &io(fs::read(&overlay))?,
+                &output,
+                dependencies.contains_key("libc"),
+            )?;
             "limits.rs"
         }
         Kind::ValueDomain | Kind::JsonEnvelope => {
@@ -740,12 +758,7 @@ pub(super) fn build_pinned(
         let leaf = format!("__projection_{index}");
         let stage = work.path().join(&leaf);
         io(fs::create_dir(&stage))?;
-        let (source, projection) = project(
-            component,
-            base,
-            &stage,
-            manifest.dependencies.contains_key("libc"),
-        )?;
+        let (source, projection) = project(component, base, &stage, &manifest.dependencies)?;
         let directory = &group.directory;
         let module = src.join(directory);
         io(fs::create_dir_all(&module))?;

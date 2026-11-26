@@ -1291,3 +1291,12 @@ w:checkedValueErrorLinkageReview a p:Finding ;
     rdfs:label "Reject a checked constructor whose native error export has a different portable identity" ;
     p:source w:checkedValuesFixture .
 w:checkedValueProductProjection p:addresses w:checkedValueErrorLinkageReview ; p:evidence w:checkedValuesFixture .
+
+w:publicObservationalRecordsPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-public-records.md" .
+w:publicObservationalRecords a p:Task ;
+    rdfs:label "Recover and project native public records and re-export identities" ;
+    p:milestone w:marmishMilestone ;
+    p:source w:publicObservationalRecordsPlan ;
+    p:acceptance "Named public records preserve ordered typed fields, supported traits and alias identity in a source-free package, verified against independently compiled baseline and mutated native callers." ;
+    p:status p:active .

@@ -26,6 +26,7 @@ pub mod local_status_owner;
 pub mod model;
 pub mod native_package;
 mod process_limit;
+pub mod public_records;
 pub mod rust_recovery;
 pub mod rust_roundtrip;
 pub mod sequence_journal;
