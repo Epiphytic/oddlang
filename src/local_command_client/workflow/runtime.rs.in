@@ -39,6 +39,7 @@ fn request(
     fields: &[Field],
     matches: &ArgMatches,
     values: &BTreeMap<&str, Value>,
+    inputs: &BTreeMap<String, Value>,
 ) -> Result<(), Failure> {
     append(body, b"{")?;
     for (position, field) in fields.iter().enumerate() {
@@ -50,7 +51,7 @@ fn request(
         append(body, b":")?;
         let encoded = match &field.source {
             Source::Object { fields } => {
-                request(body, fields, matches, values)?;
+                request(body, fields, matches, values, inputs)?;
                 continue;
             }
             Source::Literal { value } => serde_json::to_vec(value),
@@ -60,6 +61,7 @@ fn request(
             Source::Captured { name } => {
                 serde_json::to_vec(values.get(name.as_str()).ok_or(PROTOCOL)?)
             }
+            Source::Input { name } => serde_json::to_vec(inputs.get(name).ok_or(PROTOCOL)?),
         }.map_err(|_| FRAME_JSON)?;
         append(body, &encoded)?;
     }
@@ -79,13 +81,18 @@ fn capture_is_valid(value: &Value, kind: &CaptureKind) -> bool {
     }
 }
 
-async fn run_workflow(workflow: &Workflow, path: &Path, matches: &ArgMatches) -> Result<u8, Failure> {
+async fn run_workflow(
+    workflow: &Workflow,
+    path: &Path,
+    matches: &ArgMatches,
+    inputs: &BTreeMap<String, Value>,
+) -> Result<u8, Failure> {
     let mut state = workflow.entry.as_str();
     let mut captured = BTreeMap::new();
     for exchange_index in 0..workflow.transport.maximum_exchanges {
         let step = workflow.steps.iter().find(|step| step.id == state).ok_or(PROTOCOL)?;
         let mut body = Vec::new();
-        request(&mut body, &step.request, matches, &captured)?;
+        request(&mut body, &step.request, matches, &captured, inputs)?;
         let strict_json::Strict(reply) = exchange(path, &body).await?;
         let transition = step.transitions.iter().find(|transition| {
             transition.when.iter().all(|predicate| {
@@ -127,11 +134,12 @@ async fn run_workflow(workflow: &Workflow, path: &Path, matches: &ArgMatches) ->
 
 fn execute_workflow(matches: &ArgMatches) -> Result<u8, Failure> {
     let workflow: Workflow = serde_json::from_str(WORKFLOW).map_err(|_| PROTOCOL)?;
-    let path = matches.try_get_one::<PathBuf>(&workflow.socket_argument)
-        .map_err(|_| BINDING)?.ok_or(BINDING)?;
+    let inputs = initial_inputs(&workflow, matches)?;
+    let explicit = matches.try_get_one::<PathBuf>(&workflow.socket_argument).map_err(|_| BINDING)?;
+    let path = choose_socket(matches, explicit)?;
     let runtime = tokio::runtime::Builder::new_current_thread().enable_all().build().map_err(|_| IO)?;
     runtime.block_on(async {
-        tokio::time::timeout(Duration::from_millis(DEADLINE_MS), run_workflow(&workflow, path, matches))
+        tokio::time::timeout(Duration::from_millis(DEADLINE_MS), run_workflow(&workflow, &path, matches, &inputs))
             .await.map_err(|_| DEADLINE)?
     })
 }
