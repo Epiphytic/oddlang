@@ -1,0 +1,21 @@
+    pub async fn serve_until(self, shutdown: impl Future<Output = ()>) -> Result<(), OwnerError> {
+        self.serve_async_routed_until(shutdown, |_| std::future::ready(None)).await
+    }
+
+    pub async fn serve_routed_until(
+        self,
+        shutdown: impl Future<Output = ()>,
+        route: impl Fn(&[u8]) -> Option<Vec<u8>> + Send + Sync + 'static,
+    ) -> Result<(), OwnerError> {
+        self.serve_async_routed_until(shutdown, move |body| std::future::ready(route(&body))).await
+    }
+
+    pub async fn serve_async_routed_until<F>(
+        self,
+        shutdown: impl Future<Output = ()>,
+        route: impl Fn(Vec<u8>) -> F + Send + Sync + 'static,
+    ) -> Result<(), OwnerError>
+    where
+        F: Future<Output = Option<Vec<u8>>> + Send + 'static,
+    {
+        let route = Arc::new(route);

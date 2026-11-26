@@ -1,0 +1,206 @@
+use ::sha2::Digest as _;
+
+type QueuedSubmit = (
+    SubmitRequest,
+    tokio::sync::oneshot::Sender<Result<SubmitHandle, Failure>>,
+);
+
+async fn route_room_request(
+    body: Vec<u8>,
+    prepare: RoomPrepareQueue,
+    submit: mpsc::Sender<QueuedSubmit>,
+) -> Option<Vec<u8>> {
+    if let Some(reply) = prepare.route(&body) {
+        return Some(reply);
+    }
+    let request: SubmitRequest = serde_json::from_slice(&body).ok()?;
+    if request.operation != SUBMIT_OPERATION {
+        return None;
+    }
+    let (reply, response) = tokio::sync::oneshot::channel();
+    let result = match submit.try_send((request, reply)) {
+        Ok(()) => response.await.unwrap_or(Err(SUBMIT_FAILURES[4])),
+        Err(mpsc::error::TrySendError::Full(_)) => Err(PREPARE_CATEGORIES[3]),
+        Err(mpsc::error::TrySendError::Closed(_)) => Err(SUBMIT_FAILURES[4]),
+    };
+    match result {
+        Ok(handle) => serde_json::to_vec(&SubmitReply {
+            ok: SUBMIT_ACCEPTED_OK,
+            result: (),
+            error: (),
+            command: SubmitAccepted {
+                state: SUBMIT_QUEUED,
+                handle,
+            },
+        })
+        .ok(),
+        Err(category) => serde_json::to_vec(&SubmitReply {
+            ok: SUBMIT_REFUSED_OK,
+            result: (),
+            error: (),
+            command: SubmitRefused {
+                state: PREPARE_STATES[2],
+                category,
+                handle: (),
+            },
+        })
+        .ok(),
+    }
+}
+
+fn submit_hex<const N: usize>(value: &str) -> Result<[u8; N], Failure> {
+    if !lower_hex(value, N) {
+        return Err(SUBMIT_FAILURES[0]);
+    }
+    let mut decoded = [0; N];
+    hex::decode_to_slice(value, &mut decoded).map_err(|_| SUBMIT_FAILURES[0])?;
+    Ok(decoded)
+}
+
+fn submit_bytes(value: &str) -> Result<Vec<u8>, Failure> {
+    let bytes = STANDARD.decode(value).map_err(|_| SUBMIT_FAILURES[0])?;
+    if STANDARD.encode(&bytes) != value {
+        return Err(SUBMIT_FAILURES[0]);
+    }
+    Ok(bytes)
+}
+
+fn submit_queue_failure(error: SubmitQueue::QueueError) -> Failure {
+    match error {
+        SubmitQueue::QueueError::RequestCollision => SUBMIT_FAILURES[2],
+        SubmitQueue::QueueError::InvocationCollision => SUBMIT_FAILURES[3],
+        SubmitQueue::QueueError::Digest | SubmitQueue::QueueError::Frame => SUBMIT_FAILURES[0],
+        _ => SUBMIT_FAILURES[4],
+    }
+}
+
+struct RetainedSubmitRoom {
+    remote: String,
+    session: String,
+    group: GroupId,
+    welcome: MessageId,
+}
+
+fn select_submit_room(
+    journal: &rusqlite::Connection,
+    prepare: &RoomPrepareQueue,
+    input: &SubmitRequest,
+) -> Result<RetainedSubmitRoom, Failure> {
+    prepare.authorization(&input.remote)?;
+    if input.relays.as_slice() != [prepare.endpoint.as_str()] {
+        return Err(PREPARE_CATEGORIES[1]);
+    }
+    let (remote, session, group, welcome) = journal.query_row(
+        "SELECT remote_account, session, native_group, welcome_id FROM main.local_room_prepare_v1
+         WHERE local_account = ?1 AND remote_account = ?2 AND relay = ?3 AND session = ?4 AND ready = 1",
+        rusqlite::params![prepare.local, input.remote, prepare.endpoint, input.session],
+        |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?,
+                  row.get::<_, Vec<u8>>(2)?, row.get::<_, Vec<u8>>(3)?)),
+    ).optional().map_err(|_| SUBMIT_FAILURES[4])?.ok_or(SUBMIT_FAILURES[1])?;
+    Ok(RetainedSubmitRoom {
+        remote,
+        session,
+        group: GroupId::new(group),
+        welcome: MessageId::new(welcome),
+    })
+}
+
+fn commit_room_submit(
+    providers: &mut ActiveProviders,
+    prepare: &RoomPrepareQueue,
+    input: &SubmitRequest,
+    profile: &str,
+) -> Result<SubmitHandle, Failure> {
+    let room = select_submit_room(&providers.journal, prepare, input)?;
+    let local: [u8; 32] = providers
+        .identity
+        .as_slice()
+        .try_into()
+        .map_err(|_| SUBMIT_FAILURES[4])?;
+    if hex::encode(local) != prepare.local {
+        return Err(SUBMIT_FAILURES[4]);
+    }
+    verify_room(
+        providers,
+        &prepare.local,
+        &room.remote,
+        &room.group,
+        &room.session,
+        &prepare.endpoint,
+    )?;
+    verify_delivered_room(providers, &room.group, &room.welcome)?;
+    prepare.authorization(&room.remote)?;
+    persist_verified_submit(&mut providers.journal, local, room, input, profile)
+}
+
+fn persist_verified_submit(
+    journal: &mut rusqlite::Connection,
+    local: [u8; 32],
+    retained: RetainedSubmitRoom,
+    input: &SubmitRequest,
+    profile: &str,
+) -> Result<SubmitHandle, Failure> {
+    let RetainedSubmitRoom {
+        remote, session, ..
+    } = retained;
+    let room = submit_hex(&session)?;
+    let peer = submit_hex(&remote)?;
+    let request = submit_hex(&input.request)?;
+    let invocation = submit_hex(&input.payload.invocation)?;
+    let chunks = input
+        .payload
+        .chunks
+        .iter()
+        .map(|value| submit_bytes(value))
+        .collect::<Result<Vec<_>, _>>()?;
+    let frame = encode_room_submit(
+        local,
+        peer,
+        room,
+        request,
+        invocation,
+        chunks,
+        submit_bytes(&input.payload.bytes)?,
+    )?;
+    let digest: [u8; 32] = ::sha2::Sha256::digest(&frame).into();
+    let scope = SubmitQueue::QueueScope {
+        account: local,
+        room,
+    };
+    let mut queue =
+        SubmitQueue::LocalQueue::attach(journal, scope).map_err(submit_queue_failure)?;
+    if queue
+        .read(scope, request)
+        .map_err(submit_queue_failure)?
+        .is_none()
+    {
+        let last = epoch_seconds()?.saturating_add(SUBMIT_FUTURE);
+        let timestamp = |id: [u8; 16]| {
+            id[..6]
+                .iter()
+                .fold(0u64, |n, &byte| (n << 8) | u64::from(byte))
+        };
+        if timestamp(request) > last || timestamp(invocation) > last {
+            return Err(SUBMIT_FAILURES[0]);
+        }
+    }
+    let accepted = queue
+        .enqueue(SubmitQueue::Request {
+            scope,
+            request_id: request,
+            invocation_id: invocation,
+            kind: SubmitQueue::RequestKind::Initial,
+            digest,
+            frame: &frame,
+        })
+        .map_err(submit_queue_failure)?;
+    let receipt = accepted.receipt();
+    Ok(SubmitHandle {
+        format: SUBMIT_HANDLE_FORMAT,
+        profile: profile.to_owned(),
+        remote,
+        session,
+        invocation: hex::encode(receipt.invocation_id),
+        digest: hex::encode(receipt.digest),
+    })
+}

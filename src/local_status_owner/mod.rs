@@ -98,11 +98,15 @@ struct Binding {
     socket_option: String,
     #[serde(default)]
     routed_requests: bool,
+    async_route_deadline_ms: Option<u64>,
 }
 
 fn validate(graph: &Graph, binding: &Binding) -> Result<(), String> {
     if graph.format != "oddlang-local-status-owner-v1"
         || binding.format != "oddlang-local-status-owner-rust-v1"
+        || binding
+            .async_route_deadline_ms
+            .is_some_and(|ms| !binding.routed_requests || !(1..=86_400_000).contains(&ms))
         || !label(&binding.executable)
         || !label(&binding.socket_option)
         || matches!(binding.socket_option.as_str(), "help" | "version")
