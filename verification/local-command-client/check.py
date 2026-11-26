@@ -145,6 +145,15 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
 
     graph["guards"][0]["argument"] = "unit"
     manifest["components"][1]["graph"] = pin("graph.json")
+    cli = json.loads((root / "cli.json").read_bytes())
+    unit = cli["root"]["arguments"][1]
+    unit["global"] = False
+    cli["root"]["subcommands"][0]["arguments"] = [{**unit, "id": "shadow_unit"}]
+    write("shadowed.json", cli)
+    manifest["components"][0]["graph"] = pin("shadowed.json")
+    reject_link(b"has incompatible argument", "shadowed-guard")
+    manifest["components"][0]["graph"] = pin("cli.json")
+
     unlinked = json.loads((root / "cli-rust.json").read_bytes())
     unlinked["handlers"]["urn:field:read"] = ["device", "other"]
     write("unlinked.json", unlinked)
@@ -158,4 +167,4 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
     assert mutant.returncode and b"constant request exceeds frame limit" in mutant.stderr
     assert not (root / "invalid").exists()
 
-print("field-meter IPC: nine framed interactions, three local errors, and four graph or linking rejections passed")
+print("field-meter IPC: nine framed interactions, three local errors, and five graph or linking rejections passed")
