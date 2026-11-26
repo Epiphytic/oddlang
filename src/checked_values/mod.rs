@@ -310,6 +310,7 @@ impl Graph {
                                 !checked_method_name(name) || !methods.insert(name)
                             })
                             || (constructor.is_some() && target.public)
+                            || (!target.public && target.getter.is_none())
                         {
                             return Err(format!("invalid checked field binding: {field_id}"));
                         }

@@ -74,7 +74,8 @@ fn main() {
     assert_eq!(format!("{:?}",value.caption),"Caption(\"test\")");
     assert_eq!(Fault::Invalid.kind(),"invalid");
     assert_eq!(Fault::Invalid.to_string(),"bad detector input");
-    for text in ["ééé","éé","", "éééx", "x\u{009f}", "x\u{2066}"] {
+    for text in ["ééé","éé","", "éééx", "x\u{009f}", "x\u{2066}", "x\u{0}", "x\u{1f}",
+                 "x\u{7f}", "x\u{80}", "x\u{a0}", "x\u{20}"] {
         println!("{}",Caption::make(text).is_ok());
     }
 }
@@ -127,7 +128,7 @@ def main():
     with tempfile.TemporaryDirectory() as work:
         root=Path(work)
         g,r=fixture()
-        assert assembled(root,exe,g,r,"baseline")==["true","true","false","false","false","false"]
+        assert assembled(root,exe,g,r,"baseline")==["true","true"]+["false"]*8+["true"]*2
         original_rust=write(root/"deterministic-rust.json",r)
         graph=write(root/"deterministic.json",g)
         run(exe,"build","checked-values","rust",graph,original_rust,root/"first")
@@ -140,16 +141,22 @@ def main():
         obligations_path=root/"first/obligations.json"
         assert lock["obligationsSha256"]==hashlib.sha256(obligations_path.read_bytes()).hexdigest()
         assert lock["sourceSha256"]==hashlib.sha256((root/"first/values.rs").read_bytes()).hexdigest()
-        obligation={entry["declaration"]:entry["expected"] for entry in json.loads(obligations_path.read_bytes())["obligations"]}
+        entries=json.loads(obligations_path.read_bytes())["obligations"]
+        assert all(entry["role"]=="checked-value-domain" and entry["qualification"]=="independent-witness-required"
+                   for entry in entries)
+        obligation={entry["declaration"]:entry["expected"] for entry in entries}
+        assert set(obligation)==set(g["types"]) and len(obligation)==len(entries)
         assert obligation[n("caption")]["orderedGuards"]==g["types"][n("caption")]["guards"]
         assert obligation[n("tone")]["values"]==g["types"][n("tone")]["values"]
         g,r=fixture(5)
-        assert assembled(root,exe,g,r,"mutated")==["false","true","false","false","false","false"]
+        assert assembled(root,exe,g,r,"mutated")==["false","true"]+["false"]*8+["true"]*2
         for change,message in [
             ("cycle","recursive"),
             ("public","invalid checked field"),
             ("inaccessible","invalid checked record"),
             ("trait-shadow","invalid finite value table bindings"),
+            ("borrow-shadow","invalid checked field"),
+            ("unreadable-checked","invalid checked field"),
             ("mixed","invalid or repeated representation"),
             ("overlap","ill-typed constructor guard"),
         ]:
@@ -162,6 +169,10 @@ def main():
                 r["types"][n("metadata")]["members"][n("metadata:caption")]["public"]=False
             elif change=="trait-shadow":
                 r["types"][n("tone")]["view"]="clone"
+            elif change=="borrow-shadow":
+                r["types"][n("station")]["members"][n("station:code")]["getter"]="borrow"
+            elif change=="unreadable-checked":
+                r["types"][n("station")]["members"][n("station:code")].pop("getter")
             elif change=="mixed":
                 g["types"][n("octave")]["values"][n("low")]="one"
             else:
