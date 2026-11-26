@@ -2046,6 +2046,7 @@ w:rangeEndpointImportRun a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/c5b92a9cde79d8286029381863a17e6989f4da67/verification/whole/gap-range-role-workspace/imports-aarch64-apple-darwin.json" .
 
 w:basicCommandInteropPlan a p:Artifact ;
+    rdfs:label "Plan for single-platform basic-command interoperability" ;
     p:location "docs/superpowers/plans/2026-11-26-basic-command-interop.md" .
 w:basicCommandInteropBar a p:Decision ;
     rdfs:label "Accept basic commands on one platform in both mixed peer directions" ;
