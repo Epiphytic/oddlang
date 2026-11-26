@@ -31,7 +31,7 @@ pub(crate) fn open_retained_stores(
         let account = || SqliteAccountStorage::open_encrypted(
             &account_path, &SqlCipherKey::raw(*account_key),
         ).map_err(|_| ACCOUNT);
-        drop(account()?);
+        account()?.close().map_err(|_| ACCOUNT)?;
         let storage = account()?;
         if !storage.key_package_lifecycle().map_err(|_| ACCOUNT)?
             .is_some_and(|lifecycle| lifecycle.stable_slot_id == slot)

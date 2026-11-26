@@ -25,11 +25,12 @@ async fn failing_meter_flush_still_joins_and_closes_the_receiver() {
     let logged = RefCell::new(Vec::new());
     let joined = Arc::new(AtomicBool::new(false));
     let (ready, active) = tokio::sync::oneshot::channel();
+    let (close, closing) = tokio::sync::oneshot::channel();
     let observer = FlushWatch(joined.clone());
     let sender = tokio::spawn(async move {
         let _owned = observer;
         ready.send(()).unwrap();
-        future::pending::<()>().await;
+        closing.await.unwrap();
     });
     active.await.unwrap();
 
@@ -39,11 +40,13 @@ async fn failing_meter_flush_still_joins_and_closes_the_receiver() {
         async { logged.borrow_mut().push("stop reader"); true },
         Some(sender),
         async {
-            assert!(joined.load(Ordering::SeqCst));
+            assert!(!joined.load(Ordering::SeqCst));
             logged.borrow_mut().push("close receiver");
+            close.send(()).unwrap();
         },
     ).await;
     assert!(!passed);
+    assert!(joined.load(Ordering::SeqCst));
     assert_eq!(*logged.borrow(), ["flush", "stop reader", "close receiver"]);
 }
 

@@ -147,6 +147,10 @@ fn render_lifecycle(out: &mut String, model: &Lifecycle, path: &[String]) {
         model.excluded_profile_entries,
     )
     .unwrap();
+    let engine_stop = match model.engine {
+        EngineRole::Absent => (false, true),
+    };
+    writeln!(out, "const ENGINE_STOP: (bool, bool) = {engine_stop:?};").unwrap();
     out.push_str("#[derive(serde::Serialize)]\nstruct TerminalReport {\n");
     let names = &model.report_fields;
     fields(

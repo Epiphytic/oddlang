@@ -47,6 +47,7 @@ impl AccountIdentityProofSigner for ProofSigner {
 #[derive(Clone, Debug)]
 struct LocalTlsBoundary {
     endpoint: SocketAddr,
+    authorized: Url,
     stop: watch::Receiver<bool>,
     result: Arc<std::sync::Mutex<Option<Failure>>>,
 }
@@ -60,10 +61,7 @@ impl WebSocketTransport for LocalTlsBoundary {
         Output = Result<(WebSocketSink, WebSocketStream), nostr_sdk::error::Error>
     > + Send + 'a>> {
         Box::pin(async move {
-            let requested = url.as_str().strip_prefix("wss://")
-                .and_then(|authority| authority.strip_suffix('/'))
-                .and_then(|authority| authority.parse::<SocketAddr>().ok());
-            let failure = if requested != Some(self.endpoint) || proxy.is_some() {
+            let failure = if url != &self.authorized || proxy.is_some() {
                 RELAY_SCOPE
             } else {
                 let mut stop = self.stop.clone();
@@ -84,6 +82,7 @@ type Account = AccountDeviceRuntime<NostrTransportAdapter, StaticTransportRoutin
 struct Providers {
     account: Account,
     journal: rusqlite::Connection,
+    storage_closer: storage_sqlite::DatabaseCloser,
     identity: MemberId,
     relay: Arc<NostrSdkRelayClient>,
     adapter: NostrTransportAdapter,
@@ -102,6 +101,7 @@ impl Providers {
         let public = profile.public_key.as_deref().ok_or((1, INVALID_PROFILE))?;
         let raw = <&[u8; 32]>::try_from(secret.as_slice()).map_err(|_| (1, INVALID_CREDENTIAL))?;
         let (storage, journal) = open_stores(root, raw, public, &profile.device)?;
+        let storage_closer = storage.closer();
 
         let keys = Arc::new(Keys::new(SecretKey::from_slice(&signing).map_err(|_| (1, INVALID_CREDENTIAL))?));
         let identity = MemberId::new(keys.public_key().to_bytes().to_vec());
@@ -113,14 +113,15 @@ impl Providers {
         secret_key.non_secure_erase();
         let (transport_stop, stop) = watch::channel(false);
         let transport_result = Arc::new(std::sync::Mutex::new(None));
-        let transport = LocalTlsBoundary { endpoint, stop, result: transport_result.clone() };
+        let relay_url = format!("wss://{endpoint}/");
+        let authorized = Url::parse(&relay_url).map_err(|_| (1, RELAY_SCOPE))?;
+        let transport = LocalTlsBoundary { endpoint, authorized, stop, result: transport_result.clone() };
         let client = Client::builder().websocket_transport(transport)
             .authenticator(SignerAuthenticator::new(keys.as_ref().clone()))
             .connect_timeout(Duration::from_millis(DIAL_MS)).build();
         let signer: Arc<dyn MarmotNostrSigner> = keys;
         let relay = Arc::new(NostrSdkRelayClient::with_account_signer(client.clone(), identity.clone(), signer.clone()));
         let adapter = NostrTransportAdapter::new(relay.clone());
-        let relay_url = format!("wss://{endpoint}/");
         let routes = StaticTransportRouting::new(vec![TransportEndpoint(relay_url.clone())]);
         let config = SessionConfig::with_storage(
             storage, Duration::ZERO, identity.as_slice().to_vec(),
@@ -129,7 +130,7 @@ impl Providers {
         let account = AccountDeviceRuntime::open(config, || {
             Ok::<_, SessionError>((adapter.clone(), routes, LocalPublisher))
         }).map_err(|_| (1, PROVIDER_OPEN_FAILURE))?;
-        Ok(Self { account, journal, identity, relay, adapter, client, transport_stop, transport_result,
+        Ok(Self { account, journal, storage_closer, identity, relay, adapter, client, transport_stop, transport_result,
             forwarder: None, relay_url })
     }
 
@@ -156,7 +157,7 @@ impl Providers {
     }
 
     async fn stop(self) -> bool {
-        let Self { account, journal, identity, relay, adapter, client, transport_stop, forwarder, .. } = self;
+        let Self { account, journal, storage_closer, identity, relay, adapter, client, transport_stop, forwarder, .. } = self;
         let _ = transport_stop.send(true);
         let deadline = Instant::now() + Duration::from_millis(SHUTDOWN_MS);
         let closed = stop_provider_stages(
@@ -170,8 +171,9 @@ impl Providers {
         drop(adapter);
         drop(relay);
         drop(client);
+        let storage_closed = storage_closer.close().is_ok() && storage_closer.is_released();
         let journal_closed = journal.close().is_ok();
-        closed && journal_closed
+        closed && storage_closed && journal_closed
     }
 }
 
@@ -205,7 +207,8 @@ async fn start(root: &Path, profile: &ProfileRecord, endpoint: SocketAddr) -> Re
     }
     let runtime_cleanup_complete = provider_stop_complete && runtime.remove().is_ok();
     let report = TerminalReport {
-        schema: REPORT_VERSION, engine_quiesced: false, engine_stop_complete: true,
+        schema: REPORT_VERSION,
+        engine_quiesced: ENGINE_STOP.0, engine_stop_complete: ENGINE_STOP.1,
         provider_stop_complete, runtime_cleanup_complete,
     };
     let encoded = serde_json::to_string(&report).map_err(|_| failure(CLEANUP))?;
