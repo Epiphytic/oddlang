@@ -2713,7 +2713,11 @@ w:localWorkflowDelivery a p:Task ;
     rdfs:label "Project verified binary replies and local cursor consumption for native workflows" ;
     p:milestone w:marmishMilestone ; p:source w:localWorkflowDeliveryPlan, w:basicCommandInteropPlan ;
     p:status p:active ; p:dependsOn w:localOwnerWorkflow, w:authorizedLocalCommandInputs ;
+    p:evidence w:localWorkflowDeliveryReference, w:checkedLocalReplyDeliveryReplay ;
+    p:addresses w:deliveryLegacyPathFinding, w:deliveryLegacyLiteralFinding, w:deliveryCatalogFinding ;
     p:acceptance "Validate canonical reply digest and delivery binding, preserve separate byte streams and compare write and consume behavior with an independent local oracle." .
+w:localWorkflowDeliveryReference a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a58578667a7a1428ff1e66914b5709b53f76ba7a/verification/whole/basic-command-interop/upstream-local-delivery-aarch64-apple-darwin.json" .
 w:basicCommandInterop p:dependsOn w:localWorkflowDelivery .
 w:authorizedProfileVerification a p:Artifact ;
     p:location "verification/local-owner-workflow/authorized-profile-verification.md" .
@@ -2767,3 +2771,15 @@ w:unitEnumWire a p:Task ;
     p:acceptance "Recover renamed unit cases with stable identities, compile their native projection, and compare its serialization and rejection behavior with an unrelated original enum." .
 w:unitEnumGarden a p:Artifact ; p:location "verification/wire-schema/README.md" .
 w:basicCommandInterop p:dependsOn w:unitEnumWire .
+
+w:checkedLocalReplyDeliveryReplay a p:Artifact ;
+    p:location "verification/local-owner-workflow/delivery-verification.md" .
+w:deliveryLegacyPathFinding a p:Finding ;
+    rdfs:label "Require explicit delivery selection for canonical array indexes in replies" ;
+    p:source w:checkedLocalReplyDeliveryReplay .
+w:deliveryLegacyLiteralFinding a p:Finding ;
+    rdfs:label "Preserve scalar-only predicates in workflows that did not select delivery" ;
+    p:source w:checkedLocalReplyDeliveryReplay .
+w:deliveryCatalogFinding a p:Finding ;
+    rdfs:label "Publish binary reply checks and bounded output semantics in the pinned obligation catalog" ;
+    p:source w:checkedLocalReplyDeliveryReplay .

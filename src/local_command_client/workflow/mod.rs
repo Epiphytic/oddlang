@@ -704,7 +704,7 @@ fn emit_outputs(_: &Value, outputs: &[schema::BinaryOutput]) -> Result<(), Failu
             "sizeLimits": "bound-encoded-length-before-decode-and-check-decoded-byte-limit",
             "embeddedDigest": "sha256-lowercase-hex-over-decoded-bytes",
             "openedField": "$opened",
-            "openedFieldFromPeer": "reject",
+            "openedFieldFromPeer": "reject-on-embedded-reply",
             "embeddedJson": "strict-json-without-duplicate-members",
             "replyArrayPaths": "canonical-unsigned-decimal-index-with-no-leading-zero",
             "comparePath": "structural-json-equality-with-both-paths-present",
