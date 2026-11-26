@@ -1,0 +1,219 @@
+
+fn runtime_directory(record: &Record) -> Result<std::path::PathBuf, Failure> {
+    let runtime = std::env::temp_dir().join(format!("{RUNTIME_PREFIX}{}-{}", uid(), record.profile));
+    if runtime.as_os_str().as_encoded_bytes().len() + RUNTIME_SUFFIX_ALLOCATION >= RUNTIME_BOUND {
+        return Err(RUNTIME_PATH);
+    }
+    Ok(runtime)
+}
+
+fn bind_runtime(root: &Path, record: &Record, runtime: &Path) -> Result<(), Failure> {
+    directory(runtime).map_err(|_| RUNTIME_COLLISION)?;
+    let leaf = runtime.join(BINDING_LEAF);
+    let binding = RuntimeBinding { version: VERSION, identity: record.profile.clone(), root: root.to_owned() };
+    let expected = serde_json::to_vec(&binding).map_err(|_| RUNTIME_COLLISION)?;
+    if let Some(file) = open_existing(&leaf, false).map_err(|_| RUNTIME_COLLISION)? {
+        let mut observed = Vec::new();
+        file.take(u64::from(MANIFEST_MAX) + 1).read_to_end(&mut observed).map_err(|_| RUNTIME_COLLISION)?;
+        let current: RuntimeBinding = serde_json::from_slice(&observed).map_err(|_| RUNTIME_COLLISION)?;
+        if current != binding { return Err(RUNTIME_COLLISION); }
+    } else if !committed(&leaf, &expected, runtime, false).map_err(|_| RUNTIME_COLLISION)? {
+        return Err(RUNTIME_COLLISION);
+    }
+    if runtime.join(SOCKET_LEAF).symlink_metadata().is_ok() { return Err(RUNTIME_COLLISION); }
+    Ok(())
+}
+
+fn store_file(path: &Path, allow_create: bool, diagnostic: Failure) -> Result<(), Failure> {
+    if open_existing(path, false).map_err(|_| diagnostic)?.is_none() {
+        if !allow_create { return Err(diagnostic); }
+        committed(path, b"", path.parent().ok_or(diagnostic)?, false).map_err(|_| diagnostic)?;
+        open_existing(path, false).map_err(|_| diagnostic)?.ok_or(diagnostic)?;
+    }
+    Ok(())
+}
+
+fn storage_key(root: &[u8; 32], role: &str) -> Result<Zeroizing<[u8; 32]>, Failure> {
+    let extract = hkdf::Hkdf::<sha2::Sha256>::new(Some(STORAGE_SALT.as_bytes()), root);
+    let mut key = Zeroizing::new([0; 32]);
+    extract.expand(role.as_bytes(), key.as_mut()).map_err(|_| IO)?;
+    Ok(key)
+}
+
+fn keyed_database(path: &Path, key: &[u8; 32], read_only: bool, failure: Failure) -> Result<rusqlite::Connection, Failure> {
+    use rusqlite::{Connection, OpenFlags, ffi};
+    let access = if read_only { OpenFlags::SQLITE_OPEN_READ_ONLY } else { OpenFlags::SQLITE_OPEN_READ_WRITE };
+    let flags = access | OpenFlags::SQLITE_OPEN_NO_MUTEX | OpenFlags::SQLITE_OPEN_NOFOLLOW;
+    let connection = Connection::open_with_flags(path, flags).map_err(|_| failure)?;
+    connection.busy_timeout(std::time::Duration::from_secs(2)).map_err(|_| failure)?;
+    let mut key_literal = Zeroizing::new([0u8; 67]);
+    key_literal[..2].copy_from_slice(b"x'");
+    hex::encode_to_slice(key, &mut key_literal[2..66]).map_err(|_| failure)?;
+    key_literal[66] = b'\'';
+    // SAFETY: connection and key buffer outlive the bounded synchronous SQLCipher call.
+    if unsafe { ffi::sqlite3_key(connection.handle(), key_literal.as_ptr().cast(), 67) } != ffi::SQLITE_OK {
+        return Err(failure);
+    }
+    connection.execute_batch("PRAGMA cipher_compatibility=4; PRAGMA cipher_memory_security=ON; PRAGMA cipher_page_size=4096;")
+        .map_err(|_| failure)?;
+    Ok(connection)
+}
+
+fn preflight(path: &Path, key: &[u8; 32], current_version: u32, pending: bool) -> Result<(), Failure> {
+    let name = path.as_os_str();
+    for extension in ["-wal", "-shm", "-journal"] {
+        let mut sidecar = name.to_os_string();
+        sidecar.push(extension);
+        open_existing(Path::new(&sidecar), false).map_err(|_| PREFLIGHT)?;
+    }
+    let Some(file) = open_existing(path, false).map_err(|_| PREFLIGHT)? else {
+        return if pending { Ok(()) } else { Err(PREFLIGHT) };
+    };
+    if file.metadata().map_err(|_| PREFLIGHT)?.len() == 0 {
+        return if pending { Ok(()) } else { Err(PREFLIGHT) };
+    }
+    let connection = keyed_database(path, key, true, PREFLIGHT)?;
+    connection.query_row("SELECT count(*) FROM sqlite_schema", [], |row| row.get::<_, i64>(0)).map_err(|_| PREFLIGHT)?;
+    let version: u32 = connection.pragma_query_value(None, "user_version", |row| row.get(0)).map_err(|_| PREFLIGHT)?;
+    if version == current_version { Ok(()) } else { Err(RELOAD_UNSUPPORTED) }
+}
+
+fn journal(path: &Path, key: &[u8; 32], public: &str, pending: bool, effects: impl FnOnce(&mut rusqlite::Connection) -> Result<(), Failure>) -> Result<Vec<u64>, Failure> {
+    store_file(path, pending, JOURNAL)?;
+    let mut connection = keyed_database(path, key, false, JOURNAL)?;
+    let tables: u32 = connection.query_row("SELECT count(*) FROM sqlite_schema", [], |r| r.get(0)).map_err(|_| JOURNAL)?;
+    let version: u32 = connection.pragma_query_value(None, "user_version", |row| row.get(0)).map_err(|_| JOURNAL)?;
+    if version == 0 && tables == 0 && pending {
+        connection.execute_batch("PRAGMA temp_store=MEMORY; PRAGMA foreign_keys=ON; PRAGMA secure_delete=ON; PRAGMA synchronous=FULL; PRAGMA journal_mode=WAL;").map_err(|_| JOURNAL)?;
+        let tx = connection.transaction().map_err(|_| JOURNAL)?;
+        tx.execute_batch(JOURNAL_DDL).map_err(|_| JOURNAL)?;
+        native_journal_seed(&tx, public)?;
+        tx.pragma_update(None, "user_version", JOURNAL_VERSION).map_err(|_| JOURNAL)?;
+        tx.commit().map_err(|_| JOURNAL)?;
+    } else if version != JOURNAL_VERSION {
+        return Err(RELOAD_UNSUPPORTED);
+    }
+    let mut check = connection.prepare(JOURNAL_IDENTITY).map_err(|_| JOURNAL)?;
+    let mut result = check.query([]).map_err(|_| JOURNAL)?;
+    let previous: String = result.next().map_err(|_| JOURNAL)?.ok_or(JOURNAL)?.get(0).map_err(|_| JOURNAL)?;
+    if previous != public || result.next().map_err(|_| JOURNAL)?.is_some() { return Err(JOURNAL); }
+    for query in RELOAD_GUARDS {
+        if connection.query_row(query, [], |row| row.get::<_, bool>(0)).map_err(|_| JOURNAL)? {
+            return Err(RELOAD_UNSUPPORTED);
+        }
+    }
+    drop(result);
+    drop(check);
+    effects(&mut connection)?;
+    METRICS.iter().map(|(_, query)| connection.query_row(query, [], |row| row.get::<_, i64>(0)).map_err(|_| JOURNAL)
+        .and_then(|count| u64::try_from(count).map_err(|_| JOURNAL))).collect()
+}
+
+struct AccountSigner(secp256k1::Keypair);
+impl Drop for AccountSigner {
+    fn drop(&mut self) { self.0.non_secure_erase(); }
+}
+impl marmot_session::AccountIdentityProofSigner for AccountSigner {
+    fn sign_account_identity_proof(&self, request: &marmot_session::AccountIdentityProofRequest) -> Result<[u8; 64], String> {
+        let hash = request.proof_event_id()?;
+        Ok(*secp256k1::Secp256k1::new().sign_schnorr_no_aux_rand(&hash, &self.0).as_ref())
+    }
+}
+
+struct OfflineTransport;
+
+use cgka_traits::{
+    MemberId, TransportAdapter, TransportAdapterError, TransportAccountActivation,
+    TransportGroupSync, TransportPublishRequest, TransportPublishReport, TransportDelivery,
+    maintenance::KeyPackageLifecycleState, storage::MaintenanceStorage,
+};
+use marmot_session::{AccountDeviceRuntime, NoopKeyPackagePublisher, SessionConfig, SessionError, StaticTransportRouting};
+use storage_sqlite::{SqlCipherKey, SqliteAccountStorage};
+use transport_nostr_peeler::NostrMlsPeeler;
+
+#[async_trait::async_trait]
+impl TransportAdapter for OfflineTransport {
+    async fn activate_account(&self, _: TransportAccountActivation) -> Result<(), TransportAdapterError> {
+        Err(TransportAdapterError::Closed)
+    }
+    async fn sync_account_groups(&self, _: TransportGroupSync) -> Result<(), TransportAdapterError> {
+        Err(TransportAdapterError::Closed)
+    }
+    async fn deactivate_account(&self, _: &MemberId) -> Result<(), TransportAdapterError> { Ok(()) }
+    async fn publish(&self, _: TransportPublishRequest) -> Result<TransportPublishReport, TransportAdapterError> {
+        Err(TransportAdapterError::Closed)
+    }
+    async fn receive(&self) -> Result<Option<TransportDelivery>, TransportAdapterError> { Ok(None) }
+}
+
+fn account(path: &Path, key: &[u8; 32], signing: &[u8; 32], record: &Record) -> Result<(), Failure> {
+    store_file(path, record.phase == PENDING, ACCOUNT)?;
+    let storage = SqliteAccountStorage::open_encrypted(path, &SqlCipherKey::raw(*key)).map_err(|_| ACCOUNT)?;
+    match storage.key_package_lifecycle().map_err(|_| ACCOUNT)? {
+        Some(existing) if existing.stable_slot_id != record.slot => return Err(ACCOUNT),
+        Some(_) => (),
+        None if record.phase == PENDING => storage.put_key_package_lifecycle(
+            &KeyPackageLifecycleState::slot_only(record.slot.clone())).map_err(|_| ACCOUNT)?,
+        None => return Err(ACCOUNT),
+    }
+    let mut secret = secp256k1::SecretKey::from_byte_array(signing).map_err(|_| INVALID_SIGNING_KEY)?;
+    let signer = AccountSigner(secp256k1::Keypair::from_secret_key(&secp256k1::Secp256k1::new(), &secret));
+    secret.non_secure_erase();
+    let public = signer.0.x_only_public_key().0.serialize().to_vec();
+    let config = SessionConfig::with_storage(storage, std::time::Duration::ZERO, public, Box::new(NostrMlsPeeler::new()))
+        .account_identity_proof_signer(std::sync::Arc::new(signer));
+    drop(AccountDeviceRuntime::open(config, || Ok::<_, SessionError>((
+        OfflineTransport, StaticTransportRouting::new(vec![]), NoopKeyPackagePublisher,
+    ))).map_err(|_| ACCOUNT)?);
+    Ok(())
+}
+
+fn complete(root: &Path, record: &mut Record, signing: &[u8; 32], raw_key: &[u8; 32], check_native: impl FnOnce(&Path, &[u8;32]) -> Result<(),Failure>, effects: impl FnOnce(&mut rusqlite::Connection, &Record) -> Result<(), Failure>) -> Result<Vec<u64>, Failure> {
+    for entry in EXCLUDED_PROFILE_ENTRIES {
+        match fs::symlink_metadata(root.join(entry)) {
+            Ok(_) => return Err(RELOAD_UNSUPPORTED),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => (),
+            Err(_) => return Err(PREFLIGHT),
+        }
+    }
+    let runtime = runtime_directory(record)?;
+    bind_runtime(root, record, &runtime)?;
+    // SAFETY: initialization takes no arguments and is serialized by the DB provider.
+    if unsafe { rusqlite::ffi::sqlite3_initialize() } != rusqlite::ffi::SQLITE_OK { return Err(ACCOUNT); }
+    let account_key = storage_key(raw_key, ACCOUNT_ROLE)?;
+    let journal_key = storage_key(raw_key, JOURNAL_ROLE)?;
+    let pending = record.phase == PENDING;
+    preflight(&root.join(ACCOUNT_LEAF), &account_key, ACCOUNT_VERSION, pending)?;
+    preflight(&root.join(JOURNAL_LEAF), &journal_key, JOURNAL_VERSION, pending)?;
+    check_native(&root.join(ACCOUNT_LEAF), &account_key)?;
+    account(&root.join(ACCOUNT_LEAF), &account_key, signing, record)?;
+    let metrics = journal(&root.join(JOURNAL_LEAF), &journal_key,
+        record.public.as_deref().ok_or(IDENTITY_MISMATCH)?, record.phase == PENDING, |connection| effects(connection, record))?;
+    for leaf in [ACCOUNT_LEAF, JOURNAL_LEAF] {
+        open_existing(&root.join(leaf), false)?.ok_or(IO)?.sync_all().map_err(|_| IO)?;
+    }
+    File::open(root).and_then(|directory| directory.sync_all()).map_err(|_| IO)?;
+    if record.phase == PENDING {
+        record.phase = READY.into();
+        save_manifest(root, record, true)?;
+    }
+    fs::remove_file(runtime.join(BINDING_LEAF)).map_err(|_| RUNTIME_COLLISION)?;
+    fs::remove_dir(runtime).map_err(|_| RUNTIME_COLLISION)?;
+    Ok(metrics)
+}
+
+fn print_initialized(profile: &Prepared, metrics: &[u64]) -> Result<(), Failure> {
+    use serde::{Serialize, Serializer, ser::SerializeMap};
+    struct ResultRecord<'a>(&'a str, &'a [u64]);
+    impl Serialize for ResultRecord<'_> {
+        fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+            let mut map = serializer.serialize_map(Some(self.1.len() + 1))?;
+            map.serialize_entry(IDENTITY_KEY, self.0)?;
+            for ((name, _), value) in METRICS.iter().zip(self.1) { map.serialize_entry(name, value)?; }
+            map.end()
+        }
+    }
+    let identity = profile.record.public.as_deref().ok_or(IDENTITY_MISMATCH)?;
+    let report = serde_json::to_string(&ResultRecord(identity, metrics)).map_err(|_| IO)?;
+    writeln!(std::io::stdout().lock(), "{report}").map_err(|_| IO)
+}

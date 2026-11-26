@@ -20,6 +20,11 @@ fn import_has_profile(path: &str, profile: &str) -> bool {
 fn run(args: &[String]) -> Result<(), String> {
     match args {
         [group, kind, target, graph, binding, out]
+            if group == "build" && kind == "file-profile" && target == "rust" =>
+        {
+            oddlang::file_profile::build(graph.as_ref(), binding.as_ref(), out.as_ref())
+        }
+        [group, kind, target, graph, binding, out]
             if group == "build" && kind == "local-command-client" && target == "rust" =>
         {
             oddlang::local_command_client::build(graph.as_ref(), binding.as_ref(), out.as_ref())
