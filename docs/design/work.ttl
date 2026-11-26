@@ -2835,6 +2835,7 @@ w:boundedLocalWorkflowProgress a p:Task ;
     rdfs:label "Preserve private command handles and bounded multi-poll delivery" ;
     p:milestone w:marmishMilestone ; p:source w:localWorkflowDeliveryPlan ;
     p:status p:active ; p:dependsOn w:localWorkflowDelivery ;
+    p:evidence w:boundedLocalWorkflowProgressReplay ;
     p:acceptance "Verify fresh request identity, prior and produced cursor bounds, typed reply guard, exact detached handle bytes, inline wait admission and named failures using independent Unix owner evidence." .
 w:basicCommandInterop p:dependsOn w:boundedLocalWorkflowProgress .
 
@@ -2859,3 +2860,6 @@ w:sharedWireRecordCheckCoverageFinding a p:Finding ;
     p:source w:sharedWireRecordCheckReview .
 w:sharedWireRecordCheckReview a p:Artifact ;
     p:location "Claude auto review of the shared record check compiler and canonical wire fixture patch" .
+
+w:boundedLocalWorkflowProgressReplay a p:Artifact ;
+    p:location "verification/local-owner-workflow/progress-verification.md" .

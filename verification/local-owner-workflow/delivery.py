@@ -18,14 +18,14 @@ def encode(value):
 
 
 def wrap(payload, *, digest=None):
-    return body({'encoded': encode(payload), 'digest': digest or sha256(payload).hexdigest()})
+    return body({'encoded': encode(payload), 'digest': digest or sha256(payload).hexdigest(), 'state': 'answer'})
 
 
 def main():
     stdout, stderr = b'measurement\x00', b'warning\xff'
     sample = {'type': 'measurement', 'indexes': [8, 9], 'binding': sha256(b'{"scale":"C","precision":2}').hexdigest(),
               'stdout': encode(stdout), 'stderr': encode(stderr), 'outCursor': len(stdout) + 5,
-              'errCursor': len(stderr), 'produced': len(stdout) + 5, 'exit': 7}
+              'errCursor': len(stderr), 'retained': len(stdout) + 5, 'produced': len(stdout) + 5, 'exit': 7}
     graph = {
         'format': 'oddlang-local-command-workflow-v1', 'id': 'urn:meter:workflow',
         'socket_argument': 'port', 'delivery': True,
@@ -38,7 +38,8 @@ def main():
              'transitions': [go('read', [when('ready', True)], 'read', capture=[
                  {'name': 'previous', 'path': ['previous'], 'value_kind': {'kind': 'unsigned64'}}])]},
             {'id': SUFFIX + 'step:read', 'request': [field('action', literal('read'))],
-             'embedded': {'id': SUFFIX + 'embedded', 'bytes': ['encoded'], 'sha256': ['digest'], 'maximum_bytes': 512},
+             'embedded': {'id': SUFFIX + 'embedded', 'bytes': ['encoded'], 'sha256': ['digest'], 'maximum_bytes': 512,
+                          'tagged': {'path': ['state'], 'value': 'answer'}},
              'transitions': [
                  go('ack', [when('$opened.type', 'measurement'),
                             when('$opened.indexes.1', 9),
@@ -49,7 +50,7 @@ def main():
                               'value_kind': {'kind': 'exit_status'}}]) | {
                          'outputs': [{'id': SUFFIX + 'output:' + channel, 'channel': channel,
                                       'bytes': ['$opened', channel], 'cursor': ['$opened', cursor],
-                                      'maximum_bytes': 32} | ({'start': 'previous'} if channel == 'stdout' else {})
+                                      'maximum_bytes': 32} | ({'start': 'previous', 'upper': ['$opened', 'retained']} if channel == 'stdout' else {})
                                      for channel, cursor in [('stdout', 'outCursor'), ('stderr', 'errCursor')]],
                     }]},
             {'id': SUFFIX + 'step:ack', 'request': [field('confirm', literal('measurement'))],
@@ -107,6 +108,9 @@ tokio = { version = "=1.54.1", features = ["io-util", "net", "rt", "time"] }
                       wrap(body(sample | {'stderr': '!!!!'})),
                       wrap(body(sample | {'exit': 256})),
                       wrap(body(sample | {'produced': len(stdout) + 1})),
+                      wrap(body(sample | {'outCursor': len(stdout) + 4, 'produced': len(stdout) + 4})),
+                      wrap(body(sample | {'retained': len(stdout) + 4})),
+                      body(json.loads(wrap(body(sample))) | {'state': 'other'}),
                       wrap(body(sample | {'indexes': [8]})),
                       wrap(body(sample), digest=sha256(body(sample)).hexdigest().upper()),
                       body(json.loads(wrap(body(sample))) | {'$opened': sample}),
