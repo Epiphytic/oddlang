@@ -1719,3 +1719,13 @@ w:structuralApplicationConvergence a p:Task ;
     p:dependsOn w:structuralProfileCompiler, w:vaultHelperChoice ;
     p:acceptance "Preserve and identify member contracts, qualify the cold native build and CLI, and measure actual import and named upstream test coverage on the composed workspace." ;
     p:status p:planned .
+
+w:sharedWireChoiceCopy a p:Task ;
+    rdfs:label "Preserve explicit clone-only value semantics for a wire string choice" ;
+    p:source w:wholeMarmishPlan ; p:milestone w:marmishMilestone ; p:status p:done ;
+    p:acceptance "An unrelated generated numbered choice round-trips through Serde, supports Clone and rejects a Copy bound. The legacy default and explicit true project identically." ;
+    p:evidence w:sharedWireChoiceCopyFixture .
+w:sharedWireChoiceCopyFixture a p:Artifact ;
+    rdfs:label "Native string-choice numbering, wire and Copy controls" ;
+    p:location "verification/shared-declarations/verify.py" .
+w:wholeMarmishStructure p:dependsOn w:sharedWireChoiceCopy .
