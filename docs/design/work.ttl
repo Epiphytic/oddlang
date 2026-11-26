@@ -1044,7 +1044,9 @@ w:foregroundProfileReview a p:Finding ;
 w:foregroundProfileOwner p:addresses w:foregroundProfileReview .
 
 w:integratedClientReceipt a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/36> .
+w:combinedForegroundReceipt a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/40> .
+
 w:combinedForegroundPeers a p:Task ; rdfs:label "Qualify both foreground daemon and status client from one release" ;
-    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:active ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ; p:evidence w:combinedForegroundReceipt ;
     p:dependsOn w:integratedNativeInterfaces, w:localOwnerTlsOracle, w:foregroundProfileOwner ;
     p:acceptance "Build both peers from the same portable workspace and exercise automatic discovery, live activation, lease contention, and crash recovery on both ARM64 hosts with original and generated processes." .

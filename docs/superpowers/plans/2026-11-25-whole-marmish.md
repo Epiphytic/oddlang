@@ -30,7 +30,7 @@ The independent stream comparison including macro expansions left 373 compiler-o
 - [x] Qualify Launch writer recovery and a changed upstream writer on both ARM64 hosts. [Changed source qualification](https://github.com/Epiphytic/marmish-oddlang/pull/29) · [Linux replay](https://github.com/Epiphytic/marmish-oddlang/pull/31)
 - [x] Observe native plaintext and TLS rejection with exact status, exit, shutdown and socket cleanup on both hosts. [Original transport evidence](https://github.com/Epiphytic/marmish-oddlang/pull/34)
 - [x] Build the copy relations and automatic status client in one native workspace. [Two-platform qualification](https://github.com/Epiphytic/marmish-oddlang/pull/36)
-- [ ] Assemble the foreground daemon and status client into the same native workspace. Exercise both generated peers together and the mixed pairs on both ARM64 platforms.
+- [x] Assemble the foreground daemon and status client into the same native workspace. Exercise both generated peers together and the mixed pairs on both ARM64 platforms.
 
 - [x] Freeze the original local status and extended reply observations on Darwin and Linux ARM64. [Live daemon and framing](https://github.com/Epiphytic/marmish-oddlang/pull/20) · [Extended reply corpus](https://github.com/Epiphytic/marmish-oddlang/pull/22)
 - [x] Build the core, stream and partial command surfaces together and replay 25 unchanged tests on Darwin and Linux ARM64. [Three-member workspace](https://github.com/Epiphytic/marmish-oddlang/pull/25)
