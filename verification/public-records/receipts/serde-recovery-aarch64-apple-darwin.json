@@ -1,12 +1,12 @@
 {
-  "compiler": "59fca0872b9d9d48b4988c918301674874d2c5c2",
-  "compilerSha256": "fac7933b413ddbe0842c2110f424edc8ca4968e60a84548616d6e2ac4d7f485d",
+  "compiler": "9923e6664899de66915ed3a94e417f261ffed401",
+  "compilerSha256": "b602348a555ec3408f2f11ce0935bbbc9331a67ac9eb420d640a6c80dc23a85f",
   "existingFixturesPassed": [
     "verification/public-records/read_policy.py",
     "verification/serde-string-choice/verify.py",
     "verification/observational-record-defaults/pointer_width.py"
   ],
-  "fixtureSha256": "a22e2e84a336a8b1bb17bd58d2abec87c0520321fd1f53b0c28677e9126e6481",
+  "fixtureSha256": "f375480676479b98311afd5ea0a4bc00bc0bdda91601e43958dea977cd0895ee",
   "format": "oddlang-serde-public-record-recovery-receipt-v1",
   "identicalLegacyArtifacts": {
     "model/graph.json": "879380ea262679ca5f68431bf5e2be9860f1fe87e4ab694a6c4bd18b3cf2b44d",
@@ -36,7 +36,8 @@
     "shadowed Option",
     "missing enum root export",
     "private crate-root record shadows glob export",
-    "private crate-root choice import shadows glob export"
+    "private crate-root choice import shadows glob export",
+    "public-only Rustdoc omits private root shadow"
   ],
   "unchangedPredecessor": "4e43a3d2367cbb1839ff224ccb24da175c6b8278"
 }
