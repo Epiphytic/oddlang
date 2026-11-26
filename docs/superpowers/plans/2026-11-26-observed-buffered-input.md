@@ -14,4 +14,4 @@ Its receipt records structure, inferred policies and assumptions separately.
 - [x] Collect an unrelated real native trace and reproduce the missing recovery route.
 - [x] Validate the three stimuli, reject inconsistent observations and preserve the authored route.
 - [x] Change the unrelated native implementation, confirm the recovered shape is invariant and replay both inferred graphs.
-- [ ] Review and publish the independent framework branch.
+- [x] Review and publish the independent framework branch.

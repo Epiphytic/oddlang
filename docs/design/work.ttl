@@ -1414,5 +1414,8 @@ w:observedBufferedInputPlan a p:Artifact ;
 w:observedBufferedInput a p:Task ;
     rdfs:label "Infer bounded buffered-input policies from three controlled native traces" ;
     p:milestone w:marmishMilestone ; p:source w:observedBufferedInputPlan ;
-    p:dependsOn w:privateBufferedInput ; p:status p:active ;
+    p:dependsOn w:privateBufferedInput ; p:status p:done ; p:evidence w:observedBufferedInputFixture ;
     p:acceptance "Infer only the declared empty-read, retirement and refill-error policy choices. Reject inconsistent observations, preserve observed structure and replay both a real source baseline and a shape-invariant behavior mutation." .
+
+w:observedBufferedInputFixture a p:Artifact ;
+    p:location "verification/observed-buffered-input/verify.py" .
