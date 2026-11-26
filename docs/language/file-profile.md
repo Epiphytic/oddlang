@@ -34,3 +34,18 @@ identifies which relations must be empty for this target to reopen safely.
 Standalone native packages can pin HTTPS Git dependencies to a full revision
 and bind a registry replacement to a full revision. Cargo lock verification uses
 the resulting manifest and the pinned lock, offline.
+
+A configured extension declares prioritized OS environment sources, a bounded
+private JSON file, dynamic relay and route fields, and an exact supported
+profile of the remaining fields. Reopen validates the document before effects
+and under the lease, and the native runner permits implicit backend selection
+for an existing ready file-backed identity.
+
+The guarded reopen profile admits recent durable records with valid timestamp
+prefixes when the declared native recovery and journal relations are empty.
+It reads the persisted replay floor, advances declared clocks monotonically,
+reclassifies declared statuses, and refreshes validated static seed rows. A
+configured journal can also add a versioned binding of domain-separated
+SHA-256 public references derived from its profile and account identities.
+These native operations share the encrypted lease and a transaction. The
+projection computes status counts from the reopened store after those effects.

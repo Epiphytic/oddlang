@@ -1,0 +1,165 @@
+
+fn selected_state(explicit: Option<&std::path::PathBuf>) -> Result<std::path::PathBuf, Failure> {
+    if let Some(path) = explicit { return Ok(path.clone()); }
+    STATE_SOURCES.iter().find_map(|(name, platform, absolute, suffix)| {
+        if !platform { return None; }
+        let selected = std::path::PathBuf::from(std::env::var_os(name)?);
+        if *absolute && !selected.is_absolute() { return None; }
+        Some(suffix.iter().fold(selected, |path, part| path.join(part)))
+    }).ok_or(NO_STATE)
+}
+
+fn selected_config(root: &Path) -> Result<Option<(String, Vec<String>)>, Failure> {
+    let Some(file) = open_existing(&root.join(CONFIGURED_LEAF), false)? else { return Ok(None); };
+    let mut bytes = Vec::new();
+    file.take(CONFIGURED_MAX as u64 + 1).read_to_end(&mut bytes).map_err(|_| IO)?;
+    if bytes.len() > CONFIGURED_MAX { return Err(CONFIG_SIZE); }
+    let mut parser = serde_json::Deserializer::from_slice(&bytes);
+    let StrictConfig(serde_json::Value::Object(mut document)) = serde::Deserialize::deserialize(&mut parser).map_err(|_| CONFIG_FORMAT)? else {
+        return Err(CONFIG_FORMAT);
+    };
+    parser.end().map_err(|_| CONFIG_FORMAT)?;
+    let route: String = serde_json::from_value(document.remove(CONFIG_ROUTE_FIELD).ok_or(CONFIG_FORMAT)?).map_err(|_| CONFIG_FORMAT)?;
+    let relays: Vec<String> = serde_json::from_value(document.remove(CONFIG_RELAY_FIELD).ok_or(CONFIG_FORMAT)?).map_err(|_| CONFIG_FORMAT)?;
+    let fixed: serde_json::Map<String, serde_json::Value> = serde_json::from_str(CONFIG_FIXED).map_err(|_| CONFIG_FORMAT)?;
+    if !document.keys().eq(fixed.keys()) { return Err(CONFIG_FORMAT); }
+    if document != fixed { return Err(CONFIGURATION); }
+    let relays = configured_relays(&route, &relays)?;
+    Ok(Some((route, relays)))
+}
+
+fn configured_relays(route: &str, relays: &[String]) -> Result<Vec<String>, Failure> {
+    if !ROUTE_CHOICES.contains(&route) { return Err(INVALID_ROUTE); }
+    if !DIRECT_ROUTES.contains(&route) { return Err(CONFIGURATION); }
+    if relays.is_empty() || relays.len() > MAXIMUM_RELAYS { return Err(CONFIG_RELAY_COUNT); }
+    let mut canonical = std::collections::BTreeSet::new();
+    for value in relays {
+        if value.len() > 2048 || value.chars().any(|ch| ch.is_control() || ch.is_whitespace() || ch == '\\') {
+            return Err(INVALID_RELAY);
+        }
+        let url = url::Url::parse(value).map_err(|_| INVALID_RELAY)?;
+        if url.scheme() != SCHEME || url.host().is_none() || !url.username().is_empty()
+            || url.password().is_some() || url.query().is_some() || url.fragment().is_some()
+            || url.port() == Some(0) || url.host_str().is_some_and(|host| host.ends_with('.') || host.ends_with(".onion"))
+        { return Err(CONFIGURATION); }
+        let authority = value.split_once("://").and_then(|(_, rest)| rest.split('/').next()).ok_or(INVALID_RELAY)?;
+        if authority.contains('@') || authority.ends_with(':') || authority.rsplit_once(':').is_some_and(|(_,port)|
+            !port.ends_with(']') && port.len()>1 && port.starts_with('0')) { return Err(CONFIGURATION); }
+        canonical.insert(url.to_string());
+    }
+    Ok(canonical.into_iter().collect())
+}
+
+struct StrictConfig(serde_json::Value);
+
+impl<'de> serde::Deserialize<'de> for StrictConfig {
+    fn deserialize<D: serde::Deserializer<'de>>(decoder: D) -> Result<Self, D::Error> {
+        use serde::de::{Error, MapAccess, SeqAccess, Visitor};
+        use serde_json::Value;
+        struct StrictVisitor;
+        impl<'de> Visitor<'de> for StrictVisitor {
+            type Value = StrictConfig;
+            fn expecting(&self, out: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                out.write_str("a JSON document with unique object fields")
+            }
+            fn visit_map<A: MapAccess<'de>>(self, mut map: A) -> Result<Self::Value, A::Error> {
+                let mut fields = serde_json::Map::new();
+                while let Some((name, StrictConfig(value))) = map.next_entry::<String, StrictConfig>()? {
+                    if fields.insert(name, value).is_some() { return Err(A::Error::custom("duplicate field")); }
+                }
+                Ok(StrictConfig(Value::Object(fields)))
+            }
+            fn visit_seq<A: SeqAccess<'de>>(self, mut sequence: A) -> Result<Self::Value, A::Error> {
+                let mut items = Vec::new();
+                while let Some(StrictConfig(value)) = sequence.next_element()? { items.push(value); }
+                Ok(StrictConfig(Value::Array(items)))
+            }
+            fn visit_bool<E: Error>(self, value: bool) -> Result<Self::Value, E> { Ok(StrictConfig(value.into())) }
+            fn visit_i64<E: Error>(self, value: i64) -> Result<Self::Value, E> { Ok(StrictConfig(value.into())) }
+            fn visit_u64<E: Error>(self, value: u64) -> Result<Self::Value, E> { Ok(StrictConfig(value.into())) }
+            fn visit_f64<E: Error>(self, value: f64) -> Result<Self::Value, E> { Ok(StrictConfig(value.into())) }
+            fn visit_str<E: Error>(self, value: &str) -> Result<Self::Value, E> { Ok(StrictConfig(value.into())) }
+            fn visit_unit<E: Error>(self) -> Result<Self::Value, E> { Ok(StrictConfig(Value::Null)) }
+        }
+        decoder.deserialize_any(StrictVisitor)
+    }
+}
+
+fn validate_seed_shape(bytes: &[u8], fields: &[(&str, &str)]) -> Option<()> {
+    if bytes.len() > CONFIGURED_MAX { return None; }
+    let StrictConfig(serde_json::Value::Object(document)) = serde_json::from_slice(bytes).ok()? else {
+        return None;
+    };
+    if document.len() != fields.len() { return None; }
+    for (key, kind) in fields {
+        let value = document.get(*key)?;
+        let valid = match *kind {
+            "unsigned" => value.as_u64().is_some(),
+            "text" => value.as_str().is_some(),
+            "nullable_unsigned" => value.is_null() || value.as_u64().is_some(),
+            _ => false,
+        };
+        if !valid { return None; }
+    }
+    Some(())
+}
+
+fn configured_effects(connection: &mut rusqlite::Connection, record: &Record, bind: bool) -> Result<(), Failure> {
+    use rusqlite::OptionalExtension;
+    use sha2::{Digest, Sha256};
+    let elapsed = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_err(|_| JOURNAL)?.as_secs();
+    if elapsed > CLOCK_MAXIMUM { return Err(JOURNAL); }
+    let now_floor = elapsed.saturating_sub(RECOVERY_HORIZON);
+    let cutoff = elapsed.saturating_sub(RECOVERY_RETENTION);
+    let tx = connection.transaction().map_err(|_| JOURNAL)?;
+    let current = tx.query_row(PRIMARY_FLOOR, [], |row| row.get::<_,i64>(0)).map_err(|_| JOURNAL)?;
+    let current = u64::try_from(current).map_err(|_| JOURNAL)?;
+    if current > CLOCK_MAXIMUM { return Err(JOURNAL); }
+    let floor = current.max(now_floor);
+    let prefix = format!("{floor:0TIMESTAMP_WIDTH$x}");
+    for statement in CHECK_RECENT {
+        if tx.query_row(statement, rusqlite::params![cutoff as i64, prefix], |row| row.get::<_,bool>(0))
+            .map_err(|_| JOURNAL)? { return Err(RELOAD_UNSUPPORTED); }
+    }
+    for statement in ADVANCE_FLOORS {
+        if tx.execute(statement, [now_floor as i64]).map_err(|_| JOURNAL)? != 1 { return Err(JOURNAL); }
+    }
+    for (statement, from, to) in TRANSITIONS {
+        tx.execute(statement, [to, from]).map_err(|_| JOURNAL)?;
+    }
+    if bind {
+        refresh_configured_seeds(&tx)?;
+        let account = hex::decode(record.public.as_deref().ok_or(IDENTITY_MISMATCH)?).map_err(|_| IDENTITY_MISMATCH)?;
+        let reference = |domain: &str| {
+            let mut digest = Sha256::new();
+            digest.update(domain.as_bytes());
+            digest.update(record.profile.as_bytes());
+            digest.update(&account);
+            digest.finalize().to_vec()
+        };
+        let first = reference(REFERENCE_FIRST_DOMAIN);
+        let second = reference(REFERENCE_SECOND_DOMAIN);
+        let observed = tx.query_row(REFERENCE_QUERY, [], |row| {
+            Ok((row.get::<_,u32>(0)?, row.get::<_,Vec<u8>>(1)?, row.get::<_,Vec<u8>>(2)?))
+        }).optional().map_err(|_| JOURNAL)?;
+        match observed {
+            Some((version,a,b)) if version == REFERENCE_VERSION && a == first && b == second => (),
+            Some(_) => return Err(REFERENCE_MISMATCH),
+            None => { tx.execute(REFERENCE_INSERT, rusqlite::params![REFERENCE_VERSION,first,second]).map_err(|_| JOURNAL)?; }
+        }
+    }
+    tx.commit().map_err(|_| JOURNAL)
+}
+
+
+fn configured_native_ready(path: &Path, key: &[u8;32]) -> Result<(), Failure> {
+    let Some(file) = open_existing(path, false).map_err(|_| PREFLIGHT)? else { return Ok(()); };
+    if file.metadata().map_err(|_| PREFLIGHT)?.len() == 0 { return Ok(()); }
+    let connection = keyed_database(path, key, true, PREFLIGHT)?;
+    for statement in NATIVE_IDLE {
+        if connection.query_row(statement, [], |row| row.get::<_,bool>(0)).map_err(|_| PREFLIGHT)? {
+            return Err(RELOAD_UNSUPPORTED);
+        }
+    }
+    Ok(())
+}
