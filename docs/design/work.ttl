@@ -1052,3 +1052,7 @@ w:originalPrivateDefaultRelease a p:Task ; rdfs:label "Run the unchanged Linux A
     p:acceptance "Match every compiled harness digest and its complete runnable and ignored counts, including the formerly failing path-permissions case." ;
     p:status p:done ; p:evidence w:originalPrivateDefaultReleaseReceipt .
 w:originalPrivateDefaultReleaseReceipt a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/47> .
+
+w:publicTypeBindingGraph a p:Task ; rdfs:label "Recover public type spellings and field audiences from the Rust compiler" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:active ;
+    p:acceptance "Resolve public module names and aliases to stable type identities, retain ambiguity and field audience, and compare unchanged external callers with a source mutation." .
