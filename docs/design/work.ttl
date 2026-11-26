@@ -1941,6 +1941,6 @@ w:combinedRangeLinux a p:Artifact ; p:location "https://github.com/Epiphytic/mar
 w:wholeMarmishStructure p:dependsOn w:combinedRangeData .
 
 w:serdePublicRecordRootShadow a p:Finding ;
-    rdfs:label "Private crate-root declarations can hide public glob exports" ;
+    rdfs:label "Private crate-root declarations can hide public glob exports and public-only Rustdoc can omit them" ;
     p:source w:recoverSerdePublicRecordsReceipt .
 w:recoverSerdePublicRecords p:addresses w:serdePublicRecordRootShadow .
