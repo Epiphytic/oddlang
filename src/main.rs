@@ -19,6 +19,12 @@ fn import_has_profile(path: &str, profile: &str) -> bool {
 
 fn run(args: &[String]) -> Result<(), String> {
     match args {
+        [cmd, kind, target, root, out] if cmd == "build" && kind == "value-domain" && target == "typescript" => {
+            oddlang::value_domain::build_typescript(root.as_ref(),out.as_ref())
+        }
+        [cmd, kind, target, root, overlay, out] if cmd == "build" && kind == "value-domain" && target == "rust" => {
+            oddlang::value_domain::build(root.as_ref(),overlay.as_ref(),out.as_ref())
+        }
         [group, kind, source, selection, overlay, variant, output]
             if group == "recover" && kind == "tagged-contract" =>
         {
