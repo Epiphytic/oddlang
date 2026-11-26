@@ -1,0 +1,5 @@
+fn print_result(profile: &Prepared) -> Result<(), Failure> {
+    let report = serde_json::json!({"profile":profile.record.name, "identity":profile.record.public,
+        "profile_phase":profile.record.phase, "credential_preparation_complete":true});
+    writeln!(std::io::stdout().lock(), "{report}").map_err(|_| IO)
+}

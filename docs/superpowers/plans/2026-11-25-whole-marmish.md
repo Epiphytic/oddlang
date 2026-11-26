@@ -27,6 +27,11 @@ The independent stream comparison including macro expansions left 373 compiler-o
 
 ## Implementation evidence
 
+- [x] Qualify Launch writer recovery and a changed upstream writer on both ARM64 hosts. [Changed source qualification](https://github.com/Epiphytic/marmish-oddlang/pull/29) · [Linux replay](https://github.com/Epiphytic/marmish-oddlang/pull/31)
+- [x] Observe native plaintext and TLS rejection with exact status, exit, shutdown and socket cleanup on both hosts. [Original transport evidence](https://github.com/Epiphytic/marmish-oddlang/pull/34)
+- [x] Build the copy relations and automatic status client in one native workspace. [Two-platform qualification](https://github.com/Epiphytic/marmish-oddlang/pull/36)
+- [x] Assemble the foreground daemon and status client into the same native workspace. Exercise both generated peers together and the mixed pairs on both ARM64 platforms.
+
 - [x] Freeze the original local status and extended reply observations on Darwin and Linux ARM64. [Live daemon and framing](https://github.com/Epiphytic/marmish-oddlang/pull/20) · [Extended reply corpus](https://github.com/Epiphytic/marmish-oddlang/pull/22)
 - [x] Build the core, stream and partial command surfaces together and replay 25 unchanged tests on Darwin and Linux ARM64. [Three-member workspace](https://github.com/Epiphytic/marmish-oddlang/pull/25)
 - [x] Qualify the explicit-socket status client against an activating original daemon. [Mixed native status](https://github.com/Epiphytic/marmish-oddlang/pull/23)
@@ -37,6 +42,7 @@ The independent stream comparison including macro expansions left 373 compiler-o
 - [x] Compose separately pinned native package contracts into one Cargo workspace with a root dependency lock. Compile a downstream caller of two generated crates and verify native binary return status. [Composition fixture](../../../verification/native-workspace/verify.py)
 - [x] Qualify acknowledged stream windows with all five upstream tests unchanged, including the three tests that inspect private storage. Compare 13,031 public observations and reject the retry-conflict mutation on Darwin ARM64. [Companion window qualification](https://github.com/Epiphytic/marmish-oddlang/pull/15)
 
+- [x] Recover the ordered field encodings of supported record writers, qualify source reordering and reject unsupported helpers. [Record writer profile](../../language/ordered-record-writes.md)
 
 - [x] Bind explicit byte discriminants and exhaustive conversion outcomes for string enums. [Shared declaration profile](../../language/shared-declarations.md)
 
@@ -78,3 +84,19 @@ No source text, AST dump, MIR instruction stream, original executable, vendored 
 The principal feasibility risk is recovering intended behavior where only incidental implementation details are visible. Budget the effort by families of protocols, state machines and OS effects, then recalibrate after the installed command in phase 4 using actual authoring time, unresolved obligations and porting effort. If that checkpoint requires copying upstream implementation logic into provider shims or adding project knowledge to Oddlang, reopen the semantic design before expanding coverage. A finite qualification suite supports a versioned compatibility claim for tested profiles. Universal behavioral equivalence for arbitrary Rust remains unproven.
 
 - [x] Compose recovered JSON wire schemas with shared declarations in pinned native libraries. Compile the independent bounded-byte sensor fixture through the assembled crate.
+
+- [x] Project ordered typed hashing and namespaced hexadecimal record views. Check byte encodings, first-error validation and invalid bindings with an independent native fixture. [Typed hash views](../../language/json-wire-schema.md#typed-hash-views)
+
+- [x] Project ordered tagged binary records. Check field bounds, ordered structural failures and validation after parsing with an independent consumer. [Binary records](../../language/binary-records.md)
+
+- [x] Project typed cross-record equality, ordered prechecks and checked result comparisons. [Field relations](../../language/field-relations.md)
+
+- [x] Extend ordered binary records with nullable metadata, inline signed values, typed guards, and hexadecimal views. [Binary metadata](../../language/binary-records.md#binary-metadata)
+- [x] Qualify the copy Manifest and Mtime against the pinned native original. [Native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/32)
+- [x] Qualify the copy Checkpoint and its FileIdentity record against the pinned native original. [Native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/39)
+- [x] Qualify Manifest matching and the helper start and build consistency checks against the pinned native original. [Native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/33)
+- [x] Project nested checked codecs, fixed record fields and checksum footers with independent timing and error precedence witnesses. [Composite records](../../language/binary-records.md#composite-binary-records)
+- [x] Project bounded tagged frame variants and a one-frame incremental decoder. [Binary frame profile](../../language/binary-frames.md)
+- [x] Qualify the complete copy protocol library against every unchanged pinned native test and exact frame error controls on macOS ARM64. [Native receipt and structural inventory](https://github.com/Epiphytic/marmish-oddlang/pull/42)
+
+- [ ] Check composite slot bounds and member types against pinned external codec contracts before package emission.
