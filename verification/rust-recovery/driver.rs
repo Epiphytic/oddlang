@@ -600,6 +600,14 @@ struct Recovery;
 
 impl Callbacks for Recovery {
     fn after_analysis<'tcx>(&mut self, _compiler: &Compiler, tcx: TyCtxt<'tcx>) -> Compilation {
+        if let Ok(selection) = env::var("ODD_RECOVERY_TAGGED_FRAME_GUARDS") {
+            let compiler = env::var("ODD_RECOVERY_COMPILER").expect("compiler commit");
+            let output = env::var_os("ODD_RECOVERY_OUT").expect("frame guard destination");
+            let file = fs::File::create_new(output).expect("create frame guard observation");
+            serde_json::to_writer(file, &tagged_frame::observe_guards(tcx, &compiler, &selection))
+                .expect("serialize frame guard observation");
+            return Compilation::Continue;
+        }
         if let Ok(method) = env::var("ODD_RECOVERY_TAGGED_FRAME") {
             let compiler = env::var("ODD_RECOVERY_COMPILER").expect("compiler commit");
             let output = env::var_os("ODD_RECOVERY_OUT").expect("tagged frame destination");

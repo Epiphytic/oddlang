@@ -938,3 +938,18 @@ w:taggedFrameSourceReviewArtifact a p:Artifact ;
     p:location "docs/design/reviews/rust-tagged-frame.md" .
 w:taggedCopyEncoderNativeReceipt a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/e4531704137c59a8deb93fd9bb81326cac4ed5a1/verification/whole/source-copy-frame/reference-aarch64-apple-darwin.json" .
+
+w:recoverFramePreflight a p:Task ;
+    rdfs:label "Recover ordered binary encoder preconditions and named errors" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:recoverTaggedFrameEncoder ;
+    p:acceptance "Recover the source order of proven count, range, checked end, and relative-field guards. Use an independent native witness where two guards fail, verify exact output and named error, and preserve decoder precedence." ;
+    p:addresses w:frameGuardOrderReview ; p:evidence w:frameGuardFixture .
+w:wholeMarmishProtocols p:dependsOn w:recoverFramePreflight .
+w:frameGuardFixture a p:Artifact ;
+    p:location "verification/rust-recovery/frame-guards/verify.py" .
+w:frameGuardOrderReview a p:Finding ;
+    rdfs:label "Require joint failure witnesses, native error identity, and explicit role-specific guard order" ;
+    p:source w:frameGuardOrderReviewArtifact .
+w:frameGuardOrderReviewArtifact a p:Artifact ;
+    p:location "docs/design/reviews/rust-frame-guards.md" .
