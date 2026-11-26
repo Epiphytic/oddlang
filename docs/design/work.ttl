@@ -1765,3 +1765,9 @@ w:releaseObservedVisibility a p:Task ;
     p:acceptance "Resolve named module restrictions on both surfaces, expose missing scope evidence and detect a real field visibility mutation even when declaration paths agree." ;
     p:status p:done ; p:evidence w:directObserverBindingFixture .
 w:wholeMarmishStructure p:dependsOn w:releaseObservedVisibility .
+
+w:coreDeclarationOwnership a p:Task ;
+    rdfs:label "Compare original and source-free core declaration ownership on both ARM64 hosts" ;
+    p:status p:active ; p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:releaseObservedVisibility ;
+    p:acceptance "Publish both native observations, distinguish lexical owner paths from compiled import availability, and identify the projection component for each of the six public core type names." .

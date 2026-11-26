@@ -93,6 +93,7 @@ mod outer {
                 after = check.collect(*options)["comparison"]["declaredAccess"]
                 changed_doc = capture.call_args.args[1]
             self.assertEqual(after["different"], [])
+            self.assertEqual(after["unresolved"], [])
             changed = check.compare(original, changed_doc, root)
             difference, = changed["declaredAccess"]["different"]
             self.assertEqual(difference["path"][-1], "limit")
