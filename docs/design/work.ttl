@@ -1795,3 +1795,10 @@ w:readOnlyFileDarwin a p:Artifact ;
 
 w:readOnlyFileLinux a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/d27146eee73937d147b9db32d3210d515220be04/verification/whole/local-file-integrity/aarch64-unknown-linux-gnu.json" .
+
+w:verifiedLocalFileCatalog a p:Task ;
+    rdfs:label "Qualify pinned directory catalogs against a typed parser and descriptor policy" ;
+    p:milestone w:marmishMilestone ; p:source w:readOnlyFileIntegrityPlan ;
+    p:dependsOn w:readOnlyFileIntegrity, w:structuralProfileCompiler ;
+    p:status p:planned ;
+    p:acceptance "Run the unchanged original directory discovery test and typed guard comparisons on both ARM64 hosts using only inert files and a caller-supplied checksum." .

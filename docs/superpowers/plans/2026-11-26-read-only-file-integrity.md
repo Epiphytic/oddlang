@@ -27,7 +27,8 @@ a second type check on the descriptor. Hashing stops after the expected length
 plus one byte and rejects a length change. These are explicit safeguards beyond
 the stable-file comparison, which uses Unix metadata on macOS and Linux ARM64.
 The observations do not qualify device access, ancestor traversal or mutation by
-a concurrent writer.
+a concurrent writer. Ownership was observed for fixture files owned by the
+effective user. A different owner was outside the native probe.
 
 Both hardened projections and their original oracle computations agreed on
 the inert-file observations and the source hard-link mutation. The shared
