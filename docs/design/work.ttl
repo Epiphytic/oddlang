@@ -793,3 +793,7 @@ w:boundedBinaryRecords a p:Task ; rdfs:label "Project ordered bounded tagged bin
     p:evidence w:binaryRecordFixture .
 w:binaryRecordFixture a p:Artifact ; p:location "verification/binary-record/verify.py" .
 w:wholeMarmishProtocols p:dependsOn w:boundedBinaryRecords .
+w:binaryRecordReview a p:Finding ;
+    rdfs:label "Disambiguate binary record errors and compile the native package composition" ;
+    p:source w:binaryRecordFixture .
+w:boundedBinaryRecords p:addresses w:binaryRecordReview .

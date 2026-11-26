@@ -289,7 +289,7 @@ pub(crate) fn type_symbol(name: &str) -> bool {
     symbol(name) && name.as_bytes()[0].is_ascii_uppercase()
 }
 
-pub(crate) fn native_path(path: &str) -> bool {
+fn native_path(path: &str) -> bool {
     let mut parts = path
         .strip_prefix("::")
         .unwrap_or(path)

@@ -117,7 +117,7 @@ struct Binding {
     #[serde(default, deserialize_with = "unique_map")]
     variant_order: BTreeMap<String, Vec<String>>,
 }
-fn unique_map<'de, D, V>(de: D) -> std::result::Result<BTreeMap<String, V>, D::Error>
+pub(crate) fn unique_map<'de, D, V>(de: D) -> std::result::Result<BTreeMap<String, V>, D::Error>
 where
     D: serde::Deserializer<'de>,
     V: Deserialize<'de>,

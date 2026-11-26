@@ -1,7 +1,8 @@
 //! Ordered, bounded binary records with named decode and validation failures.
 mod rust;
 
-use crate::wire_schema::{digest, encode, iri, json, native_path, symbol, type_symbol};
+use crate::shared_declarations::unique_map;
+use crate::wire_schema::{digest, encode, iri, json, symbol, type_symbol};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::{
@@ -75,6 +76,7 @@ enum Encoding {
     },
     EnumU8 {
         external: String,
+        #[serde(deserialize_with = "unique_map")]
         tags: BTreeMap<String, u8>,
         error: String,
     },
@@ -157,9 +159,12 @@ impl Encoding {
 struct Binding {
     format: String,
     name: String,
+    #[serde(deserialize_with = "unique_map")]
     names: BTreeMap<String, String>,
+    #[serde(deserialize_with = "unique_map")]
     externals: BTreeMap<String, External>,
     error_type: String,
+    #[serde(deserialize_with = "unique_map")]
     errors: BTreeMap<String, Fault>,
 }
 
@@ -167,6 +172,7 @@ struct Binding {
 #[serde(deny_unknown_fields)]
 struct External {
     path: String,
+    #[serde(deserialize_with = "unique_map")]
     variants: BTreeMap<String, String>,
 }
 
@@ -175,6 +181,15 @@ struct External {
 struct Fault {
     variant: String,
     argument: Option<String>,
+}
+
+fn absolute_path(path: &str) -> bool {
+    let path = path
+        .strip_prefix("crate::")
+        .or_else(|| path.strip_prefix("::"));
+    path.is_some_and(|path| {
+        path.split("::").all(symbol) && path.rsplit("::").next().is_some_and(type_symbol)
+    })
 }
 
 fn unique<T: Ord>(items: impl IntoIterator<Item = T>) -> bool {
@@ -187,7 +202,7 @@ impl Graph {
         if self.format != FORMAT
             || binding.format != "oddlang-binary-record-rust-v1"
             || !type_symbol(&binding.name)
-            || !native_path(&binding.error_type)
+            || !absolute_path(&binding.error_type)
             || self.layout.is_empty()
         {
             return Err("invalid binary record format, layout, or native declaration".into());
@@ -252,7 +267,7 @@ impl Graph {
             iri(external)?;
             let native = &binding.externals[external];
             if !ids.insert(external)
-                || !native_path(&native.path)
+                || !absolute_path(&native.path)
                 || !tags.keys().eq(native.variants.keys())
                 || !unique(native.variants.values())
                 || native.variants.values().any(|name| !type_symbol(name))
@@ -275,7 +290,10 @@ impl Graph {
         }
         for error in errors {
             iri(error)?;
-            if !symbol(&binding.errors[error].variant) {
+            if !ids.insert(error) {
+                return Err(format!("binary error aliases a declaration: {error}"));
+            }
+            if !type_symbol(&binding.errors[error].variant) {
                 return Err(format!("invalid native binary error variant: {error}"));
             }
         }

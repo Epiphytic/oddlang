@@ -18,7 +18,7 @@ Decode checks the aggregate limit, then reads slots in declaration order. A fixe
 
 Encode validates the native record first, computes its exact length and rejects excess before allocating the output. `decodeSize` and `encodeSize` select the aggregate errors independently. The profile covers fixed ordered layouts and one-byte enum fields. Optional payloads, tagged unions and cross-record constraints need separate declarations.
 
-An `oddlang-binary-record-rust-v1` overlay binds the public record `name`, field `names`, external enum paths and variant names, and each named error to a Rust `errorType`, variant and optional text argument. The resulting struct exposes checked `validate`, `encode` and `decode` methods. The build emits `record.rs`, declaration-keyed `obligations.json` and `projection.lock`. A pinned native package can use the `binary-record` component kind. [Independent fixture](../../verification/binary-record/verify.py)
+An `oddlang-binary-record-rust-v1` overlay binds the public record `name`, field `names`, external enum paths and variant names, and each named error to a Rust `errorType`, variant and optional text argument. Paths are absolute through `crate::` or a leading `::`. The resulting struct exposes checked `validate`, `encode` and `decode` methods. The build emits `record.rs`, declaration-keyed `obligations.json` and `projection.lock`. A pinned native package can use the `binary-record` component kind. [Independent fixture](../../verification/binary-record/verify.py)
 
 ```sh
 oddlang build binary-record rust graph.json rust.json output
