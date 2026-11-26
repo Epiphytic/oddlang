@@ -1,0 +1,41 @@
+{
+  "selection": {
+    "file": "crates/marmish-stream/src/copy_protocol.rs",
+    "module": [],
+    "typeName": "Frame",
+    "variant": "Data",
+    "encode": "encode",
+    "decode": "decode"
+  },
+  "sourceSha256": "cd25b010838a5f2d29d49550abe7ea99092064c5303d727a05efb1868612cbf2",
+  "encodedTag": {
+    "value": 5,
+    "line": 398
+  },
+  "decodedTag": {
+    "value": 5,
+    "line": 488
+  },
+  "fields": [
+    {
+      "name": "offset",
+      "position": 0,
+      "kind": "uint-be",
+      "width": 8,
+      "writeLine": 396,
+      "writerDefinitionLine": 751
+    },
+    {
+      "name": "bytes",
+      "position": 1,
+      "kind": "rest-bytes",
+      "writeLine": 397
+    }
+  ],
+  "unresolved": [
+    "build configuration and compiler name resolution",
+    "complete reachable behavior and encoder guard semantics",
+    "decoder field consumption, bounds, and error precedence",
+    "other variants, stream consumption, and process effects"
+  ]
+}

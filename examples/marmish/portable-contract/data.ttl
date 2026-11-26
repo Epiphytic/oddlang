@@ -1,0 +1,48 @@
+@prefix t: <urn:oddlang:tagged-wire:v1:> .
+@prefix copy: <urn:marmish:portable:copy-frame:v1:> .
+
+copy:contract a t:Contract ;
+    t:maxPayload 16384 ;
+    t:shortHeader copy:shortHeader ;
+    t:payloadLimit copy:limit ;
+    t:lengthMismatch copy:lengthMismatch ;
+    t:unknownTag copy:unknownTag ;
+    t:truncated copy:truncated ;
+    t:trailing copy:trailing ;
+    t:invalidValue copy:invalidValue ;
+    t:feedFailed copy:feedFailed ;
+    t:incomplete copy:truncated ;
+    t:variant copy:Data .
+
+copy:Data
+    t:name "Data" ;
+    t:tag 5 ;
+    t:field copy:offset, copy:bytes .
+
+copy:offset
+    t:name "offset" ;
+    t:position 0 ;
+    t:kind "uint-be" ;
+    t:width 8 ;
+    t:max 9223372036854775807 ;
+    t:rangeError copy:badOffset .
+
+copy:bytes
+    t:name "bytes" ;
+    t:position 1 ;
+    t:kind "rest-bytes" ;
+    t:min 1 ;
+    t:max 8192 ;
+    t:rangeError copy:limit ;
+    t:sumWith copy:offset ;
+    t:sumError copy:badOffset .
+
+copy:shortHeader t:code "Invalid/copy_frame" .
+copy:limit t:code "Limit" .
+copy:lengthMismatch t:code "Invalid/copy_frame_length" .
+copy:unknownTag t:code "Invalid/copy_frame_tag" .
+copy:truncated t:code "Invalid/copy_truncated" .
+copy:trailing t:code "Invalid/copy_trailing" .
+copy:invalidValue t:code "Invalid/value" .
+copy:feedFailed t:code "Invalid/copy_decoder_failed" .
+copy:badOffset t:code "Offset" .

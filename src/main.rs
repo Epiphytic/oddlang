@@ -19,6 +19,44 @@ fn import_has_profile(path: &str, profile: &str) -> bool {
 
 fn run(args: &[String]) -> Result<(), String> {
     match args {
+        [group, kind, source, selection, overlay, variant, output]
+            if group == "recover" && kind == "tagged-contract" =>
+        {
+            oddlang::tagged_wire::recover(
+                source.as_ref(), selection.as_ref(), overlay.as_ref(), variant, output.as_ref(),
+            )
+        }
+        [command, kind, target, graph, output, flag, pin]
+            if command == "build" && kind == "tagged-wire" && flag == "--graph-sha256" =>
+        {
+            oddlang::tagged_wire::build(graph.as_ref(), pin, target, output.as_ref())
+        }
+        [group, kind, root, selection]
+            if group == "recover" && kind == "tagged-variant" =>
+        {
+            let bytes = std::fs::read(selection).map_err(|err| err.to_string())?;
+            let selection = serde_json::from_slice(&bytes).map_err(|err| err.to_string())?;
+            let candidate = oddlang::rust_recovery::tagged::recover(root.as_ref(), &selection)?;
+            println!("{}", serde_json::to_string_pretty(&candidate).map_err(|err| err.to_string())?);
+            Ok(())
+        }
+        [group, command, graph] if group == "tagged-wire" && command == "digest" => {
+            println!("{}", oddlang::tagged_wire::load(graph.as_ref())?.sha256());
+            Ok(())
+        }
+        [group, kind, manifest, profile_flag, profile, out_flag, output]
+            if group == "recover" && kind == "rust" && profile_flag == "--profile" && out_flag == "--out" =>
+        {
+            oddlang::rust_recovery::recover(manifest.as_ref(), profile.as_ref(), output.as_ref())
+        }
+        [group, kind, input, output, flag, package]
+            if group == "recover" && kind == "validate-inventory" && flag == "--package" =>
+        {
+            oddlang::rust_recovery::validate_scoped_inventory(input.as_ref(), output.as_ref(), Some(package))
+        }
+        [group, kind, input, output] if group == "recover" && kind == "validate-inventory" => {
+            oddlang::rust_recovery::validate_inventory(input.as_ref(), output.as_ref())
+        }
         [command, kind, manifest, package, output] if command == "import" && kind == "rust-tree" => {
             oddlang::rust_roundtrip::capture(manifest.as_ref(), package, output.as_ref())
         }
@@ -286,7 +324,7 @@ fn run(args: &[String]) -> Result<(), String> {
             oddlang::targets::build(&load_model(dir)?, std::path::Path::new(out))
                 .map_err(|e| e.to_string())
         }
-        _ => Err("usage: oddlang check PROJECT | impact PROJECT IRI | build PROJECT OUTPUT | import rust-tree MANIFEST PACKAGE OUTPUT | build rust-tree BUNDLE OUTPUT --bundle-sha256 PIN".into()),
+        _ => Err("usage: oddlang check PROJECT | impact PROJECT IRI | build PROJECT OUTPUT | recover rust MANIFEST --profile PROFILE --out OUTPUT | recover tagged-contract SOURCE SELECTION OVERLAY VARIANT OUTPUT | tagged-wire digest GRAPH | build tagged-wire TARGET GRAPH OUTPUT --graph-sha256 PIN | import rust-tree MANIFEST PACKAGE OUTPUT | build rust-tree BUNDLE OUTPUT --bundle-sha256 PIN".into()),
     }
 }
 fn main() -> ExitCode {

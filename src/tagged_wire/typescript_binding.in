@@ -1,0 +1,150 @@
+
+export type WireValue = bigint | Uint8Array;
+export type WireRecord = { tag: number; name: string; values: WireValue[] };
+
+export class WireError extends Error {
+  readonly code: string;
+
+  constructor(code: string) {
+    super(code);
+    this.name = "WireError";
+    this.code = code;
+  }
+}
+
+type UIntWidth = 1 | 2 | 4 | 8;
+type Range = { max: bigint; error: string };
+type Rest = {
+  kind: "rest";
+  min: number;
+  max: number;
+  error: string;
+  sum?: Range & { field: number };
+};
+type Field = { name: string } & (
+  { kind: "uint"; width: UIntWidth; range?: Range }
+  | { kind: "fixed"; width: number }
+  | Rest
+);
+type Variant = { name: string; fields: Field[] };
+
+const headerWidth = 5;
+const widthMaximum = { 1: 0xffn, 2: 0xffffn, 4: 0xffffffffn, 8: 0xffffffffffffffffn };
+
+export function variantName(tag: number): string | undefined {
+  return variants.get(tag)?.name;
+}
+
+export function fieldNames(tag: number): string[] | undefined {
+  return variants.get(tag)?.fields.map((field) => field.name);
+}
+
+function validateRest(field: Rest, length: number, values: readonly WireValue[]): void {
+  if (length < field.min || length > field.max) throw new WireError(field.error);
+  if (field.sum) {
+    // The schema references an earlier integer that has already been validated.
+    const base = values[field.sum.field] as bigint;
+    if (base + BigInt(length) > field.sum.max) throw new WireError(field.sum.error);
+  }
+}
+
+function readUInt(view: DataView, offset: number, width: UIntWidth): bigint {
+  switch (width) {
+    case 1: return BigInt(view.getUint8(offset));
+    case 2: return BigInt(view.getUint16(offset));
+    case 4: return BigInt(view.getUint32(offset));
+    case 8: return view.getBigUint64(offset);
+  }
+}
+
+function writeUInt(view: DataView, offset: number, width: UIntWidth, value: bigint): void {
+  switch (width) {
+    case 1: view.setUint8(offset, Number(value)); break;
+    case 2: view.setUint16(offset, Number(value)); break;
+    case 4: view.setUint32(offset, Number(value)); break;
+    case 8: view.setBigUint64(offset, value); break;
+  }
+}
+
+export function encode(tag: number, values: readonly WireValue[]): Uint8Array {
+  const variant = variants.get(tag);
+  if (!variant || !Array.isArray(values) || values.length !== variant.fields.length) {
+    throw new WireError(errors.invalidValue);
+  }
+  const last = variant.fields[variant.fields.length - 1];
+  const deferred = last?.kind === "rest" ? last.sum?.field : undefined;
+  const checked: WireValue[] = [];
+  let length = 0;
+  for (const [index, field] of variant.fields.entries()) {
+    const value = values[index];
+    if (field.kind === "uint") {
+      if (typeof value !== "bigint" || value < 0n) throw new WireError(errors.invalidValue);
+      if (field.range && index !== deferred && value > field.range.max) {
+        throw new WireError(field.range.error);
+      }
+      if (value > widthMaximum[field.width]) throw new WireError(errors.invalidValue);
+      length += field.width;
+    } else {
+      if (!(value instanceof Uint8Array)) throw new WireError(errors.invalidValue);
+      if (field.kind === "fixed" && value.length !== field.width) {
+        throw new WireError(errors.invalidValue);
+      }
+      if (field.kind === "rest") validateRest(field, value.length, checked);
+      length += value.length;
+    }
+    checked.push(value);
+  }
+  if (length > maxPayload) throw new WireError(errors.payloadLimit);
+
+  const bytes = new Uint8Array(headerWidth + length);
+  const view = new DataView(bytes.buffer);
+  view.setUint8(0, tag);
+  view.setUint32(1, length);
+  let offset = headerWidth;
+  for (const [index, field] of variant.fields.entries()) {
+    if (field.kind === "uint") {
+      writeUInt(view, offset, field.width, checked[index] as bigint);
+      offset += field.width;
+    } else {
+      const value = checked[index] as Uint8Array;
+      bytes.set(value, offset);
+      offset += value.length;
+    }
+  }
+  return bytes;
+}
+
+export function decode(bytes: Uint8Array): WireRecord {
+  if (!(bytes instanceof Uint8Array)) throw new WireError(errors.invalidValue);
+  if (bytes.length < headerWidth) throw new WireError(errors.shortHeader);
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const length = view.getUint32(1);
+  if (length > maxPayload) throw new WireError(errors.payloadLimit);
+  if (bytes.length !== headerWidth + length) throw new WireError(errors.lengthMismatch);
+  const tag = view.getUint8(0);
+  const variant = variants.get(tag);
+  if (!variant) throw new WireError(errors.unknownTag);
+
+  const values: WireValue[] = [];
+  let offset = headerWidth;
+  for (const field of variant.fields) {
+    if (field.kind === "rest") {
+      validateRest(field, bytes.length - offset, values);
+      values.push(new Uint8Array(bytes.subarray(offset)));
+      offset = bytes.length;
+      continue;
+    }
+    const end = offset + field.width;
+    if (end > bytes.length) throw new WireError(errors.truncated);
+    if (field.kind === "uint") {
+      const value = readUInt(view, offset, field.width);
+      if (field.range && value > field.range.max) throw new WireError(field.range.error);
+      values.push(value);
+    } else {
+      values.push(new Uint8Array(bytes.subarray(offset, end)));
+    }
+    offset = end;
+  }
+  if (offset !== bytes.length) throw new WireError(errors.trailing);
+  return { tag, name: variant.name, values };
+}

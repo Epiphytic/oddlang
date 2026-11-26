@@ -1,0 +1,8 @@
+{
+  "file": "crates/marmish-stream/src/copy_protocol.rs",
+  "module": [],
+  "typeName": "Frame",
+  "variant": "Data",
+  "encode": "encode",
+  "decode": "decode"
+}

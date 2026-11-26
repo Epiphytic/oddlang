@@ -4,6 +4,17 @@
 
 **Design.** Follow the [contract recovery design](../../design/contract-recovery.md). Use the Rust compiler during extraction. Ship a structural inventory, a portable contract, a public Rust API binding, and optional implementation hints as separately addressable graphs. Use Rust for Oddlang and the drop-in Rust target. Use TypeScript on Node for the independent portability demonstration. Each phase below has a named subagent responsibility. Use the subagent-driven-development workflow and have Claude CLI review the diff and evidence in auto mode after each phase. Resolve findings and record residual gaps in the work graph before advancing.
 
+## Implementation status
+
+The original boundary and oracle gate passed. Candidate structural inventories
+exist for the stream library, bridge executable and its handler library.
+The Data-frame and incremental-decoder role has passed pinned, source-free
+Rust and TypeScript builds and independent replay. Exact structure,
+the rest of the processing model, original Rust API and CLI bindings, and
+broader workspace qualification still have open obligations.
+[Scoped evidence](../../design/portable-rust-slice.md)
+· [Phase reviews](../../design/portable-rust-implementation-review.md)
+
 ## What “exact” means
 
 | Graph | Contents | How to verify |
