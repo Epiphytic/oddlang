@@ -29,7 +29,7 @@ Publish language-neutral cases and expected outcomes with the contract. Derive e
 
 Start with HTTP and use the same obligation model for additional protocols. Protocol bindings specify how to exercise and observe a case. Project-owned target overlays can select libraries or guide native adapter authoring. Verify each adapter against the shared expected outcomes. A Rust backend and TypeScript and Go clients can each prove conformance for the roles they declare.
 
-For Rust-to-Oddlang recovery, follow the [portable Rust recovery plan](docs/superpowers/plans/2026-11-25-portable-rust-recovery.md). Keep source structure independently auditable, record observable rules in the portable contract, and attach library names and versions as optional implementation hints.
+For Rust-to-Oddlang recovery, follow the [portable Rust recovery plan](docs/superpowers/plans/2026-11-25-portable-rust-recovery.md). Keep source structure independently auditable, record observable rules in the portable contract, and attach language idioms and library/version hints to stable IDs in the target overlay. For each claimed drop-in role, record caller-required native types, signatures and traits in its binding and verify them with native callers. Follow the [native idioms and role-specific requirements](docs/design/contract-recovery.md#native-idioms-and-role-specific-requirements) when classifying a recovered fact.
 
 ## What the prototype must demonstrate
 

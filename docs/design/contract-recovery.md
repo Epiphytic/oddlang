@@ -26,6 +26,30 @@ Exact bytes matter where the contract specifies them. A frame tag or binary
 field layout can be normative on the wire. Exact Rust text and binary hashes
 are separate measures of source and build fidelity.
 
+## Native idioms and role-specific requirements
+
+Attach each target hint to a stable declaration or operation IRI in a
+project-owned overlay. Identify the language and the role it guides. Alongside
+a library and version, a hint may suggest a native representation, ownership
+convention, error type, or asynchronous interface. Implementers may omit or
+replace any hint. Doing so must leave the portable obligations and expected
+outcomes unchanged.
+
+If existing callers depend on a particular native signature, trait, or ABI,
+declare that fact in the target binding for the specific compatibility role.
+A drop-in implementation must satisfy that binding as well as the portable
+contract. Verify a source API with unchanged native callers and an ABI with
+an appropriate binary consumer.
+
+For example, a range endpoint can accept an omitted field or JSON null as
+an open end, encode an open end as null, and otherwise carry an unsigned
+64-bit integer. Rust may use `Option<u64>` and TypeScript may use
+`bigint | null` internally. Both implementations run the same wire cases,
+including the exact JSON number `9007199254740993`. If existing Rust callers
+access a public `end: Option<u64>` field, record its name, visibility and
+type in the Rust drop-in binding and compile a caller against it. A consumer
+claiming only the wire role runs the wire cases.
+
 ## Marmish example
 
 A stream contract would name the Data frame, assign its tag, describe its
