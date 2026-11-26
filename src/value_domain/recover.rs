@@ -33,36 +33,202 @@ fn output(cmd: &mut Command) -> Result<Vec<u8>> {
     Ok(out.stdout)
 }
 
+fn git(root: &Path) -> Command {
+    let mut command = Command::new("git");
+    command
+        .env_clear()
+        .env("PATH", "/usr/bin:/bin")
+        .env("GIT_CONFIG_NOSYSTEM", "1")
+        .env("GIT_CONFIG_GLOBAL", "/dev/null")
+        .env("GIT_ATTR_NOSYSTEM", "1")
+        .arg("--no-replace-objects")
+        .current_dir(root);
+    command
+}
+
+fn git_text(root: &Path, args: &[&str]) -> Result<String> {
+    String::from_utf8(output(git(root).args(args))?)
+        .map(|text| text.trim_end_matches('\n').to_owned())
+        .map_err(|e| e.to_string())
+}
+
 fn clean(root: &Path, revision: &str) -> Result<()> {
-    let git = |args: &[&str]| output(Command::new("git").current_dir(root).args(args));
-    if String::from_utf8_lossy(&git(&["rev-parse", "HEAD"])?).trim() != revision
-        || !git(&["status", "--porcelain", "--untracked-files=all"])?.is_empty()
+    if git_text(root, &["rev-parse", "HEAD"])? != revision
+        || !output(git(root).args(["status", "--porcelain", "--untracked-files=all"]))?.is_empty()
     {
         return Err("original checkout does not match the clean revision".into());
     }
     Ok(())
 }
 
-fn tool(name: &str, root: &Path) -> Command {
-    let mut cmd = Command::new("rustup");
-    cmd.args(["run", "1.97.1", name]).current_dir(root);
-    for key in std::env::vars_os().map(|(k, _)| k) {
-        let s = key.to_string_lossy();
-        if matches!(
-            s.as_ref(),
-            "RUSTFLAGS"
-                | "RUSTC"
-                | "RUSTC_WRAPPER"
-                | "RUSTC_WORKSPACE_WRAPPER"
-                | "CARGO_ENCODED_RUSTFLAGS"
-                | "RUSTC_BOOTSTRAP"
-        ) || s.starts_with("CARGO_PROFILE_")
-            || s.ends_with("_RUSTFLAGS")
-        {
-            cmd.env_remove(key);
+fn check_export_links(root: &Path, directory: &Path) -> Result<()> {
+    for entry in fs::read_dir(directory).map_err(|e| e.to_string())? {
+        let entry = entry.map_err(|e| e.to_string())?;
+        let kind = entry.file_type().map_err(|e| e.to_string())?;
+        let path = entry.path();
+        if kind.is_symlink() {
+            if !path
+                .canonicalize()
+                .is_ok_and(|target| target.starts_with(root))
+            {
+                return Err(format!(
+                    "export link escapes the pinned source: {}",
+                    path.display()
+                ));
+            }
+        } else if kind.is_dir() {
+            check_export_links(root, &path)?;
         }
     }
-    cmd
+    Ok(())
+}
+
+fn export(original: &Path, stage: &Path, revision: &str) -> Result<PathBuf> {
+    // The alternate object store supplies Git objects only. Archive attributes and
+    // other local configuration from the original checkout do not follow them.
+    let objects = git_text(
+        original,
+        &[
+            "rev-parse",
+            "--path-format=absolute",
+            "--git-path",
+            "objects",
+        ],
+    )?;
+    let bare = stage.join("objects.git");
+    output(
+        git(stage)
+            .args(["init", "--bare", "--template="])
+            .arg(&bare),
+    )?;
+    fs::create_dir_all(bare.join("objects/info")).map_err(|e| e.to_string())?;
+    fs::write(bare.join("objects/info/alternates"), format!("{objects}\n"))
+        .map_err(|e| e.to_string())?;
+    let archive = stage.join("source.tar");
+    output(
+        git(&bare)
+            .args(["archive", "--format=tar", "--output"])
+            .arg(&archive)
+            .arg(revision),
+    )?;
+    let exported = stage.join("source");
+    fs::create_dir(&exported).map_err(|e| e.to_string())?;
+    output(
+        Command::new("tar")
+            .env_clear()
+            .env("PATH", "/usr/bin:/bin")
+            .args(["-xf"])
+            .arg(archive)
+            .current_dir(&exported),
+    )?;
+    check_export_links(&exported, &exported)?;
+    Ok(exported)
+}
+
+fn reject_cargo_configs(root: &Path) -> Result<()> {
+    for parent in root.ancestors() {
+        for name in ["config", "config.toml"] {
+            let path = parent.join(".cargo").join(name);
+            match path.symlink_metadata() {
+                Ok(_) => {
+                    return Err(format!(
+                        "unexpected Cargo configuration: {}",
+                        path.display()
+                    ));
+                }
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound => (),
+                Err(error) => return Err(error.to_string()),
+            }
+        }
+    }
+    Ok(())
+}
+
+#[cfg(unix)]
+use std::os::unix::fs::symlink as symlink_dir;
+#[cfg(windows)]
+use std::os::windows::fs::symlink_dir;
+
+fn isolated_cache(stage: &Path) -> Result<PathBuf> {
+    let cache = stage.join("cargo");
+    fs::create_dir(&cache).map_err(|e| e.to_string())?;
+    let installed = std::env::var_os("CARGO_HOME")
+        .map(PathBuf::from)
+        .or_else(|| std::env::var_os("HOME").map(|home| PathBuf::from(home).join(".cargo")));
+    if let Some(installed) = installed {
+        // Re-extract crate archives and Git checkouts into the isolated home.
+        // Their persistent download caches remain available without source overlays.
+        fs::create_dir(cache.join("registry")).map_err(|e| e.to_string())?;
+        fs::create_dir(cache.join("git")).map_err(|e| e.to_string())?;
+        for name in ["registry/cache", "registry/index", "git/db"] {
+            let path = installed.join(name);
+            match path.canonicalize() {
+                Ok(source) if source.is_dir() => {
+                    symlink_dir(source, cache.join(name)).map_err(|e| e.to_string())?;
+                }
+                Ok(_) => {
+                    return Err(format!(
+                        "Cargo cache is not a directory: {}",
+                        path.display()
+                    ));
+                }
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound => (),
+                Err(error) => return Err(error.to_string()),
+            }
+        }
+    }
+    Ok(cache)
+}
+
+fn installed_program(name: &str) -> Result<PathBuf> {
+    let bytes = output(Command::new("rustup").args(["which", "--toolchain", "1.97.1", name]))?;
+    let path = String::from_utf8(bytes).map_err(|e| e.to_string())?;
+    PathBuf::from(path.trim_end_matches('\n'))
+        .canonicalize()
+        .map_err(|e| e.to_string())
+}
+
+fn tool(executable: &Path, root: &Path, cache: &Path, rustc: &Path) -> Command {
+    let mut command = Command::new(executable);
+    command
+        .env_clear()
+        .env("PATH", "/usr/bin:/bin")
+        .env("CARGO_HOME", cache)
+        .env("RUSTC", rustc)
+        .current_dir(root);
+    command
+}
+
+fn check_workspace_paths(packages: &[Value], exported: &Path) -> Result<()> {
+    for package in packages {
+        let paths = package["targets"]
+            .as_array()
+            .ok_or("missing Cargo targets")?
+            .iter()
+            .map(|target| &target["src_path"])
+            .chain(std::iter::once(&package["manifest_path"]))
+            .chain(
+                package["dependencies"]
+                    .as_array()
+                    .ok_or("missing Cargo dependencies")?
+                    .iter()
+                    .map(|dependency| &dependency["path"])
+                    .filter(|path| !path.is_null()),
+            );
+        for value in paths {
+            let path = Path::new(value.as_str().ok_or("invalid Cargo source path")?);
+            if !path
+                .canonicalize()
+                .is_ok_and(|actual| actual.starts_with(exported))
+            {
+                return Err(format!(
+                    "Cargo path escapes the pinned source: {}",
+                    path.display()
+                ));
+            }
+        }
+    }
+    Ok(())
 }
 
 fn probe(selection: &Selection) -> Result<String> {
@@ -83,7 +249,13 @@ fn probe(selection: &Selection) -> Result<String> {
     ] {
         template = template.replace(key, value);
     }
+    let ordinal_checks = api.variant_order.as_ref().map_or_else(String::new, |order| {
+        order.iter().enumerate().map(|(ordinal, id)|
+            format!("    assert_eq!(Error::{} as isize, {ordinal}, \"unexpected enum ordinal\");\n", api.variants[id])
+        ).collect()
+    });
     Ok(template
+        .replace("@ORDINAL_CHECKS@", &ordinal_checks)
         .replace("@INTEGER@", &format!("u{}", selection.bits))
         .replace(
             "@VARIANTS@",
@@ -117,10 +289,32 @@ pub fn recover(manifest: &Path, selection_path: &Path, destination: &Path) -> Re
         return Err("invalid package name".into());
     }
     let program = probe(&s)?;
-    let root = manifest.parent().ok_or("missing manifest parent")?;
-    clean(root, &s.source_revision)?;
+    let probe_sha256 = digest(program.as_bytes());
+    let manifest_parent = manifest.parent().ok_or("missing manifest parent")?;
+    let checkout = PathBuf::from(git_text(
+        manifest_parent,
+        &["rev-parse", "--show-toplevel"],
+    )?)
+    .canonicalize()
+    .map_err(|e| e.to_string())?;
+    clean(&checkout, &s.source_revision)?;
+    let source_tree = git_text(&checkout, &["rev-parse", "HEAD^{tree}"])?;
+    let relative_manifest = manifest
+        .strip_prefix(&checkout)
+        .map_err(|e| e.to_string())?;
+    let stage = tempfile::tempdir().map_err(|e| e.to_string())?;
+    let work = stage.path().canonicalize().map_err(|e| e.to_string())?;
+    let exported = export(&checkout, &work, &s.source_revision)?;
+    let manifest = exported.join(relative_manifest);
+    let root = manifest
+        .parent()
+        .ok_or("missing exported manifest parent")?;
+    reject_cargo_configs(root)?;
+    let cache = isolated_cache(&work)?;
+    let cargo = installed_program("cargo")?;
+    let rustc = installed_program("rustc")?;
     let metadata: Value = serde_json::from_slice(&output(
-        tool("cargo", root)
+        tool(&cargo, root, &cache, &rustc)
             .args([
                 "metadata",
                 "--format-version",
@@ -138,6 +332,12 @@ pub fn recover(manifest: &Path, selection_path: &Path, destination: &Path) -> Re
             .as_str()
             .ok_or("missing workspace root")?,
     );
+    if !workspace
+        .canonicalize()
+        .is_ok_and(|path| path.starts_with(&exported))
+    {
+        return Err("Cargo workspace escapes the pinned source".into());
+    }
     let lock = workspace.join("Cargo.lock");
     if digest(&fs::read(&lock).map_err(|e| e.to_string())?) != s.cargo_lock_sha256 {
         return Err("Cargo.lock pin mismatch".into());
@@ -145,12 +345,13 @@ pub fn recover(manifest: &Path, selection_path: &Path, destination: &Path) -> Re
     let packages = metadata["packages"]
         .as_array()
         .ok_or("invalid Cargo metadata")?;
+    check_workspace_paths(packages, &exported)?;
     let package = packages
         .iter()
         .find(|p| p["name"] == s.package)
         .ok_or("unknown workspace package")?;
-    let compiler =
-        String::from_utf8(output(tool("rustc", root).arg("-vV"))?).map_err(|e| e.to_string())?;
+    let compiler = String::from_utf8(output(tool(&rustc, root, &cache, &rustc).arg("-vV"))?)
+        .map_err(|e| e.to_string())?;
     if !compiler
         .lines()
         .any(|l| l.strip_prefix("commit-hash: ") == Some(&s.compiler_commit))
@@ -161,10 +362,9 @@ pub fn recover(manifest: &Path, selection_path: &Path, destination: &Path) -> Re
         .lines()
         .find_map(|l| l.strip_prefix("host: "))
         .ok_or("missing compiler host")?;
-    let stage = tempfile::tempdir().map_err(|e| e.to_string())?;
-    let target = stage.path().join("target");
+    let target = work.join("target");
     let messages = output(
-        tool("cargo", root)
+        tool(&cargo, root, &cache, &rustc)
             .args([
                 "build",
                 "--release",
@@ -209,7 +409,7 @@ pub fn recover(manifest: &Path, selection_path: &Path, destination: &Path) -> Re
     let exe = stage.path().join("observe");
     fs::write(&source, program).map_err(|e| e.to_string())?;
     output(
-        tool("rustc", root)
+        tool(&rustc, root, &cache, &rustc)
             .arg("--edition=2024")
             .arg(&source)
             .arg("--extern")
@@ -263,7 +463,7 @@ pub fn recover(manifest: &Path, selection_path: &Path, destination: &Path) -> Re
     if lines.next().is_some() {
         return Err("unexpected observations".into());
     }
-    clean(workspace, &s.source_revision)?;
+    clean(&checkout, &s.source_revision)?;
     let parent = destination
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
@@ -271,7 +471,7 @@ pub fn recover(manifest: &Path, selection_path: &Path, destination: &Path) -> Re
     let tmp = tempfile::tempdir_in(parent).map_err(|e| e.to_string())?;
     fs::write(tmp.path().join("domain.ttl"), graph).map_err(|e| e.to_string())?;
     let domain = super::load(tmp.path())?;
-    let receipt = serde_json::json!({"qualification":"candidate","sourceRevision":s.source_revision,"compilerCommit":s.compiler_commit,"cargoLockSha256":s.cargo_lock_sha256,"host":host,"profile":"release","package":s.package,"selectionSha256":digest(&input),"graphSha256":digest(&serde_json::to_vec(&domain).map_err(|e|e.to_string())?),"numericCoverage":if s.bits<=16 {"exhaustive"} else {"sampled; interval property requires independent review"}});
+    let receipt = serde_json::json!({"qualification":"candidate","sourceRevision":s.source_revision,"sourceTree":source_tree,"probeSha256":probe_sha256,"compilerCommit":s.compiler_commit,"cargoLockSha256":s.cargo_lock_sha256,"host":host,"profile":"release","package":s.package,"selectionSha256":digest(&input),"graphSha256":digest(&serde_json::to_vec(&domain).map_err(|e|e.to_string())?),"numericCoverage":if s.bits<=16 {"exhaustive"} else {"sampled; interval property requires independent review"}});
     fs::write(
         tmp.path().join("observation.json"),
         serde_json::to_vec_pretty(&receipt).map_err(|e| e.to_string())?,

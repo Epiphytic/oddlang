@@ -10,7 +10,7 @@ fn accept(n: Input) -> bool {
 }
 
 fn main() {
-    assert_eq!(Value::@CONSTRUCTOR@(None).unwrap().@ACCESSOR@(), None);
+@ORDINAL_CHECKS@    assert_eq!(Value::@CONSTRUCTOR@(None).unwrap().@ACCESSOR@(), None);
     let default = Value::default().@ACCESSOR@().expect("expected present default");
     let max: Input = Value::@MAX@;
     assert!(accept(default) && accept(max) && default <= max);
