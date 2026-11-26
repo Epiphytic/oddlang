@@ -773,3 +773,11 @@ w:nativeWirePackage a p:Task ; rdfs:label "Assemble recovered wire schemas into 
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:dependsOn w:wireByteValues, w:nativePackageAssembly, w:sharedTypedDeclarations ;
     p:acceptance "Assemble an unrelated bounded byte record and compile it locked and offline." ;
     p:status p:done ; p:evidence w:wireByteFixture .
+
+w:typedHashViews a p:Task ; rdfs:label "Project ordered typed hashing and hexadecimal record views" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:wireByteValues, w:nativePackageAssembly ;
+    p:acceptance "Project independent SHA-256 views with portable field order, binary encodings, stable enum tag identities and named validation. Qualify an unrelated native consumer with independent expected bytes and negative controls." ;
+    p:evidence w:typedHashViewsFixture .
+w:typedHashViewsFixture a p:Artifact ; p:location "verification/wire-schema/hash_views.py" .
+w:wholeMarmishProtocols p:dependsOn w:typedHashViews .

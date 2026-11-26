@@ -67,6 +67,18 @@ pub(super) fn derive(schema: &Schema) -> Value {
             }),
         ));
     }
+    for view in &schema.hash_views {
+        obligations.push(row(&view.id, "typed-hash-view", json!(view)));
+    }
+    for (external, tags) in &schema.hash_tags {
+        for (case, tag) in tags {
+            obligations.push(row(
+                case,
+                "hash-tag",
+                json!({"external":external, "byte":tag}),
+            ));
+        }
+    }
     json!({"domain":schema.id,"obligations":obligations})
 }
 

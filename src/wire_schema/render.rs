@@ -49,6 +49,7 @@ pub(super) fn project(schema: &Schema, binding: &Binding) -> String {
                     write_guards(&mut text, &guards, &selectors, "        ", native);
                     guard_end(&mut text);
                 }
+                super::hash_view::render(&mut text, schema, binding, id, fields);
             }
             Definition::Adjacent {
                 tag,

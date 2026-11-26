@@ -8,6 +8,7 @@ use std::{
     path::Path,
 };
 
+mod hash_view;
 mod obligations;
 pub mod recover;
 mod render;
@@ -23,6 +24,14 @@ struct Schema {
     id: String,
     types: Vec<Definition>,
     guards: Vec<Guard>,
+    #[serde(rename = "hashViews", default, skip_serializing_if = "Vec::is_empty")]
+    hash_views: Vec<hash_view::View>,
+    #[serde(
+        rename = "hashTags",
+        default,
+        skip_serializing_if = "BTreeMap::is_empty"
+    )]
+    hash_tags: BTreeMap<String, BTreeMap<String, u8>>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     unresolved: Vec<String>,
 }
@@ -236,6 +245,18 @@ struct Binding {
     )]
     native_validation: BTreeMap<String, NativeValidation>,
     externals: BTreeMap<String, String>,
+    #[serde(
+        rename = "hashViews",
+        default,
+        skip_serializing_if = "BTreeMap::is_empty"
+    )]
+    hash_views: BTreeMap<String, hash_view::ViewBinding>,
+    #[serde(
+        rename = "hashVariants",
+        default,
+        skip_serializing_if = "BTreeMap::is_empty"
+    )]
+    hash_variants: BTreeMap<String, String>,
     #[serde(
         rename = "externalDerives",
         default,
@@ -472,7 +493,7 @@ impl Schema {
                 return Err(format!("invalid native validation binding: {owner}"));
             }
         }
-        Ok(())
+        hash_view::validate(self, binding, &declared, &ids)
     }
 }
 
@@ -668,6 +689,9 @@ fn publish(output: &Path, files: &[(&str, &[u8])]) -> Result<()> {
 pub fn build(graph: &Path, binding: &Path, destination: &Path) -> Result<()> {
     let mut graph: Schema = json(graph)?;
     graph.types.sort_by(|left, right| left.id().cmp(right.id()));
+    graph
+        .hash_views
+        .sort_by(|left, right| left.id.cmp(&right.id));
     let binding: Binding = json(binding)?;
     graph.validate(&binding)?;
     let source = render::project(&graph, &binding);
