@@ -1,0 +1,40 @@
+{
+  "vocabulary": "oddlang-integrity-block-v1",
+  "id": "urn:terrain:tile-chunk",
+  "fields": [
+    {"role":"offset","wireName":"position"},
+    {"role":"representation","wireName":"mode"},
+    {"role":"rawLength","wireName":"width"},
+    {"role":"digest","wireName":"fingerprint"},
+    {"role":"payload","wireName":"pixels"}
+  ],
+  "bounds": {
+    "rawMinimum": 1, "rawMaximum": 192,
+    "encodedMinimum": 1, "encodedMaximum": 192, "offsetMaximum": 256
+  },
+  "digest": "sha256",
+  "representations": {
+    "identity": "stored",
+    "compressed": {
+      "wireName": "deflated", "algorithm": "zlib", "effort": "default",
+      "selection": "strictly-smaller", "members": "exactly-one",
+      "dictionary": "forbidden", "trailing": "forbidden"
+    }
+  },
+  "wire": {
+    "shape":"closed-object-or-tuple", "digest":"lower-hex",
+    "payload":"base64-standard-padded", "digestSyntaxMessage":"bad fingerprint"
+  },
+  "errors": {
+    "size":"urn:terrain:size", "offset":"urn:terrain:range",
+    "representation":"urn:terrain:damaged", "payloadSyntax":"urn:terrain:payload-syntax",
+    "payloadDecodedSize":"urn:terrain:payload-decoded-size"
+  },
+  "providerHints": {"zlib": "flate2 1.1.10"},
+  "errorMessages": {
+    "urn:terrain:size": "tile capacity reached",
+    "urn:terrain:payload-syntax": "invalid pixels"
+  },
+  "validateOrder": ["raw-size","encoded-size","offset","representation-size"],
+  "decodeOrder": ["negotiated","dictionary","member","decoded-size","digest"]
+}
