@@ -1502,10 +1502,19 @@ w:publicApiConvergence a p:Task ;
     rdfs:label "Converge the prototype constant, typed engine errors and native choice in the same generated workspace" ;
     p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;
     p:dependsOn w:publicConstantRecovery, w:typedFiniteErrors ;
-    p:status p:active ;
+    p:status p:done ; p:evidence w:publicApiDarwin, w:publicApiLinux, w:publicImportAudit ;
     p:acceptance "Qualify the combined compiler commands, preserve independently verified package members, replay public behaviors on both supported ARM64 hosts and rerun all 140 original Darwin imports against the combined workspace lock." .
 
 w:typedFiniteErrorPrimitiveShadow a p:Finding ;
     rdfs:label "Reject local declarations that shadow a recovered primitive width" ;
     p:source w:typedFiniteErrorsPlan .
 w:typedFiniteErrors p:addresses w:typedFiniteErrorPrimitiveShadow .
+
+w:publicApiDarwin a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4f39fe3da13635d66b5a09fbe55e52fe27d17962/verification/whole/converged-public-api/aarch64-apple-darwin.json" .
+
+w:publicApiLinux a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4f39fe3da13635d66b5a09fbe55e52fe27d17962/verification/whole/converged-public-api/aarch64-unknown-linux-gnu.json" .
+
+w:publicImportAudit a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4f39fe3da13635d66b5a09fbe55e52fe27d17962/verification/whole/converged-public-api/darwin-imports.json" .
