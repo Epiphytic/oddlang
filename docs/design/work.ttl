@@ -1046,3 +1046,9 @@ w:originalNamedReleaseTests a p:Task ; rdfs:label "Enumerate compiled upstream r
     p:acceptance "Bind every compiled default release harness to its binary digest, package, target and named runnable and ignored cases on macOS and Linux ARM64." ;
     p:evidence w:originalNamedReleaseTestsEvidence .
 w:originalNamedReleaseTestsEvidence a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/43> .
+
+w:originalPrivateDefaultRelease a p:Task ; rdfs:label "Run the unchanged Linux ARM64 default release workspace from a private build path" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:dependsOn w:originalNamedReleaseTests ;
+    p:acceptance "Match every compiled harness digest and its complete runnable and ignored counts, including the formerly failing path-permissions case." ;
+    p:status p:done ; p:evidence w:originalPrivateDefaultReleaseReceipt .
+w:originalPrivateDefaultReleaseReceipt a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/47> .
