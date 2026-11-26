@@ -19,6 +19,12 @@ fn import_has_profile(path: &str, profile: &str) -> bool {
 
 fn run(args: &[String]) -> Result<(), String> {
     match args {
+        [cmd, kind, doc] if cmd == "inspect" && kind == "native-value-api" => {
+            let witness = oddlang::rust_recovery::public_api::read(doc.as_ref())?;
+            println!("{}", serde_json::to_string_pretty(&witness).map_err(|e| e.to_string())?);
+            Ok(())
+        }
+
         [cmd, kind, target, root, overlay, release]
             if cmd == "verify" && kind == "value-domain" && target == "rust" => {
                 oddlang::value_domain::verify(root.as_ref(), Some(overlay.as_ref()), release.as_ref())

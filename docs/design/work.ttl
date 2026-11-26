@@ -678,3 +678,11 @@ w:wholeRetentionCaller a p:Artifact ; p:location "https://github.com/Epiphytic/m
 w:wholeWorkspaceShapeArchive a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/commit/f6f31b50ab34ca59c9d60aaeb4b29035a9726b8f" .
 w:wholeMarmishStructure p:evidence w:wholeWorkspaceShapeArchive .
+
+w:wholeValueApiWitness a p:Task ; rdfs:label "Compare native public value APIs across independent builds" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Match equivalent concrete value facades after a private rename and distinguish changed argument borrowing, return surface, enum order, constant type and traits." ;
+    p:evidence w:wholeApiMutations .
+w:wholeApiMutations a p:Artifact ; p:location "verification/rust-recovery/test_public_api.py" .
+w:wholeAmd64Effects a p:Artifact ; p:location "https://github.com/Epiphytic/oddlang/actions/runs/45775359148" .
+w:wholeMarmishFreeze p:evidence w:wholeAmd64Effects .
