@@ -22,6 +22,8 @@ struct SelectedModule {
     records: BTreeMap<String, String>,
     #[serde(default, deserialize_with = "unique_map")]
     aliases: BTreeMap<String, String>,
+    #[serde(rename = "scopeGlobs", default, deserialize_with = "unique_map")]
+    scope_globs: BTreeMap<String, String>,
 }
 
 struct Import<'a> {
@@ -117,7 +119,11 @@ fn imports(file: &syn::File) -> Vec<Import<'_>> {
                     declaration: use_item,
                 });
             }
-            UseTree::Glob(_) => {}
+            UseTree::Glob(_) => into.push(Import {
+                name: "*".into(),
+                path: prefix.clone(),
+                declaration: use_item,
+            }),
         }
     }
 
@@ -130,35 +136,66 @@ fn imports(file: &syn::File) -> Vec<Import<'_>> {
     found
 }
 
+const PRELUDE_NAMES: [&str; 9] = [
+    "bool",
+    "u8",
+    "u64",
+    "String",
+    "Vec",
+    "std",
+    "serde",
+    "Clone",
+    "Serialize",
+];
+
+fn item_type_binding(item: &Item) -> Option<(&syn::Ident, &Visibility)> {
+    match item {
+        Item::Enum(item) => Some((&item.ident, &item.vis)),
+        Item::Struct(item) => Some((&item.ident, &item.vis)),
+        Item::Type(item) => Some((&item.ident, &item.vis)),
+        Item::Union(item) => Some((&item.ident, &item.vis)),
+        Item::Mod(item) => Some((&item.ident, &item.vis)),
+        Item::Trait(item) => Some((&item.ident, &item.vis)),
+        Item::TraitAlias(item) => Some((&item.ident, &item.vis)),
+        Item::ExternCrate(item) => Some((
+            item.rename.as_ref().map_or(&item.ident, |(_, name)| name),
+            &item.vis,
+        )),
+        _ => None,
+    }
+}
+
+fn reserved(name: &syn::Ident) -> bool {
+    PRELUDE_NAMES.iter().any(|n| *name == *n)
+}
+
+fn reject_item_expansion(file: &syn::File) -> Result<()> {
+    if file.items.iter().any(|item| {
+        matches!(
+            item,
+            Item::Macro(_) | Item::ForeignMod(_) | Item::Verbatim(_)
+        )
+    }) {
+        return Err("unsupported expanded item in public record source scope".into());
+    }
+    Ok(())
+}
+
 fn reject_type_shadows(file: &syn::File, imports: &[Import<'_>]) -> Result<()> {
-    let names = [
-        "bool", "u8", "u64", "String", "Vec", "std", "serde", "Clone",
-    ];
     for item in &file.items {
-        let declared = match item {
-            Item::Enum(item) => Some(&item.ident),
-            Item::Struct(item) => Some(&item.ident),
-            Item::Type(item) => Some(&item.ident),
-            Item::Union(item) => Some(&item.ident),
-            Item::Mod(item) => Some(&item.ident),
-            Item::Trait(item) => Some(&item.ident),
-            Item::ExternCrate(item) => {
-                Some(item.rename.as_ref().map_or(&item.ident, |(_, name)| name))
-            }
-            _ => None,
-        };
-        if let Some(name) = declared.filter(|name| names.iter().any(|n| **name == *n)) {
+        if let Some((name, _)) = item_type_binding(item).filter(|(name, _)| reserved(name)) {
             return Err(format!("shadowed public record type or derive: {name}"));
         }
     }
     for item in imports
         .iter()
-        .filter(|item| names.contains(&item.name.as_str()))
+        .filter(|item| PRELUDE_NAMES.contains(&item.name.as_str()))
     {
         let canonical = match item.name.as_str() {
             "String" => &["std", "string", "String"][..],
             "Vec" => &["std", "vec", "Vec"][..],
             "Clone" => &["std", "clone", "Clone"][..],
+            "Serialize" => &["serde", "Serialize"][..],
             _ => &[],
         };
         if item.path != canonical || !item.declaration.attrs.iter().all(is_doc) {
@@ -168,12 +205,85 @@ fn reject_type_shadows(file: &syn::File, imports: &[Import<'_>]) -> Result<()> {
             ));
         }
     }
-    if file
-        .attrs
-        .iter()
-        .any(|attribute| attribute.path().is_ident("no_implicit_prelude"))
-    {
-        return Err("public record source requires the implicit prelude".into());
+    Ok(())
+}
+
+fn doc_module(file: &syn::File) -> Result<()> {
+    if !file.attrs.iter().all(is_doc) {
+        return Err("unsupported inner public record module attribute".into());
+    }
+    Ok(())
+}
+
+fn resolve_globs(
+    directory: &Path,
+    file: &syn::File,
+    imports_in_scope: &[Import<'_>],
+    pins: &BTreeMap<String, String>,
+) -> Result<()> {
+    let mut used = BTreeSet::new();
+    for glob in imports_in_scope.iter().filter(|import| import.name == "*") {
+        let child = match glob.path.as_slice() {
+            [name] => name,
+            [prefix, name] if prefix == "self" => name,
+            _ => return Err("unsupported public record glob source".into()),
+        };
+        let pin = pins
+            .get(child)
+            .ok_or("unpinned public record glob source")?;
+        if !symbol(child)
+            || glob.declaration.leading_colon.is_some()
+            || !glob.declaration.attrs.iter().all(is_doc)
+        {
+            return Err("unsupported public record glob binding".into());
+        }
+        if !used.insert(child) {
+            continue;
+        }
+        let filename = format!("{child}.rs");
+        let declarations = file
+            .items
+            .iter()
+            .filter_map(|item| match item {
+                Item::Mod(found) if found.ident == child.as_str() => Some(found),
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+        if !matches!(declarations.as_slice(), [module] if module.content.is_none()
+            && module.attrs.iter().filter(|attr| !is_doc(attr)).count() == 1
+            && module.attrs.iter().any(|attr| matches!(&attr.meta,
+                syn::Meta::NameValue(meta) if meta.path.is_ident("path")
+                    && matches!(&meta.value, syn::Expr::Lit(literal)
+                        if matches!(&literal.lit, syn::Lit::Str(path) if path.value() == filename)))))
+        {
+            return Err(format!("unresolved public record glob child: {child}"));
+        }
+        let path = directory.join(filename);
+        if io(path.canonicalize())? != path {
+            return Err(format!("non-local public record glob child: {child}"));
+        }
+        let scope = select_source(&path, pin)?;
+        doc_module(&scope)?;
+        reject_item_expansion(&scope)?;
+        for item in &scope.items {
+            if let Some((name, vis)) = item_type_binding(item)
+                && !matches!(vis, Visibility::Inherited)
+                && reserved(name)
+            {
+                return Err(format!("shadowed public record type through glob: {name}"));
+            }
+        }
+        if imports(&scope).iter().any(|import| {
+            !matches!(import.declaration.vis, Visibility::Inherited)
+                && (import.name == "*" || PRELUDE_NAMES.contains(&import.name.as_str()))
+        }) {
+            return Err(format!(
+                "unsupported public record glob re-export in child: {child}"
+            ));
+        }
+    }
+    if used.len() != pins.len() {
+        return Err("unused public record glob source pin".into());
     }
     Ok(())
 }
@@ -303,11 +413,7 @@ pub fn recover(lib: &Path, selection: &Path, out: &Path) -> Result<()> {
     let lib = io(lib.canonicalize())?;
     let directory = lib.parent().ok_or("missing Rust module directory")?;
     let crate_source = select_source(&lib, &selected.lib_sha256)?;
-    if crate_source.attrs.iter().any(|attribute| {
-        attribute.path().is_ident("no_std") || attribute.path().is_ident("no_implicit_prelude")
-    }) {
-        return Err("public record source requires the standard implicit prelude".into());
-    }
+    doc_module(&crate_source)?;
     let mut bindings = BTreeMap::new();
     let mut identities = BTreeMap::new();
     let mut sources = BTreeMap::new();
@@ -318,9 +424,16 @@ pub fn recover(lib: &Path, selection: &Path, out: &Path) -> Result<()> {
     for part in &selected.modules {
         let path = module_file(directory, &crate_source, &part.name)?;
         let rust = select_source(&path, &part.sha256)?;
+        doc_module(&rust)?;
+        reject_item_expansion(&rust)?;
         let imports = imports(&rust);
-        if !part.records.is_empty() {
+        if part.records.is_empty() {
+            if !part.scope_globs.is_empty() {
+                return Err("unused public record glob source pin".into());
+            }
+        } else {
             reject_type_shadows(&rust, &imports)?;
+            resolve_globs(directory, &rust, &imports, &part.scope_globs)?;
         }
         let mut module = Module {
             id: part.id.clone(),
@@ -392,11 +505,18 @@ pub fn recover(lib: &Path, selection: &Path, out: &Path) -> Result<()> {
         .iter()
         .map(|module| (&module.name, &module.sha256))
         .collect();
+    let scope_globs: BTreeMap<_, _> = selected
+        .modules
+        .iter()
+        .filter(|module| !module.scope_globs.is_empty())
+        .map(|module| (&module.name, &module.scope_globs))
+        .collect();
     let lock = encode(&serde_json::json!({
         "format":"oddlang-public-record-recovery-lock-v1",
         "selectionSha256":digest(&selection_bytes),
         "crateSourceSha256":selected.lib_sha256,
         "moduleSourceSha256":modules,
+        "globSourceSha256":scope_globs,
         "graphSha256":digest(&graph),
         "overlaySha256":digest(&overlay),
     }))?;

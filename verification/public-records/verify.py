@@ -146,6 +146,22 @@ serde_json = "=1.0.151"
     selection["modules"][1]["aliases"]["Archived"] = ROOT+":archived"
     aliases.write_text("pub use crate::missing::{Reading as Archived};")
     recover(work/"unresolved-alias","unresolved public record re-export")
+    aliases.write_text('#![cfg(unix)]\n'+EXPORT)
+    recover(work/"inner-cfg","unsupported inner public record module attribute")
+    aliases.write_text(EXPORT)
+    records.write_text("macro_rules! shadow { () => { pub struct String; } }\nshadow!();\n"+DECLARATION)
+    recover(work/"macro-shadow","unsupported expanded item")
+    inject = '#[path="scope.rs"] mod scope;\nuse self::scope::*;\n'
+    scope = records.parent/"scope.rs"
+    scope.write_text("pub(crate) struct Extra;\n")
+    records.write_text(inject+DECLARATION)
+    recover(work/"unresolved-glob","unpinned public record glob source")
+    selection["modules"][0]["scopeGlobs"] = {"scope":sha(scope)}
+    recover(work/"pinned-glob")
+    assert (work/"pinned-glob/graph.json").read_bytes() == (baseline/"graph.json").read_bytes()
+    scope.write_text("pub(crate) struct String;\n")
+    selection["modules"][0]["scopeGlobs"]["scope"] = sha(scope)
+    recover(work/"glob-shadow","shadowed public record type through glob")
     shutil.rmtree(source)
 
     manifest = dict(format="oddlang-native-package-v1", name="indicator-core",

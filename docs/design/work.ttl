@@ -1306,3 +1306,8 @@ w:processLimitCompanionRelease a p:Artifact ;
 
 w:unifiedVaultEngineReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/blob/aee87208cdfe403a77e652902f65d5b77804f42c/verification/whole/unified-vault/darwin-arm64/receipt.json> .
+
+w:publicRecordScopeResolution a p:Finding ;
+    rdfs:label "Require scoped source evidence for potential type shadows and reject conditional modules and unexpanded items" ;
+    p:source w:publicObservationalRecordsPlan .
+w:publicObservationalRecords p:addresses w:publicRecordScopeResolution .

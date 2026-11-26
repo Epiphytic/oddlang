@@ -104,7 +104,11 @@ named public fields in declaration order and accepts bool, u64, String and
 Vec<u8>. It recognizes Clone and Serde Serialize derives and explicit
 `pub use crate::module::Record` leaves, including grouped and renamed uses.
 Selected conditional declarations, data-affecting attributes and direct
-type shadows are rejected. The scope is a structural source slice.
+type shadows, inner non-doc attributes and unexpanded items are rejected.
+A record module with a local glob import must bind the child's source
+digest in `scopeGlobs`. The direct child must have an explicit sibling
+`#[path]` declaration. Its visible prelude-name shadows and recursive
+glob re-exports are rejected. The scope is a structural source slice.
 Qualification compiles independent Rust callers to corroborate type and
 trait resolution.
 
