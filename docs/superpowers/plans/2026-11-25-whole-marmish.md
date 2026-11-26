@@ -114,7 +114,7 @@ The principal feasibility risk is recovering intended behavior where only incide
 - [x] Project bounded tagged frame variants and a one-frame incremental decoder. [Binary frame profile](../../language/binary-frames.md)
 - [x] Qualify the complete copy protocol library against every unchanged pinned native test and exact frame error controls on macOS ARM64. [Native receipt and structural inventory](https://github.com/Epiphytic/marmish-oddlang/pull/42)
 
-- [ ] Check composite slot bounds and member types against pinned external codec contracts before package emission.
+- [x] Check composite slot bounds and member types against pinned external codec contracts before package emission. Resolve each nested stable ID to one in-package codec, verify its byte maximum and exact member types and Rust exports, and reject cycles. [File-format fixture and mismatch controls](../../../verification/binary-record/package.py)
 
 - [x] Define finite scalar views, typed checked products, and named error categories. Verify exact native value semantics, borrowed getters, private constructors and UTF-8 boundary behavior in an unrelated standalone package. [Checked value domains](../../language/checked-values.md)
 - [x] Compose the verified vault value and engine process-limit packages into the native error and release-report workspace. Build the pinned portable closure with source reads and network denied on macOS ARM64. Compare the unchanged copy protocol tests, vault and error callers, process-limit observations and release-report cases. [Five-member native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/67)

@@ -3,6 +3,7 @@ mod composite;
 mod extension;
 pub(crate) mod linkage;
 mod recover_fragment;
+pub(crate) mod package;
 use composite::{Constraint, ExternalRecord, Integrity, IntegrityBinding, RecordBinding};
 pub use recover_fragment::recover as recover_frame_fragment;
 mod rust;

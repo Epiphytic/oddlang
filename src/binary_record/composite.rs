@@ -19,7 +19,7 @@ pub(super) struct ExternalRecord {
     pub(super) fields: BTreeMap<String, Primitive>,
 }
 
-#[derive(Clone, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(tag = "kind", rename_all = "kebab-case", deny_unknown_fields)]
 pub(super) enum Primitive {
     Signed { bits: u8 },
@@ -144,7 +144,7 @@ impl Operand {
                 let Encoding::Nested { record, .. } = field(graph, owner)? else {
                     return None;
                 };
-                graph.external_records.get(record)?.fields.get(id).cloned()
+                graph.external_records.get(record)?.fields.get(id).copied()
             }
             Self::Unsigned { bits, value }
                 if matches!(bits, 8 | 16 | 32 | 64) && *value <= u64::MAX >> (64 - bits) =>
