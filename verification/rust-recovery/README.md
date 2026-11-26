@@ -68,3 +68,16 @@ ordinary Cargo without the adapter. `verification/rust-inventory/` provides
 a separate nightly Rustdoc declaration inventory. Its compiler, coverage and
 Cargo mode differ from this adapter's, so reconcile their overlapping claims
 at the declaration level.
+
+## Same-profile declaration comparison
+
+`release_rustdoc.py` runs the compiler adapter and a separate private-item rustdoc JSON pass with Rust 1.97.1. Both must use the pinned compiler commit and requested target. The verifier compares the actual Cargo invocations' edition, crate kind, feature and build-script cfg flags, code generation settings affecting cfg, external dependency aliases and remapped workspace root. It forwards the compiler's optimization and assertion settings because Cargo's release rustdoc command can omit them. The unstable JSON switch is enabled only in the rustdoc subprocess. Rustdoc implicitly selects `cfg(doc)`; the report and fixture preserve that difference. Run the fixture with `python3 -B verification/rust-recovery/test_release_rustdoc.py`.
+
+```sh
+python3 -B verification/rust-recovery/release_rustdoc.py /path/to/workspace package \
+  lib crate_name aarch64-apple-darwin --out /tmp/declarations.json
+```
+
+The semantic comparison uses enclosing declared names and normalized categories. It preserves collisions and counts observations with missing identity by original kind. Declaration witnesses carry each observer's file and starting line. The separate `spanEvidence` section retains the historical diagnostic method. Supply `--previous-spans PATH` with a prior `reconcile_rustdoc.py` report to track each original one-sided key.
+
+A path match verifies the presence of a named declaration at this ownership boundary. It does not qualify its type, layout, body or effects. The current mapping needs additional identity rules for impl-owned items, generic parameters and anonymous or synthetic items. Aliases are compared by name. Dependency instance and content reconciliation remains open. Cargo build scripts can observe their environment, and macro expansion differs between documentation and code-generation interfaces.
