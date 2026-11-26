@@ -130,6 +130,12 @@ with tempfile.TemporaryDirectory(prefix="odd-meter-prefix-") as temp:
         accepted = run(root / "target/debug/candidate", "--brief", "survey", "label", check=False)
         assert accepted.returncode == 18
         assert b"unexpected argument 'label'" in accepted.stderr
+        flag_like = ["-p", "--brief", "survey", "--help"]
+        raw = run(root / "target/debug/reference", *flag_like, check=False)
+        fallback = run(root / "target/debug/candidate", *flag_like, check=False)
+        assert raw.returncode == 0 and b"Survey readings" in raw.stdout
+        assert fallback.returncode == 18 and not fallback.stdout
+        assert b"a value is required for '--place" in fallback.stderr
         if len(outputs) == 1:
             denied = ["--agent=east", "survey", "label"]
             ref = run(root / "target/debug/reference", *denied, check=False)
