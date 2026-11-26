@@ -852,6 +852,30 @@ w:nativeFileProfileFixture a p:Artifact ;
     p:location "verification/file-profile/check.py" .
 w:nativeFileProfileStores a p:Task ;
     rdfs:label "Complete native initialization after encrypted storage opens and verified counts" ;
-    p:milestone w:marmishMilestone ; p:source w:nativeFileProfilePlan ; p:status p:active ;
+    p:milestone w:marmishMilestone ; p:source w:nativeFileProfilePlan ; p:status p:done ;
     p:dependsOn w:nativeFileProfilePreparation ;
-    p:acceptance "Initialize and reopen both native encrypted stores before publishing ready identity; independently verify schema versions and counts before either peer can repair a fixture profile." .
+    p:acceptance "Initialize and reopen both native encrypted stores before publishing ready identity; independently verify schema versions and counts before either peer can repair a fresh or pristine current-format profile using explicit direct relay and file backing." ;
+    p:evidence w:nativeFileProfileStoreReceipt, w:nativeJournalSchemaFixture .
+w:nativeFileProfileStoreReceipt a p:Artifact ;
+    p:location "companion:verification/whole/status/encrypted-init-macos-arm64.json" .
+w:nativeJournalSchemaFixture a p:Artifact ;
+    p:location "src/file_profile/schema.rs" .
+w:nativeFileProfileExtendedInit a p:Task ;
+    rdfs:label "Extend initialization to config-selected routing and stored-state replay" ;
+    p:milestone w:marmishMilestone ; p:source w:nativeFileProfilePlan ; p:status p:planned ;
+    p:dependsOn w:nativeFileProfileStores ;
+    p:acceptance "Qualify OS-default state selection, persisted config, keychain, Tor and current or older nonempty storage with native replay and migration witnesses." .
+
+w:nativeConfiguredProfileInit a p:Task ;
+    rdfs:label "Initialize a private file profile from saved configuration and current journal rows" ;
+    p:milestone w:marmishMilestone ; p:source w:nativeFileProfilePlan ; p:status p:done ;
+    p:dependsOn w:nativeFileProfileStores ;
+    p:acceptance "Verify state selection, private config reads, public reference binding, replay floor transitions and metrics before upstream can repair the candidate state." ;
+    p:evidence w:nativeConfiguredProfileInitReceipt .
+w:nativeConfiguredProfileInitReceipt a p:Artifact ;
+    p:location "companion:verification/whole/status/configured-init-macos-arm64.json" .
+
+w:nativeConfiguredRelayPolicyFinding a p:Finding ;
+    rdfs:label "Make URL restrictions part of the declared policy" ;
+    p:source w:nativeFileProfilePlan .
+w:nativeConfiguredProfileInit p:addresses w:nativeConfiguredRelayPolicyFinding .

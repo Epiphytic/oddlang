@@ -168,7 +168,12 @@ fn load_or_create(root: &Path, leaf: &str, allow_missing: bool, signing: bool) -
     Ok(existing)
 }
 
-fn prepare(base: &Path, name: &str) -> Result<Prepared, Failure> {
+fn prepare(
+    base: &Path,
+    name: &str,
+    before_credentials: impl Fn(&Path, &Record) -> Result<(), Failure>,
+    after_credentials: impl FnOnce(&Path, &mut Record, &[u8; 32], &[u8; 32]) -> Result<(), Failure>,
+) -> Result<Prepared, Failure> {
     fs::DirBuilder::new().mode(DIR_MODE).recursive(true).create(base).map_err(|_| IO)?;
     if !atom(name) { return Err(INVALID_PROFILE); }
     check_directory(base)?;
@@ -179,7 +184,9 @@ fn prepare(base: &Path, name: &str) -> Result<Prepared, Failure> {
     if unsafe { libc::flock(std::os::fd::AsRawFd::as_raw_fd(&lease), libc::LOCK_EX | libc::LOCK_NB) } != 0 {
         return Err(IN_USE);
     }
-    let mut record = match read_manifest(&root, name)? {
+    let existing = read_manifest(&root, name)?;
+    let fresh = existing.is_none();
+    let mut record = match existing {
         Some(record) => record,
         None => {
             let record = Record {
@@ -188,11 +195,12 @@ fn prepare(base: &Path, name: &str) -> Result<Prepared, Failure> {
                 signer: random_hex::<32>()?, storage: random_hex::<32>()?, slot: random_hex::<16>()?,
                 public: None,
             };
-            save_manifest(&root, &record, false)?;
             record
         }
     };
     if record.backend != FILES { return Err(WRONG_BACKEND); }
+    before_credentials(&root, &record)?;
+    if fresh { save_manifest(&root, &record, false)?; }
     let keys = root.join(KEYS);
     directory(&keys)?;
     let pending = record.phase == PENDING;
@@ -206,13 +214,8 @@ fn prepare(base: &Path, name: &str) -> Result<Prepared, Failure> {
             save_manifest(&root, &record, true)?;
         }
     }
-    load_or_create(&keys, &format!("{STORAGE_PREFIX}{}", record.storage), pending, false)?;
+    let storage = load_or_create(&keys, &format!("{STORAGE_PREFIX}{}", record.storage), pending, false)?;
     for name in EXTRA_DIRS { directory(&root.join(name))?; }
+    after_credentials(&root, &mut record, &signing, &storage)?;
     Ok(Prepared { _lease: lease, record })
-}
-
-fn print_result(profile: &Prepared) -> Result<(), Failure> {
-    let report = serde_json::json!({"profile":profile.record.name, "identity":profile.record.public,
-        "profile_phase":profile.record.phase, "credential_preparation_complete":true});
-    writeln!(std::io::stdout().lock(), "{report}").map_err(|_| IO)
 }

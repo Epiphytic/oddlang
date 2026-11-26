@@ -218,12 +218,15 @@ pub(crate) fn validate_callbacks(
                 RequiredArgument::OptionalValue => {
                     arg.kind.is_some() && !arg.required && arg.default_value.is_none()
                 }
-                RequiredArgument::String => matches!(arg.kind, Some(ValueKind::String)),
+                RequiredArgument::String | RequiredArgument::RepeatedString => {
+                    matches!(arg.kind, Some(ValueKind::String))
+                }
+                RequiredArgument::Unsigned64 => matches!(arg.kind, Some(ValueKind::U64)),
                 RequiredArgument::Path => matches!(arg.kind, Some(ValueKind::Path)),
             };
             // Clap stores subcommand-local options on a different ArgMatches.
             // Global inheritance prevents both ID and spelling shadowing.
-            if arg.repeated
+            if arg.repeated != matches!(expected, RequiredArgument::RepeatedString)
                 || !kind_matches
                 || ((!graph.root.subcommands.is_empty() || graph.external) && !arg.global)
             {
