@@ -196,6 +196,50 @@ def tree_hash(entries):
 PRODUCERS = {"framing": "frame.rs", "facade": "lib.rs"}
 
 
+def immutable_commit_payload(tree):
+    # git show -s --format='%at %ai' on pinned Marmish 49fc7054 gives
+    # 1795640010 with timezone -0700. rebuild.run_build uses this author date
+    # for both identities and makes a parentless commit in a fresh repository.
+    identity = "Oddlang qualification <qualification@oddlang.invalid> 1795640010 -0700"
+    return (
+        f"tree {tree}\nauthor {identity}\ncommitter {identity}\n\n"
+        f"Qualify regenerated Marmish framing and facade from {PIN}\n"
+    ).encode()
+
+
+def check_immutable_commit(base, staged, result):
+    immutable = base / "immutable"
+    names = {"commit.raw", *(Path(p).name for p in ONTOLOGY)}
+    require(
+        immutable.is_dir()
+        and not immutable.is_symlink()
+        and {p.name for p in immutable.iterdir()} == names,
+        "incomplete immutable Git object witnesses",
+    )
+    final = dict(staged)
+    digests = {}
+    for path in ONTOLOGY:
+        require(path in staged, f"missing original ontology file: {path}")
+        data = read(immutable / Path(path).name)
+        mode, prior = staged[path]
+        oid = git_object("blob", data)
+        require(oid != prior, f"unchanged ontology blob labelled regenerated: {path}")
+        final[path] = (mode, oid)
+        digests[path] = digest(data)
+    tree = tree_hash(final)
+    require(
+        tree == result["candidateTree"],
+        "candidate Git tree disagrees with final ontology and assembled source blobs",
+    )
+    raw = read(immutable / "commit.raw")
+    require(
+        raw == immutable_commit_payload(tree)
+        and git_object("commit", raw) == result["candidateCommit"],
+        "candidate Git commit disagrees with archived immutable object or deterministic build recipe",
+    )
+    return digests
+
+
 def verify_build_pair(dir, inventory):
     reconstruction = read_json(dir / "rebuild.json")
     generated_paths = {f"crates/marmish-core/src/{m}" for m in PRODUCERS.values()}
@@ -287,6 +331,7 @@ def verify_build_pair(dir, inventory):
             ),
             f"{build} result disagrees with raw assembly evidence",
         )
+        immutable_digests = check_immutable_commit(base, git_entries, result)
         logs = {
             f: read(base / f) for f in ("ontology-update.txt", "ontology-check.txt")
         }
@@ -299,8 +344,11 @@ def verify_build_pair(dir, inventory):
             "missing ontology check or update observations",
         )
         if previous is not None:
-            require(previous == (result, logs), "independent rebuild results differ")
-        previous = result, logs
+            require(
+                previous == (result, logs, immutable_digests),
+                "independent rebuild results differ",
+            )
+        previous = result, logs, immutable_digests
     require(
         reconstruction
         == {"originalCommit": PIN, "independentBuilds": 2, **previous[0]},

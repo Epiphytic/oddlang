@@ -24,6 +24,19 @@ class CandidateObservations(unittest.TestCase):
             {"test": "b", "original": "FAILED", "candidate": "ok"},
         ])
 
+    def test_named_improvements_preserve_cargo_exit_and_each_previous_test_outcome(self):
+        commands = [{"command": "workspace", "original": 101, "candidate": 0},
+                    {"command": "marmish-worker-help", "original": 1, "candidate": 0},
+                    {"command": "installed", "original": 0, "candidate": 101}]
+        rows = verify.deltas({"fixed": "FAILED", "activated": "ignored, platform",
+                              "broken": "ok"}, {"fixed": "ok", "activated": "ok", "broken": "FAILED", "new": "ok"})
+        actual = verify.improvements(commands, {"workspace": {"differences": rows}})
+        self.assertEqual(actual, [
+            {"kind": "cargo-exit", "command": "workspace", "original": 101, "candidate": 0},
+            {"kind": "test", "suite": "workspace", "test": "activated", "original": "ignored, platform", "candidate": "ok"},
+            {"kind": "test", "suite": "workspace", "test": "fixed", "original": "FAILED", "candidate": "ok"},
+        ])
+
     def test_truncated_test_log_rejected(self):
         with self.assertRaisesRegex(ValueError, "individual outcomes"):
             verify.test_outcomes("running 2 tests\ntest good ... ok\n"

@@ -1,4 +1,5 @@
 import copy
+from contextlib import contextmanager
 import json
 from pathlib import Path
 import tempfile
@@ -135,117 +136,191 @@ class Phase7ReplayTests(unittest.TestCase):
             coverage(fixture, set())
 
     def test_second_independent_build_is_verified_from_its_own_artifacts(self):
-        from unittest.mock import patch
-        from phase7 import (
-            ONTOLOGY,
-            PIN,
-            PRODUCERS,
-            git_object,
-            tree_hash,
-            verify_build_pair,
-        )
+        from phase7 import verify_build_pair
 
-        def save(path, value):
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(json.dumps(value))
-            return digest(path.read_bytes())
+        with archived_build_pair() as (builds, inventory):
+            verify_build_pair(builds, inventory)
+            (builds / "second/facade-projection/lib.rs").unlink()
+            with self.assertRaisesRegex(
+                ValueError,
+                "missing or redirected evidence.*second/facade-projection/lib.rs",
+            ):
+                verify_build_pair(builds, inventory)
 
-        with tempfile.TemporaryDirectory() as temp:
-            root = Path(temp)
-            builds = root / "rebuild"
-            frozen = root / "examples/marmish"
-            inventory = {"files": {}}
-            generated = {}
-            entries = {}
-            rows = []
-            # Independent small blob names and a real canonical Git tree ID.
-            for name, module in PRODUCERS.items():
-                path = f"crates/marmish-core/src/{module}"
-                original = b"original " + module.encode()
-                emitted = b"emitted " + module.encode()
-                before = git_object("blob", original)
-                after = git_object("blob", emitted)
-                inventory["files"][path] = {
-                    "mode": "100644",
-                    "sha256": digest(original),
-                    "gitBlob": before,
-                }
-                entries[path] = ("100644", after)
-                generated[path] = {
-                    "originalBlob": before,
-                    "candidateBlob": after,
-                    "sha256": digest(emitted),
-                }
-                rows.append(
-                    f'[[files]]\npath="{path}"\nmode="100644"\nproducer="generated"\nsha256="{digest(emitted)}"\n'
-                )
-                for run in ("first", "second"):
-                    base = builds / run
-                    imported = base / name
-                    projected = base / (name + "-projection")
-                    imported.mkdir(parents=True)
-                    projected.mkdir()
-                    (imported / "domain.ttl").write_bytes(b"fixture graph")
-                    (imported / "source-map.json").write_bytes(b"{}")
-                    graph = digest(b"fixture graph")
-                    lock = save(
-                        imported / "import.lock",
-                        {
-                            "graphSha256": graph,
-                            "files": {
-                                "domain.ttl": graph,
-                                "source-map.json": digest(b"{}"),
-                            },
-                        },
-                    )
-                    (projected / module).write_bytes(emitted)
-                    receipt = save(
-                        projected / "projection.json",
-                        {
-                            "version": 1,
-                            "graphSha256": graph,
-                            "files": {module: digest(emitted)},
-                        },
-                    )
-                    release = {
-                        "graphSha256": graph,
-                        "importSha256": lock,
-                        "projectionSha256": receipt,
-                    }
-                    if name == "framing":
-                        (projected / "world.wit").write_bytes(b"world fixture {}")
-                        release["witSha256"] = digest(b"world fixture {}")
-                    save(frozen / (name + "-release.json"), release)
-            manifest = "".join(rows)
-            manifest_hash = digest(manifest.encode())
-            (frozen / "assembly-v2.sha256").write_text(manifest_hash + "\n")
-            result = {
-                "assemblySha256": manifest_hash,
-                "sourceFiles": len(rows),
-                "retainedFiles": 0,
-                "generated": generated,
-                "stagedAssemblyTree": tree_hash(entries),
-                "regeneratedOntology": sorted(ONTOLOGY),
-                "candidateCommit": "1" * 40,
-                "candidateTree": "2" * 40,
+    def test_coherent_commit_and_tree_rewrites_are_rejected(self):
+        from phase7 import verify_build_pair, git_object
+
+        for mutation in (
+            "claimed commit",
+            "claimed tree",
+            "modified commit object",
+            "modified ontology blob",
+        ):
+            with self.subTest(mutation=mutation), archived_build_pair() as (
+                builds,
+                inventory,
+            ):
+                key = "candidateCommit"
+                value = "f" * 40
+                if mutation == "claimed tree":
+                    key = "candidateTree"
+                if mutation == "modified commit object":
+                    # Even rewriting all internal SHA-1s cannot change the pinned build recipe.
+                    for run in ("first", "second"):
+                        p = builds / run / "immutable/commit.raw"
+                        raw = p.read_bytes().replace(
+                            b"Qualify regenerated", b"Unexpected regenerated"
+                        )
+                        p.write_bytes(raw)
+                    value = git_object("commit", raw)
+                if mutation == "modified ontology blob":
+                    for run in ("first", "second"):
+                        (builds / run / "immutable/symbols.jsonl").write_bytes(
+                            b"other ontology"
+                        )
+                else:
+                    for p in (
+                        builds / "first/result.json",
+                        builds / "second/result.json",
+                        builds / "rebuild.json",
+                    ):
+                        data = json.loads(p.read_bytes())
+                        data[key] = value
+                        p.write_text(json.dumps(data))
+                with self.assertRaisesRegex(ValueError, "candidate Git (tree|commit)"):
+                    verify_build_pair(builds, inventory)
+
+
+@contextmanager
+def archived_build_pair():
+    from unittest.mock import patch
+    from phase7 import (
+        ONTOLOGY,
+        PIN,
+        PRODUCERS,
+        git_object,
+        tree_hash,
+        immutable_commit_payload,
+    )
+
+    def save(path, value):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(value))
+        return digest(path.read_bytes())
+
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        builds = root / "rebuild"
+        frozen = root / "examples/marmish"
+        inventory = {"files": {}}
+        generated = {}
+        entries = {}
+        rows = []
+        # Independent small blob names and a real canonical Git tree ID.
+        for name, module in PRODUCERS.items():
+            path = f"crates/marmish-core/src/{module}"
+            original = b"original " + module.encode()
+            emitted = b"emitted " + module.encode()
+            before = git_object("blob", original)
+            after = git_object("blob", emitted)
+            inventory["files"][path] = {
+                "mode": "100644",
+                "sha256": digest(original),
+                "gitBlob": before,
             }
-            save(
-                builds / "rebuild.json",
-                {"originalCommit": PIN, "independentBuilds": 2, **result},
+            entries[path] = ("100644", after)
+            generated[path] = {
+                "originalBlob": before,
+                "candidateBlob": after,
+                "sha256": digest(emitted),
+            }
+            rows.append(
+                f'[[files]]\npath="{path}"\nmode="100644"\nproducer="generated"\nsha256="{digest(emitted)}"\n'
             )
             for run in ("first", "second"):
                 base = builds / run
-                save(base / "result.json", result)
-                (base / "project.toml").write_text(manifest)
-                for verb in ("check", "update"):
-                    (base / f"ontology-{verb}.txt").write_text(
-                        f"code ontology {verb}: fixture counts\n"
-                    )
-            with patch("phase7.ROOT", root):
-                verify_build_pair(builds, inventory)
-                (builds / "second/facade-projection/lib.rs").unlink()
-                with self.assertRaisesRegex(
-                    ValueError,
-                    "missing or redirected evidence.*second/facade-projection/lib.rs",
-                ):
-                    verify_build_pair(builds, inventory)
+                imported = base / name
+                projected = base / (name + "-projection")
+                imported.mkdir(parents=True)
+                projected.mkdir()
+                (imported / "domain.ttl").write_bytes(b"fixture graph")
+                (imported / "source-map.json").write_bytes(b"{}")
+                graph = digest(b"fixture graph")
+                lock = save(
+                    imported / "import.lock",
+                    {
+                        "graphSha256": graph,
+                        "files": {
+                            "domain.ttl": graph,
+                            "source-map.json": digest(b"{}"),
+                        },
+                    },
+                )
+                (projected / module).write_bytes(emitted)
+                receipt = save(
+                    projected / "projection.json",
+                    {
+                        "version": 1,
+                        "graphSha256": graph,
+                        "files": {module: digest(emitted)},
+                    },
+                )
+                release = {
+                    "graphSha256": graph,
+                    "importSha256": lock,
+                    "projectionSha256": receipt,
+                }
+                if name == "framing":
+                    (projected / "world.wit").write_bytes(b"world fixture {}")
+                    release["witSha256"] = digest(b"world fixture {}")
+                save(frozen / (name + "-release.json"), release)
+        final_entries = dict(entries)
+        for path in sorted(ONTOLOGY):
+            retained = b"old ontology"
+            original = git_object("blob", retained)
+            inventory["files"][path] = {
+                "mode": "100644",
+                "sha256": digest(retained),
+                "gitBlob": original,
+            }
+            entries[path] = ("100644", original)
+            data = ("new " + path).encode()
+            final_entries[path] = ("100644", git_object("blob", data))
+            rows.append(
+                f'[[files]]\npath="{path}"\nmode="100644"\nproducer="retained"\nsha256="{digest(retained)}"\n'
+            )
+            for run in ("first", "second"):
+                dst = builds / run / "immutable"
+                dst.mkdir(exist_ok=True)
+                (dst / Path(path).name).write_bytes(data)
+        tree = tree_hash(final_entries)
+        raw = immutable_commit_payload(tree)
+        for run in ("first", "second"):
+            (builds / run / "immutable/commit.raw").write_bytes(raw)
+        manifest = "".join(rows)
+        manifest_hash = digest(manifest.encode())
+        (frozen / "assembly-v2.sha256").write_text(manifest_hash + "\n")
+        result = {
+            "assemblySha256": manifest_hash,
+            "sourceFiles": len(rows),
+            "retainedFiles": len(ONTOLOGY),
+            "generated": generated,
+            "stagedAssemblyTree": tree_hash(entries),
+            "regeneratedOntology": sorted(ONTOLOGY),
+            "candidateCommit": git_object("commit", raw),
+            "candidateTree": tree,
+        }
+        save(
+            builds / "rebuild.json",
+            {"originalCommit": PIN, "independentBuilds": 2, **result},
+        )
+        for run in ("first", "second"):
+            base = builds / run
+            save(base / "result.json", result)
+            (base / "project.toml").write_text(manifest)
+            for verb in ("check", "update"):
+                (base / f"ontology-{verb}.txt").write_text(
+                    f"code ontology {verb}: fixture counts\n"
+                )
+        with patch("phase7.ROOT", root):
+            yield builds, inventory

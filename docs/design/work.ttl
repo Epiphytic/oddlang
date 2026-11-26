@@ -430,3 +430,6 @@ w:marmishQualificationReview a p:Finding ; rdfs:label "Reject incomplete qualifi
 w:marmishQualification p:addresses w:marmishQualificationReview .
 w:marmishFacadeRelease a p:Artifact ; rdfs:label "Independent release pins for the Marmish public facade" ; p:location "examples/marmish/facade-release.json" .
 w:marmish-capability-modules p:evidence w:marmishFacadeRelease, w:marmishAssemblyTests .
+
+w:marmishCandidateIdentityReview a p:Finding ; rdfs:label "Recompute the final Git tree and commit and reject coordinated edits of both rebuild receipts" ; p:source w:marmishQualificationEvidence .
+w:marmishQualification p:addresses w:marmishCandidateIdentityReview .

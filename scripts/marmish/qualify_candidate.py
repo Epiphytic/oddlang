@@ -198,6 +198,16 @@ def command_rows(directory, metadata):
     return rows
 
 
+def improvements(command_differences, tests):
+    fixed = [{"kind": "cargo-exit", **row} for row in command_differences
+             if row["command"] in ("workspace", "installed") and row["original"] != 0 and row["candidate"] == 0]
+    for suite, result in tests.items():
+        for row in result["differences"]:
+            if row["candidate"] == "ok" and (row["original"] == "FAILED" or row["original"].startswith("ignored")):
+                fixed.append({"kind": "test", "suite": suite, **row})
+    return fixed
+
+
 def listed_ignored(path):
     return sorted(line.removesuffix(": test") for line in path.read_text().splitlines() if line.endswith(": test"))
 
@@ -352,6 +362,7 @@ def compare_archived(directory, original_commit, candidate_commit, candidate_tre
               "historical": json.loads((ROOT / "examples/marmish/observations.json").read_bytes())["historical"],
               "isolatedInstalledDriverUnitTests": dict(cohorts), "currentFailures": failures,
               "commandDifferences": command_differences, "regressions": regressions,
+              "improvements": improvements(command_differences, tests),
               "unobserved": ["release artifacts and installed multi-host cohorts", "native Linux x86-64 and ARM64",
                              "interactive Keychain and Tor", "remote dispatch"]}
     return result
