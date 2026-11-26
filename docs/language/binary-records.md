@@ -24,3 +24,13 @@ An `oddlang-binary-record-rust-v1` overlay binds the public record `name`, field
 oddlang build binary-record rust graph.json rust.json output
 python3 verification/binary-record/verify.py target/debug/oddlang
 ```
+
+## Binary metadata
+
+A `bool` slot uses one byte, with zero and one as the only accepted tags. An `optional` slot uses the same tags for absence and presence, followed on presence by its declared `payload`. Both declare a slot error for other tags. An optional payload can be an unsigned integer or a named inline `record`. Inline records declare ordered fixed-width integer members and can mix signed and unsigned fields. Signed fields use two's-complement big-endian bytes. Their Rust binding supplies the type and member names.
+
+An unsigned slot may supply a `readError` to check its range immediately after reading the integer. Integer and byte slots can supply `valueError` to override the default native validation error. A byte slot can exclude specified bytes. Native validation checks these field constraints in layout order, then applies the declared `guards` in order. The decoder applies native validation after its trailing-byte check.
+
+A `presence-equals` guard equates a boolean with optional presence. An `optional-mask` guard requires all `required` bits and forbids bits outside `allowed` when an unsigned value is present. An `optional-member-range` guard applies an inclusive unsigned range to a member of a present inline record. Each guard has a stable identity and a named validation error.
+
+Binary `hashViews` select an ordered list of fixed byte arrays and enumerated tag fields. The digest is SHA-256 of the declared domain bytes and selected wire representations. The output is the supplied prefix followed by lowercase hexadecimal digest bytes. The corresponding native binding selects the method name and SHA-256 library. These views operate independently of validation. [Independent metadata fixture](../../verification/binary-record/metadata.py)

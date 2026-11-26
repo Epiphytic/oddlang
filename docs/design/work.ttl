@@ -797,3 +797,11 @@ w:binaryRecordReview a p:Finding ;
     rdfs:label "Disambiguate binary record errors and compile the native package composition" ;
     p:source w:binaryRecordFixture .
 w:boundedBinaryRecords p:addresses w:binaryRecordReview .
+
+w:binaryMetadataRecords a p:Task ; rdfs:label "Project optional binary metadata and ordered constraints" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:boundedBinaryRecords, w:typedHashViews ;
+    p:acceptance "Check exact boolean and optional tags, signed inline records, typed metadata guards, early and deferred errors, and pure namespace views with an unrelated native fixture." ;
+    p:evidence w:binaryMetadataFixture .
+w:binaryMetadataFixture a p:Artifact ; p:location "verification/binary-record/metadata.py" .
+w:wholeMarmishProtocols p:dependsOn w:binaryMetadataRecords .
