@@ -1,11 +1,11 @@
-use super::{EndpointView, Native, Protocol, Source, View, digests, rules::Compiler};
+use super::{EndpointView, Native, Protocol, Source, View, digests, preflight, rules::Compiler};
 use crate::wire_schema::{
     Binding, Payload, Result, Schema, Shape,
     render::{expression, ty},
 };
 use std::{collections::BTreeMap, fmt::Write as _};
 
-const ERROR: &str = "__OddlangProtocolError";
+pub(super) const ERROR: &str = "__OddlangProtocolError";
 
 pub(super) fn error(graph: &Protocol, native: &Native, id: &str) -> String {
     let constructor = &graph.errors[id];
@@ -42,20 +42,19 @@ pub(super) fn render(
     let size = error(graph, native, &graph.size_error);
     let admission = error(graph, native, &graph.admission_error);
     let limit = graph.maximum_wire_bytes;
-    writeln!(text, r#"
-fn __oddlang_encode_frame(value: &{env_type}) -> ::core::result::Result<::std::vec::Vec<u8>, {ERROR}> {{
-    let bytes = ::serde_json::to_vec(value).map_err(|_| {admission})?;
-    if bytes.len() > {limit} {{
-        return ::core::result::Result::Err({size});
-    }}
-    ::core::result::Result::Ok(bytes)
-}}
-
+    let bounds = preflight::Bounds::new(schema);
+    text.push_str(&preflight::runtime(limit, &size, &admission));
+    text.push_str(&bounds.emit(schema, binding));
+    writeln!(
+        text,
+        r#"
 fn __oddlang_decode_frame(bytes: &[u8]) -> ::core::result::Result<{env_type}, {ERROR}> {{
     if bytes.len() > {limit} {{
         return ::core::result::Result::Err({size});
     }}
-    let value: {env_type} = ::serde_json::from_slice(bytes).map_err(|_| {admission})?;"#).unwrap();
+    let value: {env_type} = ::serde_json::from_slice(bytes).map_err(|_| {admission})?;"#
+    )
+    .unwrap();
     for (field, id) in &graph.literals {
         writeln!(
             text,
@@ -68,7 +67,7 @@ fn __oddlang_decode_frame(bytes: &[u8]) -> ::core::result::Result<{env_type}, {E
     }
     writeln!(
         text,
-        r#"    if __oddlang_encode_frame(&value)?.as_slice() != bytes {{
+        r#"    if __oddlang_serialize_frame(&value)?.as_slice() != bytes {{
         return ::core::result::Result::Err({admission});
     }}
     ::core::result::Result::Ok(value)
@@ -79,10 +78,10 @@ fn __oddlang_decode_frame(bytes: &[u8]) -> ::core::result::Result<{env_type}, {E
         let steps = compiler.endpoint(endpoint, &endpoint.graph.steps, false)?;
         let timed = compiler.endpoint(endpoint, &endpoint.graph.timed, true)?;
         emit_endpoint(
-            &mut text, index, graph, native, binding, view, endpoint, &steps, &timed,
+            &mut text, index, graph, native, binding, view, endpoint, &steps, &timed, &bounds,
         );
     }
-    digests::emit(&mut text, &mut compiler, view)?;
+    digests::emit(&mut text, &mut compiler, view, &bounds)?;
     Ok(text)
 }
 
@@ -96,6 +95,7 @@ fn emit_endpoint(
     endpoint: &EndpointView<'_>,
     steps: &str,
     timed: &str,
+    bounds: &preflight::Bounds<'_>,
 ) {
     let name = &endpoint.target.ty;
     let encode = &endpoint.target.encode;
@@ -169,9 +169,13 @@ fn emit_endpoint(
         text,
         r#"
 pub fn {encode}(value: &{name}) -> ::core::result::Result<::std::vec::Vec<u8>, {ERROR}> {{
-{encode_validation}    let envelope = {env} {{"#
+{encode_validation}"#
     )
     .unwrap();
+    preflight::check_fields(text, bounds, &endpoint.fields, |field| {
+        format!("&value.{}", field.name)
+    });
+    writeln!(text, "    let envelope = {env} {{").unwrap();
     let get = |source: &Source| {
         let index = endpoint
             .graph
@@ -228,7 +232,7 @@ pub fn {encode}(value: &{name}) -> ::core::result::Result<::std::vec::Vec<u8>, {
     writeln!(
         text,
         r#"    }};
-    __oddlang_encode_frame(&envelope)
+    __oddlang_serialize_frame(&envelope)
 }}
 
 pub fn {decode}(bytes: &[u8]) -> ::core::result::Result<{name}, {ERROR}> {{

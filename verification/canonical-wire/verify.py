@@ -279,9 +279,31 @@ with tempfile.TemporaryDirectory(prefix="canonical-wire-") as directory:
                    "minimum":1,"maximum":20},"error":"urn:radio:range"})
     run("build", "wire-protocol", "rust", write(temp / "private-guard.json", bad), shape_binding,
         graph, overlay, temp / "invisible-guard", failure="internal frame cannot own")
+    single_shape, single_binding = json.loads(shape_path.read_bytes()), json.loads(shape_binding.read_bytes())
+    single_shape["types"][1]["variants"] = [single_shape["types"][1]["variants"][0]]
+    for removed in (scan, read):
+        del single_binding["names"][removed]
+    single_protocol, single_target = json.loads(graph.read_bytes()), json.loads(overlay.read_bytes())
+    single_protocol["endpoints"] = single_protocol["endpoints"][:1]
+    only_endpoint = single_protocol["endpoints"][0]
+    single_target["endpoints"] = {only_endpoint["id"]: single_target["endpoints"][only_endpoint["id"]]}
+    single_target["fields"] = {field["id"]: single_target["fields"][field["id"]]
+                               for field in only_endpoint["fields"]}
+    singleton = temp / "singleton"
+    run("build", "wire-protocol", "rust", write(temp / "single-shape.json", single_shape),
+        write(temp / "single-binding.json", single_binding),
+        write(temp / "single-protocol.json", single_protocol),
+        write(temp / "single-target.json", single_target), singleton)
+    shape_only_graph = json.loads(graph.read_bytes())
+    shape_only_graph["endpoints"][2]["steps"] = []
+    shape_only_graph["digests"][-1]["steps"] = []
+    shape_only = temp / "shape-only"
+    run(*common, write(temp / "shape-only-protocol.json", shape_only_graph), overlay, shape_only)
     consumer = temp / "consumer"
     shutil.copytree(ROOT / "fixture", consumer)
     shutil.copyfile(output / "wire.rs", consumer / "src/generated.rs")
+    shutil.copyfile(singleton / "wire.rs", consumer / "src/singleton.rs")
+    shutil.copyfile(shape_only / "wire.rs", consumer / "src/shape_only.rs")
     subprocess.run(("cargo", "+1.97.1", "run", "--locked", "--offline", "--quiet"), cwd=consumer,
                    env={**os.environ, "CARGO_ENCODED_RUSTFLAGS": "-Dwarnings"}, check=True)
 print("canonical source-free native wire operations passed")

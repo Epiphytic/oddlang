@@ -1,4 +1,6 @@
 mod generated;
+pub mod shape_only;
+pub mod singleton;
 
 use generated::{
     decode_message, decode_reply, encode_message, encode_reply, raw_digest, transmit_digest,
@@ -70,6 +72,12 @@ fn main() {
         Ok(raw_digest(br#"{"dir":"send","payload":{"gain":13}}"#))
     );
     assert!(decode_message(valid).ok() == Some(packet));
+    let single = singleton::Transmit {
+        sequence: 5,
+        gain: 13,
+    };
+    assert_eq!(singleton::encode_message(&single).unwrap(), valid);
+    assert!(singleton::decode_message(valid).ok() == Some(single));
     assert!(matches!(decode_message(&[b'?'; 241]), Err(Oversize)));
     assert!(matches!(
         decode_message(b" {}"),
@@ -174,4 +182,23 @@ fn main() {
         serde_json::from_str::<TokenWrapper>(&exported).unwrap().0,
         [7; 16]
     );
+    let token = [0; 16];
+    for samples in [vec![vec![3]; 5], vec![vec![9; 4]], vec![vec![3; 3]; 3]] {
+        let invalid = shape_only::Scan {
+            sequence: 0,
+            plan: shape_only::Sweep::Burst {
+                samples: samples.clone(),
+                sensor: None,
+                token,
+            },
+        };
+        assert_eq!(
+            shape_only::encode_scan(&invalid),
+            Err(Malformed("json-wire"))
+        );
+        assert_eq!(
+            shape_only::burst_digest(&samples, None, token),
+            Err(Malformed("json-wire"))
+        );
+    }
 }
