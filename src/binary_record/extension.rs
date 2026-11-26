@@ -210,6 +210,11 @@ pub(super) fn validate_records<'a>(
     let mut types = BTreeSet::from([binding.name.as_str()]);
     for (id, record) in &graph.records {
         iri(id)?;
+        if !graph.layout.iter().any(|slot| {
+            matches!(&slot.encoding, Encoding::Optional { payload: Payload::Record { id: payload }, .. } if payload == id)
+        }) {
+            return Err(format!("unused inline binary record: {id}"));
+        }
         if !ids.insert(id)
             || record.fields.is_empty()
             || !binding
@@ -253,7 +258,15 @@ pub(super) fn validate_checks<'a>(
     if !graph.hash_views.keys().eq(binding.hash_views.keys()) {
         return Err("binary hash views need exact native bindings".into());
     }
-    let mut methods = BTreeSet::from(["validate", "encode", "decode"]);
+    let mut methods = BTreeSet::from([
+        "validate",
+        "encode",
+        "decode",
+        "clone",
+        "clone_from",
+        "eq",
+        "ne",
+    ]);
     for (id, view) in &graph.hash_views {
         iri(id)?;
         if !ids.insert(id)
@@ -271,7 +284,13 @@ pub(super) fn validate_checks<'a>(
             return Err(format!("invalid binary hash view: {id}"));
         }
         let native = &binding.hash_views[id];
-        if !symbol(&native.method) || !methods.insert(&native.method) {
+        if !symbol(&native.method)
+            || !native
+                .method
+                .bytes()
+                .all(|ch| ch.is_ascii_lowercase() || ch.is_ascii_digit() || ch == b'_')
+            || !methods.insert(&native.method)
+        {
             return Err(format!("invalid binary hash method: {id}"));
         }
     }

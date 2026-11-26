@@ -805,3 +805,13 @@ w:binaryMetadataRecords a p:Task ; rdfs:label "Project optional binary metadata 
     p:evidence w:binaryMetadataFixture .
 w:binaryMetadataFixture a p:Artifact ; p:location "verification/binary-record/metadata.py" .
 w:wholeMarmishProtocols p:dependsOn w:binaryMetadataRecords .
+
+w:binaryMetadataErrorReview a p:Finding ;
+    rdfs:label "Separate parse-time offsets and tags from deferred Manifest field and metadata errors" ;
+    p:source w:binaryMetadataFixture .
+w:binaryMetadataRecords p:addresses w:binaryMetadataErrorReview .
+w:copyManifestQualification a p:Task ; rdfs:label "Qualify a native copy Manifest and Mtime" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned ;
+    p:dependsOn w:binaryMetadataRecords ;
+    p:acceptance "Compare source-free Manifest validation, binary encoding, decoding, namespace and canonical SHA-256 with the pinned original." .
+w:wholeMarmishProtocols p:dependsOn w:copyManifestQualification .

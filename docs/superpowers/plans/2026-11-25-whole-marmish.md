@@ -73,3 +73,4 @@ The principal feasibility risk is recovering intended behavior where only incide
 - [x] Project ordered tagged binary records. Check field bounds, ordered structural failures and validation after parsing with an independent consumer. [Binary records](../../language/binary-records.md)
 
 - [x] Extend ordered binary records with nullable metadata, inline signed values, typed guards, and hexadecimal views. [Binary metadata](../../language/binary-records.md#binary-metadata)
+- [ ] Qualify the copy Manifest and Mtime against the pinned native original. Checkpoint owns the separate FileIdentity record witness.
