@@ -2,6 +2,7 @@
 import copy
 import hashlib
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -13,8 +14,8 @@ CLI = Path(sys.argv[1]).resolve()
 FIXTURE = Path(__file__).resolve().parents[2] / "tests/fixtures/json-envelope"
 
 
-def run(*args, cwd=None, error=None):
-    result = subprocess.run(args, cwd=cwd, text=True, capture_output=True)
+def run(*args, cwd=None, error=None, env=None):
+    result = subprocess.run(args, cwd=cwd, text=True, capture_output=True, env=env)
     if error is None:
         assert result.returncode == 0, result.stderr
     else:
@@ -42,8 +43,8 @@ with tempfile.TemporaryDirectory(prefix="native-image-package-") as directory:
     manifest = dict(format="oddlang-native-package-v1", name=cargo["package"]["name"],
                     version=cargo["package"]["version"], edition="2024", dependencies=deps,
                     cargoLock=pin(lock, inputs), components=[])
-    for group, names in (("images", ("Thumbnail", "Bounds", "ReadError")),
-                         ("images", ("Sticker", "StickerSize", "StickerError"))):
+    for group, names in (("lib", ("Thumbnail", "Bounds", "ReadError")),
+                         ("lib", ("Sticker", "StickerSize", "StickerError"))):
         overlay = inputs / (names[0] + ".json")
         overlay.write_text(json.dumps(dict(binding, codecType=names[0], limitsType=names[1], errorType=names[2])))
         manifest["components"].append(dict(kind="json-envelope", module=group, graph=pin(graph, inputs),
@@ -62,6 +63,10 @@ with tempfile.TemporaryDirectory(prefix="native-image-package-") as directory:
     def files(path):
         return {p.relative_to(path): p.read_bytes() for p in path.rglob("*") if p.is_file()}
     assert files(first) == files(second)
+    assert json.loads((first / "package.lock").read_bytes())["generatedFiles"] == {
+        p.relative_to(first).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+        for p in (first / "src").rglob("*.rs")
+    }
     assert set(p.suffix for p in inputs.iterdir()) == {".ttl", ".json", ".lock"}
     build(manifest, "first", "output already exists")
     mutated = copy.deepcopy(manifest)
@@ -81,6 +86,18 @@ with tempfile.TemporaryDirectory(prefix="native-image-package-") as directory:
     mutated = copy.deepcopy(manifest)
     mutated["version"] = "8.0.0"
     build(mutated, "stale-lock", "Cargo.lock validation")
+    if sys.platform in ("linux", "darwin"):
+        spec.write_text(json.dumps(manifest))
+        tools = root / "tools"
+        tools.mkdir()
+        competing = root / "competing"
+        cargo = tools / "cargo"
+        cargo.write_text('#!/bin/sh\nmkdir "$COMPETING" || exit 1\nexec "$REAL_CARGO" "$@"\n')
+        cargo.chmod(0o755)
+        env = dict(os.environ, PATH=str(tools) + os.pathsep + os.environ["PATH"],
+                   COMPETING=str(competing), REAL_CARGO=shutil.which("cargo"))
+        run(CLI, "build", "native-package", "rust", spec, competing, error="publish fresh package", env=env)
+        assert competing.is_dir() and not list(competing.iterdir())
     (first / "tests").mkdir()
     (first / "tests/consumer.rs").write_text("""
 use thumbnail_consumer::{Thumbnail, Sticker, StickerError, Bounds};
@@ -93,4 +110,4 @@ fn shared_wire() {
 }
 """)
     run("cargo", "+1.97.1", "test", "--locked", "--offline", "--quiet", cwd=first)
-print("Two projections in one private module, clean replay, six negative controls and downstream Rust passed.")
+print("Two projections in one private module, clean replay, negative controls and downstream Rust passed.")

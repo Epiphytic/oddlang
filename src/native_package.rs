@@ -33,7 +33,7 @@ struct Manifest {
     components: Vec<Component>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Dependency {
     version: String,
@@ -209,12 +209,13 @@ pub fn build(path: &Path, output: &Path) -> Result<()> {
     io(fs::create_dir_all(&src))?;
     io(fs::write(package.join("Cargo.toml"), &cargo))?;
     io(fs::write(package.join("Cargo.lock"), &lock))?;
-    let mut groups = BTreeMap::<String, String>::new();
+    let mut groups = BTreeMap::<String, (String, String)>::new();
     let mut exports: BTreeSet<_> = manifest
         .components
         .iter()
         .map(|c| c.module.clone())
         .collect();
+    let mut generated_files = BTreeMap::new();
     let mut records = Vec::new();
     let mut root_exports = String::new();
     for (index, component) in manifest.components.iter().enumerate() {
@@ -230,26 +231,31 @@ pub fn build(path: &Path, output: &Path) -> Result<()> {
         let stage = work.path().join(&leaf);
         io(fs::create_dir(&stage))?;
         let (source, projection) = project(component, base, &stage)?;
-        let module = src.join(&component.module);
+        let (directory, declarations) = groups
+            .entry(component.module.clone())
+            .or_insert_with(|| (format!("group_{index}"), String::new()));
+        let module = src.join(&*directory);
         io(fs::create_dir_all(&module))?;
         io(fs::write(module.join(format!("{leaf}.rs")), &source))?;
+        generated_files.insert(format!("src/{directory}/{leaf}.rs"), digest(&source));
         let names = component.reexports.join(", ");
-        writeln!(
-            groups.entry(component.module.clone()).or_default(),
-            "mod {leaf};\npub use {leaf}::{{{names}}};"
-        )
-        .unwrap();
+        writeln!(declarations, "mod {leaf};\npub use {leaf}::{{{names}}};").unwrap();
         writeln!(root_exports, "pub use {}::{{{names}}};", component.module).unwrap();
         records.push(serde_json::json!({"kind":component.kind,"module":component.module,"reexports":component.reexports,
             "graphSha256":component.graph.sha256,"overlaySha256":component.overlay.sha256,
             "sourceSha256":digest(&source),"projection":projection}));
     }
     let mut lib = String::new();
-    for (group, declarations) in groups {
-        writeln!(lib, "mod {group};").unwrap();
-        io(fs::write(src.join(&group).join("mod.rs"), declarations))?;
+    for (group, (directory, declarations)) in groups {
+        writeln!(lib, "#[path = \"{directory}/mod.rs\"]\nmod {group};").unwrap();
+        generated_files.insert(
+            format!("src/{directory}/mod.rs"),
+            digest(declarations.as_bytes()),
+        );
+        io(fs::write(src.join(directory).join("mod.rs"), declarations))?;
     }
     lib.push_str(&root_exports);
+    generated_files.insert("src/lib.rs".into(), digest(lib.as_bytes()));
     io(fs::write(src.join("lib.rs"), lib))?;
     // Cargo validates the dependency closure and resolves the exact external crates without building.
     let result = io(Command::new("cargo")
@@ -263,10 +269,20 @@ pub fn build(path: &Path, output: &Path) -> Result<()> {
         ));
     }
     let receipt = serde_json::json!({"format":"oddlang-native-package-lock-v1","manifestSha256":digest(&raw),
-        "cargoLockSha256":digest(&lock),"cargoManifestSha256":digest(cargo.as_bytes()),"components":records});
+        "cargoLockSha256":digest(&lock),"cargoManifestSha256":digest(cargo.as_bytes()),"generatedFiles":generated_files,"components":records});
     io(fs::write(
         package.join("package.lock"),
         serde_json::to_vec_pretty(&receipt).map_err(|e| e.to_string())?,
     ))?;
-    io(fs::rename(package, output))
+    // A competing creator can insert even an empty directory after the initial check.
+    #[cfg(any(target_os = "linux", target_os = "macos"))]
+    {
+        use rustix::fs::{CWD, RenameFlags, renameat_with};
+        renameat_with(CWD, &package, CWD, output, RenameFlags::NOREPLACE)
+            .map_err(|error| format!("publish fresh package: {error}"))
+    }
+    #[cfg(not(any(target_os = "linux", target_os = "macos")))]
+    {
+        io(fs::rename(package, output))
+    }
 }
