@@ -229,7 +229,7 @@ protocol["digests"].extend([
     }, "size")]},
 ])
 target["auxiliary"].update({"urn:radio:token-alias":"Token","urn:radio:token-encoding":"token_hex",
-    cal_hash:"cal_digest", burst_hash:"burst_digest", "urn:radio:samples-arg":"samples",
+    cal_hash:"cal_digest", burst_hash:"burst_digest", "urn:radio:samples-arg":"budget",
     "urn:radio:sensor-arg":"sensor", "urn:radio:token-arg":"token"})
 target["internalEnvelope"] = True
 

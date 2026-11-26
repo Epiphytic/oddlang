@@ -56,7 +56,7 @@ impl<'a> Bounds<'a> {
             let shape = &binding.names[id];
             writeln!(
                 text,
-                "\n#[allow(dead_code)]\nfn {helper}(value: &{shape}, budget: &mut __OddlangWireBudget) -> ::core::result::Result<(), {ERROR}> {{"
+                "\n#[allow(dead_code)]\nfn {helper}(value: &{shape}, __oddlang_budget: &mut __OddlangWireBudget) -> ::core::result::Result<(), {ERROR}> {{"
             )
             .unwrap();
             match definition {
@@ -127,12 +127,12 @@ impl<'a> Bounds<'a> {
 
     fn check(&self, shape: &Shape, value: &str, indent: &str) -> String {
         match shape {
-            Shape::Text {} => format!("{indent}budget.take(({value}).len())?;\n"),
+            Shape::Text {} => format!("{indent}__oddlang_budget.take(({value}).len())?;\n"),
             Shape::List { item } | Shape::Optional { item } => {
                 let child = format!("{indent}    ");
                 let item_code = self.check(item, "__oddlang_item", &child);
                 if matches!(shape, Shape::List { .. }) {
-                    let mut result = format!("{indent}budget.take(({value}).len())?;\n");
+                    let mut result = format!("{indent}__oddlang_budget.take(({value}).len())?;\n");
                     if !item_code.is_empty() {
                         writeln!(result, "{indent}for __oddlang_item in ({value}).iter() {{")
                             .unwrap();
@@ -152,7 +152,7 @@ impl<'a> Bounds<'a> {
                 format!("{indent}budget.binary({value}, {})?;\n", policy.max_bytes,)
             }
             Shape::BoundedBase64List { policy } => format!(
-                "{indent}budget.binary_list({value}, {}, {}, {}, {})?;\n",
+                "{indent}__oddlang_budget.binary_list({value}, {}, {}, {}, {})?;\n",
                 policy.max_items,
                 policy.max_item_bytes,
                 policy.max_total_bytes,
@@ -162,7 +162,7 @@ impl<'a> Bounds<'a> {
                 .functions
                 .get(id.as_str())
                 .map_or_else(String::new, |function| {
-                    format!("{indent}{function}({value}, budget)?;\n")
+                    format!("{indent}{function}({value}, __oddlang_budget)?;\n")
                 }),
             _ => String::new(),
         }
@@ -278,7 +278,9 @@ pub(super) fn check_fields(
 ) {
     let code = bounds.fields(fields, access);
     if !code.is_empty() {
-        output.push_str("    let budget = &mut __OddlangWireBudget(__ODDLANG_MAX_WIRE_BYTES);\n");
+        output.push_str(
+            "    let __oddlang_budget = &mut __OddlangWireBudget(__ODDLANG_MAX_WIRE_BYTES);\n",
+        );
         output.push_str(&code);
     }
 }
