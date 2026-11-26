@@ -107,11 +107,27 @@ def main():
             "custom": (BASE, "not proven effect-free", None),
             "effect": (BASE.replace("other.serial ==", 'eprintln!("effect"); other.serial =='),
                        "statements, aliases or effects", None),
-            "alias": (BASE.replace("other.serial ==", "let alias = other; alias.serial =="),
-                      "statements, aliases or effects", None),
-            "shadow": (BASE.replace("other.serial ==", "let other = self; other.serial ==")
-                       ,
-                       "statements, aliases or effects", None),
+            "alias": (BASE.replace("other.serial", "{ let alias = other; alias }.serial"),
+                      "field operand uses indirection or an alias", None),
+            "shadow": (BASE.replace("other.serial", "{ let other = self; other }.serial"),
+                       "field operand uses indirection or an alias", None),
+            "trait-only": (PRODUCT + """
+trait Agreement { fn agrees(&self, other: &Receipt) -> bool; }
+impl Agreement for Invoice {
+    fn agrees(&self, other: &Receipt) -> bool { self.serial == other.serial }
+}
+""", "selected inherent method is absent", None),
+            "overloaded-deref": (BASE.replace("other.serial", "other.extra") + """
+pub struct Shadow { extra: u32 }
+impl std::ops::Deref for Receipt {
+    type Target = Shadow;
+    fn deref(&self) -> &Shadow {
+        eprintln!("effect");
+        static FALLBACK: Shadow = Shadow { extra: 0 };
+        &FALLBACK
+    }
+}
+""", "non-builtin receiver adjustment", None),
         }
         for name, (text, reason, expected) in cases.items():
             source.write_bytes(text.replace("\n", "\r\n").encode() if name == "base" else text.encode())
@@ -155,7 +171,7 @@ def main():
         assert base[1:] == mutant[1:]
         assert base[0]["left"]["field"].endswith(":serial")
         assert mutant[0]["left"]["field"].endswith(":backup")
-    print("Qualified unrelated native equality, field mutation, cross-file invalidation and four unresolved controls.")
+    print("Qualified unrelated native equality, field mutation, cross-file invalidation and six unresolved controls.")
 
 
 if __name__ == "__main__":

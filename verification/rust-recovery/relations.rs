@@ -1,5 +1,8 @@
 //! Targeted compiler observation of a Rust field equality conjunction.
-use rustc_hir::{BinOpKind, Expr, ExprKind, PatKind, QPath, def::Res};
+use rustc_hir::{
+    BinOpKind, Expr, ExprKind, PatKind, QPath,
+    def::{DefKind, Res},
+};
 use rustc_middle::{
     mir::{self, Operand, ProjectionElem, Rvalue, StatementKind, TerminatorKind},
     ty::{self, Ty, TyCtxt, TypeckResults},
@@ -82,6 +85,9 @@ fn path(tcx: TyCtxt<'_>, def: DefId) -> Result<String> {
     if !def.is_local() {
         return Err("external record ownership is unproven".into());
     }
+    if !matches!(tcx.def_kind(def), DefKind::Struct | DefKind::Enum) {
+        return Err("compiler owner is not a nominal record".into());
+    }
     let mut names = Vec::new();
     let mut cursor = def;
     while !cursor.is_crate_root() {
@@ -94,6 +100,9 @@ fn path(tcx: TyCtxt<'_>, def: DefId) -> Result<String> {
         }
         names.push(name);
         cursor = tcx.opt_parent(cursor).ok_or("missing compiler parent")?;
+        if !cursor.is_crate_root() && tcx.def_kind(cursor) != DefKind::Mod {
+            return Err("compiler owner is not module-scoped".into());
+        }
     }
     names.reverse();
     Ok(format!("crate::{}", names.join("::")))
@@ -105,7 +114,7 @@ fn find_method(tcx: TyCtxt<'_>, selected: &str) -> Result<LocalDefId> {
         .ok_or("expected qualified method selection")?;
     let mut candidates = tcx.iter_local_def_id().filter(|id| {
         let def = id.to_def_id();
-        if !matches!(tcx.def_kind(def), rustc_hir::def::DefKind::AssocFn)
+        if !matches!(tcx.def_kind(def), DefKind::AssocFn)
             || !tcx
                 .opt_item_name(def)
                 .is_some_and(|candidate| candidate.as_str() == name)
@@ -233,7 +242,7 @@ impl<'tcx> Observer<'_, 'tcx> {
         if expr.span.from_expansion() {
             return Err("macro-expanded field operands are unresolved".into());
         }
-        let ExprKind::Field(base, _) = expr.kind else {
+        let ExprKind::Field(base, spelling) = expr.kind else {
             return Err("equality operand is not a direct field".into());
         };
         let ExprKind::Path(QPath::Resolved(None, native)) = base.kind else {
@@ -261,7 +270,18 @@ impl<'tcx> Observer<'_, 'tcx> {
         {
             return Err("field owner does not resolve to the selected record type".into());
         }
-        let field = &adt.non_enum_variant().fields[self.typeck.field_index(expr.hir_id)];
+        use ty::adjustment::{Adjust, Adjustment, DerefAdjustKind};
+        if !matches!(self.typeck.expr_adjustments(base),
+            [Adjustment { kind: Adjust::Deref(DerefAdjustKind::Builtin), target }] if target == owner)
+        {
+            return Err("field access requires a non-builtin receiver adjustment".into());
+        }
+        let field = adt
+            .non_enum_variant()
+            .fields
+            .get(self.typeck.field_index(expr.hir_id))
+            .filter(|field| field.name == spelling.name)
+            .ok_or("field identity disagrees with the resolved owner")?;
         Ok((
             json!({"parameter":index,"owner":self.inputs[index],"field":field.name.to_string()}),
             self.typeck.expr_ty(expr),
