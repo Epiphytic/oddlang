@@ -872,3 +872,8 @@ w:copyProtocolQualification a p:Task ; rdfs:label "Qualify the complete native c
     p:dependsOn w:copyCheckpointQualification, w:boundedTaggedBinaryFrames ;
     p:acceptance "Compile the full source-free copy API and compare all original tests, exact error cases, frame payloads and public constants, with explicit structural gap accounting." .
 w:wholeMarmishProtocols p:dependsOn w:copyProtocolQualification .
+
+w:binaryFrameFragmentReview a p:Finding ;
+    rdfs:label "Check borrowed and bound record fragments at both native call sites and enforce the consumed limit" ;
+    p:source w:binaryFrameFixture .
+w:boundedTaggedBinaryFrames p:addresses w:binaryFrameFragmentReview .

@@ -229,7 +229,7 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
                     }
                 },
                 Encoding::Fixed{size}=>writeln!(out,"                let {var} = __take(&mut __rest,{size})?.try_into().expect(\"array width\");").unwrap(),
-                Encoding::Fragment{id}=>writeln!(out,"                let {var} = {}::__oddlang_read_prefix(&mut __rest)?;\n                {var}.validate()?;",binding.types[id].path).unwrap(),
+                Encoding::Fragment{id}=>writeln!(out,"                let {var} = {}::__oddlang_read_prefix(&mut __rest)?;\n                {var}.__oddlang_check()?;",binding.types[id].path).unwrap(),
                 Encoding::Literal{value,error}=>writeln!(out,"                if __take(&mut __rest,1)?[0] != {value} {{ return ::core::result::Result::Err({}); }}",fault(binding,error)).unwrap(),
                 Encoding::Rest{minimum,maximum,error}=>writeln!(out,
                     "                if !({minimum}..={maximum}).contains(&__rest.len()) {{ return ::core::result::Result::Err({}); }}\n                let {var} = ::core::mem::take(&mut __rest).to_vec();",
@@ -249,6 +249,15 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
             }
         }
         for guard in &case.decode_guards {
+            if let Predicate::Range { field } = &guard.require {
+                if case.slots.iter().any(|slot| {
+                    slot.id == *field
+                        && matches!(slot.encoding,
+                    Encoding::Unsigned {bits,maximum,..} if maximum==u64::MAX>>(64-bits))
+                }) {
+                    continue;
+                }
+            }
             writeln!(
                 out,
                 "                if !({}) {{ return ::core::result::Result::Err({}); }}",

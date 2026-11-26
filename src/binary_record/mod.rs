@@ -473,9 +473,20 @@ impl Graph {
 }
 
 pub fn build(graph: &Path, binding: &Path, output: &Path) -> Result<()> {
+    build_record(graph, binding, output, false)
+}
+
+pub(crate) fn build_bound_fragment(graph: &Path, binding: &Path, output: &Path) -> Result<()> {
+    build_record(graph, binding, output, true)
+}
+
+fn build_record(graph: &Path, binding: &Path, output: &Path, require_bound: bool) -> Result<()> {
     let graph: Graph = json(graph)?;
     let binding: Binding = json(binding)?;
     graph.validate(&binding)?;
+    if require_bound && (!graph.fragment || binding.existing_type.is_none()) {
+        return Err("binary fragment components must bind an existing type".into());
+    }
     let source = rust::render(&graph, &binding);
     let obligations = encode(&graph.obligations())?;
     let lock = encode(&json!({

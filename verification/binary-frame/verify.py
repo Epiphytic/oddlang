@@ -17,16 +17,17 @@ cases={
     iri("samples"):dict(tag=23,form="named",slots=[slot("index","unsigned",bits=64,maximum=12,error=err("range")),
                       slot("data","rest",minimum=1,maximum=8,error=err("data"))],
                       encodeGuards=[count,end("encode-end")],decodeGuards=[end("decode-end")]),
+    iri("existing-case"):dict(tag=25,form="tuple",slots=[slot("existing","fragment",id=iri("existing-type"))]),
     iri("seal"):dict(tag=24,form="tuple",slots=[slot("seal-id","fixed",size=2),
                       slot("stamp","literal",value=91,error=err("stamp"))]),
 }
 errors={k:err(k) for k in ("header","length","limit","tag","truncated","trailing","decoderFailed")}
 graph=dict(format="oddlang-binary-frame-v1",id=iri("messages"),maximum=16,errors=errors,
-           types={iri("header"):dict(kind="fragment")},cases=cases)
+           types={iri("header"):dict(kind="fragment"),iri("existing-type"):dict(kind="fragment")},cases=cases)
 binding=dict(format="oddlang-binary-frame-rust-v1",name="Message",decoder="Messages",errorType="crate::Fault",
-             cases={iri("panel"):"Panel",iri("samples"):"Samples",iri("seal"):"Seal"},
-             fields={iri("device"):"device",iri("index"):"index",iri("data"):"data",iri("seal-id"):"seal_id"},
-             types={iri("header"):dict(path="crate::Header")},
+             cases={iri("panel"):"Panel",iri("samples"):"Samples",iri("seal"):"Seal",iri("existing-case"):"Existing"},
+             fields={iri("device"):"device",iri("index"):"index",iri("data"):"data",iri("seal-id"):"seal_id",iri("existing"):"existing"},
+             types={iri("header"):dict(path="crate::Header"),iri("existing-type"):dict(path="crate::Existing")},
              errors={err(name):dict(variant="Bad",argument=name) for name in
                      (*errors,"data","range","stamp")})
 device=dict(format="oddlang-binary-record-v1",id=iri("header"),fragment=True,maximum=16,
@@ -36,6 +37,13 @@ device=dict(format="oddlang-binary-record-v1",id=iri("header"),fragment=True,max
 overlay=dict(format="oddlang-binary-record-rust-v1",name="Header",names={iri("unit"):"unit"},
              externals={},errorType="crate::Fault",errors={err(name):dict(variant="Bad",argument=name)
                       for name in ("unit","limit","trailing","truncated")})
+
+existing=dict(device,id=iri("existing-type"),maximum=7,layout=[
+    slot("quantity","unsigned-be",bits=16,minimum=1,maximum=13),
+    slot("sample","bytes",minimum=1,maximum=8,overflow=err("limit")),
+])
+existing_native=dict(overlay,name="Existing",existingType="crate::Existing",
+                     names={iri("quantity"):"quantity",iri("sample"):"sample"})
 
 def run(*args,error=None):
     result=subprocess.run(args,capture_output=True,text=True)
@@ -51,10 +59,16 @@ with tempfile.TemporaryDirectory() as directory:
     project("binary-frame",graph,binding,root/"src")
     project("binary-record",device,overlay,root/"inner")
     (root/"src/record.rs").write_bytes((root/"inner/record.rs").read_bytes())
+    project("binary-record",existing,existing_native,root/"bound")
+    (root/"src/bound.rs").write_bytes((root/"bound/record.rs").read_bytes())
     (root/"src/main.rs").write_text(r'''#![deny(warnings)]
 mod frame;
 mod record;
+mod bound;
 pub use record::Header;
+#[derive(Clone, Eq, PartialEq)]
+pub struct Existing { quantity:u16, sample:Vec<u8> }
+impl Existing { pub fn validate(&self) -> Result<(),Fault> { Ok(()) } }
 use frame::{Message,Messages};
 #[derive(Debug,PartialEq,Eq)]
 pub enum Fault { Bad(&'static str) }
@@ -73,6 +87,10 @@ fn main() {
         assert_eq!(decoder.finish(),Ok(()));
     }
     assert_eq!(Message::decode(&[22,0,0,0,3,0,0,1]).err(),Some(Fault::Bad("unit")));
+    assert_eq!(Message::decode(&[25,0,0,0,7,0,0,0,0,0,1,7]).err(),Some(Fault::Bad("unit")));
+    assert_eq!(Message::decode(&[25,0,0,0,8,0,1,0,0,0,2,7,8]).err(),Some(Fault::Bad("limit")));
+    let valid=Message::Existing(Existing{quantity:1,sample:vec![7]});
+    assert!(Message::decode(&valid.encode().unwrap()).unwrap()==valid);
     assert_eq!(Message::decode(&[24,0,0,0,2,0,1]).err(),Some(Fault::Bad("truncated")));
     assert_eq!(Message::decode(&[24,0,0,0,3,0,1,1]).err(),Some(Fault::Bad("stamp")));
     assert_eq!(Message::Samples{index:13,data:vec![]}.encode().err(),Some(Fault::Bad("data")));

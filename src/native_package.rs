@@ -171,7 +171,11 @@ fn project(
         Kind::BinaryRecord | Kind::BinaryFragment => {
             let path = input.join("graph.json");
             io(fs::write(&path, graph))?;
-            crate::binary_record::build(&path, &overlay, &output)?;
+            if matches!(component.kind, Kind::BinaryFragment) {
+                crate::binary_record::build_bound_fragment(&path, &overlay, &output)?;
+            } else {
+                crate::binary_record::build(&path, &overlay, &output)?;
+            }
             "record.rs"
         }
         Kind::WireSchema => {

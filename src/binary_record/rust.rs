@@ -271,9 +271,21 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
     writeln!(text, "        ::core::result::Result::Ok(__output)\n    }}").unwrap();
 
     if graph.fragment {
+        writeln!(
+            text,
+            "    pub(crate) fn __oddlang_check(&self) -> ::core::result::Result<(), {error}> {{"
+        )
+        .unwrap();
+        if existing.is_some() {
+            text.push_str(
+                "        self.validate()?;\n        self.__oddlang_validate_layout()\n    }\n",
+            );
+        } else {
+            text.push_str("        self.validate()\n    }\n");
+        }
         if existing.is_none() {
             writeln!(text,"    pub(crate) fn __oddlang_encode(&self) -> ::core::result::Result<::std::vec::Vec<u8>, {error}> {{\n        self.encode()\n    }}").unwrap();
-            writeln!(text, "    pub fn decode(input: &[u8]) -> ::core::result::Result<Self, {error}> {{\n        if input.len() > {max} {{ return ::core::result::Result::Err({}); }}\n        let mut rest = input;\n        let value = Self::__oddlang_read_prefix(&mut rest)?;\n        if !rest.is_empty() {{ return ::core::result::Result::Err({}); }}\n        value.validate()?;\n        ::core::result::Result::Ok(value)\n    }}",fault(&graph.errors.decode_size),fault(&graph.errors.trailing)).unwrap();
+            writeln!(text, "    pub fn decode(input: &[u8]) -> ::core::result::Result<Self, {error}> {{\n        if input.len() > {max} {{ return ::core::result::Result::Err({}); }}\n        let mut rest = input;\n        let value = Self::__oddlang_read_prefix(&mut rest)?;\n        if !rest.is_empty() {{ return ::core::result::Result::Err({}); }}\n        value.__oddlang_check()?;\n        ::core::result::Result::Ok(value)\n    }}",fault(&graph.errors.decode_size),fault(&graph.errors.trailing)).unwrap();
         }
         writeln!(text,"    pub(crate) fn __oddlang_read_prefix(input: &mut &[u8]) -> ::core::result::Result<Self, {error}> {{\n        let mut __rest = *input;").unwrap();
     } else {
@@ -498,7 +510,8 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
         .unwrap();
     }
     if graph.fragment {
-        text.push_str("        };\n        *input = __rest;\n        ::core::result::Result::Ok(__value)\n    }\n");
+        writeln!(text,"        }};\n        if input.len() - __rest.len() > {max} {{ return ::core::result::Result::Err({}); }}\n        *input = __rest;\n        ::core::result::Result::Ok(__value)\n    }}",
+            fault(&graph.errors.decode_size)).unwrap();
     } else {
         text.push_str("        };\n        __value.validate()?;\n        ::core::result::Result::Ok(__value)\n    }\n");
     }
