@@ -45,6 +45,8 @@ pub(super) struct Initialization {
     preflight_error: Diagnostic,
     reload_unsupported: Diagnostic,
     journal: Journal,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    configured: Option<super::configured::Configured>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -72,6 +74,9 @@ impl Guard {
 }
 
 impl Initialization {
+    pub(super) fn has_config(&self) -> bool {
+        self.configured.is_some()
+    }
     pub(super) fn validate(&self, base: &Policy) -> Result<(), String> {
         let layout = &base.layout;
         if !distinct(
@@ -191,6 +196,13 @@ impl Initialization {
     ) -> Result<(), String> {
         out.push_str(include_str!("complete.rs.in"));
         out.push_str(&self.journal.render(&self.identity_key)?);
+        if let Some(configured) = &self.configured {
+            configured.render(out)?;
+            configured.storage.render(&self.journal, out)?;
+        } else {
+            out.push_str(include_str!("explicit.rs.in"));
+            writeln!(out, "const ROUTE: &str = {:?};", self.local_route).unwrap();
+        }
         for (name, diagnostic) in self.diagnostics() {
             writeln!(
                 out,
@@ -200,7 +212,6 @@ impl Initialization {
             .unwrap();
         }
         for (name, value) in [
-            ("ROUTE", &self.local_route),
             ("SCHEME", &self.relay_scheme),
             ("RUNTIME_PREFIX", &self.runtime_prefix),
             ("SOCKET_LEAF", &self.socket_leaf),
@@ -242,6 +253,72 @@ impl Initialization {
             )
             .unwrap();
         }
+        let (select, before_credentials, effects, backend_guard, native_check) = if let Some(
+            configured,
+        ) =
+            &self.configured
+        {
+            if [
+                &policy.layout.owner,
+                &policy.layout.keys,
+                &policy.layout.manifest,
+                &self.account_leaf,
+                &self.journal_leaf,
+            ]
+            .into_iter()
+            .chain(policy.layout.private_subdirectories.iter())
+            .any(|leaf| configured.leaf == *leaf)
+            {
+                return Err("persisted configuration aliases another profile file".into());
+            }
+            (
+                format!(
+                    r#"
+        let base = selected_state(matches.try_get_one::<std::path::PathBuf>({:?}).map_err(|_| BINDING)?)?;
+        let label = matches.try_get_one::<String>({:?}).map_err(|_| BINDING)?.map(String::as_str).unwrap_or({:?});
+        if !atom(label) {{ return Err(INVALID_PROFILE); }}
+        let explicit = matches.try_get_many::<String>({:?}).map_err(|_| BINDING)?
+            .map(|values| values.cloned().collect::<Vec<_>>());
+        let selected = if let Some(relays) = &explicit {{
+            let route = route.unwrap_or(DEFAULT_ROUTE);
+            (route.to_owned(), configured_relays(route, relays)?)
+        }} else {{
+            check_directory(&base.join(label))?;
+            selected_config(&base.join(label))?.ok_or(IO)?
+        }};
+        let bound = std::cell::Cell::new(false);
+        let base = &base;"#,
+                    args.state, args.profile, args.default_profile, self.relay_argument
+                ),
+                r#"|root, record| {
+                if default_storage && record.phase != READY { return Err(BACKEND_REQUIRED); }
+                runtime_directory(record)?;
+                let stored = selected_config(root)?;
+                if stored.as_ref().is_some_and(|config| config != &selected) { return Err(CONFIG_CONFLICT); }
+                if explicit.is_none() && stored.is_none() { return Err(IO); }
+                bound.set(stored.is_some());
+                Ok(())
+            }"#,
+                "|database, snapshot| configured_effects(database, snapshot, bound.get())",
+                "let default_storage = backend == Some(AUTO_BACKEND);\n        if !default_storage && backend != Some(file_argument) { return Err(BACKEND_REQUIRED); }",
+                "configured_native_ready",
+            )
+        } else {
+            (
+                format!(
+                    r#"
+        let relays = matches.try_get_many::<String>({:?}).map_err(|_| BINDING)?.ok_or(CONFIGURATION)?;
+        check_relays(route, relays)?;
+        let base = matches.try_get_one::<std::path::PathBuf>({:?}).map_err(|_| BINDING)?.ok_or(STATE_REQUIRED)?;
+        let label = matches.try_get_one::<String>({:?}).map_err(|_| BINDING)?.map(String::as_str).unwrap_or({:?});"#,
+                    self.relay_argument, args.state, args.profile, args.default_profile
+                ),
+                "|_, record| runtime_directory(record).map(|_| ())",
+                "|_, _| Ok(())",
+                "if backend != Some(file_argument) { return Err(BACKEND_REQUIRED); }",
+                "|_, _| Ok(())",
+            )
+        };
         writeln!(out, "pub fn {}(matches: clap::ArgMatches) -> std::process::ExitCode {{
     let run = || -> Result<(), Failure> {{
 {guards}
@@ -251,16 +328,14 @@ impl Initialization {
             || matches.try_get_one::<u64>({:?}).map_err(|_| BINDING)?.is_some_and(|value| *value != {}) {{
             return Err(CONFIGURATION);
         }}
-        let relays = matches.try_get_many::<String>({:?}).map_err(|_| BINDING)?.ok_or(CONFIGURATION)?;
-        check_relays(route, relays)?;
-        let base = matches.try_get_one::<std::path::PathBuf>({:?}).map_err(|_| BINDING)?.ok_or(STATE_REQUIRED)?;
-        let label = matches.try_get_one::<String>({:?}).map_err(|_| BINDING)?.map(String::as_str).unwrap_or({:?});
+{select}
         let backend = matches.try_get_one::<String>({:?}).map_err(|_| BINDING)?.map(String::as_str);
-        if backend != Some({:?}) {{ return Err(BACKEND_REQUIRED); }}
+        let file_argument = {:?};
+{backend_guard}
         let mut metrics = Vec::new();
-        let profile = prepare(base, label, |_, record| runtime_directory(record).map(|_| ()),
+        let profile = prepare(base, label, {before_credentials},
             |root, record, signing, storage| {{
-                metrics = complete(root, record, signing, storage)?;
+                metrics = complete(root, record, signing, storage, {native_check}, {effects})?;
                 Ok(())
             }})?;
         print_initialized(&profile, &metrics)
@@ -269,7 +344,7 @@ impl Initialization {
         Ok(()) => std::process::ExitCode::SUCCESS,
         Err(error) => error.report(),
     }}
-}}", binding.entry, self.route_argument, self.unsupported_peers_argument, self.retention_argument, self.retention_default, self.relay_argument, args.state, args.profile, args.default_profile, args.backend, args.file_backend).unwrap();
+}}", binding.entry, self.route_argument, self.unsupported_peers_argument, self.retention_argument, self.retention_default, args.backend, args.file_backend).unwrap();
         Ok(())
     }
 }

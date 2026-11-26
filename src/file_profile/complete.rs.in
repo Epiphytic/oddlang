@@ -1,17 +1,4 @@
 
-fn check_relays<'a>(route: Option<&str>, relays: impl Iterator<Item = &'a String>) -> Result<(), Failure> {
-    if route != Some(ROUTE) { return Err(CONFIGURATION); }
-    for relay in relays {
-        let url = url::Url::parse(relay).map_err(|_| INVALID_RELAY)?;
-        if url.scheme() != SCHEME || url.host().is_none() || !url.username().is_empty()
-            || url.password().is_some() || url.fragment().is_some()
-        {
-            return Err(INVALID_RELAY);
-        }
-    }
-    Ok(())
-}
-
 fn runtime_directory(record: &Record) -> Result<std::path::PathBuf, Failure> {
     let runtime = std::env::temp_dir().join(format!("{RUNTIME_PREFIX}{}-{}", uid(), record.profile));
     if runtime.as_os_str().as_encoded_bytes().len() + RUNTIME_SUFFIX_ALLOCATION >= RUNTIME_BOUND {
@@ -91,7 +78,7 @@ fn preflight(path: &Path, key: &[u8; 32], current_version: u32, pending: bool) -
     if version == current_version { Ok(()) } else { Err(RELOAD_UNSUPPORTED) }
 }
 
-fn journal(path: &Path, key: &[u8; 32], public: &str, pending: bool) -> Result<Vec<u64>, Failure> {
+fn journal(path: &Path, key: &[u8; 32], public: &str, pending: bool, effects: impl FnOnce(&mut rusqlite::Connection) -> Result<(), Failure>) -> Result<Vec<u64>, Failure> {
     store_file(path, pending, JOURNAL)?;
     let mut connection = keyed_database(path, key, false, JOURNAL)?;
     let tables: u32 = connection.query_row("SELECT count(*) FROM sqlite_schema", [], |r| r.get(0)).map_err(|_| JOURNAL)?;
@@ -115,6 +102,9 @@ fn journal(path: &Path, key: &[u8; 32], public: &str, pending: bool) -> Result<V
             return Err(RELOAD_UNSUPPORTED);
         }
     }
+    drop(result);
+    drop(check);
+    effects(&mut connection)?;
     METRICS.iter().map(|(_, query)| connection.query_row(query, [], |row| row.get::<_, i64>(0)).map_err(|_| JOURNAL)
         .and_then(|count| u64::try_from(count).map_err(|_| JOURNAL))).collect()
 }
@@ -178,7 +168,7 @@ fn account(path: &Path, key: &[u8; 32], signing: &[u8; 32], record: &Record) -> 
     Ok(())
 }
 
-fn complete(root: &Path, record: &mut Record, signing: &[u8; 32], raw_key: &[u8; 32]) -> Result<Vec<u64>, Failure> {
+fn complete(root: &Path, record: &mut Record, signing: &[u8; 32], raw_key: &[u8; 32], check_native: impl FnOnce(&Path, &[u8;32]) -> Result<(),Failure>, effects: impl FnOnce(&mut rusqlite::Connection, &Record) -> Result<(), Failure>) -> Result<Vec<u64>, Failure> {
     for entry in EXCLUDED_PROFILE_ENTRIES {
         match fs::symlink_metadata(root.join(entry)) {
             Ok(_) => return Err(RELOAD_UNSUPPORTED),
@@ -195,9 +185,10 @@ fn complete(root: &Path, record: &mut Record, signing: &[u8; 32], raw_key: &[u8;
     let pending = record.phase == PENDING;
     preflight(&root.join(ACCOUNT_LEAF), &account_key, ACCOUNT_VERSION, pending)?;
     preflight(&root.join(JOURNAL_LEAF), &journal_key, JOURNAL_VERSION, pending)?;
+    check_native(&root.join(ACCOUNT_LEAF), &account_key)?;
     account(&root.join(ACCOUNT_LEAF), &account_key, signing, record)?;
     let metrics = journal(&root.join(JOURNAL_LEAF), &journal_key,
-        record.public.as_deref().ok_or(IDENTITY_MISMATCH)?, record.phase == PENDING)?;
+        record.public.as_deref().ok_or(IDENTITY_MISMATCH)?, record.phase == PENDING, |connection| effects(connection, record))?;
     for leaf in [ACCOUNT_LEAF, JOURNAL_LEAF] {
         open_existing(&root.join(leaf), false)?.ok_or(IO)?.sync_all().map_err(|_| IO)?;
     }

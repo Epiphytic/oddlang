@@ -1170,3 +1170,17 @@ w:localProviderObservationReview a p:Finding ;
     p:source w:localProviderReceipt .
 
 w:localProviderLifecycle p:addresses w:localProviderBarrierReview, w:localProviderObservationReview .
+
+w:nativeConfiguredProfileInit a p:Task ;
+    rdfs:label "Initialize a private file profile from saved configuration and current journal rows" ;
+    p:milestone w:marmishMilestone ; p:source w:nativeFileProfilePlan ; p:status p:done ;
+    p:dependsOn w:nativeFileProfileStores ;
+    p:acceptance "Verify state selection, private config reads, public reference binding, replay floor transitions and metrics before upstream can repair the candidate state." ;
+    p:evidence w:nativeConfiguredProfileInitReceipt .
+w:nativeConfiguredProfileInitReceipt a p:Artifact ;
+    p:location "companion:verification/whole/status/configured-init-macos-arm64.json" .
+
+w:nativeConfiguredRelayPolicyFinding a p:Finding ;
+    rdfs:label "Make URL restrictions part of the declared policy" ;
+    p:source w:nativeFileProfilePlan .
+w:nativeConfiguredProfileInit p:addresses w:nativeConfiguredRelayPolicyFinding .
