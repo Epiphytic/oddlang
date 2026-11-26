@@ -10,4 +10,3 @@ fn check_relays<'a>(route: Option<&str>, relays: impl Iterator<Item = &'a String
     }
     Ok(())
 }
-
