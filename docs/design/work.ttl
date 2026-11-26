@@ -2705,6 +2705,26 @@ w:requiredNullableGarden a p:Artifact ;
     p:location "verification/wire-schema/verify.py" .
 w:basicCommandInterop p:dependsOn w:requiredNullableWire .
 
+w:composedBasicOwnerCandidate a p:Task ;
+    rdfs:label "Compose and qualify generated setup, provider and local client roles" ;
+    p:milestone w:marmishMilestone ;
+    p:source w:basicCommandInteropPlan ;
+    p:dependsOn w:leasedProfileSetup, w:generatedRelayActivation, w:localOwnerWorkflow ;
+    p:status p:done ;
+    p:acceptance "Build one pinned companion candidate, qualify setup and authenticated provider activation in both mixed peer directions, and replay the local client handoff against a bounded fixture." ;
+    p:evidence w:composedBasicOwnerBuild, w:composedBasicOwnerReplay, w:composedGeneratedClientActivation, w:composedGeneratedServerActivation .
+w:composedBasicOwnerBuild a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b4e9c2ad3434d79740a05d7b4ec078ee59f24728/verification/whole/basic-command-interop/composed-basic-owner-build-aarch64-apple-darwin.json" .
+w:composedBasicOwnerReplay a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b4e9c2ad3434d79740a05d7b4ec078ee59f24728/verification/whole/basic-command-interop/COMPOSED-OWNER.md" .
+w:basicCommandInterop p:dependsOn w:composedBasicOwnerCandidate .
+w:composedGeneratedClientActivation a p:Artifact ;
+    rdfs:label "Generated client and upstream server activation and cleanup on macOS ARM64" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/9fc7d3ba8e4f474f4950cf9cc0307c28d5c1de21/verification/whole/basic-command-interop/composed-mixed-activation-generated-client-upstream-server-macos-arm64.json" .
+w:composedGeneratedServerActivation a p:Artifact ;
+    rdfs:label "Upstream client and generated server activation and cleanup on macOS ARM64" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/9fc7d3ba8e4f474f4950cf9cc0307c28d5c1de21/verification/whole/basic-command-interop/composed-mixed-activation-upstream-client-generated-server-macos-arm64.json" .
+
 w:unitEnumWire a p:Task ;
     rdfs:label "Recover and project named unit enums in wire records" ;
     p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
