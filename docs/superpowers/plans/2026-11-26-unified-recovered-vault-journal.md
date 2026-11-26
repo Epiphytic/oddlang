@@ -14,7 +14,9 @@ core, stream and engine member pins. Keep the fixed vault member and
 source-derived report inputs. Scope remains the selected public data
 contracts and release reporting.
 
-- [ ] Join the compiler branches and rerun the unrelated public record and fixed-value fixtures.
-- [ ] Assemble the combined locked workspace with the journal component and check source, Cargo and sibling-member hashes.
-- [ ] Run the fixed-width vault test and direct ownership probe, all selected native release-info invocations, and the complete named journal caller against the one sealed product.
-- [ ] Review and publish the compiler branch and companion evidence. Retain all preceding release locks.
+- [x] Join the compiler branches and rerun the unrelated public record and fixed-value fixtures.
+- [x] Assemble the combined locked workspace with the journal component and check source, Cargo and sibling-member hashes.
+- [x] Run the fixed-width vault test and direct ownership probe, all selected native release-info invocations, and the complete named journal caller against the one sealed product.
+- [x] Review and publish the compiler branch and companion evidence. Retain all preceding release locks.
+
+The [companion qualification](https://github.com/Epiphytic/marmish-oddlang/pull/76) records all three oracles against the same sealed macOS ARM64 release build from compiler `84b173b288ef41b60c87aa45291f3f20ccb44bed`.
