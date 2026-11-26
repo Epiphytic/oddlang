@@ -216,6 +216,7 @@ enum Kind {
     SequenceJournal,
     CliSurface,
     LocalCommandClient,
+    LocalRequestQueue,
     WireSchema,
     WireProtocol,
     BinaryRecord,
@@ -470,6 +471,13 @@ fn project(
         Kind::FileProfile => {
             crate::file_profile::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
             "profile.rs"
+        }
+        Kind::LocalRequestQueue => {
+            if !(dependencies.contains_key("rusqlite") && dependencies.contains_key("sha2")) {
+                return Err("local-request-queue requires pinned rusqlite and sha2 dependencies".into());
+            }
+            crate::local_request_queue::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
+            "queue.rs"
         }
         Kind::LocalCommandClient => {
             crate::local_command_client::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
