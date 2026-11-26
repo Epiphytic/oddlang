@@ -13,43 +13,69 @@ struct Selection {
     source_sha256: String,
 }
 
-fn reserved(name: &syn::Ident) -> bool {
+fn reserved(name: &syn::Ident, extended: bool) -> bool {
     let name = name.to_string();
-    CAPABILITIES.contains(&name.strip_prefix("r#").unwrap_or(&name))
+    let name = name.strip_prefix("r#").unwrap_or(&name);
+    CAPABILITIES.contains(&name) || (extended && name == "Debug")
 }
 
-fn shadow_import(tree: &UseTree, parent: Option<&syn::Ident>) -> bool {
+fn shadow_import(tree: &UseTree, parent: Option<&syn::Ident>, extended: bool) -> bool {
     match tree {
-        UseTree::Path(item) => shadow_import(&item.tree, Some(&item.ident)),
-        UseTree::Name(item) if item.ident == "self" => parent.is_none_or(reserved),
-        UseTree::Name(item) => reserved(&item.ident),
-        UseTree::Rename(item) => reserved(&item.rename),
-        UseTree::Group(item) => item.items.iter().any(|item| shadow_import(item, parent)),
+        UseTree::Path(item) => shadow_import(&item.tree, Some(&item.ident), extended),
+        UseTree::Name(item) if item.ident == "self" => {
+            parent.is_none_or(|name| reserved(name, extended))
+        }
+        UseTree::Name(item) => reserved(&item.ident, extended),
+        UseTree::Rename(item) => reserved(&item.rename, extended),
+        UseTree::Group(item) => item
+            .items
+            .iter()
+            .any(|item| shadow_import(item, parent, extended)),
         UseTree::Glob(_) => true,
     }
 }
 
-fn shadow(item: &Item) -> bool {
+fn shadow(item: &Item, extended: bool) -> bool {
     match item {
-        Item::Use(item) => shadow_import(&item.tree, None),
+        Item::Use(item) => shadow_import(&item.tree, None, extended),
         Item::Mod(item) => {
-            reserved(&item.ident) || item.attrs.iter().any(|a| a.path().is_ident("macro_use"))
-        }
-        Item::ExternCrate(item) => {
-            reserved(item.rename.as_ref().map_or(&item.ident, |(_, alias)| alias))
+            reserved(&item.ident, extended)
                 || item.attrs.iter().any(|a| a.path().is_ident("macro_use"))
         }
-        Item::Enum(item) => reserved(&item.ident),
-        Item::Struct(item) => reserved(&item.ident),
-        Item::Type(item) => reserved(&item.ident),
-        Item::Trait(item) => reserved(&item.ident),
-        Item::TraitAlias(item) => reserved(&item.ident),
-        Item::Macro(item) => item.ident.as_ref().is_some_and(reserved),
+        Item::ExternCrate(item) => {
+            reserved(
+                item.rename.as_ref().map_or(&item.ident, |(_, alias)| alias),
+                extended,
+            ) || item.attrs.iter().any(|a| a.path().is_ident("macro_use"))
+        }
+        Item::Enum(item) => reserved(&item.ident, extended),
+        Item::Struct(item) => reserved(&item.ident, extended),
+        Item::Type(item) => reserved(&item.ident, extended),
+        Item::Trait(item) => reserved(&item.ident, extended),
+        Item::TraitAlias(item) => reserved(&item.ident, extended),
+        Item::Macro(item) => item
+            .ident
+            .as_ref()
+            .is_some_and(|name| reserved(name, extended)),
         _ => false,
     }
 }
 
+struct Capabilities {
+    copy: bool,
+    debug: bool,
+    equality: Equality,
+}
+
 fn ordinary_derives(item: &syn::ItemEnum, debug: bool) -> Result<Equality> {
+    let capabilities = fieldless_derives(item)?;
+    if !capabilities.copy || capabilities.debug != debug {
+        return Err("unsupported derives on copyable plain choice".into());
+    }
+    Ok(capabilities.equality)
+}
+
+fn fieldless_derives(item: &syn::ItemEnum) -> Result<Capabilities> {
     let attrs: Vec<_> = item
         .attrs
         .iter()
@@ -75,20 +101,23 @@ fn ordinary_derives(item: &syn::ItemEnum, debug: bool) -> Result<Equality> {
         .collect();
     if derives.len() != args.len()
         || !derives.contains("Clone")
-        || !derives.contains("Copy")
-        || derives.contains("Debug") != debug
         || derives
             .iter()
             .any(|name| !CAPABILITIES.contains(&name.as_str()) && name != "Debug")
     {
         return Err("unsupported derives on copyable plain choice".into());
     }
-    match (derives.contains("PartialEq"), derives.contains("Eq")) {
-        (true, true) => Ok(Equality::Total),
-        (true, false) => Ok(Equality::Partial),
-        (false, false) => Ok(Equality::None),
-        (false, true) => Err("plain choice Eq requires PartialEq".into()),
-    }
+    let equality = match (derives.contains("PartialEq"), derives.contains("Eq")) {
+        (true, true) => Equality::Total,
+        (true, false) => Equality::Partial,
+        (false, false) => Equality::None,
+        (false, true) => return Err("plain choice Eq requires PartialEq".into()),
+    };
+    Ok(Capabilities {
+        copy: derives.contains("Copy"),
+        debug: derives.contains("Debug"),
+        equality,
+    })
 }
 
 fn names(ident: &syn::Ident, expected: &str) -> bool {
@@ -194,7 +223,10 @@ fn unit_cases(item: &syn::ItemEnum) -> Result<Vec<String>> {
 
 fn extract(source: &str, selection: &Selection) -> Result<(Graph, Binding)> {
     let file = syn::parse_file(source).map_err(|e| e.to_string())?;
-    if !file.attrs.iter().all(|attr| attr.path().is_ident("doc")) || file.items.iter().any(shadow) {
+    let extended = selection.format == "oddlang-plain-choice-selection-v2";
+    if !file.attrs.iter().all(|attr| attr.path().is_ident("doc"))
+        || file.items.iter().any(|item| shadow(item, extended))
+    {
         return Err("plain choice source may shadow standard derives".into());
     }
     let mut selected = file.items.iter().filter_map(|item| match item {
@@ -216,7 +248,19 @@ fn extract(source: &str, selection: &Selection) -> Result<(Graph, Binding)> {
     let mut cases = Vec::new();
     let mut names = BTreeMap::new();
     let type_id = format!("{}:type", selection.id);
-    let equality = ordinary_derives(item, false)?;
+    let Capabilities {
+        copy,
+        debug,
+        equality,
+    } = if extended {
+        fieldless_derives(item)?
+    } else {
+        Capabilities {
+            copy: true,
+            debug: false,
+            equality: ordinary_derives(item, false)?,
+        }
+    };
     for label in unit_cases(item)? {
         let id = format!("{type_id}:{label}");
         names.insert(id.clone(), label);
@@ -230,6 +274,8 @@ fn extract(source: &str, selection: &Selection) -> Result<(Graph, Binding)> {
             Definition::Choice {
                 cases: cases.clone(),
                 equality,
+                copy,
+                debug,
             },
         )]),
     };
@@ -240,7 +286,7 @@ fn extract(source: &str, selection: &Selection) -> Result<(Graph, Binding)> {
             Native {
                 name: selection.name.clone(),
                 order: cases,
-                traits: vec![Derived::Copy],
+                traits: if copy { vec![Derived::Copy] } else { vec![] },
                 view: None,
                 parse: None,
                 shape: None,
@@ -260,8 +306,10 @@ pub fn recover(source: &Path, selection: &Path, output: &Path) -> Result<()> {
     let selected: Selection = serde_json::from_slice(&raw).map_err(|e| e.to_string())?;
     let source = fs::read_to_string(source).map_err(|e| e.to_string())?;
     let source_digest = digest(source.as_bytes());
-    if selected.format != "oddlang-plain-choice-selection-v1"
-        || selected.source_sha256 != source_digest
+    if !matches!(
+        selected.format.as_str(),
+        "oddlang-plain-choice-selection-v1" | "oddlang-plain-choice-selection-v2"
+    ) || selected.source_sha256 != source_digest
     {
         return Err("plain choice selector version or source digest mismatch".into());
     }

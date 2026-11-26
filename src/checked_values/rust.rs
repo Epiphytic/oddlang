@@ -313,6 +313,18 @@ pub(crate) fn render_plain_choice<'a>(
     equality: Equality,
     debug: bool,
 ) {
+    render_fieldless_choice(out, name, cases, equality, true, debug);
+}
+
+fn render_fieldless_choice<'a>(
+    out: &mut String,
+    name: &str,
+    cases: impl Iterator<Item = &'a str>,
+    equality: Equality,
+    copy: bool,
+    debug: bool,
+) {
+    let copy = if copy { ", Copy" } else { "" };
     let equality = match equality {
         Equality::None => "",
         Equality::Partial => ", PartialEq",
@@ -321,7 +333,7 @@ pub(crate) fn render_plain_choice<'a>(
     let debug = if debug { ", Debug" } else { "" };
     writeln!(
         out,
-        "#[derive(Clone, Copy{equality}{debug})]\npub enum {name} {{"
+        "#[derive(Clone{copy}{equality}{debug})]\npub enum {name} {{"
     )
     .unwrap();
     for case in cases {
@@ -344,12 +356,18 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
             Definition::FixedBytes {
                 length, failure, ..
             } => fixed_bytes(&mut out, *length, &binding.errors[failure], target),
-            Definition::Choice { cases, equality } => render_plain_choice(
+            Definition::Choice {
+                cases,
+                equality,
+                copy,
+                debug,
+            } => render_fieldless_choice(
                 &mut out,
                 &target.name,
                 cases.iter().map(|case| binding.variants[case].as_str()),
                 *equality,
-                false,
+                *copy,
+                *debug,
             ),
             Definition::Enum { values, failure } => {
                 enumeration(&mut out, values, failure.as_deref(), binding, target)

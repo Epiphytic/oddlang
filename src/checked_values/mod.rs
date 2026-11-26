@@ -54,6 +54,10 @@ enum Definition {
         cases: Vec<String>,
         #[serde(default, skip_serializing_if = "Equality::is_total")]
         equality: Equality,
+        #[serde(default = "default_copy", skip_serializing_if = "is_copy")]
+        copy: bool,
+        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+        debug: bool,
     },
     #[serde(rename = "fixed-bytes")]
     FixedBytes {
@@ -76,6 +80,14 @@ enum Definition {
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         guards: Vec<Guard>,
     },
+}
+
+fn default_copy() -> bool {
+    true
+}
+
+fn is_copy(copy: &bool) -> bool {
+    *copy
 }
 
 #[derive(Deserialize, Serialize)]
@@ -302,10 +314,14 @@ impl Graph {
                     }
                     errors.insert(failure);
                 }
-                Definition::Choice { cases, .. } => {
+                Definition::Choice { cases, copy, .. } => {
                     if cases.is_empty()
                         || native.order != *cases
-                        || native.traits != [Derived::Copy]
+                        || (if *copy {
+                            native.traits != [Derived::Copy]
+                        } else {
+                            !native.traits.is_empty()
+                        })
                         || native.view.is_some()
                         || native.parse.is_some()
                         || native.shape.is_some()
@@ -525,14 +541,18 @@ pub fn build(graph: &Path, overlay: &Path, output: &Path) -> Result<()> {
             let expected = match definition {
                 Definition::FixedBytes { length, failure, on_drop } =>
                     json!({"length":length,"failure":failure,"onDrop":on_drop,"view":"borrow","input":"exact-bytes"}),
-                Definition::Choice { cases, equality } => json!({
-                    "orderedCases":cases,"copy":true,"equality":match equality {
-                        Equality::None => "none",
-                        Equality::Partial => "partial-case-identity",
-                        Equality::Total => "case-identity",
-                    },
-                    "externalRepresentation":null, "targetOrdinals":"zero-based-declaration-order"
-                }),
+                Definition::Choice { cases, equality, copy, debug } => {
+                    let mut expected = json!({
+                        "orderedCases":cases,"copy":copy,"equality":match equality {
+                            Equality::None => "none",
+                            Equality::Partial => "partial-case-identity",
+                            Equality::Total => "case-identity",
+                        },
+                        "externalRepresentation":null, "targetOrdinals":"zero-based-declaration-order"
+                    });
+                    if *debug { expected["debug"] = json!("derived-variant-name"); }
+                    expected
+                },
                 Definition::Enum { values, failure } => json!({"values":values,"failure":failure}),
                 Definition::Record { fields, constructor, guards } =>
                     json!({"fields":fields,"constructor":constructor,"orderedGuards":guards}),

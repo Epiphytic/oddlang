@@ -1753,3 +1753,8 @@ w:pointerWidthLocalGlobReview a p:Finding ;
     rdfs:label "Keep locally bound glob prefixes out of the unresolved dependency path" ;
     p:source w:pointerWidthRecordFixture .
 w:pointerWidthPublicRecords p:addresses w:pointerWidthLocalGlobReview .
+w:fieldlessChoiceCapabilities a p:Task ;
+    rdfs:label "Recover optional copying and derived variant-name formatting for public fieldless choices" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:plainValueChoices ; p:status p:active ;
+    p:acceptance "Preserve historical copyable graph bytes, compare an unrelated Rust fixture, and verify unchanged consumers of pinned original and generated engine choices with real source order and trait mutations on both ARM64 hosts." .
