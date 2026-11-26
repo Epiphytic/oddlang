@@ -76,7 +76,23 @@ struct Alias {
 #[serde(deny_unknown_fields)]
 struct StringEnum {
     id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    numbers: Option<Numbering>,
     variants: Vec<WireVariant>,
+}
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct Numbering {
+    #[serde(deserialize_with = "unique_map")]
+    tags: BTreeMap<String, u8>,
+    unknown: NumberError,
+}
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct NumberError {
+    id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    argument: Option<serde_json::Value>,
 }
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -88,6 +104,12 @@ struct WireVariant {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct Binding {
     format: String,
+    #[serde(
+        default,
+        skip_serializing_if = "BTreeMap::is_empty",
+        deserialize_with = "unique_map"
+    )]
+    external_error_types: BTreeMap<String, String>,
     #[serde(deserialize_with = "unique_map")]
     names: BTreeMap<String, String>,
     #[serde(default, deserialize_with = "unique_map")]
@@ -262,31 +284,79 @@ impl Graph {
             }
         }
         for e in &self.string_enums {
+            if let Some(numbering) = &e.numbers {
+                let ids = e.variants.iter().map(|v| &v.id).collect::<BTreeSet<_>>();
+                if !numbering.tags.keys().eq(ids)
+                    || numbering.tags.values().collect::<BTreeSet<_>>().len()
+                        != numbering.tags.len()
+                {
+                    return Err(format!(
+                        "byte tags must cover every variant uniquely: {}",
+                        e.id
+                    ));
+                }
+                let (_, v) = self.error_variant(&numbering.unknown.id)?;
+                let argument = numbering.unknown.argument.as_ref();
+                let matches = match v.payload {
+                    Payload::None => argument.is_none(),
+                    Payload::Text => argument.is_some_and(|v| v.is_string()),
+                    Payload::Bool => argument.is_some_and(|v| v.is_boolean()),
+                    Payload::U64 => argument.is_some_and(|v| v.is_u64()),
+                };
+                if !matches {
+                    return Err(format!("invalid number error payload: {}", v.id));
+                }
+            }
             let mut wires = BTreeSet::new();
             if e.variants.iter().any(|v| !wires.insert(&v.wire)) {
                 return Err(format!("duplicate wire spelling: {}", e.id));
             }
         }
+        for (id, path) in &binding.external_error_types {
+            if !self.errors.iter().any(|e| &e.id == id)
+                || !rust_type_path(path)
+                || !path.contains("::")
+                || path.rsplit("::").next() != Some(binding.name(id)?)
+            {
+                return Err(format!("invalid external error type binding: {id}"));
+            }
+        }
         Ok(())
+    }
+    fn error_variant(&self, id: &str) -> Result<(&ErrorType, &ErrorVariant)> {
+        self.errors
+            .iter()
+            .find_map(|e| e.variants.iter().find(|v| v.id == id).map(|v| (e, v)))
+            .ok_or_else(|| format!("unresolved number error variant: {id}"))
     }
 }
 
+fn native_ident(name: &str) -> bool {
+    name.bytes()
+        .next()
+        .is_some_and(|ch| ch.is_ascii_alphabetic())
+        && name
+            .bytes()
+            .all(|ch| ch.is_ascii_alphanumeric() || ch == b'_')
+        && name != "gen"
+        && syn::parse_str::<syn::Ident>(name).is_ok()
+}
+fn rust_type_path(path: &str) -> bool {
+    let mut names = path.split("::");
+    let Some(first) = names.next() else {
+        return false;
+    };
+    let parts: Vec<_> = names.collect();
+    (native_ident(first) || (!parts.is_empty() && matches!(first, "crate" | "super" | "self")))
+        && parts.iter().all(|name| native_ident(name))
+}
 impl Binding {
     fn name(&self, id: &str) -> Result<&str> {
         let name = self
             .names
             .get(id)
             .ok_or_else(|| format!("unbound declaration: {id}"))?;
-        if !name
-            .bytes()
-            .next()
-            .is_some_and(|ch| ch.is_ascii_alphabetic())
-            || !name
-                .bytes()
-                .all(|ch| ch.is_ascii_alphanumeric() || ch == b'_')
-            || name == "gen"
-            || syn::parse_str::<syn::Ident>(name).is_err()
-        {
+        if !native_ident(name) {
             return Err(format!("invalid Rust name: {name}"));
         }
         Ok(name)

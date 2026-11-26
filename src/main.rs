@@ -27,6 +27,18 @@ fn run(args: &[String]) -> Result<(), String> {
         [cmd,kind,target,manifest,out] if cmd=="build" && kind=="native-workspace" && target=="rust" =>
             oddlang::native_workspace::build(manifest.as_ref(),out.as_ref()),
 
+        [cmd, kind, target, shape, shape_binding, protocol, protocol_binding, output]
+            if cmd == "build" && kind == "wire-protocol" && target == "rust" => {
+                oddlang::wire_schema::protocol::build(shape.as_ref(), shape_binding.as_ref(), protocol.as_ref(), protocol_binding.as_ref(), output.as_ref())
+            }
+        [cmd, kind, source, selection, output]
+            if cmd == "recover" && kind == "wire-schema" => {
+                oddlang::wire_schema::recover::from_source(source.as_ref(), selection.as_ref(), output.as_ref())
+            }
+        [cmd, kind, target, graph, overlay, output]
+            if cmd == "build" && kind == "wire-schema" && target == "rust" => {
+                oddlang::wire_schema::build(graph.as_ref(), overlay.as_ref(), output.as_ref())
+            }
         [cmd, kind, target, graph, overlay, output]
             if cmd == "build" && kind == "integrity-block" && target == "rust" => {
                 oddlang::integrity_block::build(graph.as_ref(), overlay.as_ref(), output.as_ref())

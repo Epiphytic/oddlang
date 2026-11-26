@@ -26,3 +26,4 @@ pub mod value_domain;
 pub mod wasm;
 
 pub mod native_workspace;
+pub mod wire_schema;
