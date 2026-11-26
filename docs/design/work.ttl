@@ -818,3 +818,13 @@ w:typedFieldRelationReview a p:Finding ;
     rdfs:label "Require native equality and copy capabilities and compile assembled relation components" ;
     p:source w:typedFieldRelationFixture .
 w:typedFieldRelations p:addresses w:typedFieldRelationReview .
+
+w:binaryMetadataErrorReview a p:Finding ;
+    rdfs:label "Separate parse-time offsets and tags from deferred Manifest field and metadata errors" ;
+    p:source w:binaryMetadataFixture .
+w:binaryMetadataRecords p:addresses w:binaryMetadataErrorReview .
+w:copyManifestQualification a p:Task ; rdfs:label "Qualify a native copy Manifest and Mtime" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned ;
+    p:dependsOn w:binaryMetadataRecords ;
+    p:acceptance "Compare source-free Manifest validation, binary encoding, decoding, namespace and canonical SHA-256 with the pinned original." .
+w:wholeMarmishProtocols p:dependsOn w:copyManifestQualification .
