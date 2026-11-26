@@ -221,7 +221,12 @@ pub(crate) fn validate_callbacks(
                 RequiredArgument::String => matches!(arg.kind, Some(ValueKind::String)),
                 RequiredArgument::Path => matches!(arg.kind, Some(ValueKind::Path)),
             };
-            if arg.repeated || !kind_matches {
+            // Clap stores subcommand-local options on a different ArgMatches.
+            // Global inheritance prevents both ID and spelling shadowing.
+            if arg.repeated
+                || !kind_matches
+                || ((!graph.root.subcommands.is_empty() || graph.external) && !arg.global)
+            {
                 return Err(format!(
                     "handler {operation:?} has incompatible argument {name:?}"
                 ));
