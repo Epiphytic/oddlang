@@ -81,6 +81,7 @@ enum Kind {
     EndpointSet,
     IntegrityBlock,
     SharedDeclarations,
+    SequenceJournal,
 }
 
 #[derive(Deserialize)]
@@ -164,6 +165,14 @@ fn project(
             let binding = crate::endpoint_set::overlay_digest(&overlay)?;
             crate::endpoint_set::build(&path, &pin, Some((&overlay, &binding)), &output)?;
             "endpoint_set.rs"
+        }
+        Kind::SequenceJournal => {
+            let path = input.join("graph.json");
+            io(fs::write(&path, graph))?;
+            let graph_pin = crate::sequence_journal::digest(&path)?;
+            let binding_pin = crate::sequence_journal::overlay_digest(&overlay)?;
+            crate::sequence_journal::build(&path, &graph_pin, &overlay, &binding_pin, &output)?;
+            "sequence_journal.rs"
         }
     };
     let bytes = io(fs::read(output.join(source)))?;

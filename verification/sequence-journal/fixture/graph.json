@@ -1,0 +1,851 @@
+{
+  "format": "oddlang-sequence-journal-v1",
+  "limits": {
+    "max-bytes": {
+      "size": 5
+    },
+    "max-records": {
+      "size": 2
+    },
+    "max-append": {
+      "size": 3
+    },
+    "max-receipts": {
+      "size": 2
+    },
+    "max-cursor": {
+      "cursor": "7"
+    },
+    "absolute-max": {
+      "cursor": "18446744073709551615"
+    },
+    "no-receipts": {
+      "size": 0
+    }
+  },
+  "errors": [
+    "urn:telemetry-queue:Bounds",
+    "urn:telemetry-queue:Cursor",
+    "urn:telemetry-queue:Gap",
+    "urn:telemetry-queue:Conflict",
+    "urn:telemetry-queue:Stale",
+    "urn:telemetry-queue:Closed"
+  ],
+  "expressions": {
+    "len": {
+      "op": "size-of",
+      "args": [
+        {
+          "arg": "payload"
+        }
+      ]
+    },
+    "next": {
+      "op": "advance",
+      "args": [
+        {
+          "arg": "offset"
+        },
+        {
+          "expr": "len"
+        }
+      ]
+    },
+    "bad-size": {
+      "op": "or",
+      "args": [
+        {
+          "op": "equal",
+          "args": [
+            {
+              "expr": "len"
+            },
+            {
+              "size": 0
+            }
+          ]
+        },
+        {
+          "op": "greater",
+          "args": [
+            {
+              "expr": "len"
+            },
+            {
+              "limit": "max-append"
+            }
+          ]
+        }
+      ]
+    },
+    "usable": {
+      "op": "choose",
+      "args": [
+        {
+          "op": "or",
+          "args": [
+            {
+              "op": "exists",
+              "args": [
+                {
+                  "fact": "final"
+                }
+              ]
+            },
+            {
+              "op": "equal",
+              "args": [
+                {
+                  "fact": "record-credit"
+                },
+                {
+                  "size": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "size": 0
+        },
+        {
+          "fact": "byte-credit"
+        }
+      ]
+    }
+  },
+  "states": [
+    {
+      "id": "urn:telemetry-queue:state",
+      "byteCapacity": "max-bytes",
+      "recordCapacity": "max-records",
+      "appendLimit": "max-append",
+      "receiptCapacity": "max-receipts",
+      "cursorLimit": "max-cursor",
+      "initialCursor": "0"
+    },
+    {
+      "id": "urn:telemetry-queue:near-cursor-limit",
+      "byteCapacity": "max-bytes",
+      "recordCapacity": "max-records",
+      "appendLimit": "max-append",
+      "receiptCapacity": "no-receipts",
+      "cursorLimit": "absolute-max",
+      "initialCursor": "18446744073709551614"
+    }
+  ],
+  "operations": [
+    {
+      "id": "urn:telemetry-queue:usable",
+      "state": "urn:telemetry-queue:state",
+      "access": "read",
+      "params": [],
+      "result": "size",
+      "fallible": false,
+      "cases": [
+        {
+          "id": "urn:telemetry-queue:usable:0",
+          "when": [],
+          "value": {
+            "expr": "usable"
+          },
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "urn:telemetry-queue:buffered",
+      "state": "urn:telemetry-queue:state",
+      "access": "read",
+      "params": [],
+      "result": "size",
+      "fallible": false,
+      "cases": [
+        {
+          "id": "urn:telemetry-queue:buffered:0",
+          "when": [],
+          "value": {
+            "fact": "buffered"
+          },
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "urn:telemetry-queue:remaining_bytes",
+      "state": "urn:telemetry-queue:state",
+      "access": "read",
+      "params": [],
+      "result": "size",
+      "fallible": false,
+      "cases": [
+        {
+          "id": "urn:telemetry-queue:remaining_bytes:0",
+          "when": [],
+          "value": {
+            "fact": "byte-credit"
+          },
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "urn:telemetry-queue:record_count",
+      "state": "urn:telemetry-queue:state",
+      "access": "read",
+      "params": [],
+      "result": "size",
+      "fallible": false,
+      "cases": [
+        {
+          "id": "urn:telemetry-queue:record_count:0",
+          "when": [],
+          "value": {
+            "fact": "record-count"
+          },
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "urn:telemetry-queue:end",
+      "state": "urn:telemetry-queue:state",
+      "access": "read",
+      "params": [],
+      "result": "cursor",
+      "fallible": false,
+      "cases": [
+        {
+          "id": "urn:telemetry-queue:end:0",
+          "when": [],
+          "value": {
+            "fact": "end"
+          },
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "urn:telemetry-queue:oldest_receipt",
+      "state": "urn:telemetry-queue:state",
+      "access": "read",
+      "params": [],
+      "result": "optional-cursor",
+      "fallible": false,
+      "cases": [
+        {
+          "id": "urn:telemetry-queue:oldest_receipt:0",
+          "when": [],
+          "value": {
+            "fact": "front-receipt-end"
+          },
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "urn:telemetry-queue:latest_receipt",
+      "state": "urn:telemetry-queue:state",
+      "access": "read",
+      "params": [],
+      "result": "optional-cursor",
+      "fallible": false,
+      "cases": [
+        {
+          "id": "urn:telemetry-queue:latest_receipt:0",
+          "when": [],
+          "value": {
+            "fact": "last-receipt-end"
+          },
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "urn:telemetry-queue:ack",
+      "state": "urn:telemetry-queue:state",
+      "access": "write",
+      "params": [
+        {
+          "name": "cursor",
+          "type": "cursor"
+        }
+      ],
+      "result": "unit",
+      "fallible": true,
+      "cases": [
+        {
+          "id": "urn:telemetry-queue:ack:0",
+          "when": [
+            {
+              "op": "or",
+              "args": [
+                {
+                  "op": "less",
+                  "args": [
+                    {
+                      "arg": "cursor"
+                    },
+                    {
+                      "fact": "start"
+                    }
+                  ]
+                },
+                {
+                  "op": "greater",
+                  "args": [
+                    {
+                      "arg": "cursor"
+                    },
+                    {
+                      "fact": "end"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "reject": "urn:telemetry-queue:Cursor"
+        },
+        {
+          "id": "urn:telemetry-queue:ack:1",
+          "when": [],
+          "value": {
+            "unit": true
+          },
+          "effects": [
+            {
+              "kind": "trim",
+              "error": "urn:telemetry-queue:Cursor",
+              "cursor": {
+                "arg": "cursor"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "urn:telemetry-queue:close",
+      "state": "urn:telemetry-queue:state",
+      "access": "write",
+      "params": [
+        {
+          "name": "cursor",
+          "type": "cursor"
+        }
+      ],
+      "result": "unit",
+      "fallible": true,
+      "cases": [
+        {
+          "id": "urn:telemetry-queue:close:0",
+          "when": [],
+          "value": {
+            "unit": true
+          },
+          "effects": [
+            {
+              "kind": "finish",
+              "error": "urn:telemetry-queue:Cursor",
+              "cursor": {
+                "arg": "cursor"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "urn:telemetry-queue:view",
+      "state": "urn:telemetry-queue:state",
+      "access": "read",
+      "params": [
+        {
+          "name": "cursor",
+          "type": "cursor"
+        },
+        {
+          "name": "limit",
+          "type": "size"
+        }
+      ],
+      "result": "bytes",
+      "fallible": true,
+      "cases": [
+        {
+          "id": "urn:telemetry-queue:view:0",
+          "when": [
+            {
+              "op": "or",
+              "args": [
+                {
+                  "op": "less",
+                  "args": [
+                    {
+                      "arg": "cursor"
+                    },
+                    {
+                      "fact": "start"
+                    }
+                  ]
+                },
+                {
+                  "op": "greater",
+                  "args": [
+                    {
+                      "arg": "cursor"
+                    },
+                    {
+                      "fact": "end"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "reject": "urn:telemetry-queue:Cursor"
+        },
+        {
+          "id": "urn:telemetry-queue:view:1",
+          "when": [
+            {
+              "op": "or",
+              "args": [
+                {
+                  "op": "equal",
+                  "args": [
+                    {
+                      "arg": "limit"
+                    },
+                    {
+                      "size": 0
+                    }
+                  ]
+                },
+                {
+                  "op": "greater",
+                  "args": [
+                    {
+                      "arg": "limit"
+                    },
+                    {
+                      "limit": "max-append"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "reject": "urn:telemetry-queue:Bounds"
+        },
+        {
+          "id": "urn:telemetry-queue:view:2",
+          "when": [],
+          "value": {
+            "op": "slice",
+            "args": [
+              {
+                "arg": "cursor"
+              },
+              {
+                "arg": "limit"
+              }
+            ]
+          },
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "urn:telemetry-queue:post",
+      "state": "urn:telemetry-queue:state",
+      "access": "write",
+      "params": [
+        {
+          "name": "offset",
+          "type": "cursor"
+        },
+        {
+          "name": "payload",
+          "type": "bytes"
+        }
+      ],
+      "result": "flag",
+      "fallible": true,
+      "cases": [
+        {
+          "id": "urn:telemetry-queue:post:0",
+          "when": [
+            {
+              "expr": "bad-size"
+            }
+          ],
+          "reject": "urn:telemetry-queue:Bounds"
+        },
+        {
+          "id": "urn:telemetry-queue:post:1",
+          "when": [
+            {
+              "op": "not",
+              "args": [
+                {
+                  "op": "exists",
+                  "args": [
+                    {
+                      "expr": "next"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "reject": "urn:telemetry-queue:Cursor"
+        },
+        {
+          "id": "urn:telemetry-queue:post:2",
+          "when": [
+            {
+              "op": "less",
+              "args": [
+                {
+                  "arg": "offset"
+                },
+                {
+                  "fact": "end"
+                }
+              ]
+            },
+            {
+              "op": "same-receipt",
+              "args": [
+                {
+                  "arg": "offset"
+                },
+                {
+                  "expr": "next"
+                },
+                {
+                  "arg": "payload"
+                }
+              ]
+            }
+          ],
+          "value": {
+            "flag": false
+          },
+          "effects": []
+        },
+        {
+          "id": "urn:telemetry-queue:post:3",
+          "when": [
+            {
+              "op": "less",
+              "args": [
+                {
+                  "arg": "offset"
+                },
+                {
+                  "fact": "end"
+                }
+              ]
+            },
+            {
+              "op": "has-receipt",
+              "args": [
+                {
+                  "arg": "offset"
+                }
+              ]
+            }
+          ],
+          "reject": "urn:telemetry-queue:Conflict"
+        },
+        {
+          "id": "urn:telemetry-queue:post:4",
+          "when": [
+            {
+              "op": "less",
+              "args": [
+                {
+                  "arg": "offset"
+                },
+                {
+                  "fact": "end"
+                }
+              ]
+            }
+          ],
+          "reject": "urn:telemetry-queue:Stale"
+        },
+        {
+          "id": "urn:telemetry-queue:post:5",
+          "when": [
+            {
+              "op": "greater",
+              "args": [
+                {
+                  "arg": "offset"
+                },
+                {
+                  "fact": "end"
+                }
+              ]
+            }
+          ],
+          "reject": "urn:telemetry-queue:Gap"
+        },
+        {
+          "id": "urn:telemetry-queue:post:6",
+          "when": [
+            {
+              "op": "exists",
+              "args": [
+                {
+                  "fact": "final"
+                }
+              ]
+            }
+          ],
+          "reject": "urn:telemetry-queue:Closed"
+        },
+        {
+          "id": "urn:telemetry-queue:post:7",
+          "when": [
+            {
+              "op": "greater",
+              "args": [
+                {
+                  "expr": "len"
+                },
+                {
+                  "expr": "usable"
+                }
+              ]
+            }
+          ],
+          "reject": "urn:telemetry-queue:Bounds"
+        },
+        {
+          "id": "urn:telemetry-queue:post:8",
+          "when": [
+            {
+              "op": "equal",
+              "args": [
+                {
+                  "fact": "receipt-credit"
+                },
+                {
+                  "size": 0
+                }
+              ]
+            },
+            {
+              "op": "not",
+              "args": [
+                {
+                  "op": "front-receipt-evictable",
+                  "args": []
+                }
+              ]
+            }
+          ],
+          "reject": "urn:telemetry-queue:Bounds"
+        },
+        {
+          "id": "urn:telemetry-queue:post:9",
+          "when": [
+            {
+              "op": "equal",
+              "args": [
+                {
+                  "fact": "receipt-credit"
+                },
+                {
+                  "size": 0
+                }
+              ]
+            }
+          ],
+          "value": {
+            "flag": true
+          },
+          "effects": [
+            {
+              "kind": "append",
+              "error": "urn:telemetry-queue:Bounds",
+              "bytes": {
+                "arg": "payload"
+              }
+            },
+            {
+              "kind": "evict-receipt",
+              "error": "urn:telemetry-queue:Bounds"
+            },
+            {
+              "kind": "remember",
+              "error": "urn:telemetry-queue:Cursor",
+              "cursor": {
+                "arg": "offset"
+              },
+              "bytes": {
+                "arg": "payload"
+              }
+            }
+          ]
+        },
+        {
+          "id": "urn:telemetry-queue:post:10",
+          "when": [],
+          "value": {
+            "flag": true
+          },
+          "effects": [
+            {
+              "kind": "append",
+              "error": "urn:telemetry-queue:Bounds",
+              "bytes": {
+                "arg": "payload"
+              }
+            },
+            {
+              "kind": "remember",
+              "error": "urn:telemetry-queue:Cursor",
+              "cursor": {
+                "arg": "offset"
+              },
+              "bytes": {
+                "arg": "payload"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "urn:telemetry-queue:probe_rollback",
+      "state": "urn:telemetry-queue:state",
+      "access": "write",
+      "params": [
+        {
+          "name": "payload",
+          "type": "bytes"
+        }
+      ],
+      "result": "unit",
+      "fallible": true,
+      "cases": [
+        {
+          "id": "urn:telemetry-queue:probe_rollback:0",
+          "when": [],
+          "value": {
+            "unit": true
+          },
+          "effects": [
+            {
+              "kind": "append",
+              "error": "urn:telemetry-queue:Bounds",
+              "bytes": {
+                "arg": "payload"
+              }
+            },
+            {
+              "kind": "remember",
+              "error": "urn:telemetry-queue:Cursor",
+              "cursor": {
+                "limit": "max-cursor"
+              },
+              "bytes": {
+                "arg": "payload"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "urn:telemetry-queue:probe_evict_rollback",
+      "state": "urn:telemetry-queue:state",
+      "access": "write",
+      "params": [
+        {
+          "name": "payload",
+          "type": "bytes"
+        }
+      ],
+      "result": "unit",
+      "fallible": true,
+      "cases": [
+        {
+          "id": "urn:telemetry-queue:probe_evict_rollback:0",
+          "when": [],
+          "value": {
+            "unit": true
+          },
+          "effects": [
+            {
+              "kind": "evict-receipt",
+              "error": "urn:telemetry-queue:Bounds"
+            },
+            {
+              "kind": "append",
+              "error": "urn:telemetry-queue:Bounds",
+              "bytes": {
+                "arg": "payload"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "urn:telemetry-queue:boundary:at_limit",
+      "state": "urn:telemetry-queue:near-cursor-limit",
+      "access": "read",
+      "params": [],
+      "result": "cursor",
+      "fallible": false,
+      "cases": [
+        {
+          "id": "urn:telemetry-queue:boundary:at_limit:0",
+          "when": [],
+          "value": {
+            "fact": "end"
+          },
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "urn:telemetry-queue:boundary:write",
+      "state": "urn:telemetry-queue:near-cursor-limit",
+      "access": "write",
+      "params": [
+        {
+          "name": "bytes",
+          "type": "bytes"
+        }
+      ],
+      "result": "cursor",
+      "fallible": true,
+      "cases": [
+        {
+          "id": "urn:telemetry-queue:boundary:write:0",
+          "when": [],
+          "value": {
+            "fact": "end"
+          },
+          "effects": [
+            {
+              "kind": "append",
+              "bytes": {
+                "arg": "bytes"
+              },
+              "error": "urn:telemetry-queue:Cursor"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

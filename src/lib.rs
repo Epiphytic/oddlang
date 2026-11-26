@@ -17,6 +17,7 @@ pub mod native_package;
 pub mod rust_recovery;
 pub mod rust_roundtrip;
 pub mod shared_declarations;
+pub mod sequence_journal;
 pub mod tagged_wire;
 pub mod targets;
 pub mod value_domain;
