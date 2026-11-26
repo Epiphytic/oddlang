@@ -11,6 +11,12 @@ pub(super) fn derive(graph: &Graph, binding: &Binding) -> Result<Json> {
             json!({"kind":"constant","unsignedDecimal":values[constant.id.as_str()].to_string()}),
         );
     }
+    for constant in &graph.text_constants {
+        cases.insert(
+            &constant.id,
+            json!({"kind":"text-constant","value":constant.value}),
+        );
+    }
     for alias in &graph.results {
         cases.insert(
             &alias.id,
@@ -60,6 +66,31 @@ pub(super) fn derive(graph: &Graph, binding: &Binding) -> Result<Json> {
             unknown.push('?');
         }
         cases.insert(&enumeration.id,json!({"kind":"string-enum","nativeVariantOrder":binding.variant_order[&enumeration.id],"rejectWireString":unknown}));
+        if let Some(n) = &enumeration.numbers {
+            let rejected: Vec<_> = (0u8..=255)
+                .filter(|byte| !n.tags.values().any(|tag| tag == byte))
+                .collect();
+            let (owner, variant) = graph.error_variant(&n.unknown.id)?;
+            let argument = n
+                .unknown
+                .argument
+                .as_ref()
+                .map(|v| {
+                    v.as_str()
+                        .map(str::to_owned)
+                        .unwrap_or_else(|| v.to_string())
+                })
+                .unwrap_or_default();
+            let display: String = variant
+                .message
+                .iter()
+                .map(|seg| match seg {
+                    Segment::Text { text } => text.as_str(),
+                    Segment::Payload { .. } => argument.as_str(),
+                })
+                .collect();
+            cases.get_mut(&enumeration.id).unwrap()["numberAdmission"] = json!({"accept":n.tags,"reject":rejected,"error":n.unknown,"errorType":owner.id,"display":display});
+        }
         for variant in &enumeration.variants {
             cases.insert(&variant.id,json!({"kind":"string-variant","wireString":variant.wire,"encode":true,"decode":true}));
         }

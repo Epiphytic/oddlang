@@ -1,0 +1,9 @@
+{
+  "executable": "telescope",
+  "invalid_exit": 12,
+  "invalid_diagnostic": "telescope: invalid arguments",
+  "uncovered_exit": 125,
+  "operations": {
+    "capture": "urn:observatory:capture"
+  }
+}

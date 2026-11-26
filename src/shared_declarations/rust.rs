@@ -12,6 +12,7 @@ pub(super) fn render(g: &Graph, b: &Binding) -> Result<String> {
             Width::U32 => ("u32", u32::MAX as u64),
             Width::U64 => ("u64", u64::MAX),
             Width::Usize => ("usize", u64::MAX),
+            Width::I64 => ("i64", i64::MAX as u64),
         };
         if value > max {
             return Err(format!("constant exceeds native type: {}", c.id));
@@ -23,7 +24,19 @@ pub(super) fn render(g: &Graph, b: &Binding) -> Result<String> {
         )
         .unwrap();
     }
+    for constant in &g.text_constants {
+        writeln!(
+            out,
+            "pub const {}: &'static ::core::primitive::str = {:?};",
+            b.name(&constant.id)?,
+            constant.value
+        )
+        .unwrap();
+    }
     for e in &g.errors {
+        if b.external_error_types.contains_key(&e.id) {
+            continue;
+        }
         let name = b.name(&e.id)?;
         writeln!(
             out,
@@ -74,23 +87,66 @@ pub(super) fn render(g: &Graph, b: &Binding) -> Result<String> {
             out,
             "pub type {}<__Value> = ::core::result::Result<__Value, {}>;",
             b.name(&a.id)?,
-            b.name(&a.error)?
+            b.external_error_types
+                .get(&a.error)
+                .map(String::as_str)
+                .unwrap_or(b.name(&a.error)?)
         )
         .unwrap();
     }
     for e in &g.string_enums {
+        if e.numbers.is_some() {
+            out.push_str("#[repr(u8)]\n");
+        }
         writeln!(out,"#[derive(Debug, Clone, Copy, PartialEq, Eq, ::serde::Serialize, ::serde::Deserialize)]\npub enum {} {{",b.name(&e.id)?).unwrap();
         let variants: BTreeMap<_, _> = e.variants.iter().map(|v| (&v.id, v)).collect();
         for id in &b.variant_order[&e.id] {
+            let tag = e
+                .numbers
+                .as_ref()
+                .map(|n| format!(" = {}", n.tags[id]))
+                .unwrap_or_default();
             writeln!(
                 out,
-                "    #[serde(rename = {:?})]\n    {},",
+                "    #[serde(rename = {:?})]\n    {}{tag},",
                 variants[id].wire,
                 b.name(id)?
             )
             .unwrap();
         }
         out.push_str("}\n");
+        if let Some(n) = &e.numbers {
+            let name = b.name(&e.id)?;
+            let (owner, variant) = g.error_variant(&n.unknown.id)?;
+            let ty = b
+                .external_error_types
+                .get(&owner.id)
+                .map(String::as_str)
+                .unwrap_or(b.name(&owner.id)?);
+            let variant = b.name(&variant.id)?;
+            let arg = match n.unknown.argument.as_ref() {
+                Some(serde_json::Value::String(s)) => format!("({s:?})"),
+                Some(v) => format!("({v})"),
+                None => String::new(),
+            };
+            writeln!(out,"impl ::core::convert::TryFrom<::core::primitive::u8> for {name} {{\n    type Error = {ty};\n    fn try_from(__byte: ::core::primitive::u8) -> ::core::result::Result<Self,{ty}> {{\n        match __byte {{").unwrap();
+            for (id, tag) in &n.tags {
+                writeln!(
+                    out,
+                    "            {tag} => ::core::result::Result::Ok(Self::{}),",
+                    b.name(id)?
+                )
+                .unwrap();
+            }
+            if n.tags.len() < 256 {
+                writeln!(
+                    out,
+                    "            _ => ::core::result::Result::Err({ty}::{variant}{arg}),"
+                )
+                .unwrap();
+            }
+            out.push_str("        }\n    }\n}\n");
+        }
     }
     Ok(out)
 }
