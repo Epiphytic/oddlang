@@ -797,3 +797,11 @@ w:binaryRecordReview a p:Finding ;
     rdfs:label "Disambiguate binary record errors and compile the native package composition" ;
     p:source w:binaryRecordFixture .
 w:boundedBinaryRecords p:addresses w:binaryRecordReview .
+
+w:typedFieldRelations a p:Task ; rdfs:label "Project typed ordered cross-record relations" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:boundedBinaryRecords, w:typedHashViews ;
+    p:acceptance "Compare typed fields and arguments with explicit short-circuit order and propagate a checked operation error only when reached. Verify each outcome and reject invalid operands." ;
+    p:evidence w:typedFieldRelationFixture .
+w:typedFieldRelationFixture a p:Artifact ; p:location "verification/field-relation/verify.py" .
+w:wholeMarmishProtocols p:dependsOn w:typedFieldRelations .

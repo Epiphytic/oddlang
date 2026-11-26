@@ -71,3 +71,5 @@ The principal feasibility risk is recovering intended behavior where only incide
 - [x] Project ordered typed hashing and namespaced hexadecimal record views. Check byte encodings, first-error validation and invalid bindings with an independent native fixture. [Typed hash views](../../language/json-wire-schema.md#typed-hash-views)
 
 - [x] Project ordered tagged binary records. Check field bounds, ordered structural failures and validation after parsing with an independent consumer. [Binary records](../../language/binary-records.md)
+
+- [x] Project typed cross-record equality, ordered prechecks and checked result comparisons. [Field relations](../../language/field-relations.md)

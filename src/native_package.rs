@@ -83,6 +83,7 @@ enum Kind {
     SharedDeclarations,
     WireSchema,
     BinaryRecord,
+    FieldRelation,
 }
 
 #[derive(Deserialize)]
@@ -152,6 +153,12 @@ fn project(
             io(fs::write(&path, graph))?;
             crate::integrity_block::build(&path, &overlay, &output)?;
             "codec.rs"
+        }
+        Kind::FieldRelation => {
+            let path = input.join("graph.json");
+            io(fs::write(&path, graph))?;
+            crate::field_relation::build(&path, &overlay, &output)?;
+            "relations.rs"
         }
         Kind::BinaryRecord => {
             let path = input.join("graph.json");
@@ -279,7 +286,9 @@ pub fn build(path: &Path, output: &Path) -> Result<()> {
     let mut root_exports = String::new();
     for (index, component) in manifest.components.iter().enumerate() {
         if !ident(&component.module)
-            || (component.reexports.is_empty() && component.crate_reexports.is_empty())
+            || (component.reexports.is_empty()
+                && component.crate_reexports.is_empty()
+                && !matches!(component.kind, Kind::FieldRelation))
         {
             return Err("invalid module or empty reexports".into());
         }
