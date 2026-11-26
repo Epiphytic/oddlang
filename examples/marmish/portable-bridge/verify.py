@@ -10,6 +10,7 @@ import re
 import resource
 import selectors
 import stat
+import sys
 import subprocess
 import tempfile
 import time
@@ -74,14 +75,18 @@ def inspect_state(root):
                 entries[name]["magic"] = key.read(8).decode("latin1")
     lock = "absent"
     if "state/frontend.lock" in entries:
-        with (root / "state/frontend.lock").open("rb") as descriptor:
+        # Linux OFD locks conflict with POSIX byte-range locks. BSD flock has a
+        # separate lock space there. Darwin's original uses the BSD primitive.
+        linux = sys.platform.startswith("linux")
+        probe = fcntl.lockf if linux else fcntl.flock
+        with (root / "state/frontend.lock").open("r+b" if linux else "rb") as descriptor:
             try:
-                fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                probe(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
             except BlockingIOError:
                 lock = "held"
             else:
                 lock = "available"
-                fcntl.flock(descriptor, fcntl.LOCK_UN)
+                probe(descriptor, fcntl.LOCK_UN)
     return {"entries": entries, "frontend_lock": lock}, hashes
 
 

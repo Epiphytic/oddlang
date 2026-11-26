@@ -643,3 +643,10 @@ w:releaseObserverGaps a p:Finding ;
     p:source w:releaseObserverComparison .
 w:wholeMarmishStructure p:addresses w:releaseObserverGaps .
 w:wholeMarmishFreeze p:evidence w:releaseObserverComparison .
+
+w:wholeLinuxArmBaseline a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/aee0cb6755e5763466ea671fb0d2cfe541cae953/verification/whole/linux/aarch64-unknown-linux-gnu" .
+w:linuxBridgeLockProbe a p:Finding ;
+    rdfs:label "The Linux original holds an OFD lock while an independent BSD flock succeeds on the same inode. The Linux observer needs a conflicting byte-range lock." ;
+    p:source w:wholeLinuxArmBaseline .
+w:wholeMarmishFreeze p:addresses w:linuxBridgeLockProbe ; p:evidence w:wholeLinuxArmBaseline .
