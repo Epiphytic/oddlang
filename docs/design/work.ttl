@@ -1400,3 +1400,12 @@ w:pureReleaseManifestGrammar a p:Task ;
     p:dependsOn w:checkedRecordGrammar ;
     p:acceptance "Use compiler evidence for the native source shapes, recover or verify one changed-source constraint, and compare all 224 independent pure cases and the source mutation." ;
     p:status p:active .
+
+w:lineGrammarLexicalReview a p:Finding ;
+    rdfs:label "Reject unused nested grammars and directly conflicting token literals" ;
+    p:source w:orderedLineGrammarPlan .
+w:orderedLineGrammar p:addresses w:lineGrammarLexicalReview .
+w:lineGrammarPayloadReview a p:Finding ;
+    rdfs:label "Check static text payload capability for native manifest error variants" ;
+    p:source w:orderedLineGrammarPlan .
+w:checkedRecordGrammar p:addresses w:lineGrammarPayloadReview .

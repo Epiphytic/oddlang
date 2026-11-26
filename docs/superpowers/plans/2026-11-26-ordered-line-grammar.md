@@ -26,3 +26,16 @@ decimal text subgrammars remain reusable.
 
 The application role takes bytes and returns release metadata or one
 stable error. It includes pure identity and download-name formatting.
+
+## Review findings
+
+The capture review of `e07f114` found unused nested grammars and
+graphical token literals that could conflict with forbidden bytes.
+Graph validation now rejects these declarations, and the native fixture
+checks malformed framing, lexical, capture and overlay branches.
+
+The typed output review of `ff1edf9` found that package assembly admitted
+non-unit errors whose payload could still differ from the required
+static text. Error exports now carry their static-text capability.
+The unrelated package fixture rejects a matching error name and ID
+whose declared payload is an owned string.

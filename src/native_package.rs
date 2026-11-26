@@ -483,6 +483,7 @@ pub(crate) struct ErrorVariantExport {
     pub error_type: String,
     pub variant: String,
     pub unit: bool,
+    pub static_text: bool,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -549,7 +550,7 @@ fn validate_line_grammar_errors(components: &[Component], base: &Path) -> Result
                     continue;
                 }
                 let paths = export_paths(component, &error.error_type);
-                if error.unit
+                if !error.static_text
                     || error.variant != link.variant
                     || !paths.iter().any(|path| {
                         link.r#type.first().is_some_and(|root| root == "crate")

@@ -1,4 +1,5 @@
 """Compile unrelated records with typed projections and independent rejection cases."""
+import copy
 import hashlib
 import json
 import os
@@ -97,7 +98,7 @@ with tempfile.TemporaryDirectory(prefix="odd-line-records-") as tmp:
     r.write_text(json.dumps(overlay))
     run(CLI, "build", "line-grammar", "rust", g, r, out)
     exe = stage / "caller"
-    run("rustc", "+1.97.1", "--edition=2021", HERE / "records.rs", "-o", exe,
+    run("rustc", "+1.97.1", "--edition=2021", "-Dwarnings", HERE / "records.rs", "-o", exe,
         env=dict(os.environ, GENERATED=str(out / "lines.rs")))
     run(exe)
     def pin(path):
@@ -144,10 +145,40 @@ with tempfile.TemporaryDirectory(prefix="odd-line-records-") as tmp:
     assert "error binding does not match a native export" in denial and not rejected_package.exists()
     overlay["error"]["variant"] = "Invalid"
     r.write_text(json.dumps(overlay))
+    owned = json.loads(error_graph.read_bytes())
+    owned["variants"][scope]["payload"] = {"kind": "owned-text"}
+    error_graph.write_text(json.dumps(owned))
+    package["components"][0]["graph"] = pin(error_graph.name)
+    package["components"][1]["overlay"] = pin(r.name)
+    manifest.write_text(json.dumps(package))
+    denial = run(CLI, "build", "native-package", "rust", manifest, rejected_package, success=False)
+    assert "error binding does not match a native export" in denial and not rejected_package.exists()
 
-    graph["constraints"][1]["afterRow"] = 4
-    g.write_text(json.dumps(graph))
-    rejected = stage / "rejected"
-    stderr = run(CLI, "build", "line-grammar", "rust", g, r, rejected, success=False)
-    assert "unavailable capture" in stderr and not rejected.exists()
+    def result(graph):
+        return graph["recordResult"]
+
+    for description, mutate, message in [
+        ("future capture", lambda g, r: g["constraints"][1].update(afterRow=4), "unavailable capture"),
+        ("wrong scalar", lambda g, r: g["constraints"][0]["allowed"][0].__setitem__(1, 1), "matching scalar"),
+        ("duplicate tuple", lambda g, r: g["constraints"][0]["allowed"].append(["indoor", True]), "distinct complete"),
+        ("sum of text", lambda g, r: g["constraints"][1]["captures"].__setitem__(1, "mode"), "requires unsigned"),
+        ("duplicate sum input", lambda g, r: g["constraints"][1]["captures"].__setitem__(1, "amountA"), "distinct capture"),
+        ("unknown child", lambda g, r: result(g)["records"]["book"][-1]["type"].update(record="missing"), "unknown record"),
+        ("field mismatch", lambda g, r: result(g)["entry"]["fields"]["mode"].update(id="active"), "incompatible typed"),
+        ("array length", lambda g, r: result(g)["entry"]["fields"]["counts"]["captures"].pop(), "incompatible typed"),
+        ("array width", lambda g, r: result(g)["entry"]["fields"]["counts"]["captures"].__setitem__(0, "amountA"), "array capture width"),
+        ("derive propagation", lambda g, r: r["records"]["sample"]["derives"].remove("clone"), "required native derive"),
+        ("derive dependency", lambda g, r: r["records"]["book"]["derives"].remove("partial-eq"), "invalid record fields or derives"),
+        ("formatter nontext", lambda g, r: result(g)["formatters"][0]["parts"][0].update(field="counts"), "formatter requires text"),
+        ("formatter argument", lambda g, r: result(g)["formatters"][1].update(argument=False), "formatter requires text"),
+        ("formatter binding", lambda g, r: r["formatters"].pop("key"), "invalid formatter"),
+        ("bad error path", lambda g, r: r["error"].update(type=["Fault"]), "invalid stable failure"),
+    ]:
+        wrong_g, wrong_r = copy.deepcopy(graph), copy.deepcopy(overlay)
+        mutate(wrong_g, wrong_r)
+        g.write_text(json.dumps(wrong_g))
+        r.write_text(json.dumps(wrong_r))
+        rejected = stage / "rejected"
+        stderr = run(CLI, "build", "line-grammar", "rust", g, r, rejected, success=False)
+        assert message in stderr and not rejected.exists(), (description, stderr)
 print("Typed records, finite relation, checked aggregate, and formatters passed")
