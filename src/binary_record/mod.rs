@@ -1,7 +1,10 @@
 //! Ordered, bounded binary records with named decode and validation failures.
 mod composite;
 mod extension;
+pub(crate) mod linkage;
+mod recover_fragment;
 use composite::{Constraint, ExternalRecord, Integrity, IntegrityBinding, RecordBinding};
+pub use recover_fragment::recover as recover_frame_fragment;
 mod rust;
 use extension::{Guard, HashBinding, HashView, Payload, Record};
 

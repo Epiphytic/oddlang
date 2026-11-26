@@ -62,10 +62,15 @@ done < <(compgen -e)
 
 # rustc_private is enabled for the adapter crate only. The requested crate is
 # compiled as normal by the pinned stable compiler.
+adapter_features=()
+if [[ ${ODD_RECOVERY_TYPE_EXPORTS:-0} == 1 ]]; then
+    adapter_features=(--features public-type-bindings)
+fi
 RUSTC="$rustc" RUSTC_BOOTSTRAP=oddlang_rust_recovery_driver \
     RUSTFLAGS="-C rpath=yes" \
     "$cargo" build --quiet --locked --offline \
-    --manifest-path "$adapter_dir/Cargo.toml" --target-dir "$output/driver" --target "$host" >&2
+    --manifest-path "$adapter_dir/Cargo.toml" --target-dir "$output/driver" --target "$host" \
+    "${adapter_features[@]}" >&2
 
 cd "$(dirname "$manifest")"
 verbosity=(--quiet)

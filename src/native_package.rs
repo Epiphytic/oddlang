@@ -31,6 +31,8 @@ struct Manifest<C = Component> {
     #[serde(default)]
     dependencies: BTreeMap<String, Dependency>,
     #[serde(default)]
+    dev_dependencies: BTreeMap<String, Dependency>,
+    #[serde(default)]
     registry_patches: BTreeMap<String, GitSource>,
     cargo_lock: Pin,
     #[serde(default)]
@@ -196,6 +198,9 @@ impl Pin {
 #[serde(rename_all = "kebab-case")]
 enum Kind {
     BufferedInput,
+    BoundedJsonInput,
+    ReadOnlyFile,
+    LocalFileCatalog,
     BuildReport,
     StructuredDiagnostics,
     ProcessLimit,
@@ -297,6 +302,22 @@ fn project(
             }
             crate::structured_diagnostics::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
             "diagnostics.rs"
+        }
+        Kind::LocalFileCatalog => {
+            let graph_path = input.join("graph.json");
+            io(fs::write(&graph_path, &graph))?;
+            crate::local_file_catalog::build(&graph_path, &overlay, &output)?;
+            "catalog.rs"
+        }
+        Kind::ReadOnlyFile => {
+            let graph_path = input.join("graph.json");
+            io(fs::write(&graph_path, &graph))?;
+            crate::read_only_file::build(&graph_path, &overlay, &output)?;
+            "file.rs"
+        }
+        Kind::BoundedJsonInput => {
+            crate::bounded_json_input::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
+            "metadata.rs"
         }
         Kind::BuildReport => {
             crate::build_report::build(&graph, &io(fs::read(&overlay))?, &output)?;
@@ -529,6 +550,7 @@ fn export_paths(component: &Component, entry: &str) -> Vec<Vec<String>> {
 }
 
 pub(crate) struct ErrorVariantExport {
+    pub io_error: bool,
     pub id: String,
     pub error_type: String,
     pub variant: String,
@@ -547,6 +569,23 @@ pub(super) const ZEROIZE: RegistryProvider = RegistryProvider {
     name: "zeroize",
     version: "1.9.1",
     checksum: "e13084392c5e4bc371903e2935a5eaeed24905a7511356b883835e18a78f6879",
+};
+
+const UNIX_FILE: RegistryProvider = RegistryProvider {
+    name: "libc",
+    version: "0.2.189",
+    checksum: "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2",
+};
+const SHA256_FILE: RegistryProvider = RegistryProvider {
+    name: "sha2",
+    version: "0.10.9",
+    checksum: "a7507d819769d01a365ab707794a4084392c824f54a7a6a7862f8c3d0892b283",
+};
+
+const STRUCTURAL_JSON: RegistryProvider = RegistryProvider {
+    name: "serde_json",
+    version: "1.0.151",
+    checksum: "c841b55ecdae098c80dcae9cf767f6f8a0c2cdb3416bbef72181df4d0fe73f14",
 };
 
 impl RegistryProvider {
@@ -680,6 +719,81 @@ fn validate_public_record_links(components: &[Component], base: &Path) -> Result
     Ok(())
 }
 
+fn validate_local_catalogs(components: &[Component], base: &Path) -> Result<()> {
+    for catalog in components
+        .iter()
+        .filter(|component| matches!(component.kind, Kind::LocalFileCatalog))
+    {
+        let (graph, binding) = crate::local_file_catalog::parse(
+            &catalog.graph.read(base)?,
+            &catalog.overlay.read(base)?,
+        )?;
+        if catalog.visibility != Visibility::Private
+            || !catalog.reexports.is_empty()
+            || catalog
+                .root_reexports
+                .as_ref()
+                .is_some_and(|names| !names.is_empty())
+            || catalog
+                .crate_reexports
+                .iter()
+                .any(|name| !binding.exports().contains(&name.as_str()))
+        {
+            return Err("local file catalog needs private crate-scoped bindings".into());
+        }
+        let mut grammars = components.iter().filter(|component| {
+            matches!(component.kind, Kind::LineGrammar)
+                && binding.record.module[1..] == [component.module.as_str()]
+                && component.crate_reexports.contains(&binding.record.r#type)
+        });
+        let grammar = grammars
+            .next()
+            .ok_or("local file catalog needs its bound line grammar")?;
+        if grammars.next().is_some() {
+            return Err("local file catalog line grammar is ambiguous".into());
+        }
+        crate::line_grammar::validate_catalog_record(
+            &grammar.graph.read(base)?,
+            &grammar.overlay.read(base)?,
+            &graph,
+            &binding,
+        )?;
+        let mut providers = components.iter().filter(|component| {
+            matches!(component.kind, Kind::ReadOnlyFile)
+                && binding.file.module[1..] == [component.module.as_str()]
+                && [binding.file.read.as_str(), binding.file.verify.as_str()]
+                    .iter()
+                    .all(|name| {
+                        component
+                            .crate_reexports
+                            .iter()
+                            .any(|actual| actual == name)
+                    })
+        });
+        let provider = providers
+            .next()
+            .ok_or("local file catalog needs its bound read-only file policy")?;
+        if providers.next().is_some() {
+            return Err("local file catalog read-only file policy is ambiguous".into());
+        }
+        let raw = provider.graph.read(base)?;
+        let native = provider.overlay.read(base)?;
+        let ([_, read, verify], [io, invalid]) =
+            crate::read_only_file::native_links(&raw, &native)?;
+        if crate::read_only_file::identity(&raw)? != graph.file_policy
+            || read != binding.file.read
+            || verify != binding.file.verify
+            || io.error != binding.error
+            || io.variant != binding.io_variant
+            || invalid.id != graph.error_id()
+            || invalid.variant != binding.invalid_variant
+        {
+            return Err("local file catalog file and error identities or scopes differ".into());
+        }
+    }
+    Ok(())
+}
+
 fn validate_component_requirements(
     manifest: &Manifest,
     base: &Path,
@@ -697,6 +811,84 @@ fn validate_component_requirements(
         require_erasing_storage(manifest, "buffered-input")?;
         required.insert(ZEROIZE);
     }
+    for component in components
+        .iter()
+        .filter(|component| matches!(component.kind, Kind::ReadOnlyFile))
+    {
+        for provider in [UNIX_FILE, SHA256_FILE] {
+            if manifest.registry_patches.contains_key(provider.name)
+                || !manifest
+                    .dependencies
+                    .get(provider.name)
+                    .is_some_and(|dependency| {
+                        dependency.version == provider.version
+                            && dependency.source.is_none()
+                            && dependency.default_features != Some(false)
+                            && dependency.features.is_empty()
+                    })
+            {
+                return Err(format!(
+                    "read-only file requires the locked registry provider {} {}",
+                    provider.name, provider.version
+                ));
+            }
+            required.insert(provider);
+        }
+        let (operations, links) = crate::read_only_file::native_links(
+            &component.graph.read(base)?,
+            &component.overlay.read(base)?,
+        )?;
+        if component.visibility != Visibility::Private
+            || !component.reexports.is_empty()
+            || component
+                .crate_reexports
+                .iter()
+                .any(|name| !operations.contains(name))
+            || component
+                .root_reexports
+                .as_ref()
+                .is_some_and(|names| !names.is_empty())
+        {
+            return Err("read-only file operations need private crate-scoped bindings".into());
+        }
+        for link in links {
+            let mut matching = 0;
+            for provider in components
+                .iter()
+                .filter(|provider| matches!(provider.kind, Kind::FiniteErrorDomain))
+            {
+                for error in crate::finite_error_domain::error_variants(
+                    &provider.graph.read(base)?,
+                    &provider.overlay.read(base)?,
+                )? {
+                    if error.id == link.id {
+                        if error.variant != link.variant
+                            || (if link.io {
+                                !error.io_error
+                            } else {
+                                !error.static_text
+                            })
+                            || !export_paths(provider, &error.error_type)
+                                .iter()
+                                .any(|path| link.error[1..] == path[..])
+                        {
+                            return Err(format!(
+                                "read-only file error role does not match its bound native variant: {}",
+                                link.id
+                            ));
+                        }
+                        matching += 1;
+                    }
+                }
+            }
+            if matching != 1 {
+                return Err(format!(
+                    "read-only file needs exactly one error role provider: {}",
+                    link.id
+                ));
+            }
+        }
+    }
     let mut limits = Vec::new();
     for component in components
         .iter()
@@ -707,7 +899,34 @@ fn validate_component_requirements(
             limits.push(error);
         }
     }
-    if checked.is_empty() && limits.is_empty() {
+    let mut json_inputs = Vec::new();
+    for component in components
+        .iter()
+        .filter(|c| matches!(c.kind, Kind::BoundedJsonInput))
+    {
+        if !manifest
+            .dev_dependencies
+            .get("serde_json")
+            .or_else(|| manifest.dependencies.get("serde_json"))
+            .is_some_and(|dep| {
+                dep.version == STRUCTURAL_JSON.version
+                    && dep.features.is_empty()
+                    && dep.source.is_none()
+                    && dep.default_features != Some(false)
+            })
+            || manifest.registry_patches.contains_key("serde_json")
+        {
+            return Err(
+                "bounded JSON input requires the default locked serde_json provider 1.0.151".into(),
+            );
+        }
+        required.insert(STRUCTURAL_JSON);
+        json_inputs.extend(crate::bounded_json_input::error_paths(
+            &component.graph.read(base)?,
+            &component.overlay.read(base)?,
+        )?);
+    }
+    if checked.is_empty() && limits.is_empty() && json_inputs.is_empty() {
         return Ok(required);
     }
     let mut providers = BTreeMap::new();
@@ -737,6 +956,14 @@ fn validate_component_requirements(
     }
     for error in limits {
         error.validate_link(&providers)?;
+    }
+    for (id, path) in json_inputs {
+        if !providers
+            .get(&id)
+            .is_some_and(|paths| paths.contains(&path))
+        {
+            return Err(format!("unresolved bounded JSON unit error: {id}"));
+        }
     }
     Ok(required)
 }
@@ -807,23 +1034,44 @@ fn validate_command_callbacks(components: &[Component], base: &Path) -> Result<(
     Ok(())
 }
 
-fn cargo_manifest(manifest: &Manifest) -> Result<String> {
-    let valid_name = |name: &str| {
-        !name.is_empty()
-            && name
-                .bytes()
-                .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, b'_' | b'-'))
-    };
-    if manifest.format != "oddlang-native-package-v1"
-        || !valid_name(&manifest.name)
-        || !matches!(manifest.edition.as_str(), "2021" | "2024")
-        || manifest.components.is_empty()
-    {
-        return Err("invalid package format, name, edition or empty component list".into());
+fn validate_nested_codecs(components: &[Component], base: &Path) -> Result<()> {
+    let mut codecs = Vec::new();
+    let mut root_aliases = BTreeMap::new();
+    for component in components {
+        for name in component
+            .root_reexports
+            .as_ref()
+            .unwrap_or(&component.reexports)
+        {
+            root_aliases.insert(
+                format!("crate::{name}"),
+                format!("crate::{}::{name}", component.module),
+            );
+        }
+        if matches!(component.kind, Kind::BinaryRecord | Kind::BinaryFragment) {
+            let record = crate::binary_record::linkage::Record::read(
+                &component.graph.read(base)?,
+                &component.overlay.read(base)?,
+            )?;
+            let paths = export_paths(component, record.name());
+            codecs.push((record, paths));
+        }
     }
-    semver::Version::parse(&manifest.version).map_err(|e| format!("package version: {e}"))?;
+    crate::binary_record::linkage::validate(&codecs, &root_aliases)
+}
+
+fn valid_name(name: &str) -> bool {
+    !name.is_empty()
+        && name
+            .bytes()
+            .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, b'_' | b'-'))
+}
+
+fn cargo_dependencies(
+    entries: &BTreeMap<String, Dependency>,
+) -> Result<BTreeMap<&String, serde_json::Value>> {
     let mut dependencies = BTreeMap::new();
-    for (name, dependency) in &manifest.dependencies {
+    for (name, dependency) in entries {
         if !valid_name(name) {
             return Err(format!("invalid dependency: {name}"));
         }
@@ -839,6 +1087,26 @@ fn cargo_manifest(manifest: &Manifest) -> Result<String> {
         }
         dependencies.insert(name, record);
     }
+    Ok(dependencies)
+}
+
+fn cargo_manifest(manifest: &Manifest) -> Result<String> {
+    if manifest.format != "oddlang-native-package-v1"
+        || !valid_name(&manifest.name)
+        || !matches!(manifest.edition.as_str(), "2021" | "2024")
+        || manifest.components.is_empty()
+    {
+        return Err("invalid package format, name, edition or empty component list".into());
+    }
+    semver::Version::parse(&manifest.version).map_err(|e| format!("package version: {e}"))?;
+    if manifest
+        .dev_dependencies
+        .keys()
+        .any(|name| manifest.dependencies.contains_key(name))
+    {
+        return Err("normal and dev dependencies must have distinct names".into());
+    }
+    let dependencies = cargo_dependencies(&manifest.dependencies)?;
     if manifest
         .components
         .iter()
@@ -852,6 +1120,10 @@ fn cargo_manifest(manifest: &Manifest) -> Result<String> {
     }
     let mut cargo = serde_json::json!({"package":{"name":manifest.name,"version":manifest.version,
         "edition":manifest.edition,"publish":false},"dependencies":dependencies,"workspace":{}});
+    if !manifest.dev_dependencies.is_empty() {
+        cargo["dev-dependencies"] =
+            serde_json::json!(cargo_dependencies(&manifest.dev_dependencies)?);
+    }
     if !manifest.registry_patches.is_empty() {
         let mut patches = BTreeMap::new();
         for (name, source) in &manifest.registry_patches {
@@ -872,13 +1144,38 @@ pub fn build(path: &Path, output: &Path) -> Result<()> {
     let path = io(path.canonicalize())?;
     let base = path.parent().ok_or("missing manifest directory")?;
     let raw = io(fs::read(&path))?;
-    build_pinned(&raw, base, output, None).map(|_| ())
+    build_pinned(&raw, base, output, None, DependencyCache::Offline).map(|_| ())
 }
+#[derive(Clone, Copy)]
+pub(super) enum DependencyCache {
+    Offline,
+    FetchLocked,
+}
+
+impl DependencyCache {
+    pub(super) fn resolve(self, directory: &Path, context: &str) -> Result<()> {
+        let mut cargo = Command::new("cargo");
+        cargo.args(["metadata", "--locked", "--format-version", "1"]);
+        if matches!(self, Self::Offline) {
+            cargo.arg("--offline");
+        }
+        let result = io(cargo.current_dir(directory).output())?;
+        if !result.status.success() {
+            return Err(format!(
+                "{context}: {}",
+                String::from_utf8_lossy(&result.stderr)
+            ));
+        }
+        Ok(())
+    }
+}
+
 pub(super) fn build_pinned(
     raw: &[u8],
     base: &Path,
     output: &Path,
     siblings: Option<&BTreeSet<String>>,
+    cache: DependencyCache,
 ) -> Result<BTreeSet<RegistryProvider>> {
     let input: Manifest<recovered::ComponentInput> =
         serde_json::from_slice(raw).map_err(|e| format!("package manifest: {e}"))?;
@@ -887,6 +1184,7 @@ pub(super) fn build_pinned(
     let required = validate_component_requirements(&manifest, base)?;
     validate_line_grammar_errors(&manifest.components, base)?;
     validate_public_record_links(&manifest.components, base)?;
+    validate_local_catalogs(&manifest.components, base)?;
     let cargo = cargo_manifest(&manifest)?;
     let lock = manifest.cargo_lock.read(base)?;
     for provider in &required {
@@ -928,7 +1226,7 @@ pub(super) fn build_pinned(
     let mut records = Vec::new();
     let mut root_exports = String::new();
     for (index, component) in manifest.components.iter().enumerate() {
-        if matches!(component.kind, Kind::BufferedInput)
+        if matches!(component.kind, Kind::BufferedInput | Kind::BoundedJsonInput)
             && (component.visibility != Visibility::Private
                 || !component.reexports.is_empty()
                 || !component.crate_reexports.is_empty()
@@ -937,7 +1235,12 @@ pub(super) fn build_pinned(
                     .as_ref()
                     .is_some_and(|names| !names.is_empty()))
         {
-            return Err("buffered-input must stay private".into());
+            let name = if matches!(component.kind, Kind::BufferedInput) {
+                "buffered-input"
+            } else {
+                "bounded-json-input"
+            };
+            return Err(format!("{name} must stay private"));
         }
         if matches!(component.kind, Kind::FieldRelation | Kind::BinaryFragment)
             && (!component.reexports.is_empty()
@@ -955,7 +1258,12 @@ pub(super) fn build_pinned(
                 && component.crate_reexports.is_empty()
                 && !matches!(
                     component.kind,
-                    Kind::FieldRelation | Kind::BinaryFragment | Kind::BufferedInput
+                    Kind::FieldRelation
+                        | Kind::BinaryFragment
+                        | Kind::BufferedInput
+                        | Kind::BoundedJsonInput
+                        | Kind::ReadOnlyFile
+                        | Kind::LocalFileCatalog
                 ))
         {
             return Err("invalid module or empty reexports".into());
@@ -1037,6 +1345,7 @@ pub(super) fn build_pinned(
         }
         records.push(record);
     }
+    validate_nested_codecs(&manifest.components, base)?;
     let mut lib = String::new();
     for (
         group,
@@ -1087,17 +1396,7 @@ pub(super) fn build_pinned(
             ));
         }
     }
-    // Cargo validates the dependency closure and resolves the exact external crates without building.
-    let result = io(Command::new("cargo")
-        .args(["metadata", "--locked", "--offline", "--format-version", "1"])
-        .current_dir(&package)
-        .output())?;
-    if !result.status.success() {
-        return Err(format!(
-            "Cargo.lock validation: {}",
-            String::from_utf8_lossy(&result.stderr)
-        ));
-    }
+    cache.resolve(&package, "Cargo.lock validation")?;
     let receipt = serde_json::json!({"format":"oddlang-native-package-lock-v1","manifestSha256":digest(&raw),
         "cargoLockSha256":digest(&lock),"cargoManifestSha256":digest(cargo.as_bytes()),"generatedFiles":generated_files,"components":records});
     io(fs::write(

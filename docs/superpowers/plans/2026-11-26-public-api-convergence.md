@@ -35,3 +35,9 @@ The [compiler qualification receipt](../../../verification/structural-profile-co
 Both ARM64 hosts built the seven-member application with workspace lock `5abf57c811d641ba126c32dde208334d85d47374bbfbb983231783a403f24df4`. Each matched 164 terminal CLI cases and all 224 private release-parser vectors, including 34 accepted inputs. One separately observed post-parse CLI error still differs per executable. The Darwin import audit passed 77 of the 140 inventoried names. The [application receipts](https://github.com/Epiphytic/marmish-oddlang/pull/103) identify the exact artifacts and probes.
 
 The [upstream test receipts](https://github.com/Epiphytic/marmish-oddlang/pull/101) on the same lock account for 42 of 909 active original tests on macOS ARM64 and 43 of 887 on Linux ARM64, plus five ignored tests per host. Both full-suite checks rejected certification.
+
+## Named tests for the recovered release parser
+
+- [x] Identify upstream private parser tests by their original harness and exact names. Stage the pinned test module and included version vectors against the generated private parser. Measure both native release catalogs.
+
+The source-free workspace passed 42 of 909 active original tests on Darwin ARM64 and 43 of 887 on Linux ARM64, with five additional ignored cases on each. The new cases are `native_manifest::tests::strict_vectors` and `native_manifest::tests::shared_release_version_vectors`. The independent 224-case parser corpus contributes zero to these counts. Both full-suite certification checks exited with status 1. [Catalog receipts and reproduction instructions](https://github.com/Epiphytic/marmish-oddlang/tree/cb6e38f463fece606f6b0e8c5fb2f920c46dfa16/verification/whole/suite)

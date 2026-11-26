@@ -5,8 +5,9 @@
   semantics in the shared-declarations graph.
 - [x] Verify an unrelated real rustdoc fixture and a source mutation, then
   compile downstream callers of the original and projected constants.
-- [ ] Qualify the separately composed prototype export and preserve the six
-  sibling member locks and the private buffered reader.
+- [x] Qualify the separately composed prototype export on both native ARM64
+  hosts and preserve the six sibling member locks and the private buffered
+  reader in the [companion release](https://github.com/Epiphytic/marmish-oddlang/pull/87).
 
 `oddlang recover public-constant SOURCE RUSTDOC SELECTION OUTPUT` publishes
 `graph.json`, `rust.json` and `recovery.lock` atomically. The selector sets

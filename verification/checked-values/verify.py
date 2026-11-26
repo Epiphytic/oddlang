@@ -169,7 +169,7 @@ def main():
         with_payload=finite_component("owned-text","finite")
         attempt("payload",[with_payload,value_errors(errorType="crate::finite::Fault")],mismatch)
         attempt("ambiguous",[shared_component,with_payload,value_component],
-                f"ambiguous checked value error: {FAULT}")
+                f"ambiguous native error declaration: {FAULT}")
         original_rust=write(root/"deterministic-rust.json",r)
         graph=write(root/"deterministic.json",g)
         run(exe,"build","checked-values","rust",graph,original_rust,root/"first")

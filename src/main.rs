@@ -19,6 +19,23 @@ fn import_has_profile(path: &str, profile: &str) -> bool {
 
 fn run(args: &[String]) -> Result<(), String> {
     match args {
+
+        [cmd, kind, target, graph, overlay, out]
+            if cmd == "build" && kind == "local-file-catalog" && target == "rust" =>
+        {
+            oddlang::local_file_catalog::build(graph.as_ref(), overlay.as_ref(), out.as_ref())
+        }
+        [cmd, kind, observation, selection, out] if cmd == "recover" && kind == "read-only-file" => {
+            oddlang::read_only_file::recover(observation.as_ref(), selection.as_ref(), out.as_ref())
+        }
+        [cmd, kind, target, graph, overlay, out]
+            if cmd == "build" && kind == "read-only-file" && target == "rust" =>
+        {
+            oddlang::read_only_file::build(graph.as_ref(), overlay.as_ref(), out.as_ref())
+        }
+        [cmd, kind, observation, selection, out] if cmd == "recover" && kind == "bounded-json-input" => {
+            oddlang::bounded_json_input::recover(observation.as_ref(), selection.as_ref(), out.as_ref())
+        }
         [cmd, kind, source, selection, out] if cmd == "recover" && kind == "plain-choice" => {
             oddlang::checked_values::recover(source.as_ref(), selection.as_ref(), out.as_ref())
         }
@@ -38,6 +55,14 @@ fn run(args: &[String]) -> Result<(), String> {
             if cmd == "build" && kind == "structured-diagnostics" && target == "rust" =>
         {
             oddlang::structured_diagnostics::build(graph.as_ref(), overlay.as_ref(), out.as_ref())
+        }
+
+        [cmd, kind, observation, selection, trace, output]
+            if cmd == "recover" && kind == "observed-buffered-input" =>
+        {
+            oddlang::buffered_input::recover_observed(
+                observation.as_ref(), selection.as_ref(), trace.as_ref(), output.as_ref(),
+            )
         }
 
         [cmd, kind, observation, selection, output] if cmd == "recover" && kind == "buffered-input" => {
@@ -84,6 +109,11 @@ fn run(args: &[String]) -> Result<(), String> {
         {
             oddlang::checked_values::build_typescript(graph.as_ref(), overlay.as_ref(), output.as_ref())
         }
+        [cmd, kind, target, graph, output]
+            if cmd == "build" && kind == "checked-values" && target == "typescript" =>
+        {
+            oddlang::checked_values::build_fixed_typescript(graph.as_ref(), output.as_ref())
+        }
         [cmd, kind, target, graph, overlay, output]
             if cmd == "build" && kind == "checked-values" && target == "rust" =>
         {
@@ -113,6 +143,11 @@ fn run(args: &[String]) -> Result<(), String> {
         {
             oddlang::local_command_client::build(graph.as_ref(), binding.as_ref(), out.as_ref())
         }
+        [cmd, kind, target, manifest, out, option]
+            if cmd == "build" && kind == "native-workspace" && target == "rust" && option == "--fetch-locked" =>
+        {
+            oddlang::native_workspace::build_fetch_locked(manifest.as_ref(), out.as_ref())
+        }
         [cmd,kind,target,manifest,out] if cmd=="build" && kind=="native-workspace" && target=="rust" =>
             oddlang::native_workspace::build(manifest.as_ref(),out.as_ref()),
 
@@ -122,6 +157,26 @@ fn run(args: &[String]) -> Result<(), String> {
             }
         [cmd, kind, source, selection, output] if cmd == "recover" && kind == "record-writer" => {
             oddlang::wire_schema::record_writer::recover(source.as_ref(), selection.as_ref(), output.as_ref())
+        }
+        [cmd, kind, root, source, evidence, selection, template, hints, output]
+            if cmd == "recover" && kind == "frame-fragment" =>
+        {
+            oddlang::binary_record::recover_frame_fragment(root.as_ref(), source.as_ref(), evidence.as_ref(), selection.as_ref(), template.as_ref(), hints.as_ref(), output.as_ref())
+        }
+        [cmd, kind, root, source, evidence, selection, template, hints, output]
+            if cmd == "recover" && kind == "frame-guards" =>
+        {
+            oddlang::binary_frame::recover_guards(root.as_ref(), source.as_ref(), evidence.as_ref(), selection.as_ref(), template.as_ref(), hints.as_ref(), output.as_ref())
+        }
+        [cmd, kind, root, source, evidence, selection, template, hints, output]
+            if cmd == "recover" && kind == "tagged-frame" =>
+        {
+            oddlang::binary_frame::recover(root.as_ref(), source.as_ref(), evidence.as_ref(), selection.as_ref(), template.as_ref(), hints.as_ref(), output.as_ref())
+        }
+        [cmd, kind, root, source, evidence, selection, template, hints, output]
+            if cmd == "recover" && kind == "field-conjunction" =>
+        {
+            oddlang::field_relation::recover(root.as_ref(), source.as_ref(), evidence.as_ref(), selection.as_ref(), template.as_ref(), hints.as_ref(), output.as_ref())
         }
         [cmd, kind, source, selection, output]
             if cmd == "recover" && kind == "wire-schema" => {
@@ -153,12 +208,21 @@ fn run(args: &[String]) -> Result<(), String> {
         [cmd, kind, target, graph, overlay, output] if cmd == "build" && kind == "shared-declarations" && target == "rust" => {
             oddlang::shared_declarations::build(graph.as_ref(), overlay.as_ref(), output.as_ref())
         }
+        [cmd, kind, repo, selection, destination] if cmd == "recover" && kind == "shared-declarations" =>
+            oddlang::rust_recovery::shared::run(repo.as_ref(), selection.as_ref(), destination.as_ref()),
+
         [cmd, kind, target, manifest, output] if cmd == "build" && kind == "native-package" && target == "rust" => {
             oddlang::native_package::build(manifest.as_ref(), output.as_ref())
         }
         [cmd, kind, target, root, overlay, out] if cmd == "build" && kind == "json-envelope" && target == "rust" => {
             oddlang::json_envelope::build(root.as_ref(), overlay.as_ref(), out.as_ref())
         }
+        [cmd, kind, doc] if cmd == "inspect" && kind == "native-value-api" => {
+            let witness = oddlang::rust_recovery::public_api::read(doc.as_ref())?;
+            println!("{}", serde_json::to_string_pretty(&witness).map_err(|e| e.to_string())?);
+            Ok(())
+        }
+
         [cmd, kind, target, root, overlay, release]
             if cmd == "verify" && kind == "value-domain" && target == "rust" => {
                 oddlang::value_domain::verify(root.as_ref(), Some(overlay.as_ref()), release.as_ref())
@@ -166,6 +230,9 @@ fn run(args: &[String]) -> Result<(), String> {
         [cmd, kind, target, root, release]
             if cmd == "verify" && kind == "value-domain" && target == "typescript" => {
                 oddlang::value_domain::verify(root.as_ref(), None, release.as_ref())
+        }
+        [cmd, kind, manifest, selection, out] if cmd == "recover" && kind == "value-domain-structure" => {
+            oddlang::value_domain::recover::recover_structure(manifest.as_ref(), selection.as_ref(), out.as_ref())
         }
         [cmd, kind, manifest, selection, out] if cmd == "recover" && kind == "value-domain" => {
             oddlang::value_domain::recover::recover(manifest.as_ref(), selection.as_ref(), out.as_ref())
@@ -254,6 +321,11 @@ fn run(args: &[String]) -> Result<(), String> {
             if group == "recover" && kind == "rust" && profile_flag == "--profile" && out_flag == "--out" =>
         {
             oddlang::rust_recovery::recover(manifest.as_ref(), profile.as_ref(), output.as_ref())
+        }
+        [group, kind, manifest, profile_flag, profile, out_flag, output]
+            if group == "recover" && kind == "rust-exports" && profile_flag == "--profile" && out_flag == "--out" =>
+        {
+            oddlang::rust_recovery::recover_exports(manifest.as_ref(), profile.as_ref(), output.as_ref())
         }
         [group, kind, manifest, profile_flag, profile, out_flag, output]
             if group == "recover" && kind == "rust-shapes" && profile_flag == "--profile" && out_flag == "--out" =>
@@ -535,7 +607,7 @@ fn run(args: &[String]) -> Result<(), String> {
             oddlang::targets::build(&load_model(dir)?, std::path::Path::new(out))
                 .map_err(|e| e.to_string())
         }
-        _ => Err("usage: oddlang recover structured-diagnostics SOURCE OUTPUT | build structured-diagnostics rust GRAPH OVERLAY OUTPUT | recover public-constant SOURCE RUSTDOC SELECTION OUTPUT | recover plain-choice SOURCE SELECTION OUTPUT | recover serde-string-choice SOURCE SELECTION OUTPUT | recover buffered-input OBSERVATION SELECTION OUTPUT | recover serde-public-record SOURCE RUSTDOC SELECTION OUTPUT | recover public-root-records SOURCE SELECTION OUTPUT | recover public-records SOURCE SELECTION OUTPUT | build public-records rust GRAPH OVERLAY OUTPUT | recover build-report ROOT SELECTION OUTPUT | recover fixed-bytes OBSERVATION SELECTION OUTPUT | recover finite-error-domain SOURCE SELECTION OUTPUT | build finite-error-domain rust GRAPH OVERLAY OUTPUT | recover record-writer SOURCE SELECTION OUTPUT | recover wire-schema SOURCE SELECTION OUTPUT | build wire-schema rust GRAPH OVERLAY OUTPUT | build wire-protocol rust SHAPE SHAPE_BINDING GRAPH OVERLAY OUTPUT | check PROJECT | impact PROJECT IRI | build PROJECT OUTPUT | recover rust MANIFEST --profile PROFILE --out OUTPUT | recover rust-shapes MANIFEST --profile PROFILE --out OUTPUT | recover tagged-contract SOURCE SELECTION OVERLAY VARIANT OUTPUT | build binary-frame rust GRAPH OVERLAY OUTPUT | build file-profile rust GRAPH BINDING OUTPUT | build binary-record rust GRAPH OVERLAY OUTPUT | build checked-values rust|typescript GRAPH OVERLAY OUTPUT | build field-relation rust GRAPH OVERLAY OUTPUT | build shared-declarations rust GRAPH OVERLAY OUTPUT | build integrity-block rust GRAPH OVERLAY OUTPUT | build local-status-owner rust GRAPH BINDING OUTPUT | build local-command-client rust GRAPH BINDING OUTPUT | recover cli-surface SOURCE SELECTION GRAPH | build cli-surface rust GRAPH BINDING OUTPUT | build native-package rust MANIFEST OUTPUT | build native-workspace rust MANIFEST OUTPUT | build json-envelope rust GRAPH OVERLAY OUTPUT | sequence-journal digest GRAPH | sequence-journal overlay-digest OVERLAY | build sequence-journal rust GRAPH OVERLAY OUTPUT --graph-sha256 PIN --overlay-sha256 PIN | endpoint-set digest GRAPH | endpoint-set overlay-digest OVERLAY | build endpoint-set rust GRAPH [OVERLAY] OUTPUT --graph-sha256 PIN [--overlay-sha256 PIN] | tagged-wire digest GRAPH | build tagged-wire TARGET GRAPH OUTPUT --graph-sha256 PIN | import rust-tree MANIFEST PACKAGE OUTPUT | build rust-tree BUNDLE OUTPUT --bundle-sha256 PIN | build line-grammar rust GRAPH OVERLAY OUTPUT | recover text-grammar rust SOURCE SELECTION OUTPUT | build text-grammar rust GRAPH OUTPUT".into()),
+        _ => Err("usage: oddlang build local-file-catalog rust GRAPH OVERLAY OUTPUT | recover read-only-file OBSERVATION SELECTION OUTPUT | build read-only-file rust GRAPH OVERLAY OUTPUT | recover structured-diagnostics SOURCE OUTPUT | build structured-diagnostics rust GRAPH OVERLAY OUTPUT | recover public-constant SOURCE RUSTDOC SELECTION OUTPUT | recover plain-choice SOURCE SELECTION OUTPUT | recover serde-string-choice SOURCE SELECTION OUTPUT | recover observed-buffered-input OBSERVATION STRUCTURAL_SELECTION TRACE OUTPUT | recover buffered-input OBSERVATION SELECTION OUTPUT | recover serde-public-record SOURCE RUSTDOC SELECTION OUTPUT | recover public-root-records SOURCE SELECTION OUTPUT | recover public-records SOURCE SELECTION OUTPUT | build public-records rust GRAPH OVERLAY OUTPUT | recover build-report ROOT SELECTION OUTPUT | recover fixed-bytes OBSERVATION SELECTION OUTPUT | recover finite-error-domain SOURCE SELECTION OUTPUT | build finite-error-domain rust GRAPH OVERLAY OUTPUT | recover record-writer SOURCE SELECTION OUTPUT | recover wire-schema SOURCE SELECTION OUTPUT | build wire-schema rust GRAPH OVERLAY OUTPUT | build wire-protocol rust SHAPE SHAPE_BINDING GRAPH OVERLAY OUTPUT | check PROJECT | impact PROJECT IRI | build PROJECT OUTPUT | recover rust MANIFEST --profile PROFILE --out OUTPUT | recover rust-exports MANIFEST --profile PROFILE --out OUTPUT | recover value-domain-structure MANIFEST SELECTION OUTPUT | recover rust-shapes MANIFEST --profile PROFILE --out OUTPUT | recover tagged-contract SOURCE SELECTION OVERLAY VARIANT OUTPUT | build binary-frame rust GRAPH OVERLAY OUTPUT | build file-profile rust GRAPH BINDING OUTPUT | build binary-record rust GRAPH OVERLAY OUTPUT | build checked-values rust|typescript GRAPH OVERLAY OUTPUT | recover frame-fragment CRATE_ROOT SOURCE EVIDENCE SELECTION TEMPLATE OVERLAY OUTPUT | recover frame-guards CRATE_ROOT SOURCE EVIDENCE SELECTION TEMPLATE OVERLAY GRAPH | recover tagged-frame CRATE_ROOT SOURCE EVIDENCE SELECTION TEMPLATE OVERLAY OUTPUT | recover field-conjunction CRATE_ROOT SOURCE EVIDENCE SELECTION TEMPLATE OVERLAY GRAPH | build checked-values typescript GRAPH OUTPUT | build field-relation rust GRAPH OVERLAY OUTPUT | build shared-declarations rust GRAPH OVERLAY OUTPUT | build integrity-block rust GRAPH OVERLAY OUTPUT | build local-status-owner rust GRAPH BINDING OUTPUT | build local-command-client rust GRAPH BINDING OUTPUT | recover cli-surface SOURCE SELECTION GRAPH | build cli-surface rust GRAPH BINDING OUTPUT | build native-package rust MANIFEST OUTPUT | build native-workspace rust MANIFEST OUTPUT [--fetch-locked] | build json-envelope rust GRAPH OVERLAY OUTPUT | sequence-journal digest GRAPH | sequence-journal overlay-digest OVERLAY | build sequence-journal rust GRAPH OVERLAY OUTPUT --graph-sha256 PIN --overlay-sha256 PIN | endpoint-set digest GRAPH | endpoint-set overlay-digest OVERLAY | build endpoint-set rust GRAPH [OVERLAY] OUTPUT --graph-sha256 PIN [--overlay-sha256 PIN] | tagged-wire digest GRAPH | build tagged-wire TARGET GRAPH OUTPUT --graph-sha256 PIN | import rust-tree MANIFEST PACKAGE OUTPUT | build rust-tree BUNDLE OUTPUT --bundle-sha256 PIN | build line-grammar rust GRAPH OVERLAY OUTPUT | recover text-grammar rust SOURCE SELECTION OUTPUT | build text-grammar rust GRAPH OUTPUT".into()),
     }
 }
 fn main() -> ExitCode {

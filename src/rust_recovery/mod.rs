@@ -1,6 +1,10 @@
 //! Declaration-level, code-free Rust build inventory.
+pub mod public_api;
+#[path = "../../verification/rust-recovery/export_model.rs"]
+mod export_model;
 #[path = "../../verification/rust-recovery/shape_model.rs"]
 pub(crate) mod shape_model;
+pub mod shared;
 mod structure;
 pub mod tagged;
 
@@ -69,19 +73,29 @@ struct Pin<'a> {
     cargo_config_sha256: BTreeMap<String, String>,
 }
 
+enum Projection {
+    Structure,
+    Shapes,
+    Exports,
+}
+
+pub fn recover_exports(manifest: &Path, profile_path: &Path, output: &Path) -> Result<()> {
+    recover_profile(manifest, profile_path, output, Projection::Exports)
+}
+
 pub fn recover(manifest: &Path, profile_path: &Path, output: &Path) -> Result<()> {
-    recover_profile(manifest, profile_path, output, false)
+    recover_profile(manifest, profile_path, output, Projection::Structure)
 }
 
 pub fn recover_shapes(manifest: &Path, profile_path: &Path, output: &Path) -> Result<()> {
-    recover_profile(manifest, profile_path, output, true)
+    recover_profile(manifest, profile_path, output, Projection::Shapes)
 }
 
 fn recover_profile(
     manifest: &Path,
     profile_path: &Path,
     output: &Path,
-    data_shapes: bool,
+    projection: Projection,
 ) -> Result<()> {
     let manifest = manifest.canonicalize().map_err(|err| err.to_string())?;
     if manifest.file_name().and_then(|name| name.to_str()) != Some("Cargo.toml") {
@@ -164,6 +178,15 @@ fn recover_profile(
         .canonicalize()
         .map_err(|err| format!("compiler adapter: {err}"))?;
     let adapter_directory = adapter.parent().expect("adapter has a directory");
+    if matches!(projection, Projection::Exports) {
+        for input in ["exports.rs", "export_model.rs"] {
+            if !profile.adapter_inputs.iter().any(|p| p == input) {
+                return Err(format!(
+                    "public type projection requires a pinned adapter input {input}"
+                ));
+            }
+        }
+    }
     let mut adapter_inputs_sha256 = BTreeMap::new();
     for input in &profile.adapter_inputs {
         let path = crate::contracts::contained(adapter_directory, input)?;
@@ -227,14 +250,23 @@ fn recover_profile(
             features,
         ])
         .args(pin.features);
-    if data_shapes {
-        command.env("ODD_RECOVERY_DATA_SHAPES", "1");
-    } else {
-        command.env_remove("ODD_RECOVERY_DATA_SHAPES");
+    command
+        .env_remove("ODD_RECOVERY_DATA_SHAPES")
+        .env_remove("ODD_RECOVERY_TYPE_EXPORTS");
+    match projection {
+        Projection::Shapes => {
+            command.env("ODD_RECOVERY_DATA_SHAPES", "1");
+        }
+        Projection::Exports => {
+            command.env("ODD_RECOVERY_TYPE_EXPORTS", "1");
+        }
+        Projection::Structure => {}
     }
     let raw = run(&mut command)?;
-    if data_shapes {
-        return publish_shapes(output, &raw, pin);
+    match projection {
+        Projection::Shapes => return publish_shapes(output, &raw, pin),
+        Projection::Exports => return publish_exports(output, &raw, pin),
+        Projection::Structure => {}
     }
     let inventory = structure::Inventory::load(&raw)?;
     if inventory.crate_name != pin.target_name.replace('-', "_")
@@ -438,4 +470,52 @@ fn publish_shapes(output: &Path, raw: &[u8], pin: Pin<'_>) -> Result<()> {
     .map_err(|err| err.to_string())?;
     lock.push(b'\n');
     publish_pair(output, "shapes.json", bytes, "shapes.lock", lock)
+}
+
+fn publish_exports(output: &Path, raw: &[u8], pin: Pin<'_>) -> Result<()> {
+    use export_model::{Kind, Observation, VOCABULARY};
+    let observation: Observation =
+        serde_json::from_slice(raw).map_err(|e| format!("export observation: {e}"))?;
+    let graph = observation.graph;
+    if observation.crate_name != pin.target_name.replace('-', "_")
+        || observation.compiler != pin.compiler_commit
+        || graph.vocabulary != VOCABULARY
+        || !graph.modules.contains_key(&graph.root)
+        || graph.root != format!("local::{}", observation.crate_name)
+    {
+        return Err("compiler adapter reported a different export scope".into());
+    }
+    let paths = graph.canonical_paths();
+    if paths.len() != graph.modules.len() {
+        return Err("export observation contains unreachable modules".into());
+    }
+    for (id, module) in &graph.modules {
+        if paths[id] != module.path {
+            return Err(format!("inconsistent canonical module path for {id}"));
+        }
+        for (name, ambiguity) in &module.ambiguous {
+            if module.unresolved.contains(name)
+                || ambiguity.alternatives.is_empty()
+                || ambiguity.alternatives.contains(&ambiguity.primary)
+            {
+                return Err(format!("inconsistent ambiguity for {name}"));
+            }
+        }
+        for (name, binding) in &module.bindings {
+            if module.ambiguous.contains_key(name)
+                || module.unresolved.contains(name)
+                || binding.kind == Kind::Module && !graph.modules.contains_key(&binding.target)
+                || binding.kind == Kind::Data && !graph.data.contains_key(&binding.target)
+            {
+                return Err(format!("inconsistent type binding {name}"));
+            }
+        }
+    }
+    let mut bytes = serde_json::to_vec_pretty(&graph).map_err(|e| e.to_string())?;
+    bytes.push(b'\n');
+    let mut lock = serde_json::to_vec_pretty(&serde_json::json!({"vocabulary":VOCABULARY,
+        "pin":pin,"exportsSha256":sha256(&bytes),"qualification":"candidate"}))
+    .map_err(|e| e.to_string())?;
+    lock.push(b'\n');
+    publish_pair(output, "exports.json", bytes, "exports.lock", lock)
 }

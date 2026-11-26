@@ -1,8 +1,9 @@
 //! Portable bounded lookahead storage with independently selected error and erasure policies.
 mod recovery;
 mod rust;
+mod trace;
 use crate::wire_schema::iri;
-pub use recovery::recover;
+pub use recovery::{recover, recover_observed};
 pub(crate) use rust::build_bytes;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;

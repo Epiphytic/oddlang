@@ -18,6 +18,19 @@ struct Selection {
     transitions: Transitions,
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct StructuralSelection {
+    declaration: String,
+    id: String,
+    fields: FieldNames,
+}
+
+enum Policies {
+    Authored(Transitions),
+    Observed(Vec<u8>),
+}
+
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct FieldNames {
@@ -68,10 +81,49 @@ fn byte_extent(shape: &Shape) -> Option<u64> {
 }
 
 pub fn recover(observation: &Path, selection: &Path, output: &Path) -> Result<()> {
+    let raw = fs::read(selection).map_err(|e| e.to_string())?;
+    let selector: Selection = serde_json::from_slice(&raw).map_err(|e| e.to_string())?;
+    let structure = StructuralSelection {
+        declaration: selector.declaration,
+        id: selector.id,
+        fields: selector.fields,
+    };
+    recover_selected(
+        observation,
+        &raw,
+        structure,
+        Policies::Authored(selector.transitions),
+        output,
+    )
+}
+
+pub fn recover_observed(
+    observation: &Path,
+    selection: &Path,
+    trace: &Path,
+    output: &Path,
+) -> Result<()> {
+    let raw = fs::read(selection).map_err(|e| e.to_string())?;
+    let selector = serde_json::from_slice(&raw).map_err(|e| e.to_string())?;
+    let trace = fs::read(trace).map_err(|e| e.to_string())?;
+    recover_selected(
+        observation,
+        &raw,
+        selector,
+        Policies::Observed(trace),
+        output,
+    )
+}
+
+fn recover_selected(
+    observation: &Path,
+    selection: &[u8],
+    selector: StructuralSelection,
+    policies: Policies,
+    output: &Path,
+) -> Result<()> {
     let raw = fs::read(observation).map_err(|e| e.to_string())?;
-    let selected = fs::read(selection).map_err(|e| e.to_string())?;
     let obs: Observation = serde_json::from_slice(&raw).map_err(|e| e.to_string())?;
-    let selector: Selection = serde_json::from_slice(&selected).map_err(|e| e.to_string())?;
     if obs.compiler != "8bab26f4f68e0e26f0bb7960be334d5b520ea452"
         || obs.graph.vocabulary != VOCABULARY
         || !selector
@@ -169,31 +221,57 @@ pub fn recover(observation: &Path, selection: &Path, output: &Path) -> Result<()
         }
         order.push(role);
     }
+    let capacity = capacity.ok_or("missing octet storage")?;
+    let bits = cursor_width.ok_or("missing cursor width")?;
+    if capacity > max_capacity(bits) {
+        return Err("extent exceeds observed target layout bound".into());
+    }
+    let (transitions, trace_sha) = match policies {
+        Policies::Authored(transitions) => (transitions, None),
+        Policies::Observed(raw) => {
+            let trace: trace::Trace = serde_json::from_slice(&raw).map_err(|e| e.to_string())?;
+            (trace.infer(capacity)?, Some(digest(&raw)))
+        }
+    };
     let graph = Graph {
         format: FORMAT.into(),
         id: selector.id,
-        capacity: capacity.ok_or("missing octet storage")?,
+        capacity,
         field_order: order,
-        transitions: selector.transitions,
+        transitions,
     };
     graph.validate()?;
-    let bits = cursor_width.ok_or("missing cursor width")?;
-    if graph.capacity > max_capacity(bits) {
-        return Err("extent exceeds observed target layout bound".into());
-    }
     let bytes = encode(&graph)?;
     let binding = encode(
         &json!({"format":"oddlang-buffered-input-rust-v1","id":graph.id,
         "type":decl.name,"parameter":param.name,"fields":selector.fields}),
     )?;
-    let receipt = encode(
-        &json!({"format":"oddlang-buffered-input-recovery-v1","compiler":obs.compiler,
-        "observationSha256":digest(&raw),"selectionSha256":digest(&selected),"declaration":decl.id,
+    let mut receipt = json!({
+        "format":"oddlang-buffered-input-recovery-v1","compiler":obs.compiler,
+        "observationSha256":digest(&raw),"selectionSha256":digest(selection),"declaration":decl.id,
         "graphSha256":digest(&bytes),"overlaySha256":digest(&binding),"observedIndexBits":bits,
         "observed":["generic input identity","field order","octet storage provider and extent","index representations"],
         "authored":["portable identity","semantic field roles","all transition policies"],
-        "requiresIndependentQualification":["implementation behavior","storage release obligation","native visibility","generic constraints and defaults","storage provider package instance","target data layout"]}),
-    )?;
+        "requiresIndependentQualification":["implementation behavior","storage release obligation","native visibility","generic constraints and defaults","storage provider package instance","target data layout"],
+    });
+    if let Some(trace_sha) = trace_sha {
+        receipt["format"] = json!("oddlang-observed-buffered-input-recovery-v1");
+        receipt["authored"] = json!(["portable identity", "semantic field roles"]);
+        receipt["inferred"] = json!([
+            "empty-read policy",
+            "refill-error policy",
+            "consumed-byte policy"
+        ]);
+        receipt["providerAssumptions"] = json!([
+            "fresh exhausted specimens with conforming Read providers",
+            "first read writes exactly the declared payload",
+            "EOF and injected Interrupted leave storage untouched",
+            "EOF provider observes initialized storage before writing",
+            "storage erase on drop depends on the locked zeroize provider",
+        ]);
+        receipt["traceSha256"] = json!(trace_sha);
+    }
+    let receipt = encode(&receipt)?;
     let parent = output
         .parent()
         .filter(|p| !p.as_os_str().is_empty())

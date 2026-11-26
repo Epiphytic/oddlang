@@ -2,7 +2,9 @@
 """Qualify generated copy Data encoders, decoders and incremental consumers."""
 import argparse
 from collections import Counter
+from functools import partial
 import json
+import os
 import platform
 from pathlib import Path
 import re
@@ -53,6 +55,11 @@ def boundary(stage, read=(), executable=()):
 """]
 
 
+def policy_digest(prefix, stage):
+    policy = prefix[-1] if prefix[0] == SANDBOX else json.dumps(prefix)
+    return oracle.sha(policy.replace(str(stage), "$STAGE").encode()).hex()
+
+
 def environment(stage, sdk=None):
     values = {"PATH": "/usr/bin:/bin", "HOME": str(stage), "TMPDIR": str(stage),
               "LANG": "C", "LC_ALL": "C", "TZ": "UTC"}
@@ -63,6 +70,11 @@ def environment(stage, sdk=None):
 
 def probe_denied(prefix, paths, stage):
     results = []
+    if sys.platform == "linux":
+        proc = checked([*prefix, "/bin/cat", "/proc/self/status"], stage, environment(stage)).decode()
+        fields = dict(line.split(":", 1) for line in proc.splitlines() if ":" in line)
+        oracle.require(int(fields["Uid"].split()[1]) == os.getuid() and int(fields["CapEff"], 16) == 0,
+                       "target sandbox retained privileges")
     for role, path in paths.items():
         oracle.require(path.is_file(), f"withheld input {role} must exist")
         variants = [(role, path)]
@@ -73,7 +85,8 @@ def probe_denied(prefix, paths, stage):
             result = subprocess.run([*prefix, "/bin/cat", str(spelling)], cwd=stage, env=environment(stage),
                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10)
             oracle.require(result.returncode == 1 and not result.stdout
-                           and b"Operation not permitted" in result.stderr, f"could read withheld input {label}")
+                           and (b"Operation not permitted" if prefix[0] == SANDBOX else b"No such file or directory")
+                           in result.stderr, f"withheld input probe failed for {label}")
             results.append(label)
     return sorted(results)
 
@@ -88,13 +101,13 @@ def run_rows(command, requests, stage, env):
     return rows
 
 
-def build(stage, oddlang, graph, denied, approved_pin=None):
+def build(stage, oddlang, graph, denied, approved_pin=None, *, isolate=boundary):
     stage.mkdir()
     builder = stage / "oddlang"
     shutil.copy2(oddlang, builder)
     contract = stage / "data.ttl"
     contract.write_bytes(graph)
-    projection = boundary(stage)
+    projection = isolate(stage)
     controls = probe_denied(projection, denied, stage)
     env = environment(stage)
     pin = checked([*projection, str(builder), "tagged-wire", "digest", str(contract)], stage, env).decode().strip()
@@ -119,10 +132,10 @@ def build(stage, oddlang, graph, denied, approved_pin=None):
             "generatorSha256": oracle.digest(builder), "generatedSourceSha256": outputs,
             "projectionLockSha256": locks,
             "deniedReadProbes": controls, "commandArguments": commands,
-            "sandboxProfileSha256": oracle.sha(projection[-1].replace(str(stage), "$STAGE").encode()).hex()}
+            "sandboxProfileSha256": policy_digest(projection, stage)}
 
 
-def compile_adapters(stage, rustc, node, developer, sdk, clang, denied, build_evidence):
+def compile_adapters(stage, rustc, node, developer, sdk, clang, denied, build_evidence, *, isolate=boundary):
     rust_dir, node_dir = stage / "rust", stage / "typescript"
     sources = {"rust": rust_dir / "wire.rs", "typescript": node_dir / "wire.mts"}
 
@@ -134,12 +147,12 @@ def compile_adapters(stage, rustc, node, developer, sdk, clang, denied, build_ev
     shutil.copy2(ROOT / "tagged_adapter.rs", rust_dir / "adapter.rs")
     shutil.copy2(ROOT / "tagged_adapter.mjs", node_dir / "adapter.mjs")
     executable = rust_dir / "adapter"
-    native = boundary(stage, read=[rustc.parent.parent, developer])
+    native = isolate(stage, read=[rustc.parent.parent, developer])
     rust_probes = probe_denied(native, denied, stage)
     sdk_env = environment(stage, sdk)
     checked([*native, str(rustc), "--edition=2024", "-C", f"linker={clang}", str(rust_dir / "adapter.rs"), "-o", str(executable)],
             stage, sdk_env)
-    node_runtime = boundary(stage, executable=[node])
+    node_runtime = isolate(stage, executable=[node])
     node_probes = probe_denied(node_runtime, denied, stage)
     node_cmd = [
         *node_runtime, str(node), "--no-warnings", "--experimental-strip-types",
@@ -148,10 +161,10 @@ def compile_adapters(stage, rustc, node, developer, sdk, clang, denied, build_ev
     verify_sources()
     build_evidence["adapterBoundaries"] = {
         role: {"deniedReadProbes": probes,
-               "sandboxProfileSha256": oracle.sha(profile[-1].replace(str(stage), "$STAGE").encode()).hex()}
+               "sandboxProfileSha256": policy_digest(profile, stage)}
         for role, profile, probes in [("rustCompile", native, rust_probes), ("nodeRuntime", node_runtime, node_probes)]
     }
-    return {"rust": [*boundary(stage), str(executable)], "typescript": node_cmd}
+    return {"rust": [*isolate(stage), str(executable)], "typescript": node_cmd}
 
 
 def comparable(row):
@@ -350,6 +363,10 @@ def main():
     parser.add_argument("--holdout", type=Path)
     parser.add_argument("--deny-read", action="append", type=Path, default=[])
     parser.add_argument("--receipt", type=Path, required=True)
+    parser.add_argument("--external-judge", action="store_true",
+                        help="read a JSON array of Data adapter input lines and emit both native observations on stdout")
+    parser.add_argument("--linux-privileged-mounts", action="store_true",
+                        help="use sudo for namespace setup and drop privileges before entering each target on Linux")
     oracle.original_arguments(parser)
     args = parser.parse_args()
     target = shutil.which("node")
@@ -357,9 +374,22 @@ def main():
     node = Path(target).resolve()
     rustc = Path(subprocess.check_output(["rustup", "which", "--toolchain", "1.97.1", "rustc"],
                                        text=True).strip()).resolve()
-    developer = Path(subprocess.check_output(["xcode-select", "-p"], text=True).strip()).resolve()
-    clang = Path(subprocess.check_output(["xcrun", "--find", "clang"], text=True).strip()).resolve()
-    sdk = Path(subprocess.check_output(["xcrun", "--show-sdk-path"], text=True).strip()).resolve()
+    if sys.platform == "linux":
+        from linux_boundary import boundary as linux_boundary
+        isolate = partial(linux_boundary, privileged_mounts=args.linux_privileged_mounts)
+        developer, sdk = None, None
+        platform_evidence = {"bubblewrapSha256": oracle.digest(Path("/usr/bin/bwrap")),
+                             "privilegedMountSetup": args.linux_privileged_mounts}
+        clang_path = shutil.which("clang")
+        oracle.require(clang_path is not None, "Linux qualification needs clang")
+        clang = Path(clang_path).resolve()
+    else:
+        oracle.require(sys.platform == "darwin" and not args.linux_privileged_mounts, "unsupported sandbox host")
+        isolate = boundary
+        developer = Path(subprocess.check_output(["xcode-select", "-p"], text=True).strip()).resolve()
+        clang = Path(subprocess.check_output(["xcrun", "--find", "clang"], text=True).strip()).resolve()
+        sdk = Path(subprocess.check_output(["xcrun", "--show-sdk-path"], text=True).strip()).resolve()
+        platform_evidence = {"sdkSettingsSha256": oracle.digest(sdk / "SDKSettings.json")}
     upstream = args.upstream.resolve()
     freeze = json.loads(oracle.FREEZE.read_bytes())
     prior = json.loads(oracle.VECTORS.read_bytes())
@@ -414,19 +444,27 @@ def main():
         if hint_input is not None:
             denied["advisoryHintSource"] = hint_input
         initial_denied = denied | {"withheldHintCopy": hints} if hints is not None else denied
-        original_build = build(release, oddlang, pin, initial_denied, RELEASE_PIN)
+        original_build = build(release, oddlang, pin, initial_denied, RELEASE_PIN, isolate=isolate)
         if hints is not None:
             hints.unlink()
             hint_evidence["withheldOnFirstBuild"] = True
-        changed_build = build(alternate, oddlang, changed, denied)
-        no_hints_build = build(without_hints, oddlang, pin, denied, RELEASE_PIN)
+        changed_build = build(alternate, oddlang, changed, denied, isolate=isolate)
+        no_hints_build = build(without_hints, oddlang, pin, denied, RELEASE_PIN, isolate=isolate)
         oracle.require(original_build["graphSha256"] == no_hints_build["graphSha256"]
                        and original_build["generatedSourceSha256"] == no_hints_build["generatedSourceSha256"],
                        "withholding optional hints changed generation")
         oracle.require(changed_build["graphSha256"] != original_build["graphSha256"], "mutation did not change graph pin")
-        adapters = compile_adapters(release, rustc, node, developer, sdk, clang, denied, original_build)
-        mutant = compile_adapters(alternate, rustc, node, developer, sdk, clang, denied, changed_build)
-        restored = compile_adapters(without_hints, rustc, node, developer, sdk, clang, denied, no_hints_build)
+        adapters = compile_adapters(release, rustc, node, developer, sdk, clang, denied, original_build, isolate=isolate)
+        mutant = compile_adapters(alternate, rustc, node, developer, sdk, clang, denied, changed_build, isolate=isolate)
+        restored = compile_adapters(without_hints, rustc, node, developer, sdk, clang, denied, no_hints_build, isolate=isolate)
+        if args.external_judge:
+            # Only transport blind inputs and outputs. Expected values stay with the external judge.
+            requests = json.load(sys.stdin)
+            oracle.require(isinstance(requests, list) and all(isinstance(line, str) and "\n" not in line
+                           and "\r" not in line for line in requests), "expected single-line adapter requests")
+            responses = {name: run_rows(command, requests, release, environment(release))
+                         for name, command in adapters.items()}
+            print(json.dumps(responses, separators=(",", ":")), flush=True)
         compared = {name: len(assert_observations(release, command, public)) for name, command in adapters.items()}
         if holdout:
             # The target boundary already denies all reads outside the staging and runtime tools.
@@ -457,6 +495,7 @@ def main():
             "sealedCases": len(holdout), "comparedOperationResults": compared,
             "driverSourceSha256": {name: oracle.digest(ROOT / name) for name in [
                 "qualify_tagged.py", "tagged_adapter.rs", "tagged_adapter.mjs",
+                *(["linux_boundary.py"] if sys.platform == "linux" else []),
             ]},
             "mixedPeers": mixed, "build": original_build, "hintOmission": hint_evidence,
             "alternativeLibraryValidation": "unresolved",
@@ -472,7 +511,7 @@ def main():
                 "rust": subprocess.check_output([str(rustc), "-vV"], text=True).splitlines(),
                 "rustcSha256": oracle.digest(rustc),
                 "clangSha256": oracle.digest(clang),
-                "sdkSettingsSha256": oracle.digest(sdk / "SDKSettings.json"),
+                **platform_evidence,
                 "node": subprocess.check_output([str(node), "--version"], text=True).strip(),
                 "nodeSha256": oracle.digest(node),
                 "nodeOptions": ["--no-warnings", "--experimental-strip-types"],
@@ -488,7 +527,8 @@ def main():
             ],
         }
     oracle.write(args.receipt, receipt)
-    print(f"{len(public)} public cases; {len(holdout)} sealed cases; both native targets and graph tag mutation passed")
+    print(f"{len(public)} public cases; {len(holdout)} sealed cases; both native targets and graph tag mutation passed",
+          file=sys.stderr if args.external_judge else sys.stdout)
 
 
 if __name__ == "__main__":
