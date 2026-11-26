@@ -2973,3 +2973,7 @@ w:authorizedOwnerLocalSubmitReviewFinding a p:Finding ;
     p:source w:authorizedOwnerLocalSubmitReview .
 w:authorizedOwnerLocalSubmitReview a p:Artifact ;
     p:location "Claude auto review of the bounded local submit and async owner route patch" .
+w:authorizedOwnerLocalSubmit p:addresses w:localSubmitReceiptShapeFinding .
+w:localSubmitReceiptShapeFinding a p:Finding ;
+    rdfs:label "Declare local reply flags and receipt version in the application graph" ;
+    p:source w:authorizedOwnerLocalSubmitReview .
