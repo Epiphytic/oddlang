@@ -22,5 +22,9 @@ descriptor metadata. Ancestor traversal and concurrent content changes require s
 Descriptor limits use a checked one-byte lookahead. The original comparison
 covers its documented finite parser and file-size range. The Rust projection
 rejects a caller limit of `u64::MAX` for bounded reads because it cannot add the
-lookahead byte. Hashing reads from the file descriptor until EOF, matching the
-observed dispatch-free behavior on stable inert files.
+lookahead byte. The projection preflights path types and opens nonblocking, with
+a second type check on the descriptor. Hashing stops after the expected length
+plus one byte and rejects a length change. These are explicit safeguards beyond
+the stable-file comparison, which uses Unix metadata on macOS and Linux ARM64.
+The observations do not qualify device access, ancestor traversal or mutation by
+a concurrent writer.

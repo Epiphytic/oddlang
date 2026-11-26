@@ -25,7 +25,16 @@ struct Profile {
     open: Vec<String>,
     guards: Vec<String>,
     read_ceiling: String,
+    safety: Safety,
     errors: Errors,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct Safety {
+    preflight_file_type: String,
+    nonblocking_open: bool,
+    hash_ceiling: String,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -90,6 +99,9 @@ impl Graph {
                     "digest",
                 ]
             || profile.read_ceiling != "requested-size-plus-one"
+            || profile.safety.preflight_file_type != "regular-or-final-symlink"
+            || !profile.safety.nonblocking_open
+            || profile.safety.hash_ceiling != "exact-size-plus-one"
             || rejections
                 .iter()
                 .map(|error| &error.code)

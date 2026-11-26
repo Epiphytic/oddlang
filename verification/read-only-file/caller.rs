@@ -50,5 +50,10 @@ fn descriptor_order_and_content() {
     fs::hard_link(&sample, &hard).unwrap();
     assert!(matches!(open_sample(&sample, 56), Err(Fault::Rejected("unsafe-file"))));
     assert!(matches!(open_sample(&root, u64::MAX), Err(Fault::Rejected("unsafe-file"))));
+    use std::os::unix::ffi::OsStrExt;
+    let fifo = root.join("fifo");
+    let fifo_path = std::ffi::CString::new(fifo.as_os_str().as_bytes()).unwrap();
+    assert_eq!(unsafe { libc::mkfifo(fifo_path.as_ptr(), 0o600) }, 0);
+    assert!(matches!(open_sample(&fifo, 56), Err(Fault::Rejected("unsafe-file"))));
     fs::remove_dir_all(root).unwrap();
 }

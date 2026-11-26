@@ -4,9 +4,15 @@ pub(crate) fn @OPEN@(
     maximum: u64,
 ) -> ::core::result::Result<::std::fs::File, @ERROR@> {
     use ::std::os::unix::fs::{MetadataExt, OpenOptionsExt};
+    let path_type = ::std::fs::symlink_metadata(path)
+        .map_err(@ERROR@::@IO@)?
+        .file_type();
+    if !path_type.is_file() && !path_type.is_symlink() {
+        return Err(@ERROR@::@INVALID@("@UNSAFE@"));
+    }
     let handle = ::std::fs::OpenOptions::new()
         .read(true)
-        .custom_flags(::libc::O_NOFOLLOW | ::libc::O_CLOEXEC)
+        .custom_flags(::libc::O_NOFOLLOW | ::libc::O_CLOEXEC | ::libc::O_NONBLOCK)
         .open(path)
         .map_err(@ERROR@::@IO@)?;
     let facts = handle.metadata().map_err(@ERROR@::@IO@)?;
@@ -42,7 +48,7 @@ pub(crate) fn @VERIFY@(
 ) -> ::core::result::Result<(), @ERROR@> {
     use ::sha2::Digest;
     use ::std::{io::Read, os::unix::fs::MetadataExt};
-    let mut handle = @OPEN@(path, expected_bytes)?;
+    let handle = @OPEN@(path, expected_bytes)?;
     let facts = handle.metadata().map_err(@ERROR@::@IO@)?;
     if facts.len() != expected_bytes
         || (check_owner_and_mode
@@ -51,6 +57,8 @@ pub(crate) fn @VERIFY@(
         return Err(@ERROR@::@INVALID@("@METADATA@"));
     }
 
+    let ceiling = expected_bytes.checked_add(1).ok_or(@ERROR@::@INVALID@("@DIGEST@"))?;
+    let mut handle = handle.take(ceiling);
     let mut state = ::sha2::Sha256::new();
     let mut buffer = [0u8; @CHUNK@];
     loop {
@@ -60,7 +68,7 @@ pub(crate) fn @VERIFY@(
         }
     }
     let actual: [u8; 32] = state.finalize().into();
-    if &actual != expected_digest {
+    if handle.limit() != 1 || &actual != expected_digest {
         return Err(@ERROR@::@INVALID@("@DIGEST@"));
     }
     Ok(())

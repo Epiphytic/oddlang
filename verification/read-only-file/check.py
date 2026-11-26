@@ -28,6 +28,8 @@ with tempfile.TemporaryDirectory() as scratch:
         "guards": ["regular", "links", "maximum-size", "exact-size",
                    "effective-owner", "masked-mode", "digest"],
         "readCeiling": "requested-size-plus-one",
+        "safety": {"preflightFileType": "regular-or-final-symlink", "nonblockingOpen": True,
+                   "hashCeiling": "exact-size-plus-one"},
         "errors": {
             "io": {"id": "urn:fixture:error:io"},
             **{name: {"id": "urn:fixture:error:invalid", "code": code} for name, code in (
@@ -67,6 +69,7 @@ with tempfile.TemporaryDirectory() as scratch:
     for edit in (
         {"maximumLinks": 0},
         {"profile": dict(profile, modeMask=4095)},
+        {"profile": dict(profile, safety=dict(profile["safety"], nonblockingOpen=False))},
         {"profile": dict(profile, open=["read-only", "close-on-exec"])},
         {"profile": dict(profile, guards=list(reversed(profile["guards"])))},
         {"profile": dict(profile, digest={"algorithm": "sha256", "chunkBytes": 0})},
