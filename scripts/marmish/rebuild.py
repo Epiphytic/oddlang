@@ -216,6 +216,11 @@ def run_build(upstream, destination, evidence, binary, original, env):
         (evidence / "ontology-check.txt").write_bytes(index("check", "--ref", "HEAD"))
     if git("status", "--porcelain"):
         raise ValueError("immutable candidate check left a changed source tree")
+    immutable = evidence / "immutable"
+    immutable.mkdir()
+    (immutable / "commit.raw").write_bytes(git("cat-file", "commit", "HEAD"))
+    for path in sorted(changed):
+        (immutable / Path(path).name).write_bytes(git("show", f"HEAD:{path}"))
     result = {
         "assemblySha256": assembly_hash,
         "sourceFiles": len(rows),
@@ -283,7 +288,7 @@ def rebuild(upstream, out):
         )
     if first != second:
         raise ValueError("independent candidate results differ")
-    for name in ("framing", "facade", "framing-projection", "facade-projection"):
+    for name in ("framing", "facade", "framing-projection", "facade-projection", "immutable"):
         left, right = out / "first" / name, out / "second" / name
         if {p.name: p.read_bytes() for p in left.iterdir()} != {
             p.name: p.read_bytes() for p in right.iterdir()
