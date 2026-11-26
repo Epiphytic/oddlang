@@ -1,5 +1,6 @@
 """Check field and fallible result relations with an unrelated runtime oracle."""
 from copy import deepcopy
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -89,8 +90,8 @@ fn main() {
 }
 '''
 
-def run(*args, error=None):
-    result = subprocess.run(args,capture_output=True,text=True)
+def run(*args, error=None, cwd=None):
+    result = subprocess.run(args,capture_output=True,text=True,cwd=cwd)
     if error:
         assert result.returncode and error in result.stderr,result
     else:
@@ -110,7 +111,21 @@ with tempfile.TemporaryDirectory() as tmp:
     (out/"main.rs").write_text(native)
     run("rustc","+1.97.1","--edition=2024",out/"main.rs","-o",root/"witness")
     run(root/"witness")
+    def unused(g,b):
+        g["relations"][iri("names-owner")]["arguments"].append(argument("unused",number))
+        b["relations"][iri("names-owner")]["arguments"][iri("unused")]="unused"
+
+    def opaque(g,b):
+        g["types"][iri("Denomination")]={"fields":{}}
+        b["types"][iri("Denomination")]="crate::Denomination"
+        g["calls"][iri("quote-total")]["arguments"]=[named("Denomination")]
+        g["relations"][iri("accepts")]["arguments"][1]["value"]=named("Denomination")
+
     for change,error in [
+        (unused, "unused argument"),
+        (opaque, "requires Copy"),
+        (lambda g,b:g["types"][iri("Approval")]["fields"][iri("owner")].update(extra=True),"unknown field"),
+        (lambda g,b:g["relations"][iri("accepts")]["steps"][1].update(right=field("receiver","owner")),"reflexive comparison"),
         (lambda g,b:g["relations"][iri("accepts")]["steps"][1]["right"].update(field=iri("amount")),
          "unknown field"),
         (lambda g,b:g["relations"][iri("accepts")]["steps"][1].update(right=arg("units")),
@@ -124,5 +139,64 @@ with tempfile.TemporaryDirectory() as tmp:
         change(g,b)
         project(g,b,root/"rejected",error)
         assert not (root/"rejected").exists()
+
+    def pin(name, obj):
+        path=root/name
+        path.write_text(json.dumps(obj))
+        return {"path":name,"sha256":hashlib.sha256(path.read_bytes()).hexdigest()}
+
+    def part(kind, module, names, g, b):
+        return dict(kind=kind,module=module,reexports=names,
+                    graph=pin(module+".json",g),overlay=pin(module+"-rust.json",b))
+
+    shared = part("shared-declarations","fault",["WireFault"],
+        dict(format="oddlang-shared-declarations-v1",id=iri("fault"),
+             errors=[dict(id=iri("WireFault"),variants=[dict(id=iri("Bad"),payload="text",message=[dict(payload=True)])])]),
+        dict(format="oddlang-shared-rust-v1", names={iri("WireFault"):"WireFault",iri("Bad"):"Bad"},
+             variantOrder={iri("WireFault"):[iri("Bad")]}))
+    layouts = []
+    amount = {}
+    fault_types = ("value","truncated","trailing","decodeSize","encodeSize")
+    for name in ("Invoice", "Remittance"):
+        module=name.lower()
+        amount[name]=iri(module+":amount")
+        layout=[dict(id=amount[name],encoding=dict(kind="unsigned-be",bits=64,minimum=0,maximum=99))]
+        errors={key:iri(module+":"+key) for key in fault_types}
+        layouts.append(part("binary-record",module,[name],
+            dict(format="oddlang-binary-record-v1",id=iri(name),layout=layout,maximum=8,errors=errors),
+            dict(format="oddlang-binary-record-rust-v1",name=name,names={amount[name]:"amount"},
+                 externals={},errorType="crate::WireFault",
+                 errors={value:dict(variant="Bad",argument=key) for key,value in errors.items()})))
+    remittance=iri("package-remittance")
+    relation=part("field-relation","relation",[],
+        dict(format="oddlang-field-relation-v1",id=iri("payment"),
+             types={iri(name):{"fields":{field:number}} for name,field in amount.items()},calls={},
+             relations={iri("agrees"):dict(receiver=iri("Invoice"),arguments=[dict(id=remittance,value=named("Remittance"))],
+                 steps=[same(dict(kind="field",object="receiver",field=amount["Invoice"]),
+                             dict(kind="field",object=remittance,field=amount["Remittance"]))])}),
+        dict(format="oddlang-field-relation-rust-v1",types={iri(name):f"crate::{name}" for name in amount},
+             fields={field:"amount" for field in amount.values()},calls={},errors={},
+             relations={iri("agrees"):dict(name="agrees",arguments={remittance:"remittance"})}))
+
+    (root/"src").mkdir()
+    (root/"src/lib.rs").touch()
+    (root/"Cargo.toml").write_text('[package]\nname="payment-fixture"\nversion="0.0.0"\nedition="2024"\n')
+    run("cargo","+1.97.1","generate-lockfile","--offline",cwd=root)
+    package=dict(format="oddlang-native-package-v1",name="payment-fixture",version="0.0.0",edition="2024",
+                 cargoLock=dict(path="Cargo.lock",sha256=hashlib.sha256((root/"Cargo.lock").read_bytes()).hexdigest()),
+                 components=[shared,*layouts,relation])
+    manifest=root/"package.json"
+    manifest.write_text(json.dumps(package))
+    projected=root/"package"
+    run(CLI,"build","native-package","rust",manifest,projected)
+    (projected/"examples").mkdir()
+    (projected/"examples/witness.rs").write_text(
+        "use payment_fixture::{Invoice,Remittance};\nfn main() {assert!(Invoice{amount:25}.agrees(&Remittance{amount:25}));"
+        "assert!(!Invoice{amount:25}.agrees(&Remittance{amount:26}));}\n"
+    )
+    run("cargo","+1.97.1","run","--locked","--offline","--example","witness",cwd=projected)
+    relation["reexports"]= ["Invoice"]
+    manifest.write_text(json.dumps(package))
+    run(CLI,"build","native-package","rust",manifest,root/"bad-reexports",error="cannot reexport")
 
 print("Typed field equality and ordered checked calls pass independent runtime controls.")

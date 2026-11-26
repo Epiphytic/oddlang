@@ -285,6 +285,17 @@ pub fn build(path: &Path, output: &Path) -> Result<()> {
     let mut records = Vec::new();
     let mut root_exports = String::new();
     for (index, component) in manifest.components.iter().enumerate() {
+        if matches!(component.kind, Kind::FieldRelation)
+            && (!component.reexports.is_empty()
+                || !component.crate_reexports.is_empty()
+                || component
+                    .root_reexports
+                    .as_ref()
+                    .is_some_and(|names| !names.is_empty()))
+        {
+            return Err("field relation component cannot reexport items".into());
+        }
+
         if !ident(&component.module)
             || (component.reexports.is_empty()
                 && component.crate_reexports.is_empty()

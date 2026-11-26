@@ -34,16 +34,20 @@ struct Graph {
 struct Type {
     #[serde(deserialize_with = "unique_map")]
     fields: BTreeMap<String, Value>,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    equality: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    copy: bool,
 }
 
 #[derive(Clone, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(tag = "kind", rename_all = "kebab-case", deny_unknown_fields)]
 enum Value {
-    Bool,
+    Bool {},
     Unsigned { bits: u8 },
     FixedBytes { size: u32 },
-    Bytes,
-    Text,
+    Bytes {},
+    Text {},
     Named { id: String },
 }
 
@@ -78,7 +82,7 @@ enum Step {
     Check { call: Call },
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(PartialEq, Eq, Deserialize, Serialize)]
 #[serde(tag = "kind", rename_all = "kebab-case", deny_unknown_fields)]
 enum Operand {
     Field { object: String, field: String },
@@ -86,7 +90,7 @@ enum Operand {
     Result { call: Call },
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(PartialEq, Eq, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 struct Call {
     method: String,
@@ -240,7 +244,14 @@ impl Graph {
             if let Some(error) = &relation.failure {
                 errors.insert(error);
             }
+            let used = std::cell::RefCell::new(BTreeSet::new());
+            let mark = |name: &str| {
+                if let Some(&id) = args.keys().find(|&&id| id == name) {
+                    used.borrow_mut().insert(id);
+                }
+            };
             let object = |name: &str| {
+                mark(name);
                 if name == RECEIVER {
                     Some(relation.receiver.as_str())
                 } else if let Some(Value::Named { id }) = args.get(name).copied() {
@@ -264,6 +275,16 @@ impl Graph {
                 {
                     return Err(format!("ill-typed fallible relation call: {}", call.method));
                 }
+                for argument in &call.arguments {
+                    mark(argument);
+                    if let Some(Value::Named { id }) = args.get(argument.as_str()).copied() {
+                        if self.types[id].fields.is_empty() && !self.types[id].copy {
+                            return Err(format!(
+                                "opaque relation call argument requires Copy: {argument}"
+                            ));
+                        }
+                    }
+                }
                 Ok(signature.output.as_ref())
             };
             let operand_type = |operand: &Operand| -> Result<&Value> {
@@ -272,7 +293,10 @@ impl Graph {
                         object: owner,
                         field,
                     } => object(owner).and_then(|id| self.types[id].fields.get(field)),
-                    Operand::Argument { id } => args.get(id.as_str()).copied(),
+                    Operand::Argument { id } => {
+                        mark(id);
+                        args.get(id.as_str()).copied()
+                    }
                     Operand::Result { call } => call_type(call)?,
                 }
                 .ok_or_else(|| {
@@ -282,8 +306,15 @@ impl Graph {
             for step in &relation.steps {
                 match step {
                     Step::Equal { left, right } => {
-                        if operand_type(left)? != operand_type(right)? {
+                        let left_type = operand_type(left)?;
+                        let right_type = operand_type(right)?;
+                        if left_type != right_type
+                            || matches!(left_type, Value::Named { id } if !self.types[id].equality)
+                        {
                             return Err(format!("incompatible types in relation comparison: {id}"));
+                        }
+                        if left == right && !matches!(left, Operand::Result { .. }) {
+                            return Err(format!("reflexive comparison in relation: {id}"));
                         }
                     }
                     Step::Check { call } => {
@@ -292,6 +323,9 @@ impl Graph {
                         }
                     }
                 }
+            }
+            if !used.borrow().iter().copied().eq(args.keys().copied()) {
+                return Err(format!("unused argument in field relation: {id}"));
             }
         }
         if !errors.iter().copied().eq(binding.errors.keys())
@@ -314,9 +348,9 @@ impl Graph {
             Value::Unsigned {
                 bits: 8 | 16 | 32 | 64,
             }
-            | Value::Bool
-            | Value::Bytes
-            | Value::Text => Ok(()),
+            | Value::Bool {}
+            | Value::Bytes {}
+            | Value::Text {} => Ok(()),
             Value::FixedBytes { size } if *size != 0 => Ok(()),
             Value::Named { id } if self.types.contains_key(id) => Ok(()),
             _ => Err("invalid type in field relation".into()),
@@ -325,13 +359,13 @@ impl Graph {
 
     fn type_text(&self, value: &Value, binding: &Binding, argument: bool) -> String {
         match value {
-            Value::Bool => "::core::primitive::bool".into(),
+            Value::Bool {} => "::core::primitive::bool".into(),
             Value::Unsigned { bits } => format!("::core::primitive::u{bits}"),
             Value::FixedBytes { size } => format!("[::core::primitive::u8; {size}]"),
-            Value::Bytes if argument => "&[::core::primitive::u8]".into(),
-            Value::Bytes => "::std::vec::Vec<::core::primitive::u8>".into(),
-            Value::Text if argument => "&::core::primitive::str".into(),
-            Value::Text => "::std::string::String".into(),
+            Value::Bytes {} if argument => "&[::core::primitive::u8]".into(),
+            Value::Bytes {} => "::std::vec::Vec<::core::primitive::u8>".into(),
+            Value::Text {} if argument => "&::core::primitive::str".into(),
+            Value::Text {} => "::std::string::String".into(),
             Value::Named { id } if argument && !self.types[id].fields.is_empty() => {
                 format!("&{}", binding.types[id])
             }
@@ -341,9 +375,9 @@ impl Graph {
 
     fn borrow(&self, value: &Value, expression: &str, argument: bool) -> String {
         match value {
-            Value::Bytes if !argument => format!("({expression}).as_slice()"),
-            Value::Text if !argument => format!("({expression}).as_str()"),
-            Value::Bytes | Value::Text => expression.into(),
+            Value::Bytes {} if !argument => format!("({expression}).as_slice()"),
+            Value::Text {} if !argument => format!("({expression}).as_str()"),
+            Value::Bytes {} | Value::Text {} => expression.into(),
             Value::Named { id } if argument && !self.types[id].fields.is_empty() => {
                 expression.into()
             }
@@ -402,7 +436,14 @@ impl Graph {
                 let args = call
                     .arguments
                     .iter()
-                    .map(|id| native.arguments[id].as_str())
+                    .map(|id| {
+                        let argument = &native.arguments[id];
+                        if matches!(args[id.as_str()], Value::Named { id } if self.types[id].fields.is_empty()) {
+                            format!("*(&{argument})")
+                        } else {
+                            argument.clone()
+                        }
+                    })
                     .collect::<Vec<_>>();
                 let error = binding
                     .error_type

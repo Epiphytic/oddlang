@@ -813,3 +813,8 @@ w:binaryMetadataRecords a p:Task ; rdfs:label "Project optional binary metadata 
     p:evidence w:binaryMetadataFixture .
 w:binaryMetadataFixture a p:Artifact ; p:location "verification/binary-record/metadata.py" .
 w:wholeMarmishProtocols p:dependsOn w:binaryMetadataRecords .
+
+w:typedFieldRelationReview a p:Finding ;
+    rdfs:label "Require native equality and copy capabilities and compile assembled relation components" ;
+    p:source w:typedFieldRelationFixture .
+w:typedFieldRelations p:addresses w:typedFieldRelationReview .
