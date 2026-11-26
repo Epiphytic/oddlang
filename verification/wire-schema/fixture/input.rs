@@ -42,7 +42,8 @@ mod signature_text {
 
     pub fn deserialize<'de, D: Deserializer<'de>>(reader: D) -> Result<[u8; 2], D::Error> {
         let text = String::deserialize(reader)?;
-        let value = u16::from_str_radix(&text, 16).map_err(D::Error::custom)?;
+        let value =
+            u16::from_str_radix(&text, 16).map_err(|_| D::Error::custom("signature text"))?;
         if format!("{value:04x}") != text {
             return Err(D::Error::custom("signature text"));
         }

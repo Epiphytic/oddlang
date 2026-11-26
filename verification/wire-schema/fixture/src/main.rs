@@ -79,6 +79,13 @@ fn main() {
         assert!(err.to_string().starts_with(expected));
         assert!(original.to_string().starts_with(expected));
     }
-    let upper_hex = bytes.replace("00ab", "00AB");
-    assert!(serde_json::from_str::<Packet>(&upper_hex).is_err());
+    for malformed in ["00AB", "zzzz", ""] {
+        let text = bytes.replace("00ab", malformed);
+        let projected = serde_json::from_str::<Packet>(&text).err().unwrap();
+        let source = serde_json::from_str::<original::Packet>(&text)
+            .err()
+            .unwrap();
+        assert!(projected.to_string().starts_with("signature text"));
+        assert!(source.to_string().starts_with("signature text"));
+    }
 }

@@ -210,6 +210,12 @@ struct Binding {
     names: BTreeMap<String, String>,
     derives: BTreeMap<String, BTreeSet<String>>,
     externals: BTreeMap<String, String>,
+    #[serde(
+        rename = "externalDerives",
+        default,
+        skip_serializing_if = "BTreeMap::is_empty"
+    )]
+    external_derives: BTreeMap<String, BTreeSet<String>>,
 }
 
 fn symbol(name: &str) -> bool {
@@ -293,14 +299,7 @@ impl Schema {
                 return Err("invalid or duplicate native type binding".into());
             }
             if let Some(traits) = binding.derives.get(ty.id()) {
-                if traits.iter().any(|name| {
-                    !matches!(
-                        name.as_str(),
-                        "Clone" | "Copy" | "Debug" | "Eq" | "PartialEq"
-                    )
-                }) || traits.contains("Copy") && !traits.contains("Clone")
-                    || traits.contains("Eq") && !traits.contains("PartialEq")
-                {
+                if !allowed_derives(traits) {
                     return Err("unsupported or incomplete Rust derive binding".into());
                 }
             }
@@ -367,6 +366,27 @@ impl Schema {
                 .any(|id| !declared.contains_key(id.as_str()) || externals.contains(id.as_str()))
         {
             return Err("Rust binding must cover exactly the declared identities".into());
+        }
+        for (id, traits) in &binding.external_derives {
+            if !externals.contains(id.as_str()) || !allowed_derives(traits) {
+                return Err("invalid external derive declaration".into());
+            }
+        }
+        for definition in &self.types {
+            if let Some(traits) = binding.derives.get(definition.id()) {
+                let fields = definition_shapes(definition);
+                for trait_name in traits {
+                    if fields
+                        .iter()
+                        .any(|shape| !supports_derive(shape, trait_name, binding))
+                    {
+                        return Err(format!(
+                            "{}: referenced field does not support derive {trait_name}",
+                            definition.id()
+                        ));
+                    }
+                }
+            }
         }
         check_cycles(&declared)?;
         let mut guard_ids = BTreeSet::new();
@@ -447,6 +467,48 @@ fn check_shape(shape: &Shape, declared: &BTreeMap<&str, &Definition>) -> Result<
         }
         Shape::Unresolved { reason } => Err(format!("unresolved shape: {reason}")),
         _ => Err("unknown wire type or unsupported width".into()),
+    }
+}
+
+fn allowed_derives(traits: &BTreeSet<String>) -> bool {
+    traits.iter().all(|name| {
+        matches!(
+            name.as_str(),
+            "Clone" | "Copy" | "Debug" | "Eq" | "PartialEq"
+        )
+    }) && (!traits.contains("Copy") || traits.contains("Clone"))
+        && (!traits.contains("Eq") || traits.contains("PartialEq"))
+}
+
+fn definition_shapes(definition: &Definition) -> Vec<&Shape> {
+    let mut shapes = Vec::new();
+    match definition {
+        Definition::Record { fields, .. } => shapes.extend(fields.iter().map(|f| &f.shape)),
+        Definition::Adjacent { variants, .. } => {
+            for variant in variants {
+                match &variant.payload {
+                    Payload::Record { fields } => shapes.extend(fields.iter().map(|f| &f.shape)),
+                    Payload::Newtype { shape } => shapes.push(shape),
+                    Payload::Unit {} => {}
+                }
+            }
+        }
+        Definition::External { .. } => {}
+    }
+    shapes
+}
+
+fn supports_derive(shape: &Shape, trait_name: &str, binding: &Binding) -> bool {
+    match shape {
+        Shape::Ref { id } => binding
+            .derives
+            .get(id)
+            .or_else(|| binding.external_derives.get(id))
+            .is_some_and(|traits| traits.contains(trait_name)),
+        Shape::Optional { item } => supports_derive(item, trait_name, binding),
+        Shape::List { item } => trait_name != "Copy" && supports_derive(item, trait_name, binding),
+        Shape::Text {} | Shape::BoundedBase64List { .. } => trait_name != "Copy",
+        _ => true,
     }
 }
 

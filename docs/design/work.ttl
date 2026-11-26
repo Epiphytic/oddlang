@@ -738,3 +738,8 @@ w:jsonWireCanonicalOperations a p:Task ;
     p:dependsOn w:jsonWireStructuralSchema ;
     p:acceptance "Model direction-sensitive canonical envelope operations and typed cross-object validation. Qualify each operation against independent native peers." .
 w:wholeMarmishProtocols p:dependsOn w:jsonWireCanonicalOperations .
+
+w:jsonWireSchemaReview a p:Finding ;
+    rdfs:label "Verify lexical Serde declarations, transitive native derives and selected adapter witnesses" ;
+    p:source w:jsonWireSchemaFixture .
+w:jsonWireStructuralSchema p:addresses w:jsonWireSchemaReview .

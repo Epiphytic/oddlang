@@ -50,7 +50,12 @@ with tempfile.TemporaryDirectory(prefix="wire-schema-test-") as directory:
     for name in ("graph.json", "rust.json", "observation.json"):
         assert (recovered / name).read_bytes() == (repeat / name).read_bytes()
     observed = json.loads((recovered / "observation.json").read_bytes())
-    assert observed["gaps"] == [{"kind": "behavior", "reason": "conditional guards require independent evidence"}]
+    assert {row["reason"] for row in observed["gaps"]} == {
+        "conditional guards require independent evidence",
+        "selected adapter policy requires independent witness: chunks_text",
+        "selected adapter policy requires independent witness: signature_text",
+    }
+    assert all(row["kind"] == "behavior" for row in observed["gaps"])
     tampered = root / "tampered.rs"
     tampered.write_bytes(source.read_bytes() + b"\n")
     run("recover", "wire-schema", tampered, selected, root / "bad-source", failure="source digest")
@@ -65,6 +70,26 @@ with tempfile.TemporaryDirectory(prefix="wire-schema-test-") as directory:
     assert any(row["kind"] == "structure" and "skip_serializing_if" in row["reason"] for row in gaps)
     run("build", "wire-schema", "rust", gap / "graph.json", gap / "rust.json",
         root / "unsafe", failure="unresolved structural evidence")
+
+    lexical_controls = [
+        ("macro", source.read_text().replace("pub struct Sensor", "#[serde_with::skip_serializing_none]\npub struct Sensor"),
+         "unvetted Rust attribute serde_with::skip_serializing_none"),
+        ("derive", source.read_text().replace("use serde::{Deserialize, Serialize};",
+                                               "use another::{Deserialize, Serialize};"),
+         "unverified native derive"),
+        ("builtin", source.read_text() + "\ntype Option<T> = std::vec::Vec<T>;\n",
+         "unverified generic field type Option"),
+    ]
+    for name, text, reason in lexical_controls:
+        edited = root / (name + ".rs")
+        edited.write_text(text)
+        candidate = root / name
+        run("recover", "wire-schema", edited, write(root / (name + ".json"),
+            dict(selection, sourceSha256=hashlib.sha256(edited.read_bytes()).hexdigest())), candidate)
+        gaps = json.loads((candidate / "observation.json").read_bytes())["gaps"]
+        assert any(row["kind"] == "structure" and reason in row["reason"] for row in gaps)
+        run("build", "wire-schema", "rust", candidate / "graph.json", candidate / "rust.json",
+            root / (name + "-unsafe"), failure="unresolved structural evidence")
 
     graph = json.loads((recovered / "graph.json").read_bytes())
     event = next(row for row in graph["types"] if row["id"] == "urn:garden:event")
@@ -90,6 +115,15 @@ with tempfile.TemporaryDirectory(prefix="wire-schema-test-") as directory:
         assert (generated / name).read_bytes() == (reordered / name).read_bytes()
     lock = json.loads((generated / "projection.lock").read_bytes())
     assert lock["obligationsSha256"] == hashlib.sha256((generated / "obligations.json").read_bytes()).hexdigest()
+    binding = json.loads((recovered / "rust.json").read_bytes())
+    binding["derives"]["urn:garden:sensor"] = ["Clone", "Copy"]
+    run("build", "wire-schema", "rust", path, write(root / "bad-derive.json", binding),
+        root / "bad-derive", failure="referenced field does not support derive Eq")
+    binding = json.loads((recovered / "rust.json").read_bytes())
+    binding["derives"]["urn:garden:event"].append("Copy")
+    run("build", "wire-schema", "rust", path, write(root / "bad-copy.json", binding),
+        root / "bad-copy", failure="referenced field does not support derive Copy")
+
     consumer = root / "consumer"
     shutil.copytree(FIXTURE, consumer)
     shutil.copyfile(generated / "wire.rs", consumer / "src/projected.rs")

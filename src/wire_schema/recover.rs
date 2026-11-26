@@ -29,6 +29,8 @@ struct Selection {
 struct External {
     id: String,
     rust_path: String,
+    #[serde(default)]
+    derives: BTreeSet<String>,
 }
 
 #[derive(Deserialize)]
@@ -52,6 +54,9 @@ struct Observer<'a> {
     selection: &'a Selection,
     aliases: BTreeMap<String, &'a Type>,
     gaps: Vec<String>,
+    used_adapters: BTreeSet<String>,
+    imports: BTreeMap<String, String>,
+    locals: BTreeSet<String>,
     binding: Binding,
 }
 
@@ -109,15 +114,47 @@ impl Observer<'_> {
         Ok(value)
     }
 
-    fn conditional(&mut self, id: &str, attrs: &[Attribute]) {
-        if attrs
-            .iter()
-            .any(|a| a.path().is_ident("cfg") || a.path().is_ident("cfg_attr"))
-        {
-            self.gaps.push(format!(
-                "{id}: conditional declaration needs compiler evidence"
-            ));
+    fn attributes(&mut self, id: &str, attrs: &[Attribute]) {
+        for attr in attrs {
+            let name = path_name(attr.path());
+            match name.as_str() {
+                "derive" | "serde" | "doc" | "allow" | "warn" | "deny" | "forbid"
+                | "deprecated" | "must_use" => {}
+                "cfg" | "cfg_attr" => self.gaps.push(format!(
+                    "{id}: conditional declaration needs compiler evidence"
+                )),
+                _ => self
+                    .gaps
+                    .push(format!("{id}: unvetted Rust attribute {name}")),
+            }
         }
+    }
+
+    fn known_path(&self, segments: &syn::Path, expected: &str) -> bool {
+        let path = path_name(segments);
+        if segments.leading_colon.is_some() {
+            return path == expected;
+        }
+        let (root, suffix) = path.split_once("::").unwrap_or((&path, ""));
+        if self.locals.contains(root)
+            || expected
+                .split_once("::")
+                .is_some_and(|(namespace, _)| self.locals.contains(namespace))
+        {
+            return false;
+        }
+        match self.imports.get(root) {
+            Some(import) if suffix.is_empty() => import == expected,
+            Some(import) => format!("{import}::{suffix}") == expected,
+            None => path == expected,
+        }
+    }
+
+    fn builtin(&self, segments: &syn::Path, bare: &str, paths: &[&str]) -> bool {
+        if self.known_path(segments, bare) {
+            return true;
+        }
+        paths.iter().any(|path| self.known_path(segments, path))
     }
 
     fn derives(&mut self, id: &str, attrs: &[Attribute]) -> Result<()> {
@@ -137,15 +174,19 @@ impl Observer<'_> {
                     .ident
                     .to_string();
                 match name.as_str() {
-                    "Serialize" | "Deserialize" => {
+                    "Serialize" | "Deserialize"
+                        if self.known_path(&path, &format!("serde::{name}")) =>
+                    {
                         serde.insert(name);
                     }
-                    "Clone" | "Copy" | "Debug" | "Eq" | "PartialEq" => {
+                    "Clone" | "Copy" | "Debug" | "Eq" | "PartialEq"
+                        if self.known_path(&path, &name) =>
+                    {
                         host.insert(name);
                     }
                     _ => self
                         .gaps
-                        .push(format!("{id}: unsupported native derive {name}")),
+                        .push(format!("{id}: unverified native derive {name}")),
                 }
             }
         }
@@ -168,10 +209,10 @@ impl Observer<'_> {
                 let rust = field.ident.as_ref().expect("named field").to_string();
                 let rust = rust.strip_prefix("r#").unwrap_or(&rust).to_owned();
                 let id = format!("{owner}:field:{rust}");
-                self.conditional(&id, &field.attrs);
+                self.attributes(&id, &field.attrs);
                 let opts = self.serde(&id, &field.attrs, &["rename", "with"])?;
                 let shape = if let Some(adapter) = opts.adapter {
-                    match self.selection.adapters.get(&adapter) {
+                    let shape = match self.selection.adapters.get(&adapter) {
                         Some(Adapter::LowerHex { bytes, diagnostic })
                             if self.array_bytes(&field.ty, 0) == Some(*bytes) =>
                         {
@@ -180,13 +221,19 @@ impl Observer<'_> {
                                 diagnostic: diagnostic.clone(),
                             }
                         }
-                        Some(Adapter::BoundedBase64List { policy }) if vector_bytes(&field.ty) => {
+                        Some(Adapter::BoundedBase64List { policy })
+                            if self.vector_bytes(&field.ty) =>
+                        {
                             Shape::BoundedBase64List {
                                 policy: policy.clone(),
                             }
                         }
                         _ => self.unresolved(&id, format!("unverified Serde adapter {adapter}")),
+                    };
+                    if !matches!(shape, Shape::Unresolved { .. }) {
+                        self.used_adapters.insert(adapter);
                     }
+                    shape
                 } else {
                     self.shape(&id, &field.ty)
                 };
@@ -214,7 +261,11 @@ impl Observer<'_> {
                 let Type::Path(element) = array.elem.as_ref() else {
                     return None;
                 };
-                if !element.path.is_ident("u8") {
+                if !self.builtin(
+                    &element.path,
+                    "u8",
+                    &["core::primitive::u8", "std::primitive::u8"],
+                ) {
                     return None;
                 }
                 let Expr::Lit(length) = &array.len else {
@@ -233,6 +284,17 @@ impl Observer<'_> {
         }
     }
 
+    fn vector_bytes(&self, ty: &Type) -> bool {
+        fn vector_item<'a>(observer: &Observer<'_>, ty: &'a Type) -> Option<&'a Type> {
+            let (path, item) = generic_item(ty)?;
+            observer
+                .builtin(path, "Vec", &["std::vec::Vec", "alloc::vec::Vec"])
+                .then_some(item)
+        }
+        matches!(vector_item(self, ty).and_then(|inner| vector_item(self, inner)), Some(Type::Path(leaf))
+                 if self.builtin(&leaf.path, "u8", &["core::primitive::u8", "std::primitive::u8"]))
+    }
+
     fn shape(&mut self, at: &str, ty: &Type) -> Shape {
         let Type::Path(path) = ty else {
             return self.unresolved(at, "unsupported non-path field type".into());
@@ -240,59 +302,74 @@ impl Observer<'_> {
         if path.qself.is_some() {
             return self.unresolved(at, "unsupported associated field type".into());
         }
-        let name = path
+        let name = path_name(&path.path);
+        if let Some((_, item)) = generic_item(ty) {
+            if self.builtin(&path.path, "Vec", &["std::vec::Vec", "alloc::vec::Vec"]) {
+                return Shape::List {
+                    item: Box::new(self.shape(at, item)),
+                };
+            }
+            if self.builtin(
+                &path.path,
+                "Option",
+                &["std::option::Option", "core::option::Option"],
+            ) {
+                return Shape::Optional {
+                    item: Box::new(self.shape(at, item)),
+                };
+            }
+            return self.unresolved(at, format!("unverified generic field type {name}"));
+        }
+        if path
             .path
             .segments
             .iter()
-            .map(|part| part.ident.to_string())
-            .collect::<Vec<_>>()
-            .join("::");
-        let leaf = path.path.segments.last().expect("nonempty path");
-        if let PathArguments::AngleBracketed(args) = &leaf.arguments {
-            let params: Vec<_> = args.args.iter().collect();
-            if let [GenericArgument::Type(item)] = params.as_slice() {
-                if matches!(name.as_str(), "Vec" | "std::vec::Vec" | "alloc::vec::Vec") {
-                    return Shape::List {
-                        item: Box::new(self.shape(at, item)),
-                    };
-                }
-                if matches!(
-                    name.as_str(),
-                    "Option" | "std::option::Option" | "core::option::Option"
-                ) {
-                    return Shape::Optional {
-                        item: Box::new(self.shape(at, item)),
-                    };
-                }
-            }
-            return self.unresolved(at, format!("unsupported generic field type {name}"));
+            .any(|segment| !matches!(segment.arguments, PathArguments::None))
+        {
+            return self.unresolved(at, format!("unverified generic field type {name}"));
         }
-        match name.as_str() {
-            "u8" => Shape::Unsigned { bits: 8 },
-            "u16" => Shape::Unsigned { bits: 16 },
-            "u32" => Shape::Unsigned { bits: 32 },
-            "u64" => Shape::Unsigned { bits: 64 },
-            "bool" => Shape::Bool {},
-            "String" | "std::string::String" => Shape::Text {},
-            _ => {
-                if let Some(id) = self.selection.types.get(&name) {
-                    return Shape::Ref { id: id.clone() };
-                }
-                if let Some(external) = self.selection.externals.get(&name) {
-                    return Shape::Ref {
-                        id: external.id.clone(),
-                    };
-                }
-                self.unresolved(at, format!("unresolved native reference {name}"))
+        for (primitive, bits) in [("u8", 8), ("u16", 16), ("u32", 32), ("u64", 64)] {
+            if self.builtin(
+                &path.path,
+                primitive,
+                &[
+                    &format!("core::primitive::{primitive}"),
+                    &format!("std::primitive::{primitive}"),
+                ],
+            ) {
+                return Shape::Unsigned { bits };
             }
         }
+        if self.builtin(
+            &path.path,
+            "bool",
+            &["core::primitive::bool", "std::primitive::bool"],
+        ) {
+            return Shape::Bool {};
+        }
+        if self.builtin(
+            &path.path,
+            "String",
+            &["std::string::String", "alloc::string::String"],
+        ) {
+            return Shape::Text {};
+        }
+        if let Some(id) = self.selection.types.get(&name) {
+            return Shape::Ref { id: id.clone() };
+        }
+        if let Some(external) = self.selection.externals.get(&name) {
+            return Shape::Ref {
+                id: external.id.clone(),
+            };
+        }
+        self.unresolved(at, format!("unverified native reference {name}"))
     }
 
     fn variant(&mut self, owner: &str, value: &syn::Variant, snake_case: bool) -> Result<Variant> {
         let rust = value.ident.to_string();
         let rust = rust.strip_prefix("r#").unwrap_or(&rust).to_owned();
         let id = format!("{owner}:variant:{rust}");
-        self.conditional(&id, &value.attrs);
+        self.attributes(&id, &value.attrs);
         let opts = self.serde(&id, &value.attrs, &["rename"])?;
         let wire = opts.rename.unwrap_or_else(|| {
             if snake_case {
@@ -315,7 +392,7 @@ impl Observer<'_> {
             },
             Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
                 let field = &fields.unnamed[0];
-                self.conditional(&id, &field.attrs);
+                self.attributes(&id, &field.attrs);
                 if field.attrs.iter().any(|attr| attr.path().is_ident("serde")) {
                     self.gaps.push(format!(
                         "{id}: unsupported Serde attributes on newtype payload"
@@ -339,32 +416,113 @@ impl Observer<'_> {
     }
 }
 
-fn vector_bytes(ty: &Type) -> bool {
-    fn vector_item(ty: &Type) -> Option<&Type> {
-        let Type::Path(path) = ty else { return None };
-        let leaf = path.path.segments.last()?;
-        let names = path
-            .path
-            .segments
-            .iter()
-            .map(|segment| segment.ident.to_string())
-            .collect::<Vec<_>>()
-            .join("::");
-        if path.qself.is_some()
-            || !matches!(names.as_str(), "Vec" | "std::vec::Vec" | "alloc::vec::Vec")
-        {
-            return None;
+fn path_name(path: &syn::Path) -> String {
+    path.segments
+        .iter()
+        .map(|segment| segment.ident.to_string())
+        .collect::<Vec<_>>()
+        .join("::")
+}
+
+fn generic_item(ty: &Type) -> Option<(&syn::Path, &Type)> {
+    let Type::Path(path) = ty else { return None };
+    let leaf = path.path.segments.last()?;
+    let PathArguments::AngleBracketed(args) = &leaf.arguments else {
+        return None;
+    };
+    let arguments: Vec<_> = args.args.iter().collect();
+    let [GenericArgument::Type(inner)] = arguments.as_slice() else {
+        return None;
+    };
+    Some((&path.path, inner))
+}
+
+fn scan_imports(
+    tree: &syn::UseTree,
+    prefix: &str,
+    imports: &mut BTreeMap<String, String>,
+    gaps: &mut Vec<String>,
+) {
+    let bind = |imports: &mut BTreeMap<String, String>,
+                source: String,
+                name: String,
+                gaps: &mut Vec<String>| {
+        if name == "_" {
+            return;
         }
-        let PathArguments::AngleBracketed(args) = &leaf.arguments else {
-            return None;
-        };
-        let arguments: Vec<_> = args.args.iter().collect();
-        let [GenericArgument::Type(inner)] = arguments.as_slice() else {
-            return None;
-        };
-        Some(inner)
+        if imports.insert(name.clone(), source).is_some() {
+            gaps.push(format!("source has competing imports for {name}"));
+        }
+    };
+    let join = |leaf: &str| {
+        if prefix.is_empty() {
+            leaf.to_owned()
+        } else if leaf == "self" {
+            prefix.to_owned()
+        } else {
+            format!("{prefix}::{leaf}")
+        }
+    };
+    match tree {
+        syn::UseTree::Path(path) => {
+            scan_imports(&path.tree, &join(&path.ident.to_string()), imports, gaps)
+        }
+        syn::UseTree::Name(name) => {
+            let source = join(&name.ident.to_string());
+            let local = source
+                .rsplit("::")
+                .next()
+                .expect("nonempty import")
+                .to_owned();
+            bind(imports, source, local, gaps);
+        }
+        syn::UseTree::Rename(name) => bind(
+            imports,
+            join(&name.ident.to_string()),
+            name.rename.to_string(),
+            gaps,
+        ),
+        syn::UseTree::Group(group) => {
+            for item in &group.items {
+                scan_imports(item, prefix, imports, gaps);
+            }
+        }
+        syn::UseTree::Glob(_) => gaps.push(format!("unresolved glob import {prefix}::*")),
     }
-    matches!(vector_item(ty).and_then(vector_item), Some(Type::Path(leaf)) if leaf.path.is_ident("u8"))
+}
+
+fn lexical_scope(file: &syn::File) -> (BTreeMap<String, String>, BTreeSet<String>, Vec<String>) {
+    let mut imports = BTreeMap::new();
+    let mut locals = BTreeSet::new();
+    let mut gaps = Vec::new();
+    for item in &file.items {
+        let name = match item {
+            Item::Use(item) => {
+                if item
+                    .attrs
+                    .iter()
+                    .any(|attr| !matches!(path_name(attr.path()).as_str(), "allow" | "doc"))
+                {
+                    gaps.push("source has conditional or decorated imports".into());
+                }
+                scan_imports(&item.tree, "", &mut imports, &mut gaps);
+                None
+            }
+            Item::Type(item) => Some(&item.ident),
+            Item::Struct(item) => Some(&item.ident),
+            Item::Enum(item) => Some(&item.ident),
+            Item::Union(item) => Some(&item.ident),
+            Item::Trait(item) => Some(&item.ident),
+            Item::TraitAlias(item) => Some(&item.ident),
+            Item::Mod(item) => Some(&item.ident),
+            Item::ExternCrate(item) => Some(item.rename.as_ref().map_or(&item.ident, |(_, id)| id)),
+            _ => None,
+        };
+        if let Some(name) = name {
+            locals.insert(name.to_string());
+        }
+    }
+    (imports, locals, gaps)
 }
 
 pub fn from_source(source: &Path, selection: &Path, output: &Path) -> Result<()> {
@@ -393,6 +551,7 @@ pub fn from_source(source: &Path, selection: &Path, output: &Path) -> Result<()>
     }
     let parsed = syn::parse_file(std::str::from_utf8(&source).map_err(|error| error.to_string())?)
         .map_err(|error| error.to_string())?;
+    let (imports, locals, gaps) = lexical_scope(&parsed);
     let mut observer = Observer {
         selection: &config,
         aliases: parsed
@@ -405,7 +564,10 @@ pub fn from_source(source: &Path, selection: &Path, output: &Path) -> Result<()>
                 _ => None,
             })
             .collect(),
-        gaps: Vec::new(),
+        gaps,
+        imports,
+        locals,
+        used_adapters: BTreeSet::new(),
         binding: Binding {
             format: BINDING_FORMAT.into(),
             names: BTreeMap::new(),
@@ -414,6 +576,12 @@ pub fn from_source(source: &Path, selection: &Path, output: &Path) -> Result<()>
                 .externals
                 .values()
                 .map(|external| (external.id.clone(), external.rust_path.clone()))
+                .collect(),
+            external_derives: config
+                .externals
+                .values()
+                .filter(|external| !external.derives.is_empty())
+                .map(|external| (external.id.clone(), external.derives.clone()))
                 .collect(),
         },
     };
@@ -428,7 +596,7 @@ pub fn from_source(source: &Path, selection: &Path, output: &Path) -> Result<()>
             continue;
         };
         observer.derives(id, attrs)?;
-        observer.conditional(id, attrs);
+        observer.attributes(id, attrs);
         if !generics.params.is_empty() {
             observer.gaps.push(format!(
                 "{id}: parameterized declaration needs compiler evidence"
@@ -517,6 +685,12 @@ pub fn from_source(source: &Path, selection: &Path, output: &Path) -> Result<()>
         .iter()
         .map(|reason| json!({"kind":"structure","reason":reason}))
         .collect();
+    gaps.extend(observer.used_adapters.iter().map(|adapter| {
+        json!({
+            "kind":"behavior",
+            "reason":format!("selected adapter policy requires independent witness: {adapter}")
+        })
+    }));
     gaps.push(
         json!({"kind":"behavior","reason":"conditional guards require independent evidence"}),
     );
