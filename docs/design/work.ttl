@@ -1973,3 +1973,33 @@ w:observationalRecordDefaultsMutation a p:Artifact ;
 w:observationalRecordDefaultsCoverage a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/e8f4d14b185cec310c0a19a0e09d3b06f6a17545/verification/whole/engine-native-records/README.md" .
 w:observationalRecordDefaults p:evidence w:observationalRecordDefaultsDarwin, w:observationalRecordDefaultsLinux, w:observationalRecordDefaultsMutation, w:observationalRecordDefaultsCoverage .
+
+w:publicRecordRustSourceApi a p:Task ;
+    rdfs:label "Check Rust drop-in source API requirements for public record fields" ;
+    p:milestone w:marmishMilestone ;
+    p:source w:publicRecordRustSourceApiPlan ;
+    p:dependsOn w:recoverSerdePublicRecords ;
+    p:acceptance "Consume explicit field name, visibility and native type requirements during Rust projection, reject mismatches and preserve the portable wire role and legacy bytes." ;
+    p:status p:done ; p:evidence w:publicRecordRustSourceApiReceipt .
+
+w:publicRecordRustSourceApiPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-public-record-native-field-requirements.md" .
+
+w:nativeIdiomHints a p:Decision ;
+    rdfs:label "Scope native idiom hints and caller requirements to their target and role" ;
+    p:source w:contractRecoveryDesign ;
+    p:reason "A consumer can choose idiomatic native types while sharing wire expectations. Existing native callers can independently require an exact public type or signature for a drop-in role." .
+
+w:publicRecordRustSourceApiReceipt a p:Artifact ;
+    p:location "verification/public-records/receipts/source-api-aarch64-apple-darwin.json" .
+
+w:rangeEndpointRoles a p:Task ;
+    rdfs:label "Qualify the portable endpoint and the Rust drop-in field separately" ;
+    p:milestone w:marmishMilestone ; p:source w:publicRecordRustSourceApiPlan, w:nativeIdiomHints ;
+    p:dependsOn w:publicRecordRustSourceApi, w:recoveredRangeWorkspace ; p:status p:done ;
+    p:evidence w:rangeEndpointBindingRun, w:rangeEndpointHintsRemovedRun, w:rangeEndpointWorkspaceRun ;
+    p:acceptance "Run the shared end-field wire corpus with Rust and TypeScript, preserve outcomes when hints change, and compile the unchanged Rust caller that reads the public optional u64 field." .
+w:wholeMarmishStructure p:dependsOn w:rangeEndpointRoles .
+w:rangeEndpointBindingRun a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/be1de6c244732424c3b6b0bc9502152b2e4eb425/verification/whole/gap-range-endpoint/binding-aarch64-apple-darwin.json" .
+w:rangeEndpointHintsRemovedRun a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/be1de6c244732424c3b6b0bc9502152b2e4eb425/verification/whole/gap-range-endpoint/omitted-hints-aarch64-apple-darwin.json" .
+w:rangeEndpointWorkspaceRun a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/be1de6c244732424c3b6b0bc9502152b2e4eb425/verification/whole/gap-range-role-workspace/aarch64-apple-darwin.json" .

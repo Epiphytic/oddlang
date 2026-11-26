@@ -747,6 +747,7 @@ pub fn recover_serde(source: &Path, rustdoc: &Path, selection: &Path, out: &Path
             (selected.record.id, selected.record.name),
         ]),
         external_types,
+        source_api: None,
     };
     render(&graph, &overlay, true)?;
     let graph = encode(&graph)?;
