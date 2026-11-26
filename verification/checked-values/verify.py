@@ -133,15 +133,43 @@ def main():
         g,r=fixture()
         assert assembled(root,exe,g,r,"baseline")==["true","true"]+["false"]*8+["true"]*2
         package=json.loads((root/"baseline-package.json").read_bytes())
-        variant=dict(r["errors"][FAULT],variant="Other")
-        wrong=write(root/"misbound-rust.json",dict(r,errors={FAULT:variant}))
-        package["components"][1]["overlay"]=pin(wrong,root)
-        invalid=write(root/"misbound-package.json",package)
-        dest=root/"misbound"
-        result=subprocess.run([exe,"build","native-package","rust",invalid,dest],
-                              capture_output=True,text=True)
-        assert result.returncode and "has no matching unit export" in result.stderr
-        assert FAULT in result.stderr and "crate::Fault::Other" in result.stderr and not dest.exists()
+        shared_component, value_component=package["components"]
+        def attempt(tag, components, error=None):
+            manifest=write(root/(tag+"-package.json"),dict(package,components=components))
+            dest=root/tag
+            result=subprocess.run([exe,"build","native-package","rust",manifest,dest],
+                                  capture_output=True,text=True)
+            if error:
+                assert result.returncode and error in result.stderr and not dest.exists(),result.stderr
+            else:
+                assert result.returncode==0,result.stderr
+                run("cargo","+1.97.1","check","--locked","--offline","--manifest-path",dest/"Cargo.toml")
+        def value_errors(**changes):
+            fault=dict(r["errors"][FAULT],**changes)
+            path=write(root/"linked-rust.json",dict(r,errors={FAULT:fault}))
+            return dict(value_component,overlay=pin(path,root))
+        mismatch=f"checked value error {FAULT} has no matching unit export"
+        attempt("misbound",[shared_component,value_errors(variant="Other")],mismatch)
+        module_only=dict(shared_component,rootReexports=[])
+        attempt("module",[module_only,value_errors(errorType="crate::faults::Fault")])
+        attempt("unexported-root",[module_only,value_component],mismatch)
+        fault, result = n("fault"), n("result")
+        def finite_component(payload, module):
+            graph=write(root/"finite.json",dict(format="oddlang-finite-error-domain-v1",id=n("finite"),
+                error=fault,result=result,categories={},
+                variants={FAULT:dict(payload=dict(kind=payload),message=(
+                    dict(kind="literal",text="bad detector input") if payload=="unit"
+                    else dict(kind="insertion",prefix="bad input: ",suffix="")),
+                    source=False,**{"from":False})}))
+            overlay=write(root/"finite-rust.json",dict(format="oddlang-finite-error-rust-v1",
+                variantOrder=[FAULT],categoryTypes={},names={fault:"Fault",result:"Result",FAULT:"Invalid"}))
+            return dict(kind="finite-error-domain",module=module,graph=pin(graph,root),
+                        overlay=pin(overlay,root),reexports=["Fault"],rootReexports=[])
+        attempt("finite",[finite_component("unit","finite"),value_errors(errorType="crate::finite::Fault")])
+        with_payload=finite_component("owned-text","finite")
+        attempt("payload",[with_payload,value_errors(errorType="crate::finite::Fault")],mismatch)
+        attempt("ambiguous",[shared_component,with_payload,value_component],
+                f"ambiguous checked value error: {FAULT}")
         original_rust=write(root/"deterministic-rust.json",r)
         graph=write(root/"deterministic.json",g)
         run(exe,"build","checked-values","rust",graph,original_rust,root/"first")
@@ -152,6 +180,7 @@ def main():
             assert (root/"first"/name).read_bytes()==(root/"second"/name).read_bytes(),name
         lock=json.loads((root/"first/projection.lock").read_bytes())
         obligations_path=root/"first/obligations.json"
+        assert lock["format"]=="oddlang-checked-values-lock-v1"
         assert lock["obligationsSha256"]==hashlib.sha256(obligations_path.read_bytes()).hexdigest()
         assert lock["sourceSha256"]==hashlib.sha256((root/"first/values.rs").read_bytes()).hexdigest()
         entries=json.loads(obligations_path.read_bytes())["obligations"]

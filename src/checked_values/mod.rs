@@ -480,7 +480,7 @@ pub fn build(graph: &Path, overlay: &Path, output: &Path) -> Result<()> {
         }).collect::<Vec<_>>()
     }))?;
     let lock = encode(&json!({
-        "format":FORMAT,"domainSha256":digest(&encode(&graph)?),"bindingSha256":digest(&encode(&bindings)?),
+        "format":"oddlang-checked-values-lock-v1","domainSha256":digest(&encode(&graph)?),"bindingSha256":digest(&encode(&bindings)?),
         "sourceSha256":digest(source.as_bytes()),"obligationsSha256":digest(&obligations),
     }))?;
     let parent = output
