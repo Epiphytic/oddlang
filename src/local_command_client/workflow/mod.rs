@@ -1,6 +1,6 @@
 use super::{
     Binding, Callback, RequestArgumentKind, RequiredArgument, arg_id, contains_fractional_literal,
-    rust,
+    discovery::Discovery, rust,
 };
 use serde_json::{Value, json};
 use std::{
@@ -10,6 +10,7 @@ use std::{
     path::Path,
 };
 
+mod profile;
 #[allow(dead_code)] // The generated runtime reads all declared effects.
 mod schema;
 use schema::{ArgumentKind, CaptureKind, Effect, Field, Source, Transition, Workflow};
@@ -73,6 +74,7 @@ fn minimum_request(fields: &[Field], captures: &BTreeMap<&str, &CaptureKind>) ->
                     CaptureKind::String { .. } => "\"\"".into(),
                     CaptureKind::Unsigned64 => "0".into(),
                 },
+                Source::Input { .. } => "0".into(),
                 Source::Object { fields } => minimum_request(fields, captures),
             };
             format!("{key}:{body}")
@@ -85,6 +87,7 @@ fn validate_fields(
     fields: &[Field],
     seen: &mut BTreeSet<String>,
     captures: &BTreeSet<&str>,
+    inputs: &BTreeSet<&str>,
     arguments: &mut Vec<(String, RequiredArgument)>,
 ) -> Result<(), String> {
     let mut keys = BTreeSet::new();
@@ -106,12 +109,7 @@ fn validate_fields(
                 if !arg_id(id) {
                     return Err(format!("invalid workflow request argument {id}"));
                 }
-                let kind = match value_kind {
-                    ArgumentKind::String => RequiredArgument::String,
-                    ArgumentKind::RepeatedString => RequiredArgument::RepeatedString,
-                    ArgumentKind::Unsigned64 => RequiredArgument::Unsigned64,
-                    ArgumentKind::Flag => RequiredArgument::Flag,
-                };
+                let kind = argument_kind(*value_kind).required_argument();
                 arguments.push((id.to_owned(), kind));
             }
             Source::Captured { name } => {
@@ -121,7 +119,14 @@ fn validate_fields(
                     ));
                 }
             }
-            Source::Object { fields } => validate_fields(fields, seen, captures, arguments)?,
+            Source::Input { name } => {
+                if !inputs.contains(name.as_str()) {
+                    return Err(format!("undeclared workflow input {name}"));
+                }
+            }
+            Source::Object { fields } => {
+                validate_fields(fields, seen, captures, inputs, arguments)?
+            }
         }
     }
     Ok(())
@@ -144,7 +149,11 @@ fn diagnostics() -> [(&'static str, &'static str); 8] {
     ]
 }
 
-fn validate(workflow: &Workflow) -> Result<Vec<(String, RequiredArgument)>, String> {
+fn validate(
+    workflow: &Workflow,
+    profile: Option<&profile::ProfileInputs>,
+    discovery: Option<&Discovery>,
+) -> Result<Vec<(String, RequiredArgument)>, String> {
     let transport = &workflow.transport;
     if workflow.format != FORMAT
         || !arg_id(&workflow.socket_argument)
@@ -171,6 +180,27 @@ fn validate(workflow: &Workflow) -> Result<Vec<(String, RequiredArgument)>, Stri
     let mut seen = BTreeSet::new();
     identity(&workflow.id, &mut seen)?;
     let mut arguments = vec![(workflow.socket_argument.clone(), RequiredArgument::Path)];
+    let mut inputs = BTreeSet::new();
+    if let Some(profile) = profile {
+        let (required, names) = profile::validate(profile, &mut seen)?;
+        arguments.extend(required);
+        inputs = names;
+    }
+    if let Some(discovery) = discovery {
+        discovery.validate(&workflow.socket_argument)?;
+        if let Some(profile) = profile {
+            if !discovery.selects_profile(
+                &profile.arguments.state,
+                &profile.arguments.profile,
+                &profile.arguments.default_profile,
+            ) {
+                return Err(
+                    "workflow context and socket discovery select different profiles".into(),
+                );
+            }
+        }
+        arguments.extend(discovery.arguments());
+    }
     let mut captures = BTreeMap::new();
     for step in &workflow.steps {
         identity(&step.id, &mut seen)?;
@@ -296,7 +326,13 @@ fn validate(workflow: &Workflow) -> Result<Vec<(String, RequiredArgument)>, Stri
                 "cannot carry workflow capture {missing} before assignment"
             ));
         }
-        validate_fields(&step.request, &mut seen, &guaranteed, &mut arguments)?;
+        validate_fields(
+            &step.request,
+            &mut seen,
+            &guaranteed,
+            &inputs,
+            &mut arguments,
+        )?;
         if minimum_request(&step.request, &captures).len() > transport.maximum_frame_bytes as usize
         {
             return Err(format!(
@@ -308,13 +344,18 @@ fn validate(workflow: &Workflow) -> Result<Vec<(String, RequiredArgument)>, Stri
     Ok(arguments)
 }
 
-fn load(
-    graph: &[u8],
-    binding: &[u8],
-) -> Result<(Workflow, Binding, Vec<(String, RequiredArgument)>), String> {
+struct SelectedWorkflow {
+    workflow: Workflow,
+    binding: Binding,
+    profile: Option<profile::ProfileInputs>,
+    discovery: Option<Discovery>,
+    arguments: Vec<(String, RequiredArgument)>,
+}
+
+fn load(graph: &[u8], binding: &[u8]) -> Result<SelectedWorkflow, String> {
     let strict_json::Strict(value) =
         serde_json::from_slice(graph).map_err(|error| error.to_string())?;
-    let graph: Workflow = serde_json::from_value(value).map_err(|error| error.to_string())?;
+    let workflow: Workflow = serde_json::from_value(value).map_err(|error| error.to_string())?;
     let binding: Binding = serde_json::from_slice(binding).map_err(|error| error.to_string())?;
     if binding.format != "oddlang-local-command-client-rust-v1"
         || !super::valid_entry(&binding.entry)
@@ -327,22 +368,54 @@ fn load(
             "capture_is_valid",
             "run_workflow",
             "execute_workflow",
+            "initial_inputs",
+            "choose_socket",
         ]
         .contains(&binding.entry.as_str())
     {
         return Err("invalid local command workflow entry".into());
     }
-    let arguments = validate(&graph)?;
-    Ok((graph, binding, arguments))
+    let profile = match (
+        &workflow.profile_inputs,
+        binding.profile_provider.as_deref(),
+    ) {
+        (Some(profile), Some("nostr-url-base64-unix")) => Some(profile::load(profile)?),
+        (None, None) => None,
+        _ => {
+            return Err(
+                "workflow private profile inputs require their pinned provider binding".into(),
+            );
+        }
+    };
+    let discovery = workflow
+        .discovery
+        .clone()
+        .map(serde_json::from_value)
+        .transpose()
+        .map_err(|error| error.to_string())?;
+    if (profile.is_some() && profile::reserved_entry(&binding.entry))
+        || (discovery.is_some()
+            && (binding.entry == "discover_endpoint" || binding.entry.starts_with("endpoint_")))
+    {
+        return Err("invalid local command workflow entry".into());
+    }
+    let arguments = validate(&workflow, profile.as_ref(), discovery.as_ref())?;
+    Ok(SelectedWorkflow {
+        workflow,
+        binding,
+        profile,
+        discovery,
+        arguments,
+    })
 }
 
 pub(super) fn callback(graph: &[u8], binding: &[u8]) -> Result<Callback, String> {
-    let (_, binding, arguments) = load(graph, binding)?;
+    let selected = load(graph, binding)?;
     Ok(Callback {
         local_arguments: None,
         operation: None,
-        entry: binding.entry,
-        arguments,
+        entry: selected.binding.entry,
+        arguments: selected.arguments,
     })
 }
 
@@ -357,6 +430,7 @@ fn field_obligations(fields: &[Field], rows: &mut Vec<Value>) {
                 row["representation"] = argument_kind(*value_kind).representation();
             }
             Source::Captured { name } => row["captured"] = json!(name),
+            Source::Input { name } => row["authorizedInput"] = json!(name),
             Source::Literal { value } => row["literal"] = json!(value),
             Source::Object { fields: children } => {
                 let mut nested = Vec::new();
@@ -369,7 +443,8 @@ fn field_obligations(fields: &[Field], rows: &mut Vec<Value>) {
 }
 
 pub(super) fn build(graph: &[u8], binding: &[u8], output: &Path) -> Result<(), String> {
-    let (workflow, overlay, _) = load(graph, binding)?;
+    let selected = load(graph, binding)?;
+    let workflow = selected.workflow;
     let mut source =
         String::from("// Generated by Oddlang from oddlang-local-command-workflow-v1.\n");
     source.push_str(&rust::framed_exchange(
@@ -413,8 +488,61 @@ pub(super) fn build(graph: &[u8], binding: &[u8], output: &Path) -> Result<(), S
         )
         .unwrap();
     }
+    if let Some(profile) = &selected.profile {
+        profile::render(profile, &mut source);
+        source.push_str(r#"
+fn initial_inputs(workflow: &Workflow, matches: &ArgMatches) -> Result<BTreeMap<String, Value>, Failure> {
+    let raw = workflow.profile_inputs.as_ref().ok_or(PROTOCOL)?;
+    let policy = serde_json::from_value(raw.clone()).map_err(|_| PROTOCOL)?;
+    context_values(&policy, matches)
+}
+"#);
+    } else {
+        source.push_str(
+            r#"
+fn initial_inputs(_: &Workflow, _: &ArgMatches) -> Result<BTreeMap<String, Value>, Failure> {
+    Ok(BTreeMap::new())
+}
+"#,
+        );
+    }
+    if let Some(discovery) = &selected.discovery {
+        discovery.render(&mut source);
+        if let Some(profile) = &selected.profile {
+            let profile_argument = &profile.arguments.profile;
+            writeln!(
+                source,
+                r#"
+fn choose_socket(matches: &ArgMatches, explicit: Option<&PathBuf>) -> Result<PathBuf, Failure> {{
+    let mut selected = matches.clone();
+    if !explicit_argument(matches, {profile_argument:?}) {{
+        selected.try_remove_one::<String>({profile_argument:?}).map_err(|_| BINDING)?;
+    }}
+    discover_endpoint(&selected, explicit)
+}}
+"#
+            )
+            .unwrap();
+        } else {
+            source.push_str(
+                r#"
+fn choose_socket(matches: &ArgMatches, explicit: Option<&PathBuf>) -> Result<PathBuf, Failure> {
+    discover_endpoint(matches, explicit)
+}
+"#,
+            );
+        }
+    } else {
+        source.push_str(
+            r#"
+fn choose_socket(_: &ArgMatches, explicit: Option<&PathBuf>) -> Result<PathBuf, Failure> {
+    explicit.cloned().ok_or(BINDING)
+}
+"#,
+        );
+    }
     source.push_str(include_str!("runtime.rs.in"));
-    let entry = overlay.entry;
+    let entry = selected.binding.entry;
     writeln!(source, "\npub fn {entry}(matches: ArgMatches) -> ExitCode {{\n    match execute_workflow(&matches) {{\n        Ok(code) => ExitCode::from(code),\n        Err(error) => error.report(),\n    }}\n}}").unwrap();
 
     let rows = workflow
@@ -450,13 +578,37 @@ pub(super) fn build(graph: &[u8], binding: &[u8], output: &Path) -> Result<(), S
         })
     );
     use crate::wire_schema::digest;
-    let lock = json!({
+    let mut lock = json!({
         "format": "oddlang-local-command-workflow-lock-v1",
         "graphSha256": digest(graph),
         "bindingSha256": digest(binding),
         "sourceSha256": digest(source.as_bytes()),
         "workflowObligationsSha256": digest(obligations.as_bytes()),
     });
+    let profile_obligations = workflow
+        .profile_inputs
+        .as_ref()
+        .map(|profile| format!("{:#}\n", profile::obligations(profile)));
+    if let Some(catalog) = &profile_obligations {
+        lock["profileObligationsSha256"] = digest(catalog.as_bytes()).into();
+    }
+    let endpoint_obligations = selected.discovery.as_ref().map(|discovery| {
+        let mut catalog = discovery.obligations();
+        if selected.profile.is_some() {
+            if let Some(order) = catalog["selectionOrder"].as_array_mut() {
+                order.retain(|source| source != "ordered-environment");
+            }
+            catalog["composedStateSelection"] = "explicitStateRequired".into();
+        }
+        format!("{catalog:#}\n")
+    });
+    if let Some(discovery) = &selected.discovery {
+        lock["discoverySha256"] =
+            digest(&serde_json::to_vec(discovery).map_err(|error| error.to_string())?).into();
+    }
+    if let Some(catalog) = &endpoint_obligations {
+        lock["endpointObligationsSha256"] = digest(catalog.as_bytes()).into();
+    }
     if output.symlink_metadata().is_ok() {
         return Err(format!("output already exists: {}", output.display()));
     }
@@ -471,6 +623,14 @@ pub(super) fn build(graph: &[u8], binding: &[u8], output: &Path) -> Result<(), S
         ("workflow-obligations.json", obligations),
     ] {
         fs::write(stage.path().join(name), content).map_err(|error| error.to_string())?;
+    }
+    for (name, catalog) in [
+        ("profile-obligations.json", profile_obligations),
+        ("endpoint-obligations.json", endpoint_obligations),
+    ] {
+        if let Some(content) = catalog {
+            fs::write(stage.path().join(name), content).map_err(|error| error.to_string())?;
+        }
     }
     crate::native_package::publish(stage.path(), output)
 }
