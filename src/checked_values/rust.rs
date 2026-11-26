@@ -306,17 +306,44 @@ fn fixed_bytes(out: &mut String, length: u32, fault: &Fault, target: &Native) {
     writeln!(out, "}}").unwrap();
 }
 
+pub(crate) fn render_plain_choice<'a>(
+    out: &mut String,
+    name: &str,
+    cases: impl Iterator<Item = &'a str>,
+    debug: bool,
+) {
+    let debug = if debug { ", Debug" } else { "" };
+    writeln!(
+        out,
+        "#[derive(Clone, Copy, PartialEq, Eq{debug})]\npub enum {name} {{"
+    )
+    .unwrap();
+    for case in cases {
+        writeln!(out, "    {case},").unwrap();
+    }
+    out.push_str("}\n");
+}
+
 pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
     let mut out = String::new();
     for (id, definition) in &graph.types {
         let target = &binding.types[id];
-        if !matches!(definition, Definition::FixedBytes { .. }) {
+        if !matches!(
+            definition,
+            Definition::FixedBytes { .. } | Definition::Choice { .. }
+        ) {
             derives(&mut out, target);
         }
         match definition {
             Definition::FixedBytes {
                 length, failure, ..
             } => fixed_bytes(&mut out, *length, &binding.errors[failure], target),
+            Definition::Choice { cases } => render_plain_choice(
+                &mut out,
+                &target.name,
+                cases.iter().map(|case| binding.variants[case].as_str()),
+                false,
+            ),
             Definition::Enum { values, failure } => {
                 enumeration(&mut out, values, failure.as_deref(), binding, target)
             }

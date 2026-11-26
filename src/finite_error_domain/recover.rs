@@ -10,12 +10,16 @@ use syn::{
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct Selection {
+pub(super) struct Selection {
     format: String,
-    id: String,
+    pub(super) id: String,
     source_sha256: String,
-    error: String,
-    result: Option<String>,
+    pub(super) error: String,
+    pub(super) result: Option<String>,
+    #[serde(default)]
+    pub(super) choices: Vec<String>,
+    #[serde(default, deserialize_with = "unique_map")]
+    pub(super) variant_ids: BTreeMap<String, String>,
 }
 
 struct Diagnostic {
@@ -44,7 +48,7 @@ impl Parse for Diagnostic {
     }
 }
 
-fn docs(attrs: &[Attribute]) -> bool {
+pub(super) fn docs(attrs: &[Attribute]) -> bool {
     attrs.iter().all(|attr| attr.path().is_ident("doc"))
 }
 
@@ -159,7 +163,7 @@ fn literal_table(helper: &ItemFn, ty: &Type) -> Result<BTreeMap<String, String>>
     Ok(result)
 }
 
-fn check_alias(alias: &syn::ItemType, error: &syn::Ident) -> Result<()> {
+pub(super) fn check_alias(alias: &syn::ItemType, error: &syn::Ident) -> Result<()> {
     if error == "T" {
         return Err("result alias parameter shadows the error type".into());
     }
@@ -200,7 +204,7 @@ fn message(diagnostic: &Diagnostic, field: bool) -> Result<Message> {
     Err("unsupported diagnostic interpolation".into())
 }
 
-fn derive_error(error: &syn::ItemEnum, imported: bool) -> Result<()> {
+pub(super) fn derive_error(error: &syn::ItemEnum, imported: bool, equality: bool) -> Result<()> {
     let attrs: Vec<_> = error
         .attrs
         .iter()
@@ -214,10 +218,13 @@ fn derive_error(error: &syn::ItemEnum, imported: bool) -> Result<()> {
         .map_err(|e| e.to_string())?;
     let names: BTreeSet<_> = paths.iter().map(strict_path).collect::<Result<_>>()?;
     let debug = vec!["Debug".to_owned()];
-    let standard = BTreeSet::from([debug.clone(), vec!["thiserror".into(), "Error".into()]]);
+    let mut standard = BTreeSet::from([debug.clone(), vec!["thiserror".into(), "Error".into()]]);
     let via_import = BTreeSet::from([debug, vec!["Error".into()]]);
+    if equality {
+        standard.extend([vec!["Eq".into()], vec!["PartialEq".into()]]);
+    }
     if !derive.path().is_ident("derive")
-        || paths.len() != 2
+        || paths.len() != standard.len()
         || (names != standard && !(imported && names == via_import))
         || !matches!(error.vis, Visibility::Public(_))
         || !error.generics.params.is_empty()
@@ -255,7 +262,7 @@ fn extract(source: &str, selection: Selection) -> Result<(Graph, Overlay)> {
         error.ok_or("missing error enum")?,
         alias.ok_or("missing result alias")?,
     );
-    derive_error(error, false)?;
+    derive_error(error, false, false)?;
     check_alias(alias, &error.ident)?;
 
     let id = selection.id;
@@ -267,6 +274,8 @@ fn extract(source: &str, selection: Selection) -> Result<(Graph, Overlay)> {
         result: Some(fresh("alias", result)),
         variants: BTreeMap::new(),
         categories: BTreeMap::new(),
+        choices: BTreeMap::new(),
+        equality: false,
     };
     let mut overlay = Overlay {
         format: "oddlang-finite-error-rust-v1".into(),
@@ -379,12 +388,21 @@ pub fn recover(source: &Path, selection: &Path, output: &Path) -> Result<()> {
     let selection: Selection =
         serde_json::from_slice(&selection_bytes).map_err(|e| e.to_string())?;
     let source_sha = digest(source.as_bytes());
-    if selection.format != "oddlang-finite-error-selection-v1"
-        || selection.source_sha256 != source_sha
+    if !matches!(
+        selection.format.as_str(),
+        "oddlang-finite-error-selection-v1" | "oddlang-typed-finite-error-selection-v1"
+    ) || selection.source_sha256 != source_sha
     {
         return Err("finite error source selection version or digest mismatch".into());
     }
-    let (graph, overlay) = extract(&source, selection)?;
+    let (graph, overlay) = if selection.format == "oddlang-typed-finite-error-selection-v1" {
+        super::typed::extract(&source, selection)?
+    } else {
+        if !selection.choices.is_empty() || !selection.variant_ids.is_empty() {
+            return Err("typed declarations require the typed source selection profile".into());
+        }
+        extract(&source, selection)?
+    };
     let graph = json(&graph)?;
     let overlay = json(&overlay)?;
     let receipt = json(&serde_json::json!({
@@ -473,7 +491,7 @@ fn units(file: &syn::File, selection: Selection) -> Result<(Graph, Overlay)> {
         }
     }
     let item = chosen.ok_or("missing standalone unit error")?;
-    derive_error(item, imported)?;
+    derive_error(item, imported, false)?;
     let root = selection.id;
     let error = format!("{root}:type:{}", selection.error);
     let mut graph = Graph {
@@ -483,6 +501,8 @@ fn units(file: &syn::File, selection: Selection) -> Result<(Graph, Overlay)> {
         result: None,
         variants: BTreeMap::new(),
         categories: BTreeMap::new(),
+        choices: BTreeMap::new(),
+        equality: false,
     };
     let mut overlay = Overlay {
         format: "oddlang-finite-error-rust-v1".into(),

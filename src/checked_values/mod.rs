@@ -1,6 +1,10 @@
 //! Portable checked value records and finite representation tables.
 mod fixed_recovery;
+mod recover_choice;
 pub use fixed_recovery::recover_fixed_bytes;
+pub(crate) use recover_choice::plain_choice_cases;
+pub use recover_choice::recover;
+pub(crate) use rust::render_plain_choice;
 mod rust;
 
 use crate::{
@@ -31,6 +35,9 @@ struct Graph {
 #[derive(Deserialize, Serialize)]
 #[serde(tag = "kind", rename_all = "lowercase", deny_unknown_fields)]
 enum Definition {
+    Choice {
+        cases: Vec<String>,
+    },
     #[serde(rename = "fixed-bytes")]
     FixedBytes {
         length: u32,
@@ -278,6 +285,31 @@ impl Graph {
                     }
                     errors.insert(failure);
                 }
+                Definition::Choice { cases } => {
+                    if cases.is_empty()
+                        || native.order != *cases
+                        || native.traits != [Derived::Copy]
+                        || native.view.is_some()
+                        || native.parse.is_some()
+                        || native.shape.is_some()
+                        || native.constructor.is_some()
+                        || !native.members.is_empty()
+                    {
+                        return Err(format!("invalid plain choice native binding: {id}"));
+                    }
+                    let mut labels = BTreeSet::new();
+                    for case in cases {
+                        declare(&mut ids, case)?;
+                        variants.insert(case);
+                        if !bindings
+                            .variants
+                            .get(case)
+                            .is_some_and(|name| type_symbol(name) && labels.insert(name))
+                        {
+                            return Err(format!("invalid or duplicate plain choice case: {case}"));
+                        }
+                    }
+                }
                 Definition::Enum { values, failure } => {
                     if values.is_empty()
                         || !order(values.keys().cloned(), &native.order)
@@ -345,13 +377,18 @@ impl Graph {
                         {
                             return Err(format!("invalid checked field binding: {field_id}"));
                         }
-                        if let Field::Named { id } = field
-                            && (matches!(self.types.get(id), Some(Definition::FixedBytes { .. }))
-                                || !self.types.contains_key(id))
-                        {
-                            return Err(format!(
-                                "unresolved or unsupported checked field type: {id}"
-                            ));
+                        if let Field::Named { id } = field {
+                            match self.types.get(id) {
+                                Some(Definition::Choice { .. }) => {
+                                    return Err(format!("checked record field lacks Debug: {id}"));
+                                }
+                                Some(Definition::FixedBytes { .. }) | None => {
+                                    return Err(format!(
+                                        "unresolved or unsupported checked field type: {id}"
+                                    ));
+                                }
+                                _ => {}
+                            }
                         }
                         for capability in &native.traits {
                             let supports = match field {
@@ -471,6 +508,10 @@ pub fn build(graph: &Path, overlay: &Path, output: &Path) -> Result<()> {
             let expected = match definition {
                 Definition::FixedBytes { length, failure, on_drop } =>
                     json!({"length":length,"failure":failure,"onDrop":on_drop,"view":"borrow","input":"exact-bytes"}),
+                Definition::Choice { cases } => json!({
+                    "orderedCases":cases,"copy":true,"equality":"case-identity",
+                    "externalRepresentation":null, "targetOrdinals":"zero-based-declaration-order"
+                }),
                 Definition::Enum { values, failure } => json!({"values":values,"failure":failure}),
                 Definition::Record { fields, constructor, guards } =>
                     json!({"fields":fields,"constructor":constructor,"orderedGuards":guards}),
