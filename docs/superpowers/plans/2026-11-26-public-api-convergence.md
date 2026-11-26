@@ -15,3 +15,17 @@ The integration compiler combines public constant recovery at `c70bc9b` and type
 
 Both ARM64 hosts observed the baseline ordinals 0 and 1, their reversal after swapping the original cases, and the same seven rejected trait bounds. The generated package was compiled independently of the upstream source. [Native qualification receipts](https://github.com/Epiphytic/marmish-oddlang/blob/b75be7c/verification/whole/vault-mode/)
 The [combined workspace qualification](https://github.com/Epiphytic/marmish-oddlang/pull/89) merged at `4f39fe3da13635d66b5a09fbe55e52fe27d17962`. The cold builds on Linux and Darwin ARM64 agree on the generated workspace lock and public engine, identity and constant observations. The Darwin caller audit increased importability from 65 to 70 of the 140 original names. The named suite and mixed-peer interoperability require separate evidence.
+
+## One compiler for the seven-member application
+
+- [x] Compile the private grammar, structured diagnostics, CLI terminal-prefix, observable record and copyable choice profiles into one Rust CLI. Compile the library tests and replay the unrelated profile fixtures with that same executable.
+- [ ] Combine the native package inputs in the companion, checking each changed member against its parent. Include the two private parser tests, the observational records, the copy-only vault mode, terminal CLI metadata and structured diagnostics.
+- [ ] Cold-build on native Darwin and Linux ARM64 with the original source hidden and publish the resulting workspace lock. Run the public import audit, named upstream tests and CLI comparisons against those artifacts. Keep separately tested cases out of the counts for the combined workspace.
+
+From a clean compiler checkout, build with `cargo +1.96.1 build --locked --offline`, then run `cargo +1.96.1 test --locked --offline --lib`. Set `cli=$PWD/target/debug/oddlang` and run each of the following with `python3 -B verification/PATH "$cli"`:
+
+- `line-grammar/verify_records.py`, `line-grammar/verify_support.py` and `line-grammar/verify.py`
+- `observational-record-defaults/verify.py` and `plain-value-choices/equality.py`
+- `structured-diagnostics/check.py` and `command-surface/prefix.py`
+
+All seven fixture commands and the 13 library tests passed on Darwin ARM64. They qualify compiler composition. The application checks above require a separate sealed build.

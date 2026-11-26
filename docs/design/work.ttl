@@ -1706,3 +1706,16 @@ w:terminalPrefixDenialReview a p:Finding ;
     rdfs:label "Keep a denied prefix terminal even when the auxiliary tail could parse" ;
     p:source w:wholeMarmishPlan .
 w:terminalPrefixCli p:addresses w:terminalPrefixDenialReview .
+
+w:structuralProfileCompiler a p:Task ;
+    rdfs:label "Compile the private grammar, record, choice, terminal CLI and diagnostic profiles together" ;
+    p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;
+    p:dependsOn w:choiceEqualityRecovery, w:observationalRecordDefaults, w:terminalPrefixCli, w:lineGrammarNativeSupport, w:structuredDiagnosticsProgram ;
+    p:acceptance "All seven unrelated profile fixtures use the same compiler executable, and the thirteen Rust library tests pass." ;
+    p:status p:done ; p:evidence w:publicApiConvergencePlan .
+w:structuralApplicationConvergence a p:Task ;
+    rdfs:label "Qualify the combined seven-member workspace from the five generic compiler profiles" ;
+    p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;
+    p:dependsOn w:structuralProfileCompiler, w:vaultHelperChoice ;
+    p:acceptance "Preserve and identify member contracts, qualify the cold native build and CLI, and measure actual import and named upstream test coverage on the composed workspace." ;
+    p:status p:planned .
