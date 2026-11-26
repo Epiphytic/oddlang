@@ -66,7 +66,21 @@ fn main() {
 }
 ''')
     run("cargo","+1.97.1","run","--quiet","--locked","--offline",cwd=crate)
-    b["nativeValidation"][owner]["errors"].clear()
+    # Exercise the same graph through the complete source-free package builder.
+    del b["nativeValidation"]
+    def pin(path):
+        return {"path":path.name,"sha256":hashlib.sha256(path.read_bytes()).hexdigest()}
+    shutil.copyfile(fixture/"Cargo.lock",root/"Cargo.lock")
+    component=dict(kind="wire-schema",module="readings",visibility="public",reexports=["Sample"],
+                   graph=pin(write(root/"graph.json",g)),overlay=pin(write(root/"rust.json",b)))
+    manifest=dict(format="oddlang-native-package-v1",name="irrigation-schema-fixture",
+                  version="0.0.0",edition="2021",dependencies={
+                      "base64":{"version":"0.22.1"},"serde":{"version":"1.0.229","features":["derive"]},
+                      "serde_json":{"version":"1.0.154"}},cargoLock=pin(root/"Cargo.lock"),components=[component])
+    package=root/"assembled"
+    run(cli,"build","native-package","rust",write(root/"package.json",manifest),package)
+    run("cargo","+1.97.1","check","--locked","--offline",cwd=package)
+    b["nativeValidation"]={owner:{"method":"check","typePath":"crate::Failure","errors":{}}}
     project(root/"bad",err="invalid native validation binding")
     g["guards"][1]["require"]["field"]=owner+":field:seq"
     project(root/"bad-type",err="predicate field type")

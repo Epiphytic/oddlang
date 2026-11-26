@@ -768,3 +768,8 @@ w:wireByteValues a p:Task ; rdfs:label "Recover bounded scalar byte fields and b
 w:wireByteFixture a p:Artifact ; p:location "verification/wire-schema/byte_value.py" .
 w:numberedErrorResolution a p:Finding ; rdfs:label "A byte rejection must resolve to a typed variant and a portable display expectation" ; p:source w:sharedTypedFixture .
 w:sharedNumberedEnum p:addresses w:numberedErrorResolution .
+
+w:nativeWirePackage a p:Task ; rdfs:label "Assemble recovered wire schemas into native libraries" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:dependsOn w:wireByteValues ;
+    p:acceptance "Assemble an unrelated bounded byte record and compile it locked and offline." ;
+    p:status p:done ; p:evidence w:wireByteFixture .
