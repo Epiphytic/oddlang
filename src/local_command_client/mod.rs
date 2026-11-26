@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{collections::BTreeSet, fs, path::Path};
 
+mod discovery;
 mod replies;
 mod rust;
 use replies::{Declaration, Primitive, ValueType};
@@ -13,6 +14,7 @@ use replies::{Declaration, Primitive, ValueType};
 struct Graph {
     format: String,
     socket_argument: String,
+    discovery: Option<discovery::Discovery>,
     transport: Transport,
     #[serde(default)]
     guards: Vec<Guard>,
@@ -114,7 +116,7 @@ struct Errors {
     deadline: Diagnostic,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 struct Diagnostic {
     exit: u8,
@@ -194,6 +196,9 @@ impl Graph {
         {
             return Err("invalid request field identity".into());
         }
+        if let Some(discovery) = &self.discovery {
+            discovery.validate(&self.socket_argument)?;
+        }
         replies::validate(&self.response)?;
         if !unique_keys(self.response.fields.iter().map(|field| field.key.as_str()))
             || !self.response.fields.iter().any(|field| {
@@ -248,6 +253,9 @@ pub(crate) struct Callback {
 pub(crate) fn callback(graph: &[u8], binding: &[u8]) -> Result<Callback, String> {
     let (graph, binding) = load(graph, binding)?;
     let mut arguments = vec![(graph.socket_argument, RequiredArgument::Path)];
+    if let Some(discovery) = &graph.discovery {
+        arguments.extend(discovery.arguments());
+    }
     arguments.extend(graph.guards.into_iter().map(|guard| match guard {
         Guard::FlagFalse { argument, .. } => (argument, RequiredArgument::Flag),
         Guard::Absent { argument, .. } => (argument, RequiredArgument::OptionalValue),
@@ -277,12 +285,23 @@ pub(crate) fn build_bytes(graph: &[u8], binding: &[u8], output: &Path) -> Result
     };
     let obligations =
         replies::obligations(&contract.response).map(|catalog| format!("{catalog:#}\n"));
+    let endpoint_obligations = contract
+        .discovery
+        .as_ref()
+        .map(|discovery| format!("{:#}\n", discovery.obligations()));
     let mut lock = serde_json::json!({
         "format": "oddlang-local-command-client-lock-v1",
         "graphSha256": hash(graph),
         "bindingSha256": hash(binding),
         "sourceSha256": hash(source.as_bytes())
     });
+    if let Some(discovery) = &contract.discovery {
+        lock["discoverySha256"] =
+            hash(&serde_json::to_vec(discovery).map_err(|error| error.to_string())?).into();
+    }
+    if let Some(catalog) = &endpoint_obligations {
+        lock["endpointObligationsSha256"] = hash(catalog.as_bytes()).into();
+    }
     if let Some(obligations) = &obligations {
         lock["replyObligationsSha256"] = hash(obligations.as_bytes()).into();
     }
@@ -295,6 +314,10 @@ pub(crate) fn build_bytes(graph: &[u8], binding: &[u8], output: &Path) -> Result
         .unwrap_or(Path::new("."));
     let stage = tempfile::tempdir_in(parent).map_err(|error| error.to_string())?;
     fs::write(stage.path().join("client.rs"), source).map_err(|error| error.to_string())?;
+    if let Some(catalog) = endpoint_obligations {
+        fs::write(stage.path().join("endpoint-obligations.json"), catalog)
+            .map_err(|error| error.to_string())?;
+    }
     if let Some(obligations) = obligations {
         fs::write(stage.path().join("reply-obligations.json"), obligations)
             .map_err(|error| error.to_string())?;
@@ -321,6 +344,8 @@ fn load(graph: &[u8], binding: &[u8]) -> Result<(Graph, Binding), String> {
         || overlay.entry == "gen"
         || syn::parse_str::<syn::Ident>(&overlay.entry).is_err()
         || matches!(overlay.entry.as_str(), "run_inner" | "perform" | "exchange")
+        || (contract.discovery.is_some()
+            && (overlay.entry == "discover_endpoint" || overlay.entry.starts_with("endpoint_")))
     {
         return Err("invalid local command client entry".into());
     }

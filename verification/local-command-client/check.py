@@ -4,6 +4,7 @@
 import errno
 import hashlib
 import json
+import os
 from pathlib import Path
 import shutil
 import socket
@@ -47,13 +48,13 @@ def reply(body):
     return struct.pack("!I", len(body)) + body
 
 
-def exchange(binary, path, wire, expected):
+def exchange(binary, path, wire, expected, *, args=None, env=None):
     with socket.socket(socket.AF_UNIX) as listener:
         listener.settimeout(3)
         listener.bind(str(path))
         listener.listen(1)
-        argv = [binary, "read", "--port", path]
-        with subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as process:
+        argv = [binary, "read", "--port", path] if args is None else [binary, *args]
+        with subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env) as process:
             connection, _ = listener.accept()
             with connection:
                 connection.settimeout(3)
@@ -200,6 +201,97 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
     assert not (root / "anonymous").exists()
     manifest["components"][1]["graph"] = pin("graph.json")
 
+    discovery_graph = json.loads((root / "graph.json").read_bytes())
+    endpoint_cli = json.loads((root / "cli.json").read_bytes())
+    endpoint_cli["root"]["arguments"].extend([
+        {"id":"folder", "long":"folder", "kind":"path", "global":True},
+        {"id":"station", "long":"station", "kind":"string", "global":True},
+    ])
+
+    def diagnostic(stderr):
+        return {"exit":8, "stderr":stderr}
+
+    def endpoint_field(owner, key, kind):
+        return {"id":f"urn:meter:{owner}:{key}", "key":key, "type":{"kind":kind}}
+
+    def operand(kind, **keys):
+        return {"kind":kind, **keys}
+
+    discovery_graph["discovery"] = {
+        "id":"urn:meter:endpoint", "state_argument":"folder", "profile_argument":"station",
+        "default_profile":"bench", "socket_leaf":"sock", "socket_maximum_exclusive":104,
+        "state_sources":[{"variable":"METER_STORE", "require_absolute":True, "suffix":["meter"]}],
+        "missing_state":diagnostic("missing meter store"),
+        "profile_atom":{"maximum_bytes":10, "punctuation":"-", "invalid":diagnostic("invalid station")},
+        "private_directory_mode":448, "private_file_mode":384,
+        "unsafe_directory":diagnostic("unsafe station directory"), "unsafe_file":diagnostic("unsafe station file"),
+        "invalid_runtime_component":diagnostic("invalid component"), "socket_too_long":diagnostic("long path"),
+        "profile":{"id":"urn:meter:station", "leaf":"station.json", "maximum_bytes":128, "overflow":"reject",
+                   "invalid":diagnostic("invalid station document"), "missing":diagnostic("missing station document"),
+                   "fields":[endpoint_field("station","slot","text")], "checks":[
+                       {"id":"urn:meter:slot-hex","require":{"kind":"lower_hex", "value":operand("profile_field",id="urn:meter:station:slot"),
+                        "bytes":2,"nullable":False},"rejected":diagnostic("invalid station slot")},
+                   ]},
+        "runtime":[operand("literal",value="meter-"), operand("effective_uid"),operand("literal",value="-"),
+                   operand("profile_field",id="urn:meter:station:slot")],
+        "binding":{"id":"urn:meter:link", "leaf":"link.json", "maximum_bytes":128, "overflow":"reject",
+                   "invalid":diagnostic("invalid link"), "fields":[endpoint_field("link","path","text")],
+                   "checks":[{"id":"urn:meter:link-owner","require":{"kind":"equal","left":operand("binding_field",id="urn:meter:link:path"),
+                               "right":operand("profile_path")},"rejected":diagnostic("incorrect station binding")}]},
+    }
+    write("discovery.json", discovery_graph)
+    write("discovery-cli.json", endpoint_cli)
+    checked(ODDLANG, "build", "local-command-client", "rust", root / "discovery.json",
+            root / "binding.json", root / "effects")
+    catalog = (root / "effects/endpoint-obligations.json").read_bytes()
+    assert json.loads((root / "effects/projection.lock").read_bytes())["endpointObligationsSha256"] == hashlib.sha256(catalog).hexdigest()
+    manifest["components"][0]["graph"] = pin("discovery-cli.json")
+    manifest["components"][1]["graph"] = pin("discovery.json")
+    write("manifest.json", manifest)
+    checked(ODDLANG, "build", "native-package", "rust", root / "manifest.json", root / "discovery-client")
+    checked("cargo", "build", "--release", "--locked", "--offline", cwd=root / "discovery-client")
+    discovery_bin = root / "discovery-client/target/release/field-meter"
+    home, scratch = root / "h", root / "t"
+    state = home / "meter"
+    station = state / "bench"
+    runtime = scratch / f"meter-{os.geteuid()}-1a2b"
+    for directory in (home, state, station, scratch, runtime):
+        directory.mkdir(mode=0o700)
+    env = {"PATH":os.defpath, "TMPDIR":str(scratch), "METER_STORE":str(home)}
+    station_file, binding = station / "station.json", runtime / "link.json"
+    station_file.write_text('{"slot":"1a2b"}')
+    station_file.chmod(0o600)
+    binding.write_text(json.dumps({"path":str(station.resolve())}))
+    binding.chmod(0o600)
+    positive = (0, b'{"reading":null,"ready":true}\n', b"")
+    exchange(discovery_bin, runtime / "sock", reply(b'{"ready":true}'), positive, args=["read"], env=env)
+
+    def declined(message):
+        case = subprocess.run([discovery_bin, "read"], env=env, capture_output=True, timeout=5)
+        assert (case.returncode, case.stdout, case.stderr) == (8, b"", message + b"\n")
+
+    binding.write_text('{"path":"/elsewhere"}')
+    declined(b"incorrect station binding")
+    station_file.chmod(0o644)
+    declined(b"unsafe station file")
+    env["METER_STORE"] = "relative"
+    declined(b"missing meter store")
+    exchange(discovery_bin, path, reply(b'{"ready":true}'), positive,
+             args=["read","--folder",state,"--station","bad/name","--port",path], env=env)
+    for name, update, diagnostic_text in (
+        ("escape", lambda policy: policy.update(socket_leaf="../sock"), b"invalid local endpoint discovery policy"),
+        ("future", lambda policy: policy["profile"]["checks"][0]["require"].update(
+            value=operand("binding_field",id="urn:meter:link:path")), b"runtime binding field used before reading it"),
+    ):
+        invalid_graph = json.loads((root / "discovery.json").read_bytes())
+        update(invalid_graph["discovery"])
+        write(name + ".json", invalid_graph)
+        invalid = subprocess.run([ODDLANG, "build", "local-command-client", "rust", root / (name + ".json"),
+                                  root / "binding.json", root / name], capture_output=True)
+        assert invalid.returncode and diagnostic_text in invalid.stderr and not (root / name).exists()
+    manifest["components"][0]["graph"] = pin("cli.json")
+    manifest["components"][1]["graph"] = pin("graph.json")
+
     def reject_link(message, output):
         write("manifest.json", manifest)
         invalid = subprocess.run(
@@ -244,4 +336,4 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
     assert mutant.returncode and b"constant request exceeds frame limit" in mutant.stderr
     assert not (root / "invalid").exists()
 
-print("field-meter IPC: nine framed interactions, three local errors, five graph or linking rejections, and typed nested and sequence replies passed")
+print("field-meter IPC: nine framed interactions, three local errors, five graph or linking rejections, typed replies, and private endpoint discovery passed")
