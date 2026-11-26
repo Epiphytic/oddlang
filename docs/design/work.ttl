@@ -907,7 +907,7 @@ w:recoverFieldConjunctions a p:Task ;
     p:dependsOn w:typedFieldRelations ;
     p:acceptance "Reproduce ordered field correspondence from a selected native method. Compare independent native outcomes before and after editing its source and reject ambiguous bindings or equality whose semantics are unproven." ;
     p:addresses w:fieldConjunctionProvenanceReview, w:fieldConjunctionDerefReview ;
-    p:evidence w:fieldConjunctionNativeFixture .
+    p:evidence w:fieldConjunctionNativeFixture, w:copySourceConjunctionNativeReceipt .
 w:wholeMarmishProtocols p:dependsOn w:recoverFieldConjunctions .
 w:fieldConjunctionNativeFixture a p:Artifact ;
     p:location "verification/rust-recovery/field-conjunction/verify.py" .
@@ -919,3 +919,5 @@ w:fieldConjunctionReview a p:Artifact ;
 w:fieldConjunctionDerefReview a p:Finding ;
     rdfs:label "Require built-in receiver dereference and exact module-scoped field ownership" ;
     p:source w:fieldConjunctionReview .
+w:copySourceConjunctionNativeReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/c8c187862a114efaf2bc8fce403471959d3a939d/verification/whole/copy-source-correspondence/reference-aarch64-apple-darwin.json" .

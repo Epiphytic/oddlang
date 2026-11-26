@@ -84,4 +84,4 @@ The principal feasibility risk is recovering intended behavior where only incide
 
 - [ ] Check composite slot bounds and member types against pinned external codec contracts before package emission.
 
-- [x] Derive ordered field equality from a pinned compiler observation. Qualify a source mutation with an independent native fixture and emit explicit unresolved evidence for unsupported equality. [Recovery profile](../../language/field-relations.md#compiler-backed-recovery-of-direct-conjunctions)
+- [x] Derive ordered field equality from a pinned compiler observation. Qualify a source mutation with an independent native fixture and emit explicit unresolved evidence for unsupported equality. [Recovery profile](../../language/field-relations.md#compiler-backed-recovery-of-direct-conjunctions) · [Upstream source mutation and native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/48)
