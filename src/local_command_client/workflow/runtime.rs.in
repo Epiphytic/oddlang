@@ -1,0 +1,137 @@
+use schema::{ArgumentKind, CaptureKind, Effect, Field, Source, Workflow};
+use serde_json::Value;
+use std::collections::BTreeMap;
+
+type Response = strict_json::Strict;
+
+fn field_at<'a>(root: &'a Value, path: &[String]) -> Option<&'a Value> {
+    path.iter().try_fold(root, |value, key| value.get(key))
+}
+
+fn explicit_argument(matches: &ArgMatches, id: &str) -> bool {
+    matches.value_source(id) == Some(clap::parser::ValueSource::CommandLine)
+}
+
+fn argument_value(matches: &ArgMatches, id: &str, kind: ArgumentKind) -> Result<Value, Failure> {
+    use serde_json::json;
+    Ok(match kind {
+        ArgumentKind::String => json!(matches.try_get_one::<String>(id).map_err(|_| BINDING)?
+            .filter(|_| explicit_argument(matches, id)).ok_or(BINDING)?),
+        ArgumentKind::RepeatedString => json!(matches.try_get_many::<String>(id).map_err(|_| BINDING)?
+            .filter(|_| explicit_argument(matches, id)).map(|items| items.collect::<Vec<_>>()).unwrap_or_default()),
+        ArgumentKind::Unsigned64 => json!(matches.try_get_one::<u64>(id).map_err(|_| BINDING)?
+            .filter(|_| explicit_argument(matches, id)).ok_or(BINDING)?),
+        ArgumentKind::Flag => json!(matches.try_get_one::<bool>(id).map_err(|_| BINDING)?
+            .filter(|_| explicit_argument(matches, id)).copied().unwrap_or(false)),
+    })
+}
+
+fn append(body: &mut Vec<u8>, input: &[u8]) -> Result<(), Failure> {
+    if input.len() > FRAME_LIMIT as usize - body.len() {
+        return Err(FRAME_SIZE);
+    }
+    body.extend_from_slice(input);
+    Ok(())
+}
+
+fn request(
+    body: &mut Vec<u8>,
+    fields: &[Field],
+    matches: &ArgMatches,
+    values: &BTreeMap<&str, Value>,
+) -> Result<(), Failure> {
+    append(body, b"{")?;
+    for (position, field) in fields.iter().enumerate() {
+        if position > 0 {
+            append(body, b",")?;
+        }
+        let key = serde_json::to_vec(&field.key).map_err(|_| FRAME_JSON)?;
+        append(body, &key)?;
+        append(body, b":")?;
+        let encoded = match &field.source {
+            Source::Object { fields } => {
+                request(body, fields, matches, values)?;
+                continue;
+            }
+            Source::Literal { value } => serde_json::to_vec(value),
+            Source::Argument { id, value_kind } => {
+                serde_json::to_vec(&argument_value(matches, id, *value_kind)?)
+            }
+            Source::Captured { name } => {
+                serde_json::to_vec(values.get(name.as_str()).ok_or(PROTOCOL)?)
+            }
+        }.map_err(|_| FRAME_JSON)?;
+        append(body, &encoded)?;
+    }
+    append(body, b"}")
+}
+
+fn capture_is_valid(value: &Value, kind: &CaptureKind) -> bool {
+    match kind {
+        CaptureKind::LowerHex { bytes } => value.as_str().is_some_and(|text| {
+            text.len() == usize::from(*bytes) * 2
+                && text.bytes().all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+        }),
+        CaptureKind::String { maximum_bytes } => {
+            value.as_str().is_some_and(|text| text.len() <= *maximum_bytes as usize)
+        }
+        CaptureKind::Unsigned64 => value.as_u64().is_some(),
+    }
+}
+
+async fn run_workflow(workflow: &Workflow, path: &Path, matches: &ArgMatches) -> Result<u8, Failure> {
+    let mut state = workflow.entry.as_str();
+    let mut captured = BTreeMap::new();
+    for exchange_index in 0..workflow.transport.maximum_exchanges {
+        let step = workflow.steps.iter().find(|step| step.id == state).ok_or(PROTOCOL)?;
+        let mut body = Vec::new();
+        request(&mut body, &step.request, matches, &captured)?;
+        let strict_json::Strict(reply) = exchange(path, &body).await?;
+        let transition = step.transitions.iter().find(|transition| {
+            transition.when.iter().all(|predicate| {
+                field_at(&reply, &predicate.path) == Some(&predicate.equals)
+            })
+        }).ok_or(PROTOCOL)?;
+        let mut transferred = BTreeMap::new();
+        for name in &transition.carry {
+            let value = captured.remove(name.as_str()).ok_or(PROTOCOL)?;
+            transferred.insert(name.as_str(), value);
+        }
+        for field in &transition.capture {
+            let value = field_at(&reply, &field.path)
+                .filter(|value| capture_is_valid(value, &field.value_kind))
+                .ok_or(PROTOCOL)?;
+            transferred.insert(field.name.as_str(), value.clone());
+        }
+        captured = transferred;
+        match &transition.effect {
+            Effect::Continue { step, delay_ms } => {
+                if exchange_index + 1 == workflow.transport.maximum_exchanges {
+                    return Err(BUDGET);
+                }
+                state = step;
+                if *delay_ms != 0 {
+                    tokio::time::sleep(Duration::from_millis(u64::from(*delay_ms))).await;
+                }
+            }
+            Effect::Exit { status, stderr } => {
+                if !stderr.is_empty() {
+                    writeln!(std::io::stderr().lock(), "{stderr}").map_err(|_| IO)?;
+                }
+                return Ok(*status);
+            }
+        }
+    }
+    Err(BUDGET)
+}
+
+fn execute_workflow(matches: &ArgMatches) -> Result<u8, Failure> {
+    let workflow: Workflow = serde_json::from_str(WORKFLOW).map_err(|_| PROTOCOL)?;
+    let path = matches.try_get_one::<PathBuf>(&workflow.socket_argument)
+        .map_err(|_| BINDING)?.ok_or(BINDING)?;
+    let runtime = tokio::runtime::Builder::new_current_thread().enable_all().build().map_err(|_| IO)?;
+    runtime.block_on(async {
+        tokio::time::timeout(Duration::from_millis(DEADLINE_MS), run_workflow(&workflow, path, matches))
+            .await.map_err(|_| DEADLINE)?
+    })
+}

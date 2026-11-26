@@ -23,6 +23,8 @@
 
 - [x] Verify the reusable [typed local command request projection](2026-11-26-local-command-arguments.md) as a prerequisite to the client-side owner handoff.
 
+- [x] Verify the reusable [bounded local owner workflow](2026-11-26-local-owner-workflow.md) and the pinned upstream submit frame.
+
 ### 3. Decide compatibility from repeatable observations
 
 - [ ] In each direction run the full corpus once with fresh identities and rooms, then three more times reusing the established pairing. One cold and three warm repetitions follow upstream benchmark practice. Every case must agree with the pinned oracle in every run, and teardown must pass. Any failure voids the attempt. Preserve all attempted outcomes and require a full fresh cold/warm series for qualification.
