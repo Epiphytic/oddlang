@@ -2,7 +2,15 @@
 use crate::local_command_client::{Callback, Guard};
 use crate::wire_schema::{digest, encode, iri, symbol};
 use serde::{Deserialize, Serialize};
-use std::{collections::BTreeSet, fmt::Write as _, fs, path::Path};
+mod recover;
+pub use recover::recover;
+
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    fmt::Write as _,
+    fs,
+    path::Path,
+};
 
 pub(crate) const TARGET_SCRIPT: &str = r#"fn main() {
     println!("cargo:rerun-if-changed=build.rs");
@@ -12,17 +20,17 @@ pub(crate) const TARGET_SCRIPT: &str = r#"fn main() {
 }
 "#;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 struct Report {
     format: String,
     id: String,
     fields: Vec<Field>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     guards: Vec<Guard>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 struct Field {
     id: String,
@@ -42,11 +50,117 @@ enum Source {
         length: usize,
         value: Vec<u64>,
     },
+    UnsignedReferenceList {
+        bits: u8,
+        length: usize,
+        items: Vec<Reference>,
+    },
     PackageVersion,
     BuildTarget,
     Revision {
         value: String,
     },
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct Reference {
+    chain: Vec<IntegerDeclaration>,
+    conversion: Conversion,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct IntegerDeclaration {
+    id: String,
+    integer: Integer,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    value: Option<Literal>,
+}
+
+#[derive(Clone, Copy, Deserialize, Serialize)]
+#[serde(untagged)]
+enum Literal {
+    Signed(i64),
+    Unsigned(u64),
+}
+
+impl Literal {
+    fn integer(self) -> i128 {
+        match self {
+            Self::Signed(value) => value.into(),
+            Self::Unsigned(value) => value.into(),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+struct Integer {
+    signed: bool,
+    bits: u8,
+}
+
+impl Integer {
+    fn valid(self) -> bool {
+        matches!(self.bits, 8 | 16 | 32 | 64)
+    }
+    fn contains(self, value: i128) -> bool {
+        if !self.valid() {
+            return false;
+        }
+        let limit = 1_i128 << (self.bits - u8::from(self.signed));
+        let min = if self.signed { -limit } else { 0 };
+        (min..limit).contains(&value)
+    }
+}
+
+#[derive(Clone, Copy, Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case")]
+enum Conversion {
+    Identity,
+    Widen,
+    Wrap,
+}
+
+fn resolved(bits: u8, length: usize, items: &[Reference]) -> Result<Vec<u64>, String> {
+    let dest = Integer {
+        signed: false,
+        bits,
+    };
+    if !dest.valid() || items.len() != length {
+        return Err("invalid reference-list length or integer width".into());
+    }
+    items
+        .iter()
+        .map(|item| {
+            let (last, aliases) = item
+                .chain
+                .split_last()
+                .ok_or("empty integer declaration chain")?;
+            let integer = last.integer;
+            let value = last
+                .value
+                .ok_or("reference chain must end at its literal declaration")?
+                .integer();
+            let mut ids = BTreeSet::new();
+            for declaration in &item.chain {
+                iri(&declaration.id)?;
+                if !ids.insert(&declaration.id) || declaration.integer != integer {
+                    return Err("cyclic or type-changing integer declaration chain".into());
+                }
+            }
+            if !integer.contains(value) || aliases.iter().any(|row| row.value.is_some()) {
+                return Err("invalid literal value or intermediate declaration".into());
+            }
+            match item.conversion {
+                Conversion::Identity if integer == dest => Ok(value as u64),
+                Conversion::Widen if !integer.signed && integer.bits <= bits => Ok(value as u64),
+                Conversion::Wrap => Ok(value.rem_euclid(1_i128 << bits) as u64),
+                _ => Err("conversion disagrees with source and destination integer types".into()),
+            }
+        })
+        .collect()
 }
 
 #[derive(Deserialize)]
@@ -100,6 +214,13 @@ fn load(graph: &[u8], overlay: &[u8]) -> Result<(Report, Binding), String> {
                     field.id
                 ));
             }
+            Source::UnsignedReferenceList {
+                bits,
+                length,
+                items,
+            } => {
+                resolved(*bits, *length, items)?;
+            }
             _ => {}
         }
         if let Source::Revision { value } = &field.source {
@@ -109,6 +230,31 @@ fn load(graph: &[u8], overlay: &[u8]) -> Result<(Report, Binding), String> {
                     .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
             {
                 return Err(format!("expected full lowercase revision: {}", field.id));
+            }
+        }
+    }
+    let mut declarations = BTreeMap::new();
+    for field in &report.fields {
+        if let Source::UnsignedReferenceList { items, .. } = &field.source {
+            for item in items {
+                for (index, declaration) in item.chain.iter().enumerate() {
+                    let next = item.chain.get(index + 1).map(|decl| decl.id.as_str());
+                    let meaning = (
+                        declaration.integer,
+                        declaration.value.map(Literal::integer),
+                        next,
+                    );
+                    if ids.contains(&declaration.id)
+                        || declarations
+                            .insert(&declaration.id, meaning)
+                            .is_some_and(|prior| prior != meaning)
+                    {
+                        return Err(format!(
+                            "conflicting build report declaration: {}",
+                            declaration.id
+                        ));
+                    }
+                }
             }
         }
     }
@@ -185,6 +331,17 @@ pub(crate) fn build(graph: &[u8], overlay: &[u8], out: &Path) -> Result<(), Stri
             }
             Source::UnsignedList { value, .. } => {
                 prefix.push_str(&serde_json::to_string(value).map_err(|e| e.to_string())?);
+                None
+            }
+            Source::UnsignedReferenceList {
+                bits,
+                length,
+                items,
+            } => {
+                prefix.push_str(
+                    &serde_json::to_string(&resolved(*bits, *length, items)?)
+                        .map_err(|e| e.to_string())?,
+                );
                 None
             }
             Source::Revision { value } => {

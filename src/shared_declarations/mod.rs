@@ -481,6 +481,7 @@ pub(crate) fn error_variants(
                 variant: binding.name(&variant.id)?.to_owned(),
                 id: variant.id,
                 unit: variant.payload == Payload::None,
+                static_text: variant.payload == Payload::Text,
             });
         }
     }
