@@ -1384,4 +1384,7 @@ w:unifiedRecoveredVaultJournal a p:Task ;
     p:source w:unifiedRecoveredVaultJournalPlan ;
     p:dependsOn w:fixedByteWorkspaceIntegration, w:publicObservationalRecords ;
     p:acceptance "Rebuild a source-isolated workspace using one compiler and verify the recovered release CLI, fixed vault values and public journal record caller against the exact same build. Keep the core, stream and engine member pins." ;
-    p:status p:active .
+    p:status p:done ; p:evidence w:unifiedRecoveredVaultJournalReceipt .
+
+w:unifiedRecoveredVaultJournalReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/76> .
