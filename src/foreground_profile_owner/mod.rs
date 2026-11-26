@@ -448,6 +448,7 @@ pub(crate) fn callback(
     }
     let args = graph.arguments;
     Ok(Callback {
+        operation: None,
         entry: binding.entry,
         arguments: vec![
             (args.foreground, RequiredArgument::Flag),

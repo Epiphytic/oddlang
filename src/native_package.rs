@@ -155,6 +155,7 @@ impl Pin {
 #[derive(Deserialize, Serialize, Copy, Clone)]
 #[serde(rename_all = "kebab-case")]
 enum Kind {
+    BuildReport,
     ValueDomain,
     JsonEnvelope,
     EndpointSet,
@@ -234,6 +235,10 @@ fn project(
     io(fs::create_dir(&input))?;
     let output = stage.join("projection");
     let source = match component.kind {
+        Kind::BuildReport => {
+            crate::build_report::build(&graph, &io(fs::read(&overlay))?, &output)?;
+            "report.rs"
+        }
         Kind::ValueDomain | Kind::JsonEnvelope => {
             io(fs::write(input.join("domain.ttl"), graph))?;
             match component.kind {
@@ -434,6 +439,10 @@ fn validate_command_callbacks(components: &[Component], base: &Path) -> Result<(
     }
     for component in components {
         let callback = match component.kind {
+            Kind::BuildReport => crate::build_report::callback(
+                &component.graph.read(base)?,
+                &component.overlay.read(base)?,
+            )?,
             Kind::LocalCommandClient => crate::local_command_client::callback(
                 &component.graph.read(base)?,
                 &component.overlay.read(base)?,
@@ -561,6 +570,22 @@ pub(super) fn build_pinned(raw: &[u8], base: &Path, output: &Path, standalone: b
         .map(|c| c.module.clone())
         .collect();
     let mut generated_files = BTreeMap::new();
+    if manifest
+        .components
+        .iter()
+        .any(|c| matches!(c.kind, Kind::BuildReport))
+    {
+        for dependency in ["clap", "serde_json"] {
+            if !manifest.dependencies.contains_key(dependency) {
+                return Err(format!(
+                    "build report requires native dependency {dependency}"
+                ));
+            }
+        }
+        let script = crate::build_report::TARGET_SCRIPT;
+        io(fs::write(package.join("build.rs"), script))?;
+        generated_files.insert("build.rs".into(), digest(script.as_bytes()));
+    }
     let mut records = Vec::new();
     let mut root_exports = String::new();
     for (index, component) in manifest.components.iter().enumerate() {

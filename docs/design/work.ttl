@@ -1203,4 +1203,12 @@ w:buildReportCommandPlan a p:Artifact ;
     p:location "docs/superpowers/plans/2026-11-26-build-report.md" .
 w:buildReportCommand a p:Task ; rdfs:label "Project ordered native build metadata from the release contract" ;
     p:milestone w:marmishMilestone ; p:source w:buildReportCommandPlan ; p:status p:active ;
-    p:acceptance "Verify actual Cargo target and package-version binding, explicit revision and format values and exact stdout, stderr and exit status with an independent program and both companion roles." .
+    p:acceptance "Verify actual Cargo target and package-version binding, explicit revision and format values and exact stdout, stderr and exit status with an independent program and the original and generated client and daemon on both ARM64 hosts." .
+
+w:buildReportCommand p:dependsOn w:unifiedProfileWorkspace .
+w:buildReportRevision a p:Decision ; rdfs:label "Pin the represented release revision and record the actual product and tool digests in the verifier receipt" ;
+    p:source w:buildReportCommandPlan ; p:reason "The native wire contract reports one source revision; the companion and its compiler have separate build identities." .
+w:buildReportSourceRecovery a p:Task ; rdfs:label "Recover the ordered profile, journal, engine, configuration and command format references from Rust" ;
+    p:milestone w:marmishMilestone ; p:source w:buildReportCommandPlan ; p:status p:planned ;
+    p:dependsOn w:buildReportCommand ;
+    p:acceptance "Link the five source declarations to the report in order, verify widths and conversion rules, and demonstrate a mutation against an independently compiled observer." .

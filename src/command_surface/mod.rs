@@ -204,6 +204,15 @@ pub(crate) fn validate_callbacks(
         let callback = callbacks.get(path).ok_or_else(|| {
             format!("unresolved checked native command handler for {operation:?}")
         })?;
+        if callback
+            .operation
+            .as_ref()
+            .is_some_and(|id| id != operation)
+        {
+            return Err(format!(
+                "native handler operation identity differs for {operation:?}"
+            ));
+        }
         for (name, expected) in &callback.arguments {
             let arg = graph
                 .root

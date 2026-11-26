@@ -304,6 +304,7 @@ pub(crate) fn callback(graph: &[u8], binding: &[u8]) -> Result<Callback, String>
         arguments.extend(initialize.callback_arguments());
     }
     Ok(Callback {
+        operation: None,
         entry: native.entry,
         arguments,
     })

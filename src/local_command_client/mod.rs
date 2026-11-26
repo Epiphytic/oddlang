@@ -44,9 +44,9 @@ enum Peer {
     SameEffectiveUid,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(tag = "condition", rename_all = "snake_case", deny_unknown_fields)]
-enum Guard {
+pub(crate) enum Guard {
     FlagFalse {
         argument: String,
         rejected: Diagnostic,
@@ -118,9 +118,9 @@ struct Errors {
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
-struct Diagnostic {
-    exit: u8,
-    stderr: String,
+pub(crate) struct Diagnostic {
+    pub(crate) exit: u8,
+    pub(crate) stderr: String,
 }
 
 impl Diagnostic {
@@ -139,6 +139,38 @@ fn arg_id(id: &str) -> bool {
             .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'_' | b'-'))
 }
 
+impl Guard {
+    pub(crate) fn validate(&self) -> Result<(), String> {
+        let (argument, diagnostic) = match self {
+            Guard::FlagFalse { argument, rejected }
+            | Guard::Absent { argument, rejected }
+            | Guard::PathPresent { argument, rejected } => (argument, rejected),
+            Guard::OneOf {
+                argument,
+                values,
+                rejected,
+            } => {
+                if values.is_empty() || !unique_keys(values.iter().map(String::as_str)) {
+                    return Err("invalid argument choice guard".into());
+                }
+                (argument, rejected)
+            }
+        };
+        if !arg_id(argument) {
+            return Err("invalid command argument identity".into());
+        }
+        diagnostic.validate()?;
+        Ok(())
+    }
+    pub(crate) fn requirement(&self) -> (String, RequiredArgument) {
+        match self {
+            Guard::FlagFalse { argument, .. } => (argument.clone(), RequiredArgument::Flag),
+            Guard::Absent { argument, .. } => (argument.clone(), RequiredArgument::OptionalValue),
+            Guard::OneOf { argument, .. } => (argument.clone(), RequiredArgument::String),
+            Guard::PathPresent { argument, .. } => (argument.clone(), RequiredArgument::Path),
+        }
+    }
+}
 fn unique_keys<'a>(keys: impl Iterator<Item = &'a str>) -> bool {
     let mut seen = BTreeSet::new();
     keys.into_iter()
@@ -171,25 +203,7 @@ impl Graph {
             diagnostic.validate()?;
         }
         for guard in &self.guards {
-            let (argument, diagnostic) = match guard {
-                Guard::FlagFalse { argument, rejected }
-                | Guard::Absent { argument, rejected }
-                | Guard::PathPresent { argument, rejected } => (argument, rejected),
-                Guard::OneOf {
-                    argument,
-                    values,
-                    rejected,
-                } => {
-                    if values.is_empty() || !unique_keys(values.iter().map(String::as_str)) {
-                        return Err("invalid argument choice guard".into());
-                    }
-                    (argument, rejected)
-                }
-            };
-            if !arg_id(argument) {
-                return Err("invalid command argument identity".into());
-            }
-            diagnostic.validate()?;
+            guard.validate()?;
         }
         if self.request.is_empty()
             || !unique_keys(self.request.iter().map(|field| field.key.as_str()))
@@ -248,6 +262,7 @@ pub(crate) enum RequiredArgument {
 }
 
 pub(crate) struct Callback {
+    pub operation: Option<String>,
     pub entry: String,
     pub arguments: Vec<(String, RequiredArgument)>,
 }
@@ -258,13 +273,9 @@ pub(crate) fn callback(graph: &[u8], binding: &[u8]) -> Result<Callback, String>
     if let Some(discovery) = &graph.discovery {
         arguments.extend(discovery.arguments());
     }
-    arguments.extend(graph.guards.into_iter().map(|guard| match guard {
-        Guard::FlagFalse { argument, .. } => (argument, RequiredArgument::Flag),
-        Guard::Absent { argument, .. } => (argument, RequiredArgument::OptionalValue),
-        Guard::OneOf { argument, .. } => (argument, RequiredArgument::String),
-        Guard::PathPresent { argument, .. } => (argument, RequiredArgument::Path),
-    }));
+    arguments.extend(graph.guards.iter().map(Guard::requirement));
     Ok(Callback {
+        operation: None,
         entry: binding.entry,
         arguments,
     })

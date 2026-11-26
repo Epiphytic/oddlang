@@ -43,34 +43,7 @@ pub(super) fn render(graph: &Graph, entry: &str) -> Result<String, String> {
     write!(out, "\npub fn {entry}(matches: ArgMatches) -> ExitCode {{\n    match run_inner(&matches) {{\n        Ok(code) => ExitCode::from(code),\n        Err(error) => error.report(),\n    }}\n}}\n").unwrap();
     out.push_str("\nfn run_inner(matches: &ArgMatches) -> Result<u8, Failure> {\n");
     for guard in &graph.guards {
-        let (condition, rejected) = match guard {
-            Guard::FlagFalse { argument, rejected } => (
-                format!(
-                    "matches.try_get_one::<bool>({argument:?}).map_err(|_| BINDING)?.copied().unwrap_or(false)"
-                ),
-                rejected,
-            ),
-            Guard::Absent { argument, rejected } => (
-                format!("matches.try_contains_id({argument:?}).map_err(|_| BINDING)?"),
-                rejected,
-            ),
-            Guard::OneOf {
-                argument,
-                values,
-                rejected,
-            } => (
-                format!(
-                    "matches.try_get_one::<String>({argument:?}).map_err(|_| BINDING)?.is_some_and(|value| !{values:?}.contains(&value.as_str()))"
-                ),
-                rejected,
-            ),
-            Guard::PathPresent { argument, rejected } => (
-                format!(
-                    "matches.try_get_one::<PathBuf>({argument:?}).map_err(|_| BINDING)?.is_none()"
-                ),
-                rejected,
-            ),
-        };
+        let (condition, rejected) = guard.rust_rejection();
         writeln!(
             out,
             "    if {condition} {{\n        return Err({});\n    }}",
@@ -99,4 +72,37 @@ pub(super) fn render(graph: &Graph, entry: &str) -> Result<String, String> {
 
 pub(super) fn failure(diagnostic: &Diagnostic) -> String {
     format!("Failure({}, {:?})", diagnostic.exit, diagnostic.stderr)
+}
+
+impl Guard {
+    pub(crate) fn rust_rejection(&self) -> (String, &Diagnostic) {
+        match self {
+            Guard::FlagFalse { argument, rejected } => (
+                format!(
+                    "matches.try_get_one::<bool>({argument:?}).map_err(|_| BINDING)?.copied().unwrap_or(false)"
+                ),
+                rejected,
+            ),
+            Guard::Absent { argument, rejected } => (
+                format!("matches.try_contains_id({argument:?}).map_err(|_| BINDING)?"),
+                rejected,
+            ),
+            Guard::OneOf {
+                argument,
+                values,
+                rejected,
+            } => (
+                format!(
+                    "matches.try_get_one::<String>({argument:?}).map_err(|_| BINDING)?.is_some_and(|value| !{values:?}.contains(&value.as_str()))"
+                ),
+                rejected,
+            ),
+            Guard::PathPresent { argument, rejected } => (
+                format!(
+                    "matches.try_get_one::<PathBuf>({argument:?}).map_err(|_| BINDING)?.is_none()"
+                ),
+                rejected,
+            ),
+        }
+    }
 }

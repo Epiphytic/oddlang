@@ -20,3 +20,5 @@ python3 -B verification/native-package/verify.py target/debug/oddlang
 ```
 
 It generates two codecs into one private module, exercises the public API from an integration test, compares independently generated directories and rejects stale pins, an inconsistent Cargo lock, invalid or duplicate exports, a symlink escape and preexisting output. On macOS and Linux it also inserts an empty destination after generation begins and verifies the competing directory stays empty.
+
+A `build-report` component binds its operation IRI to a checked CLI callback. Its fields declare stable identities, wire names and ordered sources. Literal integers declare their unsigned width and lists also declare their length. The projection captures the actual Cargo target in a sealed `build.rs`, reads the package version from Cargo, embeds the graph's represented revision, and emits compact JSON followed by LF. The assembler includes the script in the generated file inventory. Graphs can declare the same ordered argument checks used by local commands.
