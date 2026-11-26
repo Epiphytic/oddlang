@@ -2,7 +2,8 @@
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
-pub const VOCABULARY: &str = "oddlang-data-shapes-v1";
+pub const VOCABULARY: &str = "oddlang-data-shapes-v2";
+pub const PREVIOUS_VOCABULARY: &str = "oddlang-data-shapes-v1";
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -136,12 +137,24 @@ pub enum Shape {
         mutable: bool,
         target: Box<Shape>,
     },
+    Array {
+        element: Box<Shape>,
+        extent: ArrayExtent,
+    },
     Slice {
         element: Box<Shape>,
     },
     Unresolved {
         reason: String,
     },
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields, tag = "kind", rename_all = "kebab-case")]
+pub enum ArrayExtent {
+    Fixed { count: u64 },
+    Parameter { id: String },
+    Unresolved,
 }
 
 #[derive(Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]

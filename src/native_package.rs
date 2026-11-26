@@ -477,7 +477,8 @@ pub(crate) struct UnitErrorVariant {
     pub variant: String,
 }
 
-fn validate_checked_value_errors(components: &[Component], base: &Path) -> Result<()> {
+fn validate_checked_values(manifest: &Manifest, base: &Path) -> Result<()> {
+    let components = &manifest.components;
     let checked: Vec<_> = components
         .iter()
         .filter(|component| matches!(component.kind, Kind::CheckedValues))
@@ -503,6 +504,15 @@ fn validate_checked_value_errors(components: &[Component], base: &Path) -> Resul
         }
     }
     for component in checked {
+        if crate::checked_values::needs_erasure_provider(&component.graph.read(base)?)?
+            && (manifest.registry_patches.contains_key("zeroize")
+                || !manifest
+                    .dependencies
+                    .get("zeroize")
+                    .is_some_and(|dep| dep.version == "1.9.1" && dep.source.is_none()))
+        {
+            return Err("fixed-bytes requires the locked registry provider zeroize 1.9.1".into());
+        }
         crate::checked_values::validate_error_links(&component.overlay.read(base)?, &providers)?;
     }
     Ok(())
@@ -650,7 +660,7 @@ pub(super) fn build_pinned(
     let manifest: Manifest =
         serde_json::from_slice(raw).map_err(|e| format!("package manifest: {e}"))?;
     validate_command_callbacks(&manifest.components, base)?;
-    validate_checked_value_errors(&manifest.components, base)?;
+    validate_checked_values(&manifest, base)?;
     let cargo = cargo_manifest(&manifest)?;
     let lock = manifest.cargo_lock.read(base)?;
     let parent = output

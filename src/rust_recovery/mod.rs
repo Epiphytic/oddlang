@@ -1,6 +1,6 @@
 //! Declaration-level, code-free Rust build inventory.
 #[path = "../../verification/rust-recovery/shape_model.rs"]
-mod shape_model;
+pub(crate) mod shape_model;
 mod structure;
 pub mod tagged;
 
@@ -383,13 +383,26 @@ fn publish_pair(
     fs::rename(stage.path(), output).map_err(|err| format!("publish recovery output: {err}"))
 }
 
+// Typed deserialization has already checked the model. In the older grammar
+// the array discriminator was absent at every nesting level.
+fn contains_array_shape(node: &serde_json::Value) -> bool {
+    match node {
+        serde_json::Value::Array(items) => items.iter().any(contains_array_shape),
+        serde_json::Value::Object(fields) => {
+            fields.get("kind").and_then(|kind| kind.as_str()) == Some("array")
+                || fields.values().any(contains_array_shape)
+        }
+        _ => false,
+    }
+}
+
 fn publish_shapes(output: &Path, raw: &[u8], pin: Pin<'_>) -> Result<()> {
-    use shape_model::{Observation, VOCABULARY};
+    use shape_model::{Observation, PREVIOUS_VOCABULARY, VOCABULARY};
 
     #[derive(Serialize)]
     #[serde(rename_all = "camelCase")]
     struct Lock<'a> {
-        vocabulary: &'static str,
+        vocabulary: &'a str,
         pin: Pin<'a>,
         shapes_sha256: String,
         qualification: &'static str,
@@ -402,13 +415,22 @@ fn publish_shapes(output: &Path, raw: &[u8], pin: Pin<'_>) -> Result<()> {
     {
         return Err("compiler adapter reported a different crate or compiler commit".into());
     }
-    if observation.graph.vocabulary != VOCABULARY {
+    if !matches!(
+        observation.graph.vocabulary.as_str(),
+        VOCABULARY | PREVIOUS_VOCABULARY
+    ) {
         return Err("compiler adapter reported an unsupported data shape graph".into());
     }
     let mut bytes = serde_json::to_vec_pretty(&observation.graph).map_err(|err| err.to_string())?;
+    if observation.graph.vocabulary == PREVIOUS_VOCABULARY {
+        let tree = serde_json::from_slice(&bytes).map_err(|err| err.to_string())?;
+        if contains_array_shape(&tree) {
+            return Err("array shape requires the v2 data shape vocabulary".into());
+        }
+    }
     bytes.push(b'\n');
     let mut lock = serde_json::to_vec_pretty(&Lock {
-        vocabulary: VOCABULARY,
+        vocabulary: &observation.graph.vocabulary,
         pin,
         shapes_sha256: sha256(&bytes),
         qualification: "candidate",

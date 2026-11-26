@@ -120,7 +120,8 @@ cargoLockSha256 = "{digest}"
             self.assertEqual(fields["read"]["type"]["ownership"], "shared-borrow")
             self.assertEqual(fields["write"]["type"]["ownership"], "exclusive-borrow")
             self.assertEqual(fields["mixed"]["type"]["elements"][1]["position"], 1)
-            self.assertEqual(fields["array"]["type"], {"kind": "unresolved", "reason": "array-length"})
+            self.assertEqual(fields["array"]["type"], {"kind": "array", "extent": {"kind": "fixed", "count": 3},
+                                                      "element": {"kind": "unsigned-integer", "bits": 8}})
             variants = rows["Choice"]["variants"]
             self.assertEqual([v["name"] for v in variants], ["Zero", "One", "More", "EmptyTuple", "EmptyRecord"])
             self.assertEqual([v["form"] for v in variants], ["unit", "tuple", "record", "tuple", "record"])
@@ -128,10 +129,37 @@ cargoLockSha256 = "{digest}"
             self.assertEqual(variants[1]["fields"][0]["owner"], variants[1]["id"])
             self.assertEqual(rows["Packet"]["fields"][1]["type"], {"kind": "signed-integer", "bits": 64})
             self.assertEqual(rows["Bits"]["kind"], "union")
-            self.assertIn(
+            self.assertNotIn(
                 {"owner": fields["array"]["id"], "reason": "array-length"},
                 json.loads(original)["gaps"],
             )
+
+            # Replay a pinned older adapter observation and reject the same
+            # vocabulary label when a nested field actually uses v2 arrays.
+            fake = root / "legacy.py"
+            payload = root / "legacy.json"
+            fake.write_text("#!/usr/bin/env python3\nfrom pathlib import Path\nprint(Path(__file__).with_suffix('.json').read_text())\n")
+            fake.chmod(0o755)
+            legacy = json.loads(original)
+            legacy["vocabulary"] = "oddlang-data-shapes-v1"
+            profile.write_text(base.replace(str(HERE / 'run.sh'), str(fake)).replace(
+                '["Cargo.toml", "Cargo.lock", "driver.rs", "shapes.rs", "shape_model.rs"]', '["legacy.json"]'))
+            def replay(name):
+                payload.write_text(json.dumps(dict(graph=legacy, crateName="observatory",
+                                  compiler="8bab26f4f68e0e26f0bb7960be334d5b520ea452")))
+                return subprocess.run([BINARY, "recover", "rust-shapes", manifest, "--profile",
+                                       profile, "--out", root / name], capture_output=True, text=True)
+            forged = replay("mislabeled")
+            self.assertNotEqual(forged.returncode, 0)
+            self.assertIn("array shape requires", forged.stderr)
+            self.assertFalse((root / "mislabeled").exists())
+            historical = next(d for d in legacy["declarations"] if d["name"] == "Frame")
+            next(f for f in historical["fields"] if f["name"] == "array")["type"] = {
+                "kind": "unresolved", "reason": "array-length"}
+            old = replay("valid-old")
+            self.assertEqual(old.returncode, 0, old.stderr)
+            self.assertEqual(json.loads((root / "valid-old/shapes.lock").read_bytes())["vocabulary"],
+                             "oddlang-data-shapes-v1")
 
             reformatted, _ = extract(SOURCE.replace("struct Marker;", "\n\nstruct Marker;"), "reformat")
             self.assertEqual(original, reformatted)
@@ -139,12 +167,16 @@ cargoLockSha256 = "{digest}"
             mutation = SOURCE.replace("word: u16,\n    shared: Arc<T>,",
                                       "shared: Arc<T>,\n    word: u32,")
             mutation = mutation.replace("Zero,\n    One(T, u128),", "One(T, u128),\n    Zero,")
+            mutation = mutation.replace("[u8; 3]", "[[u8; 0]; 2 + 2]")
             changed, mutated = extract(mutation, "mutation", feature=True)
             self.assertNotEqual(original, changed)
             new_fields = {field["name"]: field for field in mutated["Frame"]["fields"]}
             self.assertEqual(new_fields["word"]["type"]["bits"], 32)
             self.assertEqual(new_fields["word"]["id"], fields["word"]["id"])
             self.assertEqual(new_fields["word"]["position"], 1)
+            nested = new_fields["array"]["type"]
+            self.assertEqual(nested["extent"], {"kind": "fixed", "count": 4})
+            self.assertEqual(nested["element"]["extent"], {"kind": "fixed", "count": 0})
             self.assertIn("extra", new_fields)
             self.assertEqual(mutated["Choice"]["variants"][0]["id"], variants[1]["id"])
             self.assertEqual(mutated["Choice"]["variants"][0]["position"], 0)
@@ -157,6 +189,9 @@ cargoLockSha256 = "{digest}"
             self.assertNotIn("ownership", route["alias"]["type"])
             self.assertEqual(route["cache"]["type"]["ownership"], "shared")
             self.assertEqual(route["next"]["type"]["ownership"], "exclusive")
+            array = network["Window"]["fields"][1]["type"]
+            self.assertEqual(array["element"]["id"], network["Window"]["parameters"][1]["id"])
+            self.assertEqual(array["extent"], {"kind": "parameter", "id": network["Window"]["parameters"][2]["id"]})
             arguments = route["bytes"]["type"]["arguments"]
             self.assertEqual([arg["name"] for arg in arguments], ["'a", "T", "N"])
             self.assertEqual(arguments[0]["value"]["id"], network["Route"]["parameters"][0]["id"])

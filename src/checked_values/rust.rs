@@ -278,12 +278,45 @@ fn record(
     out.push_str("}\n");
 }
 
+fn fixed_bytes(out: &mut String, length: u32, fault: &Fault, target: &Native) {
+    let name = &target.name;
+    let create = target
+        .constructor
+        .as_deref()
+        .expect("validated constructor");
+    let parse = target
+        .parse
+        .as_deref()
+        .expect("validated sequence constructor");
+    let view = target.view.as_deref().expect("validated borrow");
+    let array = format!("[::core::primitive::u8; {length}]");
+    let error = &fault.error_type;
+    let rejected = fault.path();
+    writeln!(out, "pub struct {name}(::zeroize::Zeroizing<{array}>);").unwrap();
+    writeln!(out, "impl {name} {{").unwrap();
+    writeln!(
+        out,
+        "    pub fn {create}(input: {array}) -> Self {{ Self(::zeroize::Zeroizing::new(input)) }}"
+    )
+    .unwrap();
+    writeln!(out, "    pub fn {parse}(input: &[::core::primitive::u8]) -> ::core::result::Result<Self, {error}> {{").unwrap();
+    writeln!(out, "        <{array} as ::core::convert::TryFrom<&[::core::primitive::u8]>>::try_from(input).map(Self::{create}).map_err(|_| {rejected})").unwrap();
+    writeln!(out, "    }}").unwrap();
+    writeln!(out, "    pub fn {view}(&self) -> &{array} {{ &self.0 }}").unwrap();
+    writeln!(out, "}}").unwrap();
+}
+
 pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
     let mut out = String::new();
     for (id, definition) in &graph.types {
         let target = &binding.types[id];
-        derives(&mut out, target);
+        if !matches!(definition, Definition::FixedBytes { .. }) {
+            derives(&mut out, target);
+        }
         match definition {
+            Definition::FixedBytes {
+                length, failure, ..
+            } => fixed_bytes(&mut out, *length, &binding.errors[failure], target),
             Definition::Enum { values, failure } => {
                 enumeration(&mut out, values, failure.as_deref(), binding, target)
             }

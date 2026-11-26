@@ -1,4 +1,6 @@
 //! Portable checked value records and finite representation tables.
+mod fixed_recovery;
+pub use fixed_recovery::recover_fixed_bytes;
 mod rust;
 
 use crate::{
@@ -29,6 +31,13 @@ struct Graph {
 #[derive(Deserialize, Serialize)]
 #[serde(tag = "kind", rename_all = "lowercase", deny_unknown_fields)]
 enum Definition {
+    #[serde(rename = "fixed-bytes")]
+    FixedBytes {
+        length: u32,
+        failure: String,
+        #[serde(rename = "onDrop")]
+        on_drop: DropPolicy,
+    },
     Enum {
         #[serde(deserialize_with = "unique_map")]
         values: BTreeMap<String, Literal>,
@@ -43,6 +52,12 @@ enum Definition {
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         guards: Vec<Guard>,
     },
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "lowercase")]
+enum DropPolicy {
+    Erase,
 }
 
 #[derive(Clone, Deserialize, Serialize, Eq, PartialEq)]
@@ -247,6 +262,22 @@ impl Graph {
                 return Err(format!("invalid checked type name or traits: {id}"));
             }
             match definition {
+                Definition::FixedBytes { failure, .. } => {
+                    let methods = [&native.constructor, &native.parse, &native.view];
+                    let mut names = BTreeSet::new();
+                    if !methods.into_iter().all(|method| {
+                        method
+                            .as_deref()
+                            .is_some_and(|name| checked_method_name(name) && names.insert(name))
+                    }) || !native.order.is_empty()
+                        || !native.traits.is_empty()
+                        || !native.members.is_empty()
+                        || native.shape.is_some()
+                    {
+                        return Err(format!("invalid fixed-byte bindings: {id}"));
+                    }
+                    errors.insert(failure);
+                }
                 Definition::Enum { values, failure } => {
                     if values.is_empty()
                         || !order(values.keys().cloned(), &native.order)
@@ -315,9 +346,12 @@ impl Graph {
                             return Err(format!("invalid checked field binding: {field_id}"));
                         }
                         if let Field::Named { id } = field
-                            && !self.types.contains_key(id)
+                            && (matches!(self.types.get(id), Some(Definition::FixedBytes { .. }))
+                                || !self.types.contains_key(id))
                         {
-                            return Err(format!("unresolved checked field type: {id}"));
+                            return Err(format!(
+                                "unresolved or unsupported checked field type: {id}"
+                            ));
                         }
                         for capability in &native.traits {
                             let supports = match field {
@@ -396,6 +430,14 @@ impl Graph {
     }
 }
 
+pub(crate) fn needs_erasure_provider(bytes: &[u8]) -> Result<bool> {
+    let graph: Graph = serde_json::from_slice(bytes).map_err(|e| e.to_string())?;
+    Ok(graph
+        .types
+        .values()
+        .any(|ty| matches!(ty, Definition::FixedBytes { .. })))
+}
+
 pub(crate) fn validate_error_links(
     overlay: &[u8],
     providers: &BTreeMap<String, BTreeSet<String>>,
@@ -427,6 +469,8 @@ pub fn build(graph: &Path, overlay: &Path, output: &Path) -> Result<()> {
         "format":FORMAT,"domain":graph.id,
         "obligations":graph.types.iter().map(|(id,definition)| {
             let expected = match definition {
+                Definition::FixedBytes { length, failure, on_drop } =>
+                    json!({"length":length,"failure":failure,"onDrop":on_drop,"view":"borrow","input":"exact-bytes"}),
                 Definition::Enum { values, failure } => json!({"values":values,"failure":failure}),
                 Definition::Record { fields, constructor, guards } =>
                     json!({"fields":fields,"constructor":constructor,"orderedGuards":guards}),
