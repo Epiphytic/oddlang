@@ -1,0 +1,28 @@
+{
+  "compiler": "7855c055dc1e72b49d3654f6e6c500a0ffdb57ec",
+  "compilerSha256": "5701bea86331ac273a213f9af52a64f5d8bf900b1b8cf7687e700bf2329a91ae",
+  "format": "oddlang-public-record-compiler-composition-v1",
+  "identicalLegacyArtifacts": {
+    "model/graph.json": "879380ea262679ca5f68431bf5e2be9860f1fe87e4ab694a6c4bd18b3cf2b44d",
+    "model/recovery.lock": "506a8dd515869d406aa8b2d25e800d6257e5482b0328dbc07cb926842e861977",
+    "model/rust.json": "26fff29ea2d1119d46822d0d083ef334ecb7439022c38cbdb7d8ce686f0db23c",
+    "product/Cargo.lock": "9cf3e2edbfd40065a94c60e86dcbbd25a9525eac60ea914a395fe37c8755f355",
+    "product/Cargo.toml": "7d4664fffbad4c7d4301683ef3bd88e59604ef92c7de91c24c05f6d1f97f4daf",
+    "product/package.lock": "7137580050dd336914266fb29746c509957a41d6db74161a37ad940e8d21b0b1",
+    "product/src/group_0/__projection_0.rs": "f2553625c5ae5501ec90cd6479eeb3413a5d57e8d3ef7b9198b84d35319bcf43",
+    "product/src/group_0/mod.rs": "1c30e5db413e305ac76ff62f7a308f24ccd3bb4107de328bebb15c85a36cde3b",
+    "product/src/lib.rs": "faf1fe45b1239c050137fcec90301c18582a97bb8fb3af52819aebdcf1a23ab0",
+    "projection/projection.lock": "81900c8bfc9184d826e5a53855b79c40819095b69cf6e553a5722ce0e404fd4d",
+    "projection/records.rs": "f2553625c5ae5501ec90cd6479eeb3413a5d57e8d3ef7b9198b84d35319bcf43"
+  },
+  "passedFixtures": [
+    "verification/public-records/read_policy.py",
+    "verification/observational-record-defaults/pointer_width.py",
+    "verification/serde-string-choice/verify.py",
+    "verification/plain-value-choices/verify.py",
+    "verification/wire-schema/verify.py"
+  ],
+  "platform": "aarch64-apple-darwin",
+  "predecessor": "900cfa517d0136fa80c2b5e92ccf9b1a3b2a71ab",
+  "predecessorSha256": "7ca672648ab1f0b21c03f0d268fe2fb04f0c823b41a2ed3b9e64fcb0c02f1b32"
+}

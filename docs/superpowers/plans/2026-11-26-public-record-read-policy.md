@@ -29,7 +29,20 @@ candidate and a disposable source mutation of the original.
 
 ## Public-data compiler composition
 
-- [ ] Retain the pointer-width and glob checks, qualified Serde recovery,
+- [x] Retain the pointer-width and glob checks, qualified Serde recovery,
   and unrelated nested wire fixtures in one compiler.
-- [ ] Preserve unrelated legacy recovery artifacts and native package locks, and archive
+- [x] Preserve unrelated legacy recovery artifacts and native package locks, and archive
   shared-binary observations by compiler revision.
+
+The [native compiler-composition receipt](../../../verification/public-records/receipts/aarch64-apple-darwin.json)
+records the runtime and predecessor pins. On macOS ARM64, one combined
+compiler ran all five listed unrelated fixtures, including the closed nested
+`Irrigation::Sample(Sensor)` path and rejection of extra nested object keys.
+The predecessor and combined compiler produced identical bytes for all eleven
+legacy artifacts, including the graph, binding, recovery seal, projection
+seal and package lock.
+
+Run the receipt's fixture paths with the combined compiler as the argument.
+Compare legacy artifacts by passing both compiled executables to
+`python3 -B verification/public-records/composition.py OLD NEW`.
+This gate covers the generic compiler and unrelated offline fixtures.

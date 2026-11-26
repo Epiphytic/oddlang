@@ -1888,5 +1888,8 @@ w:publicDataReadPolicyConvergence a p:Task ;
     rdfs:label "Compose public record reads with the reviewed public-data compiler" ;
     p:milestone w:marmishMilestone ; p:source w:publicRecordReadPolicyPlan ;
     p:dependsOn w:publicRecordReadPolicy, w:serdeStringChoiceRecovery ;
-    p:status p:active ;
+    p:status p:done ; p:evidence w:publicDataReadPolicyConvergenceReceipt ;
     p:acceptance "Use one compiler to verify unrelated nested closed wire data and source binding checks, with byte-identical legacy graph and package locks." .
+
+w:publicDataReadPolicyConvergenceReceipt a p:Artifact ;
+    p:location "verification/public-records/receipts/aarch64-apple-darwin.json" .
