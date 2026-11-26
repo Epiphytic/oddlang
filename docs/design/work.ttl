@@ -711,3 +711,11 @@ w:nativePackageAssembly a p:Task ; rdfs:label "Assemble pinned semantic projecti
     p:acceptance "Independently project two unrelated codecs into one private module, expose their selected public types, compile the consumer offline with its pinned dependency closure, and reject stale pins, inconsistent bindings and competing publication on the qualified hosts." ;
     p:evidence w:nativePackageFixture .
 w:nativePackageFixture a p:Artifact ; p:location "verification/native-package/verify.py" .
+
+w:boundedIntegrityBlocks a p:Task ;
+    rdfs:label "Project positioned integrity blocks from portable semantics" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Generate bounded native identity and optional compression, preserve wire field shape and guard precedence, and reject malformed members, dictionaries, trailing data and incorrect digest in an unrelated caller." ;
+    p:evidence w:boundedIntegrityFixture .
+w:boundedIntegrityFixture a p:Artifact ; p:location "verification/integrity-block/README.md" .
+w:wholeMarmishProtocols p:dependsOn w:boundedIntegrityBlocks .

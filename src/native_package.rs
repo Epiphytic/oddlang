@@ -79,6 +79,7 @@ enum Kind {
     ValueDomain,
     JsonEnvelope,
     EndpointSet,
+    IntegrityBlock,
 }
 
 #[derive(Deserialize)]
@@ -122,6 +123,12 @@ fn project(
                     "codec.rs"
                 }
             }
+        }
+        Kind::IntegrityBlock => {
+            let path = input.join("graph.json");
+            io(fs::write(&path, graph))?;
+            crate::integrity_block::build(&path, &overlay, &output)?;
+            "codec.rs"
         }
         Kind::EndpointSet => {
             let path = input.join("graph.json");

@@ -8,6 +8,7 @@ pub mod framing_projection;
 pub mod http;
 pub mod impact;
 pub mod import_rust;
+pub mod integrity_block;
 pub mod interpreter;
 pub mod json_envelope;
 pub mod language;
