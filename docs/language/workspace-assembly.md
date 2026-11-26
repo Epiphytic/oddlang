@@ -177,3 +177,19 @@ Rust overlay and a recovery lock. Assembly accepts them through a
 `buffered-input` native package component with private visibility and empty
 reexports. Use registry zeroize 1.9.1 for the fixed erasing storage.
 See the [buffered input contract](../superpowers/specs/2026-11-26-buffered-input.md).
+
+### Public data record reads
+
+An ordered public record can declare both serialization and deserialization.
+The Rust projection decodes objects or positional sequences in declared field
+order. Fields can wrap a value as optional, so an absent object key or a null
+value decodes as an empty option. A reference to a declared string choice
+preserves its native type and wire spellings. Native package assembly requires
+a single matching shared declaration and native export.
+
+Records with deserialization reject unknown object keys by default. To admit
+and discard them, declare `readPolicy` with
+`shape: object-or-ordered-sequence` and `unknownFields: ignore`. The Rust
+projection delegates the exact JSON diagnostics to the bound Serde provider.
+This policy applies only to the declared public data record. Closed protocol
+schemas and conservative Rust source recovery keep their existing behavior.

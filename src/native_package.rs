@@ -288,7 +288,9 @@ fn project(
         }
         Kind::StructuredDiagnostics => {
             if !dependencies.contains_key("serde_json") {
-                return Err("structured-diagnostics requires a pinned serde_json dependency".into());
+                return Err(
+                    "structured-diagnostics requires a pinned serde_json dependency".into(),
+                );
             }
             crate::structured_diagnostics::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
             "diagnostics.rs"
@@ -620,6 +622,47 @@ fn validate_line_grammar_errors(components: &[Component], base: &Path) -> Result
     Ok(())
 }
 
+fn validate_public_record_links(components: &[Component], base: &Path) -> Result<()> {
+    for record in components
+        .iter()
+        .filter(|part| matches!(part.kind, Kind::PublicRecords))
+    {
+        let links = crate::public_records::external_choice_links(
+            &record.graph.read(base)?,
+            &record.overlay.read(base)?,
+        )?;
+        if links.is_empty() {
+            continue;
+        }
+        let mut available = BTreeMap::new();
+        for part in components
+            .iter()
+            .filter(|part| matches!(part.kind, Kind::SharedDeclarations))
+        {
+            for (id, name) in crate::shared_declarations::string_choice_names(
+                &part.graph.read(base)?,
+                &part.overlay.read(base)?,
+            )? {
+                if available
+                    .insert(id.clone(), export_paths(part, &name))
+                    .is_some()
+                {
+                    return Err(format!("ambiguous external public record choice: {id}"));
+                }
+            }
+        }
+        for (id, path) in links {
+            if !available
+                .get(&id)
+                .is_some_and(|paths| paths.iter().any(|actual| actual[..] == path[1..]))
+            {
+                return Err(format!("unresolved external public record choice: {id}"));
+            }
+        }
+    }
+    Ok(())
+}
+
 fn validate_component_requirements(
     manifest: &Manifest,
     base: &Path,
@@ -825,6 +868,7 @@ pub(super) fn build_pinned(
     validate_command_callbacks(&manifest.components, base)?;
     let required = validate_component_requirements(&manifest, base)?;
     validate_line_grammar_errors(&manifest.components, base)?;
+    validate_public_record_links(&manifest.components, base)?;
     let cargo = cargo_manifest(&manifest)?;
     let lock = manifest.cargo_lock.read(base)?;
     for provider in &required {

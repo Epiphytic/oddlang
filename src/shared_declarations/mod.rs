@@ -482,6 +482,22 @@ impl Value {
     }
 }
 
+pub(crate) fn string_choice_names(graph: &[u8], overlay: &[u8]) -> Result<Vec<(String, String)>> {
+    let graph: Graph =
+        serde_json::from_slice(graph).map_err(|e| format!("shared declarations: {e}"))?;
+    let binding: Binding =
+        serde_json::from_slice(overlay).map_err(|e| format!("shared Rust binding: {e}"))?;
+    graph.validate(&binding)?;
+    graph
+        .string_enums
+        .into_iter()
+        .map(|choice| {
+            let name = binding.name(&choice.id)?.to_owned();
+            Ok((choice.id, name))
+        })
+        .collect()
+}
+
 pub(crate) fn error_variants(
     graph: &[u8],
     overlay: &[u8],

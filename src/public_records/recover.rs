@@ -531,6 +531,7 @@ pub(super) fn record(item: &ItemStruct, identity: &str, imports: &[Import<'_>]) 
     Ok(Record {
         id: identity.into(),
         traits: derive_traits(&item.attrs, imports)?,
+        read_policy: None,
         fields: recovered,
     })
 }
@@ -643,6 +644,7 @@ pub fn recover(lib: &Path, selection: &Path, out: &Path) -> Result<()> {
         format: OVERLAY.into(),
         flatten_module: false,
         identifiers: bindings,
+        external_types: BTreeMap::new(),
     };
     render(&graph, &overlay, true)?;
     let graph = encode(&graph)?;
