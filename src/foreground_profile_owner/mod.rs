@@ -23,6 +23,7 @@ struct Graph {
     diagnostics: Diagnostics,
     lifecycle: Option<Lifecycle>,
     room_prepare: Option<RoomPrepare>,
+    room_submit: Option<RoomSubmit>,
 }
 
 #[derive(Deserialize)]
@@ -42,6 +43,36 @@ struct RoomPrepare {
     description: String,
     deadline_ms: u64,
     slot_limit: usize,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct RoomSubmit {
+    contract: String,
+    operation: String,
+    request: [String; 6],
+    payload: [String; 3],
+    handle: [String; 6],
+    handle_field: String,
+    queued: String,
+    failures: [String; 5],
+    max_future_seconds: u64,
+    id_clock: SubmitIdClock,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum SubmitIdClock {
+    UnixSecondsU48be,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct RoomSubmitBinding {
+    queue: Vec<String>,
+    request_type: Vec<String>,
+    encode: Vec<String>,
+    fields: [String; 7],
 }
 
 #[derive(Deserialize)]
@@ -219,6 +250,7 @@ struct Binding {
     status_owner: Vec<String>,
     retained_stores: Option<Vec<String>>,
     relay_backend: Option<RelayBackend>,
+    room_submit: Option<RoomSubmitBinding>,
 }
 
 impl Graph {
@@ -259,6 +291,40 @@ impl Graph {
             {
                 return Err("invalid local room preparation contract".into());
             }
+        }
+        match (&self.room_submit, &binding.room_submit, &self.room_prepare) {
+            (None, None, _) => {}
+            (Some(submit), Some(target), Some(prepare))
+                if oxigraph::model::NamedNode::new(&submit.contract).is_ok()
+                    && token(&submit.operation)
+                    && submit.operation != prepare.operation
+                    && token(&submit.queued)
+                    && token(&submit.handle_field)
+                    && submit.handle_field != prepare.reply[4]
+                    && (1..=3600).contains(&submit.max_future_seconds)
+                    && [
+                        &submit.request[..],
+                        &submit.payload[..],
+                        &submit.handle[..],
+                        &submit.failures[..],
+                    ]
+                    .into_iter()
+                    .all(|list| {
+                        list.iter().all(|item| token(item))
+                            && list.iter().collect::<BTreeSet<_>>().len() == list.len()
+                    })
+                    && [
+                        target.queue.as_slice(),
+                        target.request_type.as_slice(),
+                        target.encode.as_slice(),
+                        target.fields.as_slice(),
+                    ]
+                    .into_iter()
+                    .all(binding_path)
+                    && target.fields.iter().collect::<BTreeSet<_>>().len()
+                        == target.fields.len()
+                    && submit.request[0] == prepare.request[0] => {}
+            _ => return Err("invalid authorized local submit contract or Rust binding".into()),
         }
         match (&self.lifecycle, &binding.retained_stores) {
             (Some(lifecycle), Some(path)) => {

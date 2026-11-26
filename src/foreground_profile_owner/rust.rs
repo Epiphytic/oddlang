@@ -106,6 +106,7 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
             path,
             graph.activation.relay_runtime.as_ref(),
             graph.room_prepare.as_ref(),
+            graph.room_submit.as_ref().zip(binding.room_submit.as_ref()),
         );
     } else {
         out.push_str(include_str!("runtime.rs.in"));
@@ -141,6 +142,7 @@ fn render_lifecycle(
     path: &[String],
     relay: Option<&RelayRuntime>,
     prepare: Option<&RoomPrepare>,
+    submit: Option<(&RoomSubmit, &RoomSubmitBinding)>,
 ) {
     writeln!(out, "use crate::{} as open_stores;", path.join("::")).unwrap();
     writeln!(out, "const SHUTDOWN_MS: u64 = {};", model.shutdown_ms).unwrap();
@@ -221,7 +223,7 @@ fn render_lifecycle(
         out.push_str(include_str!("key_package.rs.in"));
         let lifecycle = include_str!("active_lifecycle.rs.in");
         if let Some(prepare) = prepare {
-            render_room_prepare(out, prepare);
+            render_room_prepare(out, prepare, submit);
             let patches = [
                 (
                     "    storage_closer: storage_sqlite::DatabaseCloser,",
@@ -273,6 +275,34 @@ fn render_lifecycle(
                 );
                 routed_lifecycle = routed_lifecycle.replacen(anchor, replacement, 1);
             }
+            if submit.is_some() {
+                let patches = [
+                    (
+                        "let (prepare, mut pending) = RoomPrepareQueue::open(root, profile, &providers)?;",
+                        "let (prepare, mut pending) = RoomPrepareQueue::open(root, profile, &providers)?;\n    let (submit, mut submissions) = mpsc::channel(ROOM_SLOT_LIMIT);",
+                    ),
+                    (
+                        "owner.serve_routed_until(async {",
+                        "owner.serve_async_routed_until(async {",
+                    ),
+                    (
+                        "prepare_active(&mut providers, &relay, &mut pending, &prepare)",
+                        "prepare_active(&mut providers, &relay, &mut pending, &prepare, &mut submissions, &profile.name)",
+                    ),
+                    (
+                        "{ let prepare = prepare.clone(); move |body| prepare.route(body) }",
+                        "{ let prepare = prepare.clone(); move |body| route_room_request(body, prepare.clone(), submit.clone()) }",
+                    ),
+                ];
+                for (anchor, replacement) in patches {
+                    assert_eq!(
+                        routed_lifecycle.matches(anchor).count(),
+                        1,
+                        "submit lifecycle anchor"
+                    );
+                    routed_lifecycle = routed_lifecycle.replacen(anchor, replacement, 1);
+                }
+            }
             out.push_str(&routed_lifecycle);
         } else {
             out.push_str(lifecycle);
@@ -283,7 +313,11 @@ fn render_lifecycle(
     out.push_str(include_str!("shutdown.rs.in"));
 }
 
-fn render_room_prepare(out: &mut String, prepare: &RoomPrepare) {
+fn render_room_prepare(
+    out: &mut String,
+    prepare: &RoomPrepare,
+    submit: Option<(&RoomSubmit, &RoomSubmitBinding)>,
+) {
     for (name, value) in [
         ("ROOM_CONFIGURATION", &prepare.configuration),
         ("PREPARE_OPERATION", &prepare.operation),
@@ -335,5 +369,143 @@ fn render_room_prepare(out: &mut String, prepare: &RoomPrepare) {
         ],
     );
     out.push_str("}\n");
-    out.push_str(include_str!("room_prepare.rs.in"));
+    let template = include_str!("room_prepare.rs.in");
+    if let Some((model, binding)) = submit {
+        let signature = "    queue: &RoomPrepareQueue,\n) -> Failure {";
+        let request = "            request = pending.recv()";
+        assert_eq!(
+            template.matches(signature).count(),
+            1,
+            "submit queue signature"
+        );
+        assert_eq!(template.matches(request).count(), 1, "submit queue route");
+        out.push_str(&template
+            .replacen(signature,
+                "    queue: &RoomPrepareQueue,\n    submissions: &mut mpsc::Receiver<QueuedSubmit>,\n    profile: &str,\n) -> Failure {", 1)
+            .replacen(request,
+                "            submission = submissions.recv() => {\n                let Some((request, reply)) = submission else { return IO; };\n                if !reply.is_closed() {\n                    let result = commit_room_submit(providers, queue, &request, profile);\n                    let _ = reply.send(result);\n                }\n                continue;\n            }\n            request = pending.recv()", 1));
+        render_room_submit(out, prepare, model, binding);
+    } else {
+        out.push_str(template);
+    }
+}
+
+fn render_room_submit(
+    out: &mut String,
+    prepare: &RoomPrepare,
+    model: &RoomSubmit,
+    binding: &RoomSubmitBinding,
+) {
+    writeln!(
+        out,
+        "\nuse crate::{} as SubmitQueue;",
+        binding.queue.join("::")
+    )
+    .unwrap();
+    writeln!(
+        out,
+        "use crate::{} as SubmitWire;",
+        binding.request_type.join("::")
+    )
+    .unwrap();
+    writeln!(
+        out,
+        "use crate::{} as encode_submit_wire;",
+        binding.encode.join("::")
+    )
+    .unwrap();
+    writeln!(out, "const SUBMIT_OPERATION: &str = {:?};", model.operation).unwrap();
+    writeln!(out, "const SUBMIT_QUEUED: &str = {:?};", model.queued).unwrap();
+    writeln!(
+        out,
+        "const SUBMIT_FAILURES: &[&str] = &{:?};",
+        model.failures
+    )
+    .unwrap();
+    writeln!(
+        out,
+        "const SUBMIT_FUTURE: u64 = {};",
+        model.max_future_seconds
+    )
+    .unwrap();
+
+    out.push_str(
+        "#[derive(serde::Deserialize)]\n#[serde(deny_unknown_fields)]\nstruct SubmitRequest {\n",
+    );
+    fields(
+        out,
+        [
+            ("operation", "String", &model.request[0]),
+            ("remote", "String", &model.request[1]),
+            ("relays", "Vec<String>", &model.request[2]),
+            ("session", "String", &model.request[3]),
+            ("request", "String", &model.request[4]),
+            ("payload", "SubmitPayload", &model.request[5]),
+        ],
+    );
+    out.push_str(
+        "}\n#[derive(serde::Deserialize)]\n#[serde(deny_unknown_fields)]\nstruct SubmitPayload {\n",
+    );
+    fields(
+        out,
+        [
+            ("chunks", "Vec<String>", &model.payload[0]),
+            ("invocation", "String", &model.payload[1]),
+            ("bytes", "String", &model.payload[2]),
+        ],
+    );
+    out.push_str("}\n#[derive(serde::Serialize)]\nstruct SubmitReply<T> {\n");
+    fields(
+        out,
+        [
+            ("ok", "bool", &prepare.reply[0]),
+            ("result", "()", &prepare.reply[1]),
+            ("error", "()", &prepare.reply[2]),
+            ("command", "T", &prepare.reply[3]),
+        ],
+    );
+    out.push_str("}\n#[derive(serde::Serialize)]\nstruct SubmitAccepted {\n");
+    fields(
+        out,
+        [
+            ("state", "&'static str", &prepare.reply[4]),
+            ("handle", "SubmitHandle", &model.handle_field),
+        ],
+    );
+    out.push_str("}\n#[derive(serde::Serialize)]\nstruct SubmitRefused {\n");
+    fields(
+        out,
+        [
+            ("state", "&'static str", &prepare.reply[4]),
+            ("category", "&'static str", &prepare.reply[7]),
+            ("handle", "()", &prepare.reply[8]),
+        ],
+    );
+    out.push_str("}\n#[derive(serde::Serialize)]\nstruct SubmitHandle {\n");
+    fields(
+        out,
+        [
+            ("format", "u8", &model.handle[0]),
+            ("profile", "String", &model.handle[1]),
+            ("remote", "String", &model.handle[2]),
+            ("session", "String", &model.handle[3]),
+            ("invocation", "String", &model.handle[4]),
+            ("digest", "String", &model.handle[5]),
+        ],
+    );
+    out.push_str("}\nfn encode_room_submit(\n    local: [u8; 32], remote: [u8; 32], session: [u8; 16], request: [u8; 16],\n    invocation: [u8; 16], chunks: Vec<Vec<u8>>, bytes: Vec<u8>,\n) -> Result<Vec<u8>, Failure> {\n    let value = SubmitWire {\n");
+    for (field, value) in binding.fields.iter().zip([
+        "local",
+        "remote",
+        "session",
+        "request",
+        "invocation",
+        "chunks",
+        "bytes",
+    ]) {
+        writeln!(out, "        {field}: {value},").unwrap();
+    }
+    out.push_str("    };\n    encode_submit_wire(&value).map_err(|_| SUBMIT_FAILURES[0])\n}\n");
+    let SubmitIdClock::UnixSecondsU48be = model.id_clock;
+    out.push_str(include_str!("room_submit.rs.in"));
 }
