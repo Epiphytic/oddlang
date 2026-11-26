@@ -1526,7 +1526,7 @@ w:observationalRecordDefaults a p:Task ;
     rdfs:label "Recover public scalar records with fieldwise defaults and owned paths" ;
     p:milestone w:marmishMilestone ; p:source w:observationalRecordDefaultsPlan ;
     p:dependsOn w:typedFiniteErrors, w:publicObservationalRecords ;
-    p:status p:active ;
+    p:status p:done ;
     p:acceptance "Recover pinned engine and native records within one reusable profile. Compare independent native callers for field widths, exact traits, default values and exported paths. Show a source-only mutation and preserve preceding sealed workspace behavior." .
 
 w:observationalRecordDefaultsFixture a p:Artifact ;
@@ -1537,3 +1537,13 @@ w:observationalPathWireScope a p:Finding ;
     rdfs:label "Require a declared wire rule before serializing an owned native path" ;
     p:source w:observationalRecordDefaultsFixture .
 w:observationalRecordDefaults p:addresses w:observationalPathWireScope .
+
+w:observationalRecordDefaultsDarwin a p:Artifact ;
+    p:location "companion:verification/whole/engine-native-records/aarch64-apple-darwin.json" .
+w:observationalRecordDefaultsLinux a p:Artifact ;
+    p:location "companion:verification/whole/engine-native-records/aarch64-unknown-linux-gnu.json" .
+w:observationalRecordDefaultsMutation a p:Artifact ;
+    p:location "companion:verification/whole/engine-native-records/source-mutation-aarch64-apple-darwin.json" .
+w:observationalRecordDefaultsCoverage a p:Artifact ;
+    p:location "companion:verification/whole/engine-native-records/README.md" .
+w:observationalRecordDefaults p:evidence w:observationalRecordDefaultsDarwin, w:observationalRecordDefaultsLinux, w:observationalRecordDefaultsMutation, w:observationalRecordDefaultsCoverage .
