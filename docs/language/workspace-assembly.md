@@ -92,6 +92,30 @@ normally bound executable entry. The assembler checks both bindings with
 Cargo before publishing. The generated wrapper hash is part of its package
 lock.
 
+### Finite errors with typed payloads
+
+A finite error domain can own ordered, fieldless choices with stable case
+IDs and explicit display text. A variant can carry one of those choices
+or an ordered named product containing unsigned integers of width 8, 16,
+32 or 64. The graph declares equality when all payloads support it. The
+Rust binding supplies declaration names, case names and field names.
+Projection keeps the Rust Result alias, derived Debug, and the declared
+source and conversion behavior.
+
+The `oddlang-typed-finite-error-selection-v1` recovery profile pins the
+source digest and names the error, Result alias and local choice enums.
+It reads ordinary `thiserror` diagnostic literals and one `{0:?}`
+insertion of a selected fieldless choice. Literal diagnostics can ignore
+named product fields. An optional `variantIds` map assigns existing stable
+IDs to selected native variants. Sibling macro expansion, native name
+resolution and public reexports remain native replay obligations.
+
+A process-limit overlay can refer to a package-declared unit error using
+`error.id`, `error.typePath` and `error.variant`. The native package checks
+both the stable identity and the available Rust path. The function's
+result uses the referenced error type. The local declaration form remains
+available for independently projected operations.
+
 ### Public record views
 
 `oddlang recover public-records LIB_RS SELECTION OUTPUT` matches selected
@@ -128,3 +152,14 @@ It emits each alias as a Rust use of that same definition, so clients of
 the two paths can exchange the value directly. A native package projecting
 Serialize declares serde with the derive feature. Public module exports
 are selected through the usual native package reexports.
+
+### Private buffered input
+
+`oddlang recover buffered-input OBSERVATION SELECTION OUTPUT` accepts the
+pinned Rust shape adapter's v2 observation and a named record selection.
+The selection names the declaration, portable identity, role-to-field
+bindings and transition policies. The output contains the portable graph,
+Rust overlay and a recovery lock. Assembly accepts them through a
+`buffered-input` native package component with private visibility and empty
+reexports. Use registry zeroize 1.9.1 for the fixed erasing storage.
+See the [buffered input contract](../superpowers/specs/2026-11-26-buffered-input.md).
