@@ -87,6 +87,7 @@ fn minimum_request(fields: &[Field], captures: &BTreeMap<&str, &CaptureKind>) ->
                     }
                     CaptureKind::String { .. } => "\"\"".into(),
                     CaptureKind::Unsigned64 | CaptureKind::ExitStatus => "0".into(),
+                    CaptureKind::JsonObject { .. } => "{}".into(),
                 },
                 Source::Input { .. } => "0".into(),
                 Source::Object { fields } => minimum_request(fields, captures),
@@ -332,9 +333,16 @@ fn validate(
                 }
                 arguments.push((name.clone(), RequiredArgument::Flag));
             }
+            for binding in &transition.bindings {
+                identity(&binding.id, &mut seen)?;
+                if !workflow.delivery {
+                    return Err("workflow binding checks require delivery".into());
+                }
+            }
             let mut output_channels = BTreeSet::new();
             for output in &transition.outputs {
                 identity(&output.id, &mut seen)?;
+                let allow_opened = allow_opened && output.reply_capture.is_none();
                 if !workflow.delivery
                     || !output_channels.insert(output.channel)
                     || !valid_reply_path(&output.bytes, allow_opened)
@@ -354,7 +362,13 @@ fn validate(
             }
             for capture in &transition.capture {
                 if !arg_id(&capture.name)
-                    || (!workflow.delivery && matches!(capture.value_kind, CaptureKind::ExitStatus))
+                    || (!workflow.delivery
+                        && matches!(
+                            capture.value_kind,
+                            CaptureKind::ExitStatus | CaptureKind::JsonObject { .. }
+                        ))
+                    || matches!(capture.value_kind, CaptureKind::JsonObject { maximum_bytes }
+                        if maximum_bytes == 0 || maximum_bytes > transport.maximum_frame_bytes)
                     || !valid_reply_path(&capture.path, allow_opened)
                     || matches!(
                         capture.value_kind,
@@ -508,9 +522,35 @@ fn validate(
                     workflow.delivery,
                 )?;
             }
+            let delivered = delivered(transition);
+            for binding in &transition.bindings {
+                for source in [&binding.left, &binding.right] {
+                    validate_source(
+                        source,
+                        &mut seen,
+                        &delivered,
+                        &inputs,
+                        &mut arguments,
+                        workflow.delivery,
+                    )?;
+                }
+            }
             for output in &transition.outputs {
+                let cursor_scope = if let Some(source) = &output.reply_capture {
+                    if !transition.carry.contains(source)
+                        || !matches!(
+                            captures.get(source.as_str()),
+                            Some(CaptureKind::JsonObject { .. })
+                        )
+                    {
+                        return Err(format!("undefined retained workflow reply {source}"));
+                    }
+                    &delivered
+                } else {
+                    &guaranteed
+                };
                 if let Some(name) = &output.start {
-                    if !guaranteed.contains(name.as_str())
+                    if !cursor_scope.contains(name.as_str())
                         || !matches!(captures.get(name.as_str()), Some(CaptureKind::Unsigned64))
                     {
                         return Err(format!("undefined unsigned workflow cursor {name}"));
@@ -824,7 +864,7 @@ fn choose_socket(_: &ArgMatches, explicit: Option<&PathBuf>) -> Result<PathBuf, 
             r#"
 fn native_digest(_: &[u8]) -> Result<String, Failure> { Err(PROTOCOL) }
 fn open_embedded(_: &str, _: &mut Value, _: &schema::EmbeddedReply) -> Result<(), Failure> { Err(PROTOCOL) }
-fn emit_outputs(_: &Value, outputs: &[schema::BinaryOutput], _: &BTreeMap<&str, Value>) -> Result<(), Failure> {
+fn emit_outputs(_: &Value, outputs: &[schema::BinaryOutput], _: &BTreeMap<&str, Value>, _: &BTreeMap<&str, Value>) -> Result<(), Failure> {
     if outputs.is_empty() { Ok(()) } else { Err(PROTOCOL) }
 }
 "#,
@@ -878,6 +918,8 @@ fn emit_outputs(_: &Value, outputs: &[schema::BinaryOutput], _: &BTreeMap<&str, 
             "binaryOutput": "validate-all-declared-streams-before-first-write-then-write-and-flush-in-declaration-order",
             "cursorOrigin": "declared unsigned capture or zero",
             "cursorAdvance": "checked prior cursor plus decoded stream length, bounded by declared upper cursor when configured",
+            "deferredOutput": "read stream paths from a bounded carried JSON object and use the delivered cursor captures",
+            "bindingChecks": "require equality of ordered encoded sources after capture and before outputs or continuation",
             "record": "write the declared prefix and compact ordered JSON to stderr, followed by a newline",
             "freshRequestId": "generate a new configured timestamped identifier on the selected transition and carry it explicitly",
             "exitStatus": {"minimum": 0, "maximum": 255, "source": "validated-exit-status-capture"},

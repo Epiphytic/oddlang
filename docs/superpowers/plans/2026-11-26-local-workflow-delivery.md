@@ -13,3 +13,5 @@
 - [x] Generate fresh IDs after authenticated submit and cursor lookup. Bind each response, output range, prior cursor pair and consumption acknowledgement before advancing.
 - [x] Preserve named failure and detached handle bytes. Resume the explicit handle with the selected private profile, without issuing a new submit.
 - [x] Compose the delivery workflow with the prepared generated owner and generated typed response validators. Replay finite chunks, detached resume and refusals against an independent counterpart.
+
+- [x] Verify reusable deferred output after a later cursor lookup in an independent local workflow.

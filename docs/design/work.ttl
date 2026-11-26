@@ -2950,6 +2950,15 @@ w:boundedLocalNativePackageCodec a p:Artifact ;
     rdfs:label "117 response cases against the emitted composed native package codec" ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/d0a92d72c2abac7a57916a7af0a51f34ae2b5e60/verification/whole/basic-command-interop/bounded-local-progress-workspace-codec-aarch64-apple-darwin.json" .
 
+w:deferredWorkflowOutput a p:Task ;
+    rdfs:label "Check retained reply bindings after a later local cursor lookup" ;
+    p:milestone w:marmishMilestone ; p:source w:localWorkflowDeliveryPlan ;
+    p:status p:done ; p:dependsOn w:boundedLocalWorkflowProgress ;
+    p:evidence w:deferredWorkflowOutputFixture ;
+    p:addresses w:deferredOutputControlFinding ;
+    p:acceptance "Retain a bounded reply object across exchanges, validate a binding against newly captured cursors before any stream output, and preserve direct and legacy workflow behavior." .
+w:deferredWorkflowOutputFixture a p:Artifact ;
+    p:location "verification/local-owner-workflow/deferred-output.md" .
 w:asyncLocalOwnerRoute a p:Task ;
     rdfs:label "Await bounded replies on the private local owner listener" ;
     p:milestone w:marmishMilestone ; p:source w:authorizedOwnerLocalSubmitPlan ;
@@ -2987,3 +2996,7 @@ w:localRetainedPollRecovery a p:Task ;
     p:dependsOn w:boundedLocalWorkflowProgress ; p:status p:active ;
     p:evidence w:retainedPollComparison ;
     p:acceptance "After interrupting the waiter at stdout/stderr offsets 8 and 9, the restarted generated client must reproduce the mainline suffixes, exit 7 and acknowledge the reply against the old cursor pair. Verify digest, session and cursor checks before emitting bytes or consuming a retained reply." .
+
+w:deferredOutputControlFinding a p:Finding ;
+    rdfs:label "Isolate cursor arithmetic and retained object bounds in the deferred output witness" ;
+    p:source w:deferredWorkflowOutputFixture .
