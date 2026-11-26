@@ -27,6 +27,8 @@ The independent stream comparison including macro expansions left 373 compiler-o
 
 ## Implementation evidence
 
+- [x] Recover the ordered field encodings of supported record writers, qualify source reordering and reject unsupported helpers. [Record writer profile](../../language/ordered-record-writes.md)
+
 - [x] Bind explicit byte discriminants and exhaustive conversion outcomes for string enums. [Shared declaration profile](../../language/shared-declarations.md)
 
 - [x] Recover scalar byte adapters and bind ordered wire guard failures to typed native error constructors. [Wire schema profile](../../language/json-wire-schema.md)

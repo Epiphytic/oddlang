@@ -11,6 +11,7 @@ use std::{
 mod hash_view;
 mod obligations;
 pub mod recover;
+pub mod record_writer;
 mod render;
 
 type Result<T> = std::result::Result<T, String>;
