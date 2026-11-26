@@ -199,6 +199,7 @@ impl Pin {
 enum Kind {
     BufferedInput,
     BoundedJsonInput,
+    ReadOnlyFile,
     BuildReport,
     StructuredDiagnostics,
     ProcessLimit,
@@ -300,6 +301,12 @@ fn project(
             }
             crate::structured_diagnostics::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
             "diagnostics.rs"
+        }
+        Kind::ReadOnlyFile => {
+            let graph_path = input.join("graph.json");
+            io(fs::write(&graph_path, &graph))?;
+            crate::read_only_file::build(&graph_path, &overlay, &output)?;
+            "file.rs"
         }
         Kind::BoundedJsonInput => {
             crate::bounded_json_input::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
@@ -536,6 +543,7 @@ fn export_paths(component: &Component, entry: &str) -> Vec<Vec<String>> {
 }
 
 pub(crate) struct ErrorVariantExport {
+    pub io_error: bool,
     pub id: String,
     pub error_type: String,
     pub variant: String,
@@ -554,6 +562,17 @@ pub(super) const ZEROIZE: RegistryProvider = RegistryProvider {
     name: "zeroize",
     version: "1.9.1",
     checksum: "e13084392c5e4bc371903e2935a5eaeed24905a7511356b883835e18a78f6879",
+};
+
+const UNIX_FILE: RegistryProvider = RegistryProvider {
+    name: "libc",
+    version: "0.2.189",
+    checksum: "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2",
+};
+const SHA256_FILE: RegistryProvider = RegistryProvider {
+    name: "sha2",
+    version: "0.10.9",
+    checksum: "a7507d819769d01a365ab707794a4084392c824f54a7a6a7862f8c3d0892b283",
 };
 
 const STRUCTURAL_JSON: RegistryProvider = RegistryProvider {
@@ -726,6 +745,84 @@ fn validate_component_requirements(
     {
         require_erasing_storage(manifest, "buffered-input")?;
         required.insert(ZEROIZE);
+    }
+    for component in components
+        .iter()
+        .filter(|component| matches!(component.kind, Kind::ReadOnlyFile))
+    {
+        for provider in [UNIX_FILE, SHA256_FILE] {
+            if manifest.registry_patches.contains_key(provider.name)
+                || !manifest
+                    .dependencies
+                    .get(provider.name)
+                    .is_some_and(|dependency| {
+                        dependency.version == provider.version
+                            && dependency.source.is_none()
+                            && dependency.default_features != Some(false)
+                            && dependency.features.is_empty()
+                    })
+            {
+                return Err(format!(
+                    "read-only file requires the locked registry provider {} {}",
+                    provider.name, provider.version
+                ));
+            }
+            required.insert(provider);
+        }
+        let (operations, links) = crate::read_only_file::native_links(
+            &component.graph.read(base)?,
+            &component.overlay.read(base)?,
+        )?;
+        if component.visibility != Visibility::Private
+            || !component.reexports.is_empty()
+            || component
+                .crate_reexports
+                .iter()
+                .any(|name| !operations.contains(name))
+            || component
+                .root_reexports
+                .as_ref()
+                .is_some_and(|names| !names.is_empty())
+        {
+            return Err("read-only file operations need private crate-scoped bindings".into());
+        }
+        for link in links {
+            let mut matching = 0;
+            for provider in components
+                .iter()
+                .filter(|provider| matches!(provider.kind, Kind::FiniteErrorDomain))
+            {
+                for error in crate::finite_error_domain::error_variants(
+                    &provider.graph.read(base)?,
+                    &provider.overlay.read(base)?,
+                )? {
+                    if error.id == link.id {
+                        if error.variant != link.variant
+                            || (if link.io {
+                                !error.io_error
+                            } else {
+                                !error.static_text
+                            })
+                            || !export_paths(provider, &error.error_type)
+                                .iter()
+                                .any(|path| link.error[1..] == path[..])
+                        {
+                            return Err(format!(
+                                "read-only file error role does not match its bound native variant: {}",
+                                link.id
+                            ));
+                        }
+                        matching += 1;
+                    }
+                }
+            }
+            if matching != 1 {
+                return Err(format!(
+                    "read-only file needs exactly one error role provider: {}",
+                    link.id
+                ));
+            }
+        }
     }
     let mut limits = Vec::new();
     for component in components
@@ -1100,6 +1197,7 @@ pub(super) fn build_pinned(
                         | Kind::BinaryFragment
                         | Kind::BufferedInput
                         | Kind::BoundedJsonInput
+                        | Kind::ReadOnlyFile
                 ))
         {
             return Err("invalid module or empty reexports".into());

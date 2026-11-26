@@ -2516,3 +2516,29 @@ w:wholeMarmishStructure p:dependsOn w:coreInherentNames .
 w:coreInherentWitness a p:Artifact ;
     rdfs:label "Six concrete core function-pointer checks and four associated constant type checks on both ARM64 hosts" ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/tree/9caf478ba084416195fbf7f3279eb516d44478a3/verification/whole/core-inherent" .
+
+w:readOnlyFileIntegrityPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-read-only-file-integrity.md" .
+w:readOnlyFileIntegrity a p:Task ;
+    rdfs:label "Recover and qualify read-only descriptor and integrity rules" ;
+    p:milestone w:marmishMilestone ; p:source w:readOnlyFileIntegrityPlan ;
+    p:dependsOn w:structuralProfileCompiler ;
+    p:status p:done ;
+    p:acceptance "Observe ordered file admission, bounded reads and digest checks on both native ARM64 hosts using inert files, and independently detect a source mutation." .
+
+w:readOnlyFileIntegrityFixture a p:Artifact ;
+    p:location "verification/read-only-file/check.py" .
+w:readOnlyFileIntegrity p:evidence w:readOnlyFileIntegrityFixture, w:readOnlyFileDarwin, w:readOnlyFileLinux .
+
+w:readOnlyFileDarwin a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/d27146eee73937d147b9db32d3210d515220be04/verification/whole/local-file-integrity/aarch64-apple-darwin.json" .
+
+w:readOnlyFileLinux a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/d27146eee73937d147b9db32d3210d515220be04/verification/whole/local-file-integrity/aarch64-unknown-linux-gnu.json" .
+
+w:verifiedLocalFileCatalog a p:Task ;
+    rdfs:label "Qualify pinned directory catalogs against a typed parser and descriptor policy" ;
+    p:milestone w:marmishMilestone ; p:source w:readOnlyFileIntegrityPlan ;
+    p:dependsOn w:readOnlyFileIntegrity, w:structuralProfileCompiler ;
+    p:status p:planned ;
+    p:acceptance "Run the unchanged original directory discovery test and typed guard comparisons on both ARM64 hosts using only inert files and a caller-supplied checksum." .

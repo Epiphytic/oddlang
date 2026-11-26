@@ -33,6 +33,7 @@ mod process_limit;
 pub mod public_records;
 mod root_data_scope;
 pub mod rust_recovery;
+pub mod read_only_file;
 pub mod rust_roundtrip;
 pub mod sequence_journal;
 pub mod shared_declarations;

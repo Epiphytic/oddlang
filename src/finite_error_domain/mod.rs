@@ -445,6 +445,7 @@ pub(crate) fn error_variants(
         .variants
         .into_iter()
         .map(|(id, variant)| crate::native_package::ErrorVariantExport {
+            io_error: matches!(variant.payload, Payload::IoError),
             unit: matches!(variant.payload, Payload::Unit),
             static_text: matches!(variant.payload, Payload::StaticText),
             error_type: overlay.names[&graph.error].clone(),
