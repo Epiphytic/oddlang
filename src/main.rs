@@ -153,6 +153,9 @@ fn run(args: &[String]) -> Result<(), String> {
         [cmd, kind, target, graph, overlay, output] if cmd == "build" && kind == "shared-declarations" && target == "rust" => {
             oddlang::shared_declarations::build(graph.as_ref(), overlay.as_ref(), output.as_ref())
         }
+        [cmd, kind, repo, selection, destination] if cmd == "recover" && kind == "shared-declarations" =>
+            oddlang::rust_recovery::shared::run(repo.as_ref(), selection.as_ref(), destination.as_ref()),
+
         [cmd, kind, target, manifest, output] if cmd == "build" && kind == "native-package" && target == "rust" => {
             oddlang::native_package::build(manifest.as_ref(), output.as_ref())
         }

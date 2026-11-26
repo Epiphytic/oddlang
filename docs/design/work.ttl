@@ -2075,3 +2075,20 @@ w:wholeValueApiWitness a p:Task ; rdfs:label "Compare native public value APIs a
 w:wholeApiMutations a p:Artifact ; p:location "verification/rust-recovery/test_public_api.py" .
 w:wholeAmd64Effects a p:Artifact ; p:location "https://github.com/Epiphytic/oddlang/actions/runs/45775359148" .
 w:wholeMarmishFreeze p:evidence w:wholeAmd64Effects .
+
+w:wholeRecoverShared a p:Task ; rdfs:label "Recover bounded shared declarations from pinned Rust source" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Derive constants, typed error templates, variant order and result aliases as structured facts at a pinned Git blob. Detect changed native declarations and reject unsupported selections." ;
+    p:evidence w:wholeSharedRecoveryFixture .
+w:wholeSharedRecoveryFixture a p:Artifact ; p:location "verification/rust-recovery/test_shared_source.py" .
+
+w:wholeCoreBuild a p:Task ; rdfs:label "Build the core package without first-party source inputs" ;
+    p:source w:wholeMarmishPlan ; p:milestone w:marmishMilestone ; p:status p:done ;
+    p:acceptance "Build from three contracts offline, qualify all seven unchanged integration tests and compare the native public caller on Darwin ARM64 and Linux ARM64." ;
+    p:evidence w:wholeCoreRelease .
+w:wholeCoreRelease a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/commit/9ef593c538d53b2397e5fae64f61aa119c0cc76d" .
+w:wholeStreamBlock a p:Task ; rdfs:label "Build and exchange bounded native stream blocks" ;
+    p:source w:wholeMarmishPlan ; p:milestone w:marmishMilestone ; p:status p:done ; p:dependsOn w:wholeRecoverShared ;
+    p:acceptance "Pass five original codec tests, read both native representations on each peer and detect a changed offset bound on Darwin ARM64." ;
+    p:evidence w:wholeBlockRelease .
+w:wholeBlockRelease a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/commit/e2008a2eecec3f62bbc37934e91421d1438405ad" .

@@ -2,6 +2,7 @@
 pub mod public_api;
 #[path = "../../verification/rust-recovery/shape_model.rs"]
 pub(crate) mod shape_model;
+pub mod shared;
 mod structure;
 pub mod tagged;
 

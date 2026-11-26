@@ -59,6 +59,13 @@ The independent stream comparison including macro expansions left 373 compiler-o
 - [x] Project bounded positioned integrity blocks. Exercise identity, optional zlib, checked offsets, canonical serialization and declared error precedence with an unrelated native consumer. [Block profile and fixture](../../language/integrity-block.md)
 - [x] Generate shared constant, error, result and enum declarations, bind public and crate-private paths and ship declaration-keyed expectations. [Shared declarations and unrelated qualification fixture](../../language/shared-declarations.md)
 
+- [x] Build the native Rust core library from the three pinned contracts and qualify its seven unchanged integration tests on Darwin and Linux ARM64. A public caller matched 1,735 observations on each host. [Core package and receipts](https://github.com/Epiphytic/marmish-oddlang/pull/11)
+- [x] Independently recover shared stream declarations, build the compression module from its separately authored policy, and read original and generated blocks on both peers. Five unchanged codec tests pass on Darwin ARM64. [Module and qualification](https://github.com/Epiphytic/marmish-oddlang/pull/12)
+
+
+- [x] Recover selected symbolic constants, public error payloads and result aliases from a pinned source module as candidate declarations. [Recovery fixture](../../../verification/rust-recovery/test_shared_source.py)
+
+
 - [x] Assemble pinned semantic projections into a native library with private module groups, public type reexports, exact dependency closure and a separate offline consumer. [Native package contract and test](../../language/native-package.md)
 - [x] Compare the exported paths, ordered unit variants, documented inherent signatures and directly implemented trait identities of two independently compiled concrete value APIs. Run controls that alter each observed property. [Native witness fixture](../../../verification/rust-recovery/test_public_api.py)
 
