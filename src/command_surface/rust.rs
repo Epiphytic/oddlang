@@ -51,6 +51,23 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> Result<String, String>
         // The auxiliary parser has its own argument identities and no version flag.
         validate(parser, trigger, &[], &mut BTreeSet::new(), 1)?;
     }
+    for (trigger, policy) in &graph.terminal_prefixes {
+        let allowed: BTreeSet<_> = policy.allowed.iter().collect();
+        if !graph.terminal_subparsers.contains_key(trigger)
+            || allowed.len() != policy.allowed.len()
+            || policy.denied.is_empty()
+            || policy.denied.chars().any(char::is_control)
+            || allowed.iter().any(|id| {
+                !graph
+                    .root
+                    .arguments
+                    .iter()
+                    .any(|argument| argument.global && &argument.id == *id)
+            })
+        {
+            return Err(format!("invalid terminal prefix policy for {trigger:?}"));
+        }
+    }
     for (command, operation) in &binding.operations {
         if !operations.contains(command)
             || !operation.starts_with("urn:")
@@ -91,7 +108,32 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> Result<String, String>
         root.push_str(".allow_external_subcommands(true)");
     }
     writeln!(out, "    {root}\n}}").unwrap();
+    if !graph.terminal_prefixes.is_empty() {
+        out.push_str(include_str!("terminal_prefix.rs"));
+    }
     out.push_str("\npub fn parse(args: impl IntoIterator<Item = OsString>) -> Invocation {\n");
+    if !graph.terminal_prefixes.is_empty() {
+        out.push_str("    let args = args.into_iter().collect::<Vec<_>>();\n");
+        let globals = graph
+            .root
+            .arguments
+            .iter()
+            .filter(|argument| argument.global)
+            .map(|argument| {
+                (
+                    argument.id.as_str(),
+                    argument.long.as_deref(),
+                    argument.short.map(|byte| byte as u8),
+                    argument.kind.is_some(),
+                )
+            })
+            .collect::<Vec<_>>();
+        for (trigger, policy) in &graph.terminal_prefixes {
+            let auxiliary = render_command(&graph.terminal_subparsers[trigger]);
+            writeln!(out, "    if let Some(result) = terminal_prefix(&args, {trigger:?}, &{globals:?}, &{:?}, {:?}, {auxiliary}) {{ return result; }}", policy.allowed, policy.denied).unwrap();
+        }
+    }
+
     if !graph.terminal_subparsers.is_empty() {
         out.push_str(
             "    let mut args = args.into_iter().peekable();\n    let executable = args.next();\n",

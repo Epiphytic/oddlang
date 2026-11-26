@@ -1557,3 +1557,9 @@ w:publicDiagnosticsCliDarwin a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/blob/37a5be63638cfc7a6796a7058313bc5c03be5519/verification/whole/converged-diagnostics-cli/aarch64-apple-darwin.json> .
 w:publicDiagnosticsCliLinux a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/blob/37a5be63638cfc7a6796a7058313bc5c03be5519/verification/whole/converged-diagnostics-cli/aarch64-unknown-linux-gnu.json> .
+
+w:terminalPrefixCli a p:Task ;
+    rdfs:label "Recover and project leading-option policy for auxiliary terminal CLI responses" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:publicDiagnosticsCliConvergence ; p:status p:active ;
+    p:acceptance "Verify the original and generated terminal responses for long and short leading options, attached and separate values, root-help precedence and denial, on both ARM64 hosts. Keep successful operational paths outside the projection." .
