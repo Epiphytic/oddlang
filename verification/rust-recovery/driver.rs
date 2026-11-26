@@ -11,6 +11,7 @@ extern crate rustc_type_ir;
 mod shape_model;
 mod shapes;
 mod relations;
+mod tagged_frame;
 
 use std::collections::BTreeSet;
 use std::{env, fs, process};
@@ -599,6 +600,14 @@ struct Recovery;
 
 impl Callbacks for Recovery {
     fn after_analysis<'tcx>(&mut self, _compiler: &Compiler, tcx: TyCtxt<'tcx>) -> Compilation {
+        if let Ok(method) = env::var("ODD_RECOVERY_TAGGED_FRAME") {
+            let compiler = env::var("ODD_RECOVERY_COMPILER").expect("compiler commit");
+            let output = env::var_os("ODD_RECOVERY_OUT").expect("tagged frame destination");
+            let file = fs::File::create_new(output).expect("create tagged frame observation");
+            serde_json::to_writer(file, &tagged_frame::observe(tcx, &compiler, &method))
+                .expect("serialize tagged frame observation");
+            return Compilation::Continue;
+        }
         if let Ok(method) = env::var("ODD_RECOVERY_FIELD_CONJUNCTION") {
             let compiler = env::var("ODD_RECOVERY_COMPILER").expect("compiler commit");
             let output = env::var_os("ODD_RECOVERY_OUT").expect("field conjunction destination");

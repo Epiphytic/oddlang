@@ -921,3 +921,18 @@ w:fieldConjunctionDerefReview a p:Finding ;
     p:source w:fieldConjunctionReview .
 w:copySourceConjunctionNativeReceipt a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/c8c187862a114efaf2bc8fce403471959d3a939d/verification/whole/copy-source-correspondence/reference-aarch64-apple-darwin.json" .
+
+w:recoverTaggedFrameEncoder a p:Task ;
+    rdfs:label "Recover discriminators and ordered encoder writes from a tagged Rust frame" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:recoverFieldConjunctions, w:boundedTaggedBinaryFrames ;
+    p:acceptance "Use pinned compiler bindings to recover distinct tags and payload correspondence. Qualify an unrelated frame and an upstream encoder mutation using independently expected native bytes, with explicit per-variant gaps for unresolved effects." ;
+    p:addresses w:taggedFrameSourceReview ; p:evidence w:taggedFrameSourceFixture .
+w:wholeMarmishProtocols p:dependsOn w:recoverTaggedFrameEncoder .
+w:taggedFrameSourceFixture a p:Artifact ;
+    p:location "verification/rust-recovery/tagged-frame/verify.py" .
+w:taggedFrameSourceReview a p:Finding ;
+    rdfs:label "Require a dominating length guard, complete tag and enum mappings, and payload alias invalidation" ;
+    p:source w:taggedFrameSourceReviewArtifact .
+w:taggedFrameSourceReviewArtifact a p:Artifact ;
+    p:location "docs/design/reviews/rust-tagged-frame.md" .
