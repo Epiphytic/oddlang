@@ -19,10 +19,10 @@ decimal text subgrammars remain reusable.
 - [x] Add finite constraints and typed native output records, including
       fixed arrays, bounded by-source vectors, stable native errors, and
       text formatters. Exercise each with independent native callers.
-- [ ] Corroborate the application record shapes and limit mutation with
+- [x] Corroborate the application record shapes and limit mutation with
       pinned native compiler evidence. Verify both upstream and emitted Rust
       against the independently published 224 original manifest vectors.
-      Review and publish the framework and companion branches separately.
+      Review and publish the framework and [companion](https://github.com/Epiphytic/marmish-oddlang/pull/91) branches separately. Both native ARM64 hosts qualify the same complete baseline and changed result streams.
 
 The application role takes bytes and returns release metadata or one
 stable error. It includes pure identity and download-name formatting.

@@ -1397,9 +1397,11 @@ w:checkedRecordGrammarFixture a p:Artifact ;
 w:pureReleaseManifestGrammar a p:Task ;
     rdfs:label "Qualify native release manifest parsing and identifiers" ;
     p:milestone w:marmishMilestone ; p:source w:orderedLineGrammarPlan ;
-    p:dependsOn w:checkedRecordGrammar ;
+    p:dependsOn w:checkedRecordGrammar, w:originalReleaseManifestOracle ;
     p:acceptance "Use compiler evidence for the native source shapes, recover or verify one changed-source constraint, and compare all 224 independent pure cases and the source mutation." ;
-    p:status p:active .
+    p:status p:done ; p:evidence w:pureReleaseManifestCompanion .
+w:pureReleaseManifestCompanion a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/91> .
 
 w:lineGrammarLexicalReview a p:Finding ;
     rdfs:label "Reject unused nested grammars and directly conflicting token literals" ;
@@ -1409,3 +1411,11 @@ w:lineGrammarPayloadReview a p:Finding ;
     rdfs:label "Check static text payload capability for native manifest error variants" ;
     p:source w:orderedLineGrammarPlan .
 w:checkedRecordGrammar p:addresses w:lineGrammarPayloadReview .
+
+w:originalReleaseManifestOracle a p:Task ;
+    rdfs:label "Qualify the original pure release manifest and one boundary mutation" ;
+    p:milestone w:marmishMilestone ; p:source w:orderedLineGrammarPlan ;
+    p:acceptance "Confirm 224 boundary-weighted rows against the original on both ARM64 hosts, run both unchanged pure upstream tests, and identify the exact source mutation outcome." ;
+    p:status p:done ; p:evidence w:originalReleaseManifestCompanion .
+w:originalReleaseManifestCompanion a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/86> .
