@@ -127,6 +127,8 @@ struct Binding {
     invalid_diagnostic: Option<String>,
     uncovered_exit: u8,
     operations: BTreeMap<String, String>,
+    #[serde(default)]
+    handlers: BTreeMap<String, Vec<String>>,
 }
 
 fn is_false(value: &bool) -> bool {

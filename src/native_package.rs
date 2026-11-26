@@ -128,6 +128,7 @@ enum Kind {
     SharedDeclarations,
     SequenceJournal,
     CliSurface,
+    LocalCommandClient,
 }
 
 #[derive(Deserialize)]
@@ -211,6 +212,10 @@ fn project(
             let binding = crate::endpoint_set::overlay_digest(&overlay)?;
             crate::endpoint_set::build(&path, &pin, Some((&overlay, &binding)), &output)?;
             "endpoint_set.rs"
+        }
+        Kind::LocalCommandClient => {
+            crate::local_command_client::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
+            "client.rs"
         }
         Kind::CliSurface => {
             crate::command_surface::build_package_component(

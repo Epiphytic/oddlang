@@ -13,6 +13,7 @@ pub mod integrity_block;
 pub mod interpreter;
 pub mod json_envelope;
 pub mod language;
+pub mod local_command_client;
 pub mod model;
 pub mod native_package;
 pub mod rust_recovery;

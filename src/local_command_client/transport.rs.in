@@ -1,0 +1,40 @@
+use std::{io::Write, path::{Path, PathBuf}, process::ExitCode, time::Duration};
+use clap::ArgMatches;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
+
+#[derive(Clone, Copy)]
+struct Failure(u8, &'static str);
+
+impl Failure {
+    fn report(self) -> ExitCode {
+        let _ = writeln!(std::io::stderr().lock(), "{}", self.1);
+        ExitCode::from(self.0)
+    }
+}
+
+async fn exchange(path: &Path) -> Result<Response, Failure> {
+    let mut stream = tokio::net::UnixStream::connect(path).await.map_err(|_| IO)?;
+    let credential = stream.peer_cred().map_err(|_| IO)?;
+    // SAFETY: geteuid takes no arguments and returns the process credential.
+    if credential.uid() != unsafe { libc::geteuid() } {
+        return Err(PEER);
+    }
+    stream.write_u32(REQUEST.len() as u32).await.map_err(|_| IO)?;
+    stream.write_all(REQUEST.as_bytes()).await.map_err(|_| IO)?;
+    stream.shutdown().await.map_err(|_| IO)?;
+    let length = stream.read_u32().await.map_err(|_| IO)?;
+    if length == 0 || length > FRAME_LIMIT {
+        return Err(FRAME_SIZE);
+    }
+    let mut body = vec![0; length as usize];
+    stream.read_exact(&mut body).await.map_err(|_| IO)?;
+    serde_json::from_slice(&body).map_err(|_| FRAME_JSON)
+}
+
+fn perform(path: &Path) -> Result<Response, Failure> {
+    let runtime = tokio::runtime::Builder::new_current_thread().enable_all().build().map_err(|_| IO)?;
+    runtime.block_on(async {
+        tokio::time::timeout(Duration::from_millis(DEADLINE_MS), exchange(path))
+            .await.map_err(|_| DEADLINE)?
+    })
+}
