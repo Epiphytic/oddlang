@@ -1130,3 +1130,8 @@ w:provisionedNativeWorkspace a p:Task ;
     p:milestone w:marmishMilestone ; p:source w:provisionedNativeWorkspacePlan ;
     p:status p:active ; p:dependsOn w:combinedForegroundPeers, w:nativeFileProfileStores, w:copyProtocolQualification ;
     p:acceptance "Build one locked workspace in native ARM64 isolation, check all upstream stream tests and cross every initializer, foreground owner and status client choice on real local profiles." .
+
+w:workspaceRegistryPatchAgreement a p:Finding ;
+    rdfs:label "Unify agreeing Cargo registry patch pins and reject conflicts before workspace publication" ;
+    p:source w:provisionedNativeWorkspacePlan .
+w:provisionedNativeWorkspace p:addresses w:workspaceRegistryPatchAgreement .
