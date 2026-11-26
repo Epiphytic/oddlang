@@ -2390,3 +2390,14 @@ w:sevenMemberPublicImportReceipt a p:Artifact ;
 w:sevenMemberPublicImportGap a p:Finding ;
     rdfs:label "The seven-member workspace imports 65 of 140 original spellings; prototype MAX_LINE and serve are absent" ;
     p:source w:sevenMemberPublicImportReceipt .
+
+w:privateManifestNamedSuite a p:Task ;
+    rdfs:label "Measure the two unchanged private manifest parser tests in the native release catalogs" ;
+    p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;
+    p:dependsOn w:recoveredWorkspaceNamedSuite ;
+    p:acceptance "Match exact test names and upstream source and fixture hashes on both native ARM64 hosts. Keep authored vectors outside the named counts and reject full certification while cases are unverified." ;
+    p:status p:done ; p:evidence w:privateManifestSuiteDarwin, w:privateManifestSuiteLinux .
+w:privateManifestSuiteDarwin a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/cb6e38f463fece606f6b0e8c5fb2f920c46dfa16/verification/whole/suite/manifest-aarch64-apple-darwin.json" .
+w:privateManifestSuiteLinux a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/cb6e38f463fece606f6b0e8c5fb2f920c46dfa16/verification/whole/suite/manifest-aarch64-unknown-linux-gnu.json" .
