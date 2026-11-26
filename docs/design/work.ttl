@@ -1119,7 +1119,8 @@ w:checkpointDecodePrecedenceReview a p:Finding ;
 w:compositeBinaryRecords p:addresses w:checkpointDecodePrecedenceReview .
 w:compositeExternalContractLinkage a p:Task ;
     rdfs:label "Check composite slot bounds and member types against pinned external codec contracts" ;
-    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:active ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:evidence w:nestedCodecPackageFixture, w:nestedCodecManifestReceipt ;
     p:dependsOn w:compositeBinaryRecords ;
     p:acceptance "Verify external codec identities, independently declared inner limits and exact native types before emitting a composed package." .
 
@@ -1155,3 +1156,8 @@ w:nativeWorkspaceColdStartReceipts a p:Artifact ;
 
 w:nativeWorkspaceColdStartLockProbe a p:Artifact ;
     p:location <https://github.com/Epiphytic/oddlang/blob/e2ec7338dcf141f95d2f1e24d9bee20cc1cec44b/verification/native-workspace/bootstrap.py> .
+
+w:nestedCodecPackageFixture a p:Artifact ;
+    p:location <https://github.com/Epiphytic/oddlang/blob/00af3dab60da87ef5a5f5b9ce84813c4051eed79/verification/binary-record/verify.py> .
+w:nestedCodecManifestReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/52> .
