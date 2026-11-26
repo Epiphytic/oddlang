@@ -13,3 +13,21 @@ The native package assembler resolves every checked error binding against a unit
 An opaque `fixed-bytes` type declares an unsigned 32-bit `length`, a `failure` IRI for length mismatch, and `onDrop: "erase"`. Its native binding supplies a by-value constructor, a checked sequence constructor and a read-only array view through the `constructor`, `parse` and `view` keys. Supply empty `order` and omit fields and traits. The owner stores its own bytes, has a private backing field and exposes a borrow tied to its lifetime. The Rust backend uses the locked registry provider zeroize 1.9.1. Its destruction guarantee covers the object's current storage on drop. There is no requirement to clear a caller's separate input or copies left behind by moves.
 
 Run `oddlang recover fixed-bytes OBSERVATION SELECTION OUTPUT` on a v2 rustc shape observation. Select the source declaration identity, domain IRI, output value IRI and failure IRI in the JSON keys `source`, `domain`, `value` and `failure`. Recovery reads the monomorphic tuple member, provider type, element and extent. The failure mapping and the public construction and borrowing interface require independent caller qualification. The resulting graph contains no source syntax or provider path. Run `python3 -B verification/checked-values/fixed_bytes.py /path/to/oddlang` to exercise an independent source-width change.
+
+### Clone-only choices and derived Debug
+
+A Rust recovery selection with format `oddlang-plain-choice-selection-v2`
+accepts a public, fieldless enum that derives `Clone`, optionally
+`Copy` and `Debug`, and its declared equality capabilities. Cases
+retain declaration order and use implicit discriminants. Serde derives,
+custom formatting and explicit discriminants require different profiles.
+
+The choice graph defaults `copy` to true and `debug` to false. These
+defaults preserve the earlier copyable profile's bytes. A clone-only choice
+has `copy: false`, and the overlay omits the copy trait. A choice with
+`debug: true` emits Rust's derived variant-name formatting. The original
+v1 recovery selector retains its copyable, no-Debug scope.
+
+Recover from a selected standalone declaration or a pinned exact source
+span. The enclosing library must independently establish public paths,
+trait resolution and any missing capabilities.
