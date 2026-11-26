@@ -1275,3 +1275,7 @@ w:processLimitOperation a p:Task ;
     p:dependsOn w:buildReportCommand ;
     p:acceptance "A generated native operation and checked binary startup use reproduce selected upstream host process limits while preserving ownership of existing descriptors." ;
     p:status p:active .
+w:processLimitStrictNoop a p:Finding ;
+    rdfs:label "Reject contradictory or unknown fields on a no-op resource policy" ;
+    p:source <../superpowers/plans/2026-11-26-process-limits.md> .
+w:processLimitOperation p:addresses w:processLimitStrictNoop .
