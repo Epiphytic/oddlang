@@ -1,0 +1,10 @@
+    pub async fn serve_until(self, shutdown: impl Future<Output = ()>) -> Result<(), OwnerError> {
+        self.serve_routed_until(shutdown, |_| None).await
+    }
+
+    pub async fn serve_routed_until(
+        self,
+        shutdown: impl Future<Output = ()>,
+        route: impl Fn(&[u8]) -> Option<Vec<u8>> + Send + Sync + 'static,
+    ) -> Result<(), OwnerError> {
+        let route = Arc::new(route);

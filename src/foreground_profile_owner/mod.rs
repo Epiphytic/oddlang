@@ -22,6 +22,26 @@ struct Graph {
     activation: Activation,
     diagnostics: Diagnostics,
     lifecycle: Option<Lifecycle>,
+    room_prepare: Option<RoomPrepare>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct RoomPrepare {
+    contract: String,
+    configuration: String,
+    maximum_config_bytes: u32,
+    operation: String,
+    request: [String; 3],
+    reply: [String; 9],
+    states: [String; 3],
+    categories: [String; 5],
+    config_fields: [String; 4],
+    roles: [String; 2],
+    name_prefix: String,
+    description: String,
+    deadline_ms: u64,
+    slot_limit: usize,
 }
 
 #[derive(Deserialize)]
@@ -203,6 +223,41 @@ struct Binding {
 
 impl Graph {
     fn validate(&self, binding: &Binding) -> Result<(), String> {
+        if let Some(prepare) = &self.room_prepare {
+            if !matches!(self.activation.kind, ActivationKind::OnionWebsocket)
+                || oxigraph::model::NamedNode::new(&prepare.contract).is_err()
+                || !filename(&prepare.configuration)
+                || [
+                    &self.profile.document,
+                    &self.profile.lock,
+                    &self.provider.directory,
+                ]
+                .contains(&&prepare.configuration)
+                || !(128..=1_048_576).contains(&prepare.maximum_config_bytes)
+                || !(100..=15_000).contains(&prepare.deadline_ms)
+                || !(1..=16).contains(&prepare.slot_limit)
+                || !token(&prepare.operation)
+                || !plain(&prepare.name_prefix)
+                || !plain(&prepare.description)
+                || prepare.name_prefix.len() > 64
+                || prepare.description.len() > 128
+                || [
+                    &prepare.request[..],
+                    &prepare.reply[..],
+                    &prepare.states[..],
+                    &prepare.categories[..],
+                    &prepare.config_fields[..],
+                    &prepare.roles[..],
+                ]
+                .into_iter()
+                .any(|list| {
+                    list.iter().any(|value| !token(value))
+                        || list.iter().collect::<BTreeSet<_>>().len() != list.len()
+                })
+            {
+                return Err("invalid local room preparation contract".into());
+            }
+        }
         match (&self.lifecycle, &binding.retained_stores) {
             (Some(lifecycle), Some(path)) => {
                 let fields = &lifecycle.report_fields;

@@ -105,6 +105,7 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
             lifecycle,
             path,
             graph.activation.relay_runtime.as_ref(),
+            graph.room_prepare.as_ref(),
         );
     } else {
         out.push_str(include_str!("runtime.rs.in"));
@@ -139,6 +140,7 @@ fn render_lifecycle(
     model: &Lifecycle,
     path: &[String],
     relay: Option<&RelayRuntime>,
+    prepare: Option<&RoomPrepare>,
 ) {
     writeln!(out, "use crate::{} as open_stores;", path.join("::")).unwrap();
     writeln!(out, "const SHUTDOWN_MS: u64 = {};", model.shutdown_ms).unwrap();
@@ -216,9 +218,80 @@ fn render_lifecycle(
         .unwrap();
         out.push_str(include_str!("onion_transport.rs.in"));
         out.push_str(include_str!("key_package.rs.in"));
-        out.push_str(include_str!("active_lifecycle.rs.in"));
+        let lifecycle = include_str!("active_lifecycle.rs.in");
+        if let Some(prepare) = prepare {
+            render_room_prepare(out, prepare);
+            out.push_str(
+                &lifecycle
+                    .replace("let routing = StaticTransportRouting::new(vec![endpoint.clone()]);",
+                        "let routing = room_routing(root, profile, &endpoint).map_err(|failure| (1, failure))?;")
+                    .replace("let mut activation_failure = None;",
+                        "let mut activation_failure = None;\n    let (prepare, mut pending) = RoomPrepareQueue::open(root, profile, &providers)?;")
+                    .replace("owner.serve_until(async {", "owner.serve_routed_until(async {")
+                    .replace("error = providers.transport_lost(&relay) => activation_failure = Some(error),",
+                        "error = prepare_active(&mut providers, &relay, &mut pending, &prepare) => activation_failure = Some(error),")
+                    .replace("}).await.map_err(|_| CLEANUP)", "}, { let prepare = prepare.clone(); move |body| prepare.route(body) }).await.map_err(|_| CLEANUP)"),
+            );
+        } else {
+            out.push_str(lifecycle);
+        }
     } else {
         out.push_str(include_str!("lifecycle.rs.in"));
     }
     out.push_str(include_str!("shutdown.rs.in"));
+}
+
+fn render_room_prepare(out: &mut String, prepare: &RoomPrepare) {
+    for (name, value) in [
+        ("ROOM_CONFIGURATION", &prepare.configuration),
+        ("PREPARE_OPERATION", &prepare.operation),
+        ("ROOM_NAME_PREFIX", &prepare.name_prefix),
+        ("ROOM_DESCRIPTION", &prepare.description),
+    ] {
+        writeln!(out, "const {name}: &str = {value:?};").unwrap();
+    }
+    for (name, values) in [
+        ("PREPARE_REPLY", &prepare.reply[..]),
+        ("PREPARE_STATES", &prepare.states[..]),
+        ("PREPARE_CATEGORIES", &prepare.categories[..]),
+        ("ROOM_ROLES", &prepare.roles[..]),
+    ] {
+        writeln!(out, "const {name}: &[&str] = &{values:?};").unwrap();
+    }
+    writeln!(
+        out,
+        "const ROOM_CONFIG_LIMIT: usize = {};",
+        prepare.maximum_config_bytes
+    )
+    .unwrap();
+    writeln!(out, "const ROOM_DEADLINE: u64 = {};", prepare.deadline_ms).unwrap();
+    writeln!(
+        out,
+        "const ROOM_SLOT_LIMIT: usize = {};",
+        prepare.slot_limit
+    )
+    .unwrap();
+    out.push_str(
+        "#[derive(serde::Deserialize)]\n#[serde(deny_unknown_fields)]\nstruct PrepareRequest {\n",
+    );
+    fields(
+        out,
+        [
+            ("operation", "String", &prepare.request[0]),
+            ("remote", "String", &prepare.request[1]),
+            ("relays", "Vec<String>", &prepare.request[2]),
+        ],
+    );
+    out.push_str("}\n#[derive(serde::Deserialize)]\nstruct RoomConfig {\n");
+    fields(
+        out,
+        [
+            ("role", "String", &prepare.config_fields[0]),
+            ("trust", "Vec<String>", &prepare.config_fields[1]),
+            ("relays", "Vec<String>", &prepare.config_fields[2]),
+            ("route", "String", &prepare.config_fields[3]),
+        ],
+    );
+    out.push_str("}\n");
+    out.push_str(include_str!("room_prepare.rs.in"));
 }

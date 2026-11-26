@@ -1,0 +1,306 @@
+
+use base64::{Engine as _, engine::general_purpose::STANDARD};
+use cgka_traits::{GroupId, app_components::{AppComponentData, NOSTR_ROUTING_COMPONENT_ID,
+    NostrRoutingV1, encode_nostr_routing_v1}, engine::{CreateGroupRequest, KeyPackage, KeyPackageSource}};
+use nostr::{filter::Filter, key::PublicKey};
+use nostr_sdk::{client::ReqTarget, relay::{AcquisitionEnd, AcquisitionLimits}};
+use rusqlite::OptionalExtension;
+use std::{collections::BTreeMap, sync::Mutex, time::{SystemTime, UNIX_EPOCH}};
+use tokio::sync::mpsc;
+
+fn room_config(root: &Path, endpoint: &str) -> Result<RoomConfig, Failure> {
+    let mut bytes = Vec::new();
+    owned_file(&root.join(ROOM_CONFIGURATION), false, INVALID_PROFILE)?
+        .take(ROOM_CONFIG_LIMIT as u64 + 1).read_to_end(&mut bytes).map_err(|_| IO)?;
+    if bytes.len() > ROOM_CONFIG_LIMIT { return Err(INVALID_PROFILE); }
+    let config: RoomConfig = serde_json::from_slice(&bytes).map_err(|_| INVALID_PROFILE)?;
+    if !ROOM_ROLES.contains(&config.role.as_str()) || config.route != ROUTE_VALUE
+        || config.relays.as_slice() != [endpoint]
+        || config.trust.len() > ROOM_SLOT_LIMIT
+        || config.trust.iter().any(|peer| !lower_hex(peer, 32) || PublicKey::from_hex(peer).is_err())
+    {
+        return Err(INVALID_PROFILE);
+    }
+    Ok(config)
+}
+
+fn room_routing(root: &Path, profile: &ProfileRecord, endpoint: &TransportEndpoint)
+    -> Result<StaticTransportRouting, Failure>
+{
+    let config = room_config(root, &endpoint.0)?;
+    let mut routing = StaticTransportRouting::new(vec![endpoint.clone()]);
+    if config.role == ROOM_ROLES[0] {
+        for peer in config.trust {
+            if profile.public_key.as_deref() == Some(peer.as_str()) { return Err(INVALID_PROFILE); }
+            let account = PublicKey::from_hex(&peer).map_err(|_| INVALID_PROFILE)?;
+            routing = routing.with_inbox_route(MemberId::new(account.to_bytes().to_vec()), vec![endpoint.clone()]);
+        }
+    }
+    Ok(routing)
+}
+
+#[derive(Clone)]
+enum PrepareState {
+    Pending,
+    Ready(String),
+    Failure(&'static str),
+}
+
+#[derive(Clone)]
+struct RoomPrepareQueue {
+    root: PathBuf,
+    endpoint: String,
+    local: String,
+    requests: mpsc::Sender<String>,
+    states: Arc<Mutex<BTreeMap<String, PrepareState>>>,
+}
+
+impl RoomPrepareQueue {
+    fn open(root: &Path, profile: &ProfileRecord, providers: &ActiveProviders)
+        -> Result<(Self, mpsc::Receiver<String>), (u8, Failure)>
+    {
+        let local = profile.public_key.clone().ok_or((1, INVALID_PROFILE))?;
+        providers.journal.execute_batch(
+            "CREATE TABLE IF NOT EXISTS local_room_prepare_v1 (
+                local_account TEXT NOT NULL,
+                remote_account TEXT NOT NULL,
+                relay TEXT NOT NULL,
+                session TEXT NOT NULL UNIQUE,
+                native_group BLOB,
+                ready INTEGER NOT NULL CHECK(ready IN (0,1)),
+                PRIMARY KEY(local_account, remote_account),
+                CHECK(ready = 0 OR native_group IS NOT NULL)
+            ) STRICT;",
+        ).map_err(|_| (1, PROVIDER_OPEN_FAILURE))?;
+        let (requests, receiver) = mpsc::channel(ROOM_SLOT_LIMIT);
+        Ok((Self {
+            root: root.to_owned(), endpoint: providers.connector.relay.to_string(), local, requests,
+            states: Arc::new(Mutex::new(BTreeMap::new())),
+        }, receiver))
+    }
+
+    fn authorization(&self, remote: &str) -> Result<(), Failure> {
+        let config = room_config(&self.root, &self.endpoint).map_err(|_| PREPARE_CATEGORIES[0])?;
+        if config.role != ROOM_ROLES[0] || remote == self.local || !config.trust.iter().any(|peer| peer == remote) {
+            return Err(PREPARE_CATEGORIES[0]);
+        }
+        Ok(())
+    }
+
+    fn route(&self, body: &[u8]) -> Option<Vec<u8>> {
+        let request: PrepareRequest = serde_json::from_slice(body).ok()?;
+        if request.operation != PREPARE_OPERATION { return None; }
+        let result = self.check(&request).unwrap_or_else(PrepareState::Failure);
+        let names = PREPARE_REPLY;
+        let mut command = serde_json::Map::new();
+        match result {
+            PrepareState::Pending => {
+                command.insert(names[4].into(), PREPARE_STATES[0].into());
+            }
+            PrepareState::Ready(session) => {
+                command.insert(names[4].into(), PREPARE_STATES[1].into());
+                command.insert(names[5].into(), session.into());
+                command.insert(names[6].into(), self.local.clone().into());
+            }
+            PrepareState::Failure(category) => {
+                command.insert(names[4].into(), PREPARE_STATES[2].into());
+                command.insert(names[7].into(), category.into());
+                command.insert(names[8].into(), serde_json::Value::Null);
+            }
+        }
+        serde_json::to_vec(&serde_json::json!({
+            (names[0]): true, (names[1]): null, (names[2]): null, (names[3]): command,
+        })).ok()
+    }
+
+    fn check(&self, request: &PrepareRequest) -> Result<PrepareState, Failure> {
+        if !lower_hex(&request.remote, 32) || PublicKey::from_hex(&request.remote).is_err() {
+            return Err(PREPARE_CATEGORIES[0]);
+        }
+        if request.relays.as_slice() != [self.endpoint.as_str()] { return Err(PREPARE_CATEGORIES[1]); }
+        self.authorization(&request.remote)?;
+        let mut states = self.states.lock().map_err(|_| PREPARE_CATEGORIES[2])?;
+        if let Some(state) = states.get(&request.remote) { return Ok(state.clone()); }
+        if states.len() >= ROOM_SLOT_LIMIT { return Err(PREPARE_CATEGORIES[3]); }
+        self.requests.try_send(request.remote.clone()).map_err(|_| PREPARE_CATEGORIES[3])?;
+        states.insert(request.remote.clone(), PrepareState::Pending);
+        Ok(PrepareState::Pending)
+    }
+}
+
+async fn prepare_active(
+    providers: &mut ActiveProviders,
+    relay: &Relay,
+    pending: &mut mpsc::Receiver<String>,
+    queue: &RoomPrepareQueue,
+) -> Failure {
+    loop {
+        if !providers.transport_live(relay) { return RELAY_FAILED; }
+        let remote = tokio::select! {
+            request = pending.recv() => match request { Some(remote) => remote, None => return IO },
+            _ = tokio::time::sleep(Duration::from_millis(RELAY_HEALTH_MS)) => continue,
+        };
+        let limit = Instant::now() + Duration::from_millis(ROOM_DEADLINE);
+        let outcome = timeout_at(limit, prepare_room(providers, queue, &remote, limit))
+            .await.unwrap_or(Err(PREPARE_CATEGORIES[2]));
+        let Ok(mut states) = queue.states.lock() else { return IO };
+        let state = match outcome {
+            Ok(session) => PrepareState::Ready(session),
+            Err(category) => PrepareState::Failure(category),
+        };
+        states.insert(remote, state);
+    }
+}
+
+fn epoch_seconds() -> Result<u64, Failure> {
+    SystemTime::now().duration_since(UNIX_EPOCH).ok().map(|duration| duration.as_secs())
+        .filter(|now| *now < 1 << 48).ok_or(PREPARE_CATEGORIES[2])
+}
+
+fn verify_room(
+    providers: &ActiveProviders, local: &str, remote: &str, group: &GroupId,
+    session: &str, endpoint: &str,
+) -> Result<(), Failure> {
+    let failure = PREPARE_CATEGORIES[2];
+    let record = providers.runtime.session().group_record(group).map_err(|_| failure)?;
+    let name = format!("{ROOM_NAME_PREFIX}{session}");
+    if record.name != name || record.description != ROOM_DESCRIPTION || record.removed
+        || record.unrecoverable || record.disbanded.is_some()
+        || record.protocol_profile != ProtocolProfile::Current
+        || record.members.len() != 2
+        || ![local, remote].into_iter().all(|id| record.members.iter().any(|member| hex::encode(member.id.as_slice()) == id))
+    {
+        return Err(failure);
+    }
+    let component = providers.runtime.session().app_component(group, NOSTR_ROUTING_COMPONENT_ID)
+        .map_err(|_| failure)?.ok_or(failure)?;
+    let routing = cgka_traits::app_components::decode_nostr_routing_v1(&component).map_err(|_| failure)?;
+    if routing.relays.as_slice() != [endpoint] { return Err(failure); }
+    Ok(())
+}
+
+async fn prepare_room(
+    providers: &mut ActiveProviders, queue: &RoomPrepareQueue, remote: &str, deadline: Instant,
+) -> Result<String, Failure> {
+    let uncertain = PREPARE_CATEGORIES[2];
+    queue.authorization(remote)?;
+    let row = providers.journal.query_row(
+        "SELECT relay, session, native_group, ready FROM local_room_prepare_v1
+         WHERE local_account = ?1 AND remote_account = ?2",
+        [&queue.local, remote],
+        |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?,
+                  row.get::<_, Option<Vec<u8>>>(2)?, row.get::<_, bool>(3)?)),
+    ).optional().map_err(|_| uncertain)?;
+    if let Some((endpoint, session, Some(native_group), true)) = row {
+        if endpoint != queue.endpoint || !lower_hex(&session, 16) { return Err(uncertain); }
+        let group = GroupId::new(native_group);
+        verify_room(providers, &queue.local, remote, &group, &session, &queue.endpoint)?;
+        let pending = providers.runtime.outstanding_welcome_deliveries().map_err(|_| uncertain)?;
+        if pending.iter().any(|(candidate, _)| *candidate == group) { return Err(uncertain); }
+        return Ok(session);
+    } else if row.is_some() {
+        return Err(uncertain);
+    }
+    let count: usize = providers.journal.query_row("SELECT count(*) FROM local_room_prepare_v1", [], |row| row.get(0))
+        .map_err(|_| uncertain)?;
+    if count >= ROOM_SLOT_LIMIT { return Err(PREPARE_CATEGORIES[3]); }
+    let remote_key = PublicKey::from_hex(remote).map_err(|_| PREPARE_CATEGORIES[0])?;
+    let package = room_package(providers, remote_key, &queue.endpoint, deadline).await?;
+    queue.authorization(remote)?;
+    let mut nonce = [0u8; 10];
+    let mut transport_id = [0u8; 32];
+    getrandom::fill(&mut nonce).map_err(|_| uncertain)?;
+    getrandom::fill(&mut transport_id).map_err(|_| uncertain)?;
+    let session = format!("{:012x}{}", epoch_seconds()?, hex::encode(nonce));
+    let routing = NostrRoutingV1::new(transport_id, vec![queue.endpoint.clone()]).map_err(|_| uncertain)?;
+    let data = encode_nostr_routing_v1(&routing).map_err(|_| uncertain)?;
+    let request = CreateGroupRequest {
+        name: format!("{ROOM_NAME_PREFIX}{session}"),
+        description: ROOM_DESCRIPTION.to_owned(),
+        members: vec![package], required_features: Vec::new(), initial_admins: Vec::new(),
+        app_components: vec![AppComponentData { component_id: NOSTR_ROUTING_COMPONENT_ID, data }],
+    };
+    providers.journal.execute(
+        "INSERT INTO local_room_prepare_v1 VALUES (?1, ?2, ?3, ?4, NULL, 0)",
+        [&queue.local, remote, &queue.endpoint, &session],
+    ).map_err(|_| uncertain)?;
+    let prepared = providers.runtime.session_mut().create_group(request).await.map_err(|_| uncertain)?;
+    let group = prepared.group_id;
+    verify_room(providers, &queue.local, remote, &group, &session, &queue.endpoint)?;
+    let pending = providers.runtime.outstanding_welcome_deliveries().map_err(|_| uncertain)?;
+    let welcome = pending.into_iter().filter(|(candidate, _)| *candidate == group).count();
+    if welcome != 1 { return Err(uncertain); }
+    let bound = providers.journal.execute(
+        "UPDATE local_room_prepare_v1 SET native_group = ?2 WHERE session = ?1 AND ready = 0",
+        rusqlite::params![session, group.as_slice()],
+    ).map_err(|_| uncertain)?;
+    if bound != 1 { return Err(uncertain); }
+    queue.authorization(remote)?;
+    let effects = providers.runtime.publish_session_effects(prepared.effects).await.map_err(|_| uncertain)?;
+    if !effects.failures.is_empty() || !effects.welcome_failures.is_empty()
+        || !effects.unresolved_publishes.is_empty() || !effects.queued.is_empty() || effects.reports.is_empty()
+        || providers.runtime.outstanding_welcome_deliveries().map_err(|_| uncertain)?
+            .into_iter().any(|(candidate, _)| candidate == group)
+    {
+        return Err(uncertain);
+    }
+    queue.authorization(remote)?;
+    let updated = providers.journal.execute(
+        "UPDATE local_room_prepare_v1 SET ready = 1 WHERE session = ?1 AND native_group = ?2 AND ready = 0",
+        rusqlite::params![session, group.as_slice()],
+    ).map_err(|_| uncertain)?;
+    if updated != 1 { return Err(uncertain); }
+    Ok(session)
+}
+
+async fn room_package(providers: &ActiveProviders, peer: PublicKey, endpoint: &str, deadline: Instant)
+    -> Result<KeyPackage, Failure>
+{
+    let unavailable = PREPARE_CATEGORIES[4];
+    let kind = Kind::Custom(30443);
+    let request = providers.client.acquire_events(
+        ReqTarget::single(endpoint, [Filter::new().author(peer).kind(kind)]),
+        AcquisitionLimits::new(1, 17, 1_048_576, deadline.saturating_duration_since(Instant::now())),
+    ).await.map_err(|_| unavailable)?;
+    let mut report = request.finish().await.map_err(|_| unavailable)?;
+    if report.relays.len() != 1 { return Err(unavailable); }
+    let mut observed = report.relays.pop_first().ok_or(unavailable)?.1;
+    if !matches!(observed.end, AcquisitionEnd::Completed) || observed.events.len() > 16 {
+        return Err(unavailable);
+    }
+    observed.events.sort_by(|first, second| second.created_at.cmp(&first.created_at).then_with(|| first.id.cmp(&second.id)));
+    let now = epoch_seconds()?;
+    for event in observed.events {
+        if event.pubkey != peer || event.kind != kind || event.verify().is_err() { continue; }
+        let Ok(bytes) = STANDARD.decode(&event.content) else { continue; };
+        let package = KeyPackage {
+            bytes, source: Some(KeyPackageSource { event_id: MessageId::new(event.id.to_bytes().to_vec()) }),
+            protocol_profile: ProtocolProfile::Current,
+        };
+        let Ok(metadata) = key_package_metadata(&package) else { continue; };
+        if metadata.protocol_profile != ProtocolProfile::Current || metadata.credential_identity_hex != peer.to_hex()
+            || metadata.not_before > now || metadata.not_after <= now
+            || !APPLICATION_COMPONENTS.iter().all(|id| metadata.app_components.contains(id))
+        {
+            continue;
+        }
+        let dto = NostrTransportEvent::from_nostr_event(&event).map_err(|_| unavailable)?;
+        let mut slots = dto.tags.iter().filter(|tag| tag.first().is_some_and(|value| value == "d"));
+        let Some(slot) = slots.next().filter(|tag| tag.len() == 2) else { continue; };
+        if slots.next().is_some() { continue; }
+        let encode_id = |id: &u16| format!("0x{id:04x}");
+        let publication = NostrKeyPackagePublication {
+            client_name: transport_nostr_adapter::key_package_client_name(&dto).map(str::to_owned),
+            account_id: MemberId::new(peer.to_bytes().to_vec()), key_package: package.clone(),
+            key_package_slot_id: slot[1].clone(), key_package_ref: metadata.key_package_ref_hex,
+            mls_ciphersuite: encode_id(&metadata.ciphersuite),
+            mls_extensions: metadata.mls_extensions.iter().map(encode_id).collect(),
+            mls_proposals: metadata.mls_proposals.iter().map(encode_id).collect(),
+            app_components: metadata.app_components.iter().filter(|id| **id >= PRIVATE_USE_APP_COMPONENT_ID_START)
+                .map(encode_id).collect(),
+            publish_endpoints: vec![TransportEndpoint(endpoint.to_owned())],
+        };
+        if publication.matches_prepared_event(&dto).unwrap_or(false) { return Ok(package); }
+    }
+    Err(unavailable)
+}
