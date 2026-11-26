@@ -2875,3 +2875,15 @@ w:postPrepareLocalResponseFailure a p:Finding ;
 w:postPrepareMixedClientReceipt a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/dd5f514e66a47ad7c8c168d3df3c72c92ae62eb7/verification/whole/basic-command-interop/bounded-prepare-mixed-foreground-generated-client-upstream-server-macos-arm64.json" .
 w:basicClientQualification p:addresses w:postPrepareLocalResponseFailure .
+
+w:relaySinkShutdown a p:Task ;
+    rdfs:label "Keep native relay flush and close usable after a refused frame" ;
+    p:milestone w:marmishMilestone ;
+    p:source w:basicCommandInteropPlan ;
+    p:status p:done ;
+    p:dependsOn w:generatedRelayActivation ;
+    p:acceptance "A stopped or oversized frame fails before queueing it, and flush and close remain valid after the failure. Reproduce the prior terminal panic on the locked sink and pass the corrected sink fixture." ;
+    p:evidence w:relaySinkShutdownFixture .
+w:relaySinkShutdownFixture a p:Artifact ;
+    p:location "verification/foreground-profile-owner/relay-sink/test.rs" .
+w:boundedLocalOwnerPrepare p:dependsOn w:relaySinkShutdown .
