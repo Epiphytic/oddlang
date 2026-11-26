@@ -9,4 +9,6 @@
 - [x] Add a component fixture that exercises a non-Marmish ceiling, Linux no-op, unchanged descriptor flags, repeated calls and invalid claims.
 - [x] Lower the checked resource graph in the native package assembler. Check supported OS policy and representable limits, preserve the hard limit, and read back the result.
 - [x] Add a typed workspace sibling startup binding. Exercise the error exit and success-to-entry order and reject a missing edge or invalid signature.
-- [ ] Compose a separate engine workspace release. Compare high, equal and low resource observations with upstream in children, and check the real binary startup paths on both native ARM64 hosts. Publish independently reviewed framework and companion evidence.
+- [x] Compose a separate engine workspace release. Compare high, equal and low resource observations with upstream in children, and check the real binary startup paths on both native ARM64 hosts. Publish independently reviewed framework and companion evidence.
+
+The [companion qualification](https://github.com/Epiphytic/marmish-oddlang/pull/65) binds the exact workspace and independent ARM64 macOS and Linux receipts to the compiler at `aaf3f497d7b0fdcc543aa51dbdf19fbf517d261b`.

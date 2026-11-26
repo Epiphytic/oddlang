@@ -1230,8 +1230,12 @@ w:processLimitOperation a p:Task ;
     p:source <../superpowers/plans/2026-11-26-process-limits.md> ;
     p:dependsOn w:buildReportCommand ;
     p:acceptance "A generated native operation and checked binary startup use reproduce selected upstream host process limits while preserving ownership of existing descriptors." ;
-    p:status p:active .
+    p:status p:done ; p:evidence w:processLimitFixture, w:processLimitReceipt .
 w:processLimitStrictNoop a p:Finding ;
     rdfs:label "Reject contradictory or unknown fields on a no-op resource policy" ;
     p:source <../superpowers/plans/2026-11-26-process-limits.md> .
 w:processLimitOperation p:addresses w:processLimitStrictNoop .
+w:processLimitFixture a p:Artifact ;
+    p:location "verification/process-limits/verify.py" .
+w:processLimitReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/65> .
