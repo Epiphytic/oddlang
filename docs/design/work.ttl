@@ -1721,3 +1721,9 @@ w:structuralApplicationConvergence a p:Task ;
     p:dependsOn w:structuralProfileCompiler, w:vaultHelperChoice ;
     p:acceptance "Preserve and identify member contracts, qualify the cold native build and CLI, and measure actual import and named upstream test coverage on the composed workspace." ;
     p:status p:planned .
+
+w:typescriptPlainChoices a p:Task ;
+    rdfs:label "Project closed copyable choices into TypeScript with explicit equality capabilities" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:plainValueChoices ; p:status p:active ;
+    p:acceptance "Project the existing ordered choice graph without Rust source or binding. Compare unrelated native Rust and Node witnesses in two revisions, compile TypeScript negative controls, preserve shared obligations, and replay a published data-only graph." .

@@ -6,6 +6,8 @@ pub(crate) use recover_choice::plain_choice_cases;
 pub use recover_choice::recover;
 pub(crate) use rust::render_plain_choice;
 mod rust;
+mod typescript;
+pub use typescript::build as build_typescript;
 
 use crate::{
     native_package::publish,
@@ -519,7 +521,16 @@ pub fn build(graph: &Path, overlay: &Path, output: &Path) -> Result<()> {
         native.traits.sort();
     }
     let source = rust::render(&graph, &bindings);
-    let obligations = encode(&json!({
+    let obligations = encode(&obligations(&graph))?;
+    let lock = encode(&json!({
+        "format":"oddlang-checked-values-lock-v1","domainSha256":digest(&encode(&graph)?),"bindingSha256":digest(&encode(&bindings)?),
+        "sourceSha256":digest(source.as_bytes()),"obligationsSha256":digest(&obligations),
+    }))?;
+    publish_projection("values.rs", &source, &obligations, &lock, output)
+}
+
+fn obligations(graph: &Graph) -> serde_json::Value {
+    json!({
         "format":FORMAT,"domain":graph.id,
         "obligations":graph.types.iter().map(|(id,definition)| {
             let expected = match definition {
@@ -540,20 +551,25 @@ pub fn build(graph: &Path, overlay: &Path, output: &Path) -> Result<()> {
             json!({"declaration":id,"role":"checked-value-domain","expected":expected,
                    "qualification":"independent-witness-required"})
         }).collect::<Vec<_>>()
-    }))?;
-    let lock = encode(&json!({
-        "format":"oddlang-checked-values-lock-v1","domainSha256":digest(&encode(&graph)?),"bindingSha256":digest(&encode(&bindings)?),
-        "sourceSha256":digest(source.as_bytes()),"obligationsSha256":digest(&obligations),
-    }))?;
+    })
+}
+
+fn publish_projection(
+    filename: &str,
+    source: &str,
+    obligations: &[u8],
+    lock: &[u8],
+    output: &Path,
+) -> Result<()> {
     let parent = output
         .parent()
         .filter(|path| !path.as_os_str().is_empty())
         .unwrap_or(Path::new("."));
     let stage = tempfile::tempdir_in(parent).map_err(|err| err.to_string())?;
     for (name, bytes) in [
-        ("values.rs", source.as_bytes()),
-        ("obligations.json", &obligations),
-        ("projection.lock", &lock),
+        (filename, source.as_bytes()),
+        ("obligations.json", obligations),
+        ("projection.lock", lock),
     ] {
         fs::write(stage.path().join(name), bytes).map_err(|err| err.to_string())?;
     }
