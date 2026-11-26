@@ -1785,4 +1785,4 @@ w:coreSemanticLookup a p:Task ;
 w:wholeMarmishStructure p:dependsOn w:coreSemanticLookup .
 w:coreSemanticProjection a p:Artifact ;
     rdfs:label "TypeScript retention projection selected by portable identity" ;
-    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/00510414bb7ae23c48e9012587b7d83715297b7f/verification/whole/core-ownership/retention-node.json" .
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a1f0de219d60d2baa962a8f7fa5403525ac7f7f5/verification/whole/core-ownership/retention-node.json" .
