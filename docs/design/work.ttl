@@ -1720,7 +1720,7 @@ w:structuralApplicationConvergence a p:Task ;
     p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;
     p:dependsOn w:structuralProfileCompiler, w:vaultHelperChoice ;
     p:acceptance "Preserve and identify member contracts, qualify the cold native build and CLI, and measure actual import and named upstream test coverage on the composed workspace." ;
-    p:status p:planned .
+    p:status p:done ; p:evidence w:canonicalDarwinContracts, w:canonicalLinuxContracts, w:canonicalDarwinTests, w:canonicalLinuxTests .
 
 w:wholeMarmishAgentNavigation a p:Task ;
     rdfs:label "Link the whole-project plans and explain scope when citing workspace evidence" ;
@@ -1760,3 +1760,15 @@ w:fieldlessChoiceScopeDocumentation a p:Task ;
     p:acceptance "Describe the recovery input digest, distinguish extraction from recovery, and require independent enclosing-library witnesses." .
 w:fieldlessChoiceScopeGuide a p:Artifact ;
     p:location "docs/language/checked-values.md#clone-only-choices-and-derived-debug" .
+
+w:canonicalDarwinContracts a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/55da1b628138d48d1984f87f173a061886d48ea8/verification/whole/canonical-workspace/aarch64-apple-darwin.json" .
+
+w:canonicalLinuxContracts a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/55da1b628138d48d1984f87f173a061886d48ea8/verification/whole/canonical-workspace/aarch64-unknown-linux-gnu.json" .
+
+w:canonicalDarwinTests a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4744286ce98b89b8e712cfa2fe8618cb8959e7bd/verification/whole/suite/canonical-aarch64-apple-darwin.json" .
+
+w:canonicalLinuxTests a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4744286ce98b89b8e712cfa2fe8618cb8959e7bd/verification/whole/suite/canonical-aarch64-unknown-linux-gnu.json" .
