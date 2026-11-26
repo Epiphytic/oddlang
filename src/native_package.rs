@@ -84,6 +84,8 @@ struct Dependency {
     version: String,
     #[serde(default)]
     features: Vec<String>,
+    #[serde(rename = "defaultFeatures")]
+    default_features: Option<bool>,
 }
 
 #[derive(Deserialize)]
@@ -129,6 +131,8 @@ enum Kind {
     SequenceJournal,
     CliSurface,
     LocalCommandClient,
+    LocalStatusOwner,
+    ForegroundProfileOwner,
 }
 
 #[derive(Deserialize)]
@@ -213,6 +217,18 @@ fn project(
             crate::endpoint_set::build(&path, &pin, Some((&overlay, &binding)), &output)?;
             "endpoint_set.rs"
         }
+        Kind::ForegroundProfileOwner => {
+            crate::foreground_profile_owner::build_bytes(
+                &graph,
+                &io(fs::read(&overlay))?,
+                &output,
+            )?;
+            "foreground.rs"
+        }
+        Kind::LocalStatusOwner => {
+            crate::local_status_owner::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
+            "owner.rs"
+        }
         Kind::LocalCommandClient => {
             crate::local_command_client::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
             "client.rs"
@@ -273,36 +289,50 @@ fn project(
     Ok((bytes, lock))
 }
 
+fn export_paths(component: &Component, entry: &str) -> Vec<Vec<String>> {
+    let entry = entry.to_owned();
+    let public = component.reexports.contains(&entry);
+    let mut paths = Vec::new();
+    if public || component.crate_reexports.contains(&entry) {
+        paths.push(vec![component.module.clone(), entry.clone()]);
+    }
+    if public
+        && component
+            .root_reexports
+            .as_ref()
+            .is_none_or(|roots| roots.contains(&entry))
+    {
+        paths.push(vec![entry]);
+    }
+    paths
+}
+
 fn validate_command_callbacks(components: &[Component], base: &Path) -> Result<()> {
-    let callbacks = components
+    let mut callbacks = Vec::new();
+    let status_owners = components
         .iter()
-        .filter(|component| matches!(component.kind, Kind::LocalCommandClient))
-        .map(|component| {
-            let callback = crate::local_command_client::callback(
+        .filter(|component| matches!(component.kind, Kind::LocalStatusOwner))
+        .flat_map(|component| export_paths(component, "BoundOwner"))
+        .collect::<BTreeSet<_>>();
+    for component in components {
+        let callback = match component.kind {
+            Kind::LocalCommandClient => crate::local_command_client::callback(
                 &component.graph.read(base)?,
                 &component.overlay.read(base)?,
-            )?;
-            Ok((component, callback))
-        })
-        .collect::<Result<Vec<_>>>()?;
+            )?,
+            Kind::ForegroundProfileOwner => crate::foreground_profile_owner::callback(
+                &component.graph.read(base)?,
+                &component.overlay.read(base)?,
+                &status_owners,
+            )?,
+            _ => continue,
+        };
+        callbacks.push((component, callback));
+    }
     let mut exports = BTreeMap::new();
     for (component, callback) in &callbacks {
-        if !component.reexports.contains(&callback.entry)
-            && !component.crate_reexports.contains(&callback.entry)
-        {
-            continue;
-        }
-        exports.insert(
-            vec![component.module.clone(), callback.entry.clone()],
-            callback,
-        );
-        if component.reexports.contains(&callback.entry)
-            && component
-                .root_reexports
-                .as_ref()
-                .is_none_or(|roots| roots.contains(&callback.entry))
-        {
-            exports.insert(vec![callback.entry.clone()], callback);
+        for path in export_paths(component, &callback.entry) {
+            exports.insert(path, callback);
         }
     }
     for component in components
@@ -339,7 +369,13 @@ fn cargo_manifest(manifest: &Manifest) -> Result<String> {
             return Err(format!("invalid dependency: {name}"));
         }
         semver::Version::parse(&dependency.version).map_err(|e| format!("{name} version: {e}"))?;
-        dependencies.insert(name, serde_json::json!({"version":format!("={}",dependency.version),"features":dependency.features}));
+        let mut cargo_dependency = serde_json::json!({
+            "version": format!("={}", dependency.version), "features": dependency.features
+        });
+        if let Some(enabled) = dependency.default_features {
+            cargo_dependency["default-features"] = enabled.into();
+        }
+        dependencies.insert(name, cargo_dependency);
     }
     if manifest
         .components
