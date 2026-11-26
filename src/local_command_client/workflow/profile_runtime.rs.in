@@ -62,24 +62,52 @@ fn account_set(value: &Value, maximum: usize) -> Option<std::collections::BTreeS
     Some(normalized)
 }
 
+fn valid_v3_onion(host: &str) -> bool {
+    use sha3::Digest as _;
+    let Some(label) = host.strip_suffix(".onion") else {
+        return false;
+    };
+    if label.len() != 56 || !label.bytes().all(|b| matches!(b, b'a'..=b'z' | b'2'..=b'7')) {
+        return false;
+    }
+    let Ok(decoded) = data_encoding::BASE32_NOPAD.decode(label.to_ascii_uppercase().as_bytes()) else {
+        return false;
+    };
+    let Ok(address): Result<[u8; 35], _> = decoded.try_into() else {
+        return false;
+    };
+    let version = [address[34]];
+    let digest = sha3::Sha3_256::digest([b".onion checksum".as_slice(), &address[..32], &version].concat());
+    version == [3] && address[32..34] == digest[..2]
+}
+
 fn canonical_relays<'a>(
     texts: impl IntoIterator<Item = &'a str>,
     route: &str,
     doc: &InputDocument,
 ) -> Option<Vec<String>> {
-    let mut canonical = Vec::new();
-    for text in texts {
-        if text.len() > doc.maximum_relay_bytes || !text.contains("://") || text.contains('\\')
+    let mut canonical = std::collections::BTreeSet::new();
+    for (position, text) in texts.into_iter().enumerate() {
+        if position >= doc.maximum_relays || text.len() > doc.maximum_relay_bytes || text.contains('\\')
             || text.chars().any(|c| c.is_whitespace() || c.is_control())
+        {
+            return None;
+        }
+        let (_, after_scheme) = text.split_once("://")?;
+        let authority = after_scheme.split('/').next()?;
+        if authority.ends_with(':') || authority.contains('@') || authority.rsplit_once(':')
+            .is_some_and(|(_, port)| !port.ends_with(']') && port.len() > 1 && port.starts_with('0'))
         {
             return None;
         }
         let url = url::Url::parse(text).ok()?;
         let host = url.host_str()?;
-        if !url.username().is_empty() || url.password().is_some() || url.query().is_some()
-            || url.fragment().is_some() || url.port() == Some(0) || host.ends_with('.')
+        if host.is_empty() || host.ends_with('.') || host.contains('%')
+            || !url.username().is_empty() || url.password().is_some() || url.query().is_some()
+            || url.fragment().is_some() || url.port() == Some(0)
             || !doc.relay_rules.iter().any(|rule| {
                 rule.scheme == url.scheme() && rule.routes.iter().any(|value| value == route)
+                    && (!rule.v3_onion || valid_v3_onion(host))
                     && match &rule.host_suffix {
                         Some(suffix) => host.ends_with(suffix),
                         None => !doc.relay_rules.iter().any(|other| {
@@ -90,13 +118,9 @@ fn canonical_relays<'a>(
         {
             return None;
         }
-        let normalized = url.into();
-        if canonical.contains(&normalized) || canonical.len() == doc.maximum_relays {
-            return None;
-        }
-        canonical.push(normalized);
+        canonical.insert(String::from(url));
     }
-    if canonical.is_empty() { None } else { Some(canonical) }
+    if canonical.is_empty() { None } else { Some(canonical.into_iter().collect()) }
 }
 
 fn timestamped_id(payload: &Payload) -> Option<String> {
@@ -117,7 +141,8 @@ fn timestamped_id(payload: &Payload) -> Option<String> {
 }
 
 fn profile_flag(matches: &ArgMatches, name: &str) -> Result<bool, Failure> {
-    Ok(matches.try_get_one::<bool>(name).map_err(|_| BINDING)?.copied().unwrap_or(false))
+    Ok(matches.try_get_one::<bool>(name).map_err(|_| BINDING)?
+        .filter(|_| explicit_argument(matches, name)).copied().unwrap_or(false))
 }
 
 fn read_command_stdin(maximum: usize, timeout: Duration) -> Result<Vec<u8>, Failure> {
@@ -226,7 +251,8 @@ fn context_values(policy: &ProfileInputs, matches: &ArgMatches) -> Result<BTreeM
         }
     }
     for argument in &args.excluded_values {
-        if matches.try_contains_id(&argument.id).map_err(|_| BINDING)? {
+        if matches.try_contains_id(&argument.id).map_err(|_| BINDING)?
+            && explicit_argument(matches, &argument.id) {
             return Err(PROFILE_SCOPE);
         }
     }
@@ -243,14 +269,16 @@ fn context_values(policy: &ProfileInputs, matches: &ArgMatches) -> Result<BTreeM
         return Err(PROFILE_AUTHORITY);
     }
     let profile_route = value.get(&doc.route).and_then(Value::as_str).ok_or(PROFILE_SCHEMA)?;
-    let route = matches.try_get_one::<String>(&args.route).map_err(|_| BINDING)?;
+    let route = matches.try_get_one::<String>(&args.route).map_err(|_| BINDING)?
+        .filter(|_| explicit_argument(matches, &args.route));
     if route.is_some_and(|route| route != profile_route) {
         return Err(PROFILE_RELAYS);
     }
     let configured = value.get(&doc.relay).and_then(Value::as_array).ok_or(PROFILE_SCHEMA)?.iter()
         .map(|field| field.as_str().ok_or(PROFILE_SCHEMA)).collect::<Result<Vec<_>, _>>()?;
     let relays = canonical_relays(configured, profile_route, doc).ok_or(PROFILE_RELAYS)?;
-    if let Some(requested) = matches.try_get_many::<String>(&args.relay).map_err(|_| BINDING)? {
+    if let Some(requested) = matches.try_get_many::<String>(&args.relay).map_err(|_| BINDING)?
+        .filter(|_| explicit_argument(matches, &args.relay)) {
         let supplied = canonical_relays(requested.map(String::as_str), profile_route, doc)
             .ok_or(PROFILE_RELAYS)?;
         if supplied != relays {

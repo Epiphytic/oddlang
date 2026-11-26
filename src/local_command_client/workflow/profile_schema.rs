@@ -58,6 +58,7 @@ pub(crate) struct InputDocument {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct InputCheck {
+    pub(crate) id: String,
     pub(crate) field: String,
     pub(crate) test: InputTest,
 }
@@ -74,8 +75,11 @@ pub(crate) enum InputTest {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct RelayRule {
+    pub(crate) id: String,
     pub(crate) scheme: String,
     pub(crate) host_suffix: Option<String>,
+    #[serde(default)]
+    pub(crate) v3_onion: bool,
     pub(crate) routes: Vec<String>,
 }
 

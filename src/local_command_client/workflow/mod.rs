@@ -189,7 +189,11 @@ fn validate(
     if let Some(discovery) = discovery {
         discovery.validate(&workflow.socket_argument)?;
         if let Some(profile) = profile {
-            if !discovery.selects_profile(&profile.arguments.state, &profile.arguments.profile) {
+            if !discovery.selects_profile(
+                &profile.arguments.state,
+                &profile.arguments.profile,
+                &profile.arguments.default_profile,
+            ) {
                 return Err(
                     "workflow context and socket discovery select different profiles".into(),
                 );
@@ -389,6 +393,12 @@ fn load(graph: &[u8], binding: &[u8]) -> Result<SelectedWorkflow, String> {
         .map(serde_json::from_value)
         .transpose()
         .map_err(|error| error.to_string())?;
+    if (profile.is_some() && profile::reserved_entry(&binding.entry))
+        || (discovery.is_some()
+            && (binding.entry == "discover_endpoint" || binding.entry.starts_with("endpoint_")))
+    {
+        return Err("invalid local command workflow entry".into());
+    }
     let arguments = validate(&workflow, profile.as_ref(), discovery.as_ref())?;
     Ok(SelectedWorkflow {
         workflow,
@@ -478,8 +488,8 @@ pub(super) fn build(graph: &[u8], binding: &[u8], output: &Path) -> Result<(), S
         )
         .unwrap();
     }
-    if let Some(profile) = selected.profile {
-        profile::render(&profile, &mut source);
+    if let Some(profile) = &selected.profile {
+        profile::render(profile, &mut source);
         source.push_str(r#"
 fn initial_inputs(workflow: &Workflow, matches: &ArgMatches) -> Result<BTreeMap<String, Value>, Failure> {
     let raw = workflow.profile_inputs.as_ref().ok_or(PROTOCOL)?;
@@ -496,7 +506,7 @@ fn initial_inputs(_: &Workflow, _: &ArgMatches) -> Result<BTreeMap<String, Value
 "#,
         );
     }
-    if let Some(discovery) = selected.discovery {
+    if let Some(discovery) = &selected.discovery {
         discovery.render(&mut source);
         source.push_str(
             r#"
@@ -551,13 +561,31 @@ fn choose_socket(_: &ArgMatches, explicit: Option<&PathBuf>) -> Result<PathBuf, 
         })
     );
     use crate::wire_schema::digest;
-    let lock = json!({
+    let mut lock = json!({
         "format": "oddlang-local-command-workflow-lock-v1",
         "graphSha256": digest(graph),
         "bindingSha256": digest(binding),
         "sourceSha256": digest(source.as_bytes()),
         "workflowObligationsSha256": digest(obligations.as_bytes()),
     });
+    let profile_obligations = workflow
+        .profile_inputs
+        .as_ref()
+        .map(|profile| format!("{:#}\n", profile::obligations(profile)));
+    if let Some(catalog) = &profile_obligations {
+        lock["profileObligationsSha256"] = digest(catalog.as_bytes()).into();
+    }
+    let endpoint_obligations = selected
+        .discovery
+        .as_ref()
+        .map(|discovery| format!("{:#}\n", discovery.obligations()));
+    if let Some(discovery) = &selected.discovery {
+        lock["discoverySha256"] =
+            digest(&serde_json::to_vec(discovery).map_err(|error| error.to_string())?).into();
+    }
+    if let Some(catalog) = &endpoint_obligations {
+        lock["endpointObligationsSha256"] = digest(catalog.as_bytes()).into();
+    }
     if output.symlink_metadata().is_ok() {
         return Err(format!("output already exists: {}", output.display()));
     }
@@ -572,6 +600,14 @@ fn choose_socket(_: &ArgMatches, explicit: Option<&PathBuf>) -> Result<PathBuf, 
         ("workflow-obligations.json", obligations),
     ] {
         fs::write(stage.path().join(name), content).map_err(|error| error.to_string())?;
+    }
+    for (name, catalog) in [
+        ("profile-obligations.json", profile_obligations),
+        ("endpoint-obligations.json", endpoint_obligations),
+    ] {
+        if let Some(content) = catalog {
+            fs::write(stage.path().join(name), content).map_err(|error| error.to_string())?;
+        }
     }
     crate::native_package::publish(stage.path(), output)
 }
