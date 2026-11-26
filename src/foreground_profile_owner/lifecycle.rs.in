@@ -175,31 +175,13 @@ impl Providers {
     }
 }
 
-async fn start(base: &Path, name: &str, backend: &str, endpoint: SocketAddr) -> Result<(), (u8, Failure)> {
+async fn start(root: &Path, profile: &ProfileRecord, endpoint: SocketAddr) -> Result<(), (u8, Failure)> {
     use tokio::signal::unix::{SignalKind, signal};
     let failure = |error| (1, error);
     let mut interrupt = signal(SignalKind::interrupt()).map_err(|_| failure(IO))?;
     let mut terminate = signal(SignalKind::terminate()).map_err(|_| failure(IO))?;
-    let initial = directory(base).map_err(failure)?;
-    let canonical = base.canonicalize().map_err(|_| failure(IO))?;
-    let resolved = directory(&canonical).map_err(failure)?;
-    if (initial.dev(), initial.ino()) != (resolved.dev(), resolved.ino()) {
-        return Err(failure(UNSAFE_DIRECTORY));
-    }
-    let root = canonical.join(name);
-    directory(&root).map_err(failure)?;
-    let _lease = Lease::acquire(&root.join(LEASE_FILE)).map_err(failure)?;
-    let profile = checked_profile(&root, name, backend).map_err(failure)?;
-    check_provider(&root, &profile).map_err(failure)?;
-    for leaf in EXCLUDED_OWNER_FILES {
-        match root.join(leaf).symlink_metadata() {
-            Ok(_) => return Err((125, SCOPE)),
-            Err(error) if error.kind() == io::ErrorKind::NotFound => (),
-            Err(_) => return Err(failure(IO)),
-        }
-    }
-    let mut runtime = RuntimeDirectory::acquire(&profile, &root).await.map_err(failure)?;
-    let mut providers = match Providers::open(&root, &profile, endpoint) {
+    let mut runtime = RuntimeDirectory::acquire(profile, root).await.map_err(failure)?;
+    let mut providers = match Providers::open(root, profile, endpoint) {
         Ok(providers) => providers,
         Err(error) => {
             runtime.remove_pending = false;
@@ -237,6 +219,28 @@ async fn start(base: &Path, name: &str, backend: &str, endpoint: SocketAddr) -> 
 fn run(matches: &ArgMatches) -> Result<(), (u8, Failure)> {
     let (base, name, backend) = arguments(matches)?;
     let endpoint = relay(matches)?;
-    tokio::runtime::Builder::new_current_thread().enable_all().build()
-        .map_err(|_| (1, IO))?.block_on(start(base, name, backend, endpoint))
+    let failure = |error| (1, error);
+    let initial = directory(base).map_err(failure)?;
+    let canonical = base.canonicalize().map_err(|_| failure(IO))?;
+    let resolved = directory(&canonical).map_err(failure)?;
+    if (initial.dev(), initial.ino()) != (resolved.dev(), resolved.ino()) {
+        return Err(failure(UNSAFE_DIRECTORY));
+    }
+    let root = canonical.join(name);
+    directory(&root).map_err(failure)?;
+    let _lease = Lease::acquire(&root.join(LEASE_FILE)).map_err(failure)?;
+    let profile = checked_profile(&root, name, backend).map_err(failure)?;
+    check_provider(&root, &profile).map_err(failure)?;
+    for leaf in EXCLUDED_OWNER_FILES {
+        match root.join(leaf).symlink_metadata() {
+            Ok(_) => return Err((125, SCOPE)),
+            Err(error) if error.kind() == io::ErrorKind::NotFound => (),
+            Err(_) => return Err(failure(IO)),
+        }
+    }
+    // The executor also owns any remaining canceled SDK work. Its teardown
+    // precedes release of the exclusive lease even when a stop stage times out.
+    let executor = tokio::runtime::Builder::new_current_thread().enable_all().build()
+        .map_err(|_| failure(IO))?;
+    executor.block_on(start(&root, &profile, endpoint))
 }
