@@ -1869,7 +1869,7 @@ w:combinedPublicDataCompiler a p:Task ;
     p:source w:wholeMarmishPlan ; p:milestone w:marmishMilestone ;
     p:dependsOn w:pointerWidthPublicRecords, w:typescriptExtendedChoiceConvergence, w:serdeStringChoiceRecovery ;
     p:status p:done ; p:evidence w:combinedPublicDataDarwin, w:combinedPublicDataLinux ;
-    p:acceptance "One compiler per native ARM64 host passes record and choice fixtures and the predecessor library tests by name. The Darwin build also executes a TypeScript consumer." .
+    p:acceptance "One compiler per native ARM64 host passes record and choice fixtures, nine inherited fixtures and the predecessor library tests by name. The Darwin build also executes a TypeScript consumer." .
 w:combinedPublicDataDarwin a p:Artifact ; p:location "verification/public-data-composition/aarch64-apple-darwin.json" .
 w:combinedPublicDataLinux a p:Artifact ; p:location "verification/public-data-composition/aarch64-unknown-linux-gnu.json" .
 w:combinedPublicDataCompiler p:evidence w:inheritedPublicDataDarwin, w:inheritedPublicDataLinux .
@@ -1878,6 +1878,11 @@ w:inheritedPublicDataLinux a p:Artifact ; p:location "verification/public-data-c
 w:combinedPublicDataWorkspace a p:Task ;
     rdfs:label "Compose the recovered public data shapes under one application lock" ;
     p:source w:wholeMarmishPlan ; p:milestone w:marmishMilestone ;
-    p:dependsOn w:combinedPublicDataCompiler, w:outputGapReason ; p:status p:active ;
+    p:dependsOn w:combinedPublicDataCompiler, w:outputGapReason ; p:status p:done ;
+    p:evidence w:combinedWorkspaceDataDarwin, w:combinedWorkspaceDataLinux, w:combinedWorkspaceTestsDarwin, w:combinedWorkspaceTestsLinux ;
     p:acceptance "Measure the same 140 imports against one generated workspace on both ARM64 hosts and compare data callers, typed failures, member pins and unchanged upstream test results." .
 w:wholeMarmishStructure p:dependsOn w:combinedPublicDataWorkspace .
+w:combinedWorkspaceDataDarwin a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/8f945d725dea3f4d4812eb6ea24bc7a1aff8d75b/verification/whole/canonical-public-data/aarch64-apple-darwin.json" .
+w:combinedWorkspaceTestsDarwin a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/db13a780b894456be708efdbf1e68593b316c679/verification/whole/suite/canonical-public-data-aarch64-apple-darwin.json" .
+w:combinedWorkspaceDataLinux a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/8f945d725dea3f4d4812eb6ea24bc7a1aff8d75b/verification/whole/canonical-public-data/aarch64-unknown-linux-gnu.json" .
+w:combinedWorkspaceTestsLinux a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/db13a780b894456be708efdbf1e68593b316c679/verification/whole/suite/canonical-public-data-aarch64-unknown-linux-gnu.json" .
