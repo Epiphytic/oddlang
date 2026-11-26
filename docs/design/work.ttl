@@ -1412,5 +1412,11 @@ w:sixMemberMdkDataPlan a p:Artifact ;
 w:sixMemberMdkData a p:Task ;
     rdfs:label "Qualify pure MDK public data in the same sealed six-member workspace" ;
     p:milestone w:marmishMilestone ; p:source w:sixMemberMdkDataPlan ;
-    p:status p:active ; p:dependsOn w:unifiedRecoveredVaultJournal, w:rootPublicData ;
+    p:status p:done ; p:dependsOn w:unifiedRecoveredVaultJournal, w:rootPublicData ;
     p:acceptance "Preserve all five predecessor member pins and edges. With one compiler, build the sealed six-member workspace on both ARM64 hosts and replay the report, vault, journal and pure MDK witnesses." .
+
+w:sixMemberMdkDarwin a p:Artifact ;
+    p:location "companion:verification/whole/unified-mdk/aarch64-apple-darwin.json" .
+w:sixMemberMdkLinux a p:Artifact ;
+    p:location "companion:verification/whole/unified-mdk/aarch64-unknown-linux-gnu.json" .
+w:sixMemberMdkData p:evidence w:sixMemberMdkDarwin, w:sixMemberMdkLinux .
