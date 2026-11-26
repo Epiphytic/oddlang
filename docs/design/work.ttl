@@ -1863,3 +1863,18 @@ w:serdeStringChoiceDeriveFixtureReview a p:Finding ;
     rdfs:label "Exercise qualified Serde derives and reject explicit stock-derive or macro-use shadows" ;
     p:source w:serdeStringChoiceRecoveryFixture .
 w:serdeStringChoiceRecovery p:addresses w:serdeStringChoiceDeriveFixtureReview .
+
+w:combinedPublicDataCompiler a p:Task ;
+    rdfs:label "Qualify record and both choice recovery profiles in a single compiler" ;
+    p:source w:wholeMarmishPlan ; p:milestone w:marmishMilestone ;
+    p:dependsOn w:pointerWidthPublicRecords, w:typescriptExtendedChoiceConvergence, w:serdeStringChoiceRecovery ;
+    p:status p:done ; p:evidence w:combinedPublicDataDarwin, w:combinedPublicDataLinux ;
+    p:acceptance "One compiler per native ARM64 host passes record and choice fixtures and the predecessor library tests by name. The Darwin build also executes a TypeScript consumer." .
+w:combinedPublicDataDarwin a p:Artifact ; p:location "verification/public-data-composition/aarch64-apple-darwin.json" .
+w:combinedPublicDataLinux a p:Artifact ; p:location "verification/public-data-composition/aarch64-unknown-linux-gnu.json" .
+w:combinedPublicDataWorkspace a p:Task ;
+    rdfs:label "Compose the recovered public data shapes under one application lock" ;
+    p:source w:wholeMarmishPlan ; p:milestone w:marmishMilestone ;
+    p:dependsOn w:combinedPublicDataCompiler, w:outputGapReason ; p:status p:active ;
+    p:acceptance "Measure the same 140 imports against one generated workspace on both ARM64 hosts and compare data callers, typed failures, member pins and unchanged upstream test results." .
+w:wholeMarmishStructure p:dependsOn w:combinedPublicDataWorkspace .
