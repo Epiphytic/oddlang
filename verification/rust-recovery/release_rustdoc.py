@@ -9,6 +9,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 
+import inherent_members
 import reconcile_rustdoc as historical
 
 HERE = Path(__file__).resolve().parent
@@ -339,7 +340,7 @@ def pinned_source(root, revision):
     return {"revision": result[0], "tree": result[1]}
 
 
-def collect(root, package, kind, target, triple, no_default, features, previous=None, revision=None):
+def collect(root, package, kind, target, triple, no_default, features, previous=None, revision=None, public_inherent=False):
     root = root.resolve()
     source = pinned_source(root, revision)
     manifest = root / "Cargo.toml"
@@ -398,6 +399,16 @@ def collect(root, package, kind, target, triple, no_default, features, previous=
             cfg_args.extend(["--cfg", setting])
         selected_cfg = command(cfg_args, root, env)[0].decode().splitlines()
         result = compare(compiler, document, root)
+        extra = {}
+        if public_inherent:
+            rows = {row[0]: row for row in doc_rows(document)}
+            owners = {}
+            for key, row in rows.items():
+                if row[4] in {"record", "sum", "union"}:
+                    path = declaration_path(rows, key)
+                    if path is not None:
+                        owners[key] = list(path)
+            extra["rustdocPublicInherent"] = inherent_members.inventory(document, owners)
         legacy = span_evidence(compiler, document, root, previous)
     require(pinned_source(root, revision) == source, "source changed during observation")
     return {"schema": 1, "source": source, "package": package, "targetKind": kind, "defaultFeatures": not no_default,
@@ -405,7 +416,7 @@ def collect(root, package, kind, target, triple, no_default, features, previous=
             "profile": compiled, "compilerCfg": sorted(selected_cfg), "rustdocImplicitCfg": ["doc"],
             "cargoLockSha256": trace.sha(root / "Cargo.lock"), "workspaceManifestSha256": trace.sha(manifest),
             "previousSpanReportSha256": trace.sha(previous) if previous else None, "spanEvidence": legacy,
-            "formatVersion": 57, "comparison": result}
+            "formatVersion": 57, "comparison": result, **extra}
 
 
 def main():
@@ -417,12 +428,13 @@ def main():
     cli.add_argument("triple")
     cli.add_argument("--no-default-features", action="store_true")
     cli.add_argument("--features", nargs="+", default=[])
+    cli.add_argument("--public-inherent", action="store_true", help="include Rustdoc names on concrete local inherent impls")
     cli.add_argument("--revision", help="require this exact Git revision and a clean tree")
     cli.add_argument("--previous-spans", type=Path, help="optional recorded legacy span reconciliation")
     cli.add_argument("--out", required=True, type=Path)
     args = cli.parse_args()
     report = collect(args.workspace, args.package, args.kind, args.target, args.triple,
-                     args.no_default_features, args.features, args.previous_spans, args.revision)
+                     args.no_default_features, args.features, args.previous_spans, args.revision, args.public_inherent)
     args.out.write_text(json.dumps(report, sort_keys=True, indent=2) + "\n")
     print({group: len(report["comparison"][group]) for group in ("matched","compilerOnly","rustdocOnly","ambiguous")})
 

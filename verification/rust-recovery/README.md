@@ -123,3 +123,18 @@ candidate also leaves visibility, export paths, stable workspace package
 instances and native layout open. It covers local data declarations for
 the selected profile. Library type internals, behavioral effects, generic
 satisfaction and compatibility across profiles still require evidence.
+
+Pass `--public-inherent` to include `rustdocPublicInherent` in the release
+report. It records declared-public functions, associated constants and
+associated types on concrete local records, enums and unions. Each entry
+has the declaring type's lexical owner path, the Rustdoc kind and the item
+name. The default report is unchanged. Inspect the separate declaration and
+downstream import evidence to determine which type names are reachable.
+
+Trait implementations belong to a different surface. Generic definitions,
+specialized receivers, constrained implementations and receivers without a
+local nominal declaration path are excluded from this observation. The
+report counts excluded local inherent implementations by reason. Item
+names alone do not establish signature or behavioral equivalence. The
+independent fixture compiles a caller and checks rustc's rejection of a
+private method and a method used with the wrong type argument.
