@@ -225,6 +225,9 @@ fn argument(field: &syn::Field, definitions: &Definitions<'_>) -> Result<Option<
             };
             require_derive(&values.attrs, "ValueEnum")?;
             reject_conditional(&values.attrs)?;
+            if !attrs(&values.attrs, "value")?.is_empty() {
+                return Err(format!("unsupported value enum settings on {name}"));
+            }
             for variant in &values.variants {
                 reject_conditional(&variant.attrs)?;
                 if variant.attrs.iter().any(|attr| attr.path().is_ident("doc"))

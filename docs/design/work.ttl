@@ -781,3 +781,8 @@ w:commandSurfaceValidationReview a p:Finding ;
     rdfs:label "Preserve argument-carrier help and reject unsupported value help and malformed positional or default settings" ;
     p:source w:commandSurfaceFixture .
 w:commandSurface p:addresses w:commandSurfaceValidationReview .
+
+w:commandSurfaceDispatchReview a p:Finding ;
+    rdfs:label "Distinguish external argv names from nested commands and verify inherited argument relationships" ;
+    p:source w:commandSurfaceFixture .
+w:commandSurface p:addresses w:commandSurfaceDispatchReview .

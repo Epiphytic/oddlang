@@ -59,8 +59,33 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> Result<String, String>
          \x20   let matches = match command().try_get_matches_from(args) {\n\
          \x20       Ok(matches) => matches,\n\
          \x20       Err(error) => return Invocation::Terminal(error),\n\
-         \x20   };\n\
-         \x20   let mut selected = &matches;\n\
+         \x20   };\n",
+    );
+    if graph.external {
+        let commands = graph
+            .root
+            .subcommands
+            .iter()
+            .map(|command| command.name.as_str())
+            .collect::<Vec<_>>();
+        writeln!(
+            out,
+            "    if matches.subcommand_name().is_some_and(|name| !{commands:?}.contains(&name)) {{"
+        )
+        .unwrap();
+        if let Some(operation) = binding.operations.get("*") {
+            writeln!(
+                out,
+                "        return Invocation::Dispatch {{ operation: {operation:?}, matches }};"
+            )
+            .unwrap();
+        } else {
+            out.push_str("        return Invocation::Uncovered;\n");
+        }
+        out.push_str("    }\n");
+    }
+    out.push_str(
+        "    let mut selected = &matches;\n\
          \x20   let mut path = String::new();\n\
          \x20   while let Some((name, child)) = selected.subcommand() {\n\
          \x20       if !path.is_empty() { path.push('/'); }\n\
@@ -77,15 +102,6 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> Result<String, String>
             )
             .unwrap();
         }
-    }
-    if let Some(operation) = binding.operations.get("*") {
-        let commands = graph
-            .root
-            .subcommands
-            .iter()
-            .map(|command| command.name.as_str())
-            .collect::<Vec<_>>();
-        writeln!(out, "        _ if matches.subcommand_name().is_some_and(|name| !{commands:?}.contains(&name)) => Invocation::Dispatch {{ operation: {operation:?}, matches }},").unwrap();
     }
     out.push_str("        _ => Invocation::Uncovered,\n    }\n}\n");
     out.push_str(
@@ -194,7 +210,7 @@ fn validate<'a>(
             return Err(format!("invalid group {}", group.id));
         }
     }
-    for arg in &command.arguments {
+    for arg in inherited.iter().copied().chain(&command.arguments) {
         if arg
             .conflicts
             .iter()

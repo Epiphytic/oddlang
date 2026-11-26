@@ -183,4 +183,52 @@ enum Filter {
     )
     assert missing.returncode and b"unsupported value variant Red" in missing.stderr
 
-print(f"{len(cases)} exact process observations, deterministic recovery and assembly, and seven mutation checks passed")
+    enum_source = unsupported.read_text().replace("    /// Use the red filter.\n", "")
+    unsupported.write_text(enum_source.replace("enum Filter {", '#[value(rename_all = "UPPER")]\nenum Filter {'))
+    missing = execute(
+        ODDLANG, "recover", "cli-surface", unsupported, FIXTURE / "selection.json",
+        root / "unsupported.json",
+    )
+    assert missing.returncode and b"unsupported value enum settings" in missing.stderr
+
+    graph = json.loads((root / "graph.json").read_bytes())
+    graph["root"]["arguments"][0]["conflicts"] = ["quiet"]
+    graph["root"]["arguments"].append({"id": "quiet", "long": "quiet", "value_name": "QUIET"})
+    changed.write_text(json.dumps(graph))
+    invalid = execute(
+        ODDLANG, "build", "cli-surface", "rust", changed, FIXTURE / "binding.json",
+        root / "rejected.rs",
+    )
+    assert invalid.returncode and b"invalid argument relationship for site" in invalid.stderr
+
+    graph = json.loads((root / "graph.json").read_bytes())
+    graph["external"] = True
+    graph["root"]["subcommands"].append({
+        "name": "remote", "subcommands": [{"name": "add"}],
+    })
+    changed.write_text(json.dumps(graph))
+    binding = json.loads((FIXTURE / "binding.json").read_bytes())
+    binding["operations"]["remote/add"] = "urn:observatory:remote:add"
+    binding["operations"]["*"] = "urn:observatory:external"
+    external = root / "external.json"
+    external.write_text(json.dumps(binding))
+    checked(
+        ODDLANG, "build", "cli-surface", "rust", changed, external,
+        root / "generated/src/cli.rs",
+    )
+    (root / "generated/src/main.rs").write_text("""
+mod cli;
+fn main() -> std::process::ExitCode {
+    let _: fn() -> std::process::ExitCode = cli::run_cli;
+    cli::run_cli_with(|operation, _| {
+        println!("{operation}");
+        std::process::ExitCode::SUCCESS
+    })
+}
+""")
+    checked("cargo", "build", "--locked", "--offline", cwd=root / "generated")
+    executable = root / "generated/target/debug/observatory"
+    assert observation(execute(executable, "remote", "add", env=env)) == (0, b"urn:observatory:remote:add\n", b"")
+    assert observation(execute(executable, "remote/add", env=env)) == (0, b"urn:observatory:external\n", b"")
+
+print(f"{len(cases)} exact process observations, deterministic recovery and assembly, and ten mutation checks passed")
