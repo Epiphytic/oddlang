@@ -2,6 +2,7 @@ pub mod assemble;
 pub mod binary_frame;
 pub mod binary_record;
 pub mod build_report;
+pub mod buffered_input;
 pub mod checked_values;
 pub mod command_surface;
 pub mod contracts;

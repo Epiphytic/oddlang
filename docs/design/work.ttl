@@ -1420,3 +1420,19 @@ w:sixMemberMdkDarwin a p:Artifact ;
 w:sixMemberMdkLinux a p:Artifact ;
     p:location "companion:verification/whole/unified-mdk/aarch64-unknown-linux-gnu.json" .
 w:sixMemberMdkData p:evidence w:sixMemberMdkDarwin, w:sixMemberMdkLinux .
+w:privateBufferedInputPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-buffered-input.md" .
+w:privateBufferedInput a p:Task ;
+    rdfs:label "Recover and project bounded private buffered input" ;
+    p:milestone w:marmishMilestone ; p:source w:privateBufferedInputPlan ;
+    p:dependsOn w:unifiedRecoveredVaultJournal ; p:status p:active ;
+    p:acceptance "Recover the compiler-observed fixed array and ordered fields. Verify all declared private buffer read, refill and erasure policies through an independently written native caller and detect source mutation." .
+
+w:recoveredWorkspaceNamedSuite a p:Task ;
+    rdfs:label "Qualify registered native named tests of the recovered five-member workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:privateBufferedInputPlan ;
+    p:dependsOn w:fixedByteWorkspaceIntegration ;
+    p:acceptance "Build the recovered five-member workspace with compiler 6e2d1ef on both ARM64 hosts. Classify named cases against the independently built original and reject a false success from an empty child test selection." ;
+    p:status p:done ; p:evidence w:recoveredWorkspaceNamedSuiteReceipt .
+w:recoveredWorkspaceNamedSuiteReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/75> .
