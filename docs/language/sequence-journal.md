@@ -123,11 +123,17 @@ The latter enumerates ordered case identities per operation, named
 rejections and effect failures that must leave state unchanged. A
 portable scenario is still required to demonstrate each case.
 
-## Native storage scope
+## Private Rust storage bindings
 
-The checked type uses one authoritative private journal store for its
-cursors, byte records, final marker and receipts. This version does not
-bind private fields individually. Compatibility investigations that depend
-on native field names, private receipt container inspection or direct
-cursor-field struct construction therefore need a separate storage
-binding and qualification.
+The Rust overlay may include a `storage` map keyed by state identity.
+Each entry binds `start`, `end`, `finalCursor`, `records` and `receipts`
+to distinct Rust field names. The fields hold the authoritative cursors,
+final marker, byte record queue and receipt queue. They have private
+visibility. Read operations borrow their collections and inspect the
+current cursors. A write stages a transaction with shared immutable byte
+blocks and publishes its new fields only after every effect succeeds.
+A state without a storage entry uses the private aggregate store.
+
+A lexical child test module can observe the same fields used by the native
+methods. An external caller uses the same public API in either mode.
+The binding preserves the selected native names and privacy boundaries.

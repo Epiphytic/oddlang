@@ -11,7 +11,7 @@ pub(super) struct Bounds {
 }
 
 #[derive(Clone)]
-struct Record {
+pub(super) struct Record {
     start: u64,
     skip: usize,
     bytes: Arc<[u8]>,
@@ -28,13 +28,12 @@ impl Record {
 }
 
 #[derive(Clone)]
-struct Receipt {
+pub(super) struct Receipt {
     start: u64,
     end: u64,
     digest: [u8; 32],
 }
 
-#[derive(Clone)]
 pub(super) struct Store {
     bounds: Bounds,
     start: u64,
@@ -53,6 +52,144 @@ impl Store {
             final_cursor: None,
             records: VecDeque::new(),
             receipts: VecDeque::new(),
+        }
+    }
+
+    pub fn view(&self) -> View<'_> {
+        View::new(
+            self.bounds,
+            self.start,
+            self.end,
+            self.final_cursor,
+            &self.records,
+            &self.receipts,
+        )
+    }
+
+    pub fn into_parts(self) -> StorageParts {
+        (
+            self.start,
+            self.end,
+            self.final_cursor,
+            self.records,
+            self.receipts,
+        )
+    }
+
+    pub fn append(&mut self, bytes: &[u8]) -> bool {
+        if self.final_cursor.is_some()
+            || bytes.is_empty()
+            || bytes.len() > self.bounds.append_limit
+            || bytes.len() > self.view().byte_credit()
+            || self.view().record_credit() == 0
+        {
+            return false;
+        }
+        let Some(end) = self.view().advance(self.end, bytes.len()) else {
+            return false;
+        };
+        self.records.push_back(Record {
+            start: self.end,
+            skip: 0,
+            bytes: Arc::from(bytes),
+        });
+        self.end = end;
+        true
+    }
+
+    pub fn trim(&mut self, cursor: u64) -> bool {
+        if !(self.start..=self.end).contains(&cursor) {
+            return false;
+        }
+        while self
+            .records
+            .front()
+            .is_some_and(|record| record.end() <= cursor)
+        {
+            self.records.pop_front();
+        }
+        if let Some(record) = self.records.front_mut() {
+            let offset = (cursor - record.start) as usize;
+            record.skip += offset;
+            record.start = cursor;
+        }
+        self.start = cursor;
+        true
+    }
+
+    pub fn finish(&mut self, cursor: u64) -> bool {
+        if cursor != self.end {
+            return false;
+        }
+        self.final_cursor = Some(cursor);
+        true
+    }
+
+    pub fn evict_receipt(&mut self) -> bool {
+        self.receipts.pop_front().is_some()
+    }
+
+    pub fn remember(&mut self, cursor: u64, bytes: &[u8]) -> bool {
+        let Some(end) = self.view().advance(cursor, bytes.len()) else {
+            return false;
+        };
+        if bytes.is_empty()
+            || end > self.end
+            || self.view().receipt_credit() == 0
+            || self
+                .view()
+                .last_receipt_end()
+                .is_some_and(|previous| cursor < previous)
+        {
+            return false;
+        }
+        self.receipts.push_back(Receipt {
+            start: cursor,
+            end,
+            digest: fingerprint(bytes),
+        });
+        true
+    }
+}
+
+pub(super) type StorageParts = (u64, u64, Option<u64>, VecDeque<Record>, VecDeque<Receipt>);
+
+pub(super) struct View<'a> {
+    bounds: Bounds,
+    start: u64,
+    end: u64,
+    final_cursor: Option<u64>,
+    records: &'a VecDeque<Record>,
+    receipts: &'a VecDeque<Receipt>,
+}
+
+impl<'a> View<'a> {
+    pub fn new(
+        bounds: Bounds,
+        start: u64,
+        end: u64,
+        final_cursor: Option<u64>,
+        records: &'a VecDeque<Record>,
+        receipts: &'a VecDeque<Receipt>,
+    ) -> Self {
+        Self {
+            bounds,
+            start,
+            end,
+            final_cursor,
+            records,
+            receipts,
+        }
+    }
+
+    pub fn stage(&self) -> Store {
+        Store {
+            bounds: self.bounds,
+            start: self.start,
+            end: self.end,
+            final_cursor: self.final_cursor,
+            records: self.records.clone(),
+            receipts: self.receipts.clone(),
         }
     }
 
@@ -120,7 +257,7 @@ impl Store {
         let cursor = cursor.clamp(self.start, self.end);
         let available = ((self.end - cursor) as usize).min(limit);
         let mut result = Vec::with_capacity(available);
-        for record in &self.records {
+        for record in self.records {
             if result.len() == available {
                 break;
             }
@@ -143,80 +280,6 @@ impl Store {
             .iter()
             .find(|receipt| receipt.start == cursor)
             .is_some_and(|receipt| Some(receipt.end) == end && receipt.digest == fingerprint(bytes))
-    }
-
-    pub fn append(&mut self, bytes: &[u8]) -> bool {
-        if self.final_cursor.is_some()
-            || bytes.is_empty()
-            || bytes.len() > self.bounds.append_limit
-            || bytes.len() > self.byte_credit()
-            || self.record_credit() == 0
-        {
-            return false;
-        }
-        let Some(end) = self.advance(self.end, bytes.len()) else {
-            return false;
-        };
-        self.records.push_back(Record {
-            start: self.end,
-            skip: 0,
-            bytes: Arc::from(bytes),
-        });
-        self.end = end;
-        true
-    }
-
-    pub fn trim(&mut self, cursor: u64) -> bool {
-        if !(self.start..=self.end).contains(&cursor) {
-            return false;
-        }
-        while self
-            .records
-            .front()
-            .is_some_and(|record| record.end() <= cursor)
-        {
-            self.records.pop_front();
-        }
-        if let Some(record) = self.records.front_mut() {
-            let offset = (cursor - record.start) as usize;
-            record.skip += offset;
-            record.start = cursor;
-        }
-        self.start = cursor;
-        true
-    }
-
-    pub fn finish(&mut self, cursor: u64) -> bool {
-        if cursor != self.end {
-            return false;
-        }
-        self.final_cursor = Some(cursor);
-        true
-    }
-
-    pub fn evict_receipt(&mut self) -> bool {
-        self.receipts.pop_front().is_some()
-    }
-
-    pub fn remember(&mut self, cursor: u64, bytes: &[u8]) -> bool {
-        let Some(end) = self.advance(cursor, bytes.len()) else {
-            return false;
-        };
-        if bytes.is_empty()
-            || end > self.end
-            || self.receipt_credit() == 0
-            || self
-                .last_receipt_end()
-                .is_some_and(|previous| cursor < previous)
-        {
-            return false;
-        }
-        self.receipts.push_back(Receipt {
-            start: cursor,
-            end,
-            digest: fingerprint(bytes),
-        });
-        true
     }
 }
 

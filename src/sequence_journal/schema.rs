@@ -278,6 +278,34 @@ pub(super) struct RustOverlay {
     pub error_type: String,
     #[serde(deserialize_with = "unique_map")]
     pub error_variants: BTreeMap<String, String>,
+    #[serde(
+        default,
+        deserialize_with = "unique_map",
+        skip_serializing_if = "BTreeMap::is_empty"
+    )]
+    pub storage: BTreeMap<String, Storage>,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(super) struct Storage {
+    pub start: String,
+    pub end: String,
+    pub final_cursor: String,
+    pub records: String,
+    pub receipts: String,
+}
+
+impl Storage {
+    pub fn fields(&self) -> [&str; 5] {
+        [
+            &self.start,
+            &self.end,
+            &self.final_cursor,
+            &self.records,
+            &self.receipts,
+        ]
+    }
 }
 
 fn identifier(value: &str) -> Result<()> {
@@ -330,6 +358,16 @@ impl RustOverlay {
                 rust_ident(name)?;
             }
         }
+        for (state, storage) in &self.storage {
+            identifier(state)?;
+            let mut seen = BTreeSet::new();
+            for field in storage.fields() {
+                rust_ident(field)?;
+                if !seen.insert(field.trim_start_matches("r#")) {
+                    return Err(format!("duplicate private journal storage field {field:?}"));
+                }
+            }
+        }
         let path = syn::parse_str::<syn::Path>(&self.error_type)
             .map_err(|_| "invalid external journal Rust error path".to_owned())?;
         if path
@@ -368,6 +406,13 @@ impl RustOverlay {
         {
             return Err("Rust binding must cover every journal state, operation and error".into());
         }
+        if self
+            .storage
+            .keys()
+            .any(|state| !self.types.contains_key(state))
+        {
+            return Err("private storage binding for an unknown journal state".into());
+        }
         let canon = |name: &String| name.trim_start_matches("r#").to_owned();
         let types: BTreeSet<_> = self.types.values().map(canon).collect();
         const RESERVED_TYPES: &[&str] = &[
@@ -394,7 +439,9 @@ impl RustOverlay {
         let mut methods = BTreeSet::new();
         for operation in &graph.operations {
             let method = canon(&self.methods[&operation.id]);
-            if method == "default" || !methods.insert((&operation.state, method)) {
+            let reserved = method == "default"
+                || (method == "__oddlang_view" && self.storage.contains_key(&operation.state));
+            if reserved || !methods.insert((&operation.state, method)) {
                 return Err("duplicate or reserved journal Rust method".into());
             }
         }

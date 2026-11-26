@@ -1,4 +1,6 @@
-use super::schema::{Access, Expr, Graph, Intrinsic, Limit, Operation, RustOverlay, State, Ty};
+use super::schema::{
+    Access, Expr, Graph, Intrinsic, Limit, Operation, RustOverlay, State, Storage, Ty,
+};
 use std::{collections::BTreeMap, fmt::Write};
 
 pub(super) fn rust(graph: &Graph, binding: &RustOverlay) -> String {
@@ -20,37 +22,25 @@ pub(super) fn rust(graph: &Graph, binding: &RustOverlay) -> String {
 fn write_state(destination: &mut String, graph: &Graph, binding: &RustOverlay, state: &State) {
     let ty = &binding.types[&state.id];
     let initial = state.initial_cursor.0;
-    let bounds = [
-        (
-            "byte_capacity",
-            graph.size(&state.byte_capacity).unwrap().to_string(),
-        ),
-        (
-            "record_capacity",
-            graph.size(&state.record_capacity).unwrap().to_string(),
-        ),
-        (
-            "append_limit",
-            graph.size(&state.append_limit).unwrap().to_string(),
-        ),
-        (
-            "cursor_limit",
-            graph.cursor(&state.cursor_limit).unwrap().to_string(),
-        ),
-        (
-            "receipt_capacity",
-            graph.size(&state.receipt_capacity).unwrap().to_string(),
-        ),
-    ];
+    let bounds = render_bounds(graph, state);
+    let storage = binding.storage.get(&state.id);
+    if let Some(storage) = storage {
+        write_flat_state(destination, ty, initial, &bounds, storage);
+    } else {
+        writeln!(
+            destination,
+            "\npub struct {ty} {{\n    journal: __oddlang_journal::Store,\n}}"
+        )
+        .unwrap();
+        writeln!(destination,
+            "\nimpl Default for {ty} {{\n    fn default() -> Self {{\n        Self {{ journal: __oddlang_journal::Store::new({bounds}, {initial}) }}\n    }}\n}}",
+        ).unwrap();
+    }
     writeln!(
         destination,
-        "\npub struct {ty} {{\n    journal: __oddlang_journal::Store,\n}}\n\nimpl Default for {ty} {{\n    fn default() -> Self {{\n        Self {{ journal: __oddlang_journal::Store::new(__oddlang_journal::Bounds {{"
+        "\n#[allow(unused_parens, unused_variables)]\nimpl {ty} {{"
     )
     .unwrap();
-    for (key, value) in bounds {
-        writeln!(destination, "            {key}: {value},").unwrap();
-    }
-    writeln!(destination, "        }}, {initial}) }}\n    }}\n}}\n\n#[allow(unused_parens, unused_variables)]\nimpl {ty} {{").unwrap();
     for operation in graph
         .operations
         .iter()
@@ -60,6 +50,7 @@ fn write_state(destination: &mut String, graph: &Graph, binding: &RustOverlay, s
             graph,
             binding,
             operation,
+            storage,
             named: BTreeMap::new(),
             definitions: Vec::new(),
         };
@@ -68,10 +59,37 @@ fn write_state(destination: &mut String, graph: &Graph, binding: &RustOverlay, s
     destination.push_str("}\n");
 }
 
+fn render_bounds(graph: &Graph, state: &State) -> String {
+    let byte_capacity = graph.size(&state.byte_capacity).unwrap();
+    let record_capacity = graph.size(&state.record_capacity).unwrap();
+    let append_limit = graph.size(&state.append_limit).unwrap();
+    let cursor_limit = graph.cursor(&state.cursor_limit).unwrap();
+    let receipt_capacity = graph.size(&state.receipt_capacity).unwrap();
+    format!(
+        "__oddlang_journal::Bounds {{ byte_capacity: {byte_capacity}, record_capacity: {record_capacity}, append_limit: {append_limit}, cursor_limit: {cursor_limit}, receipt_capacity: {receipt_capacity} }}"
+    )
+}
+
+fn write_flat_state(output: &mut String, ty: &str, initial: u64, bounds: &str, storage: &Storage) {
+    let [start, end, final_cursor, records, receipts] = storage.fields();
+    writeln!(output,
+        "\npub struct {ty} {{\n    {start}: u64,\n    {end}: u64,\n    {final_cursor}: Option<u64>,\n    {records}: std::collections::VecDeque<__oddlang_journal::Record>,\n    {receipts}: std::collections::VecDeque<__oddlang_journal::Receipt>,\n}}"
+    ).unwrap();
+    writeln!(
+        output,
+        "\nimpl Default for {ty} {{\n    fn default() -> Self {{\n        Self {{ {start}: {initial}, {end}: {initial}, {final_cursor}: None, {records}: Default::default(), {receipts}: Default::default() }}\n    }}\n}}"
+    ).unwrap();
+    writeln!(
+        output,
+        "\nimpl {ty} {{\n    fn __oddlang_view(&self) -> __oddlang_journal::View<'_> {{\n        __oddlang_journal::View::new({bounds}, self.{start}, self.{end}, self.{final_cursor}, &self.{records}, &self.{receipts})\n    }}\n}}"
+    ).unwrap();
+}
+
 struct Method<'a> {
     graph: &'a Graph,
     binding: &'a RustOverlay,
     operation: &'a Operation,
+    storage: Option<&'a Storage>,
     named: BTreeMap<String, usize>,
     definitions: Vec<String>,
 }
@@ -100,6 +118,12 @@ impl Method<'_> {
         )
         .unwrap();
 
+        let view = if self.storage.is_some() {
+            "self.__oddlang_view()"
+        } else {
+            "self.journal.view()"
+        };
+        writeln!(output, "        let journal = {view};").unwrap();
         let mut rules = String::new();
         for case in &op.cases {
             let conditional = !case.when.is_empty();
@@ -131,7 +155,7 @@ impl Method<'_> {
                     writeln!(rules, "{indent}return {value};").unwrap();
                 } else {
                     writeln!(rules, "{indent}let outcome = {value};").unwrap();
-                    writeln!(rules, "{indent}let mut staged = self.journal.clone();").unwrap();
+                    writeln!(rules, "{indent}let mut staged = journal.stage();").unwrap();
                     for effect in &case.effects {
                         let (method, error, operands) = effect.parts();
                         let args = operands
@@ -153,11 +177,15 @@ impl Method<'_> {
                         )
                         .unwrap();
                     }
-                    writeln!(
-                        rules,
-                        "{indent}self.journal = staged;\n{indent}return outcome;"
-                    )
-                    .unwrap();
+                    if let Some(storage) = self.storage {
+                        let [start, end, final_cursor, records, receipts] = storage.fields();
+                        writeln!(rules,
+                            "{indent}(self.{start}, self.{end}, self.{final_cursor}, self.{records}, self.{receipts}) = staged.into_parts();"
+                        ).unwrap();
+                    } else {
+                        writeln!(rules, "{indent}self.journal = staged;").unwrap();
+                    }
+                    writeln!(rules, "{indent}return outcome;").unwrap();
                 }
             }
             if conditional {
@@ -197,7 +225,7 @@ impl Method<'_> {
                 Limit::Cursor { cursor } => format!("{}u64", cursor.0),
                 Limit::Size { size } => format!("{size}usize"),
             },
-            Expr::Fact { fact } => format!("self.journal.{}()", fact.method()),
+            Expr::Fact { fact } => format!("journal.{}()", fact.method()),
             Expr::Cursor { cursor } => format!("{}u64", cursor.0),
             Expr::Size { size } => format!("{size}usize"),
             Expr::Flag { flag } => flag.to_string(),
@@ -231,7 +259,7 @@ fn apply(op: Intrinsic, args: &[String]) -> String {
     let at = |index: usize| &args[index];
     match op {
         SizeOf => format!("({}).len()", at(0)),
-        Advance => format!("self.journal.advance({}, {})", at(0), at(1)),
+        Advance => format!("journal.advance({}, {})", at(0), at(1)),
         Some => format!("Some({})", at(0)),
         Exists => format!("({}).is_some()", at(0)),
         Equal => format!("({} == {})", at(0), at(1)),
@@ -242,18 +270,18 @@ fn apply(op: Intrinsic, args: &[String]) -> String {
         Not => format!("!({})", at(0)),
         Choose => format!("(if {} {{ {} }} else {{ {} }})", at(0), at(1), at(2)),
         Slice => format!(
-            "std::borrow::Cow::<'_, [u8]>::Owned(self.journal.slice({}, {}))",
+            "std::borrow::Cow::<'_, [u8]>::Owned(journal.slice({}, {}))",
             at(0),
             at(1)
         ),
-        HasReceipt => format!("self.journal.has_receipt({})", at(0)),
+        HasReceipt => format!("journal.has_receipt({})", at(0)),
         SameReceipt => format!(
-            "self.journal.same_receipt({}, {}, ({}).as_ref())",
+            "journal.same_receipt({}, {}, ({}).as_ref())",
             at(0),
             at(1),
             at(2)
         ),
-        FrontReceiptEvictable => "self.journal.front_receipt_evictable()".to_owned(),
+        FrontReceiptEvictable => "journal.front_receipt_evictable()".to_owned(),
     }
 }
 

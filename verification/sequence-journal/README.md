@@ -27,11 +27,19 @@ rules and altered digests. It also assembles the same queue into a native
 library with a separately projected error enum; the caller uses its
 public module and explicit root reexport.
 
-This fixture observes the generated public operations. Three upstream window
-unit tests additionally rely on private Rust storage. Two inspect the receive
-window's receipt container directly. The third constructs the send window with
-explicit produced and acknowledged fields. Those expressions need a native
-storage binding beyond the public method overlay.
+The private storage fixture also compiles the telemetry types with explicitly
+named cursors, byte records and receipts. Its lexical child tests initialize
+the high and low cursors in a struct literal and inspect the actual queue
+as it is appended and evicted. A downstream field-access probe is rejected.
+The same public caller passes in the aggregate and named-field modes.
+
+A separate native macOS ARM64 test assembled and built the production stream
+window package in an isolated scratch workspace. After the release build,
+it appended the original test module verbatim to the generated journal
+leaf with surrounding test-scope imports. All five tests passed on original
+and projected crates. The original `windows.rs` test module has SHA-256
+`34cdb8cbbdc542171ae9602d857520bd82c35cf9fb921f2143664fa82e73cff7`.
+The test module was a qualification input. [Pinned upstream test source](https://github.com/Epiphytic/marmish/blob/af54339d250290490d62d4475a77539b7e739071/crates/marmish-stream/src/windows.rs)
 
 Claude Code with Claude Opus 5.5 approved the implementation in auto permission
 mode and reran the journal, shared declarations and native-package

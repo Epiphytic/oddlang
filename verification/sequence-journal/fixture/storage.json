@@ -1,0 +1,16 @@
+{
+  "urn:telemetry-queue:state": {
+    "start": "consumed",
+    "end": "sent",
+    "finalCursor": "finished",
+    "records": "blocks",
+    "receipts": "confirmations"
+  },
+  "urn:telemetry-queue:near-cursor-limit": {
+    "start": "lower",
+    "end": "upper",
+    "finalCursor": "closing",
+    "records": "messages",
+    "receipts": "responses"
+  }
+}

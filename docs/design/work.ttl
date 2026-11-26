@@ -753,6 +753,7 @@ w:wholeMarmishStructure p:addresses w:sequenceJournalPrivateStorage .
 
 w:sequenceJournalNativeStorage a p:Task ;
     rdfs:label "Bind authoritative private target storage for native window tests" ;
-    p:milestone w:marmishMilestone ; p:source w:sequenceJournalPlan ; p:status p:planned ;
+    p:milestone w:marmishMilestone ; p:source w:sequenceJournalPlan ; p:status p:done ;
     p:dependsOn w:sequenceJournal ; p:addresses w:sequenceJournalPrivateStorage ;
+    p:evidence w:sequenceJournalFixture ;
     p:acceptance "Lexical child tests can construct native cursor fields and inspect the actual receipt queue. Downstream consumers cannot access the fields directly, and the public state behavior remains compatible." .

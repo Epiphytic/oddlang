@@ -94,6 +94,41 @@ with tempfile.TemporaryDirectory(prefix="sequence-journal-") as directory:
     consumer(reordered, "ordering-control", "left: Err(Gap)")
     consumer(larger, "capacity-control", "left: 1")
 
+    flat_binding = copy.deepcopy(binding)
+    flat_binding["storage"] = json.loads((FIXTURE / "storage.json").read_bytes())
+    flat_overlay = write(work / "flat-overlay.json", flat_binding)
+    flat = generate(graph, flat_overlay, work / "flat-generated")
+    consumer(flat, "flat-public")
+    flat_crate = work / "flat-public"
+    journal = flat_crate / "src/journal.rs"
+    with journal.open("ab") as source:
+        source.write(b"\n")
+        source.write((FIXTURE / "lexical.rs").read_bytes())
+    actual = run("cargo", "+1.97.1", "test", "--locked", "--offline", "--release", "--quiet",
+                 "--target-dir", work / "target", cwd=flat_crate)
+    assert "2 passed; 0 failed" in actual
+    private = flat_crate / "src/main.rs"
+    with private.open("a") as source:
+        source.write("""
+#[allow(dead_code)]
+fn read_private(queue: &journal::TelemetryQueue) -> usize {
+    queue.confirmations.len()
+}
+""")
+    run("cargo", "+1.97.1", "check", "--locked", "--offline", "--quiet",
+        "--target-dir", work / "target", cwd=flat_crate, error="field `confirmations`")
+    invalid_storage = copy.deepcopy(flat_binding)
+    invalid_storage["storage"][PREFIX + "state"]["end"] = "consumed"
+    run(BINARY, "sequence-journal", "overlay-digest",
+        write(work / "duplicate-storage.json", invalid_storage), error="duplicate private journal")
+    invalid_storage = copy.deepcopy(flat_binding)
+    invalid_storage["storage"][PREFIX + "unknown"] = invalid_storage["storage"][PREFIX + "state"]
+    overlay_with_unknown = write(work / "unknown-storage.json", invalid_storage)
+    unknown_pin = run(BINARY, "sequence-journal", "overlay-digest", overlay_with_unknown)
+    run(BINARY, "build", "sequence-journal", "rust", graph, overlay_with_unknown,
+        work / "unknown-storage", "--graph-sha256", graph_pin,
+        "--overlay-sha256", unknown_pin, error="unknown journal state")
+
     for name, definitions, expected in (
         ("cyclic", {"a": {"expr": "b"}, "b": {"expr": "a"}}, "named expression cycle"),
         ("missing", {"unused": {"expr": "missing"}}, "unknown named expression"),
@@ -155,7 +190,7 @@ with tempfile.TemporaryDirectory(prefix="sequence-journal-") as directory:
     journal_graph = inputs / "journal.json"
     journal_overlay = inputs / "journal-rust.json"
     shutil.copyfile(graph, journal_graph)
-    shutil.copyfile(overlay, journal_overlay)
+    shutil.copyfile(flat_overlay, journal_overlay)
     error_id = PREFIX + "shared-error"
     shared_graph = {
         "format": "oddlang-shared-declarations-v1", "id": PREFIX + "declarations",
@@ -188,6 +223,10 @@ with tempfile.TemporaryDirectory(prefix="sequence-journal-") as directory:
     assert package_lock["components"][1]["projection"]["obligationsSha256"] == digest(
         positive / "obligations.json"
     )
+    journal_leaf = assembled / "src/group_0/__projection_1.rs"
+    with journal_leaf.open("ab") as source:
+        source.write(b"\n")
+        source.write((FIXTURE / "lexical.rs").read_bytes())
     (assembled / "tests").mkdir()
     caller = (FIXTURE / "src/main.rs").read_text()
     caller = caller[caller.index("fn main() {"):].replace("fn main()", "#[test]\nfn queue()")
@@ -196,5 +235,5 @@ with tempfile.TemporaryDirectory(prefix="sequence-journal-") as directory:
     (assembled / "tests/queue.rs").write_text("use telemetry_journal_fixture::QueueError;\n" + caller)
     result = run("cargo", "+1.97.1", "test", "--locked", "--offline", "--release", "--quiet",
                  "--target-dir", work / "target", cwd=assembled)
-    assert "1 passed; 0 failed" in result
+    assert "1 passed; 0 failed" in result and "2 passed; 0 failed" in result
 print("sequence journal passed 256 native boundary cases, atomic rollback, mutations and package composition")
