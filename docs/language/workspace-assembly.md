@@ -97,7 +97,9 @@ lock.
 `oddlang recover public-records LIB_RS SELECTION OUTPUT` matches selected
 unconditional public module declarations and sibling Rust source files.
 The selection format is `oddlang-rust-public-record-selection-v1`. It
-pins `libSha256` and an ordered list of modules. Each module carries its
+pins `libSha256`, `cargoSha256` and an ordered list of modules. Recovery
+requires the default Cargo library source path and an explicit package
+edition of 2018, 2021 or 2024. Each module carries its
 stable `id`, Rust `name`, source `sha256`, and optional `records` and
 `aliases` maps from Rust names to stable IRIs. Recovery extracts the selected
 named public fields in declaration order and accepts bool, u64, String and

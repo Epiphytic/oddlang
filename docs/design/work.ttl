@@ -1311,3 +1311,8 @@ w:publicRecordScopeResolution a p:Finding ;
     rdfs:label "Require scoped source evidence for potential type shadows and reject conditional modules and unexpanded items" ;
     p:source w:publicObservationalRecordsPlan .
 w:publicObservationalRecords p:addresses w:publicRecordScopeResolution .
+
+w:publicRecordEditionResolution a p:Finding ;
+    rdfs:label "Bind bare glob lookup to a pinned Cargo edition" ;
+    p:source w:publicObservationalRecordsPlan .
+w:publicObservationalRecords p:addresses w:publicRecordEditionResolution .

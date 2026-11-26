@@ -42,6 +42,16 @@ fn main() {
 }
 """
 
+MANIFEST = """
+[package]
+name = "indicator-core"
+version = "0.1.0"
+edition = "2021"
+[dependencies]
+serde = { version = "=1.0.229", features = ["derive"] }
+serde_json = "=1.0.151"
+"""
+
 
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -73,9 +83,11 @@ with tempfile.TemporaryDirectory() as directory:
     records = source/"src/sampling.rs"
     aliases = source/"src/exports.rs"
     root.write_text(ROOT_SOURCE)
+    manifest_source = source/"Cargo.toml"
+    manifest_source.write_text(MANIFEST)
     aliases.write_text(EXPORT)
     selection = dict(format="oddlang-rust-public-record-selection-v1", libSha256=sha(root),
-        modules=[
+        cargoSha256=sha(manifest_source), modules=[
             dict(id=ROOT+":sampling", name="sampling", records={"Reading": ROOT+":reading"}),
             dict(id=ROOT+":exports", name="exports", aliases={"Archived": ROOT+":archived"}),
         ])
@@ -105,15 +117,6 @@ with tempfile.TemporaryDirectory() as directory:
 
     deps = dict(serde=dict(version="1.0.229",features=["derive"]),
                 serde_json=dict(version="1.0.151"))
-    (source/"Cargo.toml").write_text("""
-[package]
-name = "indicator-core"
-version = "0.1.0"
-edition = "2021"
-[dependencies]
-serde = { version = "=1.0.229", features = ["derive"] }
-serde_json = "=1.0.151"
-""")
     (source/"examples").mkdir()
     (source/"examples/probe.rs").write_text(CONSUMER)
     run("cargo","generate-lockfile","--offline",cwd=source)
@@ -144,6 +147,15 @@ serde_json = "=1.0.151"
     selection["modules"][1]["aliases"]["Archived"] = ROOT+":reading"
     recover(work/"duplicate-id","duplicate public record identity")
     selection["modules"][1]["aliases"]["Archived"] = ROOT+":archived"
+    manifest_source.write_text(MANIFEST.replace('"2021"','"2015"'))
+    recover(work/"stale-cargo-digest","Cargo manifest digest")
+    selection["cargoSha256"] = sha(manifest_source)
+    recover(work/"legacy-edition","requires an explicit 2018 or newer")
+    manifest_source.write_text(MANIFEST)
+    selection["cargoSha256"] = sha(manifest_source)
+    records.write_text("use ext::other as derive;\n"+DECLARATION)
+    recover(work/"derivation-shadow","shadowed public record type or derive")
+    records.write_text(DECLARATION)
     aliases.write_text("pub use crate::missing::{Reading as Archived};")
     recover(work/"unresolved-alias","unresolved public record re-export")
     aliases.write_text('#![cfg(unix)]\n'+EXPORT)

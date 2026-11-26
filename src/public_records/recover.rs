@@ -9,6 +9,7 @@ use syn::{
 struct Selection {
     format: String,
     lib_sha256: String,
+    cargo_sha256: String,
     modules: Vec<SelectedModule>,
 }
 
@@ -42,6 +43,39 @@ fn select_source(path: &Path, pin: &str) -> Result<syn::File> {
     }
     let text = std::str::from_utf8(&bytes).map_err(|e| e.to_string())?;
     syn::parse_file(text).map_err(|e| format!("invalid Rust source {}: {e}", path.display()))
+}
+
+fn package_edition(lib: &Path, pin: &str) -> Result<String> {
+    if !lib.ends_with("src/lib.rs") {
+        return Err("public record recovery requires the package src/lib.rs".into());
+    }
+    let cargo = lib
+        .parent()
+        .and_then(Path::parent)
+        .ok_or("missing public record package directory")?
+        .join("Cargo.toml");
+    if io(cargo.canonicalize())? != cargo {
+        return Err("expected regular public record Cargo manifest".into());
+    }
+    let bytes = io(fs::read(&cargo))?;
+    if digest(&bytes) != pin {
+        return Err("public record Cargo manifest digest mismatch".into());
+    }
+    let text = std::str::from_utf8(&bytes).map_err(|e| e.to_string())?;
+    let manifest: toml::Table = toml::from_str(text).map_err(|e| e.to_string())?;
+    if let Some(path) = manifest.get("lib").and_then(|library| library.get("path"))
+        && path.as_str() != Some("src/lib.rs")
+    {
+        return Err("public record recovery requires the default package library path".into());
+    }
+    match manifest
+        .get("package")
+        .and_then(|package| package.get("edition"))
+        .and_then(toml::Value::as_str)
+    {
+        Some(edition @ ("2018" | "2021" | "2024")) => Ok(edition.into()),
+        _ => Err("public record recovery requires an explicit 2018 or newer Cargo edition".into()),
+    }
 }
 
 fn module_file(root: &Path, lib: &syn::File, name: &str) -> Result<std::path::PathBuf> {
@@ -136,7 +170,7 @@ fn imports(file: &syn::File) -> Vec<Import<'_>> {
     found
 }
 
-const PRELUDE_NAMES: [&str; 9] = [
+const PRELUDE_NAMES: [&str; 10] = [
     "bool",
     "u8",
     "u64",
@@ -146,6 +180,7 @@ const PRELUDE_NAMES: [&str; 9] = [
     "serde",
     "Clone",
     "Serialize",
+    "derive",
 ];
 
 fn item_type_binding(item: &Item) -> Option<(&syn::Ident, &Visibility)> {
@@ -411,6 +446,7 @@ pub fn recover(lib: &Path, selection: &Path, out: &Path) -> Result<()> {
         return Err("invalid public record source selection".into());
     }
     let lib = io(lib.canonicalize())?;
+    let edition = package_edition(&lib, &selected.cargo_sha256)?;
     let directory = lib.parent().ok_or("missing Rust module directory")?;
     let crate_source = select_source(&lib, &selected.lib_sha256)?;
     doc_module(&crate_source)?;
@@ -515,6 +551,8 @@ pub fn recover(lib: &Path, selection: &Path, out: &Path) -> Result<()> {
         "format":"oddlang-public-record-recovery-lock-v1",
         "selectionSha256":digest(&selection_bytes),
         "crateSourceSha256":selected.lib_sha256,
+        "cargoManifestSha256":selected.cargo_sha256,
+        "rustEdition":edition,
         "moduleSourceSha256":modules,
         "globSourceSha256":scope_globs,
         "graphSha256":digest(&graph),
