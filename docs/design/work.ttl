@@ -433,3 +433,7 @@ w:marmish-capability-modules p:evidence w:marmishFacadeRelease, w:marmishAssembl
 
 w:marmishCandidateIdentityReview a p:Finding ; rdfs:label "Recompute the final Git tree and commit and reject coordinated edits of both rebuild receipts" ; p:source w:marmishQualificationEvidence .
 w:marmishQualification p:addresses w:marmishCandidateIdentityReview .
+
+w:marmishQualificationArchive a p:Artifact ; rdfs:label "Sealed observations, original and reconstructed Git object witnesses, native logs and residual register" ; p:location "examples/marmish/evidence/qualification.tar.gz" .
+w:marmishQualification p:evidence w:marmishQualificationArchive .
+w:marmish-capability-modules p:evidence w:marmishQualificationArchive .
