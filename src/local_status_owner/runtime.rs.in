@@ -28,7 +28,7 @@ fn uid() -> u32 {
 }
 
 struct OwnedSocket {
-    path: PathBuf,
+    path: Option<PathBuf>,
     device: u64,
     inode: u64,
 }
@@ -39,17 +39,18 @@ impl OwnedSocket {
         if !entry.file_type().is_socket() || entry.uid() != uid() {
             return Err(OwnerError(OCCUPIED));
         }
-        Ok(Self { path, device: entry.dev(), inode: entry.ino() })
+        Ok(Self { path: Some(path), device: entry.dev(), inode: entry.ino() })
     }
 
-    fn remove(&self) -> Result<(), OwnerError> {
-        let meta = match fs::symlink_metadata(&self.path) {
+    fn remove(&mut self) -> Result<(), OwnerError> {
+        let Some(path) = self.path.take() else { return Ok(()); };
+        let meta = match fs::symlink_metadata(&path) {
             Ok(meta) => meta,
             Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(()),
             Err(_) => return Err(OwnerError(CLEANUP)),
         };
         if meta.file_type().is_socket() && meta.dev() == self.device && meta.ino() == self.inode {
-            fs::remove_file(&self.path).map_err(|_| OwnerError(CLEANUP))?;
+            fs::remove_file(path).map_err(|_| OwnerError(CLEANUP))?;
         }
         Ok(())
     }
@@ -107,10 +108,15 @@ impl Drop for Lifetime {
     }
 }
 
-pub struct BoundOwner {
-    listener: UnixListener,
+struct Endpoint {
+    // Drop the pathname guard before releasing the listening descriptor.
     socket: OwnedSocket,
+    listener: UnixListener,
+}
+
+pub struct BoundOwner {
     lifetime: Lifetime,
+    endpoint: Endpoint,
 }
 
 impl BoundOwner {
@@ -136,10 +142,13 @@ impl BoundOwner {
         let listener = UnixListener::bind(&path).map_err(|error| {
             OwnerError(if error.kind() == io::ErrorKind::AddrInUse { OCCUPIED } else { IO })
         })?;
-        let socket = OwnedSocket::claim(path)?;
-        fs::set_permissions(&socket.path, fs::Permissions::from_mode(0o600)).map_err(|_| OwnerError(IO))?;
+        let socket = OwnedSocket::claim(path.clone())?;
+        fs::set_permissions(&path, fs::Permissions::from_mode(0o600)).map_err(|_| OwnerError(IO))?;
         let (snapshot, _) = watch::channel(BOUND);
-        Ok(Self { listener, socket, lifetime: Lifetime { snapshot: SnapshotPublisher { sender: snapshot } } })
+        Ok(Self {
+            lifetime: Lifetime { snapshot: SnapshotPublisher { sender: snapshot } },
+            endpoint: Endpoint { socket, listener },
+        })
     }
 
     pub fn snapshot_publisher(&self) -> SnapshotPublisher {
@@ -147,7 +156,7 @@ impl BoundOwner {
     }
 
     pub async fn serve_until(self, shutdown: impl Future<Output = ()>) -> Result<(), OwnerError> {
-        let Self { listener, socket, lifetime } = self;
+        let Self { endpoint, lifetime } = self;
         let clients = Arc::new(Semaphore::new(MAX_CLIENTS));
         let mut tasks = JoinSet::new();
         tokio::pin!(shutdown);
@@ -156,7 +165,7 @@ impl BoundOwner {
                 biased;
                 _ = &mut shutdown => break,
                 _ = tasks.join_next(), if !tasks.is_empty() => {},
-                result = listener.accept() => {
+                result = endpoint.listener.accept() => {
                     let (stream, _) = match result {
                         Ok(peer) => peer,
                         Err(_) => {
@@ -179,10 +188,12 @@ impl BoundOwner {
                 }
             }
         }
-        drop(listener);
         lifetime.stop();
+        let Endpoint { mut socket, listener } = endpoint;
+        let removed = socket.remove();
+        drop(listener);
         tasks.shutdown().await;
-        socket.remove()
+        removed
     }
 }
 

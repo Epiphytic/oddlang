@@ -196,6 +196,7 @@ fn validate(graph: &Graph, binding: &Binding) -> Result<(), String> {
     .chain(
         reachable
             .into_iter()
+            .chain([stopping])
             .map(|phase| serde_json::json!({ ok: true, result: { state: phase }, error: null })),
     );
     if bounds

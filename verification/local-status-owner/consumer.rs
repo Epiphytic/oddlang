@@ -42,4 +42,13 @@ async fn visible_owner_transitions_are_committed_and_stopped() {
     drop(held);
     assert_eq!(retained.current(), "closed");
     assert!(!path.exists());
+
+    let cancelled = BoundOwner::bind(&path).unwrap();
+    let retained = cancelled.snapshot_publisher();
+    let server = tokio::spawn(cancelled.serve_until(std::future::pending()));
+    assert!(!snapshot(&path).await.is_empty());
+    server.abort();
+    assert!(server.await.unwrap_err().is_cancelled());
+    assert_eq!(retained.current(), "closed");
+    assert!(!path.exists());
 }

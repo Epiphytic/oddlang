@@ -818,3 +818,8 @@ w:localStatusOwner a p:Task ;
 
 w:localStatusOwnerFixture a p:Artifact ;
     p:location "verification/local-status-owner/check.py" .
+
+w:localStatusOwnerShutdownReview a p:Finding ;
+    rdfs:label "Keep every lifecycle frame bounded and unlink the owned socket before releasing its descriptor" ;
+    p:source w:localStatusOwnerFixture .
+w:localStatusOwner p:addresses w:localStatusOwnerShutdownReview .

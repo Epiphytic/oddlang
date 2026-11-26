@@ -146,6 +146,22 @@ with tempfile.TemporaryDirectory(prefix="gauge-", dir="/tmp") as directory:
             child.kill()
             child.communicate()
 
+    endpoint.unlink()
+    child = process(program, endpoint)
+    try:
+        wait_socket(endpoint, child)
+        endpoint.unlink()
+        with socket.socket(socket.AF_UNIX) as replacement:
+            replacement.bind(str(endpoint))
+            identity = endpoint.stat().st_ino
+            child.send_signal(signal.SIGTERM)
+            assert child.communicate(timeout=5) == (b"", b"")
+            assert child.returncode == 0 and endpoint.stat().st_ino == identity
+    finally:
+        if child.poll() is None:
+            child.kill()
+            child.communicate()
+
     tests = build / "tests"
     tests.mkdir()
     shutil.copyfile(FIXTURE / "consumer.rs", tests / "consumer.rs")
@@ -161,5 +177,16 @@ with tempfile.TemporaryDirectory(prefix="gauge-", dir="/tmp") as directory:
     )
     assert mutant.returncode and b"unreachable local status transition" in mutant.stderr
     assert not (root / "invalid").exists()
+
+    graph = json.loads((root / "graph.json").read_bytes())
+    graph["lifecycle"]["stopping"] = "z" * 128
+    (root / "mutant.json").write_text(json.dumps(graph))
+    mutant = subprocess.run(
+        [ODDLANG, "build", "local-status-owner", "rust", root / "mutant.json", root / "rust.json", root / "invalid"],
+        capture_output=True, timeout=5,
+    )
+    assert mutant.returncode and b"declared local status frame exceeds listener bound" in mutant.stderr
+    assert not (root / "invalid").exists()
+
 
 print("native gauge owner passed snapshot publication, malformed frame, concurrency, signal and ownership checks")
