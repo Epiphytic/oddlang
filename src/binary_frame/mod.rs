@@ -1,5 +1,7 @@
 //! Sized, discriminated binary unions and incremental one-frame decoding.
+mod recover;
 mod rust;
+pub use recover::recover;
 
 use crate::{
     shared_declarations::unique_map,
@@ -63,7 +65,7 @@ struct Case {
     decode_guards: Vec<Guard>,
 }
 
-#[derive(Clone, Copy, Deserialize, Serialize)]
+#[derive(Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 enum Form {
     Tuple,

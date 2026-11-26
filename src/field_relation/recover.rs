@@ -1,8 +1,6 @@
 //! Lower pinned compiler observations through consumer-reviewed field identities.
 use super::*;
-use std::io::Write as _;
-
-const COMPILER: &str = "8bab26f4f68e0e26f0bb7960be334d5b520ea452";
+use crate::source_observation::{COMPILER, publish, read, validate_source_files};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -54,10 +52,6 @@ enum Shape {
     FixedBytes { size: u32 },
     Bytes {},
     Named { path: String },
-}
-
-fn read(path: &Path) -> Result<Vec<u8>> {
-    fs::read(path).map_err(|err| format!("cannot read {}: {err}", path.display()))
 }
 
 fn project_field(
@@ -131,43 +125,6 @@ fn proven_shape(binding: &Binding, comparison: &Comparison) -> Result<Value> {
     }
 }
 
-fn canonical(path: &Path) -> Result<std::path::PathBuf> {
-    path.canonicalize()
-        .map_err(|err| format!("cannot resolve {}: {err}", path.display()))
-}
-
-fn validate_source_files(root: &Path, source: &Path, evidence: &Evidence) -> Result<()> {
-    let root = canonical(root)?;
-    let source = canonical(source)?;
-    let selected = source.strip_prefix(&root).ok().and_then(Path::to_str);
-    if selected != evidence.source_file.as_deref()
-        || evidence
-            .source_file
-            .as_ref()
-            .and_then(|file| evidence.source_files.get(file))
-            != evidence.source_sha256.as_ref()
-        || evidence.source_files.is_empty()
-        || evidence.source_files.len() > 4096
-    {
-        return Err("compiler source inventory does not contain the selected file".into());
-    }
-    for (name, hash) in &evidence.source_files {
-        let relative = Path::new(name);
-        if relative.as_os_str().is_empty()
-            || !relative
-                .components()
-                .all(|part| matches!(part, std::path::Component::Normal(_)))
-        {
-            return Err(format!("invalid compiler source path: {name}"));
-        }
-        let path = canonical(&root.join(relative))?;
-        if !path.starts_with(&root) || digest(&read(&path)?) != *hash {
-            return Err(format!("compiler source inventory changed: {name}"));
-        }
-    }
-    Ok(())
-}
-
 /// Derive one vacant relation from a separately pinned compiler receipt.
 pub fn recover(
     root: &Path,
@@ -202,7 +159,13 @@ pub fn recover(
         return Err("compiler observation does not pin this source declaration".into());
     }
 
-    validate_source_files(root, source, &evidence)?;
+    validate_source_files(
+        root,
+        source,
+        evidence.source_file.as_deref(),
+        evidence.source_sha256.as_deref(),
+        &evidence.source_files,
+    )?;
     let mut graph: Graph = json(template)?;
     let binding: Binding = json(hints)?;
     let relation = graph
@@ -251,18 +214,5 @@ pub fn recover(
         .steps = steps;
     graph.validate(&binding)?;
     let encoded = encode(&graph)?;
-    let parent = output
-        .parent()
-        .filter(|parent| !parent.as_os_str().is_empty())
-        .unwrap_or(Path::new("."));
-    fs::create_dir_all(parent).map_err(|err| format!("cannot create output directory: {err}"))?;
-    let mut staged = tempfile::NamedTempFile::new_in(parent)
-        .map_err(|err| format!("cannot stage recovered field relation: {err}"))?;
-    staged
-        .write_all(&encoded)
-        .map_err(|err| format!("cannot stage recovered field relation: {err}"))?;
-    staged
-        .persist_noclobber(output)
-        .map(|_| ())
-        .map_err(|err| format!("cannot publish {}: {err}", output.display()))
+    publish(output, &encoded)
 }

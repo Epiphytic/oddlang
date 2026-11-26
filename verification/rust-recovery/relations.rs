@@ -20,40 +20,48 @@ type Result<T> = std::result::Result<T, String>;
 pub fn observe(tcx: TyCtxt<'_>, compiler: &str, selected: &str) -> Value {
     let mut evidence = json!({"format":"oddlang-rust-field-conjunction-v1","compiler":compiler,
                             "method":selected,"unresolved":[]});
-    let result = find_method(tcx, selected).and_then(|def| {
-        let span = tcx.def_span(def);
-        if span.from_expansion() {
-            return Err("a macro-generated method declaration is unresolved".into());
-        }
-        let position = tcx.sess.source_map().lookup_char_pos(span.lo());
-        let root = std::env::var_os("CARGO_MANIFEST_DIR").ok_or("missing Cargo source root")?;
-        let root = fs::canonicalize(root)
-            .map_err(|err| format!("unavailable Cargo source root: {err}"))?;
-        let (method_file, digest) = source_file(&position.file, &root)?;
-        let mut inputs = BTreeMap::new();
-        for file in tcx
-            .sess
-            .source_map()
-            .files()
-            .iter()
-            .filter(|file| !file.is_imported())
-        {
-            if matches!(file.name, rustc_span::FileName::Real(_)) {
-                let (path, digest) = source_file(file, &root)?;
-                inputs.insert(path, digest);
-            }
-        }
-        evidence["sourceFile"] = json!(method_file);
-        evidence["sourceSha256"] = json!(digest);
-        evidence["sourceFiles"] = json!(inputs);
-        evidence["line"] = json!(position.line);
+    if let Err(reason) = method_evidence(tcx, selected, &mut evidence).and_then(|def| {
         evidence["comparisons"] = json!(inspect(tcx, def)?);
         Ok(())
-    });
-    if let Err(reason) = result {
+    }) {
         evidence["unresolved"] = json!([reason]);
     }
     evidence
+}
+
+pub(crate) fn method_evidence(
+    tcx: TyCtxt<'_>,
+    selected: &str,
+    evidence: &mut Value,
+) -> Result<LocalDefId> {
+    let def = find_method(tcx, selected)?;
+    let span = tcx.def_span(def);
+    if span.from_expansion() {
+        return Err("a macro-generated method declaration is unresolved".into());
+    }
+    let position = tcx.sess.source_map().lookup_char_pos(span.lo());
+    let root = std::env::var_os("CARGO_MANIFEST_DIR").ok_or("missing Cargo source root")?;
+    let root =
+        fs::canonicalize(root).map_err(|err| format!("unavailable Cargo source root: {err}"))?;
+    let (method_file, digest) = source_file(&position.file, &root)?;
+    let mut inputs = BTreeMap::new();
+    for file in tcx
+        .sess
+        .source_map()
+        .files()
+        .iter()
+        .filter(|file| !file.is_imported())
+    {
+        if matches!(file.name, rustc_span::FileName::Real(_)) {
+            let (path, digest) = source_file(file, &root)?;
+            inputs.insert(path, digest);
+        }
+    }
+    evidence["sourceFile"] = json!(method_file);
+    evidence["sourceSha256"] = json!(digest);
+    evidence["sourceFiles"] = json!(inputs);
+    evidence["line"] = json!(position.line);
+    Ok(def)
 }
 
 fn source_file(file: &rustc_span::SourceFile, root: &Path) -> Result<(String, String)> {
@@ -81,7 +89,7 @@ fn source_file(file: &rustc_span::SourceFile, root: &Path) -> Result<(String, St
     Ok((name.to_owned(), digest))
 }
 
-fn path(tcx: TyCtxt<'_>, def: DefId) -> Result<String> {
+pub(crate) fn path(tcx: TyCtxt<'_>, def: DefId) -> Result<String> {
     if !def.is_local() {
         return Err("external record ownership is unproven".into());
     }
