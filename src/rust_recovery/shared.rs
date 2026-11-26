@@ -32,15 +32,51 @@ struct SelectedEnum {
     variants: BTreeMap<String, String>,
 }
 
-fn conditional(attrs: &[Attribute]) -> Result<()> {
-    if attrs
-        .iter()
-        .any(|a| a.path().is_ident("cfg") || a.path().is_ident("cfg_attr"))
-    {
-        Err("conditional declaration needs a compiler-profile witness".into())
-    } else {
-        Ok(())
+fn attributes(attrs: &[Attribute], allowed: &[&str]) -> Result<()> {
+    for attribute in attrs {
+        if !attribute.path().is_ident("doc")
+            && !allowed.iter().any(|key| attribute.path().is_ident(key))
+        {
+            return Err("unsupported attribute on selected declaration".into());
+        }
     }
+    Ok(())
+}
+
+fn native_error_traits(attrs: &[Attribute]) -> Result<()> {
+    use syn::{Token, punctuated::Punctuated};
+    let expected: BTreeSet<_> = [
+        "Debug",
+        "Copy",
+        "Clone",
+        "Eq",
+        "PartialEq",
+        "thiserror::Error",
+    ]
+    .into_iter()
+    .map(str::to_owned)
+    .collect();
+    let mut derived = BTreeSet::new();
+    for attr in attrs.iter().filter(|a| a.path().is_ident("derive")) {
+        let paths = attr
+            .parse_args_with(Punctuated::<syn::Path, Token![,]>::parse_terminated)
+            .map_err(|e| e.to_string())?;
+        for path in paths {
+            let name = path
+                .segments
+                .iter()
+                .map(|s| s.ident.to_string())
+                .collect::<Vec<_>>()
+                .join("::");
+            if !derived.insert(name) {
+                return Err("duplicate error derive".into());
+            }
+        }
+    }
+    if derived != expected {
+        return Err("error derive set differs from the supported native binding".into());
+    }
+    Ok(())
 }
 fn simple(ty: &Type) -> Result<String> {
     if let Type::Path(p) = ty
@@ -95,7 +131,7 @@ fn payload(fields: &Fields) -> Result<&'static str> {
         Fields::Unit => Ok("none"),
         Fields::Unnamed(f) if f.unnamed.len() == 1 => {
             let field = &f.unnamed[0];
-            conditional(&field.attrs)?;
+            attributes(&field.attrs, &[])?;
             match &field.ty {
                 Type::Reference(r)
                     if r.mutability.is_none()
@@ -181,7 +217,7 @@ fn alias(i: &syn::ItemType) -> Result<String> {
 
 fn extract(s: &Selection, src: &str) -> Result<(Value, Value)> {
     let file = syn::parse_file(src).map_err(|e| e.to_string())?;
-    conditional(&file.attrs)?;
+    attributes(&file.attrs, &[])?;
     let mut constants = vec![];
     let mut errors = vec![];
     let mut results = vec![];
@@ -206,7 +242,7 @@ fn extract(s: &Selection, src: &str) -> Result<(Value, Value)> {
     for item in file.items {
         match item {
             Item::Const(i) if let Some(id) = s.constants.get(&i.ident.to_string()) => {
-                conditional(&i.attrs)?;
+                attributes(&i.attrs, &[])?;
                 public(&i.vis)?;
                 let ty = simple(&i.ty)?;
                 if !matches!(ty.as_str(), "usize" | "u64" | "u32" | "u16" | "u8") {
@@ -217,7 +253,8 @@ fn extract(s: &Selection, src: &str) -> Result<(Value, Value)> {
                 names.insert(id, i.ident.to_string());
             }
             Item::Enum(i) if let Some(e) = s.errors.get(&i.ident.to_string()) => {
-                conditional(&i.attrs)?;
+                attributes(&i.attrs, &["derive"])?;
+                native_error_traits(&i.attrs)?;
                 public(&i.vis)?;
                 if !i.generics.params.is_empty() || i.generics.where_clause.is_some() {
                     return Err("generic errors unsupported".into());
@@ -225,7 +262,7 @@ fn extract(s: &Selection, src: &str) -> Result<(Value, Value)> {
                 let mut variants = vec![];
                 let mut order = vec![];
                 for v in i.variants {
-                    conditional(&v.attrs)?;
+                    attributes(&v.attrs, &["error"])?;
                     if v.discriminant.is_some() {
                         return Err("explicit ordinal outside this binding".into());
                     }
@@ -259,7 +296,7 @@ fn extract(s: &Selection, src: &str) -> Result<(Value, Value)> {
                 errors.push(json!({"id":e.id,"variants":variants}));
             }
             Item::Type(i) if let Some(id) = s.results.get(&i.ident.to_string()) => {
-                conditional(&i.attrs)?;
+                attributes(&i.attrs, &[])?;
                 public(&i.vis)?;
                 let name = alias(&i)?;
                 results.push(json!({"id":id,"error":s.errors.get(&name).ok_or("unselected result error")?.id}));
@@ -362,5 +399,68 @@ pub fn run(repo: &Path, selection: &Path, out: &Path) -> Result<()> {
     #[cfg(not(any(target_os = "linux", target_os = "macos")))]
     {
         fs::rename(staging.path(), out).map_err(|e| e.to_string())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    const SOURCE: &str = r#"
+pub const LIMIT:u64=i64::MAX as u64;
+pub const OTHER:u64=u32::MAX as u64;
+#[derive(Debug,Clone,Copy,PartialEq,Eq,thiserror::Error)]
+pub enum First { #[error("bad {0}")] Text(&'static str), #[error("flag {0}")] Flag(bool) }
+#[derive(Debug,Clone,Copy,PartialEq,Eq,thiserror::Error)]
+pub enum Second { #[error("missing")] Missing }
+pub type Output<T>=std::result::Result<T,First>;
+"#;
+    fn selection() -> Selection {
+        serde_json::from_value(
+            json!({"sourceRevision":"","moduleFile":"lib.rs","domain":"urn:x:d",
+           "constants":{"LIMIT":"urn:x:l","OTHER":"urn:x:o"},"results":{"Output":"urn:x:r"},
+           "errors":{"First":{"id":"urn:x:e","variants":{"Text":"urn:x:t","Flag":"urn:x:f"}},
+                     "Second":{"id":"urn:x:s","variants":{"Missing":"urn:x:m"}}}}),
+        )
+        .unwrap()
+    }
+    #[test]
+    fn selected_native_structure_tracks_the_source() {
+        let s = selection();
+        let (g, r) = extract(&s, SOURCE).unwrap();
+        assert_eq!(g["constants"][0]["value"], json!(i64::MAX));
+        assert_eq!(g["constants"][1]["value"], json!(u32::MAX));
+        assert_eq!(g["errors"][0]["variants"][0]["payload"], "text");
+        assert_eq!(g["errors"][0]["variants"][1]["payload"], "bool");
+        let edited = SOURCE.replace("T,First", "T,Second").replace(
+            r#"#[error("bad {0}")] Text(&'static str), #[error("flag {0}")] Flag(bool)"#,
+            r#"#[error("flag {0}")] Flag(bool), #[error("bad {0}")] Text(&'static str)"#,
+        );
+        let (new_g, new_r) = extract(&s, &edited).unwrap();
+        assert_eq!(new_g["results"][0]["error"], "urn:x:s");
+        assert_eq!(r["variantOrder"]["urn:x:e"], json!(["urn:x:t", "urn:x:f"]));
+        assert_eq!(
+            new_r["variantOrder"]["urn:x:e"],
+            json!(["urn:x:f", "urn:x:t"])
+        );
+        assert_eq!(new_r["constantTypes"]["urn:x:l"], "u64");
+        let mut missing = selection();
+        missing
+            .errors
+            .get_mut("First")
+            .unwrap()
+            .variants
+            .remove("Flag");
+        assert!(extract(&missing, SOURCE).is_err());
+        let mut extra = selection();
+        extra
+            .errors
+            .get_mut("First")
+            .unwrap()
+            .variants
+            .insert("Extra".into(), "urn:x:extra".into());
+        assert!(extract(&extra, SOURCE).is_err());
+        let mut duplicate = selection();
+        duplicate.constants.insert("OTHER".into(), "urn:x:l".into());
+        assert!(extract(&duplicate, SOURCE).is_err());
     }
 }

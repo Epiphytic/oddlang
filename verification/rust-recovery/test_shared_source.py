@@ -9,7 +9,7 @@ CLI=Path(sys.argv[1]).resolve()
 SOURCE="""
 pub const CAP: u16 = 3 * 17;
 pub const SOFT: u16 = CAP;
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, thiserror::Error)]
 pub enum Alarm {
     #[error("sensor {{limit}}: {0}")]
     Reading(u64),
@@ -33,6 +33,13 @@ with tempfile.TemporaryDirectory() as tmp:
         (SOURCE.replace("{0}","{0:?}"),False),
         (SOURCE.replace("SOFT: u16 = CAP","SOFT: u16 = unknown()"),False),
         (SOURCE.replace("Reading(u64)","Reading(u64,u64)"),False),
+        (SOURCE.replace("pub enum Alarm","#[non_exhaustive] pub enum Alarm"),False),
+        (SOURCE.replace("pub enum Alarm","#[repr(u8)] pub enum Alarm"),False),
+        (SOURCE.replace("Reading(u64)","Reading(#[from] u64)"),False),
+        (SOURCE.replace("pub enum Alarm","#[error(transparent)] pub enum Alarm"),False),
+        (SOURCE.replace("pub const CAP","const CAP"),False),
+        (SOURCE.replace("no signal","no signal {0}"),False),
+        (SOURCE.replace("Copy, Clone","Clone"),False),
     ]
     for n,(src,ok) in enumerate(cases):
         file=root/"lib.rs";file.write_text(src)
@@ -57,4 +64,8 @@ with tempfile.TemporaryDirectory() as tmp:
             assert variants[1]["message"]==[{"text":"disconnected" if n else "no signal"}]
             assert json.loads((out/"observation.json").read_bytes())["sourceRevision"]==revision
             run(*cmd,ok=False)
+    for key,value in [("moduleFile","../lib.rs"),("sourceRevision",run("git","rev-parse","HEAD:lib.rs",cwd=root))]:
+        original=json.loads(decl.read_bytes()); original[key]=value
+        bad=work/f"bad-{key}"; bad.write_text(json.dumps(original))
+        run(CLI,"recover","shared-declarations",root,bad,work/f"bad-out-{key}",ok=False)
     print("pinned revisions, symbolic references, typed messages, unsupported cases and existing destinations checked")
