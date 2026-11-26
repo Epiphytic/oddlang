@@ -16,6 +16,9 @@ type Result<T> = std::result::Result<T, String>;
 const FORMAT: &str = "oddlang-field-relation-v1";
 const RECEIVER: &str = "receiver";
 
+mod recover;
+pub use recover::recover;
+
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 struct Graph {

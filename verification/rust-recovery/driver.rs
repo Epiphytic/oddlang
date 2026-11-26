@@ -10,6 +10,7 @@ extern crate rustc_type_ir;
 
 mod shape_model;
 mod shapes;
+mod relations;
 
 use std::collections::BTreeSet;
 use std::{env, fs, process};
@@ -598,6 +599,14 @@ struct Recovery;
 
 impl Callbacks for Recovery {
     fn after_analysis<'tcx>(&mut self, _compiler: &Compiler, tcx: TyCtxt<'tcx>) -> Compilation {
+        if let Ok(method) = env::var("ODD_RECOVERY_FIELD_CONJUNCTION") {
+            let compiler = env::var("ODD_RECOVERY_COMPILER").expect("compiler commit");
+            let output = env::var_os("ODD_RECOVERY_OUT").expect("field conjunction destination");
+            let file = fs::File::create_new(output).expect("create field conjunction observation");
+            serde_json::to_writer(file, &relations::observe(tcx, &compiler, &method))
+                .expect("serialize field conjunction observation");
+            return Compilation::Continue;
+        }
         if env::var_os("ODD_RECOVERY_DATA_SHAPES").is_some() {
             let compiler = env::var("ODD_RECOVERY_COMPILER").expect("compiler commit");
             let output = env::var_os("ODD_RECOVERY_OUT").expect("shape observation destination");

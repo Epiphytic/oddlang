@@ -143,3 +143,5 @@ The principal feasibility risk is recovering intended behavior where only incide
 - [x] Reconcile the ARM64 stream array refinement against the v1 release and independently compare rustdoc-visible element types and extents. [63 resolved fields and scoped evidence](https://github.com/Epiphytic/marmish-oddlang/pull/45)
 - [x] Inventory named runnable and ignored cases for all compiled default release harnesses on the two ARM64 hosts. [Named reference suites](https://github.com/Epiphytic/marmish-oddlang/pull/43)
 - [x] Complete the original Linux ARM64 default release run in a private checkout and bind it to the named harness inventory. [887 passed and five ignored](https://github.com/Epiphytic/marmish-oddlang/pull/47)
+
+- [x] Derive ordered field equality from a pinned compiler observation. Qualify a source mutation with an independent native fixture and emit explicit unresolved evidence for unsupported equality. [Recovery profile](../../language/field-relations.md#compiler-backed-recovery-of-direct-conjunctions) · [Upstream source mutation and native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/48)

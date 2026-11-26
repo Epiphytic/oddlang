@@ -2112,3 +2112,24 @@ w:originalPrivateDefaultRelease a p:Task ; rdfs:label "Run the unchanged Linux A
     p:acceptance "Match every compiled harness digest and its complete runnable and ignored counts, including the formerly failing path-permissions case." ;
     p:status p:done ; p:evidence w:originalPrivateDefaultReleaseReceipt .
 w:originalPrivateDefaultReleaseReceipt a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/47> .
+
+w:recoverFieldConjunctions a p:Task ;
+    rdfs:label "Recover direct Rust field equality conjunctions from pinned compiler evidence" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:typedFieldRelations ;
+    p:acceptance "Reproduce ordered field correspondence from a selected native method. Compare independent native outcomes before and after editing its source and reject ambiguous bindings or equality whose semantics are unproven." ;
+    p:addresses w:fieldConjunctionProvenanceReview, w:fieldConjunctionDerefReview ;
+    p:evidence w:fieldConjunctionNativeFixture, w:copySourceConjunctionNativeReceipt .
+w:wholeMarmishProtocols p:dependsOn w:recoverFieldConjunctions .
+w:fieldConjunctionNativeFixture a p:Artifact ;
+    p:location "verification/rust-recovery/field-conjunction/verify.py" .
+w:fieldConjunctionProvenanceReview a p:Finding ;
+    rdfs:label "Pin compiler-read source files and select only inherent methods" ;
+    p:source w:fieldConjunctionReview .
+w:fieldConjunctionReview a p:Artifact ;
+    p:location "docs/design/reviews/rust-field-conjunctions.md" .
+w:fieldConjunctionDerefReview a p:Finding ;
+    rdfs:label "Require built-in receiver dereference and exact module-scoped field ownership" ;
+    p:source w:fieldConjunctionReview .
+w:copySourceConjunctionNativeReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/c8c187862a114efaf2bc8fce403471959d3a939d/verification/whole/copy-source-correspondence/reference-aarch64-apple-darwin.json" .
