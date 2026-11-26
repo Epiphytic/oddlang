@@ -1,11 +1,13 @@
 use super::{
-    BinaryList, Binding, Definition, Field, Guard, Payload, Predicate, Schema, Shape, Variant,
+    BinaryList, BinaryScalar, Binding, Definition, Field, Guard, NativeValidation, Payload,
+    Predicate, Schema, Shape, Variant,
 };
 use std::{collections::BTreeMap, fmt::Write as _};
 
 enum Adapter<'a> {
     Hex { bytes: usize, diagnostic: &'a str },
     Binary(&'a BinaryList),
+    Scalar(&'a BinaryScalar),
 }
 
 pub(super) fn project(schema: &Schema, binding: &Binding) -> String {
@@ -33,7 +35,8 @@ pub(super) fn project(schema: &Schema, binding: &Binding) -> String {
                 text.push_str("}\n\n");
                 let guards: Vec<_> = schema.guards.iter().filter(|g| g.owner == id).collect();
                 if !guards.is_empty() {
-                    guard_start(&mut text, name);
+                    let native = binding.native_validation.get(id);
+                    guard_start(&mut text, name, native);
                     let selectors = fields
                         .iter()
                         .map(|field| {
@@ -43,7 +46,7 @@ pub(super) fn project(schema: &Schema, binding: &Binding) -> String {
                             )
                         })
                         .collect();
-                    write_guards(&mut text, &guards, &selectors, "        ");
+                    write_guards(&mut text, &guards, &selectors, "        ", native);
                     guard_end(&mut text);
                 }
             }
@@ -109,6 +112,12 @@ mod __oddlang_wire_adapter_{index} {{
     }}
 }}"#).unwrap();
             }
+            Adapter::Scalar(policy) => {
+                writeln!(text, "mod __oddlang_wire_adapter_{index} {{").unwrap();
+                writeln!(text,"const MAX:u32={}; const ENCODED:&str={:?}; const DECODED:&str={:?}; const SYNTAX:&str={:?};",policy.max_bytes,policy.encoded_limit_message,policy.decoded_limit_message,policy.syntax_message).unwrap();
+                text.push_str(include_str!("base64_scalar.rs"));
+                text.push_str("}\n");
+            }
             Adapter::Binary(policy) => write_binary_adapter(&mut text, index, policy),
         }
     }
@@ -152,6 +161,7 @@ fn write_fields<'a>(
                 bytes: *bytes,
                 diagnostic,
             }),
+            Shape::BoundedBase64 { policy } => Some(Adapter::Scalar(policy)),
             Shape::BoundedBase64List { policy } => Some(Adapter::Binary(policy)),
             _ => None,
         };
@@ -187,6 +197,7 @@ fn ty(shape: &Shape, binding: &Binding) -> String {
             .unwrap_or_else(|| &binding.externals[id])
             .clone(),
         Shape::LowerHex { bytes, .. } => format!("[::core::primitive::u8; {bytes}]"),
+        Shape::BoundedBase64 { .. } => "::std::vec::Vec<::core::primitive::u8>".into(),
         Shape::BoundedBase64List { .. } => {
             "::std::vec::Vec<::std::vec::Vec<::core::primitive::u8>>".into()
         }
@@ -194,8 +205,15 @@ fn ty(shape: &Shape, binding: &Binding) -> String {
     }
 }
 
-fn guard_start(text: &mut String, name: &str) {
-    writeln!(text, "impl {name} {{\n    pub fn validate_wire(&self) -> ::core::result::Result<(), &'static str> {{").unwrap();
+fn guard_start(text: &mut String, name: &str, native: Option<&NativeValidation>) {
+    let (method, ty) = native.map_or(("validate_wire", "&'static str"), |n| {
+        (n.method.as_str(), n.type_path.as_str())
+    });
+    writeln!(
+        text,
+        "impl {name} {{\n    pub fn {method}(&self) -> ::core::result::Result<(), {ty}> {{"
+    )
+    .unwrap();
 }
 
 fn guard_end(text: &mut String) {
@@ -213,7 +231,8 @@ fn union_guards(
     if !schema.guards.iter().any(|guard| guard.owner == id) {
         return;
     }
-    guard_start(text, name);
+    let native = binding.native_validation.get(id);
+    guard_start(text, name, native);
     for variant in variants {
         let guards: Vec<_> = schema
             .guards
@@ -256,10 +275,10 @@ fn union_guards(
         }
         if singleton {
             text.push_str("            ..\n        } = self;\n");
-            write_guards(text, &guards, &selectors, "        ");
+            write_guards(text, &guards, &selectors, "        ", native);
         } else {
             text.push_str("            ..\n        } = self {\n");
-            write_guards(text, &guards, &selectors, "            ");
+            write_guards(text, &guards, &selectors, "            ", native);
             text.push_str("        }\n");
         }
     }
@@ -272,6 +291,7 @@ fn references(predicate: &Predicate, id: &str) -> bool {
         | Predicate::Present { field }
         | Predicate::UnsignedRange { field, .. }
         | Predicate::Count { field, .. }
+        | Predicate::ExcludesByte { field, .. }
         | Predicate::Unique { field } => field == id,
         Predicate::AtMost { left, right } => left == id || right == id,
     }
@@ -306,6 +326,7 @@ fn expression(predicate: &Predicate, selectors: &BTreeMap<&str, (String, bool)>)
         } => {
             format!("({minimum}..={maximum}).contains(&{}.len())", select(field))
         }
+        Predicate::ExcludesByte { field, byte } => format!("!{}.contains(&{byte})", select(field)),
         Predicate::Unique { field } => format!(
             "{{ let mut seen = ::std::collections::BTreeSet::new(); {}.iter().all(|item| seen.insert(item)) }}",
             select(field)
@@ -323,6 +344,7 @@ fn write_guards(
     guards: &[&Guard],
     selectors: &BTreeMap<&str, (String, bool)>,
     indent: &str,
+    native: Option<&NativeValidation>,
 ) {
     for guard in guards {
         let required = expression(&guard.require, selectors);
@@ -330,10 +352,21 @@ fn write_guards(
         if let Some(when) = &guard.when {
             write!(text, "{} && ", expression(when, selectors)).unwrap();
         }
+        let error = native.map_or_else(
+            || format!("{:?}", guard.error),
+            |n| {
+                let e = &n.errors[&guard.error];
+                let arg = e
+                    .argument
+                    .as_ref()
+                    .map(|v| format!("({v:?})"))
+                    .unwrap_or_default();
+                format!("{}::{}{arg}", n.type_path, e.variant)
+            },
+        );
         writeln!(
             text,
-            "!({required}) {{\n{indent}    return ::core::result::Result::Err({:?});\n{indent}}}",
-            guard.error
+            "!({required}) {{\n{indent}    return ::core::result::Result::Err({error});\n{indent}}}"
         )
         .unwrap();
     }

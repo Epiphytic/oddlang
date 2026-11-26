@@ -1,7 +1,7 @@
 //! Recover a structural candidate from selected, source-pinned Serde declarations.
 use super::{
-    BINDING_FORMAT, BinaryList, Binding, Definition, FORMAT, Field, Payload, Result, Schema, Shape,
-    Variant, digest, encode, io, iri, publish,
+    BINDING_FORMAT, BinaryList, BinaryScalar, Binding, Definition, FORMAT, Field, Payload, Result,
+    Schema, Shape, Variant, digest, encode, io, iri, publish,
 };
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -38,6 +38,7 @@ struct External {
 enum Adapter {
     LowerHex { bytes: usize, diagnostic: String },
     BoundedBase64List { policy: BinaryList },
+    BoundedBase64 { policy: BinaryScalar },
 }
 
 #[derive(Default)]
@@ -247,6 +248,7 @@ impl Observer<'_> {
                                 diagnostic: diagnostic.clone(),
                             }
                         }
+                        Some(Adapter::BoundedBase64{policy}) if matches!(generic_item(&field.ty),Some((path,Type::Path(inner))) if self.builtin(path,"Vec",&["std::vec::Vec","alloc::vec::Vec"]) && self.builtin(&inner.path,"u8",&["core::primitive::u8","std::primitive::u8"])) => Shape::BoundedBase64{policy:policy.clone()},
                         Some(Adapter::BoundedBase64List { policy })
                             if self.vector_bytes(&field.ty) =>
                         {
@@ -635,6 +637,7 @@ pub fn from_source(source: &Path, selection: &Path, output: &Path) -> Result<()>
             format: BINDING_FORMAT.into(),
             names: BTreeMap::new(),
             derives: BTreeMap::new(),
+            native_validation: BTreeMap::new(),
             externals: config
                 .externals
                 .values()
