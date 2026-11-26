@@ -2,9 +2,9 @@
 
 Represent an opaque fixed-width value, construction from an exact array or checked byte sequence, a read-only borrow and erasure of its owned bytes on drop. The graph names the length and failure IRI. The Rust overlay binds the method names. A Rust backend can use a locked zeroize provider. No value formatting, cloning, equality, serialization, or public backing field is part of this profile. Erasure applies to the owned storage at destruction. Caller buffers, past moves or aborting a process are outside that guarantee.
 
-- [ ] Extend checked values with a closed fixed-bytes definition. Reject inapplicable bindings and incompatible record nesting. Use the existing stable-ID error binding, package seals and deterministic obligation output.
-- [ ] Witness an unrelated width, boundary lengths, ownership and negative trait access. Recheck existing checked-value projections.
-- [ ] Extend the companion vault data package. Qualify the original unchanged strict_public_values test via an external test harness linked to the generated crate. Check the original signatures and drop requirement separately. Keep provider access outside the test. Record upstream structural width recovery separately from authoring the ownership policy.
+- [x] Extend checked values with a closed fixed-bytes definition. Reject inapplicable bindings and incompatible record nesting. Use the existing stable-ID error binding, package seals and deterministic obligation output.
+- [x] Witness an unrelated width, boundary lengths, ownership and negative trait access. Recheck existing checked-value projections.
+- [x] Extend the companion vault data package. Qualify the original unchanged strict_public_values test via an external test harness linked to the generated crate. Check the original signatures and drop requirement separately. Keep provider access outside the test. Record upstream structural width recovery separately from authoring the ownership policy.
 
 ## Review decisions
 
@@ -15,3 +15,5 @@ For the application witness, extract the entire final test module of the pinned 
 The Rust package must select the crates.io zeroize 1.9.1 provider and lock its dependency. For erasure, check the selected member shape, native needs_drop, actual invocation of the Zeroizing destructor on an instrumented payload, and zeroization of a known fixed-size byte array through the same provider. Those observations establish the implementation and provider semantics without inspecting the lifetime-ended bytes of a dropped object.
 
 - [ ] Compose the qualified vault package into the next five-member release. The separately pinned earlier five-member workspace keeps its existing acceptance evidence.
+
+The [companion qualification](https://github.com/Epiphytic/marmish-oddlang/pull/68) records identical semantic, package and dependency seals for macOS and Linux ARM64. Each host passed the original test in both libraries. A changed array length gave E0277 when compiling the unchanged test module.
