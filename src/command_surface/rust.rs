@@ -23,7 +23,7 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> Result<String, String>
     if graph.external {
         operations.insert("*".into());
     }
-    validate(&graph.root, "", &BTreeSet::new(), &mut operations, 0)?;
+    validate(&graph.root, "", &[], &mut operations, 0)?;
     for (command, operation) in &binding.operations {
         if !operations.contains(command)
             || !operation.starts_with("urn:")
@@ -38,7 +38,7 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> Result<String, String>
          use std::{ffi::OsString, process::ExitCode};\n\n\
          pub enum Invocation {\n\
          \x20   Dispatch { operation: &'static str, matches: ArgMatches },\n\
-         \x20   Uncovered(ArgMatches),\n\
+         \x20   Uncovered,\n\
          \x20   Terminal(Error),\n\
          }\n\n\
          fn command() -> Command {\n",
@@ -85,9 +85,9 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> Result<String, String>
             .iter()
             .map(|command| command.name.as_str())
             .collect::<Vec<_>>();
-        writeln!(out, "        name if !name.is_empty() && !{commands:?}.contains(&name) => Invocation::Dispatch {{ operation: {operation:?}, matches }},").unwrap();
+        writeln!(out, "        _ if matches.subcommand_name().is_some_and(|name| !{commands:?}.contains(&name)) => Invocation::Dispatch {{ operation: {operation:?}, matches }},").unwrap();
     }
-    out.push_str("        _ => Invocation::Uncovered(matches),\n    }\n}\n");
+    out.push_str("        _ => Invocation::Uncovered,\n    }\n}\n");
     out.push_str(
         "\npub fn run_cli_with(handler: impl FnOnce(&'static str, ArgMatches) -> ExitCode) -> ExitCode {\n\
          \x20   match parse(std::env::args_os()) {\n\
@@ -111,7 +111,7 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> Result<String, String>
          \x20               ExitCode::SUCCESS\n\
          \x20           }\n\
          \x20       }\n\
-         \x20       Invocation::Uncovered(_) => uncovered(),\n\
+         \x20       Invocation::Uncovered => uncovered(),\n\
          \x20   }\n\
          }\n\n\
          pub fn run_cli() -> ExitCode {\n\
@@ -132,24 +132,25 @@ fn valid_name(value: &str) -> bool {
             .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, '-' | '_'))
 }
 
-fn validate(
-    command: &Command,
+fn validate<'a>(
+    command: &'a Command,
     path: &str,
-    inherited: &BTreeSet<String>,
+    inherited: &[&'a Argument],
     operations: &mut BTreeSet<String>,
     depth: usize,
 ) -> Result<(), String> {
     if depth > 16 || !valid_name(&command.name) {
         return Err(format!("invalid command name or depth at {path:?}"));
     }
-    let mut ids = inherited.clone();
+    let mut ids = BTreeSet::from(["help".to_owned()]);
     let mut long_names = BTreeSet::from(["help"]);
     let mut short_names = BTreeSet::from(['h']);
     if depth == 0 {
+        ids.insert("version".to_owned());
         long_names.insert("version");
         short_names.insert('V');
     }
-    for arg in &command.arguments {
+    for arg in inherited.iter().copied().chain(&command.arguments) {
         if !valid_name(&arg.id) || !ids.insert(arg.id.clone()) {
             return Err(format!("invalid or duplicate argument {}", arg.id));
         }
@@ -200,15 +201,9 @@ fn validate(
     }
     let globals = inherited
         .iter()
-        .cloned()
-        .chain(
-            command
-                .arguments
-                .iter()
-                .filter(|arg| arg.global)
-                .map(|arg| arg.id.clone()),
-        )
-        .collect();
+        .copied()
+        .chain(command.arguments.iter().filter(|arg| arg.global))
+        .collect::<Vec<_>>();
     let mut names = BTreeSet::from(["help"]);
     for child in &command.subcommands {
         if std::iter::once(&child.name)

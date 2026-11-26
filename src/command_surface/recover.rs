@@ -33,6 +33,7 @@ pub(super) fn extract(source: &str, selection: Selection) -> Result<Graph, Strin
         gaps: selection.gaps,
     };
     graph.root.name = graph.package_name.clone();
+    graph.root.help = help(&root.attrs)?;
     let mut version = false;
     for meta in attrs(&root.attrs, "command")? {
         match key(&meta)?.as_str() {
@@ -63,6 +64,19 @@ pub(super) fn extract(source: &str, selection: Selection) -> Result<Graph, Strin
         let (outer, inner) = type_name(&field.ty)?;
         graph.root.subcommand_required = outer != "Option";
         subcommand_type = Some(inner.unwrap_or(outer));
+    }
+    if !graph.root.arguments.is_empty() {
+        graph.root.groups.push(Group {
+            id: selection.root,
+            arguments: graph
+                .root
+                .arguments
+                .iter()
+                .map(|arg| arg.id.clone())
+                .collect(),
+            multiple: true,
+            ..Group::default()
+        });
     }
     if let Some(name) = subcommand_type {
         let Some(Item::Enum(commands)) = definitions.get(&name) else {

@@ -12,8 +12,10 @@ struct Graph {
     version: String,
     root: Command,
     #[serde(default)]
+    #[serde(skip_serializing_if = "is_false")]
     external: bool,
     #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     gaps: Vec<String>,
 }
 
@@ -21,13 +23,21 @@ struct Graph {
 #[serde(default, deny_unknown_fields)]
 struct Command {
     name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     help: Option<String>,
+    #[serde(skip_serializing_if = "is_false")]
     hidden: bool,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     aliases: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     visible_aliases: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     arguments: Vec<Argument>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     groups: Vec<Group>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     subcommands: Vec<Command>,
+    #[serde(skip_serializing_if = "is_false")]
     subcommand_required: bool,
 }
 
@@ -35,21 +45,36 @@ struct Command {
 #[serde(default, deny_unknown_fields)]
 struct Argument {
     id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     help: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     long: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     short: Option<char>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     aliases: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     visible_aliases: Vec<String>,
     value_name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     kind: Option<ValueKind>,
+    #[serde(skip_serializing_if = "is_false")]
     required: bool,
+    #[serde(skip_serializing_if = "is_false")]
     repeated: bool,
+    #[serde(skip_serializing_if = "is_false")]
     global: bool,
+    #[serde(skip_serializing_if = "is_false")]
     last: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
     default_value: Option<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     possible_values: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     bounds: Option<Bounds>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     conflicts: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     requires: Vec<String>,
 }
 
@@ -68,6 +93,7 @@ enum ValueKind {
 #[serde(deny_unknown_fields)]
 struct Bounds {
     minimum: u64,
+    #[serde(skip_serializing_if = "Option::is_none")]
     maximum: Option<u64>,
 }
 
@@ -75,8 +101,11 @@ struct Bounds {
 #[serde(default, deny_unknown_fields)]
 struct Group {
     id: String,
+    #[serde(skip_serializing_if = "is_false")]
     required: bool,
+    #[serde(skip_serializing_if = "is_false")]
     multiple: bool,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     arguments: Vec<String>,
 }
 
@@ -98,6 +127,10 @@ struct Binding {
     invalid_diagnostic: Option<String>,
     uncovered_exit: u8,
     operations: BTreeMap<String, String>,
+}
+
+fn is_false(value: &bool) -> bool {
+    !value
 }
 
 fn read<T: serde::de::DeserializeOwned>(path: &Path) -> Result<T, String> {
