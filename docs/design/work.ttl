@@ -1191,7 +1191,7 @@ w:unifiedProfileWorkspacePlan a p:Artifact ;
 w:unifiedProfileWorkspace a p:Task ;
     rdfs:label "Qualify configured init and real local lifecycle in one release" ;
     p:milestone w:marmishMilestone ; p:source w:unifiedProfileWorkspacePlan ;
-    p:status p:active ; p:dependsOn w:provisionedNativeWorkspace, w:nativeConfiguredProfileInit, w:localProviderLifecycle ;
+    p:status p:done ; p:evidence w:unifiedProfileWorkspaceReceipt ; p:dependsOn w:provisionedNativeWorkspace, w:nativeConfiguredProfileInit, w:localProviderLifecycle ;
     p:acceptance "Build the same core and stream packages with both local profile roles. Replay their genuine original and generated processes and durable observations on both ARM64 hosts." .
 
 w:retainedReadbackComposition a p:Finding ;
@@ -1212,3 +1212,5 @@ w:buildReportSourceRecovery a p:Task ; rdfs:label "Recover the ordered profile, 
     p:milestone w:marmishMilestone ; p:source w:buildReportCommandPlan ; p:status p:planned ;
     p:dependsOn w:buildReportCommand ;
     p:acceptance "Link the five source declarations to the report in order, verify widths and conversion rules, and demonstrate a mutation against an independently compiled observer." .
+w:unifiedProfileWorkspaceReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/56> .
