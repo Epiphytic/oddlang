@@ -39,14 +39,47 @@ struct Module {
 struct Record {
     id: String,
     traits: Vec<Trait>,
+    #[serde(rename = "readPolicy", skip_serializing_if = "Option::is_none")]
+    read_policy: Option<ReadPolicy>,
     fields: Vec<Field>,
 }
 
-#[derive(Deserialize, Serialize, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct ReadPolicy {
+    shape: InputShape,
+    unknown_fields: UnknownFields,
+}
+
+impl ReadPolicy {
+    fn rejects_unknown(&self) -> bool {
+        match self.shape {
+            InputShape::ObjectOrOrderedSequence => self.unknown_fields == UnknownFields::Reject,
+        }
+    }
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case")]
+enum InputShape {
+    ObjectOrOrderedSequence,
+}
+
+#[derive(Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
+enum UnknownFields {
+    Reject,
+    Ignore,
+}
+
+#[derive(Deserialize, Serialize, Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[serde(rename_all = "kebab-case")]
 enum Trait {
     Clone,
     Serialize,
+    Deserialize,
+    PartialEq,
+    Eq,
     Debug,
     Default,
 }
@@ -69,17 +102,31 @@ enum Value {
     Text,
     Octets,
     Path,
+    Optional(Box<Value>),
+    External(String),
 }
 
 impl Value {
-    fn rust(&self) -> &'static str {
+    fn rust(&self, overlay: &Overlay) -> String {
         match self {
-            Self::Bool => "bool",
-            Self::U32 => "u32",
-            Self::U64 => "u64",
-            Self::Text => "::std::string::String",
-            Self::Octets => "::std::vec::Vec<u8>",
-            Self::Path => "::std::path::PathBuf",
+            Self::Bool => "bool".into(),
+            Self::U32 => "u32".into(),
+            Self::U64 => "u64".into(),
+            Self::Text => "::std::string::String".into(),
+            Self::Octets => "::std::vec::Vec<u8>".into(),
+            Self::Path => "::std::path::PathBuf".into(),
+            Self::Optional(inner) => format!("::core::option::Option<{}>", inner.rust(overlay)),
+            Self::External(id) => overlay.external_types[id].join("::"),
+        }
+    }
+
+    fn contained(&self) -> Result<&Value> {
+        match self {
+            Self::Optional(inner) if matches!(**inner, Self::Optional(_)) => {
+                Err("nested optional public record values have no distinct wire shape".into())
+            }
+            Self::Optional(inner) => Ok(inner),
+            _ => Ok(self),
         }
     }
 }
@@ -103,6 +150,13 @@ struct Overlay {
     flatten_module: bool,
     #[serde(deserialize_with = "unique_map")]
     identifiers: BTreeMap<String, String>,
+    #[serde(
+        rename = "externalTypes",
+        default,
+        skip_serializing_if = "BTreeMap::is_empty",
+        deserialize_with = "unique_map"
+    )]
+    external_types: BTreeMap<String, Vec<String>>,
 }
 
 impl Overlay {
@@ -119,6 +173,48 @@ fn claim<'a>(id: &'a str, seen: &mut BTreeSet<&'a str>) -> Result<()> {
     Ok(())
 }
 
+fn validate_external_types(graph: &Graph, overlay: &Overlay) -> Result<()> {
+    let mut consumed = BTreeSet::new();
+    for record in graph.modules.iter().flat_map(|module| &module.records) {
+        for field in &record.fields {
+            if let Value::External(id) = field.value.contained()? {
+                iri(id)?;
+                if matches!(field.value, Value::External(_))
+                    && record.traits.contains(&Trait::Default)
+                {
+                    return Err("an external public record choice has no declared default".into());
+                }
+                consumed.insert(id);
+            }
+        }
+    }
+    if consumed.into_iter().ne(overlay.external_types.keys()) {
+        return Err(
+            "external public record choice bindings must match the declared identities".into(),
+        );
+    }
+    for path in overlay.external_types.values() {
+        if path.len() < 2
+            || path[0] != "crate"
+            || !path[1..path.len() - 1].iter().all(|name| symbol(name))
+            || !type_symbol(path.last().expect("verified nonempty type path"))
+        {
+            return Err("invalid external public record choice path".into());
+        }
+    }
+    Ok(())
+}
+
+pub(crate) fn external_choice_links(
+    graph: &[u8],
+    binding: &[u8],
+) -> Result<BTreeMap<String, Vec<String>>> {
+    let graph = serde_json::from_slice(graph).map_err(|e| e.to_string())?;
+    let binding = serde_json::from_slice(binding).map_err(|e| e.to_string())?;
+    validate_external_types(&graph, &binding)?;
+    Ok(binding.external_types)
+}
+
 fn render(graph: &Graph, overlay: &Overlay, serde_available: bool) -> Result<String> {
     if graph.format != GRAPH || overlay.format != OVERLAY || graph.modules.is_empty() {
         return Err("invalid or empty public record contract".into());
@@ -129,6 +225,7 @@ fn render(graph: &Graph, overlay: &Overlay, serde_available: bool) -> Result<Str
             "a flat public record module requires exactly one module and no aliases".into(),
         );
     }
+    validate_external_types(graph, overlay)?;
     let mut identities = BTreeSet::new();
     let mut module_names = BTreeSet::new();
     let mut records = BTreeMap::new();
@@ -164,15 +261,23 @@ fn render(graph: &Graph, overlay: &Overlay, serde_available: bool) -> Result<Str
                 if !traits.insert(capability) {
                     return Err(format!("duplicate public record trait in {}", record.id));
                 }
-                if *capability == Trait::Serialize && !serde_available {
-                    return Err("public record Serialize requires native serde with derive".into());
+                if matches!(capability, Trait::Serialize | Trait::Deserialize) && !serde_available {
+                    return Err(format!(
+                        "public record {capability:?} requires native serde with derive"
+                    ));
                 }
             }
-            if traits.contains(&Trait::Serialize)
+            if record.read_policy.is_some() && !traits.contains(&Trait::Deserialize) {
+                return Err("public record read policy requires Deserialize".into());
+            }
+            if traits.contains(&Trait::Eq) && !traits.contains(&Trait::PartialEq) {
+                return Err("public record Eq requires PartialEq".into());
+            }
+            if (traits.contains(&Trait::Serialize) || traits.contains(&Trait::Deserialize))
                 && record
                     .fields
                     .iter()
-                    .any(|field| matches!(field.value, Value::Path))
+                    .any(|field| matches!(field.value.contained(), Ok(Value::Path)))
             {
                 return Err("serialized public path field has no portable wire rule".into());
             }
@@ -196,6 +301,13 @@ fn render(graph: &Graph, overlay: &Overlay, serde_available: bool) -> Result<Str
             }
         }
     }
+    if overlay
+        .external_types
+        .keys()
+        .any(|id| identities.contains(id.as_str()))
+    {
+        return Err("external public record choice collides with a record declaration".into());
+    }
     if bindings.len() != overlay.identifiers.len() {
         return Err("unused public record Rust identifier binding".into());
     }
@@ -212,6 +324,9 @@ fn render(graph: &Graph, overlay: &Overlay, serde_available: bool) -> Result<Str
                 .map(|capability| match capability {
                     Trait::Clone => "::std::clone::Clone",
                     Trait::Serialize => "::serde::Serialize",
+                    Trait::Deserialize => "::serde::Deserialize",
+                    Trait::PartialEq => "::core::cmp::PartialEq",
+                    Trait::Eq => "::core::cmp::Eq",
                     Trait::Debug => "::core::fmt::Debug",
                     Trait::Default => "::core::default::Default",
                 })
@@ -219,13 +334,21 @@ fn render(graph: &Graph, overlay: &Overlay, serde_available: bool) -> Result<Str
             if !traits.is_empty() {
                 writeln!(code, "{indent}#[derive({})]", traits.join(", ")).unwrap();
             }
+            if record.traits.contains(&Trait::Deserialize)
+                && record
+                    .read_policy
+                    .as_ref()
+                    .is_none_or(ReadPolicy::rejects_unknown)
+            {
+                writeln!(code, "{indent}#[serde(deny_unknown_fields)]").unwrap();
+            }
             writeln!(code, "{indent}pub struct {} {{", overlay.name(&record.id)).unwrap();
             for field in &record.fields {
                 writeln!(
                     code,
                     "{indent}    pub {}: {},",
                     field.wire,
-                    field.value.rust()
+                    field.value.rust(overlay)
                 )
                 .unwrap();
             }
