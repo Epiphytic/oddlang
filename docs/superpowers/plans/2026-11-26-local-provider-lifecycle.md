@@ -6,7 +6,9 @@
 
 The portable shutdown contract declares the report field identities, stable order, version, reason mapping and bounded terminal stages. The Rust provider adapter binds native types and methods. Activation cancels through the scoped transport, and any timeout or failed join stays false in the report. A preflight failure before listener publication returns its named error and preserves the owned binding for a subsequent retry. Interoperation evidence covers a pristine current-format prepared profile through a held or rejected direct TLS attempt. WebSocket messaging, readiness, nonempty histories, configured execution and installed services lie outside this phase.
 
-- [ ] Observe the pinned original on held TLS SIGINT and SIGTERM, rejected certificate and both corrupted and unsafe store starts. Measure owned runtime, lease and durable state before/after.
-- [ ] Make an unrelated delayed/failing provider fixture test/report each actual stage outcome and preserve existing output when no lifecycle binding is selected.
-- [ ] Compose checked file-profile store bindings with the genuine encrypted journal, account device, relay SDK and its joined notification forwarding task. Emit the checked report only after ownership barriers complete.
-- [ ] Qualify original and generated peers against separate held loopback listeners and check provider state before and after. Verify source-isolated builds on both ARM64 hosts. Publish reviewed framework and companion artifacts.
+- [x] Observe the pinned original on held TLS SIGINT and SIGTERM, rejected certificate and both corrupted and unsafe store starts. Measure owned runtime, lease and durable state before/after.
+- [x] Make an unrelated delayed/failing provider fixture test/report each actual stage outcome and preserve existing output when no lifecycle binding is selected.
+- [x] Compose checked file-profile store bindings with the genuine encrypted journal, account device, relay SDK and its joined notification forwarding task. Emit the checked report only after ownership barriers complete.
+- [x] Qualify original and generated peers against separate held loopback listeners and check provider state before and after. Verify source-isolated builds on both ARM64 hosts. Publish reviewed framework and companion artifacts.
+
+[Native ARM64 qualification](https://github.com/Epiphytic/marmish-oddlang/pull/53)
