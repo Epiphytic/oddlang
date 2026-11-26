@@ -123,6 +123,69 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
     missing_socket = subprocess.run([binary, "read", "--port", path], capture_output=True)
     assert (missing_socket.returncode, missing_socket.stdout, missing_socket.stderr) == (7, b"", b"sensor I/O\n")
 
+    typed = json.loads((root / "graph.json").read_bytes())
+    typed["transport"]["maximum_frame_bytes"] = 512
+    typed["response"].update(id="urn:field:reply", ordered_sequence_minimum=2)
+    for field in typed["response"]["fields"]:
+        field["id"] = "urn:field:reply:" + field["key"]
+
+    def nested(owner, key, kind):
+        return {"id": f"urn:field:{owner}:{key}", "key": key,
+                "kind": kind, "presence": "required"}
+
+    typed["response"]["fields"][0]["kind"] = {"kind":"ref", "id":"urn:field:reading"}
+    typed["response"]["declarations"] = [
+        {"kind":"tagged", "id":"urn:field:reading", "tag":"mode", "variants":[
+            {"id":"urn:field:reading:idle", "tag":"idle"},
+            {"id":"urn:field:reading:scan", "tag":"scan", "fields":[
+                nested("scan","digest",{"kind":"lower_hex", "bytes":2}),
+                nested("scan","rows",{"kind":"list","item":{"kind":"ref","id":"urn:field:sample"}}),
+            ]},
+        ]},
+        {"kind":"record", "id":"urn:field:sample", "fields":[
+            nested("sample","value","u8"),
+            nested("sample","reference",{"kind":"fixed_bytes","length":2}),
+        ]},
+    ]
+    write("typed.json", typed)
+    checked(ODDLANG, "build", "local-command-client", "rust", root / "typed.json",
+            root / "binding.json", root / "reply-projection")
+    projected = root / "reply-projection"
+    lock = json.loads((projected / "projection.lock").read_bytes())
+    assert lock["replyObligationsSha256"] == hashlib.sha256(
+        (projected / "reply-obligations.json").read_bytes()).hexdigest()
+    obligations = json.loads((projected / "reply-obligations.json").read_bytes())["obligations"]
+    assert len({row["declaration"] for row in obligations}) == len(obligations) == 12
+    manifest["components"][1]["graph"] = pin("typed.json")
+    write("manifest.json", manifest)
+    checked(ODDLANG, "build", "native-package", "rust", root / "manifest.json", root / "typed-client")
+    checked("cargo", "build", "--release", "--locked", "--offline", cwd=root / "typed-client")
+    typed_bin = root / "typed-client/target/release/field-meter"
+    exchange(typed_bin, path, reply(b'[null,true]'), (0, b'{"reading":null,"ready":true}\n', b""))
+    exchange(typed_bin, path, reply(b'[null,false,"stale"]'), (3, b'{"reading":null,"ready":false,"notice":"stale"}\n', b""))
+    exchange(typed_bin, path, reply(b'{"ready":true,"reading":{"mode":"idle","discard":0}}'),
+             (0, b'{"reading":{"mode":"idle"},"ready":true}\n', b""))
+    exchange(typed_bin, path, reply(b'{"ready":true,"reading":{"rows":[{"reference":[1,2],"value":255}],"mode":"scan","digest":"face"}}'),
+             (0, b'{"reading":{"mode":"scan","digest":"face","rows":[{"value":255,"reference":[1,2]}]},"ready":true}\n', b""))
+    for body in (b'[null]', b'[null,true,null,0]', b'{"ready":true,"reading":{"mode":"other"}}',
+                 b'{"ready":true,"reading":{"mode":"scan","digest":"FACE","rows":[]}}',
+                 b'{"ready":true,"reading":{"mode":"scan","digest":"face","rows":[],"extra":1}}',
+                 b'{"ready":true,"reading":{"mode":"scan","digest":"face","rows":[{"value":256,"reference":[1,2]}]}}',
+                 b'{"ready":true,"reading":{"mode":"scan","digest":"face","rows":[{"value":255,"reference":[1]}]}}'):
+        exchange(typed_bin, path, reply(body), (10, b"", b"invalid sensor response\n"))
+    for name, mutate, error in (
+        ("sequence", lambda graph: graph["response"].update(ordered_sequence_minimum=1), b"invalid nullable suffix"),
+        ("dangling", lambda graph: graph["response"]["fields"][0]["kind"].update(id="urn:field:missing"), b"unknown reply type"),
+        ("identity", lambda graph: graph["response"]["fields"][0].update(id="urn:field:reading"), b"duplicate reply declaration"),
+    ):
+        invalid_graph = json.loads((root / "typed.json").read_bytes())
+        mutate(invalid_graph)
+        write(name + ".json", invalid_graph)
+        invalid = subprocess.run([ODDLANG, "build", "local-command-client", "rust", root / (name + ".json"),
+                                  root / "binding.json", root / name], capture_output=True)
+        assert invalid.returncode and error in invalid.stderr and not (root / name).exists(), invalid.stderr
+    manifest["components"][1]["graph"] = pin("graph.json")
+
     def reject_link(message, output):
         write("manifest.json", manifest)
         invalid = subprocess.run(
@@ -167,4 +230,4 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
     assert mutant.returncode and b"constant request exceeds frame limit" in mutant.stderr
     assert not (root / "invalid").exists()
 
-print("field-meter IPC: nine framed interactions, three local errors, and five graph or linking rejections passed")
+print("field-meter IPC: nine framed interactions, three local errors, and five graph or linking rejections, and typed nested and sequence replies passed")

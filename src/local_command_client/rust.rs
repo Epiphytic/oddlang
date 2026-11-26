@@ -31,29 +31,13 @@ pub(super) fn render(graph: &Graph, entry: &str) -> Result<String, String> {
     ] {
         writeln!(out, "const {name}: Failure = {};", failure(diagnostic)).unwrap();
     }
-    out.push_str("\n#[derive(serde::Deserialize, serde::Serialize)]\n#[serde(deny_unknown_fields)]\nstruct Response {\n");
-    let mut success_field = None;
-    for (index, field) in graph.response.fields.iter().enumerate() {
-        if field.key == graph.response.success_field {
-            success_field = Some(index);
-        }
-        let ty = match field.kind {
-            ValueType::Bool => "bool",
-            ValueType::String => "String",
-            ValueType::Json => "serde_json::Value",
-            ValueType::Null => "()",
-        };
-        writeln!(out, "    #[serde(rename = {:?})]", field.key).unwrap();
-        match field.presence {
-            Presence::Required => writeln!(out, "    value_{index}: {ty},").unwrap(),
-            Presence::Nullable => writeln!(out, "    value_{index}: Option<{ty}>,").unwrap(),
-            Presence::OmitNull => {
-                out.push_str("    #[serde(skip_serializing_if = \"Option::is_none\")]\n");
-                writeln!(out, "    value_{index}: Option<{ty}>,").unwrap();
-            }
-        }
-    }
-    write!(out, "}}\n\npub fn {entry}(matches: ArgMatches) -> ExitCode {{\n    match run_inner(&matches) {{\n        Ok(code) => ExitCode::from(code),\n        Err(error) => error.report(),\n    }}\n}}\n").unwrap();
+    replies::render(&graph.response, &mut out);
+    let success_field = graph
+        .response
+        .fields
+        .iter()
+        .position(|field| field.key == graph.response.success_field);
+    write!(out, "\npub fn {entry}(matches: ArgMatches) -> ExitCode {{\n    match run_inner(&matches) {{\n        Ok(code) => ExitCode::from(code),\n        Err(error) => error.report(),\n    }}\n}}\n").unwrap();
     out.push_str("\nfn run_inner(matches: &ArgMatches) -> Result<u8, Failure> {\n");
     for guard in &graph.guards {
         let (condition, rejected) = match guard {

@@ -1,10 +1,12 @@
 //! Project bounded single-request Unix IPC as a native command handler.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{collections::BTreeSet, fs, path::Path};
 
+mod replies;
 mod rust;
+use replies::{Declaration, Primitive, ValueType};
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -72,30 +74,28 @@ struct RequestField {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Response {
+    id: Option<String>,
     fields: Vec<ResponseField>,
+    #[serde(default)]
+    declarations: Vec<Declaration>,
+    ordered_sequence_minimum: Option<usize>,
     success_field: String,
     success_exit: u8,
     failure_exit: u8,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 struct ResponseField {
+    id: Option<String>,
+    #[serde(default)]
+    default: bool,
     key: String,
     kind: ValueType,
     presence: Presence,
 }
 
-#[derive(Clone, Copy, Deserialize)]
-#[serde(rename_all = "snake_case")]
-enum ValueType {
-    Bool,
-    String,
-    Json,
-    Null,
-}
-
-#[derive(Clone, Copy, Deserialize)]
+#[derive(Clone, Copy, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 enum Presence {
     Required,
@@ -194,10 +194,11 @@ impl Graph {
         {
             return Err("invalid request field identity".into());
         }
+        replies::validate(&self.response)?;
         if !unique_keys(self.response.fields.iter().map(|field| field.key.as_str()))
             || !self.response.fields.iter().any(|field| {
                 field.key == self.response.success_field
-                    && matches!(field.kind, ValueType::Bool)
+                    && matches!(field.kind, ValueType::Primitive(Primitive::Bool))
                     && matches!(field.presence, Presence::Required)
             })
             || self.response.success_exit == self.response.failure_exit
@@ -274,12 +275,17 @@ pub(crate) fn build_bytes(graph: &[u8], binding: &[u8], output: &Path) -> Result
             .map(|byte| format!("{byte:02x}"))
             .collect::<String>()
     };
-    let lock = serde_json::json!({
+    let obligations =
+        replies::obligations(&contract.response).map(|catalog| format!("{catalog:#}\n"));
+    let mut lock = serde_json::json!({
         "format": "oddlang-local-command-client-lock-v1",
         "graphSha256": hash(graph),
         "bindingSha256": hash(binding),
         "sourceSha256": hash(source.as_bytes())
     });
+    if let Some(obligations) = &obligations {
+        lock["replyObligationsSha256"] = hash(obligations.as_bytes()).into();
+    }
     if output.symlink_metadata().is_ok() {
         return Err(format!("output already exists: {}", output.display()));
     }
@@ -289,6 +295,10 @@ pub(crate) fn build_bytes(graph: &[u8], binding: &[u8], output: &Path) -> Result
         .unwrap_or(Path::new("."));
     let stage = tempfile::tempdir_in(parent).map_err(|error| error.to_string())?;
     fs::write(stage.path().join("client.rs"), source).map_err(|error| error.to_string())?;
+    if let Some(obligations) = obligations {
+        fs::write(stage.path().join("reply-obligations.json"), obligations)
+            .map_err(|error| error.to_string())?;
+    }
     fs::write(stage.path().join("projection.lock"), format!("{lock:#}\n"))
         .map_err(|error| error.to_string())?;
     crate::native_package::publish(stage.path(), output)
