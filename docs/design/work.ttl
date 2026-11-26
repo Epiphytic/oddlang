@@ -821,10 +821,28 @@ w:typedFieldRelations p:addresses w:typedFieldRelationReview .
 
 w:binaryMetadataErrorReview a p:Finding ;
     rdfs:label "Separate parse-time offsets and tags from deferred Manifest field and metadata errors" ;
-    p:source w:binaryMetadataFixture .
+    p:source w:copyManifestNativeReview .
 w:binaryMetadataRecords p:addresses w:binaryMetadataErrorReview .
 w:copyManifestQualification a p:Task ; rdfs:label "Qualify a native copy Manifest and Mtime" ;
-    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:evidence w:copyManifestNativeReceipt ;
     p:dependsOn w:binaryMetadataRecords ;
     p:acceptance "Compare source-free Manifest validation, binary encoding, decoding, namespace and canonical SHA-256 with the pinned original." .
 w:wholeMarmishProtocols p:dependsOn w:copyManifestQualification .
+
+w:copyManifestNativeReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/2926c6aefdaca70ff1370d31f3d670aa84fb5973/verification/whole/copy-manifest/reference-aarch64-apple-darwin.json" .
+w:copyManifestNativeReview a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/2926c6aefdaca70ff1370d31f3d670aa84fb5973/docs/reviews/oddlang-copy-manifest.md" .
+
+w:copyCheckpointQualification a p:Task ; rdfs:label "Qualify a native copy Checkpoint and its FileIdentity value" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned ;
+    p:dependsOn w:copyManifestQualification ;
+    p:acceptance "Reproduce checked Checkpoint encoding and decoding, including native FileIdentity shapes and exact errors." .
+w:wholeMarmishProtocols p:dependsOn w:copyCheckpointQualification .
+
+w:copyFieldRelationQualification a p:Task ; rdfs:label "Qualify native copy Manifest matching and helper consistency checks" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned ;
+    p:dependsOn w:copyManifestQualification, w:typedFieldRelations ;
+    p:acceptance "Verify explicit field correspondence, checked helper start and build identity, and short-circuited error propagation against the pinned original." .
+w:wholeMarmishProtocols p:dependsOn w:copyFieldRelationQualification .

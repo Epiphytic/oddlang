@@ -75,4 +75,6 @@ The principal feasibility risk is recovering intended behavior where only incide
 - [x] Project typed cross-record equality, ordered prechecks and checked result comparisons. [Field relations](../../language/field-relations.md)
 
 - [x] Extend ordered binary records with nullable metadata, inline signed values, typed guards, and hexadecimal views. [Binary metadata](../../language/binary-records.md#binary-metadata)
-- [ ] Qualify the copy Manifest and Mtime against the pinned native original. Checkpoint owns the separate FileIdentity record witness.
+- [x] Qualify the copy Manifest and Mtime against the pinned native original. [Native receipt](https://github.com/Epiphytic/marmish-oddlang/pull/32)
+- [ ] Qualify the copy Checkpoint and its FileIdentity record against the pinned native original.
+- [ ] Qualify Manifest matching and the helper start and build consistency checks against the pinned native original.
