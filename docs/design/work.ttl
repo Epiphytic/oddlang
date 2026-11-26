@@ -927,7 +927,7 @@ w:recoverTaggedFrameEncoder a p:Task ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
     p:dependsOn w:recoverFieldConjunctions, w:boundedTaggedBinaryFrames ;
     p:acceptance "Use pinned compiler bindings to recover distinct tags and payload correspondence. Qualify an unrelated frame and an upstream encoder mutation using independently expected native bytes, with explicit per-variant gaps for unresolved effects." ;
-    p:addresses w:taggedFrameSourceReview ; p:evidence w:taggedFrameSourceFixture .
+    p:addresses w:taggedFrameSourceReview ; p:evidence w:taggedFrameSourceFixture, w:taggedCopyEncoderNativeReceipt .
 w:wholeMarmishProtocols p:dependsOn w:recoverTaggedFrameEncoder .
 w:taggedFrameSourceFixture a p:Artifact ;
     p:location "verification/rust-recovery/tagged-frame/verify.py" .
@@ -936,3 +936,5 @@ w:taggedFrameSourceReview a p:Finding ;
     p:source w:taggedFrameSourceReviewArtifact .
 w:taggedFrameSourceReviewArtifact a p:Artifact ;
     p:location "docs/design/reviews/rust-tagged-frame.md" .
+w:taggedCopyEncoderNativeReceipt a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/e4531704137c59a8deb93fd9bb81326cac4ed5a1/verification/whole/source-copy-frame/reference-aarch64-apple-darwin.json" .
