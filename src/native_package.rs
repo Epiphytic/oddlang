@@ -807,6 +807,32 @@ fn validate_command_callbacks(components: &[Component], base: &Path) -> Result<(
     Ok(())
 }
 
+fn validate_nested_codecs(components: &[Component], base: &Path) -> Result<()> {
+    let mut codecs = Vec::new();
+    let mut root_aliases = BTreeMap::new();
+    for component in components {
+        for name in component
+            .root_reexports
+            .as_ref()
+            .unwrap_or(&component.reexports)
+        {
+            root_aliases.insert(
+                format!("crate::{name}"),
+                format!("crate::{}::{name}", component.module),
+            );
+        }
+        if matches!(component.kind, Kind::BinaryRecord | Kind::BinaryFragment) {
+            let record = crate::binary_record::linkage::Record::read(
+                &component.graph.read(base)?,
+                &component.overlay.read(base)?,
+            )?;
+            let paths = export_paths(component, record.name());
+            codecs.push((record, paths));
+        }
+    }
+    crate::binary_record::linkage::validate(&codecs, &root_aliases)
+}
+
 fn cargo_manifest(manifest: &Manifest) -> Result<String> {
     let valid_name = |name: &str| {
         !name.is_empty()
@@ -1062,6 +1088,7 @@ pub(super) fn build_pinned(
         }
         records.push(record);
     }
+    validate_nested_codecs(&manifest.components, base)?;
     let mut lib = String::new();
     for (
         group,

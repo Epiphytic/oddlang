@@ -1119,7 +1119,8 @@ w:checkpointDecodePrecedenceReview a p:Finding ;
 w:compositeBinaryRecords p:addresses w:checkpointDecodePrecedenceReview .
 w:compositeExternalContractLinkage a p:Task ;
     rdfs:label "Check composite slot bounds and member types against pinned external codec contracts" ;
-    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:evidence w:nestedCodecPackageFixture, w:nestedCodecManifestReceipt ;
     p:dependsOn w:compositeBinaryRecords ;
     p:acceptance "Verify external codec identities, independently declared inner limits and exact native types before emitting a composed package." .
 
@@ -2160,3 +2161,18 @@ w:taggedFrameSourceReviewArtifact a p:Artifact ;
     p:location "docs/design/reviews/rust-tagged-frame.md" .
 w:taggedCopyEncoderNativeReceipt a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/e4531704137c59a8deb93fd9bb81326cac4ed5a1/verification/whole/source-copy-frame/reference-aarch64-apple-darwin.json" .
+
+w:nestedCodecPackageFixture a p:Artifact ;
+    p:location <https://github.com/Epiphytic/oddlang/blob/70821c898cabe15a5d0483dc9425e51aae883932/verification/binary-record/verify.py> .
+w:nestedCodecManifestReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/52> .
+
+w:nestedCodecReview a p:Artifact ;
+    p:location <https://github.com/Epiphytic/oddlang/pull/66> .
+w:nestedCodecErrorPropagation a p:Finding ;
+    rdfs:label "Resolve nested codec error type aliases and verify providers expose a complete codec" ;
+    p:source w:nestedCodecReview .
+w:nestedCodecDiagnosticPrecedence a p:Finding ;
+    rdfs:label "Preserve existing input, lock and re-export diagnostics before checking package-wide nested codec relationships" ;
+    p:source w:nestedCodecReview .
+w:compositeExternalContractLinkage p:addresses w:nestedCodecErrorPropagation, w:nestedCodecDiagnosticPrecedence .
