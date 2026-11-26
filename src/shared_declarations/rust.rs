@@ -24,6 +24,9 @@ pub(super) fn render(g: &Graph, b: &Binding) -> Result<String> {
         .unwrap();
     }
     for e in &g.errors {
+        if b.external_error_types.contains_key(&e.id) {
+            continue;
+        }
         let name = b.name(&e.id)?;
         writeln!(
             out,
@@ -74,7 +77,10 @@ pub(super) fn render(g: &Graph, b: &Binding) -> Result<String> {
             out,
             "pub type {}<__Value> = ::core::result::Result<__Value, {}>;",
             b.name(&a.id)?,
-            b.name(&a.error)?
+            b.external_error_types
+                .get(&a.error)
+                .map(String::as_str)
+                .unwrap_or(b.name(&a.error)?)
         )
         .unwrap();
     }
@@ -101,15 +107,18 @@ pub(super) fn render(g: &Graph, b: &Binding) -> Result<String> {
         out.push_str("}\n");
         if let Some(n) = &e.numbers {
             let name = b.name(&e.id)?;
-            let error = &b.number_errors[&n.unknown.id];
-            let ty = &error.type_path;
-            let variant = &error.variant;
-            let arg = n
-                .unknown
-                .argument
-                .as_ref()
-                .map(|v| format!("({v:?})"))
-                .unwrap_or_default();
+            let (owner, variant) = g.error_variant(&n.unknown.id)?;
+            let ty = b
+                .external_error_types
+                .get(&owner.id)
+                .map(String::as_str)
+                .unwrap_or(b.name(&owner.id)?);
+            let variant = b.name(&variant.id)?;
+            let arg = match n.unknown.argument.as_ref() {
+                Some(serde_json::Value::String(s)) => format!("({s:?})"),
+                Some(v) => format!("({v})"),
+                None => String::new(),
+            };
             writeln!(out,"impl ::core::convert::TryFrom<::core::primitive::u8> for {name} {{\n    type Error = {ty};\n    fn try_from(__byte: ::core::primitive::u8) -> ::core::result::Result<Self,{ty}> {{\n        match __byte {{").unwrap();
             for (id, tag) in &n.tags {
                 writeln!(

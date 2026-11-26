@@ -92,13 +92,7 @@ struct Numbering {
 struct NumberError {
     id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    argument: Option<String>,
-}
-#[derive(Deserialize, Serialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct Constructor {
-    type_path: String,
-    variant: String,
+    argument: Option<serde_json::Value>,
 }
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -115,7 +109,7 @@ struct Binding {
         skip_serializing_if = "BTreeMap::is_empty",
         deserialize_with = "unique_map"
     )]
-    number_errors: BTreeMap<String, Constructor>,
+    external_error_types: BTreeMap<String, String>,
     #[serde(deserialize_with = "unique_map")]
     names: BTreeMap<String, String>,
     #[serde(default, deserialize_with = "unique_map")]
@@ -289,7 +283,6 @@ impl Graph {
                 }
             }
         }
-        let mut errors = BTreeSet::new();
         for e in &self.string_enums {
             if let Some(numbering) = &e.numbers {
                 let ids = e.variants.iter().map(|v| &v.id).collect::<BTreeSet<_>>();
@@ -302,24 +295,39 @@ impl Graph {
                         e.id
                     ));
                 }
-                NamedNode::new(&numbering.unknown.id)
-                    .map_err(|_| "invalid unknown-tag error IRI")?;
-                errors.insert(&numbering.unknown.id);
+                let (_, v) = self.error_variant(&numbering.unknown.id)?;
+                let argument = numbering.unknown.argument.as_ref();
+                let matches = match v.payload {
+                    Payload::None => argument.is_none(),
+                    Payload::Text => argument.is_some_and(|v| v.is_string()),
+                    Payload::Bool => argument.is_some_and(|v| v.is_boolean()),
+                    Payload::U64 => argument.is_some_and(|v| v.is_u64()),
+                };
+                if !matches {
+                    return Err(format!("invalid number error payload: {}", v.id));
+                }
             }
             let mut wires = BTreeSet::new();
             if e.variants.iter().any(|v| !wires.insert(&v.wire)) {
                 return Err(format!("duplicate wire spelling: {}", e.id));
             }
         }
-        if !binding.number_errors.keys().eq(errors) {
-            return Err("number error bindings must cover exactly the referenced errors".into());
-        }
-        for entry in binding.number_errors.values() {
-            if !rust_type_path(&entry.type_path) || !native_ident(&entry.variant) {
-                return Err("invalid native number error binding".into());
+        for (id, path) in &binding.external_error_types {
+            if !self.errors.iter().any(|e| &e.id == id)
+                || !rust_type_path(path)
+                || !path.contains("::")
+                || path.rsplit("::").next() != Some(binding.name(id)?)
+            {
+                return Err(format!("invalid external error type binding: {id}"));
             }
         }
         Ok(())
+    }
+    fn error_variant(&self, id: &str) -> Result<(&ErrorType, &ErrorVariant)> {
+        self.errors
+            .iter()
+            .find_map(|e| e.variants.iter().find(|v| v.id == id).map(|v| (e, v)))
+            .ok_or_else(|| format!("unresolved number error variant: {id}"))
     }
 }
 
