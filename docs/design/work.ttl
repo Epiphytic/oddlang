@@ -337,7 +337,7 @@ w:rustValidation a p:Task ; rdfs:label "Validate original and regenerated ledger
     p:acceptance "Record proof scope, independent differential results and a concrete mutant counterexample." .
 
 w:marmishInventory a p:Task ; rdfs:label "Freeze Marmish baseline and inventory" ;
-    p:milestone w:marmishMilestone ; p:status p:planned ; p:source w:roundTripPlan, w:marmishSource ; p:dependsOn w:rustValidation ;
+    p:milestone w:marmishMilestone ; p:status p:done ; p:source w:roundTripPlan, w:marmishSource ; p:dependsOn w:rustValidation ;
     p:acceptance "Inventory every upstream target and native boundary with a reproducible baseline and gap register." .
 
 w:marmishFeatures a p:Task ; rdfs:label "Implement reusable Oddlang features required by Marmish" ;
@@ -387,3 +387,10 @@ w:rustUnboundedMapProof a p:Task ; rdfs:label "Prove ledger transfer equivalence
 
 w:rustProofScopeReview a p:Finding ; rdfs:label "A key-specific mutant survives the finite corpus and the populated map proof timed out" ; p:source w:rustValidationEvidence .
 w:rustUnboundedMapProof p:addresses w:rustProofScopeReview .
+
+w:marmishBaselineEvidence a p:Artifact ; rdfs:label "Pinned original source inventory and native observations" ;
+    p:location "docs/design/marmish-baseline.md" .
+w:marmishInventory p:evidence w:marmishBaselineEvidence .
+
+w:marmishBaselineReview a p:Finding ; rdfs:label "Freeze all six CLI observations, distinguish lexical and compiled units, and archive platform evidence" ; p:source w:marmishBaselineEvidence .
+w:marmishInventory p:addresses w:marmishBaselineReview .
