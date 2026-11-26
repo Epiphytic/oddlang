@@ -91,3 +91,12 @@ with tempfile.TemporaryDirectory() as temp:
         source.replace('#![cfg(unix)]', '#![cfg(target_arch = "aarch64")]'),
     )):
         recovery(text, "public-root-records", root / f"bad-record-{index}", False)
+
+    record = "#[derive(Debug)] pub struct Snapshot { pub primary: String }"
+    for index, text in enumerate((
+        "mod m { pub use ::core::clone::Clone as Debug; } use self::m::r#Debug; " + record,
+        "mod m { pub type String = u8; } use self::m::r#String; " + record,
+        "type r#String = u8; " + record,
+        "mod m { pub mod r#core {} } use self::m::r#core::{self}; " + record,
+    )):
+        recovery(text, "public-root-records", root / f"raw-shadow-{index}", False)

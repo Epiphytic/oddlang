@@ -1339,3 +1339,8 @@ w:rootPublicDataFixture a p:Artifact ;
 w:mdkPublicDataReceipt a p:Artifact ;
     p:location "companion:verification/whole/mdk-public-data/darwin-arm64/receipt.json" .
 w:rootPublicData p:evidence w:rootPublicDataFixture, w:mdkPublicDataReceipt .
+
+w:rootPublicDataRawBindingReview a p:Finding ;
+    rdfs:label "Resolve raw and self imports by their native binding names" ;
+    p:source w:rootPublicDataFixture .
+w:rootPublicData p:addresses w:rootPublicDataRawBindingReview .
