@@ -1,0 +1,124 @@
+name: Native Linux AMD64 original shape evidence
+on:
+  push:
+    branches: [verify/original-linux-amd64-shapes]
+permissions:
+  contents: read
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [core, engine, mdk, native-lib, native-products, native-tools, prototype, stream, vault]
+    env:
+      ORIGINAL: af54339d250290490d62d4475a77539b7e739071
+      FRAMEWORK: 5ec32f8177cf9d7b4ffcce0c192c5553af7f2042
+      COMPILER: 8bab26f4f68e0e26f0bb7960be334d5b520ea452
+      TARGET: x86_64-unknown-linux-gnu
+      GROUP: ${{ matrix.group }}
+      CARGO_TERM_COLOR: never
+    steps:
+      - name: Fetch pinned public sources and compiler
+        run: |
+          set -euxo pipefail
+          test "$(uname -m)" = x86_64
+          checkout_pin() {
+            local directory="$1" repository="$2" revision="$3"
+            git init "$directory"
+            git -C "$directory" fetch --depth=1 "$repository" "$revision"
+            git -C "$directory" checkout --detach FETCH_HEAD
+            test "$(git -C "$directory" rev-parse HEAD)" = "$revision"
+          }
+          checkout_pin "$RUNNER_TEMP/reference" https://github.com/Epiphytic/marmish "$ORIGINAL"
+          checkout_pin "$RUNNER_TEMP/framework" https://github.com/Epiphytic/oddlang "$FRAMEWORK"
+          rustup toolchain install 1.97.1 --profile minimal --component rustc-dev
+          rustc +1.97.1 -vV | grep -Fx "host: $TARGET"
+          rustc +1.97.1 -vV | grep -Fx "commit-hash: $COMPILER"
+          for root in reference framework framework/verification/rust-recovery; do
+            cargo +1.97.1 fetch --locked --target "$TARGET" --manifest-path "$RUNNER_TEMP/$root/Cargo.toml"
+          done
+      - name: Extract typed data shapes with the public framework
+        run: |
+          set -euxo pipefail
+          export RUSTUP_TOOLCHAIN=1.97.1
+          export CARGO_BUILD_JOBS=3
+          framework="$RUNNER_TEMP/framework"
+          reference="$RUNNER_TEMP/reference"
+          artifacts="$RUNNER_TEMP/graphs"
+          mkdir "$artifacts"
+          cargo +1.97.1 build --locked --offline --bin oddlang \
+            --manifest-path "$framework/Cargo.toml" --target-dir "$RUNNER_TEMP/cli"
+          cargo +1.97.1 metadata --locked --offline --no-deps --format-version 1 \
+            --manifest-path "$reference/Cargo.toml" > "$RUNNER_TEMP/metadata.json"
+          cd "$reference"
+          python3 - "$RUNNER_TEMP/metadata.json" "$framework" "$artifacts" <<'PY'
+          import hashlib, json, os, pathlib, subprocess, sys
+
+          metadata, framework, output = map(pathlib.Path, sys.argv[1:])
+          target_triple = os.environ["TARGET"]
+          group = os.environ["GROUP"]
+          source_revision = os.environ["ORIGINAL"]
+          compiler = os.environ["COMPILER"]
+          adapter = framework / "verification/rust-recovery/run.sh"
+          cargo_lock = hashlib.sha256(pathlib.Path("Cargo.lock").read_bytes()).hexdigest()
+          cli = output.parent / "cli/debug/oddlang"
+          groups = {
+              "marmish": "native-products", "marmishd": "native-products",
+              "marmish-worker": "native-products", "marmish_native": "native-lib",
+          }
+
+          profiles = []
+          for package in json.loads(metadata.read_text())["packages"]:
+              name = package["name"]
+              for target in package["targets"]:
+                  kind = target["kind"]
+                  if kind not in (["lib"], ["bin"]):
+                      continue
+                  if name == "marmish-native":
+                      owner = groups.get(target["name"], "native-tools")
+                  else:
+                      owner = name.removeprefix("marmish-")
+                  if owner != group:
+                      continue
+                  required = set(target.get("required-features", []))
+                  declared = package["features"]
+                  feature_sets = [[]] + [[feature] for feature in ("fault-injection", "installed-checks")
+                                        if feature in declared]
+                  for features in feature_sets:
+                      if required <= set(features) | set(declared.get("default", [])):
+                          profiles.append((name, kind[0], target["name"], features))
+
+          assert profiles, group
+          for name, kind, target, features in profiles:
+              cell = ".".join([target_triple, name, kind, target, *features])
+              profile = output.parent / f"{cell}.toml"
+              profile_pin = {
+                  "package": name,
+                  "targetKind": kind,
+                  "targetName": target,
+                  "targetTriple": target_triple,
+                  "features": features,
+                  "defaultFeatures": True,
+                  "compilerCommit": compiler,
+                  "cargoLockSha256": cargo_lock,
+                  "adapter": str(adapter),
+                  "adapterInputs": ["Cargo.toml", "Cargo.lock", "driver.rs", "shape_model.rs", "shapes.rs"],
+                  "sourceRevision": source_revision,
+              }
+              profile.write_text("".join(f"{key} = {json.dumps(value)}\n" for key, value in profile_pin.items()))
+              cell_output = output / cell
+              subprocess.run([cli, "recover", "rust-shapes", pathlib.Path("Cargo.toml").resolve(),
+                              "--profile", profile, "--out", cell_output], check=True)
+              graph_file = cell_output / "shapes.json"
+              assert {path.name for path in cell_output.iterdir()} == {"shapes.json", "shapes.lock"}
+              lock = json.loads((cell_output / "shapes.lock").read_text())
+              assert lock["shapesSha256"] == hashlib.sha256(graph_file.read_bytes()).hexdigest()
+              print(cell, lock["shapesSha256"], flush=True)
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: original-shapes-amd64-${{ matrix.group }}
+          path: ${{ runner.temp }}/graphs
+          if-no-files-found: error
