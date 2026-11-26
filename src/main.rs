@@ -19,6 +19,9 @@ fn import_has_profile(path: &str, profile: &str) -> bool {
 
 fn run(args: &[String]) -> Result<(), String> {
     match args {
+        [cmd, kind, repo, selection, destination] if cmd == "recover" && kind == "shared-declarations" =>
+            oddlang::rust_recovery::shared::run(repo.as_ref(), selection.as_ref(), destination.as_ref()),
+
         [cmd, kind, target, manifest, output] if cmd == "build" && kind == "native-package" && target == "rust" => {
             oddlang::native_package::build(manifest.as_ref(), output.as_ref())
         }

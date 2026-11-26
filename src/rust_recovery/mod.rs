@@ -1,6 +1,7 @@
 //! Declaration-level, code-free Rust build inventory.
 #[path = "../../verification/rust-recovery/shape_model.rs"]
 mod shape_model;
+pub mod shared;
 mod structure;
 pub mod tagged;
 

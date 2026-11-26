@@ -118,3 +118,9 @@ candidate also leaves visibility, export paths, stable workspace package
 instances and native layout open. It covers local data declarations for
 the selected profile. Library type internals, behavioral effects, generic
 satisfaction and compatibility across profiles still require evidence.
+
+### Recover shared value declarations
+
+`oddlang recover shared-declarations CHECKOUT SELECTION.json NEW_DIRECTORY` reads one Git blob at a full commit ID. The selector assigns contract IRIs to chosen public names and error variants. Source changes to numeric literals, multiplication, references, supported integer maxima, error payloads, display literals, declaration order and Result targets change the semantic graph or the native overlay. The output includes source and selection digests. No compiler invocation is needed for this source-level candidate. Its subset excludes conditional items, nonliteral display formatting, generic errors and payload types beyond the documented primitives. A pinned native build and independent consumer qualify inferred facts and platform-dependent types. Module resolution, macro expansion and the binding of the derive attribute to its actual dependency require a separate build witness.
+
+Run `python3 verification/rust-recovery/test_shared_source.py /path/to/oddlang` for positive revision controls and rejecting cases.

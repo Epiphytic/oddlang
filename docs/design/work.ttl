@@ -711,3 +711,9 @@ w:nativePackageAssembly a p:Task ; rdfs:label "Assemble pinned semantic projecti
     p:acceptance "Independently project two unrelated codecs into one private module, expose their selected public types, compile the consumer offline with its pinned dependency closure, and reject stale pins, inconsistent bindings and competing publication on the qualified hosts." ;
     p:evidence w:nativePackageFixture .
 w:nativePackageFixture a p:Artifact ; p:location "verification/native-package/verify.py" .
+
+w:wholeRecoverShared a p:Task ; rdfs:label "Recover bounded shared declarations from pinned Rust source" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Derive constants, typed error templates, variant order and result aliases as structured facts at a pinned Git blob. Detect changed native declarations and reject unsupported selections." ;
+    p:evidence w:wholeSharedRecoveryFixture .
+w:wholeSharedRecoveryFixture a p:Artifact ; p:location "verification/rust-recovery/test_shared_source.py" .

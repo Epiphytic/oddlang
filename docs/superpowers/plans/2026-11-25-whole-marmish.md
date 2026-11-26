@@ -27,6 +27,9 @@ The independent stream comparison including macro expansions left 373 compiler-o
 
 ## Implementation evidence
 
+- [x] Recover selected symbolic constants, public error payloads and result aliases from a pinned source module as candidate declarations. [Recovery fixture](../../../verification/rust-recovery/test_shared_source.py)
+
+
 - [x] Assemble pinned semantic projections into a native library with private module groups, public type reexports, exact dependency closure and a separate offline consumer. [Native package contract and test](../../language/native-package.md)
 
 - [x] Archive ordered declaration candidates for all 72 workspace build profiles (24 per native platform). Twenty-five distinct graphs account for all cells. Reachable calls, cross-package identity and behavior still require qualification. [Reviewed archive](https://github.com/Epiphytic/marmish-oddlang/pull/8)
