@@ -225,6 +225,8 @@ impl Graph {
     fn validate(&self, binding: &Binding) -> Result<(), String> {
         if let Some(prepare) = &self.room_prepare {
             if !matches!(self.activation.kind, ActivationKind::OnionWebsocket)
+                || self.lifecycle.is_none()
+                || self.activation.relay_runtime.is_none()
                 || oxigraph::model::NamedNode::new(&prepare.contract).is_err()
                 || !filename(&prepare.configuration)
                 || [

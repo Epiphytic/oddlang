@@ -67,8 +67,10 @@ impl RoomPrepareQueue {
                 relay TEXT NOT NULL,
                 session TEXT NOT NULL UNIQUE,
                 native_group BLOB,
+                welcome_id BLOB,
                 ready INTEGER NOT NULL CHECK(ready IN (0,1)),
                 PRIMARY KEY(local_account, remote_account),
+                CHECK((native_group IS NULL) = (welcome_id IS NULL)),
                 CHECK(ready = 0 OR native_group IS NOT NULL)
             ) STRICT;",
         ).map_err(|_| (1, PROVIDER_OPEN_FAILURE))?;
@@ -120,7 +122,12 @@ impl RoomPrepareQueue {
         if request.relays.as_slice() != [self.endpoint.as_str()] { return Err(PREPARE_CATEGORIES[1]); }
         self.authorization(&request.remote)?;
         let mut states = self.states.lock().map_err(|_| PREPARE_CATEGORIES[2])?;
-        if let Some(state) = states.get(&request.remote) { return Ok(state.clone()); }
+        if let Some(state) = states.get(&request.remote).cloned() {
+            if matches!(state, PrepareState::Failure(_)) {
+                states.remove(&request.remote);
+            }
+            return Ok(state);
+        }
         if states.len() >= ROOM_SLOT_LIMIT { return Err(PREPARE_CATEGORIES[3]); }
         self.requests.try_send(request.remote.clone()).map_err(|_| PREPARE_CATEGORIES[3])?;
         states.insert(request.remote.clone(), PrepareState::Pending);
@@ -191,21 +198,47 @@ async fn prepare_room(
     let uncertain = PREPARE_CATEGORIES[2];
     queue.authorization(remote)?;
     let row = providers.journal.query_row(
-        "SELECT relay, session, native_group, ready FROM local_room_prepare_v1
+        "SELECT relay, session, native_group, welcome_id, ready FROM local_room_prepare_v1
          WHERE local_account = ?1 AND remote_account = ?2",
-        [&queue.local, remote],
+        rusqlite::params![queue.local, remote],
         |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?,
-                  row.get::<_, Option<Vec<u8>>>(2)?, row.get::<_, bool>(3)?)),
+                  row.get::<_, Option<Vec<u8>>>(2)?, row.get::<_, Option<Vec<u8>>>(3)?,
+                  row.get::<_, bool>(4)?)),
     ).optional().map_err(|_| uncertain)?;
-    if let Some((endpoint, session, Some(native_group), true)) = row {
+    if let Some((endpoint, session, native_group, welcome_id, ready)) = row {
         if endpoint != queue.endpoint || !lower_hex(&session, 16) { return Err(uncertain); }
-        let group = GroupId::new(native_group);
-        verify_room(providers, &queue.local, remote, &group, &session, &queue.endpoint)?;
-        let pending = providers.runtime.outstanding_welcome_deliveries().map_err(|_| uncertain)?;
-        if pending.iter().any(|(candidate, _)| *candidate == group) { return Err(uncertain); }
-        return Ok(session);
-    } else if row.is_some() {
-        return Err(uncertain);
+        if let (Some(group), Some(welcome)) = (native_group, welcome_id) {
+            let group = GroupId::new(group);
+            let welcome = MessageId::new(welcome);
+            verify_room(providers, &queue.local, remote, &group, &session, &queue.endpoint)?;
+            if ready {
+                verify_delivered_room(providers, &group, &welcome)?;
+                return Ok(session);
+            }
+            queue.authorization(remote)?;
+            let effects = providers.runtime.redeliver_welcome(&welcome).await.map_err(|_| uncertain)?;
+            return complete_prepare(providers, queue, remote, session, &group, &welcome, &effects);
+        }
+        // A fence may survive a canceled native creation. Publication has not
+        // started until the group and exact Welcome are recorded together.
+        let mut recovered = None;
+        for group in providers.runtime.live_group_ids().map_err(|_| uncertain)? {
+            let record = providers.runtime.group_record(&group).map_err(|_| uncertain)?;
+            if record.name == format!("{ROOM_NAME_PREFIX}{session}") {
+                if recovered.replace(group).is_some() { return Err(uncertain); }
+            }
+        }
+        if let Some(group) = recovered {
+            verify_room(providers, &queue.local, remote, &group, &session, &queue.endpoint)?;
+            let welcome = bind_pending_room(providers, &session, &group)?;
+            queue.authorization(remote)?;
+            let effects = providers.runtime.redeliver_welcome(&welcome).await.map_err(|_| uncertain)?;
+            return complete_prepare(providers, queue, remote, session, &group, &welcome, &effects);
+        }
+        let removed = providers.journal.execute(
+            "DELETE FROM local_room_prepare_v1 WHERE session = ?1 AND native_group IS NULL", [&session],
+        ).map_err(|_| uncertain)?;
+        if removed != 1 { return Err(uncertain); }
     }
     let count: i64 = providers.journal.query_row("SELECT count(*) FROM local_room_prepare_v1", [], |row| row.get(0))
         .map_err(|_| uncertain)?;
@@ -227,37 +260,66 @@ async fn prepare_room(
         app_components: vec![AppComponentData { component_id: NOSTR_ROUTING_COMPONENT_ID, data }],
     };
     providers.journal.execute(
-        "INSERT INTO local_room_prepare_v1 VALUES (?1, ?2, ?3, ?4, NULL, 0)",
-        [&queue.local, remote, &queue.endpoint, &session],
+        "INSERT INTO local_room_prepare_v1 VALUES (?1, ?2, ?3, ?4, NULL, NULL, 0)",
+        rusqlite::params![queue.local, remote, queue.endpoint, session],
     ).map_err(|_| uncertain)?;
     let prepared = providers.runtime.prepare_create_group_with_audit_context(request, Default::default()).await.map_err(|_| uncertain)?;
     let group = prepared.group_id;
     verify_room(providers, &queue.local, remote, &group, &session, &queue.endpoint)?;
+    let welcome = bind_pending_room(providers, &session, &group)?;
+    queue.authorization(remote)?;
+    let effects = providers.runtime.publish_prepared_session_effects_with_audit_context(prepared.effects, Default::default())
+        .await.map_err(|_| uncertain)?;
+    complete_prepare(providers, queue, remote, session, &group, &welcome, &effects)
+}
+
+fn bind_pending_room(providers: &ActiveProviders, session: &str, group: &GroupId) -> Result<MessageId, Failure> {
+    let uncertain = PREPARE_CATEGORIES[2];
     let pending = providers.runtime.outstanding_welcome_deliveries().map_err(|_| uncertain)?;
-    let mut welcomes = pending.into_iter().filter(|(candidate, _)| *candidate == group);
+    let mut welcomes = pending.into_iter().filter(|(candidate, _)| candidate == group);
     let (_, welcome) = welcomes.next().ok_or(uncertain)?;
     if welcomes.next().is_some() { return Err(uncertain); }
-    let bound = providers.journal.execute(
-        "UPDATE local_room_prepare_v1 SET native_group = ?2 WHERE session = ?1 AND ready = 0",
-        rusqlite::params![session, group.as_slice()],
+    let updated = providers.journal.execute(
+        "UPDATE local_room_prepare_v1 SET native_group = ?2, welcome_id = ?3
+         WHERE session = ?1 AND native_group IS NULL AND ready = 0",
+        rusqlite::params![session, group.as_slice(), welcome.id.as_slice()],
     ).map_err(|_| uncertain)?;
-    if bound != 1 { return Err(uncertain); }
-    queue.authorization(remote)?;
-    let effects = providers.runtime.publish_prepared_session_effects_with_audit_context(prepared.effects, Default::default()).await.map_err(|_| uncertain)?;
-    if !effects.failures.is_empty() || !effects.welcome_failures.is_empty()
-        || !effects.unresolved_publishes.is_empty() || !effects.queued.is_empty()
-        || !effects.reports.iter().any(|report| report.message_id == welcome.id
-            && report.met_required_acks()
-            && report.accepted.iter().any(|receipt| receipt.endpoint.0 == queue.endpoint))
-        || providers.runtime.outstanding_welcome_deliveries().map_err(|_| uncertain)?
-            .into_iter().any(|(candidate, _)| candidate == group)
+    if updated != 1 { return Err(uncertain); }
+    Ok(welcome.id)
+}
+
+fn verify_delivered_room(providers: &ActiveProviders, group: &GroupId, welcome: &MessageId) -> Result<(), Failure> {
+    let uncertain = PREPARE_CATEGORIES[2];
+    let pending = providers.runtime.outstanding_welcome_deliveries().map_err(|_| uncertain)?;
+    let tracked = providers.runtime.tracked_outbound_welcome_ids().map_err(|_| uncertain)?;
+    if !tracked.contains(welcome) || pending.iter().any(|(candidate, _)| candidate == group)
+        || providers.runtime.has_pending_outbound_fanouts(group).map_err(|_| uncertain)?
+        || providers.runtime.has_queued_outbound_intents(group).map_err(|_| uncertain)?
     {
         return Err(uncertain);
     }
+    Ok(())
+}
+
+fn complete_prepare(
+    providers: &ActiveProviders, queue: &RoomPrepareQueue, remote: &str, session: String,
+    group: &GroupId, welcome: &MessageId, effects: &marmot_session::AccountDeviceEffects,
+) -> Result<String, Failure> {
+    let uncertain = PREPARE_CATEGORIES[2];
+    if !effects.failures.is_empty() || !effects.welcome_failures.is_empty()
+        || !effects.unresolved_publishes.is_empty() || !effects.queued.is_empty()
+        || !effects.reports.iter().any(|report| &report.message_id == welcome
+            && report.met_required_acks()
+            && report.accepted.iter().any(|receipt| receipt.endpoint.0 == queue.endpoint))
+    {
+        return Err(uncertain);
+    }
+    verify_delivered_room(providers, group, welcome)?;
     queue.authorization(remote)?;
     let updated = providers.journal.execute(
-        "UPDATE local_room_prepare_v1 SET ready = 1 WHERE session = ?1 AND native_group = ?2 AND ready = 0",
-        rusqlite::params![session, group.as_slice()],
+        "UPDATE local_room_prepare_v1 SET ready = 1
+         WHERE session = ?1 AND native_group = ?2 AND welcome_id = ?3 AND ready = 0",
+        rusqlite::params![session, group.as_slice(), welcome.as_slice()],
     ).map_err(|_| uncertain)?;
     if updated != 1 { return Err(uncertain); }
     Ok(session)

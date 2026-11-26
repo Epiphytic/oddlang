@@ -221,17 +221,38 @@ fn render_lifecycle(
         let lifecycle = include_str!("active_lifecycle.rs.in");
         if let Some(prepare) = prepare {
             render_room_prepare(out, prepare);
-            out.push_str(
-                &lifecycle
-                    .replace("let routing = StaticTransportRouting::new(vec![endpoint.clone()]);",
-                        "let routing = room_routing(root, profile, &endpoint).map_err(|failure| (1, failure))?;")
-                    .replace("let mut activation_failure = None;",
-                        "let mut activation_failure = None;\n    let (prepare, mut pending) = RoomPrepareQueue::open(root, profile, &providers)?;")
-                    .replace("owner.serve_until(async {", "owner.serve_routed_until(async {")
-                    .replace("error = providers.transport_lost(&relay) => activation_failure = Some(error),",
-                        "error = prepare_active(&mut providers, &relay, &mut pending, &prepare) => activation_failure = Some(error),")
-                    .replace("}).await.map_err(|_| CLEANUP)", "}, { let prepare = prepare.clone(); move |body| prepare.route(body) }).await.map_err(|_| CLEANUP)"),
-            );
+            let patches = [
+                (
+                    "let routing = StaticTransportRouting::new(vec![endpoint.clone()]);",
+                    "let routing = room_routing(root, profile, &endpoint).map_err(|failure| (1, failure))?;",
+                ),
+                (
+                    "let mut activation_failure = None;",
+                    "let mut activation_failure = None;\n    let (prepare, mut pending) = RoomPrepareQueue::open(root, profile, &providers)?;",
+                ),
+                (
+                    "owner.serve_until(async {",
+                    "owner.serve_routed_until(async {",
+                ),
+                (
+                    "error = providers.transport_lost(&relay) => activation_failure = Some(error),",
+                    "error = prepare_active(&mut providers, &relay, &mut pending, &prepare) => activation_failure = Some(error),",
+                ),
+                (
+                    "}).await.map_err(|_| CLEANUP)",
+                    "}, { let prepare = prepare.clone(); move |body| prepare.route(body) }).await.map_err(|_| CLEANUP)",
+                ),
+            ];
+            let mut routed_lifecycle = lifecycle.to_owned();
+            for (anchor, replacement) in patches {
+                assert_eq!(
+                    routed_lifecycle.matches(anchor).count(),
+                    1,
+                    "room preparation template anchor"
+                );
+                routed_lifecycle = routed_lifecycle.replacen(anchor, replacement, 1);
+            }
+            out.push_str(&routed_lifecycle);
         } else {
             out.push_str(lifecycle);
         }
