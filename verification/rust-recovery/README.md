@@ -101,7 +101,7 @@ keep their IDs when moved within the same owner. Tuple fields use positional
 identities. Declarations are sorted by ID and field, variant, parameter and
 argument positions are zero-based. Source positions are absent from the graph.
 
-The `oddlang-data-shapes-v1` vocabulary describes products, sums and unions
+The `oddlang-data-shapes-v2` vocabulary describes products, sums and unions
 through ordered members, nested types and nominal references. Fixed-width
 scalars carry widths in bits. Pointer-sized integers carry the selected
 target's width. References identify shared or exclusive borrowing and name
@@ -111,7 +111,9 @@ Named types retain the compiler-resolved definition and bind each argument
 to its declared parameter. A graph consumer can use these observations to
 author a portable type contract and map nominal references to contract IDs.
 
-The graph reports owner-scoped gaps for array lengths, constant arguments,
+An array retains its element shape and a target-evaluated fixed count, a reference to the declaring constant parameter, or an unresolved extent with an owner-scoped gap. Nested arrays retain each dimension. Locks from pinned v1 adapters retain the v1 vocabulary.
+
+The graph reports owner-scoped gaps for unresolved array lengths, constant arguments,
 unsupported types and lifetimes, raw pointer provenance, explicit
 discriminants, union active fields and generic constraints or defaults. The
 candidate also leaves visibility, export paths, stable workspace package

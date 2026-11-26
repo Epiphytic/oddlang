@@ -138,3 +138,8 @@ The principal feasibility risk is recovering intended behavior where only incide
 
 - [x] Exercise the range record and its linked reason in the seven-package workspace. Both ARM64 hosts matched 35 value and diagnostic cases, compiled the public path and rejected the private path. Both Cargo locks and the six other member locks were preserved. [Workspace evidence](https://github.com/Epiphytic/marmish-oddlang/pull/123)
 - [x] Select the recovered record and linked choice in the seven-package manifest. Compare the full tree with the previously qualified generated workspace on both ARM64 hosts. All 84 Rust files match, and the two changed lockfiles identify the new graph inputs. [Recovered workspace evidence](https://github.com/Epiphytic/marmish-oddlang/tree/3d543c15a74e3927af19a75e6421578a273889c3/verification/whole/canonical-recovered-range)
+
+- [x] Recover typed array elements, fixed extents and const-parameter identity in the structural graph. Verify nested, empty, symbolic and source-mutated arrays in the [compiler fixture](../../../verification/rust-recovery/test_shapes.py).
+- [x] Reconcile the ARM64 stream array refinement against the v1 release and independently compare rustdoc-visible element types and extents. [63 resolved fields and scoped evidence](https://github.com/Epiphytic/marmish-oddlang/pull/45)
+- [x] Inventory named runnable and ignored cases for all compiled default release harnesses on the two ARM64 hosts. [Named reference suites](https://github.com/Epiphytic/marmish-oddlang/pull/43)
+- [x] Complete the original Linux ARM64 default release run in a private checkout and bind it to the named harness inventory. [887 passed and five ignored](https://github.com/Epiphytic/marmish-oddlang/pull/47)

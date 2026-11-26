@@ -2092,3 +2092,23 @@ w:wholeStreamBlock a p:Task ; rdfs:label "Build and exchange bounded native stre
     p:acceptance "Pass five original codec tests, read both native representations on each peer and detect a changed offset bound on Darwin ARM64." ;
     p:evidence w:wholeBlockRelease .
 w:wholeBlockRelease a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/commit/e2008a2eecec3f62bbc37934e91421d1438405ad" .
+
+w:structuralArrayExtents a p:Task ; rdfs:label "Retain fixed and parameter-sized array extents in recovered data shapes" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Preserve element type, zero and nested dimensions and constant parameter identity across a source mutation in an unrelated fixture." ;
+    p:evidence w:arrayExtentFixture .
+w:arrayExtentFixture a p:Artifact ; p:location "verification/rust-recovery/test_shapes.py" .
+
+w:structuralArrayExtents p:evidence w:streamArrayExtentEvidence .
+w:streamArrayExtentEvidence a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/45> .
+w:originalNamedReleaseTests a p:Task ; rdfs:label "Enumerate compiled upstream release harnesses and ignored test identities" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Bind every compiled default release harness to its binary digest, package, target and named runnable and ignored cases on macOS and Linux ARM64." ;
+    p:evidence w:originalNamedReleaseTestsEvidence .
+w:originalNamedReleaseTestsEvidence a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/43> .
+
+w:originalPrivateDefaultRelease a p:Task ; rdfs:label "Run the unchanged Linux ARM64 default release workspace from a private build path" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:dependsOn w:originalNamedReleaseTests ;
+    p:acceptance "Match every compiled harness digest and its complete runnable and ignored counts, including the formerly failing path-permissions case." ;
+    p:status p:done ; p:evidence w:originalPrivateDefaultReleaseReceipt .
+w:originalPrivateDefaultReleaseReceipt a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/47> .
