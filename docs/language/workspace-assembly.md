@@ -91,3 +91,40 @@ stderr line and returns the nonzero exit code. On success it calls the
 normally bound executable entry. The assembler checks both bindings with
 Cargo before publishing. The generated wrapper hash is part of its package
 lock.
+
+### Public record views
+
+`oddlang recover public-records LIB_RS SELECTION OUTPUT` matches selected
+unconditional public module declarations and sibling Rust source files.
+The selection format is `oddlang-rust-public-record-selection-v1`. It
+pins `libSha256`, `cargoSha256` and an ordered list of modules. Recovery
+requires the default Cargo library source path and an explicit package
+edition of 2018, 2021 or 2024 without a library-specific override. Each module carries its
+stable `id`, Rust `name`, source `sha256`, and optional `records` and
+`aliases` maps from Rust names to stable IRIs. Recovery extracts the selected
+named public fields in declaration order and accepts bool, u64, String and
+Vec<u8>. It recognizes Clone and Serde Serialize derives and explicit
+`pub use crate::module::Record` leaves, including grouped and renamed uses.
+Selected conditional declarations, data-affecting attributes and direct
+type shadows, inner non-doc attributes and unexpanded items are rejected.
+A record module with a local glob import must bind the child's source
+digest in `scopeGlobs`. The direct child must have an explicit sibling
+`#[path]` declaration. Its visible prelude-name shadows and recursive
+glob re-exports are rejected. The scope is a structural source slice.
+Qualification compiles independent Rust callers to corroborate type and
+trait resolution.
+
+The output contains the graph, native name overlay, and recovery lock.
+The graph records each ordered field's stable identity, serialized name
+and admitted type, the declared traits, and the directed public alias
+relations. The separate native overlay binds module, record and alias
+identities to Rust identifiers. Recovery locks contain hashes of source
+inputs and artifacts. They carry no Rust source text.
+
+`oddlang build public-records rust GRAPH OVERLAY OUTPUT` or a
+`public-records` native package component lowers the graph into public
+module declarations. The renderer requires one definition per record.
+It emits each alias as a Rust use of that same definition, so clients of
+the two paths can exchange the value directly. A native package projecting
+Serialize declares serde with the derive feature. Public module exports
+are selected through the usual native package reexports.

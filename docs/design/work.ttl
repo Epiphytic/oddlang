@@ -1303,6 +1303,15 @@ w:fixedByteWorkspaceIntegration a p:Task ; rdfs:label "Compose fixed-byte vault 
     p:milestone w:marmishMilestone ; p:source w:fixedByteValuesPlan ; p:status p:done ; p:evidence w:fixedByteWorkspaceReceipt ;
     p:dependsOn w:fixedByteVault, w:buildReportSourceRecovery, w:unifiedVaultEngineWorkspace ;
     p:acceptance "Generate one sealed workspace with the source-recovered release graph. Compare the unchanged vault value test, a direct array constructor holdout and the prior package and CLI contracts with the pinned original." .
+w:publicObservationalRecordsPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-public-records.md" .
+w:publicObservationalRecords a p:Task ;
+    rdfs:label "Recover and project native public records and re-export identities" ;
+    p:milestone w:marmishMilestone ;
+    p:source w:publicObservationalRecordsPlan ;
+    p:dependsOn w:unifiedVaultEngineWorkspace ;
+    p:acceptance "Named public records preserve ordered typed fields, supported traits and alias identity in a source-free package, verified against independently compiled baseline and mutated native callers." ;
+    p:status p:done ; p:evidence w:publicRecordFixture, w:publicJournalReceipt .
 w:processLimitCompanionRelease a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/65> .
 
@@ -1347,3 +1356,32 @@ w:upstreamNamedDarwinReceipt a p:Artifact ;
 
 w:upstreamNamedLinuxReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/blob/862203ff9d50229624abaa582701627e156db9be/verification/whole/suite/combined-v7-aarch64-unknown-linux-gnu.json> .
+w:publicRecordScopeResolution a p:Finding ;
+    rdfs:label "Require scoped source evidence for potential type shadows and reject conditional modules and unexpanded items" ;
+    p:source w:publicObservationalRecordsPlan .
+w:publicObservationalRecords p:addresses w:publicRecordScopeResolution .
+
+w:publicRecordEditionResolution a p:Finding ;
+    rdfs:label "Bind bare glob lookup to a pinned Cargo edition" ;
+    p:source w:publicObservationalRecordsPlan .
+w:publicObservationalRecords p:addresses w:publicRecordEditionResolution .
+
+w:publicRecordImportIdentity a p:Finding ;
+    rdfs:label "Check raw identifier and grouped self imports by their Rust binding identities" ;
+    p:source w:publicObservationalRecordsPlan .
+w:publicObservationalRecords p:addresses w:publicRecordImportIdentity .
+
+w:publicRecordFixture a p:Artifact ;
+    p:location "verification/public-records/verify.py" .
+w:publicJournalReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/71> .
+
+w:unifiedRecoveredVaultJournalPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-unified-recovered-vault-journal.md" .
+w:unifiedRecoveredVaultJournal a p:Task ;
+    rdfs:label "Qualify journal records with the recovered release report and fixed-width vault in one workspace" ;
+    p:milestone w:marmishMilestone ;
+    p:source w:unifiedRecoveredVaultJournalPlan ;
+    p:dependsOn w:fixedByteWorkspaceIntegration, w:publicObservationalRecords ;
+    p:acceptance "Rebuild a source-isolated workspace using one compiler and verify the recovered release CLI, fixed vault values and public journal record caller against the exact same build. Keep the core, stream and engine member pins." ;
+    p:status p:active .
