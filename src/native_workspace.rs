@@ -53,7 +53,8 @@ pub fn build(path: &Path, destination: &Path) -> Result<()> {
     let mut members = vec![];
     let mut has_binaries = false;
     for (name, member) in &workspace.members {
-        if !name.bytes().next().is_some_and(|c| c.is_ascii_alphabetic())
+        if name.eq_ignore_ascii_case("target")
+            || !name.bytes().next().is_some_and(|c| c.is_ascii_alphabetic())
             || !name
                 .bytes()
                 .all(|c| c.is_ascii_alphanumeric() || matches!(c, b'-' | b'_'))
