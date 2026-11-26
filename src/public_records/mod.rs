@@ -3,6 +3,7 @@ mod recover;
 mod root;
 
 pub use recover::recover;
+pub(crate) use recover::{imports, item_type_binding};
 pub use root::recover_root;
 
 use crate::shared_declarations::unique_map;

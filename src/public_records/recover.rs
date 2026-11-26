@@ -27,10 +27,10 @@ struct SelectedModule {
     scope_globs: BTreeMap<String, String>,
 }
 
-pub(super) struct Import<'a> {
-    pub(super) name: String,
-    path: Vec<String>,
-    declaration: &'a ItemUse,
+pub(crate) struct Import<'a> {
+    pub(crate) name: String,
+    pub(crate) path: Vec<String>,
+    pub(crate) declaration: &'a ItemUse,
 }
 
 pub(super) fn select_source(path: &Path, pin: &str) -> Result<syn::File> {
@@ -120,7 +120,7 @@ fn is_doc(attr: &Attribute) -> bool {
     attr.path().is_ident("doc")
 }
 
-pub(super) fn imports(file: &syn::File) -> Vec<Import<'_>> {
+pub(crate) fn imports(file: &syn::File) -> Vec<Import<'_>> {
     fn flatten<'a>(
         use_item: &'a ItemUse,
         tree: &UseTree,
@@ -198,7 +198,7 @@ const PRELUDE_NAMES: &[&str] = &[
     "derive",
 ];
 
-fn item_type_binding(item: &Item) -> Option<(&syn::Ident, &Visibility)> {
+pub(crate) fn item_type_binding(item: &Item) -> Option<(&syn::Ident, &Visibility)> {
     match item {
         Item::Enum(item) => Some((&item.ident, &item.vis)),
         Item::Struct(item) => Some((&item.ident, &item.vis)),

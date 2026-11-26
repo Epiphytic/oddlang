@@ -125,7 +125,7 @@ fn names(ident: &syn::Ident, expected: &str) -> bool {
     ident.strip_prefix("r#").unwrap_or(&ident) == expected
 }
 
-fn additional_binding(file: &syn::File, name: &str) -> bool {
+pub(crate) fn additional_binding(file: &syn::File, name: &str, reject_macros: bool) -> bool {
     use syn::visit::{self, Visit};
 
     struct Reference<'a> {
@@ -141,6 +141,7 @@ fn additional_binding(file: &syn::File, name: &str) -> bool {
     struct Bindings<'a> {
         name: &'a str,
         found: bool,
+        reject_macros: bool,
     }
     impl Bindings<'_> {
         fn check_alias(&mut self, ty: &Type) {
@@ -182,11 +183,15 @@ fn additional_binding(file: &syn::File, name: &str) -> bool {
             self.found |= names(&item.ident, self.name);
         }
         fn visit_item_macro(&mut self, _item: &'ast syn::ItemMacro) {
-            self.found = true;
+            self.found |= self.reject_macros;
         }
     }
 
-    let mut scan = Bindings { name, found: false };
+    let mut scan = Bindings {
+        name,
+        found: false,
+        reject_macros,
+    };
     scan.visit_file(file);
     scan.found
 }
@@ -238,7 +243,7 @@ fn extract(source: &str, selection: &Selection) -> Result<(Graph, Binding)> {
         || !matches!(item.vis, Visibility::Public(_))
         || !item.generics.params.is_empty()
         || item.generics.where_clause.is_some()
-        || additional_binding(&file, &selection.name)
+        || additional_binding(&file, &selection.name, true)
     {
         return Err(
             "plain choice requires one public non-generic enum without aliases, additional impls or item macros"

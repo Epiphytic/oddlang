@@ -10,7 +10,9 @@ use std::{
 
 mod cases;
 mod recover;
+mod recover_choice;
 pub use recover::recover as recover_public_constant;
+pub use recover_choice::recover as recover_serde_string_choice;
 mod rust;
 type Result<T> = std::result::Result<T, String>;
 
