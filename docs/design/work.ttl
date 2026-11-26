@@ -775,3 +775,9 @@ w:wholeWindowQualification a p:Artifact ; p:location "https://github.com/Epiphyt
 w:wholeErrorFormatting a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/commit/d34ce43674bbcd27232a36c62d8bffb1ddc51fbc" .
 w:wholeWireCandidates a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/commit/ddd27f3487759cd5c5939426be797608e7278697" .
 w:wholeMarmishStructure p:evidence w:wholeWindowQualification,w:wholeErrorFormatting,w:wholeWireCandidates .
+
+
+w:commandSurfaceValidationReview a p:Finding ;
+    rdfs:label "Preserve argument-carrier help and reject unsupported value help and malformed positional or default settings" ;
+    p:source w:commandSurfaceFixture .
+w:commandSurface p:addresses w:commandSurfaceValidationReview .
