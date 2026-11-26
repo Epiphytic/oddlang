@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Exercise a generated field-meter command against an independent Unix peer."""
 
+import errno
 import hashlib
 import json
 from pathlib import Path
@@ -62,7 +63,11 @@ def exchange(binary, path, wire, expected):
                 if wire is not None:
                     connection.sendall(wire[:2])
                     connection.sendall(wire[2:])
-                    connection.shutdown(socket.SHUT_WR)
+                    try:
+                        connection.shutdown(socket.SHUT_WR)
+                    except OSError as error:
+                        if error.errno != errno.ENOTCONN:
+                            raise
                 assert capture(process) == expected
     path.unlink()
 
@@ -82,7 +87,7 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
     write("cli-rust.json", {"executable": "field-meter", "invalid_exit": 2, "uncovered_exit": 125,
                            "operations": {"read": "urn:field:read"},
                            "handlers": {"urn:field:read": ["device", "measure"]}})
-    write("manifest.json", {
+    manifest = {
         "format": "oddlang-native-package-v1", "name": "field-meter", "version": "1.0.0",
         "edition": "2021", "dependencies": DEPS, "cargoLock": pin("Cargo.lock"),
         "components": [
@@ -92,13 +97,16 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
              "overlay": pin("binding.json"), "reexports": ["measure"], "rootReexports": []},
         ],
         "binaries": [{"name": "field-meter", "entry": ["run_cli"]}],
-    })
+    }
+    write("manifest.json", manifest)
     checked(ODDLANG, "build", "native-package", "rust", root / "manifest.json", root / "generated")
-    checked("cargo", "build", "--locked", "--offline", cwd=root / "generated")
-    binary = root / "generated/target/debug/field-meter"
+    checked("cargo", "build", "--release", "--locked", "--offline", cwd=root / "generated")
+    binary = root / "generated/target/release/field-meter"
     path = root / "s"
     exchange(binary, path, reply(b'{"ready":true,"reading":{"z":1,"a":2},"notice":null}'),
              (0, b'{"reading":{"a":2,"z":1},"ready":true}\n', b""))
+    exchange(binary, path, reply(b'{"ready":true}') + reply(b'{}'),
+             (0, b'{"reading":null,"ready":true}\n', b""))
     exchange(binary, path, reply(b'{"notice":"invalid cartridge","ready":false}'),
              (3, b'{"reading":null,"ready":false,"notice":"invalid cartridge"}\n', b""))
     exchange(binary, path, struct.pack("!I", 0), (9, b"", b"invalid sensor frame size\n"))
@@ -112,7 +120,37 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
     missing = subprocess.run([binary, "read"], capture_output=True)
     assert (missing.returncode, missing.stdout, missing.stderr) == (6, b"", b"unbound sensor\n")
 
+    missing_socket = subprocess.run([binary, "read", "--port", path], capture_output=True)
+    assert (missing_socket.returncode, missing_socket.stdout, missing_socket.stderr) == (7, b"", b"sensor I/O\n")
+
+    def reject_link(message, output):
+        write("manifest.json", manifest)
+        invalid = subprocess.run(
+            [ODDLANG, "build", "native-package", "rust", root / "manifest.json", root / output],
+            capture_output=True,
+        )
+        assert invalid.returncode and message in invalid.stderr, invalid.stderr
+        assert not (root / output).exists()
+
     graph = json.loads((root / "graph.json").read_bytes())
+    graph["guards"][0]["argument"] = "units"
+    write("unknown-guard.json", graph)
+    manifest["components"][1]["graph"] = pin("unknown-guard.json")
+    reject_link(b"needs undeclared root argument", "bad-guard")
+
+    graph["guards"][0]["argument"] = "port"
+    write("wrong-guard.json", graph)
+    manifest["components"][1]["graph"] = pin("wrong-guard.json")
+    reject_link(b"has incompatible argument", "bad-kind")
+
+    graph["guards"][0]["argument"] = "unit"
+    manifest["components"][1]["graph"] = pin("graph.json")
+    unlinked = json.loads((root / "cli-rust.json").read_bytes())
+    unlinked["handlers"]["urn:field:read"] = ["device", "other"]
+    write("unlinked.json", unlinked)
+    manifest["components"][0]["overlay"] = pin("unlinked.json")
+    reject_link(b"unresolved checked native command handler", "bad-handler")
+
     graph["transport"]["maximum_frame_bytes"] = 1
     write("mutant.json", graph)
     mutant = subprocess.run([ODDLANG, "build", "local-command-client", "rust", root / "mutant.json",
@@ -120,4 +158,4 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
     assert mutant.returncode and b"constant request exceeds frame limit" in mutant.stderr
     assert not (root / "invalid").exists()
 
-print("field-meter IPC: eight framed interactions, two argument errors and one graph rejection passed")
+print("field-meter IPC: nine framed interactions, three local errors, and four graph or linking rejections passed")

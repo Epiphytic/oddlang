@@ -273,6 +273,51 @@ fn project(
     Ok((bytes, lock))
 }
 
+fn validate_command_callbacks(components: &[Component], base: &Path) -> Result<()> {
+    let callbacks = components
+        .iter()
+        .filter(|component| matches!(component.kind, Kind::LocalCommandClient))
+        .map(|component| {
+            let callback = crate::local_command_client::callback(
+                &component.graph.read(base)?,
+                &component.overlay.read(base)?,
+            )?;
+            Ok((component, callback))
+        })
+        .collect::<Result<Vec<_>>>()?;
+    let mut exports = BTreeMap::new();
+    for (component, callback) in &callbacks {
+        if !component.reexports.contains(&callback.entry)
+            && !component.crate_reexports.contains(&callback.entry)
+        {
+            continue;
+        }
+        exports.insert(
+            vec![component.module.clone(), callback.entry.clone()],
+            callback,
+        );
+        if component.reexports.contains(&callback.entry)
+            && component
+                .root_reexports
+                .as_ref()
+                .is_none_or(|roots| roots.contains(&callback.entry))
+        {
+            exports.insert(vec![callback.entry.clone()], callback);
+        }
+    }
+    for component in components
+        .iter()
+        .filter(|component| matches!(component.kind, Kind::CliSurface))
+    {
+        crate::command_surface::validate_callbacks(
+            &component.graph.read(base)?,
+            &component.overlay.read(base)?,
+            &exports,
+        )?;
+    }
+    Ok(())
+}
+
 fn cargo_manifest(manifest: &Manifest) -> Result<String> {
     let valid_name = |name: &str| {
         !name.is_empty()
@@ -324,6 +369,7 @@ pub fn build(path: &Path, output: &Path) -> Result<()> {
 pub(super) fn build_pinned(raw: &[u8], base: &Path, output: &Path, standalone: bool) -> Result<()> {
     let manifest: Manifest =
         serde_json::from_slice(raw).map_err(|e| format!("package manifest: {e}"))?;
+    validate_command_callbacks(&manifest.components, base)?;
     let cargo = cargo_manifest(&manifest)?;
     let lock = manifest.cargo_lock.read(base)?;
     let parent = output

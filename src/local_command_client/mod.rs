@@ -231,6 +231,34 @@ struct Binding {
     entry: String,
 }
 
+#[derive(Clone, Copy)]
+pub(crate) enum RequiredArgument {
+    Flag,
+    OptionalValue,
+    String,
+    Path,
+}
+
+pub(crate) struct Callback {
+    pub entry: String,
+    pub arguments: Vec<(String, RequiredArgument)>,
+}
+
+pub(crate) fn callback(graph: &[u8], binding: &[u8]) -> Result<Callback, String> {
+    let (graph, binding) = load(graph, binding)?;
+    let mut arguments = vec![(graph.socket_argument, RequiredArgument::Path)];
+    arguments.extend(graph.guards.into_iter().map(|guard| match guard {
+        Guard::FlagFalse { argument, .. } => (argument, RequiredArgument::Flag),
+        Guard::Absent { argument, .. } => (argument, RequiredArgument::OptionalValue),
+        Guard::OneOf { argument, .. } => (argument, RequiredArgument::String),
+        Guard::PathPresent { argument, .. } => (argument, RequiredArgument::Path),
+    }));
+    Ok(Callback {
+        entry: binding.entry,
+        arguments,
+    })
+}
+
 pub fn build(graph: &Path, binding: &Path, output: &Path) -> Result<(), String> {
     let graph = fs::read(graph).map_err(|error| error.to_string())?;
     let binding = fs::read(binding).map_err(|error| error.to_string())?;
@@ -238,25 +266,7 @@ pub fn build(graph: &Path, binding: &Path, output: &Path) -> Result<(), String> 
 }
 
 pub(crate) fn build_bytes(graph: &[u8], binding: &[u8], output: &Path) -> Result<(), String> {
-    let contract: Graph = serde_json::from_slice(graph).map_err(|error| error.to_string())?;
-    contract.validate()?;
-    let overlay: Binding = serde_json::from_slice(binding).map_err(|error| error.to_string())?;
-    if overlay.format != "oddlang-local-command-client-rust-v1"
-        || !overlay
-            .entry
-            .bytes()
-            .next()
-            .is_some_and(|byte| byte.is_ascii_alphabetic())
-        || !overlay
-            .entry
-            .bytes()
-            .all(|byte| byte.is_ascii_alphanumeric() || byte == b'_')
-        || overlay.entry == "gen"
-        || syn::parse_str::<syn::Ident>(&overlay.entry).is_err()
-        || matches!(overlay.entry.as_str(), "run_inner" | "perform" | "exchange")
-    {
-        return Err("invalid local command client entry".into());
-    }
+    let (contract, overlay) = load(graph, binding)?;
     let source = rust::render(&contract, &overlay.entry)?;
     let hash = |bytes: &[u8]| {
         Sha256::digest(bytes)
@@ -281,5 +291,28 @@ pub(crate) fn build_bytes(graph: &[u8], binding: &[u8], output: &Path) -> Result
     fs::write(stage.path().join("client.rs"), source).map_err(|error| error.to_string())?;
     fs::write(stage.path().join("projection.lock"), format!("{lock:#}\n"))
         .map_err(|error| error.to_string())?;
-    fs::rename(stage.path(), output).map_err(|error| error.to_string())
+    crate::native_package::publish(stage.path(), output)
+}
+
+fn load(graph: &[u8], binding: &[u8]) -> Result<(Graph, Binding), String> {
+    let contract: Graph = serde_json::from_slice(graph).map_err(|error| error.to_string())?;
+    contract.validate()?;
+    let overlay: Binding = serde_json::from_slice(binding).map_err(|error| error.to_string())?;
+    if overlay.format != "oddlang-local-command-client-rust-v1"
+        || !overlay
+            .entry
+            .bytes()
+            .next()
+            .is_some_and(|byte| byte.is_ascii_lowercase())
+        || !overlay
+            .entry
+            .bytes()
+            .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'_')
+        || overlay.entry == "gen"
+        || syn::parse_str::<syn::Ident>(&overlay.entry).is_err()
+        || matches!(overlay.entry.as_str(), "run_inner" | "perform" | "exchange")
+    {
+        return Err("invalid local command client entry".into());
+    }
+    Ok((contract, overlay))
 }

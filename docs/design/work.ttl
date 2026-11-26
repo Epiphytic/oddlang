@@ -801,3 +801,8 @@ w:localCommandClient a p:Task ;
 
 w:localCommandClientFixture a p:Artifact ;
     p:location "verification/local-command-client/check.py" .
+
+w:localClientReleaseGuardFinding a p:Finding ;
+    rdfs:label "Reject release CLI bindings that would silently omit local client arguments" ;
+    p:source w:localCommandClientFixture .
+w:localCommandClient p:addresses w:localClientReleaseGuardFinding .

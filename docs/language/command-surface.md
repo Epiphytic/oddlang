@@ -9,7 +9,7 @@ oddlang recover cli-surface SOURCE.rs SELECTION.json GRAPH.json
 oddlang build cli-surface rust GRAPH.json BINDING.json cli.rs
 ```
 
-A binding key is the canonical command path with slash-separated components, an empty string for no selected command, or `*` for an external subcommand. The emitted `parse` reports a terminal Clap response, a matched command and its typed native bindings, or an uncovered command. `run_cli` writes parser responses to the provider-selected stream and returns the bound status. `run_cli_with` allows a native consumer to bind known operation IRIs to effects. A native package overlay can map an operation IRI to a crate-relative Rust function with `handlers`. All unimplemented operations return the uncovered status. External subcommand arguments are parser data and the projection does not launch a process.
+A binding key is the canonical command path with slash-separated components, an empty string for no selected command, or `*` for an external subcommand. The emitted `parse` reports a terminal Clap response, a matched command and its typed native bindings, or an uncovered command. `run_cli` writes parser responses to the provider-selected stream and returns the bound status. `run_cli_with` allows a native consumer to bind known operation IRIs to effects. A native package overlay can map an operation IRI to a checked crate-relative local command handler with `handlers`. All unimplemented operations return the uncovered status. External subcommand arguments are parser data and the projection does not launch a process.
 
 Native package manifests can include the `cli-surface` component with pinned graph and overlay and select `run_cli` as a reexport. The manifest declares the exact Clap 4.6.7 dependency.
 
