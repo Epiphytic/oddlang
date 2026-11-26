@@ -9,6 +9,13 @@ use std::{
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
+pub(super) struct RecordCheck {
+    pub owner: String,
+    pub steps: Vec<Step>,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
 pub(super) struct Foreign {
     pub id: String,
     pub fields: Vec<Field>,
@@ -156,6 +163,7 @@ pub(super) enum Condition {
 #[derive(Deserialize, Serialize)]
 #[serde(tag = "kind", rename_all = "kebab-case", deny_unknown_fields)]
 pub(super) enum Step {
+    CheckRecord { id: String, value: Path, check: String },
     Require {
         id: String,
         predicate: Condition,
@@ -312,6 +320,38 @@ impl<'a> Compiler<'a> {
             }
         }
         Ok(())
+    }
+
+    pub fn record_checks(&mut self) -> Result<String> {
+        let mut functions = String::new();
+        let mut dependencies = BTreeMap::new();
+        for (index, (id, check)) in self.graph.record_checks.iter().enumerate() {
+            if !matches!(self.definition(&check.owner)?, Definition::Record { .. }) {
+                return Err("a shared check requires a named record".into());
+            }
+            let mut calls = BTreeSet::new();
+            for step in &check.steps {
+                step.visit(&mut |s| {
+                    if let Step::CheckRecord { check, .. } = s {
+                        calls.insert(check.as_str());
+                    }
+                });
+            }
+            dependencies.insert(id.as_str(), calls);
+            let value = Provided::Value(Value { rust: "value".into(), shape: Shape::Ref { id: check.owner.clone() } });
+            let body = self.compile(value, &check.steps, false)?;
+            let native = &self.binding.names[&check.owner];
+            writeln!(functions, "fn __oddlang_record_check_{index}(value: &{native}) -> ::core::result::Result<(), {}> {{\n{body}    ::core::result::Result::Ok(())\n}}", rust::ERROR).unwrap();
+        }
+        while !dependencies.is_empty() {
+            let leaves: BTreeSet<_> = dependencies.iter().filter(|(_, calls)| calls.is_empty()).map(|(id, _)| *id).collect();
+            if leaves.is_empty() { return Err("recursive shared record checks".into()); }
+            dependencies.retain(|id, calls| {
+                calls.retain(|call| !leaves.contains(call));
+                !leaves.contains(id)
+            });
+        }
+        Ok(functions)
     }
 
     pub fn endpoint(
@@ -674,6 +714,15 @@ impl<'a> Compiler<'a> {
         let child = format!("{indent}    ");
         for step in steps {
             match step {
+                Step::CheckRecord { value, check, .. } => {
+                    let value = self.path(value, scope)?;
+                    let (index, (_, spec)) = self.graph.record_checks.iter().enumerate()
+                        .find(|(_, (key, _))| *key == check).ok_or("undeclared record check")?;
+                    if !matches!(&value.shape, Shape::Ref { id } if id == &spec.owner) {
+                        return Err("record check requires its declared type".into());
+                    }
+                    writeln!(text, "{indent}__oddlang_record_check_{index}({})?;", value.rust).unwrap();
+                }
                 Step::Require {
                     predicate, error, ..
                 } => {
@@ -868,7 +917,7 @@ fn same_equal_shape(left: &Shape, right: &Shape, binding: &Binding) -> bool {
 impl Step {
     pub fn id(&self) -> &str {
         match self {
-            Self::Require { id, .. }
+            Self::CheckRecord { id, .. } | Self::Require { id, .. }
             | Self::If { id, .. }
             | Self::Some { id, .. }
             | Self::ForEach { id, .. }
@@ -896,7 +945,7 @@ impl Step {
                     }
                 }
             }
-            Self::Call { .. } | Self::Require { .. } => {}
+            Self::Call { .. } | Self::CheckRecord { .. } | Self::Require { .. } => {}
         }
     }
 
@@ -926,7 +975,7 @@ impl Step {
                     }
                 }
             }
-            Self::Call { .. } => {}
+            Self::CheckRecord { .. } | Self::Call { .. } => {}
         }
     }
 }
