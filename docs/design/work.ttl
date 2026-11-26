@@ -1598,4 +1598,6 @@ w:convergedReleaseManifest a p:Task ;
     p:milestone w:marmishMilestone ; p:source w:convergedReleaseManifestPlan ;
     p:dependsOn w:publicApiConvergence, w:pureReleaseManifestGrammar, w:lineGrammarNativeSupport ;
     p:acceptance "On both native hosts, preserve prior generated files and package locks, use actual crate-private native records and errors, run the two original pure parser tests unchanged, and replay 224 independent original observations." ;
-    p:status p:active .
+    p:status p:done ; p:evidence w:convergedReleaseManifestReceipt .
+w:convergedReleaseManifestReceipt a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/97> .
