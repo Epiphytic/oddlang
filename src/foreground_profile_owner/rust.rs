@@ -34,10 +34,10 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
     {
         writeln!(out, "const {name}: &str = {value:?};").unwrap();
     }
+    let choices = graph.arguments.backend_choices.iter().collect::<Vec<_>>();
     writeln!(
         out,
-        "const BACKEND_CHOICES: &[&str] = &{:?};",
-        graph.arguments.backend_choices
+        "const BACKEND_CHOICES: &[(&str, &str)] = &{choices:?};"
     )
     .unwrap();
     for (name, ty, value) in [
@@ -86,14 +86,14 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> String {
             ("public_key", "Option<String>", &profile.public_key),
         ],
     );
-    out.push_str("}\n\n#[derive(serde::Serialize)]\nstruct RuntimeRecord<'a> {\n");
+    out.push_str("}\n\n#[derive(serde::Deserialize, serde::Serialize, PartialEq, Eq)]\n#[serde(deny_unknown_fields)]\nstruct RuntimeRecord {\n");
     let runtime = &graph.runtime.fields;
     fields(
         &mut out,
         [
             ("format", "u8", &runtime.format),
-            ("profile_id", "&'a str", &runtime.profile_id),
-            ("root", "&'a std::path::Path", &runtime.root),
+            ("profile_id", "String", &runtime.profile_id),
+            ("root", "std::path::PathBuf", &runtime.root),
         ],
     );
     out.push_str("}\n");

@@ -90,7 +90,7 @@ with tempfile.TemporaryDirectory(prefix="fs-", dir="/tmp") as tmp:
     put("profile.json", {
         "format": "oddlang-foreground-profile-owner-v1",
         "arguments": dict(foreground="attached", state="data", identity="station", backend="storage",
-                          backend_choices=["disk"], route="route", relay="relay"),
+                          backend_choices={"disk": "disk", "default": "disk"}, route="route", relay="relay"),
         "profile": dict(document="station.json", lock="station.lck", format=3, maximum_bytes=2048,
                         name_limit=32, short_reference_bytes=8, credential_reference_bytes=12,
                         ready="recorded", backend="disk",
@@ -169,6 +169,20 @@ with tempfile.TemporaryDirectory(prefix="fs-", dir="/tmp") as tmp:
         fcntl.flock(lease, fcntl.LOCK_EX | fcntl.LOCK_NB)
         rejected("already running")
 
+    crashed = subprocess.Popen(cmd, env=env, cwd=root, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        with relay.accept()[0] as handshake:
+            handshake.settimeout(5)
+            assert read_exact(handshake, 3) == b"\x16\x03\x01"
+            assert (runtime / "port").is_socket()
+            crashed.kill()
+            crashed.communicate(timeout=5)
+        assert crashed.returncode == -signal.SIGKILL and (runtime / "port").is_socket()
+    finally:
+        if crashed.poll() is None:
+            crashed.kill()
+            crashed.communicate()
+
     for _ in range(2):
         child = subprocess.Popen(cmd, env=env, cwd=root, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         try:
@@ -204,6 +218,40 @@ with tempfile.TemporaryDirectory(prefix="fs-", dir="/tmp") as tmp:
             child.kill()
             child.communicate()
 
+    wrong_choice = subprocess.run(
+        [*cmd, "--storage", "remote"], cwd=root, env=env, capture_output=True, timeout=5,
+    )
+    assert (wrong_choice.returncode, wrong_choice.stderr) == (1, b"backend mismatch\n")
+    assert not runtime.exists()
+
+    runtime.mkdir(mode=0o700)
+    locator = runtime / "locator.json"
+    locator.write_text(json.dumps({"version": 4, "token": "11"*8, "profile": str(profile)}))
+    locator.chmod(0o600)
+    with socket.socket(socket.AF_UNIX) as occupied:
+        path = runtime / "port"
+        occupied.bind(str(path))
+        path.chmod(0o600)
+        occupied.listen()
+        other = subprocess.run(cmd, cwd=root, env=env, capture_output=True, timeout=5)
+        assert (other.returncode, other.stderr) == (1, b"runtime collision\n")
+        assert path.is_socket()
+    path.unlink()
+    locator.unlink()
+    runtime.rmdir()
+
+    invalid = json.loads((root / "profile.json").read_bytes())
+    invalid["arguments"]["backend_choices"]["remote"] = "other-provider"
+    put("bad-choice.json", invalid)
+    package["components"][2]["graph"] = pin("bad-choice.json")
+    put("bad-package.json", package)
+    rejected_choice = subprocess.run(
+        [ODDLANG, "build", "native-package", "rust", root / "bad-package.json", root / "rejected-choice"],
+        capture_output=True, timeout=10,
+    )
+    assert rejected_choice.returncode and b"invalid foreground owner arguments" in rejected_choice.stderr
+    package["components"][2]["graph"] = pin("profile.json")
+
     wrong = json.loads((root / "profile-rust.json").read_bytes())
     wrong["status_owner"] = ["other", "BoundOwner"]
     put("bad-owner.json", wrong)
@@ -216,4 +264,4 @@ with tempfile.TemporaryDirectory(prefix="fs-", dir="/tmp") as tmp:
     assert rejected_link.returncode and b"requires a linked local status owner" in rejected_link.stderr
     assert not (root / "rejected").exists()
 
-print("field station attachment, credentials, lease, discovery, shutdown, and reattach passed")
+print("field station passed credentials, explicit backend selection, lease, TLS, shutdown, stale recovery and occupied endpoint preservation")

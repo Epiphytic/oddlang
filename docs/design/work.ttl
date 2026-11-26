@@ -835,3 +835,8 @@ w:foregroundProfileOwner a p:Task ;
 
 w:foregroundProfileOwnerFixture a p:Artifact ;
     p:location "verification/foreground-profile-owner/check.py" .
+
+w:foregroundProfileReview a p:Finding ;
+    rdfs:label "Recover a matching dead runtime under the lease and bind explicit backend choices" ;
+    p:source w:foregroundProfileOwnerFixture .
+w:foregroundProfileOwner p:addresses w:foregroundProfileReview .

@@ -3,7 +3,11 @@
 use crate::local_command_client::{Callback, RequiredArgument};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
-use std::{collections::BTreeSet, fs, path::Path};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    fs,
+    path::Path,
+};
 
 mod rust;
 
@@ -26,7 +30,7 @@ struct Arguments {
     state: String,
     identity: String,
     backend: String,
-    backend_choices: Vec<String>,
+    backend_choices: BTreeMap<String, String>,
     route: String,
     relay: String,
 }
@@ -201,11 +205,11 @@ impl Graph {
         .into_iter()
         .any(|id| !token(id))
             || self.arguments.backend_choices.is_empty()
-            || !self
+            || self
                 .arguments
                 .backend_choices
                 .iter()
-                .all(|choice| plain(choice))
+                .any(|(choice, backend)| !plain(choice) || backend != &self.profile.backend)
         {
             return Err("invalid foreground owner arguments".into());
         }
