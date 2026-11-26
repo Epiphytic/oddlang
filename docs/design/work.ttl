@@ -1161,3 +1161,13 @@ w:nestedCodecPackageFixture a p:Artifact ;
     p:location <https://github.com/Epiphytic/oddlang/blob/00af3dab60da87ef5a5f5b9ce84813c4051eed79/verification/binary-record/verify.py> .
 w:nestedCodecManifestReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/52> .
+
+w:nestedCodecReview a p:Artifact ;
+    p:location <https://github.com/Epiphytic/oddlang/pull/66> .
+w:nestedCodecErrorPropagation a p:Finding ;
+    rdfs:label "Resolve nested codec error type aliases and verify providers expose a complete codec" ;
+    p:source w:nestedCodecReview .
+w:nestedCodecDiagnosticPrecedence a p:Finding ;
+    rdfs:label "Preserve existing input, lock and re-export diagnostics before checking package-wide nested codec relationships" ;
+    p:source w:nestedCodecReview .
+w:compositeExternalContractLinkage p:addresses w:nestedCodecErrorPropagation, w:nestedCodecDiagnosticPrecedence .

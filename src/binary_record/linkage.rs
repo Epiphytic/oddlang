@@ -17,7 +17,8 @@ impl Record {
     pub(crate) fn read(graph: &[u8], overlay: &[u8]) -> Result<Self> {
         let graph: Graph = serde_json::from_slice(graph).map_err(|e| e.to_string())?;
         let binding: Binding = serde_json::from_slice(overlay).map_err(|e| e.to_string())?;
-        graph.validate(&binding)?;
+        // Each component has passed projection. The package rechecks both input digests
+        // before providing these bytes for comparison.
         Ok(Self { graph, binding })
     }
 
@@ -89,8 +90,8 @@ pub(crate) fn validate(records: &[(Record, Vec<Vec<String>>)], aliases: &Aliases
         dependencies.push(slots);
         minima.push(minimum);
     }
-    // Children contribute their complete minimum payload. Prefixes and checksums
-    // were already counted by the enclosing graph. No recursive Rust calls.
+    // Each record counts its own length prefixes and footer. Add each child’s
+    // complete payload minimum once its dependencies are known.
     let mut complete = vec![false; records.len()];
     while complete.contains(&false) {
         let mut progress = false;

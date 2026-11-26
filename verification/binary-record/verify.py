@@ -204,9 +204,10 @@ serde = { version = "=1.0.229", features = ["derive"] }
     assemble("wrong-nested-error", "nested codec error type")
     packet_binding["errorType"] = "crate::shared::Error"
     assemble("same-error-reexport")
+    run("cargo", "+1.97.1", "check", "--locked", "--offline", cwd=root/"same-error-reexport")
     packet_binding["errorType"] = "crate::Error"
     provider["overlay"] = pin(write("extended.json", dict(header_binding, existingType="crate::Other")))
-    assemble("extended-codec", "nested codec identity")
+    assemble("extended-codec", "unknown public projected type or item: Header")
     provider["overlay"] = pin(write("header.json", header_binding))
     declaration = packet["externalRecords"][header_id]
     declaration["fields"][field_id]["bits"] = 16
@@ -220,7 +221,9 @@ serde = { version = "=1.0.229", features = ["derive"] }
     assemble("uninhabitable-slot", "nested codec minimum")
     packet["layout"][0]["encoding"]["maximum"] = 8
     packet_binding["externalRecords"][header_id]["path"] = "crate::Sample"
-    assemble("wrong-codec-binding", "nested codec identity")
+    assemble("wrong-codec-binding", "nested codec identity mismatch: " + header_id)
+    packet_binding["externalRecords"][header_id]["path"] = "::another_package::Header"
+    assemble("unresolved-codec", "nested codec identity has no pinned package export: " + header_id)
 
     packet_binding["externalRecords"][header_id]["path"] = "crate::packets::Header"
     packet_binding["externalRecords"][header_id]["fields"][field_id] = "other"
@@ -239,6 +242,7 @@ serde = { version = "=1.0.229", features = ["derive"] }
                             externalRecords={packet["id"]: dict(path="crate::Packet", fields={})})
     wrapper = append_record(envelope, envelope_binding)
     assemble("three-level-valid")
+    run("cargo", "+1.97.1", "check", "--locked", "--offline", cwd=root/"three-level-valid")
     # The middle record needs four length bytes plus its four-byte child.
     envelope["layout"][0]["encoding"]["maximum"] = 7
     wrapper["graph"] = pin(write("envelope.json", envelope))
@@ -249,5 +253,8 @@ serde = { version = "=1.0.229", features = ["derive"] }
     packet["externalRecords"] = {id("envelope"): dict(fields={})}
     packet_binding["externalRecords"] = {id("envelope"): dict(path="crate::Envelope", fields={})}
     assemble("cycle", "cyclic required nested codec slots")
+    # Existing package errors still precede the new cross-component check.
+    manifest["cargoLock"]["sha256"] = "0" * 64
+    assemble("stale-lock-before-cycle", "input digest mismatch: Cargo.lock")
 
 print("Portable tagged record agrees with independent bytes, bounds and named errors.")
