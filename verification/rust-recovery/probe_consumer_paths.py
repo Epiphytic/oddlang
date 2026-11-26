@@ -30,7 +30,8 @@ def verify_configs(pin, entry, env):
 def locked_graph(path):
     raw = path.read_bytes()
     graph = json.loads(raw)
-    lock = json.loads(path.with_name("exports.lock").read_bytes())
+    lock_bytes = path.with_name("exports.lock").read_bytes()
+    lock = json.loads(lock_bytes)
     if (
         lock["exportsSha256"] != sha(raw)
         or graph["vocabulary"] != "oddlang-public-type-bindings-v1"
@@ -38,12 +39,12 @@ def locked_graph(path):
         or lock["pin"]["targetKind"] != "lib"
     ):
         raise ValueError("expected digest-pinned library type graph")
-    return raw, graph, lock
+    return raw, graph, lock, sha(lock_bytes)
 
 
 def probe(expected, subject, manifest, cache):
-    raw, graph, lock = locked_graph(subject / "exports.json")
-    reference, reference_graph, reference_lock = locked_graph(expected)
+    raw, graph, lock, subject_lock_hash = locked_graph(subject / "exports.json")
+    reference, reference_graph, reference_lock, expected_lock_hash = locked_graph(expected)
     pin = lock["pin"]
     if pin["packageManifestSha256"] != sha(manifest.read_bytes()):
         raise ValueError("package manifest differs from subject export lock")
@@ -167,13 +168,13 @@ def probe(expected, subject, manifest, cache):
         compile_probe(["pub use observed as subject;"], temp, files[0], env)
     return {
         "expectedExportsSha256": sha(reference),
-        "expectedLockSha256": sha(expected.with_name("exports.lock").read_bytes()),
+        "expectedLockSha256": expected_lock_hash,
         "expectedUnresolved": sorted(
             list(row["path"]) + [name]
             for row in reference_graph["modules"].values()
             for name in row["unresolved"]
         ),
-        "subjectLockSha256": sha((subject / "exports.lock").read_bytes()),
+        "subjectLockSha256": subject_lock_hash,
         "subjectPackage": pin["package"],
         "subjectTargetName": pin["targetName"],
         "subjectExportsSha256": sha(raw),
