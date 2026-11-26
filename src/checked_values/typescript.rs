@@ -24,20 +24,20 @@ export class FixedBytesError extends Error {
     }
 }
 
-const nativeLength = Object.getOwnPropertyDescriptor(
-    Object.getPrototypeOf(Uint8Array.prototype), "length"
-)!.get!;
+const arrayPrototype = Object.getPrototypeOf(Uint8Array.prototype);
+const nativeLength = Object.getOwnPropertyDescriptor(arrayPrototype, "length")!.get!;
+const nativeTag = Object.getOwnPropertyDescriptor(arrayPrototype, Symbol.toStringTag)!.get!;
 
 export function fromBytes<Id extends FixedBytesId>(id: Id, input: Uint8Array): FixedBytes<Id> {
     if (typeof id !== "string" || !Object.hasOwn(definitions, id)) {
         throw new RangeError("unknown fixed-byte identity");
     }
-    if (!types.isUint8Array(input)) throw new TypeError("expected a Uint8Array");
+    if (nativeTag.call(input) !== "Uint8Array") throw new TypeError("expected a Uint8Array");
 
     const { length, failure } = definitions[id];
     if (nativeLength.call(input) !== length) throw new FixedBytesError(failure);
     const owned = new Uint8Array(length);
-    if (length !== 0) {
+    if (owned.length !== 0) {
         try {
             owned.set(input);
         } catch (error) {
@@ -97,9 +97,7 @@ pub fn build(graph: &Path, output: &Path) -> Result<()> {
     }
 
     let definitions = serde_json::to_string_pretty(&definitions).map_err(|err| err.to_string())?;
-    let source = format!(
-        "import {{ types }} from \"node:util\";\n\nconst definitions = {definitions} as const;\n{RUNTIME}"
-    );
+    let source = format!("const definitions = {definitions} as const;\n{RUNTIME}");
     let obligations = encode(&json!({
         "format": FORMAT,
         "domain": graph.id,

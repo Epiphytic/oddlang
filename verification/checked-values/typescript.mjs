@@ -14,7 +14,9 @@ if (width > 0) {
 }
 assert.throws(() => fromBytes(id, new Uint8Array(width + 1)), wrong);
 cases.long = failure;
-assert.throws(() => fromBytes(id, new Uint8ClampedArray(width)), TypeError);
+const clamped = new Uint8ClampedArray(width);
+Object.defineProperty(clamped, Symbol.toStringTag, { value: "Uint8Array" });
+assert.throws(() => fromBytes(id, clamped), TypeError);
 assert.throws(() => fromBytes("urn:unknown:value", new Uint8Array(width)), RangeError);
 
 const expected = Array.from({ length: width }, (_, index) => index % 251);

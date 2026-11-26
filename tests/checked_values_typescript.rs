@@ -4,6 +4,7 @@ use std::{fs, path::Path, process::Command};
 const ID: &str = "urn:sensor:sample";
 const OTHER: &str = "urn:sensor:wide-sample";
 const FAILURE: &str = "urn:sensor:width";
+const OTHER_FAILURE: &str = "urn:sensor:wide-width";
 
 fn graph(width: u32) -> serde_json::Value {
     json!({
@@ -31,6 +32,7 @@ fn projects_exact_native_bytes_with_independent_input_and_output_copies() {
         let input = work.path().join(format!("input-{width}.json"));
         let mut domain = graph(width);
         domain["types"][OTHER] = graph(width + 1)["types"][ID].clone();
+        domain["types"][OTHER]["failure"] = json!(OTHER_FAILURE);
         fs::write(&input, serde_json::to_vec(&domain).unwrap()).unwrap();
         let output = work.path().join(format!("out-{width}"));
         let result = project(&input, &output);
@@ -42,14 +44,18 @@ fn projects_exact_native_bytes_with_independent_input_and_output_copies() {
 
         let obligations: serde_json::Value =
             serde_json::from_slice(&fs::read(output.join("obligations.json")).unwrap()).unwrap();
-        for (index, (id, width)) in [(ID, width), (OTHER, width + 1)].into_iter().enumerate() {
+        for (index, (id, width, failure)) in
+            [(ID, width, FAILURE), (OTHER, width + 1, OTHER_FAILURE)]
+                .into_iter()
+                .enumerate()
+        {
             let witness = Command::new("node")
                 .args([
                     "--experimental-strip-types",
                     "verification/checked-values/typescript.mjs",
                 ])
                 .arg(output.join("values.mts"))
-                .args([id, &width.to_string(), FAILURE])
+                .args([id, &width.to_string(), failure])
                 .output()
                 .unwrap();
             assert!(
@@ -60,9 +66,48 @@ fn projects_exact_native_bytes_with_independent_input_and_output_copies() {
             let entry = &obligations["obligations"][index];
             assert_eq!(entry["declaration"], id);
             assert_eq!(entry["expected"]["length"], width);
-            assert_eq!(entry["expected"]["failure"], FAILURE);
+            assert_eq!(entry["expected"]["failure"], failure);
             assert_eq!(entry["expected"]["onDrop"], "erase");
             assert_eq!(entry["disposal"]["qualification"], "unsupported");
+        }
+        if width == 7 {
+            let file = work.path().join("types.mts");
+            fs::write(
+                &file,
+                format!(
+                    r#"
+                import {{fromBytes, type FixedBytes}} from "./out-7/values.mts";
+                const expected: FixedBytes<"{ID}"> = fromBytes("{ID}", new Uint8Array(7));
+                // @ts-expect-error the other declaration is a different value type
+                const mismatch: FixedBytes<"{ID}"> = fromBytes("{OTHER}", new Uint8Array(8));
+            "#
+                ),
+            )
+            .unwrap();
+            let compiler = Command::new("npm")
+                .args([
+                    "exec",
+                    "--offline",
+                    "--package=typescript@5.9.3",
+                    "--",
+                    "tsc",
+                    "--noEmit",
+                    "--strict",
+                    "--target",
+                    "ES2022",
+                    "--module",
+                    "NodeNext",
+                    "--allowImportingTsExtensions",
+                ])
+                .arg(&file)
+                .output()
+                .unwrap();
+            assert!(
+                compiler.status.success(),
+                "{}{}",
+                String::from_utf8_lossy(&compiler.stdout),
+                String::from_utf8_lossy(&compiler.stderr)
+            );
         }
     }
 }
