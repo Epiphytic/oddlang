@@ -72,10 +72,11 @@ fn minimum_request(fields: &[Field], captures: &BTreeMap<&str, &CaptureKind>) ->
                         format!("\"{}\"", "0".repeat(usize::from(*bytes) * 2))
                     }
                     CaptureKind::String { .. } => "\"\"".into(),
-                    CaptureKind::Unsigned64 => "0".into(),
+                    CaptureKind::Unsigned64 | CaptureKind::ExitStatus => "0".into(),
                 },
                 Source::Input { .. } => "0".into(),
                 Source::Object { fields } => minimum_request(fields, captures),
+                Source::Sha256 { .. } => format!("\"{}\"", "0".repeat(64)),
             };
             format!("{key}:{body}")
         })
@@ -89,6 +90,7 @@ fn validate_fields(
     captures: &BTreeSet<&str>,
     inputs: &BTreeSet<&str>,
     arguments: &mut Vec<(String, RequiredArgument)>,
+    delivery: bool,
 ) -> Result<(), String> {
     let mut keys = BTreeSet::new();
     for field in fields {
@@ -99,34 +101,54 @@ fn validate_fields(
                 field.key
             ));
         }
-        match &field.source {
-            Source::Literal { value } => {
-                if contains_fractional_literal(value) {
-                    return Err("workflow literals require integer JSON numbers".into());
-                }
+        validate_source(&field.source, seen, captures, inputs, arguments, delivery)?;
+    }
+    Ok(())
+}
+
+fn validate_source(
+    source: &Source,
+    seen: &mut BTreeSet<String>,
+    captures: &BTreeSet<&str>,
+    inputs: &BTreeSet<&str>,
+    arguments: &mut Vec<(String, RequiredArgument)>,
+    delivery: bool,
+) -> Result<(), String> {
+    match source {
+        Source::Literal { value } => {
+            if contains_fractional_literal(value) {
+                return Err("workflow literals require integer JSON numbers".into());
             }
-            Source::Argument { id, value_kind } => {
-                if !arg_id(id) {
-                    return Err(format!("invalid workflow request argument {id}"));
-                }
-                let kind = argument_kind(*value_kind).required_argument();
-                arguments.push((id.to_owned(), kind));
+        }
+        Source::Argument { id, value_kind } => {
+            if !arg_id(id) {
+                return Err(format!("invalid workflow request argument {id}"));
             }
-            Source::Captured { name } => {
-                if !captures.contains(name.as_str()) {
-                    return Err(format!(
-                        "workflow capture {name} not assigned on every incoming transition"
-                    ));
-                }
+            arguments.push((
+                id.to_owned(),
+                argument_kind(*value_kind).required_argument(),
+            ));
+        }
+        Source::Captured { name } => {
+            if !captures.contains(name.as_str()) {
+                return Err(format!(
+                    "workflow capture {name} not assigned on every incoming transition"
+                ));
             }
-            Source::Input { name } => {
-                if !inputs.contains(name.as_str()) {
-                    return Err(format!("undeclared workflow input {name}"));
-                }
+        }
+        Source::Input { name } => {
+            if !inputs.contains(name.as_str()) {
+                return Err(format!("undeclared workflow input {name}"));
             }
-            Source::Object { fields } => {
-                validate_fields(fields, seen, captures, inputs, arguments)?
+        }
+        Source::Object { fields } => {
+            validate_fields(fields, seen, captures, inputs, arguments, delivery)?
+        }
+        Source::Sha256 { fields } => {
+            if !delivery {
+                return Err("workflow hash source requires the delivery provider".into());
             }
+            validate_fields(fields, seen, captures, inputs, arguments, delivery)?;
         }
     }
     Ok(())
@@ -134,6 +156,10 @@ fn validate_fields(
 
 fn valid_path(path: &[String]) -> bool {
     !path.is_empty() && path.iter().all(|segment| !segment.is_empty())
+}
+
+fn valid_reply_path(path: &[String], allow_opened: bool) -> bool {
+    valid_path(path) && (allow_opened || path.first().is_none_or(|field| field != "$opened"))
 }
 
 fn diagnostics() -> [(&'static str, &'static str); 8] {
@@ -210,25 +236,63 @@ fn validate(
                 step.id
             ));
         }
+        if let Some(embedded) = &step.embedded {
+            identity(&embedded.id, &mut seen)?;
+            if !workflow.delivery
+                || embedded.maximum_bytes == 0
+                || embedded.maximum_bytes > transport.maximum_frame_bytes
+                || !valid_reply_path(&embedded.bytes, false)
+                || !valid_reply_path(&embedded.sha256, false)
+            {
+                return Err(format!("invalid embedded workflow reply at {}", step.id));
+            }
+        }
+        let allow_opened = !workflow.delivery || step.embedded.is_some();
         for (position, transition) in step.transitions.iter().enumerate() {
             identity(&transition.id, &mut seen)?;
             if transition.when.is_empty() && position + 1 != step.transitions.len() {
                 return Err(format!("workflow fallback must be last at {}", step.id));
             }
-            if transition.when.iter().any(|p| {
-                !valid_path(&p.path)
-                    || p.equals.is_object()
-                    || p.equals.is_array()
-                    || contains_fractional_literal(&p.equals)
+            if transition.when.iter().any(|predicate| {
+                !valid_reply_path(&predicate.path, allow_opened)
+                    || usize::from(predicate.equals.is_some())
+                        + usize::from(predicate.equals_source.is_some())
+                        + usize::from(predicate.equals_path.is_some())
+                        != 1
+                    || predicate.equals_path.as_ref().is_some_and(|path| {
+                        !workflow.delivery || !valid_reply_path(path, allow_opened)
+                    })
+                    || predicate.equals.as_ref().is_some_and(|value| {
+                        contains_fractional_literal(value)
+                            || (!workflow.delivery && (value.is_array() || value.is_object()))
+                    })
+                    || (!workflow.delivery && predicate.equals_source.is_some())
             }) {
                 return Err(format!(
                     "invalid workflow reply predicate at {}",
                     transition.id
                 ));
             }
+            let mut output_channels = BTreeSet::new();
+            for output in &transition.outputs {
+                identity(&output.id, &mut seen)?;
+                if !workflow.delivery
+                    || !output_channels.insert(output.channel)
+                    || !valid_reply_path(&output.bytes, allow_opened)
+                    || !valid_reply_path(&output.cursor, allow_opened)
+                    || output.maximum_bytes == 0
+                    || output.maximum_bytes > transport.maximum_frame_bytes
+                {
+                    return Err(format!(
+                        "invalid binary workflow output at {}",
+                        transition.id
+                    ));
+                }
+            }
             for capture in &transition.capture {
                 if !arg_id(&capture.name)
-                    || !valid_path(&capture.path)
+                    || (!workflow.delivery && matches!(capture.value_kind, CaptureKind::ExitStatus))
+                    || !valid_reply_path(&capture.path, allow_opened)
                     || captures
                         .insert(capture.name.as_str(), &capture.value_kind)
                         .is_some()
@@ -266,6 +330,14 @@ fn validate(
                         ));
                     }
                 }
+                Effect::ExitCaptured { name } => {
+                    if !workflow.delivery || !delivered(transition).contains(name.as_str()) {
+                        return Err(format!(
+                            "invalid captured workflow exit at {}",
+                            transition.id
+                        ));
+                    }
+                }
             }
         }
     }
@@ -284,7 +356,7 @@ fn validate(
         for transition in &step.transitions {
             match &transition.effect {
                 Effect::Continue { step, .. } => pending.push_back(step),
-                Effect::Exit { .. } => exit_reachable = true,
+                Effect::Exit { .. } | Effect::ExitCaptured { .. } => exit_reachable = true,
             }
         }
     }
@@ -326,12 +398,37 @@ fn validate(
                 "cannot carry workflow capture {missing} before assignment"
             ));
         }
+        for transition in &step.transitions {
+            for source in transition
+                .when
+                .iter()
+                .filter_map(|rule| rule.equals_source.as_ref())
+            {
+                validate_source(
+                    source,
+                    &mut seen,
+                    &guaranteed,
+                    &inputs,
+                    &mut arguments,
+                    workflow.delivery,
+                )?;
+            }
+            if let Effect::ExitCaptured { name } = &transition.effect {
+                if !matches!(captures.get(name.as_str()), Some(CaptureKind::ExitStatus)) {
+                    return Err(format!(
+                        "workflow exit must capture an exit status at {}",
+                        transition.id
+                    ));
+                }
+            }
+        }
         validate_fields(
             &step.request,
             &mut seen,
             &guaranteed,
             &inputs,
             &mut arguments,
+            workflow.delivery,
         )?;
         if minimum_request(&step.request, &captures).len() > transport.maximum_frame_bytes as usize
         {
@@ -368,12 +465,23 @@ fn load(graph: &[u8], binding: &[u8]) -> Result<SelectedWorkflow, String> {
             "capture_is_valid",
             "run_workflow",
             "execute_workflow",
+            "source_bytes",
+            "native_digest",
+            "open_embedded",
+            "emit_outputs",
+            "decoded_bytes",
             "initial_inputs",
             "choose_socket",
         ]
         .contains(&binding.entry.as_str())
     {
         return Err("invalid local command workflow entry".into());
+    }
+    if !matches!(
+        (workflow.delivery, binding.delivery_provider.as_deref()),
+        (false, None) | (true, Some("base64-sha256"))
+    ) {
+        return Err("workflow delivery requires its pinned codec binding".into());
     }
     let profile = match (
         &workflow.profile_inputs,
@@ -432,10 +540,13 @@ fn field_obligations(fields: &[Field], rows: &mut Vec<Value>) {
             Source::Captured { name } => row["captured"] = json!(name),
             Source::Input { name } => row["authorizedInput"] = json!(name),
             Source::Literal { value } => row["literal"] = json!(value),
-            Source::Object { fields: children } => {
+            Source::Object { fields: children } | Source::Sha256 { fields: children } => {
                 let mut nested = Vec::new();
                 field_obligations(children, &mut nested);
                 row["orderedFields"] = json!(nested);
+                if matches!(field.source, Source::Sha256 { .. }) {
+                    row["hash"] = json!("sha256LowerHex");
+                }
             }
         }
         rows.push(row);
@@ -541,6 +652,19 @@ fn choose_socket(_: &ArgMatches, explicit: Option<&PathBuf>) -> Result<PathBuf, 
 "#,
         );
     }
+    if workflow.delivery {
+        source.push_str(include_str!("delivery.rs.in"));
+    } else {
+        source.push_str(
+            r#"
+fn native_digest(_: &[u8]) -> Result<String, Failure> { Err(PROTOCOL) }
+fn open_embedded(_: &mut Value, _: &schema::EmbeddedReply) -> Result<(), Failure> { Err(PROTOCOL) }
+fn emit_outputs(_: &Value, outputs: &[schema::BinaryOutput]) -> Result<(), Failure> {
+    if outputs.is_empty() { Ok(()) } else { Err(PROTOCOL) }
+}
+"#,
+        );
+    }
     source.push_str(include_str!("runtime.rs.in"));
     let entry = selected.binding.entry;
     writeln!(source, "\npub fn {entry}(matches: ArgMatches) -> ExitCode {{\n    match execute_workflow(&matches) {{\n        Ok(code) => ExitCode::from(code),\n        Err(error) => error.report(),\n    }}\n}}").unwrap();
@@ -554,29 +678,45 @@ fn choose_socket(_: &ArgMatches, explicit: Option<&PathBuf>) -> Result<PathBuf, 
             json!({"declaration": step.id, "role": "workflow-step", "request": ordered_fields})
         })
         .collect::<Vec<_>>();
-    let obligations = format!(
-        "{:#}\n",
-        json!({
-            "format": "oddlang-local-workflow-obligations-v1",
-            "declaration": workflow.id,
-            "role": "same-user-local-command-client",
-            "qualification": "independent-witness-required",
-            "framing": "u32_be_json_half_close",
-            "encoding": "compactUtf8Json",
-            "objectOrder": "declarationOrder",
-            "literalObjectOrder": "lexicographicUtf8Keys",
-            "literalNumberEncoding": "signedOrUnsignedDecimalInteger",
-            "stringEscaping": {
-                "quote": "backslash", "reverseSolidus": "backslash", "solidus": "raw",
-                "controlRange": "U+0000-U+001F", "shortControls": ["b", "t", "n", "f", "r"],
-                "otherControls": "lowercase-u00xx", "nonAscii": "rawUtf8",
-            },
-            "replyDuplicateMembers": "reject",
-            "captureLifetime": "nextStepUnlessExplicitlyCarried",
-            "effects": policy,
-            "obligations": rows,
-        })
-    );
+    let mut catalog = json!({
+        "format": "oddlang-local-workflow-obligations-v1",
+        "declaration": workflow.id,
+        "role": "same-user-local-command-client",
+        "qualification": "independent-witness-required",
+        "framing": "u32_be_json_half_close",
+        "encoding": "compactUtf8Json",
+        "objectOrder": "declarationOrder",
+        "literalObjectOrder": "lexicographicUtf8Keys",
+        "literalNumberEncoding": "signedOrUnsignedDecimalInteger",
+        "stringEscaping": {
+            "quote": "backslash", "reverseSolidus": "backslash", "solidus": "raw",
+            "controlRange": "U+0000-U+001F", "shortControls": ["b", "t", "n", "f", "r"],
+            "otherControls": "lowercase-u00xx", "nonAscii": "rawUtf8",
+        },
+        "replyDuplicateMembers": "reject",
+        "captureLifetime": "nextStepUnlessExplicitlyCarried",
+        "effects": policy,
+        "obligations": rows,
+    });
+    if workflow.delivery {
+        catalog["delivery"] = json!({
+            "base64": "canonical-padded-standard-alphabet",
+            "sizeLimits": "bound-encoded-length-before-decode-and-check-decoded-byte-limit",
+            "embeddedDigest": "sha256-lowercase-hex-over-decoded-bytes",
+            "openedField": "$opened",
+            "openedFieldFromPeer": "reject-on-embedded-reply",
+            "embeddedJson": "strict-json-without-duplicate-members",
+            "replyArrayPaths": "canonical-unsigned-decimal-index-with-no-leading-zero",
+            "comparePath": "structural-json-equality-with-both-paths-present",
+            "compareSource": "structural-json-equality-to-declared-literal-argument-input-capture-or-constructed-value",
+            "binaryOutput": "validate-all-declared-streams-before-first-write-then-write-and-flush-in-declaration-order",
+            "cursorOrigin": 0,
+            "cursorAdvance": "equal-to-decoded-stream-length",
+            "exitStatus": {"minimum": 0, "maximum": 255, "source": "validated-exit-status-capture"},
+            "consume": "declared-as-a-subsequent-local-exchange",
+        });
+    }
+    let obligations = format!("{catalog:#}\n");
     use crate::wire_schema::digest;
     let mut lock = json!({
         "format": "oddlang-local-command-workflow-lock-v1",

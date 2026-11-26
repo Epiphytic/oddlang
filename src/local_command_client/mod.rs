@@ -418,6 +418,7 @@ struct Binding {
     format: String,
     entry: String,
     profile_provider: Option<String>,
+    delivery_provider: Option<String>,
 }
 
 #[derive(Clone, Copy)]
@@ -534,6 +535,7 @@ fn load(graph: &[u8], binding: &[u8]) -> Result<(Graph, Binding), String> {
     let overlay: Binding = serde_json::from_slice(binding).map_err(|error| error.to_string())?;
     if overlay.format != "oddlang-local-command-client-rust-v1"
         || overlay.profile_provider.is_some()
+        || overlay.delivery_provider.is_some()
         || !valid_entry(&overlay.entry)
         || (overlay.entry == "request_body" && contract.request_arguments().next().is_some())
         || (contract.discovery.is_some()
