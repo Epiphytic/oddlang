@@ -2,6 +2,12 @@
 use super::{Binding, Encoding, Graph, Result, composite::Primitive};
 use std::collections::BTreeMap;
 
+type Aliases = BTreeMap<String, String>;
+
+fn resolve_error_path<'a>(path: &'a str, aliases: &'a Aliases) -> &'a str {
+    aliases.get(path).map(String::as_str).unwrap_or(path)
+}
+
 pub(crate) struct Record {
     graph: Graph,
     binding: Binding,
@@ -19,9 +25,14 @@ impl Record {
         &self.binding.name
     }
 
-    fn check_reference(&self, id: &str, provider: &Self) -> Result<()> {
+    fn check_reference(&self, id: &str, provider: &Self, aliases: &Aliases) -> Result<()> {
         if provider.graph.id != id || provider.binding.existing_type.is_some() {
             return Err(format!("nested codec identity mismatch: {id}"));
+        }
+        if resolve_error_path(&self.binding.error_type, aliases)
+            != resolve_error_path(&provider.binding.error_type, aliases)
+        {
+            return Err(format!("nested codec error type mismatch: {id}"));
         }
         let expected = &self.graph.external_records[id];
         if expected
@@ -42,7 +53,7 @@ impl Record {
     }
 }
 
-pub(crate) fn validate(records: &[(Record, Vec<Vec<String>>)]) -> Result<()> {
+pub(crate) fn validate(records: &[(Record, Vec<Vec<String>>)], aliases: &Aliases) -> Result<()> {
     let mut by_path = BTreeMap::new();
     for (index, (_, paths)) in records.iter().enumerate() {
         for path in paths {
@@ -71,7 +82,7 @@ pub(crate) fn validate(records: &[(Record, Vec<Vec<String>>)]) -> Result<()> {
                 let index = *by_path.get(path).ok_or_else(|| {
                     format!("nested codec identity has no pinned package export: {record} ({path})")
                 })?;
-                consumer.check_reference(record, &records[index].0)?;
+                consumer.check_reference(record, &records[index].0, aliases)?;
                 slots.push((index, *maximum, &slot.id));
             }
         }

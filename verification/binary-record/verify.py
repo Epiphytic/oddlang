@@ -190,7 +190,7 @@ serde = { version = "=1.0.229", features = ["derive"] }
                          graph=pin(write(f"record-{index}.json", g)), overlay=pin(write(f"binding-{index}.json", b)))
         manifest["components"].append(component)
         return component
-    append_record(header, header_binding)
+    provider = append_record(header, header_binding)
     consumer = append_record(packet, packet_binding)
     def assemble(name, diagnostic=None):
         consumer["graph"] = pin(write("packet.json", packet))
@@ -200,6 +200,14 @@ serde = { version = "=1.0.229", features = ["derive"] }
         assert destination.exists() == (diagnostic is None)
     assemble("nested-valid")
     run("cargo", "+1.97.1", "check", "--locked", "--offline", cwd=root/"nested-valid")
+    packet_binding["errorType"] = "crate::Mode"
+    assemble("wrong-nested-error", "nested codec error type")
+    packet_binding["errorType"] = "crate::shared::Error"
+    assemble("same-error-reexport")
+    packet_binding["errorType"] = "crate::Error"
+    provider["overlay"] = pin(write("extended.json", dict(header_binding, existingType="crate::Other")))
+    assemble("extended-codec", "nested codec identity")
+    provider["overlay"] = pin(write("header.json", header_binding))
     declaration = packet["externalRecords"][header_id]
     declaration["fields"][field_id]["bits"] = 16
     assemble("wrong-member-kind", "nested codec member")

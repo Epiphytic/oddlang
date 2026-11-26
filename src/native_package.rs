@@ -556,7 +556,18 @@ pub(super) fn build_pinned(
         serde_json::from_slice(raw).map_err(|e| format!("package manifest: {e}"))?;
     validate_command_callbacks(&manifest.components, base)?;
     let mut codecs = Vec::new();
+    let mut root_aliases = BTreeMap::new();
     for component in &manifest.components {
+        for name in component
+            .root_reexports
+            .as_ref()
+            .unwrap_or(&component.reexports)
+        {
+            root_aliases.insert(
+                format!("crate::{name}"),
+                format!("crate::{}::{name}", component.module),
+            );
+        }
         if matches!(component.kind, Kind::BinaryRecord | Kind::BinaryFragment) {
             let record = crate::binary_record::linkage::Record::read(
                 &component.graph.read(base)?,
@@ -566,7 +577,7 @@ pub(super) fn build_pinned(
             codecs.push((record, paths));
         }
     }
-    crate::binary_record::linkage::validate(&codecs)?;
+    crate::binary_record::linkage::validate(&codecs, &root_aliases)?;
     let cargo = cargo_manifest(&manifest)?;
     let lock = manifest.cargo_lock.read(base)?;
     let parent = output
