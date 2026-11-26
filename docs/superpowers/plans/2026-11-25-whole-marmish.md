@@ -27,6 +27,10 @@ The independent stream comparison including macro expansions left 373 compiler-o
 
 ## Implementation evidence
 
+- [x] Build the native Rust core library from the three pinned contracts and qualify its seven unchanged integration tests on Darwin and Linux ARM64. A public caller matched 1,735 observations on each host. [Core package and receipts](https://github.com/Epiphytic/marmish-oddlang/pull/11)
+- [x] Independently recover shared stream declarations, build the compression module from its separately authored policy, and read original and generated blocks on both peers. Five unchanged codec tests pass on Darwin ARM64. [Module and qualification](https://github.com/Epiphytic/marmish-oddlang/pull/12)
+
+
 - [x] Recover selected symbolic constants, public error payloads and result aliases from a pinned source module as candidate declarations. [Recovery fixture](../../../verification/rust-recovery/test_shared_source.py)
 
 
