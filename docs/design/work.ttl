@@ -2704,3 +2704,11 @@ w:authorizedLocalCommandInputs a p:Task ;
     p:status p:active ; p:dependsOn w:localOwnerWorkflow ;
     p:acceptance "Use descriptor-relative read-only profile admission, validate target and relay authority before same-user IPC, preserve bounded bytes and validate status, prepare and submit through the ordinary generated CLI." .
 w:basicCommandInterop p:dependsOn w:authorizedLocalCommandInputs .
+
+w:composedBasicOwnerCandidate a p:Task ;
+    rdfs:label "Compose the generated setup, provider and local client roles" ;
+    p:milestone w:marmishMilestone ;
+    p:source w:basicCommandInteropPlan ;
+    p:dependsOn w:leasedProfileSetup, w:generatedRelayActivation, w:localOwnerWorkflow ;
+    p:status p:active ;
+    p:acceptance "Build one pinned companion candidate, qualify setup and authenticated provider activation across independently attributed mixed peers, and preserve the local-client handoff boundary." .
