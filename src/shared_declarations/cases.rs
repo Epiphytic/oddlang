@@ -49,10 +49,12 @@ pub(super) fn derive(graph: &Graph, binding: &Binding) -> Result<Json> {
                 }
                 rows.push(json!({"payloadCanonicalText":payload,"display":display}));
             }
-            cases.insert(
-                &variant.id,
-                json!({"kind":"error-variant","payload":variant.payload,"examples":rows}),
-            );
+            let mut obligation =
+                json!({"kind":"error-variant","payload":variant.payload,"examples":rows});
+            if let Some(category) = &variant.category {
+                obligation["category"] = json!(category);
+            }
+            cases.insert(&variant.id, obligation);
         }
     }
     for enumeration in &graph.string_enums {

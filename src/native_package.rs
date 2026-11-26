@@ -161,6 +161,7 @@ enum Kind {
     EndpointSet,
     IntegrityBlock,
     SharedDeclarations,
+    CheckedValues,
     FiniteErrorDomain,
     SequenceJournal,
     CliSurface,
@@ -310,6 +311,12 @@ fn project(
         Kind::FiniteErrorDomain => {
             crate::finite_error_domain::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
             "errors.rs"
+        }
+        Kind::CheckedValues => {
+            let path = input.join("graph.json");
+            io(fs::write(&path, graph))?;
+            crate::checked_values::build(&path, &overlay, &output)?;
+            "values.rs"
         }
         Kind::SharedDeclarations => {
             let path = input.join("graph.json");

@@ -100,3 +100,5 @@ The principal feasibility risk is recovering intended behavior where only incide
 - [x] Qualify the complete copy protocol library against every unchanged pinned native test and exact frame error controls on macOS ARM64. [Native receipt and structural inventory](https://github.com/Epiphytic/marmish-oddlang/pull/42)
 
 - [ ] Check composite slot bounds and member types against pinned external codec contracts before package emission.
+
+- [x] Define finite scalar views, typed checked products, and named error categories. Verify exact native value semantics, borrowed getters, private constructors and UTF-8 boundary behavior in an unrelated standalone package. [Checked value domains](../../language/checked-values.md)
