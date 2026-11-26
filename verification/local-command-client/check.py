@@ -48,7 +48,7 @@ def reply(body):
     return struct.pack("!I", len(body)) + body
 
 
-def exchange(binary, path, wire, expected, *, args=None, env=None):
+def exchange(binary, path, wire, expected, *, args=None, env=None, request=REQUEST):
     with socket.socket(socket.AF_UNIX) as listener:
         listener.settimeout(3)
         listener.bind(str(path))
@@ -58,8 +58,8 @@ def exchange(binary, path, wire, expected, *, args=None, env=None):
             connection, _ = listener.accept()
             with connection:
                 connection.settimeout(3)
-                assert receive(connection, 4) == struct.pack("!I", len(REQUEST))
-                assert receive(connection, len(REQUEST)) == REQUEST
+                assert receive(connection, 4) == struct.pack("!I", len(request))
+                assert receive(connection, len(request)) == request
                 assert connection.recv(1) == b"", "client did not half-close"
                 if wire is not None:
                     connection.sendall(wire[:2])
@@ -123,6 +123,125 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
 
     missing_socket = subprocess.run([binary, "read", "--port", path], capture_output=True)
     assert (missing_socket.returncode, missing_socket.stdout, missing_socket.stderr) == (7, b"", b"sensor I/O\n")
+
+    dynamic = json.loads((root / "graph.json").read_bytes())
+    dynamic["request_id"] = "urn:field:request"
+    dynamic["request"] = [
+        {"key": "verb", "value": "read"},
+        {"key": "sensor", "argument": {"id": "sensor", "kind": "unsigned64"}},
+        {"key": "label", "argument": {"id": "label", "kind": "string"}},
+        {"key": "waiting", "argument": {"id": "waiting", "kind": "flag"}},
+        {"key": "probes", "argument": {"id": "probe", "kind": "repeated_string"}},
+        {"key": "comment", "value": None},
+    ]
+    for field in dynamic["request"]:
+        field["id"] = "urn:field:request:" + field["key"]
+    dynamic_cli = json.loads((root / "cli.json").read_bytes())
+    dynamic_cli["root"]["arguments"].extend([
+        {"id": "sensor", "long": "sensor", "kind": "u64", "global": True},
+        {"id": "label", "long": "label", "kind": "string", "global": True},
+        {"id": "waiting", "long": "waiting", "global": True},
+        {"id": "probe", "long": "probe", "kind": "string", "global": True, "repeated": True},
+    ])
+    for field in dynamic_cli["root"]["arguments"]:
+        if field["id"] == "sensor":
+            field["default_value"] = "7"
+        if field["id"] == "probe":
+            field["default_value"] = "backup"
+    write("dynamic.json", dynamic)
+    write("dynamic-cli.json", dynamic_cli)
+    dynamic_package = json.loads((root / "manifest.json").read_bytes())
+    dynamic_package["components"][0]["graph"] = pin("dynamic-cli.json")
+    dynamic_package["components"][1]["graph"] = pin("dynamic.json")
+    write("dynamic-package.json", dynamic_package)
+    built = subprocess.run([ODDLANG, "build", "native-package", "rust", root / "dynamic-package.json",
+                            root / "dynamic-client"], capture_output=True, timeout=120)
+    assert built.returncode == 0, built.stderr
+    checked("cargo", "build", "--release", "--locked", "--offline", cwd=root / "dynamic-client")
+    dynamic_bin = root / "dynamic-client/target/release/field-meter"
+    args = ["read", "--port", path, "--sensor", "18446744073709551615", "--label", 'site"3',
+            "--waiting", "--probe", "b", "--probe", "a"]
+    valid = br'{"verb":"read","sensor":18446744073709551615,"label":"site\"3","waiting":true,"probes":["b","a"],"comment":null}'
+    padding = "x" * (128 - len(valid))
+    args[6] += padding
+    filled = valid.replace(b'3","waiting"', b'3' + padding.encode() + b'","waiting"')
+    assert len(filled) == 128
+    exchange(dynamic_bin, path, reply(b'{"ready":true}'), (0, b'{"reading":null,"ready":true}\n', b""),
+             args=args, request=filled)
+    exchange(dynamic_bin, path, reply(b'{"ready":true}'), (0, b'{"reading":null,"ready":true}\n', b""),
+             args=["read", "--port", path, "--sensor", "0", "--label", "測/<\t\x01"],
+             request=b'{"verb":"read","sensor":0,"label":"\xe6\xb8\xac/<\\t\\u0001","waiting":false,"probes":[],"comment":null}')
+    args[6] += "x"
+    for invalid_args, expected in (
+        (["read", "--port", path, "--label", "a"], (6, b"", b"unbound sensor\n")),
+        (args, (9, b"", b"invalid sensor frame size\n")),
+    ):
+        bad = subprocess.run([dynamic_bin, *invalid_args], capture_output=True, timeout=5)
+        assert (bad.returncode, bad.stdout, bad.stderr) == expected
+    for index, mutation, argument in (
+        (-1, {"repeated": False}, "probe"),
+        (-4, {"kind": "string"}, "sensor"),
+        (-2, {"kind": "string"}, "waiting"),
+    ):
+        bad_cli = json.loads((root / "dynamic-cli.json").read_bytes())
+        bad_cli["root"]["arguments"][index].update(mutation)
+        write("bad-dynamic-cli.json", bad_cli)
+        dynamic_package["components"][0]["graph"] = pin("bad-dynamic-cli.json")
+        write("dynamic-package.json", dynamic_package)
+        bad = subprocess.run([ODDLANG, "build", "native-package", "rust", root / "dynamic-package.json",
+                              root / "bad-dynamic-client"], capture_output=True, timeout=120)
+        assert bad.returncode != 0 and f'incompatible argument "{argument}"'.encode() in bad.stderr
+        assert not (root / "bad-dynamic-client").exists()
+    checked(ODDLANG, "build", "local-command-client", "rust", root / "dynamic.json",
+            root / "binding.json", root / "dynamic-effects")
+    config = root / "dynamic-effects"
+    policy = (config / "request-obligations.json").read_bytes()
+    projection = json.loads((config / "projection.lock").read_bytes())
+    assert hashlib.sha256(policy).hexdigest() == projection["requestObligationsSha256"]
+    obligations = json.loads(policy)
+    assert obligations["qualification"] == "independent-witness-required"
+    header, *fields = obligations["obligations"]
+    assert header["declaration"] == "urn:field:request" and header["role"] == "request-envelope"
+    assert header["maximumFrameBytes"] == 128 and header["objectOrder"] == "declarationOrder"
+    assert header["argumentSource"] == "explicitCommandLine"
+    assert header["stringEscaping"]["otherControls"] == "lowercase-u00xx"
+    assert header["stringEscaping"]["controlRange"] == "U+0000-U+001F"
+    keys = ["verb", "sensor", "label", "waiting", "probes", "comment"]
+    assert [(field["declaration"], field["role"], field["position"], field["key"]) for field in fields] == [
+        (f"urn:field:request:{key}", "request-field", index, key) for index, key in enumerate(keys)
+    ]
+    assert fields[1]["argument"] == {"id": "sensor", "kind": "unsigned64"}
+    assert fields[1]["representation"] == {
+        "type": "integer", "minimumDecimal": "0",
+        "maximumDecimal": "18446744073709551615", "absent": "reject",
+    }
+    assert "value" in fields[-1] and fields[-1]["value"] is None
+    for change, diagnostic in (
+        (lambda graph: graph["transport"].update(maximum_frame_bytes=1),
+         b"minimum request exceeds frame limit"),
+        (lambda graph: graph.pop("request_id"),
+         b"missing request declaration identity"),
+        (lambda graph: graph["request"][1].update(id="urn:field:request"),
+         b"duplicate request declaration identity"),
+        (lambda graph: graph["request"][-1].update(value={"samples": [0.25]}),
+         b"identified request literals require signed or unsigned integer JSON numbers"),
+        (lambda graph: graph["request"][1].update(value=None),
+         b"request field needs exactly one literal value or argument"),
+        (lambda graph: graph["request"][1].pop("argument"),
+         b"request field needs exactly one literal value or argument"),
+    ):
+        variant = json.loads((root / "dynamic.json").read_bytes())
+        change(variant)
+        write("bad-dynamic.json", variant)
+        bad = subprocess.run([ODDLANG, "build", "local-command-client", "rust", root / "bad-dynamic.json",
+                              root / "binding.json", root / "bad-effects"], capture_output=True, timeout=120)
+        assert bad.returncode != 0 and diagnostic in bad.stderr
+        assert not (root / "bad-effects").exists()
+    minimum = b'{"verb":"read","sensor":0,"label":"","waiting":true,"probes":[],"comment":null}'
+    dynamic["transport"]["maximum_frame_bytes"] = len(minimum)
+    write("minimum-dynamic.json", dynamic)
+    checked(ODDLANG, "build", "local-command-client", "rust", root / "minimum-dynamic.json",
+            root / "binding.json", root / "minimum-dynamic-client")
 
     typed = json.loads((root / "graph.json").read_bytes())
     typed["transport"]["maximum_frame_bytes"] = 512
@@ -336,4 +455,4 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
     assert mutant.returncode and b"constant request exceeds frame limit" in mutant.stderr
     assert not (root / "invalid").exists()
 
-print("field-meter IPC: nine framed interactions, three local errors, five graph or linking rejections, typed replies, and private endpoint discovery passed")
+print("field-meter IPC: literal and typed request frames, frame limits, argument checks, typed replies, and private endpoint discovery passed")
