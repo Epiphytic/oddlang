@@ -874,6 +874,15 @@ w:localStatusOracles a p:Task ; rdfs:label "Characterize the local status interf
 w:localStatusBaseline a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/20> .
 w:localReplyShapes a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/22> .
 w:combinedNativeRelease a p:Task ; rdfs:label "Compose the core, stream and partial client interfaces in one source-free workspace" ;
-    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:active ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ; p:evidence w:combinedNativeReceipt ;
     p:dependsOn w:nativeWirePackage, w:localStatusOracles ;
     p:acceptance "Generate three native packages from one locked root, build them together without original sources, then replay the unchanged core, wire, window and codec tests." .
+w:combinedNativeReceipt a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/25> .
+w:statusMixedNative a p:Task ; rdfs:label "Compare a generated status client to an activating original daemon on two native ARM64 targets" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ; p:dependsOn w:localStatusOracles ;
+    p:acceptance "Compare request, write EOF, exit, output streams, frame controls and daemon shutdown when paths are explicit." ; p:evidence w:statusMixedRelease .
+w:statusMixedRelease a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/23> .
+w:launchIdentityRelease a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/24> .
+w:launchIdentityQualification a p:Task ; rdfs:label "Qualify ordered hash and namespace identity views against native and independent byte oracles" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ; p:evidence w:launchIdentityRelease ;
+    p:acceptance "Compare the two declared views on macOS ARM64 and change field order to verify that the generated digest follows the contract." .

@@ -28,7 +28,9 @@ The independent stream comparison including macro expansions left 373 compiler-o
 ## Implementation evidence
 
 - [x] Freeze the original local status and extended reply observations on Darwin and Linux ARM64. [Live daemon and framing](https://github.com/Epiphytic/marmish-oddlang/pull/20) · [Extended reply corpus](https://github.com/Epiphytic/marmish-oddlang/pull/22)
-- [ ] Build the qualified core and stream projections alongside the partial client and daemon command surfaces in one locked workspace and replay applicable upstream tests.
+- [x] Build the core, stream and partial command surfaces together and replay 25 unchanged tests on Darwin and Linux ARM64. [Three-member workspace](https://github.com/Epiphytic/marmish-oddlang/pull/25)
+- [x] Qualify the explicit-socket status client against an activating original daemon. [Mixed native status](https://github.com/Epiphytic/marmish-oddlang/pull/23)
+- [x] Qualify the separate extended Launch digest and namespace package on Darwin ARM64. [Typed hash views](https://github.com/Epiphytic/marmish-oddlang/pull/24)
 
 - [x] Recover a declarative CLI grammar and generate the Rust parser boundary. Compare exact help, version, diagnostics and dispatch against an unrelated native fixture. [Command surface profile](../../language/command-surface.md)
 
