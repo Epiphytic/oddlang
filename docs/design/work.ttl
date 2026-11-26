@@ -2958,3 +2958,40 @@ w:deferredWorkflowOutput a p:Task ;
     p:acceptance "Retain a bounded reply object across exchanges, validate a binding against newly captured cursors before any stream output, and preserve direct and legacy workflow behavior." .
 w:deferredWorkflowOutputFixture a p:Artifact ;
     p:location "verification/local-owner-workflow/deferred-output.md" .
+w:asyncLocalOwnerRoute a p:Task ;
+    rdfs:label "Await bounded replies on the private local owner listener" ;
+    p:milestone w:marmishMilestone ; p:source w:authorizedOwnerLocalSubmitPlan ;
+    p:status p:done ; p:evidence w:asyncLocalOwnerRouteVerification ;
+    p:acceptance "Exercise an awaited same-user framed request, a route timeout, and status concurrently in the unrelated gauge package." .
+w:asyncLocalOwnerRouteVerification a p:Artifact ;
+    p:location "verification/local-status-owner/ASYNC-ROUTE.md" .
+w:authorizedOwnerLocalSubmit a p:Task ;
+    rdfs:label "Verify authorized retained-room local submission through a committed queue receipt" ;
+    p:milestone w:marmishMilestone ; p:source w:authorizedOwnerLocalSubmitPlan ;
+    p:status p:done ; p:evidence w:authorizedOwnerLocalSubmitVerification ;
+    p:addresses w:authorizedOwnerLocalSubmitReviewFinding ;
+    p:dependsOn w:asyncLocalOwnerRoute, w:localRequestQueue, w:boundedLocalOwnerPrepare ;
+    p:acceptance "Exercise trusted retained-room lookup, canonical local request inputs, and the committed receipt on a keyed offline fixture database. Reopen the database and verify the same receipt." .
+w:authorizedOwnerLocalSubmitPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-26-authorized-owner-local-submit.md" .
+w:authorizedOwnerLocalSubmitVerification a p:Artifact ;
+    p:location "verification/local-status-owner/AUTHORIZED-SUBMIT-BOUNDARY.md" .
+w:authorizedOwnerLocalSubmitReviewFinding a p:Finding ;
+    rdfs:label "Pin the identifier clock to unsigned 48-bit Unix seconds and compile the mapped local submit projection" ;
+    p:source w:authorizedOwnerLocalSubmitReview .
+w:authorizedOwnerLocalSubmitReview a p:Artifact ;
+    p:location "Claude auto review of the bounded local submit and async owner route patch" .
+w:authorizedOwnerLocalSubmit p:addresses w:localSubmitReceiptShapeFinding .
+w:localSubmitReceiptShapeFinding a p:Finding ;
+    rdfs:label "Declare local reply flags and receipt version in the application graph" ;
+    p:source w:authorizedOwnerLocalSubmitReview .
+
+w:retainedPollComparison a p:Artifact ;
+    rdfs:label "Interrupted client waits with the same retained poll and committed stream cursors" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a168a2f55ede503745a3cc94fa62473cfafbef89/verification/whole/basic-command-interop/pending-poll-restart-aarch64-apple-darwin.json" .
+w:localRetainedPollRecovery a p:Task ;
+    rdfs:label "Resume a client wait after a poll reply becomes available during interruption" ;
+    p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
+    p:dependsOn w:boundedLocalWorkflowProgress ; p:status p:active ;
+    p:evidence w:retainedPollComparison ;
+    p:acceptance "After interrupting the waiter at stdout/stderr offsets 8 and 9, the restarted generated client must reproduce the mainline suffixes, exit 7 and acknowledge the reply against the old cursor pair. Verify digest, session and cursor checks before emitting bytes or consuming a retained reply." .

@@ -179,6 +179,17 @@ with tempfile.TemporaryDirectory(prefix="gauge-", dir="/tmp") as directory:
     run("cargo", "test", "--release", "--locked", "--offline", "--test", "routed_consumer", cwd=routed,
         env=dict(os.environ, GAUGE_TEST_DIR=str(root)))
 
+    binding["async_route_deadline_ms"] = 100
+    (root / "rust.json").write_text(json.dumps(binding))
+    manifest["components"][0]["overlay"] = pin("rust.json")
+    (root / "package.json").write_text(json.dumps(manifest))
+    async_routed = root / "async-build"
+    run(ODDLANG, "build", "native-package", "rust", root / "package.json", async_routed)
+    (async_routed / "tests").mkdir()
+    shutil.copyfile(FIXTURE / "async_routed_consumer.rs", async_routed / "tests/async_routed_consumer.rs")
+    run("cargo", "test", "--release", "--locked", "--offline", "--test", "async_routed_consumer",
+        cwd=async_routed, env=dict(os.environ, GAUGE_TEST_DIR=str(root)))
+
     graph = json.loads((root / "graph.json").read_bytes())
     graph["lifecycle"]["transitions"][0]["from"] = "not-reachable"
     (root / "mutant.json").write_text(json.dumps(graph))
