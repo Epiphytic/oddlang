@@ -1,0 +1,299 @@
+//! Finite error cases with a closed choice of payload and display rules.
+use crate::native_package::digest;
+use crate::shared_declarations::unique_map;
+use oxigraph::model::NamedNode;
+use serde::{Deserialize, Serialize};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    fmt::Write as _,
+    fs,
+    path::Path,
+};
+
+mod recover;
+pub use recover::recover;
+
+type Result<T> = std::result::Result<T, String>;
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct Graph {
+    format: String,
+    id: String,
+    error: String,
+    result: String,
+    #[serde(deserialize_with = "unique_map")]
+    variants: BTreeMap<String, Variant>,
+    #[serde(deserialize_with = "unique_map")]
+    categories: BTreeMap<String, Table>,
+}
+
+#[derive(Deserialize, Serialize)]
+struct Table(#[serde(deserialize_with = "unique_map")] BTreeMap<String, String>);
+
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct Variant {
+    payload: Payload,
+    message: Message,
+    source: bool,
+    from: bool,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case", tag = "kind", deny_unknown_fields)]
+enum Payload {
+    Unit,
+    OwnedText,
+    StaticText,
+    IoError,
+    Category { table: String },
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case", tag = "kind", deny_unknown_fields)]
+enum Message {
+    Literal { text: String },
+    Insertion { prefix: String, suffix: String },
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct Overlay {
+    format: String,
+    #[serde(deserialize_with = "unique_map")]
+    names: BTreeMap<String, String>,
+    variant_order: Vec<String>,
+    #[serde(deserialize_with = "unique_map")]
+    category_types: BTreeMap<String, Vec<String>>,
+}
+
+fn io<T>(result: std::io::Result<T>) -> Result<T> {
+    result.map_err(|error| error.to_string())
+}
+
+fn identifier(name: &str) -> bool {
+    syn::parse_str::<syn::Ident>(name).is_ok_and(|value| value == name)
+        && !name.starts_with("r#")
+        && name != "_"
+}
+
+fn validate(graph: &Graph, overlay: &Overlay) -> Result<()> {
+    if graph.format != "oddlang-finite-error-domain-v1"
+        || overlay.format != "oddlang-finite-error-rust-v1"
+        || graph.variants.is_empty()
+    {
+        return Err("unsupported or empty finite error domain".into());
+    }
+    let mut ids = BTreeSet::new();
+    let mut add = |id: &String| -> Result<()> {
+        NamedNode::new(id).map_err(|error| error.to_string())?;
+        if !ids.insert(id.clone()) {
+            return Err(format!("duplicate error-domain identity {id}"));
+        }
+        Ok(())
+    };
+    add(&graph.error)?;
+    add(&graph.result)?;
+    for id in graph.variants.keys() {
+        add(id)?;
+    }
+    for (id, Table(values)) in &graph.categories {
+        add(id)?;
+        if values.is_empty() {
+            return Err("empty category table".into());
+        }
+        for key in values.keys() {
+            add(key)?;
+        }
+    }
+    NamedNode::new(&graph.id).map_err(|error| error.to_string())?;
+    if ids.contains(&graph.id)
+        || !ids.iter().eq(overlay.names.keys())
+        || !overlay.names.values().all(|name| identifier(name))
+        || !graph.categories.keys().eq(overlay.category_types.keys())
+        || overlay.variant_order.len() != graph.variants.len()
+        || overlay.variant_order.iter().collect::<BTreeSet<_>>() != graph.variants.keys().collect()
+    {
+        return Err("incomplete or inconsistent finite error binding".into());
+    }
+    fn distinct<'a>(names: impl IntoIterator<Item = &'a String>) -> bool {
+        let mut seen = BTreeSet::new();
+        names.into_iter().all(|name| seen.insert(name))
+    }
+    if !distinct([&overlay.names[&graph.error], &overlay.names[&graph.result]])
+        || !distinct(graph.variants.keys().map(|id| &overlay.names[id]))
+        || !distinct(graph.categories.keys().map(|id| &overlay.names[id]))
+    {
+        return Err("duplicate native name within error declaration scope".into());
+    }
+    for (id, Table(table)) in &graph.categories {
+        let path = &overlay.category_types[id];
+        if path.len() < 2
+            || !path
+                .iter()
+                .enumerate()
+                .all(|(index, item)| identifier(item) || (index == 0 && item == "crate"))
+            || !distinct(table.keys().map(|key| &overlay.names[key]))
+        {
+            return Err(format!("invalid native category type or member name: {id}"));
+        }
+    }
+    let mut tables = BTreeSet::new();
+    let mut conversion = false;
+    for variant in graph.variants.values() {
+        let inserts = matches!(variant.message, Message::Insertion { .. });
+        match &variant.payload {
+            Payload::Category { table } if graph.categories.contains_key(table) => {
+                tables.insert(table);
+            }
+            Payload::Category { .. } => return Err("unknown category table".into()),
+            Payload::Unit | Payload::IoError if inserts => {
+                return Err("display cannot insert this payload".into());
+            }
+            _ => {}
+        }
+        if (variant.source || variant.from) && !matches!(variant.payload, Payload::IoError) {
+            return Err("error source or conversion requires an I/O error payload".into());
+        }
+        if variant.from && (!variant.source || std::mem::replace(&mut conversion, true)) {
+            return Err("conflicting I/O error conversion".into());
+        }
+    }
+    if !tables.into_iter().eq(graph.categories.keys()) {
+        return Err("unused category table".into());
+    }
+    Ok(())
+}
+
+fn native_path(path: &[String]) -> String {
+    if path[0] == "crate" {
+        path.join("::")
+    } else {
+        format!("::{}", path.join("::"))
+    }
+}
+
+fn render(graph: &Graph, overlay: &Overlay) -> String {
+    let names = &overlay.names;
+    let name = &names[&graph.error];
+    let alias = &names[&graph.result];
+    let mut out = format!("#[derive(Debug)]\npub enum {name} {{\n");
+    let variants = overlay
+        .variant_order
+        .iter()
+        .map(|id| (&names[id], &graph.variants[id]));
+    for (name, variant) in variants.clone() {
+        let payload = match &variant.payload {
+            Payload::Unit => String::new(),
+            Payload::OwnedText => "(::std::string::String)".into(),
+            Payload::StaticText => "(&'static ::core::primitive::str)".into(),
+            Payload::IoError => "(::std::io::Error)".into(),
+            Payload::Category { table } => {
+                format!("({})", native_path(&overlay.category_types[table]))
+            }
+        };
+        writeln!(out, "    {name}{payload},").unwrap();
+    }
+    writeln!(
+        out,
+        "}}\npub type {alias}<T> = ::core::result::Result<T, self::{name}>;\n"
+    )
+    .unwrap();
+    writeln!(out, "impl ::core::fmt::Display for {name} {{\n    fn fmt(&self, formatter: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {{\n        match self {{").unwrap();
+    for (name, variant) in variants.clone() {
+        let arg = match (&variant.payload, &variant.message) {
+            (Payload::Unit, _) => "",
+            (_, Message::Literal { .. }) => "(_)",
+            (_, Message::Insertion { .. }) => "(value)",
+        };
+        let body = match &variant.message {
+            Message::Literal { text } => format!("formatter.write_str({text:?})"),
+            Message::Insertion { prefix, suffix } => {
+                let value = match &variant.payload {
+                    Payload::Category { table } => format!("{}(value)", names[table]),
+                    _ => "value".to_owned(),
+                };
+                format!(
+                    "{{ formatter.write_str({prefix:?})?; formatter.write_str({value})?; formatter.write_str({suffix:?}) }}"
+                )
+            }
+        };
+        writeln!(out, "            Self::{name}{arg} => {body},").unwrap();
+    }
+    out.push_str("        }\n    }\n}\n\n");
+    writeln!(out, "impl ::core::error::Error for {name} {{\n    fn source(&self) -> ::core::option::Option<&(dyn ::core::error::Error + 'static)> {{\n        match self {{").unwrap();
+    for (name, variant) in variants.clone() {
+        let (arg, body) = if variant.source {
+            ("(source)", "::core::option::Option::Some(source)")
+        } else if matches!(variant.payload, Payload::Unit) {
+            ("", "::core::option::Option::None")
+        } else {
+            ("(_)", "::core::option::Option::None")
+        };
+        writeln!(out, "            Self::{name}{arg} => {body},").unwrap();
+    }
+    out.push_str("        }\n    }\n}\n");
+    for (variant_name, variant) in variants {
+        if variant.from {
+            writeln!(out, "\nimpl ::core::convert::From<::std::io::Error> for {name} {{\n    fn from(error: ::std::io::Error) -> Self {{\n        Self::{variant_name}(error)\n    }}\n}}").unwrap();
+        }
+    }
+    for (id, Table(table)) in &graph.categories {
+        let ty = native_path(&overlay.category_types[id]);
+        writeln!(out, "\n#[allow(dead_code)]\npub(crate) fn {}(code: &{ty}) -> &'static ::core::primitive::str {{\n    match code {{", names[id]).unwrap();
+        for (key, text) in table {
+            writeln!(out, "        {ty}::{} => {text:?},", names[key]).unwrap();
+        }
+        out.push_str("    }\n}\n");
+    }
+    out
+}
+
+fn json<T: Serialize>(value: &T) -> Result<Vec<u8>> {
+    let mut bytes = serde_json::to_vec_pretty(value).map_err(|error| error.to_string())?;
+    bytes.push(b'\n');
+    Ok(bytes)
+}
+
+fn publish(output: &Path, files: &[(&str, &[u8])]) -> Result<()> {
+    if output.symlink_metadata().is_ok() {
+        return Err("finite error output already exists".into());
+    }
+    let parent = output
+        .parent()
+        .filter(|p| !p.as_os_str().is_empty())
+        .unwrap_or(Path::new("."));
+    let stage = io(tempfile::tempdir_in(parent))?;
+    for (name, bytes) in files {
+        io(fs::write(stage.path().join(name), bytes))?;
+    }
+    crate::native_package::publish(stage.path(), output)
+}
+
+pub fn build(graph: &Path, overlay: &Path, output: &Path) -> Result<()> {
+    build_bytes(&io(fs::read(graph))?, &io(fs::read(overlay))?, output)
+}
+
+pub(crate) fn build_bytes(graph: &[u8], overlay: &[u8], output: &Path) -> Result<()> {
+    let parsed_graph: Graph = serde_json::from_slice(graph).map_err(|e| e.to_string())?;
+    let parsed_overlay: Overlay = serde_json::from_slice(overlay).map_err(|e| e.to_string())?;
+    validate(&parsed_graph, &parsed_overlay)?;
+    let generated = render(&parsed_graph, &parsed_overlay);
+    let cases = json(&parsed_graph)?;
+    let receipt = json(&serde_json::json!({
+        "format": "oddlang-finite-error-lock-v1",
+        "graphSha256": digest(graph),
+        "overlaySha256": digest(overlay),
+        "obligationsSha256": digest(&cases),
+        "rustSha256": digest(generated.as_bytes()),
+    }))?;
+    publish(
+        output,
+        &[
+            ("errors.rs", generated.as_bytes()),
+            ("obligations.json", &cases),
+            ("projection.lock", &receipt),
+        ],
+    )
+}
