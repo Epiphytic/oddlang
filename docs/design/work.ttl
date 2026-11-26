@@ -955,3 +955,18 @@ w:frameGuardOrderReviewArtifact a p:Artifact ;
     p:location "docs/design/reviews/rust-frame-guards.md" .
 w:copyGuardOrderNativeReceipt a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/64a9799039e59643e9d74b16471a8c57b65e15e0/verification/whole/source-copy-frame-guards/reference-aarch64-apple-darwin.json" .
+
+w:recoverCheckedFrameFragments a p:Task ;
+    rdfs:label "Recover checked frame delegation and ordered record fragment encoders" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:dependsOn w:recoverTaggedFrameEncoder, w:recoverFramePreflight ;
+    p:acceptance "Pin the check and delegate on one record value. Recover field order, scalar representations and option payloads. Rebuild both upstream fragment mutations and qualify exact native bytes and named rejections. Record independent validator and decoder obligations." ;
+    p:addresses w:checkedFrameFragmentReview ; p:evidence w:checkedFrameFragmentFixture .
+w:wholeMarmishProtocols p:dependsOn w:recoverCheckedFrameFragments .
+w:checkedFrameFragmentFixture a p:Artifact ;
+    p:location "verification/rust-recovery/frame-fragments/verify.py" .
+w:checkedFrameFragmentReview a p:Finding ;
+    rdfs:label "Check lossless enum tags and complete option writers while recording checked length and validation dependencies" ;
+    p:source w:checkedFrameFragmentReviewArtifact .
+w:checkedFrameFragmentReviewArtifact a p:Artifact ;
+    p:location "docs/design/reviews/rust-frame-fragments.md" .

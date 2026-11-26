@@ -15,7 +15,7 @@ pub fn observe_guards(tcx: TyCtxt<'_>, compiler: &str, selector: &str) -> Value 
         }
         output["method"] = json!(method);
         let def = super::super::relations::method_evidence(tcx, method, &mut output)?;
-        let (_, _, plans) = Observer::new(tcx, def).inspect(def, Some(&chosen))?;
+        let (_, _, plans) = Observer::new(tcx, def).inspect(def, Some(&chosen), None)?;
         output["cases"] = json!(plans);
         Ok::<_, String>(())
     })();
@@ -272,7 +272,7 @@ impl<'tcx> Observer<'tcx> {
         Ok(json!({"kind":"end-at-most","offset":offset,"bytes":bytes,"maximum":max,"error":error}))
     }
 
-    fn result_error(&self, result: Ty<'tcx>) -> Option<Ty<'tcx>> {
+    pub(super) fn result_error(&self, result: Ty<'tcx>) -> Option<Ty<'tcx>> {
         let ty::Adt(adt, args) = result.kind() else {
             return None;
         };

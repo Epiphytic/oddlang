@@ -25,3 +25,13 @@ The frame guard observer selects the encoder and named cases with `ODD_RECOVERY_
 Run `oddlang recover frame-guards CRATE_ROOT SOURCE EVIDENCE SELECTION TEMPLATE OVERLAY GRAPH` to populate vacant encoder guard lists. The selection pins the source and receipt, and maps each rule's semantic field role to an existing stable identifier. Count and range bounds must agree with the paired slot policy. The decoder's ordered checks remain defined by its own graph contracts. The generated encoder checks preconditions in the observed source order.
 
 The unrelated witness in `verification/rust-recovery/frame-guards/verify.py` exercises simultaneous failures, maximum boundaries, checked overflow and exact valid bytes. It also exercises proof failures for a side effect, altered error conversion and interleaving a check with a write.
+
+## Compiler-backed checked record fragments
+
+Select the encoder and cases with `ODD_RECOVERY_TAGGED_FRAME_FRAGMENTS=crate::Packet::encode#CaseA,CaseB`. The compiler observer supports a checked append into the frame payload and a checked inherent encoder that returns a fresh record payload. It resolves the same record field at the check and the write, verifies standard Result propagation, and records any proved writes that follow the fragment.
+
+Record writers can supply direct fixed bytes, big-endian primitive values, one-byte enum tags, boolean bytes, bounded length-prefixed bytes and optional scalar or inline-record payloads. The observer verifies the optional markers, forwarding of the matched value, and complete ordered inline members. Unsupported operations or altered delegation produce an unresolved result.
+
+Run `oddlang recover frame-fragment CRATE_ROOT SOURCE EVIDENCE SELECTION TEMPLATE OVERLAY OUTPUT`. The selection binds the source proof to an unordered portable catalog of field encodings and reviewed independent record bounds. Recovery writes `graph.json` and `dependencies.json`. The latter records the checked validator, expected validation order, any length bounds required before narrowing, and the outstanding independent qualification of validator and decoder bodies. The recovered writer order must preserve the existing validation order for fields that can reject.
+
+The unrelated native fixture at `verification/rust-recovery/frame-fragments/verify.py` recompiles both delegation forms before and after a source edit. It checks valid bytes and named rejections, including omitted prechecks, changed option markers, incomplete inline writes and unknown buffer mutation.
