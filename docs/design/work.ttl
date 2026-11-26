@@ -1466,3 +1466,11 @@ w:publicConstantRecovery a p:Task ;
     p:status p:done ; p:evidence w:publicConstantFixture .
 w:publicConstantFixture a p:Artifact ;
     p:location "verification/public-constant/verify.py" .
+w:prototypePublicLimit a p:Task ;
+    rdfs:label "Qualify the public prototype line limit in the sealed seven-member workspace" ;
+    p:milestone w:marmishMilestone ; p:source w:publicConstantPlan ;
+    p:dependsOn w:publicConstantRecovery, w:sevenMemberBufferedWorkspace ;
+    p:acceptance "Compile the same downstream constant-context caller against the original and sealed library on both native ARM64 hosts. Confirm a genuine source change affects recovery and retain the six sibling lock rows, Cargo lock and existing private reader." ;
+    p:status p:done ; p:evidence w:prototypePublicLimitCompanion .
+w:prototypePublicLimitCompanion a p:Artifact ;
+    p:location <https://github.com/Epiphytic/marmish-oddlang/pull/87> .
