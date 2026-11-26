@@ -137,3 +137,8 @@ A state without a storage entry uses the private aggregate store.
 A lexical child test module can observe the same fields used by the native
 methods. An external caller uses the same public API in either mode.
 The binding preserves the selected native names and privacy boundaries.
+
+The overlay digest treats an omitted storage map and an empty map alike.
+The shared borrowed-view runtime changes emitted source hashes in aggregate
+mode as well. Pin the generator revision when comparing release source or
+package locks across builds.

@@ -46,3 +46,9 @@ mode and reran the journal, shared declarations and native-package
 qualifications. Its Rust name collision finding led to an early rejection
 for projected type names that shadow generated runtime names. The verifier
 covers that rejection.
+
+Claude Code with Claude Opus 5.5 approved the private storage increment in
+auto permission mode. It independently rebuilt and ran the telemetry
+fixture, checked native privacy and rollback, and replayed all five unchanged
+upstream unit tests. It also confirmed the prior and current generators use
+the same digest for the original overlay.
