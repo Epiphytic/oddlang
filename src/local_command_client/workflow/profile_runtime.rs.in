@@ -1,0 +1,300 @@
+use profile_schema::{InputDocument, InputTest, Payload, ProfileInputs};
+use std::{
+    ffi::{CString, OsStr, OsString},
+    fs::File,
+    io::{self, Read},
+    os::{
+        fd::{AsRawFd, FromRawFd, RawFd},
+        unix::{ffi::OsStrExt, fs::MetadataExt},
+    },
+    time::{Instant, SystemTime, UNIX_EPOCH},
+};
+use base64::{Engine as _, engine::general_purpose::STANDARD};
+use nostr::{key::PublicKey, nips::nip19::FromBech32};
+
+fn private_openat(parent: RawFd, path: &OsStr, directory: bool) -> io::Result<File> {
+    let path = CString::new(path.as_bytes()).map_err(|_| io::ErrorKind::InvalidInput)?;
+    let flags = libc::O_RDONLY | libc::O_NOFOLLOW | libc::O_CLOEXEC | libc::O_NONBLOCK
+        | if directory { libc::O_DIRECTORY } else { 0 };
+    // SAFETY: The CString is nul-terminated. The caller retains the parent descriptor.
+    let fd = unsafe { libc::openat(parent, path.as_ptr(), flags) };
+    if fd == -1 {
+        return Err(io::Error::last_os_error());
+    }
+    // SAFETY: openat just returned a new, owned descriptor.
+    Ok(unsafe { File::from_raw_fd(fd) })
+}
+
+fn private_metadata(file: &File, directory: bool, mode: u32) -> io::Result<bool> {
+    let meta = file.metadata()?;
+    // SAFETY: geteuid has no preconditions.
+    let uid = unsafe { libc::geteuid() };
+    Ok(meta.uid() == uid && meta.mode() & 0o777 == mode
+        && if directory { meta.is_dir() } else { meta.is_file() && meta.nlink() == 1 })
+}
+
+fn get_account(text: &str) -> Option<String> {
+    if text.starts_with("npub1") {
+        PublicKey::from_bech32(text).ok().map(|key| key.to_hex())
+    } else if lower_hex(text, 32) {
+        PublicKey::from_hex(text).ok().map(|key| key.to_hex())
+    } else {
+        None
+    }
+}
+
+fn lower_hex(text: &str, byte_width: usize) -> bool {
+    text.len() == byte_width * 2
+        && text.bytes().all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+}
+
+fn account_set(value: &Value, maximum: usize) -> Option<std::collections::BTreeSet<String>> {
+    let list = value.as_array()?;
+    if list.len() > maximum {
+        return None;
+    }
+    let mut normalized = std::collections::BTreeSet::new();
+    for value in list {
+        if !normalized.insert(get_account(value.as_str()?)?) {
+            return None;
+        }
+    }
+    Some(normalized)
+}
+
+fn canonical_relays<'a>(
+    texts: impl IntoIterator<Item = &'a str>,
+    route: &str,
+    doc: &InputDocument,
+) -> Option<Vec<String>> {
+    let mut canonical = Vec::new();
+    for text in texts {
+        if text.len() > doc.maximum_relay_bytes || !text.contains("://") || text.contains('\\')
+            || text.chars().any(|c| c.is_whitespace() || c.is_control())
+        {
+            return None;
+        }
+        let url = url::Url::parse(text).ok()?;
+        let host = url.host_str()?;
+        if !url.username().is_empty() || url.password().is_some() || url.query().is_some()
+            || url.fragment().is_some() || url.port() == Some(0) || host.ends_with('.')
+            || !doc.relay_rules.iter().any(|rule| {
+                rule.scheme == url.scheme() && rule.routes.iter().any(|value| value == route)
+                    && match &rule.host_suffix {
+                        Some(suffix) => host.ends_with(suffix),
+                        None => !doc.relay_rules.iter().any(|other| {
+                            other.host_suffix.as_ref().is_some_and(|suffix| host.ends_with(suffix))
+                        }),
+                    }
+            })
+        {
+            return None;
+        }
+        let normalized = url.into();
+        if canonical.contains(&normalized) || canonical.len() == doc.maximum_relays {
+            return None;
+        }
+        canonical.push(normalized);
+    }
+    if canonical.is_empty() { None } else { Some(canonical) }
+}
+
+fn timestamped_id(payload: &Payload) -> Option<String> {
+    let now = SystemTime::now().duration_since(UNIX_EPOCH).ok()?.as_secs();
+    let clock = now.to_be_bytes();
+    let cutoff = clock.len().checked_sub(payload.timestamp_bytes as usize)?;
+    if clock[..cutoff].iter().any(|byte| *byte != 0) {
+        return None;
+    }
+    let mut entropy = vec![0; payload.random_bytes as usize];
+    getrandom::fill(&mut entropy).ok()?;
+    let mut id = String::new();
+    use std::fmt::Write as _;
+    for byte in clock[cutoff..].iter().chain(&entropy) {
+        write!(id, "{byte:02x}").ok()?;
+    }
+    Some(id)
+}
+
+fn profile_flag(matches: &ArgMatches, name: &str) -> Result<bool, Failure> {
+    Ok(matches.try_get_one::<bool>(name).map_err(|_| BINDING)?.copied().unwrap_or(false))
+}
+
+fn read_command_stdin(maximum: usize, timeout: Duration) -> Result<Vec<u8>, Failure> {
+    let started = Instant::now();
+    let mut bytes = Vec::new();
+    let mut buffer = [0; 4096];
+    loop {
+        let remaining = timeout.checked_sub(started.elapsed()).ok_or(PROFILE_STDIN_TIMEOUT)?;
+        let mut fd = libc::pollfd { fd: 0, events: libc::POLLIN, revents: 0 };
+        let ms = i32::try_from(remaining.as_millis()).unwrap_or(i32::MAX).max(1);
+        // SAFETY: fd is initialized and points to one valid writable pollfd.
+        let result = unsafe { libc::poll(&mut fd, 1, ms) };
+        if result < 0 && io::Error::last_os_error().kind() == io::ErrorKind::Interrupted {
+            continue;
+        }
+        if result < 0 {
+            return Err(IO);
+        }
+        if result == 0 {
+            return Err(PROFILE_STDIN_TIMEOUT);
+        }
+        let available = (maximum + 1 - bytes.len()).min(buffer.len());
+        // SAFETY: The writable buffer is valid for the requested number of bytes.
+        let count = unsafe { libc::read(0, buffer.as_mut_ptr().cast(), available) };
+        if count < 0 {
+            if io::Error::last_os_error().kind() == io::ErrorKind::Interrupted {
+                continue;
+            }
+            return Err(IO);
+        }
+        let count = count as usize;
+        if count == 0 {
+            return Ok(bytes);
+        }
+        bytes.extend_from_slice(&buffer[..count]);
+        if bytes.len() > maximum {
+            return Err(PROFILE_BYTES);
+        }
+    }
+}
+
+fn load_profile_document(
+    policy: &ProfileInputs,
+    matches: &ArgMatches,
+) -> Result<Value, Failure> {
+    let doc = &policy.document;
+    let args = &policy.arguments;
+    let base = matches.try_get_one::<PathBuf>(&args.state).map_err(|_| BINDING)?.ok_or(PROFILE_PATH)?;
+    let profile = matches.try_get_one::<String>(&args.profile).map_err(|_| BINDING)?
+        .map_or(args.default_profile.as_str(), String::as_str);
+    if profile.len() > doc.profile_name_maximum_bytes as usize
+        || profile.is_empty() || matches!(profile, "." | "..") || !profile.bytes().all(|b| b.is_ascii_alphanumeric()
+            || doc.profile_name_punctuation.as_bytes().contains(&b))
+    {
+        return Err(PROFILE_PATH);
+    }
+    let state = private_openat(libc::AT_FDCWD, base.as_os_str(), true).map_err(|_| PROFILE_PATH)?;
+    if !private_metadata(&state, true, doc.directory_mode).map_err(|_| IO)? {
+        return Err(PROFILE_PATH);
+    }
+    let profile_dir = private_openat(state.as_raw_fd(), OsStr::new(profile), true).map_err(|_| PROFILE_PATH)?;
+    if !private_metadata(&profile_dir, true, doc.directory_mode).map_err(|_| IO)? {
+        return Err(PROFILE_PATH);
+    }
+    let file = private_openat(profile_dir.as_raw_fd(), OsStr::new(&doc.leaf), false).map_err(|_| PROFILE_FILE)?;
+    if !private_metadata(&file, false, doc.file_mode).map_err(|_| IO)? {
+        return Err(PROFILE_FILE);
+    }
+    let mut contents = Vec::new();
+    file.take(u64::from(doc.maximum_bytes) + 1).read_to_end(&mut contents).map_err(|_| IO)?;
+    if contents.len() > doc.maximum_bytes as usize {
+        return Err(PROFILE_SIZE);
+    }
+    let strict_json::Strict(value) = serde_json::from_slice(&contents).map_err(|_| PROFILE_SCHEMA)?;
+    let object = value.as_object().ok_or(PROFILE_SCHEMA)?;
+    if object.len() != doc.checks.len() + 3 {
+        return Err(PROFILE_SCHEMA);
+    }
+    for check in &doc.checks {
+        let field = object.get(&check.field).ok_or(PROFILE_SCHEMA)?;
+        let valid = match &check.test {
+            InputTest::OneOf { values } => values.contains(field),
+            InputTest::Object => field.is_object(),
+            InputTest::NullOrAbsolutePath => field.is_null() || field.as_str().is_some_and(|text| {
+                !text.contains('\0') && text.len() <= 4095 && Path::new(text).is_absolute()
+            }),
+            InputTest::AccountSet => account_set(field, doc.maximum_accounts).is_some(),
+        };
+        if !valid {
+            return Err(PROFILE_SCHEMA);
+        }
+    }
+    Ok(value)
+}
+
+fn context_values(policy: &ProfileInputs, matches: &ArgMatches) -> Result<BTreeMap<String, Value>, Failure> {
+    let args = &policy.arguments;
+    for name in &args.required_flags {
+        if !profile_flag(matches, name)? {
+            return Err(PROFILE_SCOPE);
+        }
+    }
+    for name in &args.excluded_flags {
+        if profile_flag(matches, name)? {
+            return Err(PROFILE_SCOPE);
+        }
+    }
+    for argument in &args.excluded_values {
+        if matches.try_contains_id(&argument.id).map_err(|_| BINDING)? {
+            return Err(PROFILE_SCOPE);
+        }
+    }
+    let doc = &policy.document;
+    let value = load_profile_document(policy, matches)?;
+    let (principal, external) = matches.subcommand().ok_or(PROFILE_DESTINATION)?;
+    if !principal.starts_with("npub1") || principal.len() != 63 {
+        return Err(PROFILE_DESTINATION);
+    }
+    let remote = get_account(principal).ok_or(PROFILE_DESTINATION)?;
+    let authorized = account_set(value.get(&doc.trusted).ok_or(PROFILE_SCHEMA)?, doc.maximum_accounts)
+        .ok_or(PROFILE_SCHEMA)?;
+    if !authorized.contains(&remote) {
+        return Err(PROFILE_AUTHORITY);
+    }
+    let profile_route = value.get(&doc.route).and_then(Value::as_str).ok_or(PROFILE_SCHEMA)?;
+    let route = matches.try_get_one::<String>(&args.route).map_err(|_| BINDING)?;
+    if route.is_some_and(|route| route != profile_route) {
+        return Err(PROFILE_RELAYS);
+    }
+    let configured = value.get(&doc.relay).and_then(Value::as_array).ok_or(PROFILE_SCHEMA)?.iter()
+        .map(|field| field.as_str().ok_or(PROFILE_SCHEMA)).collect::<Result<Vec<_>, _>>()?;
+    let relays = canonical_relays(configured, profile_route, doc).ok_or(PROFILE_RELAYS)?;
+    if let Some(requested) = matches.try_get_many::<String>(&args.relay).map_err(|_| BINDING)? {
+        let supplied = canonical_relays(requested.map(String::as_str), profile_route, doc)
+            .ok_or(PROFILE_RELAYS)?;
+        if supplied != relays {
+            return Err(PROFILE_RELAYS);
+        }
+    }
+    let mut raw = external.try_get_many::<OsString>("").map_err(|_| PROFILE_ARGV)?.ok_or(PROFILE_ARGV)?;
+    if raw.next().map(OsString::as_os_str) != Some(OsStr::new("--")) {
+        return Err(PROFILE_SEPARATOR);
+    }
+    let arguments = raw.map(|word| word.as_os_str().as_bytes()).collect::<Vec<_>>();
+    if arguments.first().is_none_or(|path| path.is_empty())
+        || arguments.iter().any(|item| item.contains(&0))
+    {
+        return Err(PROFILE_ARGV);
+    }
+    let payload = &policy.payload;
+    if arguments.len() > payload.maximum_arguments || arguments.iter()
+        .try_fold(0usize, |total, word| total.checked_add(word.len())?.checked_add(1))
+        .is_none_or(|total| total > payload.maximum_argument_bytes)
+    {
+        return Err(PROFILE_BYTES);
+    }
+    use std::io::IsTerminal as _;
+    let input = if profile_flag(matches, &args.stdin)?
+        || (!profile_flag(matches, &args.stdin_none)? && !io::stdin().is_terminal())
+    {
+        read_command_stdin(payload.maximum_stdin_bytes, Duration::from_millis(u64::from(payload.stdin_timeout_ms)))?
+    } else {
+        Vec::new()
+    };
+    let request = timestamped_id(payload).ok_or(PROFILE_RANDOM)?;
+    let invocation = timestamped_id(payload).ok_or(PROFILE_RANDOM)?;
+    if request == invocation {
+        return Err(PROFILE_RANDOM);
+    }
+    use serde_json::json;
+    let outputs = &policy.outputs;
+    Ok([
+        (outputs.remote.clone(), json!(remote)),
+        (outputs.relays.clone(), json!(relays)),
+        (outputs.argv.clone(), json!(arguments.into_iter().map(|argument| STANDARD.encode(argument)).collect::<Vec<_>>())),
+        (outputs.stdin.clone(), json!(STANDARD.encode(input))),
+        (outputs.request.clone(), json!(request)),
+        (outputs.invocation.clone(), json!(invocation)),
+    ].into_iter().collect())
+}

@@ -7,6 +7,8 @@ pub(super) struct Workflow {
     pub(super) format: String,
     pub(super) id: String,
     pub(super) socket_argument: String,
+    pub(super) discovery: Option<Value>,
+    pub(super) profile_inputs: Option<Value>,
     pub(super) transport: Transport,
     pub(super) errors: std::collections::BTreeMap<String, Diagnostic>,
     pub(super) entry: String,
@@ -55,6 +57,9 @@ pub(super) enum Source {
         value_kind: ArgumentKind,
     },
     Captured {
+        name: String,
+    },
+    Input {
         name: String,
     },
     Object {
