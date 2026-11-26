@@ -7,6 +7,7 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> Result<String, String>
         || graph.version.is_empty()
         || binding.executable.is_empty()
         || graph.root.name != graph.package_name
+        || !valid_name(&graph.root.name)
         || binding.invalid_exit == 0
         || binding.uncovered_exit == 0
     {
@@ -24,6 +25,25 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> Result<String, String>
         operations.insert("*".into());
     }
     validate(&graph.root, "", &[], &mut operations, 0)?;
+    for (trigger, parser) in &graph.terminal_subparsers {
+        if !graph
+            .root
+            .subcommands
+            .iter()
+            .any(|child| &child.name == trigger)
+            || !parser.subcommands.is_empty()
+            || parser.subcommand_required
+            || parser.hidden
+            || !parser.aliases.is_empty()
+            || !parser.visible_aliases.is_empty()
+            || parser.arguments.iter().any(|argument| argument.global)
+            || !parser.name.split(' ').all(valid_name)
+        {
+            return Err(format!("invalid terminal parser for {trigger:?}"));
+        }
+        // The auxiliary parser has its own argument identities and no version flag.
+        validate(parser, trigger, &[], &mut BTreeSet::new(), 1)?;
+    }
     for (command, operation) in &binding.operations {
         if !operations.contains(command)
             || !operation.starts_with("urn:")
@@ -64,9 +84,36 @@ pub(super) fn render(graph: &Graph, binding: &Binding) -> Result<String, String>
         root.push_str(".allow_external_subcommands(true)");
     }
     writeln!(out, "    {root}\n}}").unwrap();
+    out.push_str("\npub fn parse(args: impl IntoIterator<Item = OsString>) -> Invocation {\n");
+    if !graph.terminal_subparsers.is_empty() {
+        out.push_str(
+            "    let mut args = args.into_iter().peekable();\n    let executable = args.next();\n",
+        );
+        for (trigger, parser) in &graph.terminal_subparsers {
+            let rendered = render_command(parser);
+            writeln!(
+                out,
+                "    if args.peek().is_some_and(|name| name == {trigger:?}) {{"
+            )
+            .unwrap();
+            out.push_str("        args.next();\n");
+            writeln!(
+                out,
+                "        let args = std::iter::once(OsString::from({:?})).chain(args);",
+                parser.name
+            )
+            .unwrap();
+            writeln!(
+                out,
+                "        return match {rendered}.try_get_matches_from(args) {{"
+            )
+            .unwrap();
+            out.push_str("            Ok(_) => Invocation::Uncovered,\n            Err(error) => Invocation::Terminal(error),\n        };\n    }\n");
+        }
+        out.push_str("    let args = executable.into_iter().chain(args);\n");
+    }
     out.push_str(
-        "\npub fn parse(args: impl IntoIterator<Item = OsString>) -> Invocation {\n\
-         \x20   let matches = match command().try_get_matches_from(args) {\n\
+        "    let matches = match command().try_get_matches_from(args) {\n\
          \x20       Ok(matches) => matches,\n\
          \x20       Err(error) => return Invocation::Terminal(error),\n\
          \x20   };\n",
@@ -180,7 +227,7 @@ fn validate<'a>(
     operations: &mut BTreeSet<String>,
     depth: usize,
 ) -> Result<(), String> {
-    if depth > 16 || !valid_name(&command.name) {
+    if depth > 16 {
         return Err(format!("invalid command name or depth at {path:?}"));
     }
     let mut ids = BTreeSet::from(["help".to_owned()]);
@@ -206,6 +253,8 @@ fn validate<'a>(
                 .short
                 .is_some_and(|ch| !ch.is_ascii_alphanumeric() || !short_names.insert(ch))
             || (arg.last && !positional)
+            || (arg.trailing_var_arg && (!positional || !arg.repeated || arg.last))
+            || (arg.allow_hyphen_values && arg.kind.is_none())
             || (arg.global && (positional || arg.required))
             || (arg.kind.is_none() && (positional || arg.repeated))
             || arg.bounds.as_ref().is_some_and(|bounds| {
@@ -309,7 +358,11 @@ fn validate_positionals(command: &Command) -> Result<(), String> {
                     || (next.repeated && !next.last)
             });
         let invalid_required = arg.required && seen_optional && !arg.last;
-        if invalid_last || invalid_repeated || invalid_required {
+        if invalid_last
+            || invalid_repeated
+            || invalid_required
+            || (arg.trailing_var_arg && next.is_some())
+        {
             return Err(format!(
                 "ambiguous placement of positional argument {}",
                 arg.id
@@ -410,6 +463,12 @@ fn render_argument(arg: &Argument) -> String {
     }
     if arg.last {
         out.push_str(".last(true)");
+    }
+    if arg.trailing_var_arg {
+        out.push_str(".trailing_var_arg(true)");
+    }
+    if arg.allow_hyphen_values {
+        out.push_str(".allow_hyphen_values(true)");
     }
     for alias in &arg.aliases {
         write!(out, ".alias({alias:?})").unwrap();

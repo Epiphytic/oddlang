@@ -1439,3 +1439,9 @@ w:recoveredWorkspaceNamedSuiteReceipt a p:Artifact ;
 
 w:privateBufferedInputFixture a p:Artifact ;
     p:location "verification/buffered-input/verify.py" .
+
+w:terminalAuxiliaryCli a p:Task ;
+    rdfs:label "Project isolated auxiliary CLI help and usage metadata" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
+    p:dependsOn w:commandSurface, w:wholeWorkspaceAssembly ; p:status p:active ;
+    p:acceptance "Match independent original and generated help and usage in an unrelated native fixture and across both sealed release binary roles. Preserve the main parser and record non-leading selection and successful dispatch as uncovered." .

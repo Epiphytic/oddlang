@@ -30,6 +30,7 @@ pub(super) fn extract(source: &str, selection: Selection) -> Result<Graph, Strin
         version: selection.version,
         root: Command::default(),
         external: false,
+        terminal_subparsers: BTreeMap::new(),
         gaps: selection.gaps,
     };
     graph.root.name = graph.package_name.clone();
@@ -37,13 +38,14 @@ pub(super) fn extract(source: &str, selection: Selection) -> Result<Graph, Strin
     let mut version = false;
     for meta in attrs(&root.attrs, "command")? {
         match key(&meta)?.as_str() {
+            "name" => graph.root.name = string(value(&meta)?)?,
             "about" => graph.root.help = Some(string(value(&meta)?)?),
             "version" if matches!(meta, Meta::Path(_)) => version = true,
             name => return Err(format!("unsupported parser setting {name}")),
         }
     }
-    if !version {
-        return Err("parser does not declare package version metadata".into());
+    if version == graph.version.is_empty() {
+        return Err("parser version declaration differs from the recovery selection".into());
     }
     let mut subcommand_type = None;
     for field in &root.fields {
@@ -246,6 +248,7 @@ fn argument(field: &syn::Field, definitions: &Definitions<'_>) -> Result<Option<
         return Err(format!("unsupported argument container {outer}"));
     }
     let mut required = None;
+    let mut explicit_variadic = false;
     for meta in settings {
         match key(&meta)?.as_str() {
             "long" => {
@@ -271,6 +274,20 @@ fn argument(field: &syn::Field, definitions: &Definitions<'_>) -> Result<Option<
             "value_enum" if matches!(meta, Meta::Path(_)) => {}
             "global" => arg.global = boolean(value(&meta)?)?,
             "last" => arg.last = boolean(value(&meta)?)?,
+            "trailing_var_arg" => arg.trailing_var_arg = boolean(value(&meta)?)?,
+            "allow_hyphen_values" => arg.allow_hyphen_values = boolean(value(&meta)?)?,
+            "num_args" if arg.repeated => {
+                let Expr::Range(range) = value(&meta)? else {
+                    return Err("only one-or-more variadic argument counts are supported".into());
+                };
+                if range.end.is_some()
+                    || !matches!(range.limits, syn::RangeLimits::HalfOpen(_))
+                    || range.start.as_deref().map(integer).transpose()? != Some(1)
+                {
+                    return Err("only one-or-more variadic argument counts are supported".into());
+                }
+                explicit_variadic = true;
+            }
             "required" => required = Some(boolean(value(&meta)?)?),
             "value_name" => arg.value_name = string(value(&meta)?)?,
             "default_value" => arg.default_value = Some(string(value(&meta)?)?),
@@ -292,6 +309,9 @@ fn argument(field: &syn::Field, definitions: &Definitions<'_>) -> Result<Option<
             },
             name => return Err(format!("unsupported argument setting {name} on {}", arg.id)),
         }
+    }
+    if explicit_variadic && (arg.long.is_some() || arg.short.is_some()) {
+        return Err("explicit variadic option counts are unsupported".into());
     }
     arg.required =
         required.unwrap_or(arg.kind.is_some() && inner.is_none() && arg.default_value.is_none());

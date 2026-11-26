@@ -14,6 +14,8 @@ struct Graph {
     #[serde(default)]
     #[serde(skip_serializing_if = "is_false")]
     external: bool,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    terminal_subparsers: BTreeMap<String, Command>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     gaps: Vec<String>,
@@ -66,6 +68,10 @@ struct Argument {
     global: bool,
     #[serde(skip_serializing_if = "is_false")]
     last: bool,
+    #[serde(skip_serializing_if = "is_false")]
+    trailing_var_arg: bool,
+    #[serde(skip_serializing_if = "is_false")]
+    allow_hyphen_values: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     default_value: Option<String>,
     #[serde(skip_serializing_if = "Vec::is_empty")]

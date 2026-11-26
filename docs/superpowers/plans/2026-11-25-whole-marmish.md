@@ -38,6 +38,7 @@ The independent stream comparison including macro expansions left 373 compiler-o
 - [x] Qualify the separate extended Launch digest and namespace package on Darwin ARM64. [Typed hash views](https://github.com/Epiphytic/marmish-oddlang/pull/24)
 
 - [x] Recover a declarative CLI grammar and generate the Rust parser boundary. Compare exact help, version, diagnostics and dispatch against an unrelated native fixture. [Command surface profile](../../language/command-surface.md)
+- [ ] Compare isolated terminal-parser help and usage in an unrelated native fixture and the two seven-member release binaries. Preserve the original command tree and record uncovered non-leading parser selection and successful operation behavior.
 
 - [x] Compose separately pinned native package contracts into one Cargo workspace with a root dependency lock. Compile a downstream caller of two generated crates and verify native binary return status. [Composition fixture](../../../verification/native-workspace/verify.py)
 - [x] Qualify acknowledged stream windows with all five upstream tests unchanged, including the three tests that inspect private storage. Compare 13,031 public observations and reject the retry-conflict mutation on Darwin ARM64. [Companion window qualification](https://github.com/Epiphytic/marmish-oddlang/pull/15)
