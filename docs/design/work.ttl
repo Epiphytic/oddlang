@@ -2724,3 +2724,11 @@ w:composedGeneratedClientActivation a p:Artifact ;
 w:composedGeneratedServerActivation a p:Artifact ;
     rdfs:label "Upstream client and generated server activation and cleanup on macOS ARM64" ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/9fc7d3ba8e4f474f4950cf9cc0307c28d5c1de21/verification/whole/basic-command-interop/composed-mixed-activation-upstream-client-generated-server-macos-arm64.json" .
+
+w:unitEnumWire a p:Task ;
+    rdfs:label "Recover and project named unit enums in wire records" ;
+    p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
+    p:status p:done ; p:evidence w:unitEnumGarden ;
+    p:acceptance "Recover renamed unit cases with stable identities, compile their native projection, and compare its serialization and rejection behavior with an unrelated original enum." .
+w:unitEnumGarden a p:Artifact ; p:location "verification/wire-schema/README.md" .
+w:basicCommandInterop p:dependsOn w:unitEnumWire .

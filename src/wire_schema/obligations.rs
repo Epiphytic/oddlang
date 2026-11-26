@@ -16,6 +16,12 @@ pub(super) fn derive(schema: &Schema) -> Value {
                 ));
                 record_fields(&mut obligations, fields);
             }
+            Definition::UnitEnum { id, variants } => {
+                obligations.push(row(id, "wire-shape", json!({"input":["name-string","single-key-object-with-null-value"],"output":"name-string","reject":["unknown-name","non-null-object-value","extra-keys","other-json-types"]})));
+                for variant in variants {
+                    obligations.push(row(&variant.id, "wire-case", json!({"value":variant.name})));
+                }
+            }
             Definition::Adjacent {
                 id,
                 tag,

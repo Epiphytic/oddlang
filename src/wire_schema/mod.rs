@@ -46,6 +46,10 @@ enum Definition {
         id: String,
         fields: Vec<Field>,
     },
+    UnitEnum {
+        id: String,
+        variants: Vec<Variant>,
+    },
     Adjacent {
         id: String,
         tag: String,
@@ -60,7 +64,7 @@ enum Definition {
 impl Definition {
     fn id(&self) -> &str {
         match self {
-            Self::Record { id, .. } | Self::Adjacent { id, .. } | Self::External { id } => id,
+            Self::UnitEnum { id, .. } | Self::Record { id, .. } | Self::Adjacent { id, .. } | Self::External { id } => id,
         }
     }
 }
@@ -376,21 +380,22 @@ impl Schema {
                 Definition::Record { fields, .. } => {
                     check_fields(fields, binding, &mut ids, &declared)?
                 }
-                Definition::Adjacent {
-                    tag,
-                    content,
-                    variants,
-                    ..
-                } => {
-                    if tag.is_empty()
-                        || content.is_empty()
-                        || tag == content
-                        || variants.is_empty()
-                        || !distinct(variants.iter().map(|variant| &variant.name))
+                Definition::Adjacent { variants, .. } | Definition::UnitEnum { variants, .. } => {
+                    let invalid_cases = variants.is_empty() || !distinct(variants.iter().map(|v| &v.name));
+                    match ty {
+                        Definition::Adjacent { tag, content, .. }
+                            if tag.is_empty() || content.is_empty() || tag == content || invalid_cases => {
+                                return Err("adjacent union requires distinct tag, content and case names".into());
+                            }
+                        Definition::UnitEnum { .. } if invalid_cases => {
+                            return Err("wire enum requires distinct, nonempty choices".into());
+                        }
+                        _ => {}
+                    }
+                    if matches!(ty, Definition::UnitEnum { .. })
+                        && variants.iter().any(|v| !matches!(v.payload, Payload::Unit {}))
                     {
-                        return Err(
-                            "adjacent union requires distinct tag, content and case names".into(),
-                        );
+                        return Err("unit enum variants must have unit payloads".into());
                     }
                     let mut names = BTreeSet::new();
                     for variant in variants {
@@ -587,7 +592,7 @@ fn definition_shapes(definition: &Definition) -> Vec<&Shape> {
                 }
             }
         }
-        Definition::External { .. } => {}
+        Definition::UnitEnum { .. } | Definition::External { .. } => {}
     }
     shapes
 }
@@ -645,7 +650,7 @@ fn check_cycles(declared: &BTreeMap<&str, &Definition>) -> Result<()> {
                     }
                 }
             }
-            Definition::External { .. } => {}
+            Definition::UnitEnum { .. } | Definition::External { .. } => {}
         }
         for other in refs {
             visit(other, declared, active, finished)?;
