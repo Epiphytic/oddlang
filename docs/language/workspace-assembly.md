@@ -139,3 +139,11 @@ Rust overlay and a recovery lock. Assembly accepts them through a
 `buffered-input` native package component with private visibility and empty
 reexports. Use registry zeroize 1.9.1 for the fixed erasing storage.
 See the [buffered input contract](../superpowers/specs/2026-11-26-buffered-input.md).
+
+`oddlang recover observed-buffered-input OBSERVATION STRUCTURAL_SELECTION TRACE OUTPUT`
+pairs the same compiler shape observation with controlled native evidence
+for the three existing policies. The structural selector supplies
+`declaration`, `id` and `fields`. The receipt distinguishes compiler-observed
+structure, trace-inferred policies and provider assumptions. The output
+graph and overlay use the existing buffered-input formats.
+See the [trace contract](../superpowers/specs/2026-11-26-observed-buffered-input.md).
