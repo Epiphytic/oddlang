@@ -1746,7 +1746,7 @@ w:outputGapReason a p:Task ;
     p:evidence w:outputGapReceipt .
 w:outputGapReceipt a p:Artifact ;
     rdfs:label "Standalone public reason package and comparison with the original data contract" ;
-    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/2c69f8c38cbd57136eb684f5b515ef1490f017b3/verification/whole/gap-range-reference" .
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/0df41666cdae3b5b045502fc2f68935cbed3d794/verification/whole/gap-range-reference" .
 w:outputGapRecord a p:Task ;
     rdfs:label "Recover and project an open public record with an optional unsigned field and a named wire choice" ;
     p:status p:planned ; p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ;
