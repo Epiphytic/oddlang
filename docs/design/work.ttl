@@ -603,3 +603,31 @@ w:portableDataSlice a p:Task ;
 w:portableMarmishCopyRelease a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/pull/3" .
 w:portableDataSlice p:evidence w:portableMarmishCopyRelease .
+
+w:wholeMarmishPlan a p:Artifact ;
+    p:location "docs/superpowers/plans/2026-11-25-whole-marmish.md" .
+w:wholeMarmishFreeze a p:Task ; rdfs:label "Freeze whole-release acceptance matrix" ;
+    p:dependsOn w:portableDataSlice ; p:acceptance "Reproduce original peers across the inventory and detect deliberate incompatibilities." .
+w:wholeMarmishStructure a p:Task ; rdfs:label "Reconcile seven-package structure by profile" ;
+    p:dependsOn w:wholeMarmishFreeze ; p:acceptance "Report independent type, relation and identity reconciliation for each workspace target." .
+w:wholeMarmishProtocols a p:Task ; rdfs:label "Qualify stream and core protocols and public APIs" ;
+    p:dependsOn w:wholeMarmishStructure ; p:acceptance "Exercise all normative protocol obligations, unchanged consumers and provider substitution." .
+w:wholeMarmishCommand a p:Task ; rdfs:label "Run an installed cross-peer command through a generated worker" ;
+    p:dependsOn w:wholeMarmishProtocols ; p:acceptance "Run an authorized remote command with real providers, restart and read durable results across peers." .
+w:wholeMarmishOperations a p:Task ; rdfs:label "Qualify all workspace and installed operations" ;
+    p:dependsOn w:wholeMarmishCommand ; p:acceptance "Close positive, error, state migration and failure cases for all applicable roles." .
+w:wholeMarmishDistribution a p:Task ; rdfs:label "Build and qualify the complete source-free distribution" ;
+    p:dependsOn w:wholeMarmishOperations ; p:acceptance "Publish source-isolated builds and mixed-peer installation, upgrade and platform evidence." .
+w:wholeMarmishFreeze p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned .
+w:wholeMarmishStructure p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned .
+w:wholeMarmishProtocols p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned .
+w:wholeMarmishCommand p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned .
+w:wholeMarmishOperations p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned .
+w:wholeMarmishDistribution p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned .
+w:wholeMarmishReview a p:Finding ;
+    rdfs:label "Require a pinned rebaseline, same-profile structural reconciliation, early Linux gates and installed fixtures before operation qualification" ;
+    p:source w:wholeMarmishPlan .
+w:wholeMarmishFreeze p:addresses w:wholeMarmishReview .
+w:wholeMarmishStructure p:addresses w:wholeMarmishReview .
+w:wholeMarmishCommand p:addresses w:wholeMarmishReview .
+w:wholeMarmishOperations p:addresses w:wholeMarmishReview .
