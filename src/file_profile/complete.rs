@@ -12,10 +12,10 @@ pub(super) enum StorageProvider {
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Initialization {
-    relay_argument: String,
-    route_argument: String,
+    pub(super) relay_argument: String,
+    pub(super) route_argument: String,
     local_route: String,
-    route_choices: Vec<String>,
+    pub(super) route_choices: Vec<String>,
     guards: Vec<Guard>,
     unsupported_peers_argument: String,
     retention_argument: String,
@@ -46,7 +46,7 @@ pub(super) struct Initialization {
     reload_unsupported: Diagnostic,
     journal: Journal,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    configured: Option<super::configured::Configured>,
+    pub(super) configured: Option<super::configured::Configured>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -188,6 +188,26 @@ impl Initialization {
         ]
     }
 
+    pub(super) fn argument_guards(&self) -> String {
+        let mut guards = String::new();
+        for guard in &self.guards {
+            let (id, kind, rejected) = guard.input();
+            let expression = match kind {
+                RequiredArgument::Flag => format!(
+                    "*matches.try_get_one::<bool>({id:?}).map_err(|_| BINDING)?.unwrap_or(&false)"
+                ),
+                _ => format!("matches.contains_id({id:?})"),
+            };
+            writeln!(
+                guards,
+                "        if {expression} {{ return Err(Failure({}, {:?})); }}",
+                rejected.exit, rejected.stderr
+            )
+            .unwrap();
+        }
+        guards
+    }
+
     pub(super) fn render(
         &self,
         out: &mut String,
@@ -197,7 +217,7 @@ impl Initialization {
         out.push_str(include_str!("complete.rs.in"));
         out.push_str(&self.journal.render(&self.identity_key)?);
         if let Some(configured) = &self.configured {
-            configured.render(out)?;
+            configured.render(out, policy.provisioning.is_some())?;
             configured.storage.render(&self.journal, out)?;
         } else {
             out.push_str(include_str!("explicit.rs.in"));
@@ -237,22 +257,7 @@ impl Initialization {
         writeln!(out, "}}\nconst EXCLUDED_PROFILE_ENTRIES: &[&str] = &{:?};\nconst ACCOUNT_VERSION: u32 = {};",
             self.existing_state_exclusions, self.account_version).unwrap();
         let args = &policy.arguments;
-        let mut guards = String::new();
-        for guard in &self.guards {
-            let (id, kind, rejected) = guard.input();
-            let expression = match kind {
-                RequiredArgument::Flag => format!(
-                    "*matches.try_get_one::<bool>({id:?}).map_err(|_| BINDING)?.unwrap_or(&false)"
-                ),
-                _ => format!("matches.contains_id({id:?})"),
-            };
-            writeln!(
-                guards,
-                "        if {expression} {{ return Err(Failure({}, {:?})); }}",
-                rejected.exit, rejected.stderr
-            )
-            .unwrap();
-        }
+        let guards = self.argument_guards();
         let (select, before_credentials, effects, backend_guard, native_check) = if let Some(
             configured,
         ) =

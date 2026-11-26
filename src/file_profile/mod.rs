@@ -1,6 +1,7 @@
 //! Native projection of a private file-backed credential profile.
 mod complete;
 mod configured;
+mod provisioning;
 mod schema;
 
 use crate::local_command_client::{Callback, RequiredArgument};
@@ -19,6 +20,8 @@ struct Policy {
     errors: Errors,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     initialize: Option<complete::Initialization>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    provisioning: Option<provisioning::Provisioning>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -114,6 +117,7 @@ struct Binding {
     storage: Option<complete::StorageProvider>,
     #[serde(default)]
     retained_stores: bool,
+    provisioning_entry: Option<String>,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -261,6 +265,23 @@ fn load(graph: &[u8], binding: &[u8]) -> Result<(Policy, Binding), String> {
         (None, None) if !binding.retained_stores => (),
         _ => return Err("file profile storage mode and native provider must agree".into()),
     }
+    match (&graph.provisioning, &binding.provisioning_entry) {
+        (Some(setup), Some(entry)) if graph.initialize.as_ref().is_some_and(|i| i.has_config()) => {
+            let init = graph.initialize.as_ref().unwrap();
+            setup.validate(
+                entry,
+                &binding.entry,
+                &init.configured.as_ref().unwrap().fixed,
+                &init.route_choices,
+            )?;
+        }
+        (None, None) => (),
+        _ => {
+            return Err(
+                "provisioning requires a configured profile and matching native entry".into(),
+            );
+        }
+    }
     Ok((graph, binding))
 }
 
@@ -293,6 +314,30 @@ pub(crate) fn retained_stores(graph: &[u8], binding: &[u8]) -> Result<Option<Str
     Ok(binding.retained_stores.then_some(graph.id))
 }
 
+pub(crate) fn provisioning_callback(
+    graph: &[u8],
+    binding: &[u8],
+) -> Result<Option<Callback>, String> {
+    let (policy, native) = load(graph, binding)?;
+    Ok(policy
+        .provisioning
+        .zip(native.provisioning_entry)
+        .map(|(setup, entry)| {
+            let mut arguments = vec![
+                (policy.arguments.state, RequiredArgument::Path),
+                (policy.arguments.profile, RequiredArgument::String),
+                (policy.arguments.backend, RequiredArgument::String),
+            ];
+            arguments.extend(policy.initialize.unwrap().callback_arguments());
+            Callback {
+                local_arguments: Some((setup.command.clone(), setup.local_arguments())),
+                operation: Some(setup.id),
+                entry,
+                arguments,
+            }
+        }))
+}
+
 pub(crate) fn callback(graph: &[u8], binding: &[u8]) -> Result<Callback, String> {
     let (policy, native) = load(graph, binding)?;
     let mut arguments = vec![
@@ -304,6 +349,7 @@ pub(crate) fn callback(graph: &[u8], binding: &[u8]) -> Result<Callback, String>
         arguments.extend(initialize.callback_arguments());
     }
     Ok(Callback {
+        local_arguments: None,
         operation: None,
         entry: native.entry,
         arguments,
@@ -444,6 +490,14 @@ fn render(policy: &Policy, binding: &Binding) -> Result<String, String> {
     let arguments = &policy.arguments;
     if let Some(initialize) = &policy.initialize {
         initialize.render(&mut out, policy, binding)?;
+        if let Some(setup) = &policy.provisioning {
+            setup.render(
+                &mut out,
+                &policy.arguments,
+                initialize,
+                binding.provisioning_entry.as_deref().unwrap(),
+            )?;
+        }
         if binding.retained_stores {
             out.push_str(include_str!("retained.rs.in"));
         }

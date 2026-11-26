@@ -264,6 +264,7 @@ fn load(graph: &[u8], overlay: &[u8]) -> Result<(Report, Binding), String> {
 pub(crate) fn callback(graph: &[u8], overlay: &[u8]) -> Result<Callback, String> {
     let (report, binding) = load(graph, overlay)?;
     Ok(Callback {
+        local_arguments: None,
         operation: Some(report.id),
         entry: binding.entry,
         arguments: report.guards.iter().map(Guard::requirement).collect(),

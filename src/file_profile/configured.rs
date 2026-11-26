@@ -15,7 +15,7 @@ pub(super) struct Configured {
     maximum_relays: u16,
     missing_relays: Diagnostic,
     relay_rules: RelayRules,
-    fixed: serde_json::Map<String, serde_json::Value>,
+    pub(super) fixed: serde_json::Map<String, serde_json::Value>,
     sources: Vec<StateSource>,
     missing_state: Diagnostic,
     malformed: Diagnostic,
@@ -56,7 +56,7 @@ enum Platform {
 }
 
 impl Configured {
-    pub(super) fn render(&self, out: &mut String) -> Result<(), String> {
+    pub(super) fn render(&self, out: &mut String, provisioning: bool) -> Result<(), String> {
         if !component(&self.leaf)
             || !(1..=16_777_216).contains(&self.maximum)
             || !distinct(
@@ -121,7 +121,24 @@ impl Configured {
             .unwrap();
         }
         out.push_str("];\n");
-        out.push_str(include_str!("configured.rs.in"));
+        let (check, relay_check) = if provisioning {
+            (
+                "validate_provision_fields(&document, &fixed)?;",
+                "return canonical_provision_relays(route, relays);",
+            )
+        } else {
+            ("if document != fixed { return Err(CONFIGURATION); }", "")
+        };
+        let template = include_str!("configured.rs.in").replace("@CHECK_FIELDS@", check);
+        let direct = if provisioning {
+            "configured_direct_relays"
+        } else {
+            "configured_relays"
+        };
+        out.push_str(&template.replace("@DIRECT_RELAY_CHECK@", direct));
+        if provisioning {
+            writeln!(out, "fn configured_relays(route: &str, relays: &[String]) -> Result<Vec<String>, Failure> {{ {relay_check} }}").unwrap();
+        }
         Ok(())
     }
 }

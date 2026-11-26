@@ -23,12 +23,12 @@ fn selected_config(root: &Path) -> Result<Option<(String, Vec<String>)>, Failure
     let relays: Vec<String> = serde_json::from_value(document.remove(CONFIG_RELAY_FIELD).ok_or(CONFIG_FORMAT)?).map_err(|_| CONFIG_FORMAT)?;
     let fixed: serde_json::Map<String, serde_json::Value> = serde_json::from_str(CONFIG_FIXED).map_err(|_| CONFIG_FORMAT)?;
     if !document.keys().eq(fixed.keys()) { return Err(CONFIG_FORMAT); }
-    if document != fixed { return Err(CONFIGURATION); }
+    @CHECK_FIELDS@
     let relays = configured_relays(&route, &relays)?;
     Ok(Some((route, relays)))
 }
 
-fn configured_relays(route: &str, relays: &[String]) -> Result<Vec<String>, Failure> {
+fn @DIRECT_RELAY_CHECK@(route: &str, relays: &[String]) -> Result<Vec<String>, Failure> {
     if !ROUTE_CHOICES.contains(&route) { return Err(INVALID_ROUTE); }
     if !DIRECT_ROUTES.contains(&route) { return Err(CONFIGURATION); }
     if relays.is_empty() || relays.len() > MAXIMUM_RELAYS { return Err(CONFIG_RELAY_COUNT); }
