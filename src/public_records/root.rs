@@ -75,6 +75,8 @@ pub fn recover_root(source: &Path, selection: &Path, out: &Path) -> Result<()> {
         format: OVERLAY.into(),
         flatten_module: true,
         identifiers,
+        external_types: BTreeMap::new(),
+        source_api: None,
     };
     render(&graph, &overlay, true)?;
     let graph = encode(&graph)?;

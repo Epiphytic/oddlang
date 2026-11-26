@@ -1,0 +1,42 @@
+{
+  "baseline": "4001d59842358e9951783be5e253a5917249ab93",
+  "baselineCompilerSha256": "7c3a0b4ad874de8ab5b506ac6a2e018f5c7ed9f09d631aa935e70a99c58b7b5b",
+  "candidate": "8e3320aacb0106d543c3e21ab1faf60a02132c04",
+  "candidateCompilerSha256": "acd6b75d715ee0ed9201f4b5d91842da88a445aa30c903fcfc6c2fdca10915be",
+  "rustc": [
+    "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+    "binary: rustc",
+    "commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+    "commit-date: 2026-07-14",
+    "host: aarch64-apple-darwin",
+    "release: 1.97.1",
+    "LLVM version: 22.1.6"
+  ],
+  "results": {
+    "capabilities.py": {
+      "scriptSha256": "a8c07493e13a0f0f4c1063a158df3199e8401f18214e73746d0cd0f1fceef537",
+      "exitCode": 0,
+      "stdout": "Both native variants match exact Debug, Eq, Clone, Copy and declaration ordinals.\n"
+    },
+    "equality.py": {
+      "scriptSha256": "3a65953c5f7f8346da6aa24ec2a406cbf74138d9ad901a7134cd62fb1f1caae6",
+      "exitCode": 0,
+      "stdout": "Three original and generated choice equality contracts passed.\n"
+    },
+    "verify.py": {
+      "scriptSha256": "a18c30b1423db0c1f56bd8317b750422f8b30a16fc9d3695e1273595540a4fa0",
+      "exitCode": 0,
+      "stdout": ""
+    },
+    "legacy_bytes.py": {
+      "scriptSha256": "b0b0c27b8e3ae35189e7f59831c6e94e2ee57d71180b4f6811dc3afad52af06a",
+      "exitCode": 0,
+      "identicalArtifactsSha256": {
+        "graph.json": "28a62cd4432998957dcf11e10def8fe926c5f0847869447a621d6fba8eb98c4e",
+        "rust.json": "d2dcabb9b71f5bf1856badea70b935dac3f919d2c443f6d108169115f26bc8e6",
+        "values.rs": "96c768acabda17585f83b869b12fb3691d481d0e0443ecc37e67e12d0c871b30",
+        "obligations.json": "c848b04378f76da6788b8c479abab209a827242a5d2e04fbe9883763f54120a5"
+      }
+    }
+  }
+}

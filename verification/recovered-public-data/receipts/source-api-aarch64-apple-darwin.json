@@ -1,0 +1,37 @@
+{
+  "compiler": "f74fea91c697e1e59ba894fb5284cb1717efec0f",
+  "compilerSha256": "76109cc9cd060c4a4fc7ab38ede216a63396cb228ed9630d8cbf7688c5a76e93",
+  "fixture": "verification/recovered-public-data/source_api.py",
+  "fixtureSha256": "7e5adbe07c645a50a02126fe78678c206b0d7dc841ec7dd5b36c14842d138494",
+  "format": "oddlang-assemble-recovered-source-api-receipt-v1",
+  "identicalLegacyArtifacts": {
+    "model/graph.json": "879380ea262679ca5f68431bf5e2be9860f1fe87e4ab694a6c4bd18b3cf2b44d",
+    "model/recovery.lock": "506a8dd515869d406aa8b2d25e800d6257e5482b0328dbc07cb926842e861977",
+    "model/rust.json": "26fff29ea2d1119d46822d0d083ef334ecb7439022c38cbdb7d8ce686f0db23c",
+    "product/Cargo.lock": "9cf3e2edbfd40065a94c60e86dcbbd25a9525eac60ea914a395fe37c8755f355",
+    "product/Cargo.toml": "7d4664fffbad4c7d4301683ef3bd88e59604ef92c7de91c24c05f6d1f97f4daf",
+    "product/package.lock": "7137580050dd336914266fb29746c509957a41d6db74161a37ad940e8d21b0b1",
+    "product/src/group_0/__projection_0.rs": "f2553625c5ae5501ec90cd6479eeb3413a5d57e8d3ef7b9198b84d35319bcf43",
+    "product/src/group_0/mod.rs": "1c30e5db413e305ac76ff62f7a308f24ccd3bb4107de328bebb15c85a36cde3b",
+    "product/src/lib.rs": "faf1fe45b1239c050137fcec90301c18582a97bb8fb3af52819aebdcf1a23ab0",
+    "projection/projection.lock": "81900c8bfc9184d826e5a53855b79c40819095b69cf6e553a5722ce0e404fd4d",
+    "projection/records.rs": "f2553625c5ae5501ec90cd6479eeb3413a5d57e8d3ef7b9198b84d35319bcf43"
+  },
+  "immutableGraphAndOverlayPins": true,
+  "inheritedFixtures": [
+    "verification/recovered-public-data/verify.py",
+    "verification/public-records/source_api.py"
+  ],
+  "nativeCaller": "Public optional unsigned field and linked enum",
+  "platform": "aarch64-apple-darwin",
+  "rejections": [
+    "wrong role",
+    "wrong field name",
+    "binding drift",
+    "missing role",
+    "stale role pin",
+    "unsupported choice role",
+    "competing embedded role"
+  ],
+  "sourceApiPinStoredInPackageAndProjectionLocks": true
+}

@@ -10,7 +10,9 @@ use std::{
 
 mod cases;
 mod recover;
+mod recover_choice;
 pub use recover::recover as recover_public_constant;
+pub use recover_choice::recover as recover_serde_string_choice;
 mod rust;
 type Result<T> = std::result::Result<T, String>;
 
@@ -88,10 +90,20 @@ struct Alias {
 #[serde(deny_unknown_fields)]
 struct StringEnum {
     id: String,
+    #[serde(default = "implicit_copy", skip_serializing_if = "is_copyable")]
+    copy: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     numbers: Option<Numbering>,
     variants: Vec<WireVariant>,
 }
+fn implicit_copy() -> bool {
+    true
+}
+
+fn is_copyable(value: &bool) -> bool {
+    *value
+}
+
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 struct Numbering {
@@ -468,6 +480,43 @@ impl Value {
                 .ok_or("constant product overflow".into()),
         }
     }
+}
+
+pub(crate) fn string_choice_names(graph: &[u8], overlay: &[u8]) -> Result<Vec<(String, String)>> {
+    let graph: Graph =
+        serde_json::from_slice(graph).map_err(|e| format!("shared declarations: {e}"))?;
+    let binding: Binding =
+        serde_json::from_slice(overlay).map_err(|e| format!("shared Rust binding: {e}"))?;
+    graph.validate(&binding)?;
+    graph
+        .string_enums
+        .into_iter()
+        .map(|choice| {
+            let name = binding.name(&choice.id)?.to_owned();
+            Ok((choice.id, name))
+        })
+        .collect()
+}
+
+/// Return the one fieldless public choice emitted by the string-choice recovery profile.
+pub(crate) fn recovered_choice(graph: &[u8], overlay: &[u8]) -> Result<(String, String)> {
+    let graph: Graph =
+        serde_json::from_slice(graph).map_err(|e| format!("shared declarations: {e}"))?;
+    let binding: Binding =
+        serde_json::from_slice(overlay).map_err(|e| format!("shared Rust binding: {e}"))?;
+    graph.validate(&binding)?;
+    let [choice] = graph.string_enums.as_slice() else {
+        return Err("recovered string choice requires exactly one declaration".into());
+    };
+    if !graph.constants.is_empty()
+        || !graph.text_constants.is_empty()
+        || !graph.errors.is_empty()
+        || !graph.results.is_empty()
+        || choice.numbers.is_some()
+    {
+        return Err("recovered string choice must be a single passive string enum".into());
+    }
+    Ok((choice.id.clone(), binding.name(&choice.id)?.into()))
 }
 
 pub(crate) fn error_variants(

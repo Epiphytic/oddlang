@@ -1,4 +1,5 @@
 //! Assemble a native library from pinned semantic components and Rust overlays.
+mod recovered;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
@@ -22,7 +23,7 @@ pub(super) fn digest(bytes: &[u8]) -> String {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct Manifest {
+struct Manifest<C = Component> {
     format: String,
     name: String,
     version: String,
@@ -34,7 +35,7 @@ struct Manifest {
     cargo_lock: Pin,
     #[serde(default)]
     binaries: Vec<Binary>,
-    components: Vec<Component>,
+    components: Vec<C>,
 }
 
 #[derive(Deserialize)]
@@ -235,6 +236,8 @@ struct Component {
     root_reexports: Option<Vec<String>>,
     #[serde(default)]
     crate_reexports: Vec<String>,
+    #[serde(skip)]
+    recovery: Option<recovered::Provenance>,
 }
 
 #[derive(Deserialize)]
@@ -288,7 +291,9 @@ fn project(
         }
         Kind::StructuredDiagnostics => {
             if !dependencies.contains_key("serde_json") {
-                return Err("structured-diagnostics requires a pinned serde_json dependency".into());
+                return Err(
+                    "structured-diagnostics requires a pinned serde_json dependency".into(),
+                );
             }
             crate::structured_diagnostics::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
             "diagnostics.rs"
@@ -301,9 +306,16 @@ fn project(
             let serde_available = dependencies
                 .get("serde")
                 .is_some_and(|dep| dep.features.iter().any(|feature| feature == "derive"));
+            let assertion = component
+                .recovery
+                .as_ref()
+                .and_then(|recovery| recovery.source_api.as_ref())
+                .map(|pin| pin.read(base))
+                .transpose()?;
             crate::public_records::build_bytes(
                 &graph,
                 &io(fs::read(&overlay))?,
+                assertion.as_deref(),
                 &output,
                 serde_available,
             )?;
@@ -402,6 +414,13 @@ fn project(
             "lines.rs"
         }
         Kind::SharedDeclarations => {
+            if component.recovery.is_some()
+                && !dependencies
+                    .get("serde")
+                    .is_some_and(|dep| dep.features.iter().any(|feature| feature == "derive"))
+            {
+                return Err("recovered string choice requires native serde with derive".into());
+            }
             let path = input.join("graph.json");
             io(fs::write(&path, graph))?;
             crate::shared_declarations::build(&path, &overlay, &output)?;
@@ -620,6 +639,47 @@ fn validate_line_grammar_errors(components: &[Component], base: &Path) -> Result
     Ok(())
 }
 
+fn validate_public_record_links(components: &[Component], base: &Path) -> Result<()> {
+    for record in components
+        .iter()
+        .filter(|part| matches!(part.kind, Kind::PublicRecords))
+    {
+        let links = crate::public_records::external_choice_links(
+            &record.graph.read(base)?,
+            &record.overlay.read(base)?,
+        )?;
+        if links.is_empty() {
+            continue;
+        }
+        let mut available = BTreeMap::new();
+        for part in components
+            .iter()
+            .filter(|part| matches!(part.kind, Kind::SharedDeclarations))
+        {
+            for (id, name) in crate::shared_declarations::string_choice_names(
+                &part.graph.read(base)?,
+                &part.overlay.read(base)?,
+            )? {
+                if available
+                    .insert(id.clone(), export_paths(part, &name))
+                    .is_some()
+                {
+                    return Err(format!("ambiguous external public record choice: {id}"));
+                }
+            }
+        }
+        for (id, path) in links {
+            if !available
+                .get(&id)
+                .is_some_and(|paths| paths.iter().any(|actual| actual[..] == path[1..]))
+            {
+                return Err(format!("unresolved external public record choice: {id}"));
+            }
+        }
+    }
+    Ok(())
+}
+
 fn validate_component_requirements(
     manifest: &Manifest,
     base: &Path,
@@ -820,11 +880,13 @@ pub(super) fn build_pinned(
     output: &Path,
     siblings: Option<&BTreeSet<String>>,
 ) -> Result<BTreeSet<RegistryProvider>> {
-    let manifest: Manifest =
+    let input: Manifest<recovered::ComponentInput> =
         serde_json::from_slice(raw).map_err(|e| format!("package manifest: {e}"))?;
+    let manifest = input.resolve(base)?;
     validate_command_callbacks(&manifest.components, base)?;
     let required = validate_component_requirements(&manifest, base)?;
     validate_line_grammar_errors(&manifest.components, base)?;
+    validate_public_record_links(&manifest.components, base)?;
     let cargo = cargo_manifest(&manifest)?;
     let lock = manifest.cargo_lock.read(base)?;
     for provider in &required {
@@ -965,6 +1027,13 @@ pub(super) fn build_pinned(
                 "graphSha256": shape.graph.sha256,
                 "overlaySha256": shape.overlay.sha256,
             });
+        }
+        if let Some(provenance) = &component.recovery {
+            record["recoverySha256"] = serde_json::json!(provenance.sha256);
+            record["recoveredDeclaration"] = serde_json::json!(provenance.declaration);
+            if let Some(assertion) = &provenance.source_api {
+                record["sourceApiSha256"] = serde_json::json!(assertion.sha256);
+            }
         }
         records.push(record);
     }

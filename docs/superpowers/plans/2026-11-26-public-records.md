@@ -12,3 +12,5 @@
 - [x] Mutate a selected record's field order or type in a detached temporary source copy. Independently verify the changed graph and native behavior. Publish exact reviewed framework and companion evidence and preserve earlier release pins.
 
 The [companion qualification](https://github.com/Epiphytic/marmish-oddlang/pull/71) records the combined macOS ARM64 and standalone Linux ARM64 native replays, the original mutation, and the source validation after checking raw and grouped self imports.
+
+See the [pointer-width record extension](2026-11-26-pointer-width-records.md) for target-width fields and the explicit candidate profile for qualified glob bindings.

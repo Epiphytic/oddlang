@@ -10,6 +10,7 @@ Portability means sharing versioned data and API contracts among native backends
 - Follow the [implementation plan](docs/superpowers/plans/2026-11-25-ledger.md) for task details, fixtures and verification commands.
 - Read the [HTTP conformance design](docs/superpowers/specs/2026-11-25-http-conformance.md) and [phased plan](docs/superpowers/plans/2026-11-25-http-conformance.md) for the shipped HTTP implementation.
 - Use the [WebAssembly, Rust round-trip and Marmish plan](docs/superpowers/plans/2026-11-25-wasm-rust-marmish.md) for the seven phase gates and their compatibility claims. The [Marmish qualification report](docs/design/marmish-qualification.md) gives reproduction commands, the scope of the two regenerated Rust files and the outstanding platform and language obligations.
+- Use the [basic-command interoperability gate](docs/superpowers/plans/2026-11-26-basic-command-interop.md) to decide Marmish compatibility for basic commands. Require both mixed client/server directions on one platform, isolated disposable identities and verified cleanup.
 - For the whole-project recovery experiment, use the [whole Marmish plan](docs/superpowers/plans/2026-11-25-whole-marmish.md) and the [current workspace integration plan](docs/superpowers/plans/2026-11-26-public-api-convergence.md). Cite the exact workspace lock and native receipt when reporting public imports, original test counts or CLI coverage. Count only observations from the cited workspace.
 - Consult the [process vocabulary](docs/design/process.ttl) and [work graph](docs/design/work.ttl) for decisions, review findings, dependencies, progress and evidence. These describe work on Oddlang. The [ledger core contract](docs/language/ledger-core.md) defines the prototype's executable vocabulary.
 
@@ -29,7 +30,7 @@ Publish language-neutral cases and expected outcomes with the contract. Derive e
 
 Start with HTTP and use the same obligation model for additional protocols. Protocol bindings specify how to exercise and observe a case. Project-owned target overlays can select libraries or guide native adapter authoring. Verify each adapter against the shared expected outcomes. A Rust backend and TypeScript and Go clients can each prove conformance for the roles they declare.
 
-For Rust-to-Oddlang recovery, follow the [portable Rust recovery plan](docs/superpowers/plans/2026-11-25-portable-rust-recovery.md). Keep source structure independently auditable, record observable rules in the portable contract, and attach library names and versions as optional implementation hints.
+For Rust-to-Oddlang recovery, follow the [portable Rust recovery plan](docs/superpowers/plans/2026-11-25-portable-rust-recovery.md). Keep source structure independently auditable, record observable rules in the portable contract, and attach language idioms and library/version hints to stable IDs in the target overlay. For each claimed drop-in role, record caller-required native types, signatures and traits in its binding and verify them with native callers. Follow the [native idioms and role-specific requirements](docs/design/contract-recovery.md#native-idioms-and-role-specific-requirements) when classifying a recovered fact.
 
 ## What the prototype must demonstrate
 
