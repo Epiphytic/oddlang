@@ -92,12 +92,21 @@ pub(super) fn render(graph: &Graph, entry: &str) -> Result<String, String> {
     Ok(out)
 }
 
-fn transport(parameter: &str, argument: &str, length: &str, bytes: &str) -> String {
+pub(super) fn framed_exchange(parameter: &str, length: &str, bytes: &str) -> String {
     include_str!("transport.rs.in")
         .replace("/*request_parameter*/", parameter)
-        .replace("/*request_argument*/", argument)
         .replace("/*request_length*/", length)
         .replace("/*request_bytes*/", bytes)
+}
+
+fn transport(parameter: &str, argument: &str, length: &str, bytes: &str) -> String {
+    let mut source = framed_exchange(parameter, length, bytes);
+    source.push_str(
+        &include_str!("perform.rs.in")
+            .replace("/*request_parameter*/", parameter)
+            .replace("/*request_argument*/", argument),
+    );
+    source
 }
 
 fn render_request(graph: &Graph, out: &mut String) {

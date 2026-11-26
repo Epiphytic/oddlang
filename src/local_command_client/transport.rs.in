@@ -30,11 +30,3 @@ async fn exchange(path: &Path/*request_parameter*/) -> Result<Response, Failure>
     stream.read_exact(&mut body).await.map_err(|_| IO)?;
     serde_json::from_slice(&body).map_err(|_| FRAME_JSON)
 }
-
-fn perform(path: &Path/*request_parameter*/) -> Result<Response, Failure> {
-    let runtime = tokio::runtime::Builder::new_current_thread().enable_all().build().map_err(|_| IO)?;
-    runtime.block_on(async {
-        tokio::time::timeout(Duration::from_millis(DEADLINE_MS), exchange(path/*request_argument*/))
-            .await.map_err(|_| DEADLINE)?
-    })
-}
