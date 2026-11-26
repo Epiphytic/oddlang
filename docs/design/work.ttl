@@ -2064,8 +2064,34 @@ w:basicCommandInteropBar a p:Decision ;
 w:basicCommandInterop a p:Task ;
     rdfs:label "Qualify the basic-command compatibility layer against mainline Marmish" ;
     p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan, w:basicCommandInteropBar ;
-    p:status p:planned ;
+    p:status p:active ;
     p:acceptance "Both generated-client/mainline-server and mainline-client/generated-server pairings reproduce reference statuses, output bytes and response formatting repeatedly on one platform, with distinct temporary identities, isolated instance roots, checked cleanup and a throughput observation." .
+
+w:basicCommandInterop p:evidence w:basicCommandStreamChecks ;
+    p:addresses w:basicServerEngineGap .
+w:basicCommandStreamChecks a p:Artifact ;
+    rdfs:label "Test exact command streams, detached CLI formatting and bounded throughput arithmetic" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/f035ebde10d2eaaacdcbe0e6b421401914dc12c7/verification/whole/basic-command-interop" .
+w:basicServerEngineGap a p:Finding ;
+    rdfs:label "The generated foreground owner declares an absent command engine" ;
+    p:source w:basicServerLifecycleGraph .
+w:basicServerLifecycleGraph a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/53ece04bad4d12f0a6846ecb652493be7bf92a55/oddlang/portable/workspace-v6/foreground-graph.json" .
+
+w:flatCanonicalFrame a p:Task ;
+    rdfs:label "Project flat sorted command envelopes from adjacent choices" ;
+    p:source w:basicCommandInteropPlan ; p:milestone w:marmishMilestone ;
+    p:acceptance "Use a portable layout declaration to place a tagged payload beside its envelope fields, preserve the frame limit, and reject duplicate or reordered JSON keys in an unrelated fixture." ;
+    p:status p:done ; p:evidence w:flatCanonicalRun .
+w:flatCanonicalRun a p:Artifact ;
+    p:location "verification/canonical-wire/flat-sorted-verification.md" .
+w:basicCommandInterop p:dependsOn w:flatCanonicalFrame ;
+    p:evidence w:basicGeneratedBuild, w:basicGeneratedRoles .
+w:basicGeneratedBuild a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/1155aefdc8144b9f07f8b32046ad8b92a5af1c31/verification/whole/basic-command-interop/generated-build-aarch64-apple-darwin.json" .
+w:basicGeneratedRoles a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/1155aefdc8144b9f07f8b32046ad8b92a5af1c31/verification/whole/basic-command-interop/generated-preflight-aarch64-apple-darwin.json" .
+
 w:wholeLinuxArmData a p:Artifact ;
     rdfs:label "Native ARM64 Linux generated Copy Data roles passed 253 public and 112 sealed cases each plus six mixed-peer directions" ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/tree/4e19e1c734f45b6f3d92addb2ae8b9cf7683e503/verification/whole/linux/aarch64-unknown-linux-gnu" .

@@ -15,3 +15,7 @@ The independent weather fixture exercises the standalone native package path wit
 ```sh
 python3 -B verification/canonical-wire/package.py target/debug/oddlang
 ```
+
+A protocol can set `"layout": "flat-sorted"` to put an adjacent union's tag and content directly in its enclosing JSON object. Its UTF-8 wire form uses compact JSON with object keys sorted recursively. Arrays retain their order. The declaration is rejected when the promoted names collide with envelope field names. The radio fixture checks exact bytes, round trips, duplicate keys and noncanonical field order. The default encoding retains the nested selector.
+
+Flat frames order keys by UTF-8 byte order and use serde_json compact string escaping. The packaged Rust fixture pins serde_json 1.0.154. Case digest declarations keep their own declared field order. Exact-limit and one-byte-over fixtures exercise the wire bound after flattening.
