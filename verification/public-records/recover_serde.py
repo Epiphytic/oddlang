@@ -157,4 +157,12 @@ with tempfile.TemporaryDirectory(prefix="oddlang-recover-plot-") as tmp:
     recover("missing-root-export", "expected one crate-root export of Mark",
             crateRootSha256=digest(work / "src/lib.rs"))
 
+    for label, shadow in (
+        ("private-root-record", "struct Plot;"),
+        ("private-root-choice", "mod other { pub struct Mark; }\nuse other::Mark;"),
+    ):
+        (work / "src/lib.rs").write_text(f"mod model;\npub use model::*;\n{shadow}\n")
+        document(SOURCE)
+        recover(label, "crate-root export", crateRootSha256=digest(work / "src/lib.rs"))
+
 print("Recovered default and strict Serde policy, source field order, and compiler-checked choice links")
