@@ -1,8 +1,8 @@
 pub mod assemble;
 pub mod binary_frame;
 pub mod binary_record;
+pub mod build_report;
 pub mod checked_values;
-mod build_report;
 pub mod command_surface;
 pub mod contracts;
 pub mod endpoint_set;
