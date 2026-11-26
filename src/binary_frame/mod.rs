@@ -1,6 +1,8 @@
 //! Sized, discriminated binary unions and incremental one-frame decoding.
+mod guard_recovery;
 mod recover;
 mod rust;
+pub use guard_recovery::recover as recover_guards;
 pub use recover::recover;
 
 use crate::{

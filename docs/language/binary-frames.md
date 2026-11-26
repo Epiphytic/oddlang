@@ -17,3 +17,11 @@ A case with an unknown write, unsupported encoding, or a possible payload alias 
 Run `oddlang recover tagged-frame CRATE_ROOT SOURCE EVIDENCE SELECTION TEMPLATE OVERLAY OUTPUT`. Recovery publishes the graph and a declaration-keyed obligation report together. The selection pins the source and receipt. The template supplies a sorted slot inventory and vacant tag, literal and maximum values. Positional hints bind existing tuple indices to stable slot identities. Rust source and compiler evidence are inputs to recovery. The generated library consumes the portable graph and Rust overlay.
 
 The unrelated native fixture lives at `verification/rust-recovery/tagged-frame/verify.py`. It includes direct and helper-based writes, baseline and mutated native byte comparisons, and rejections for overlapping tags, an altered output header, local buffer aliasing, unproven buffer mutation and unsupported endianness.
+
+## Compiler-backed encoder preflight
+
+The frame guard observer selects the encoder and named cases with `ODD_RECOVERY_TAGGED_FRAME_GUARDS=crate::Packet::encode#CaseA,CaseB`. It reuses the compiler-proven frame layout before reading each case's original preflight order. The supported rules are a nonempty bounded byte vector, an unsigned upper bound, checked offset plus byte count, and an ordered comparison of unsigned fields. It pins the exact resolved error variants and source inventory. A call through `?` must have the encoder's standard Result error type. Unsupported helpers, effectful statements, or guards interleaved with writes produce unresolved evidence.
+
+Run `oddlang recover frame-guards CRATE_ROOT SOURCE EVIDENCE SELECTION TEMPLATE OVERLAY GRAPH` to populate vacant encoder guard lists. The selection pins the source and receipt, and maps each rule's semantic field role to an existing stable identifier. Count and range bounds must agree with the paired slot policy. The decoder's ordered checks remain defined by its own graph contracts. The generated encoder checks preconditions in the observed source order.
+
+The unrelated witness in `verification/rust-recovery/frame-guards/verify.py` exercises simultaneous failures, maximum boundaries, checked overflow and exact valid bytes. It also exercises proof failures for a side effect, altered error conversion and interleaving a check with a write.

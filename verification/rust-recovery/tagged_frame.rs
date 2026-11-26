@@ -1,4 +1,7 @@
 //! Compiler observations of an exhaustive enum encoder with a fresh byte buffer.
+mod guards;
+pub use guards::observe_guards;
+
 use rustc_ast::LitKind;
 use rustc_hir::{
     BinOpKind, Block, BlockCheckMode, Expr, ExprKind, HirId, MatchSource, Pat, PatExprKind,
@@ -20,9 +23,9 @@ pub fn observe(tcx: TyCtxt<'_>, compiler: &str, selected: &str) -> Value {
     let mut evidence = json!({"format":"oddlang-rust-tagged-frame-v1",
         "compiler":compiler, "method":selected, "unresolved":[]});
     let result = super::relations::method_evidence(tcx, selected, &mut evidence)
-        .and_then(|def| Observer::new(tcx, def).inspect(def));
+        .and_then(|def| Observer::new(tcx, def).inspect(def, None));
     match result {
-        Ok((maximum, cases)) => {
+        Ok((maximum, cases, _)) => {
             evidence["maximum"] = json!(maximum);
             evidence["cases"] = json!(cases);
         }
@@ -44,7 +47,11 @@ impl<'tcx> Observer<'tcx> {
         }
     }
 
-    fn inspect(&self, def: LocalDefId) -> Result<(u32, Vec<Value>)> {
+    fn inspect(
+        &self,
+        def: LocalDefId,
+        guards: Option<&BTreeSet<String>>,
+    ) -> Result<(u32, Vec<Value>, BTreeMap<String, Value>)> {
         let sig = self.tcx.fn_sig(def).instantiate_identity().skip_binder();
         let [receiver] = sig.inputs() else {
             return Err("encoder requires one receiver".into());
@@ -100,6 +107,7 @@ impl<'tcx> Observer<'tcx> {
         let mut seen_variants = BTreeSet::new();
         let mut seen_tags = BTreeSet::new();
         let mut cases = Vec::new();
+        let mut recovered_guards = BTreeMap::new();
         for arm in arms {
             if arm.guard.is_some() || arm.pat.span.from_expansion() {
                 return Err("guarded or macro-generated variant matches are unresolved".into());
@@ -126,9 +134,18 @@ impl<'tcx> Observer<'tcx> {
                     json!({"variant":variant, "form":form, "tag":tag, "unresolved":[reason]})
                 }
             };
+            if guards.is_some_and(|cases| cases.contains(&variant)) {
+                let proof = self
+                    .guard_plan(stmts, &fields, &shape, sig.output())
+                    .map_err(|why| format!("{variant}: {why}"))?;
+                recovered_guards.insert(variant, proof);
+            }
             cases.push(shape);
         }
-        Ok((maximum, cases))
+        if guards.is_some_and(|chosen| !chosen.iter().eq(recovered_guards.keys())) {
+            return Err("selected guard case lacks an observed variant".into());
+        }
+        Ok((maximum, cases, recovered_guards))
     }
 
     fn variant(
