@@ -77,6 +77,8 @@ with tempfile.TemporaryDirectory(prefix="wire-schema-test-") as directory:
         ("derive", source.read_text().replace("use serde::{Deserialize, Serialize};",
                                                "use another::{Deserialize, Serialize};"),
          "unverified native derive"),
+        ("derive-alias", "use other_derive as serde;\n" + source.read_text(),
+         "unverified native derive"),
         ("builtin", source.read_text() + "\ntype Option<T> = std::vec::Vec<T>;\n",
          "unverified generic field type Option"),
     ]

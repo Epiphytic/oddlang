@@ -137,9 +137,13 @@ impl Observer<'_> {
         }
         let (root, suffix) = path.split_once("::").unwrap_or((&path, ""));
         if self.locals.contains(root)
-            || expected
-                .split_once("::")
-                .is_some_and(|(namespace, _)| self.locals.contains(namespace))
+            || expected.split_once("::").is_some_and(|(namespace, _)| {
+                self.locals.contains(namespace)
+                    || self
+                        .imports
+                        .get(namespace)
+                        .is_some_and(|source| source != namespace)
+            })
         {
             return false;
         }
@@ -516,6 +520,13 @@ fn lexical_scope(file: &syn::File) -> (BTreeMap<String, String>, BTreeSet<String
             Item::TraitAlias(item) => Some(&item.ident),
             Item::Mod(item) => Some(&item.ident),
             Item::ExternCrate(item) => Some(item.rename.as_ref().map_or(&item.ident, |(_, id)| id)),
+            Item::Macro(item) if item.ident.is_none() => {
+                gaps.push(format!(
+                    "unexpanded source item macro {}",
+                    path_name(&item.mac.path)
+                ));
+                None
+            }
             _ => None,
         };
         if let Some(name) = name {
@@ -585,6 +596,7 @@ pub fn from_source(source: &Path, selection: &Path, output: &Path) -> Result<()>
                 .collect(),
         },
     };
+    observer.attributes(&config.id, &parsed.attrs);
     let mut types = Vec::new();
     for item in &parsed.items {
         let (name, attrs, generics) = match item {
