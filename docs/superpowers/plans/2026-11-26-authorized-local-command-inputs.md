@@ -8,6 +8,6 @@
 
 **Scope** The companion graph supplies explicit-state, no-autostart external destination handling for the authorized local status, prepare and submit handoff. Pinned benign fixtures run against an owned Unix socket in a private network-denied workspace. No worker or shell execution is introduced by this input provider. Handling queued work, polling, consume and peer-side completion remain separate work.
 
-- [ ] Attach a profile and discovered endpoint to the generic workflow without changing the existing stateless projections.
-- [ ] Generate the normal Marmish client from the composed candidate, compare exact local owner frames and refusals with the pinned reference, and reject altered authority, profile permissions and relay configuration before owner contact.
-- [ ] Review with Claude auto mode and record native evidence by contract and role.
+- [x] Attach a profile and discovered endpoint to the generic workflow without changing the existing stateless projections.
+- [x] Generate the normal Marmish client from the composed candidate, compare exact local owner frames and refusals with the pinned reference, and reject altered authority, profile permissions and relay configuration before owner contact.
+- [x] Review with Claude auto mode and record native evidence by contract and role.
