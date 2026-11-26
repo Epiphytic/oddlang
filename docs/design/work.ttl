@@ -2559,3 +2559,9 @@ w:localFileCatalogDarwin a p:Artifact ;
 
 w:localFileCatalogLinux a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/88a771e63032b98ee62a97f9a09a2786692dcf6c/verification/whole/local-file-catalog/aarch64-unknown-linux-gnu.json" .
+
+
+w:nativeIdiomHints a p:Decision ;
+    rdfs:label "Scope native idiom hints and caller requirements to their target and role" ;
+    p:source w:contractRecoveryDesign ;
+    p:reason "A consumer can choose idiomatic native types while sharing wire expectations. Existing native callers can independently require an exact public type or signature for a drop-in role." .
