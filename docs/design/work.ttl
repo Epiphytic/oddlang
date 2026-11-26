@@ -1147,8 +1147,11 @@ w:provisionedNativeWorkspaceReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/46> .
 
 w:nativeWorkspaceColdStart a p:Task ; rdfs:label "Build native workspaces from portable inputs and an empty dependency cache" ;
-    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ; p:evidence w:nativeWorkspaceColdStartReceipts ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ; p:evidence w:nativeWorkspaceColdStartReceipts, w:nativeWorkspaceColdStartLockProbe ;
     p:acceptance "Fetch only through locked Cargo resolution from the package and workspace manifests, retain offline compilation, reject stale pins and reproduce the released workspace lock." .
 
 w:nativeWorkspaceColdStartReceipts a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/50> .
+
+w:nativeWorkspaceColdStartLockProbe a p:Artifact ;
+    p:location <https://github.com/Epiphytic/oddlang/blob/e2ec7338dcf141f95d2f1e24d9bee20cc1cec44b/verification/native-workspace/bootstrap.py> .
