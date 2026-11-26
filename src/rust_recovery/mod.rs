@@ -384,12 +384,12 @@ fn publish_pair(
 }
 
 fn publish_shapes(output: &Path, raw: &[u8], pin: Pin<'_>) -> Result<()> {
-    use shape_model::{Observation, VOCABULARY};
+    use shape_model::{Observation, PREVIOUS_VOCABULARY, VOCABULARY};
 
     #[derive(Serialize)]
     #[serde(rename_all = "camelCase")]
     struct Lock<'a> {
-        vocabulary: &'static str,
+        vocabulary: &'a str,
         pin: Pin<'a>,
         shapes_sha256: String,
         qualification: &'static str,
@@ -402,13 +402,16 @@ fn publish_shapes(output: &Path, raw: &[u8], pin: Pin<'_>) -> Result<()> {
     {
         return Err("compiler adapter reported a different crate or compiler commit".into());
     }
-    if observation.graph.vocabulary != VOCABULARY {
+    if !matches!(
+        observation.graph.vocabulary.as_str(),
+        VOCABULARY | PREVIOUS_VOCABULARY
+    ) {
         return Err("compiler adapter reported an unsupported data shape graph".into());
     }
     let mut bytes = serde_json::to_vec_pretty(&observation.graph).map_err(|err| err.to_string())?;
     bytes.push(b'\n');
     let mut lock = serde_json::to_vec_pretty(&Lock {
-        vocabulary: VOCABULARY,
+        vocabulary: &observation.graph.vocabulary,
         pin,
         shapes_sha256: sha256(&bytes),
         qualification: "candidate",

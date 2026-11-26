@@ -147,7 +147,30 @@ impl<'tcx> Collector<'tcx> {
             Slice(element) => Shape::Slice {
                 element: Box::new(self.shape(owner, context, element)),
             },
-            Array(..) => self.unresolved(owner, "array-length"),
+            Array(element, length) => {
+                let env = ty::TypingEnv::post_analysis(tcx, context);
+                let extent = match tcx
+                    .try_normalize_erasing_regions(env, ty::Unnormalized::new_wip(length))
+                {
+                    Ok(value) if let Some(count) = value.try_to_target_usize(tcx) => {
+                        ArrayExtent::Fixed { count }
+                    }
+                    Ok(value) if let ty::ConstKind::Param(param) = value.kind() => {
+                        let def = tcx.generics_of(context).param_at(param.index as usize, tcx);
+                        ArrayExtent::Parameter {
+                            id: identity(tcx, def.def_id),
+                        }
+                    }
+                    _ => {
+                        self.gap(owner, "array-length");
+                        ArrayExtent::Unresolved
+                    }
+                };
+                Shape::Array {
+                    element: Box::new(self.shape(owner, context, element)),
+                    extent,
+                }
+            }
             Alias(..) => self.unresolved(owner, "type-alias-projection"),
             Dynamic(..) => self.unresolved(owner, "dynamic-type"),
             FnPtr(..) => self.unresolved(owner, "function-pointer"),

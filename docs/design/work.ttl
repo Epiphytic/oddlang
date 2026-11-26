@@ -1032,3 +1032,9 @@ w:combinedForegroundPeers a p:Task ; rdfs:label "Qualify both foreground daemon 
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:planned ;
     p:dependsOn w:integratedNativeInterfaces, w:localOwnerTlsOracle, w:foregroundProfileOwner ;
     p:acceptance "Build both peers from the same portable workspace and exercise automatic discovery, live activation, lease contention, and crash recovery on both ARM64 hosts with original and generated processes." .
+
+w:structuralArrayExtents a p:Task ; rdfs:label "Retain fixed and parameter-sized array extents in recovered data shapes" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Preserve element type, zero and nested dimensions and constant parameter identity across a source mutation in an unrelated fixture." ;
+    p:evidence w:arrayExtentFixture .
+w:arrayExtentFixture a p:Artifact ; p:location "verification/rust-recovery/test_shapes.py" .
