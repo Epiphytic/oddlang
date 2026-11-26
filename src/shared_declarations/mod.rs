@@ -76,7 +76,29 @@ struct Alias {
 #[serde(deny_unknown_fields)]
 struct StringEnum {
     id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    numbers: Option<Numbering>,
     variants: Vec<WireVariant>,
+}
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct Numbering {
+    #[serde(deserialize_with = "unique_map")]
+    tags: BTreeMap<String, u8>,
+    unknown: NumberError,
+}
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct NumberError {
+    id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    argument: Option<String>,
+}
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct Constructor {
+    type_path: String,
+    variant: String,
 }
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -88,6 +110,12 @@ struct WireVariant {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct Binding {
     format: String,
+    #[serde(
+        default,
+        skip_serializing_if = "BTreeMap::is_empty",
+        deserialize_with = "unique_map"
+    )]
+    number_errors: BTreeMap<String, Constructor>,
     #[serde(deserialize_with = "unique_map")]
     names: BTreeMap<String, String>,
     #[serde(default, deserialize_with = "unique_map")]
@@ -261,32 +289,66 @@ impl Graph {
                 }
             }
         }
+        let mut errors = BTreeSet::new();
         for e in &self.string_enums {
+            if let Some(numbering) = &e.numbers {
+                let ids = e.variants.iter().map(|v| &v.id).collect::<BTreeSet<_>>();
+                if !numbering.tags.keys().eq(ids)
+                    || numbering.tags.values().collect::<BTreeSet<_>>().len()
+                        != numbering.tags.len()
+                {
+                    return Err(format!(
+                        "byte tags must cover every variant uniquely: {}",
+                        e.id
+                    ));
+                }
+                NamedNode::new(&numbering.unknown.id)
+                    .map_err(|_| "invalid unknown-tag error IRI")?;
+                errors.insert(&numbering.unknown.id);
+            }
             let mut wires = BTreeSet::new();
             if e.variants.iter().any(|v| !wires.insert(&v.wire)) {
                 return Err(format!("duplicate wire spelling: {}", e.id));
+            }
+        }
+        if !binding.number_errors.keys().eq(errors) {
+            return Err("number error bindings must cover exactly the referenced errors".into());
+        }
+        for entry in binding.number_errors.values() {
+            if !rust_type_path(&entry.type_path) || !native_ident(&entry.variant) {
+                return Err("invalid native number error binding".into());
             }
         }
         Ok(())
     }
 }
 
+fn native_ident(name: &str) -> bool {
+    name.bytes()
+        .next()
+        .is_some_and(|ch| ch.is_ascii_alphabetic())
+        && name
+            .bytes()
+            .all(|ch| ch.is_ascii_alphanumeric() || ch == b'_')
+        && name != "gen"
+        && syn::parse_str::<syn::Ident>(name).is_ok()
+}
+fn rust_type_path(path: &str) -> bool {
+    let mut names = path.split("::");
+    let Some(first) = names.next() else {
+        return false;
+    };
+    let parts: Vec<_> = names.collect();
+    (native_ident(first) || (!parts.is_empty() && matches!(first, "crate" | "super" | "self")))
+        && parts.iter().all(|name| native_ident(name))
+}
 impl Binding {
     fn name(&self, id: &str) -> Result<&str> {
         let name = self
             .names
             .get(id)
             .ok_or_else(|| format!("unbound declaration: {id}"))?;
-        if !name
-            .bytes()
-            .next()
-            .is_some_and(|ch| ch.is_ascii_alphabetic())
-            || !name
-                .bytes()
-                .all(|ch| ch.is_ascii_alphanumeric() || ch == b'_')
-            || name == "gen"
-            || syn::parse_str::<syn::Ident>(name).is_err()
-        {
+        if !native_ident(name) {
             return Err(format!("invalid Rust name: {name}"));
         }
         Ok(name)

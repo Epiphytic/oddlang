@@ -60,6 +60,13 @@ pub(super) fn derive(graph: &Graph, binding: &Binding) -> Result<Json> {
             unknown.push('?');
         }
         cases.insert(&enumeration.id,json!({"kind":"string-enum","nativeVariantOrder":binding.variant_order[&enumeration.id],"rejectWireString":unknown}));
+        if let Some(n) = &enumeration.numbers {
+            let rejected: Vec<_> = (0u8..=255)
+                .filter(|byte| !n.tags.values().any(|tag| tag == byte))
+                .collect();
+            cases.get_mut(&enumeration.id).unwrap()["numberAdmission"] =
+                json!({"accept":n.tags,"reject":rejected,"error":n.unknown});
+        }
         for variant in &enumeration.variants {
             cases.insert(&variant.id,json!({"kind":"string-variant","wireString":variant.wire,"encode":true,"decode":true}));
         }

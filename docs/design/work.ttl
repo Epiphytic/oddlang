@@ -732,3 +732,7 @@ w:sharedTypedFixture a p:Artifact ; p:location "verification/shared-declarations
 
 w:sharedFormatterReview a p:Finding ; rdfs:label "Forwarding outer formatter options into an embedded payload changes its observable text" ; p:source w:sharedTypedFixture .
 w:sharedTypedDeclarations p:addresses w:sharedFormatterReview .
+
+w:sharedNumberedEnum a p:Task ; rdfs:label "Project numeric and Serde representations for one named enum" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:dependsOn w:sharedTypedDeclarations ;
+    p:status p:done ; p:acceptance "Bind sparse byte values and error constructors and compare all 256 inputs for an unrelated meter API." ; p:evidence w:sharedTypedFixture .

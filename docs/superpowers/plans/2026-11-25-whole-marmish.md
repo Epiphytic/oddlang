@@ -27,6 +27,8 @@ The independent stream comparison including macro expansions left 373 compiler-o
 
 ## Implementation evidence
 
+- [x] Bind explicit byte discriminants and exhaustive conversion outcomes for string enums. [Shared declaration profile](../../language/shared-declarations.md)
+
 - [x] Project bounded positioned integrity blocks. Exercise identity, optional zlib, checked offsets, canonical serialization and declared error precedence with an unrelated native consumer. [Block profile and fixture](../../language/integrity-block.md)
 - [x] Generate shared constant, error, result and enum declarations, bind public and crate-private paths and ship declaration-keyed expectations. [Shared declarations and unrelated qualification fixture](../../language/shared-declarations.md)
 

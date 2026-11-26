@@ -79,18 +79,55 @@ pub(super) fn render(g: &Graph, b: &Binding) -> Result<String> {
         .unwrap();
     }
     for e in &g.string_enums {
+        if e.numbers.is_some() {
+            out.push_str("#[repr(u8)]\n");
+        }
         writeln!(out,"#[derive(Debug, Clone, Copy, PartialEq, Eq, ::serde::Serialize, ::serde::Deserialize)]\npub enum {} {{",b.name(&e.id)?).unwrap();
         let variants: BTreeMap<_, _> = e.variants.iter().map(|v| (&v.id, v)).collect();
         for id in &b.variant_order[&e.id] {
+            let tag = e
+                .numbers
+                .as_ref()
+                .map(|n| format!(" = {}", n.tags[id]))
+                .unwrap_or_default();
             writeln!(
                 out,
-                "    #[serde(rename = {:?})]\n    {},",
+                "    #[serde(rename = {:?})]\n    {}{tag},",
                 variants[id].wire,
                 b.name(id)?
             )
             .unwrap();
         }
         out.push_str("}\n");
+        if let Some(n) = &e.numbers {
+            let name = b.name(&e.id)?;
+            let error = &b.number_errors[&n.unknown.id];
+            let ty = &error.type_path;
+            let variant = &error.variant;
+            let arg = n
+                .unknown
+                .argument
+                .as_ref()
+                .map(|v| format!("({v:?})"))
+                .unwrap_or_default();
+            writeln!(out,"impl ::core::convert::TryFrom<::core::primitive::u8> for {name} {{\n    type Error = {ty};\n    fn try_from(__byte: ::core::primitive::u8) -> ::core::result::Result<Self,{ty}> {{\n        match __byte {{").unwrap();
+            for (id, tag) in &n.tags {
+                writeln!(
+                    out,
+                    "            {tag} => ::core::result::Result::Ok(Self::{}),",
+                    b.name(id)?
+                )
+                .unwrap();
+            }
+            if n.tags.len() < 256 {
+                writeln!(
+                    out,
+                    "            _ => ::core::result::Result::Err({ty}::{variant}{arg}),"
+                )
+                .unwrap();
+            }
+            out.push_str("        }\n    }\n}\n");
+        }
     }
     Ok(out)
 }
