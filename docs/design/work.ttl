@@ -2977,3 +2977,13 @@ w:authorizedOwnerLocalSubmit p:addresses w:localSubmitReceiptShapeFinding .
 w:localSubmitReceiptShapeFinding a p:Finding ;
     rdfs:label "Declare local reply flags and receipt version in the application graph" ;
     p:source w:authorizedOwnerLocalSubmitReview .
+
+w:retainedPollComparison a p:Artifact ;
+    rdfs:label "Interrupted client waits with the same retained poll and committed stream cursors" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a168a2f55ede503745a3cc94fa62473cfafbef89/verification/whole/basic-command-interop/pending-poll-restart-aarch64-apple-darwin.json" .
+w:localRetainedPollRecovery a p:Task ;
+    rdfs:label "Resume a client wait after a poll reply becomes available during interruption" ;
+    p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
+    p:dependsOn w:boundedLocalWorkflowProgress ; p:status p:active ;
+    p:evidence w:retainedPollComparison ;
+    p:acceptance "After interrupting the waiter at stdout/stderr offsets 8 and 9, the restarted generated client must reproduce the mainline suffixes, exit 7 and acknowledge the reply against the old cursor pair. Verify digest, session and cursor checks before emitting bytes or consuming a retained reply." .
