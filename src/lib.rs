@@ -8,6 +8,7 @@ pub mod endpoint_set;
 pub mod evolution;
 pub mod facade;
 pub mod field_relation;
+pub mod finite_error_domain;
 pub mod file_profile;
 pub mod foreground_profile_owner;
 pub mod framing_import;

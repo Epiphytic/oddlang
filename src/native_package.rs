@@ -161,6 +161,7 @@ enum Kind {
     EndpointSet,
     IntegrityBlock,
     SharedDeclarations,
+    FiniteErrorDomain,
     SequenceJournal,
     CliSurface,
     LocalCommandClient,
@@ -305,6 +306,10 @@ fn project(
                 &output,
             )?;
             "wire.rs"
+        }
+        Kind::FiniteErrorDomain => {
+            crate::finite_error_domain::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
+            "errors.rs"
         }
         Kind::SharedDeclarations => {
             let path = input.join("graph.json");
