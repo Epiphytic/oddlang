@@ -25,7 +25,9 @@ pub(crate) fn ordinary_root(file: &syn::File) -> Result<(), String> {
 }
 
 fn unusual_macro_attr(attrs: &[Attribute]) -> bool {
-    attrs.iter().any(|attr| attr.path().is_ident("macro_use"))
+    attrs
+        .iter()
+        .any(|attr| attr.path().is_ident("macro_use") || attr.path().is_ident("cfg_attr"))
 }
 
 pub(crate) fn name(ident: &syn::Ident, names: &[&str]) -> bool {

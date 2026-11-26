@@ -438,6 +438,22 @@ fn units(file: &syn::File, selection: Selection) -> Result<(Graph, Overlay)> {
                     return Err("duplicate selected standalone unit error".into());
                 }
             }
+            Item::ExternCrate(item)
+                if scope::name(
+                    item.rename.as_ref().map_or(&item.ident, |(_, alias)| alias),
+                    &["Debug", "Error", "thiserror"],
+                ) =>
+            {
+                return Err("shadowed standalone error derive".into());
+            }
+            Item::Union(item) if scope::name(&item.ident, &["Debug", "Error", "thiserror"]) => {
+                return Err("shadowed standalone error derive".into());
+            }
+            Item::TraitAlias(item)
+                if scope::name(&item.ident, &["Debug", "Error", "thiserror"]) =>
+            {
+                return Err("shadowed standalone error derive".into());
+            }
             Item::Enum(item) if scope::name(&item.ident, &["Debug", "Error", "thiserror"]) => {
                 return Err("shadowed standalone error derive".into());
             }
