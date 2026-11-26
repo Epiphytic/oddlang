@@ -34,6 +34,15 @@ fn main() {
         }),
         Err(Failure::Limit)
     );
+    let exact_limit = Upload {
+        bytes: vec![0; 4],
+        label: "x".repeat(20),
+        sequence: 3,
+        count: 7,
+    };
+    let wire = encode_upload(&exact_limit).unwrap();
+    assert_eq!(wire.len(), 115);
+    assert!(decode_upload(&wire).ok() == Some(exact_limit));
     let noncanonical = br#"{"seq":3,"format":2,"packet":{"tag":"upload","data":{"count":7,"bytes":"AAI=","label":"hail"}}}"#;
     assert!(matches!(decode_upload(noncanonical), Err(Failure::Invalid)));
 }

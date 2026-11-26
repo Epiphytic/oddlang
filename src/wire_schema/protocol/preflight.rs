@@ -149,7 +149,10 @@ impl<'a> Bounds<'a> {
                 }
             }
             Shape::BoundedBase64 { policy } => {
-                format!("{indent}budget.binary({value}, {})?;\n", policy.max_bytes,)
+                format!(
+                    "{indent}__oddlang_budget.binary({value}, {})?;\n",
+                    policy.max_bytes,
+                )
             }
             Shape::BoundedBase64List { policy } => format!(
                 "{indent}__oddlang_budget.binary_list({value}, {}, {}, {}, {})?;\n",
