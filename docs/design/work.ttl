@@ -760,3 +760,8 @@ w:jsonWireMacroScopeReview a p:Finding ;
     p:source w:jsonWireMacroScopeEvidence .
 w:jsonWireMacroScopeEvidence a p:Artifact ; p:location "verification/wire-schema/verify.py" .
 w:jsonWireStructuralSchema p:addresses w:jsonWireMacroScopeReview ; p:evidence w:jsonWireMacroScopeEvidence .
+
+w:wireByteValues a p:Task ; rdfs:label "Recover bounded scalar byte fields and bind ordered guard failures to native errors" ;
+    p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
+    p:acceptance "Rebuild an unrelated byte field from a source-pinned selector, verify encoded and decoded bounds independently, and compile validation into a native result." ; p:evidence w:wireByteFixture .
+w:wireByteFixture a p:Artifact ; p:location "verification/wire-schema/byte_value.py" .

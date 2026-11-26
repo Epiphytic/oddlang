@@ -73,8 +73,18 @@ enum Shape {
     List { item: Box<Shape> },
     Ref { id: String },
     LowerHex { bytes: usize, diagnostic: String },
+    BoundedBase64 { policy: BinaryScalar },
     BoundedBase64List { policy: BinaryList },
     Unresolved { reason: String },
+}
+
+#[derive(Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct BinaryScalar {
+    max_bytes: u32,
+    encoded_limit_message: String,
+    decoded_limit_message: String,
+    syntax_message: String,
 }
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -145,6 +155,10 @@ enum Predicate {
     Unique {
         field: String,
     },
+    ExcludesByte {
+        field: String,
+        byte: u8,
+    },
     AtMost {
         left: String,
         right: String,
@@ -181,9 +195,15 @@ impl Predicate {
                 minimum <= maximum
                     && matches!(
                         find(field)?,
-                        Shape::List { .. } | Shape::BoundedBase64List { .. }
+                        Shape::List { .. }
+                            | Shape::BoundedBase64List { .. }
+                            | Shape::BoundedBase64 { .. }
                     )
             }
+            Self::ExcludesByte { field, .. } => matches!(
+                find(field)?,
+                Shape::BoundedBase64 { .. } | Shape::LowerHex { .. }
+            ),
             Self::Unique { field } => match find(field)? {
                 Shape::List { item } => matches!(
                     item.as_ref(),
@@ -210,6 +230,12 @@ struct Binding {
     format: String,
     names: BTreeMap<String, String>,
     derives: BTreeMap<String, BTreeSet<String>>,
+    #[serde(
+        rename = "nativeValidation",
+        default,
+        skip_serializing_if = "BTreeMap::is_empty"
+    )]
+    native_validation: BTreeMap<String, NativeValidation>,
     externals: BTreeMap<String, String>,
     #[serde(
         rename = "externalDerives",
@@ -219,6 +245,19 @@ struct Binding {
     external_derives: BTreeMap<String, BTreeSet<String>>,
 }
 
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct NativeValidation {
+    method: String,
+    type_path: String,
+    errors: BTreeMap<String, Fault>,
+}
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct Fault {
+    variant: String,
+    argument: Option<String>,
+}
 fn symbol(name: &str) -> bool {
     name.as_bytes().first().is_some_and(u8::is_ascii_alphabetic)
         && name.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_')
@@ -345,7 +384,9 @@ impl Schema {
                                 check_shape(shape, &declared)?;
                                 if matches!(
                                     shape,
-                                    Shape::LowerHex { .. } | Shape::BoundedBase64List { .. }
+                                    Shape::LowerHex { .. }
+                                        | Shape::BoundedBase64List { .. }
+                                        | Shape::BoundedBase64 { .. }
                                 ) {
                                     return Err("wire adapter requires a named record field".into());
                                 }
@@ -415,6 +456,23 @@ impl Schema {
             }
             guard.require.validate(fields)?;
         }
+        for (owner, native) in &binding.native_validation {
+            let declared_errors: BTreeSet<_> = self
+                .guards
+                .iter()
+                .filter(|g| &g.owner == owner)
+                .map(|g| &g.error)
+                .collect();
+            if declared_errors.is_empty()
+                || !native.errors.keys().eq(declared_errors)
+                || !symbol(&native.method)
+                || !native_path(&native.type_path)
+                || !native.type_path.split("::").last().is_some_and(type_symbol)
+                || native.errors.values().any(|e| !symbol(&e.variant))
+            {
+                return Err(format!("invalid native validation binding: {owner}"));
+            }
+        }
         Ok(())
     }
 }
@@ -452,7 +510,9 @@ fn check_shape(shape: &Shape, declared: &BTreeMap<&str, &Definition>) -> Result<
         Shape::Optional { item } | Shape::List { item } => {
             if matches!(
                 item.as_ref(),
-                Shape::LowerHex { .. } | Shape::BoundedBase64List { .. }
+                Shape::LowerHex { .. }
+                    | Shape::BoundedBase64List { .. }
+                    | Shape::BoundedBase64 { .. }
             ) {
                 return Err("wire adapter requires a named record field".into());
             }
@@ -460,6 +520,7 @@ fn check_shape(shape: &Shape, declared: &BTreeMap<&str, &Definition>) -> Result<
         }
         Shape::Ref { id } if declared.contains_key(id.as_str()) => Ok(()),
         Shape::LowerHex { bytes, .. } if (1..=4096).contains(bytes) => Ok(()),
+        Shape::BoundedBase64 { policy } if policy.max_bytes.div_ceil(3) <= u32::MAX / 4 => Ok(()),
         Shape::BoundedBase64List { policy }
             if policy.max_item_bytes <= policy.max_total_bytes
                 && policy.max_item_bytes.div_ceil(3) <= i32::MAX as u32 / 4 =>
@@ -508,7 +569,9 @@ fn supports_derive(shape: &Shape, trait_name: &str, binding: &Binding) -> bool {
             .is_some_and(|traits| traits.contains(trait_name)),
         Shape::Optional { item } => supports_derive(item, trait_name, binding),
         Shape::List { item } => trait_name != "Copy" && supports_derive(item, trait_name, binding),
-        Shape::Text {} | Shape::BoundedBase64List { .. } => trait_name != "Copy",
+        Shape::Text {} | Shape::BoundedBase64List { .. } | Shape::BoundedBase64 { .. } => {
+            trait_name != "Copy"
+        }
         _ => true,
     }
 }
