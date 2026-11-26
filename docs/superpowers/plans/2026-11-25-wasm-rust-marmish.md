@@ -51,7 +51,7 @@ The setup scripts cache each Cargo registry/git closure using `cargo fetch --loc
 - [x] Phase 3 · Rust source import and regeneration
 - [x] Phase 4 · translation validation
 - [x] Phase 5 · Marmish baseline and inventory
-- [ ] Phase 6 · reusable features for Marmish
+- [x] Phase 6 · reusable features for Marmish
 - [ ] Phase 7 · whole-project qualification
 
 See the [plan review and dispositions](../../design/wasm-rust-marmish-plan-review.md).
