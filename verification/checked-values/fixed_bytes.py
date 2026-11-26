@@ -91,6 +91,13 @@ with tempfile.TemporaryDirectory() as temp:
         graph = crate / "recovered/graph.json"
         assert json.loads(graph.read_bytes())["types"][VALUE] == {
             "kind":"fixed-bytes", "length":width, "onDrop":"erase", "failure":FAILURE}
+        lock = json.loads((crate / "recovered/recovery.lock").read_bytes())
+        assert lock["observed"]["length"] == width and "failure" in lock["authored"]
+        bad = json.loads(observed)
+        bad["crateName"] = "different"
+        write(crate / "wrong.json", bad)
+        rejected = run(CLI, "recover", "fixed-bytes", "wrong.json", root / "selection.json", "invalid", cwd=crate, check=False)
+        assert rejected.returncode and b"compiler or crate" in rejected.stderr and not (crate/"invalid").exists()
         run(CLI, "build", "checked-values", "rust", graph, root / "overlay.json", "product", cwd=crate)
         cargo = ("cargo", "+1.97.1", "run", "--quiet", "--offline", "--locked")
         original = run(*cargo, cwd=crate).stdout
@@ -107,3 +114,31 @@ with tempfile.TemporaryDirectory() as temp:
                      if (d:=json.loads(line)).get("reason")=="compiler-message" and d["message"]["code"]}
             assert failed.returncode and "E0277" in codes, (trait,codes)
     print("Recovered 7 and 9 octets; both native bounds, copy ownership, borrowing, drop provider and trait controls passed.")
+
+# Exercise the package admission checks before Cargo sees any untrusted source URL.
+from verify import FAULT, pin, shared
+with tempfile.TemporaryDirectory() as temp:
+    root = Path(temp)
+    graph, error_binding = shared(root)
+    fixed = dict(format="oddlang-checked-values-v1", id=SELECTION["domain"],
+                 types={VALUE:dict(kind="fixed-bytes",length=7,onDrop="erase",failure=FAULT)})
+    binding = dict(BINDING, errors={FAULT:dict(errorType="crate::Fault",variant="Invalid")})
+    write(root/"fixed.json", fixed)
+    write(root/"overlay.json", binding)
+    (root/"Cargo.lock").write_text('version=4\n[[package]]\nname="instrument"\nversion="1.0.0"\n')
+    pkg = dict(format="oddlang-native-package-v1",name="instrument",version="1.0.0",edition="2021",
+               cargoLock=pin(root/"Cargo.lock",root), components=[
+                   dict(kind="shared-declarations",module="faults",graph=pin(graph,root),
+                        overlay=pin(error_binding,root),reexports=["Fault"]),
+                   dict(kind="checked-values",module="fixed",graph=pin(root/"fixed.json",root),
+                        overlay=pin(root/"overlay.json",root),reexports=["Calibration"])])
+    git = dict(git="https://example.org/provider", revision="1"*40)
+    for dependency, patch, message in [
+        ({}, {}, "locked registry provider"),
+        ({"version":"1.8.0"}, {}, "locked registry provider"),
+        ({"version":"1.9.1","source":git},{}, "locked registry provider"),
+        ({"version":"1.9.1"},{"zeroize":git},"locked registry provider"),
+        ({"version":"1.9.1"},{},"expected locked registry source and checksum")]:
+        write(root/"package.json", dict(pkg, dependencies={"zeroize":dependency} if dependency else {}, registryPatches=patch))
+        r = run(CLI,"build","native-package","rust",root/"package.json",root/"rejected",cwd=root,check=False)
+        assert r.returncode and message.encode() in r.stderr and not (root/"rejected").exists(),r.stderr

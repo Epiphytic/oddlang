@@ -67,6 +67,7 @@ pub fn build(path: &Path, destination: &Path) -> Result<()> {
     let mut records = BTreeMap::new();
     let mut members = vec![];
     let mut has_binaries = false;
+    let mut providers = std::collections::BTreeSet::new();
     let mut registry_patches = toml::Table::new();
     for (name, member) in &workspace.members {
         if name.eq_ignore_ascii_case("target")
@@ -88,12 +89,12 @@ pub fn build(path: &Path, destination: &Path) -> Result<()> {
             .canonicalize()
             .map_err(|e| e.to_string())?;
         let dir = root.join(name);
-        native_package::build_pinned(
+        providers.extend(native_package::build_pinned(
             &data,
             member_base.parent().unwrap(),
             &dir,
             Some(&member.dependencies),
-        )?;
+        )?);
         let cargo_file = dir.join("Cargo.toml");
         let mut cargo: toml::Table = std::str::from_utf8(&read(&cargo_file)?)
             .map_err(|e| e.to_string())?
@@ -141,6 +142,7 @@ pub fn build(path: &Path, destination: &Path) -> Result<()> {
         members.push(name);
     }
     let lock = workspace.cargo_lock.read(base)?;
+    validate_registry_providers(&providers, &registry_patches, &lock)?;
     write(&root.join("Cargo.lock"), &lock)?;
     let mut manifest = json!({"workspace":{"resolver":"2","members":members}});
     if !registry_patches.is_empty() {
@@ -188,9 +190,49 @@ pub fn build(path: &Path, destination: &Path) -> Result<()> {
     native_package::publish(&root, destination)
 }
 
+fn validate_registry_providers(
+    providers: &std::collections::BTreeSet<native_package::RegistryProvider>,
+    registry_patches: &toml::Table,
+    lock: &[u8],
+) -> Result<()> {
+    for provider in providers {
+        if registry_patches.contains_key(provider.name) {
+            return Err(format!(
+                "workspace patch overrides required registry provider {}",
+                provider.name
+            ));
+        }
+        provider.verify_lock(lock)?;
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn sibling_patch_cannot_replace_the_fixed_byte_provider() {
+        let mut merged = toml::Table::new();
+        merge_registry_patches(
+            &mut merged,
+            "[zeroize]\ngit='https://example.org/provider'"
+                .parse()
+                .unwrap(),
+        )
+        .unwrap();
+        let required = [native_package::ZEROIZE].into_iter().collect();
+        assert!(
+            validate_registry_providers(&required, &merged, b"")
+                .unwrap_err()
+                .contains("patch overrides")
+        );
+        assert!(
+            validate_registry_providers(&required, &toml::Table::new(), b"package=[]")
+                .unwrap_err()
+                .contains("expected locked registry")
+        );
+    }
 
     #[test]
     fn workspace_accepts_agreeing_registry_pins_and_rejects_conflicts() {

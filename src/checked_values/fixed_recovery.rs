@@ -17,13 +17,22 @@ struct Selection {
 pub fn recover_fixed_bytes(observation: &Path, selection: &Path, output: &Path) -> Result<()> {
     let source = fs::read(observation).map_err(|e| e.to_string())?;
     let observation: Observation = serde_json::from_slice(&source).map_err(|e| e.to_string())?;
-    let selection: Selection = json(selection)?;
+    let selected_bytes = fs::read(selection).map_err(|e| e.to_string())?;
+    let selection: Selection =
+        serde_json::from_slice(&selected_bytes).map_err(|e| e.to_string())?;
     let mut ids = BTreeSet::new();
     for id in [&selection.domain, &selection.value, &selection.failure] {
         declare(&mut ids, id)?;
     }
     if observation.graph.vocabulary != VOCABULARY {
         return Err("fixed-byte recovery requires an array-aware compiler observation".into());
+    }
+    if observation.compiler != "8bab26f4f68e0e26f0bb7960be334d5b520ea452"
+        || selection.source.split("::").nth(1) != Some(observation.crate_name.as_str())
+    {
+        return Err(
+            "observation compiler or crate does not match the pinned adapter selection".into(),
+        );
     }
     let mut declarations = observation
         .graph
@@ -95,6 +104,18 @@ pub fn recover_fixed_bytes(observation: &Path, selection: &Path, output: &Path) 
         .filter(|p| !p.as_os_str().is_empty())
         .unwrap_or(Path::new("."));
     let stage = tempfile::tempdir_in(parent).map_err(|e| e.to_string())?;
-    fs::write(stage.path().join("graph.json"), encode(&graph)?).map_err(|e| e.to_string())?;
+    let graph_bytes = encode(&graph)?;
+    let receipt = json!({
+        "format":"oddlang-fixed-bytes-recovery-v1",
+        "observationSha256":digest(&source), "selectionSha256":digest(&selected_bytes),
+        "graphSha256":digest(&graph_bytes), "compiler":observation.compiler,
+        "crate":observation.crate_name, "declaration":decl.id,
+        "observed":{"storageType":id,"element":"octet","length":length},
+        "providerAssumption":"onDrop follows from the reviewed Zeroizing provider identity",
+        "authored":["domain","value","failure","public method bindings"],
+        "requiresIndependentQualification":["provider package identity and drop semantics","public conversions","borrowed view","failure mapping"],
+    });
+    fs::write(stage.path().join("graph.json"), graph_bytes).map_err(|e| e.to_string())?;
+    fs::write(stage.path().join("recovery.lock"), encode(&receipt)?).map_err(|e| e.to_string())?;
     publish(stage.path(), output)
 }

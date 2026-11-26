@@ -477,14 +477,57 @@ pub(crate) struct UnitErrorVariant {
     pub variant: String,
 }
 
-fn validate_checked_values(manifest: &Manifest, base: &Path) -> Result<()> {
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub(super) struct RegistryProvider {
+    pub name: &'static str,
+    version: &'static str,
+    checksum: &'static str,
+}
+
+pub(super) const ZEROIZE: RegistryProvider = RegistryProvider {
+    name: "zeroize",
+    version: "1.9.1",
+    checksum: "e13084392c5e4bc371903e2935a5eaeed24905a7511356b883835e18a78f6879",
+};
+
+impl RegistryProvider {
+    pub fn verify_lock(&self, bytes: &[u8]) -> Result<()> {
+        let lock = std::str::from_utf8(bytes)
+            .map_err(|e| e.to_string())?
+            .parse::<toml::Table>()
+            .map_err(|e| e.to_string())?;
+        let packages = lock
+            .get("package")
+            .and_then(toml::Value::as_array)
+            .ok_or("missing Cargo.lock package entries")?;
+        let mut entries = packages.iter().filter(|entry| {
+            entry.get("name").and_then(toml::Value::as_str) == Some(self.name)
+                && entry.get("version").and_then(toml::Value::as_str) == Some(self.version)
+        });
+        if !entries.next().is_some_and(|entry| {
+            entry.get("source").and_then(toml::Value::as_str)
+                == Some("registry+https://github.com/rust-lang/crates.io-index")
+                && entry.get("checksum").and_then(toml::Value::as_str) == Some(self.checksum)
+        }) || entries.next().is_some()
+        {
+            return Err(format!(
+                "expected locked registry source and checksum for {} {}",
+                self.name, self.version
+            ));
+        }
+        Ok(())
+    }
+}
+
+fn validate_checked_values(manifest: &Manifest, base: &Path) -> Result<BTreeSet<RegistryProvider>> {
+    let mut required = BTreeSet::new();
     let components = &manifest.components;
     let checked: Vec<_> = components
         .iter()
         .filter(|component| matches!(component.kind, Kind::CheckedValues))
         .collect();
     if checked.is_empty() {
-        return Ok(());
+        return Ok(required);
     }
     let mut providers = BTreeMap::new();
     for component in components {
@@ -504,18 +547,22 @@ fn validate_checked_values(manifest: &Manifest, base: &Path) -> Result<()> {
         }
     }
     for component in checked {
-        if crate::checked_values::needs_erasure_provider(&component.graph.read(base)?)?
-            && (manifest.registry_patches.contains_key("zeroize")
+        if crate::checked_values::needs_erasure_provider(&component.graph.read(base)?)? {
+            if manifest.registry_patches.contains_key(ZEROIZE.name)
                 || !manifest
                     .dependencies
-                    .get("zeroize")
-                    .is_some_and(|dep| dep.version == "1.9.1" && dep.source.is_none()))
-        {
-            return Err("fixed-bytes requires the locked registry provider zeroize 1.9.1".into());
+                    .get(ZEROIZE.name)
+                    .is_some_and(|dep| dep.version == ZEROIZE.version && dep.source.is_none())
+            {
+                return Err(
+                    "fixed-bytes requires the locked registry provider zeroize 1.9.1".into(),
+                );
+            }
+            required.insert(ZEROIZE);
         }
         crate::checked_values::validate_error_links(&component.overlay.read(base)?, &providers)?;
     }
-    Ok(())
+    Ok(required)
 }
 
 fn validate_command_callbacks(components: &[Component], base: &Path) -> Result<()> {
@@ -649,20 +696,23 @@ pub fn build(path: &Path, output: &Path) -> Result<()> {
     let path = io(path.canonicalize())?;
     let base = path.parent().ok_or("missing manifest directory")?;
     let raw = io(fs::read(&path))?;
-    build_pinned(&raw, base, output, None)
+    build_pinned(&raw, base, output, None).map(|_| ())
 }
 pub(super) fn build_pinned(
     raw: &[u8],
     base: &Path,
     output: &Path,
     siblings: Option<&BTreeSet<String>>,
-) -> Result<()> {
+) -> Result<BTreeSet<RegistryProvider>> {
     let manifest: Manifest =
         serde_json::from_slice(raw).map_err(|e| format!("package manifest: {e}"))?;
     validate_command_callbacks(&manifest.components, base)?;
-    validate_checked_values(&manifest, base)?;
+    let required = validate_checked_values(&manifest, base)?;
     let cargo = cargo_manifest(&manifest)?;
     let lock = manifest.cargo_lock.read(base)?;
+    for provider in &required {
+        provider.verify_lock(&lock)?;
+    }
     let parent = output
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
@@ -859,7 +909,8 @@ pub(super) fn build_pinned(
         package.join("package.lock"),
         serde_json::to_vec_pretty(&receipt).map_err(|e| e.to_string())?,
     ))?;
-    publish(&package, output)
+    publish(&package, output)?;
+    Ok(required)
 }
 pub(crate) fn publish(package: &Path, output: &Path) -> Result<()> {
     // A competing creator can insert even an empty directory after the initial check.
