@@ -126,8 +126,9 @@ requires the default Cargo library source path and an explicit package
 edition of 2018, 2021 or 2024 without a library-specific override. Each module carries its
 stable `id`, Rust `name`, source `sha256`, and optional `records` and
 `aliases` maps from Rust names to stable IRIs. Recovery extracts the selected
-named public fields in declaration order and accepts bool, u64, String and
-Vec<u8>. It recognizes Clone and Serde Serialize derives and explicit
+named public fields in declaration order and accepts bool, u32, u64, String,
+Vec<u8> and owned paths. It recognizes Clone, Debug, fieldwise Default,
+and Serde Serialize derives and explicit
 `pub use crate::module::Record` leaves, including grouped and renamed uses.
 Selected conditional declarations, data-affecting attributes and direct
 type shadows, inner non-doc attributes and unexpanded items are rejected.
@@ -137,6 +138,18 @@ digest in `scopeGlobs`. The direct child must have an explicit sibling
 glob re-exports are rejected. The scope is a structural source slice.
 Qualification compiles independent Rust callers to corroborate type and
 trait resolution.
+
+A fieldwise Default initializes numeric fields to zero, booleans to false,
+and text, octet sequences and owned paths to empty values. A recovered
+bare PathBuf requires an explicit standard-library import. The value
+represents the path as owned native data and preserves its components.
+
+The `oddlang-rust-selected-record-selection-v1` profile of
+`oddlang recover public-root-records FILE SELECTION OUTPUT` pins an explicit
+source file and the selected named public records. The generated records
+can be projected within a component and re-exported through its bindings.
+The recorded scope gap requires independent native evidence of sibling
+macro expansion, Rust bindings and caller-visible export paths.
 
 The output contains the graph, native name overlay, and recovery lock.
 The graph records each ordered field's stable identity, serialized name
