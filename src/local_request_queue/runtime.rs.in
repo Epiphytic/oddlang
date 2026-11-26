@@ -1,4 +1,4 @@
-use ::rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
+use ::rusqlite::{params, Connection, ErrorCode, OptionalExtension, TransactionBehavior};
 use ::sha2::{Digest, Sha256};
 
 pub type Account = [u8; ACCOUNT_BYTES as usize];
@@ -66,13 +66,18 @@ pub enum QueueError {
     MissingInvocation,
     Contract,
     NonDurable,
+    TransactionActive,
+    Busy,
     Corrupt,
     Storage,
 }
 
 impl From<::rusqlite::Error> for QueueError {
-    fn from(_: ::rusqlite::Error) -> Self {
-        Self::Storage
+    fn from(error: ::rusqlite::Error) -> Self {
+        match error.sqlite_error_code() {
+            Some(ErrorCode::DatabaseBusy | ErrorCode::DatabaseLocked) => Self::Busy,
+            _ => Self::Storage,
+        }
     }
 }
 
@@ -87,6 +92,9 @@ impl<'a> LocalQueue<'a> {
         connection: &'a mut Connection,
         authorized: QueueScope,
     ) -> Result<Self, QueueError> {
+        if !connection.is_autocommit() {
+            return Err(QueueError::TransactionActive);
+        }
         let mode: String =
             connection.pragma_query_value(Some("main"), "journal_mode", |row| row.get(0))?;
         let synchronous: i64 =
@@ -99,44 +107,33 @@ impl<'a> LocalQueue<'a> {
         }
 
         let transaction = connection.transaction_with_behavior(TransactionBehavior::Immediate)?;
-        transaction.execute_batch(
-            "CREATE TABLE IF NOT EXISTS main.oddlang_queue_contract_v1 (
-                 only_row INTEGER PRIMARY KEY CHECK (only_row = 1),
-                 name TEXT NOT NULL, account_bytes INTEGER NOT NULL, room_bytes INTEGER NOT NULL,
-                 id_bytes INTEGER NOT NULL, max_frame INTEGER NOT NULL
-             );
-             CREATE TABLE IF NOT EXISTS main.oddlang_queue_frames_v1 (
-                 account BLOB NOT NULL, room BLOB NOT NULL, request BLOB NOT NULL,
-                 invocation BLOB NOT NULL, initial INTEGER NOT NULL CHECK (initial IN (0, 1)),
-                 digest BLOB NOT NULL, frame BLOB NOT NULL,
-                 PRIMARY KEY(account, room, request)
-             ) WITHOUT ROWID;
-             CREATE UNIQUE INDEX IF NOT EXISTS main.oddlang_queue_initial_v1
-                 ON oddlang_queue_frames_v1(account, room, invocation) WHERE initial = 1;",
-        )?;
-        transaction.execute(
-            "INSERT OR IGNORE INTO main.oddlang_queue_contract_v1 VALUES (1, ?1, ?2, ?3, ?4, ?5)",
-            params![
-                CONTRACT_ID,
-                ACCOUNT_BYTES,
-                ROOM_BYTES,
-                ID_BYTES,
-                MAX_FRAME_BYTES
-            ],
-        )?;
-        let compatible: bool = transaction.query_row(
-            "SELECT name = ?1 AND account_bytes = ?2 AND room_bytes = ?3 AND id_bytes = ?4
+        if install_schema(&transaction)? {
+            transaction.execute(
+                "INSERT INTO main.oddlang_queue_contract_v1 VALUES (1, ?1, ?2, ?3, ?4, ?5)",
+                params![
+                    CONTRACT_ID,
+                    ACCOUNT_BYTES,
+                    ROOM_BYTES,
+                    ID_BYTES,
+                    MAX_FRAME_BYTES
+                ],
+            )?;
+        }
+        let compatible: Option<bool> = transaction
+            .query_row(
+                "SELECT name = ?1 AND account_bytes = ?2 AND room_bytes = ?3 AND id_bytes = ?4
                  AND max_frame = ?5 FROM main.oddlang_queue_contract_v1 WHERE only_row = 1",
-            params![
-                CONTRACT_ID,
-                ACCOUNT_BYTES,
-                ROOM_BYTES,
-                ID_BYTES,
-                MAX_FRAME_BYTES
-            ],
-            |row| row.get(0),
-        )?;
-        if !compatible {
+                params![
+                    CONTRACT_ID,
+                    ACCOUNT_BYTES,
+                    ROOM_BYTES,
+                    ID_BYTES,
+                    MAX_FRAME_BYTES
+                ],
+                |row| row.get(0),
+            )
+            .optional()?;
+        if compatible != Some(true) {
             return Err(QueueError::Contract);
         }
         transaction.commit()?;
@@ -217,6 +214,61 @@ impl<'a> LocalQueue<'a> {
     }
 }
 
+fn install_schema(connection: &Connection) -> Result<bool, QueueError> {
+    let definitions = [
+        (
+            "TABLE",
+            "oddlang_queue_contract_v1",
+            " (only_row INTEGER PRIMARY KEY CHECK (only_row = 1),
+                name TEXT NOT NULL, account_bytes INTEGER NOT NULL, room_bytes INTEGER NOT NULL,
+                id_bytes INTEGER NOT NULL, max_frame INTEGER NOT NULL) STRICT"
+                .to_owned(),
+        ),
+        (
+            "TABLE",
+            "oddlang_queue_frames_v1",
+            format!(
+                " (account BLOB NOT NULL CHECK (length(account) = {ACCOUNT_BYTES}),
+                   room BLOB NOT NULL CHECK (length(room) = {ROOM_BYTES}),
+                   request BLOB NOT NULL CHECK (length(request) = {ID_BYTES}),
+                   invocation BLOB NOT NULL CHECK (length(invocation) = {ID_BYTES}),
+                   initial INTEGER NOT NULL CHECK (initial IN (0, 1)),
+                   digest BLOB NOT NULL CHECK (length(digest) = 32),
+                   frame BLOB NOT NULL CHECK (length(frame) BETWEEN 1 AND {MAX_FRAME_BYTES}),
+                   PRIMARY KEY(account, room, request)) STRICT, WITHOUT ROWID"
+            ),
+        ),
+        (
+            "UNIQUE INDEX",
+            "oddlang_queue_initial_v1",
+            " ON oddlang_queue_frames_v1(account, room, invocation) WHERE initial = 1".to_owned(),
+        ),
+    ];
+    let mut missing = Vec::new();
+    for (kind, name, definition) in &definitions {
+        let stored: Option<String> = connection
+            .query_row(
+                "SELECT sql FROM main.sqlite_schema WHERE name = ?1 COLLATE NOCASE",
+                [name],
+                |row| row.get(0),
+            )
+            .optional()?;
+        match stored {
+            Some(sql) if sql == format!("CREATE {kind} {name}{definition}") => {}
+            Some(_) => return Err(QueueError::Contract),
+            None => missing.push(format!("CREATE {kind} main.{name}{definition};")),
+        }
+    }
+    match missing.len() {
+        0 => Ok(false),
+        count if count == definitions.len() => {
+            connection.execute_batch(&missing.concat())?;
+            Ok(true)
+        }
+        _ => Err(QueueError::Contract),
+    }
+}
+
 fn validate(frame: &[u8], digest: &[u8; 32]) -> Result<(), QueueError> {
     if frame.is_empty() || frame.len() > MAX_FRAME_BYTES as usize {
         return Err(QueueError::Frame);
@@ -235,7 +287,7 @@ fn read(
     let row = connection
         .query_row(
             "SELECT invocation, initial, digest,
-            CASE WHEN length(frame) BETWEEN 1 AND ?4 THEN frame END
+            CASE WHEN typeof(frame) = 'blob' AND length(frame) BETWEEN 1 AND ?4 THEN frame END
             FROM main.oddlang_queue_frames_v1 WHERE account = ?1 AND room = ?2 AND request = ?3",
             params![scope.account, scope.room, request_id, MAX_FRAME_BYTES],
             |row| {
@@ -247,7 +299,13 @@ fn read(
                 ))
             },
         )
-        .optional()?;
+        .optional()
+        .map_err(|error| match error {
+            ::rusqlite::Error::FromSqlConversionFailure(..)
+            | ::rusqlite::Error::InvalidColumnType(..)
+            | ::rusqlite::Error::IntegralValueOutOfRange(..) => QueueError::Corrupt,
+            error => error.into(),
+        })?;
     row.map(|(invocation_id, initial, digest, frame)| {
         let kind = match initial {
             0 => RequestKind::FollowUp,

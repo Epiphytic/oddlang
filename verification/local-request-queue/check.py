@@ -59,10 +59,15 @@ with tempfile.TemporaryDirectory(prefix="oddlang-river-gauge-queue-") as tempora
     database = root / "readings.sqlite3"
     for phase in ("write", "recover"):
         subprocess.run((observer, phase, database), check=True)
+    children = [subprocess.Popen((observer, "race", database), stdout=subprocess.PIPE, text=True)
+                for _ in range(2)]
+    values = [child.communicate(timeout=10)[0].strip() for child in children]
+    assert all(child.returncode == 0 for child in children) and sorted(values) == ["already queued", "queued"]
     assert database.read_bytes()[:16] != b"SQLite format 3\x00"
-    for bound in (0, 1_048_577):
-        graph["maximumFrameBytes"] = bound
-        manifest["components"][0]["graph"] = pin("queue.json", graph)
+    for field, value in (("maximumFrameBytes", 0), ("maximumFrameBytes", 1_048_577),
+                         ("accountBytes", 0), ("idBytes", 65), ("id", "invalid"),
+                         ("id", "urn:"), ("id", "urn:spaces invalid"), ("id", "urn:" + "a" * 256)):
+        manifest["components"][0]["graph"] = pin("queue.json", {**graph, field: value})
         path.write_text(json.dumps(manifest))
         result = subprocess.run((CLI, "build", "native-package", "rust", path, root / "invalid"),
                                 capture_output=True, text=True)

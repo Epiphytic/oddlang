@@ -39,10 +39,43 @@ fn main() {
     db.pragma_update(None, "key", "fixture-only-queue-key")
         .unwrap();
     let initial = request(3, 4, RequestKind::Initial, FRAME);
+    if phase == "race" {
+        db.busy_timeout(std::time::Duration::from_secs(5)).unwrap();
+        db.pragma_update(None, "synchronous", "FULL").unwrap();
+        let mut queue = LocalQueue::attach(&mut db, SCOPE).unwrap();
+        let request = request(13, 14, RequestKind::Initial, b"race");
+        println!(
+            "{}",
+            match queue.enqueue(request).unwrap() {
+                Enqueued::Queued(_) => "queued",
+                Enqueued::AlreadyQueued(_) => "already queued",
+            }
+        );
+        return;
+    }
     if phase == "write" {
         db.execute_batch("CREATE TABLE gauge_owner_state(value INTEGER); INSERT INTO gauge_owner_state VALUES (17);")
             .unwrap();
-        db.pragma_update(None, "synchronous", "OFF").unwrap();
+        db.execute_batch("CREATE TABLE oddlang_queue_frames_v1 (invalid INTEGER)")
+            .unwrap();
+        assert!(matches!(
+            LocalQueue::attach(&mut db, SCOPE),
+            Err(QueueError::Contract)
+        ));
+        db.execute_batch("DROP TABLE oddlang_queue_frames_v1; BEGIN")
+            .unwrap();
+        assert!(matches!(
+            LocalQueue::attach(&mut db, SCOPE),
+            Err(QueueError::TransactionActive)
+        ));
+        db.execute_batch("ROLLBACK; PRAGMA journal_mode=WAL")
+            .unwrap();
+        assert_eq!(
+            db.pragma_query_value::<String, _>(None, "journal_mode", |row| row.get(0))
+                .unwrap(),
+            "wal"
+        );
+        db.pragma_update(None, "synchronous", "NORMAL").unwrap();
         assert!(matches!(
             LocalQueue::attach(&mut db, SCOPE),
             Err(QueueError::NonDurable)
@@ -162,5 +195,19 @@ fn main() {
             .read(other_scope, initial.request_id)
             .unwrap()
             .is_none());
+        assert_eq!(
+            db.execute(
+                "UPDATE oddlang_queue_frames_v1 SET digest = zeroblob(32) WHERE request = ?1",
+                [initial.request_id],
+            )
+            .unwrap(),
+            1
+        );
+        let mut queue = LocalQueue::attach(&mut db, SCOPE).unwrap();
+        assert_eq!(
+            queue.read(SCOPE, initial.request_id),
+            Err(QueueError::Corrupt)
+        );
+        assert_eq!(queue.enqueue(initial), Err(QueueError::Corrupt));
     }
 }

@@ -31,9 +31,11 @@ pub(crate) fn build_bytes(
     let overlay: Overlay = serde_json::from_slice(overlay_bytes)
         .map_err(|error| format!("local request queue overlay: {error}"))?;
     if graph.format != "oddlang-local-request-queue-v1"
-        || graph.id.split_once(':').is_none_or(|(scheme, rest)| {
-            scheme.is_empty() || rest.is_empty() || graph.id.contains(char::is_whitespace)
-        })
+        || graph
+            .id
+            .split_once(':')
+            .is_none_or(|(scheme, rest)| scheme.is_empty() || rest.is_empty())
+        || !graph.id.bytes().all(|byte| (b'!'..=b'~').contains(&byte))
         || graph.id.len() > 255
         || [graph.account_bytes, graph.room_bytes, graph.id_bytes]
             .iter()
