@@ -30,6 +30,6 @@ candidate and a disposable source mutation of the original.
 ## Public-data compiler composition
 
 - [ ] Retain the pointer-width and glob checks, qualified Serde recovery,
-  nested wire fixtures and real public range replays in one compiler.
-- [ ] Preserve the preceding data artifacts and workspace locks, and archive
+  and unrelated nested wire fixtures in one compiler.
+- [ ] Preserve unrelated legacy recovery artifacts and native package locks, and archive
   shared-binary observations by compiler revision.

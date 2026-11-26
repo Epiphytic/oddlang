@@ -1889,4 +1889,4 @@ w:publicDataReadPolicyConvergence a p:Task ;
     p:milestone w:marmishMilestone ; p:source w:publicRecordReadPolicyPlan ;
     p:dependsOn w:publicRecordReadPolicy, w:serdeStringChoiceRecovery ;
     p:status p:active ;
-    p:acceptance "Use one compiler to verify nested closed wire data, source binding checks and the real public range package, and preserve preceding graph and package locks." .
+    p:acceptance "Use one compiler to verify unrelated nested closed wire data and source binding checks, with byte-identical legacy graph and package locks." .
