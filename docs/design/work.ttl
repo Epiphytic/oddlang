@@ -1973,3 +1973,8 @@ w:observationalRecordDefaultsMutation a p:Artifact ;
 w:observationalRecordDefaultsCoverage a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/e8f4d14b185cec310c0a19a0e09d3b06f6a17545/verification/whole/engine-native-records/README.md" .
 w:observationalRecordDefaults p:evidence w:observationalRecordDefaultsDarwin, w:observationalRecordDefaultsLinux, w:observationalRecordDefaultsMutation, w:observationalRecordDefaultsCoverage .
+
+w:nativeIdiomHints a p:Decision ;
+    rdfs:label "Scope native idiom hints and caller requirements to their target and role" ;
+    p:source w:contractRecoveryDesign ;
+    p:reason "A consumer can choose idiomatic native types while sharing wire expectations. Existing native callers can independently require an exact public type or signature for a drop-in role." .
