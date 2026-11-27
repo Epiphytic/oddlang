@@ -3830,3 +3830,8 @@ w:portHistoricTooling p:evidence w:candidatePreflightRust .
 w:candidatePreflightRust a p:Artifact ;
     rdfs:label "Two preflight verifiers now use the shared native Seatbelt policy. Five ARM64 macOS candidate exports reproduced all 22 archived exit statuses, stdout and stderr, contract pins and cleanup observations. Ten negative controls passed. A separate test exercised permitted and denied file operations and verified that Seatbelt denied a reachable loopback listener." ;
     p:location "verification/provider-tooling/candidate-preflight-rust.json" .
+
+w:portHistoricTooling p:evidence w:composedOwnerPreflightRust .
+w:composedOwnerPreflightRust a p:Artifact ;
+    rdfs:label "The composed-owner preflight and its downstream artifact inspection now use the native verifier. All 24 CLI observations from six exports matched their ARM64 macOS archives, and eight altered provenance records failed inspection. The activation caller received both expected binary digests and all three contract pins." ;
+    p:location "verification/provider-tooling/composed-preflight-rust.json" .

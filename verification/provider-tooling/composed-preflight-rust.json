@@ -1,0 +1,60 @@
+{
+  "host": "aarch64-apple-darwin",
+  "companionRevision": "4226e010dd42f2e05099d72d8e64690fc06166a8",
+  "replays": [
+    {
+      "archive": "composed-basic-owner-preflight-aarch64-apple-darwin.json",
+      "cases": 2,
+      "buildReceiptSha256": "f096f5ba61841346ba14974a5f507f935f1161ad8fc5f3df418bf9ed1ed0a32b",
+      "newReceiptSha256": "368d9d3f620e2a27624b2af839d8968bf6b75ded8cf82e1d6a12ce9ea5207c9f"
+    },
+    {
+      "archive": "generated-preflight-aarch64-apple-darwin.json",
+      "cases": 6,
+      "buildReceiptSha256": "d4c7c74cc03b3b3b18682188a8439ffc0e3485bc508760cfcd49fbae86447ddd",
+      "newReceiptSha256": "4edcdeecc45b9a5f54f44c4263a27bd06a2bded80e1bbb9b80936234f7e3ef35"
+    },
+    {
+      "archive": "profile-setup-preflight-macos-arm64.json",
+      "cases": 6,
+      "buildReceiptSha256": "a002231a2c51b18bcc08ed866e2eb517b38ef7e9a960abda744102ce6fc8e6ae",
+      "newReceiptSha256": "ddd2423dffb8937e1fb753bd76c0c9fd24e01764725bd8c5f10336c2940ba5b4"
+    },
+    {
+      "archive": "profile-setup-initial-preflight-macos-arm64.json",
+      "cases": 6,
+      "buildReceiptSha256": "5b14a6f48156cb0f8f6e59a33e7a8111ec131f5bb01cf65135a342935971b222",
+      "newReceiptSha256": "0e70a8d30f51369cec4f91b667cd775456f3e8aa13578cda0cdc9f01f3a321c4"
+    },
+    {
+      "archive": "bounded-owner-prepare-preflight-aarch64-apple-darwin.json",
+      "cases": 2,
+      "buildReceiptSha256": "9f6da7040b955fb85272572a1a3fa12e87addf22305398dec8e06fcd882af9d7",
+      "newReceiptSha256": "4b86be37be33c8030a9d05c3330ffe876ba104f111b70092295202dd87f62cfe"
+    },
+    {
+      "archive": "bounded-owner-prepare-fixed-preflight-aarch64-apple-darwin.json",
+      "cases": 2,
+      "buildReceiptSha256": "ced6d82150d00bfb4dc385a941ab85a9eef7fe994424fc80fc1da51281d60df5",
+      "newReceiptSha256": "997b309a005d88764b33762c9f0ae44c311a05bd93d3bc32890e7bcd8b7cb2ad"
+    }
+  ],
+  "changedArchivedFields": [
+    "preflightSha256"
+  ],
+  "composedInputControlsRejected": [
+    "read isolation statement",
+    "source denial probe",
+    "missing *",
+    "missing setup",
+    "extra executable",
+    "workspace-composed-basic-owner.json",
+    "marmish-native-composed-basic-owner-package.json",
+    "composed-basic-owner-v1/marmish-cli.json"
+  ],
+  "downstreamInspection": {
+    "binaryDigestsMatched": 2,
+    "contractPinsMatched": 3,
+    "preflightReceiptDigestMatched": true
+  }
+}
