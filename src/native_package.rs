@@ -1202,13 +1202,21 @@ fn cargo_manifest(manifest: &Manifest) -> Result<String> {
 }
 
 pub fn build(path: &Path, output: &Path) -> Result<()> {
+    build_selected(path, output, None)
+}
+
+pub fn build_selected(
+    path: &Path,
+    output: &Path,
+    registry: Option<&crate::providers::Registry>,
+) -> Result<()> {
     if output.symlink_metadata().is_ok() {
         return Err(format!("output already exists: {}", output.display()));
     }
     let path = io(path.canonicalize())?;
     let base = path.parent().ok_or("missing manifest directory")?;
     let raw = io(fs::read(&path))?;
-    build_pinned(&raw, base, output, None, DependencyCache::Offline, None).map(|_| ())
+    build_pinned(&raw, base, output, None, DependencyCache::Offline, registry).map(|_| ())
 }
 #[derive(Clone, Copy)]
 pub(super) enum DependencyCache {
