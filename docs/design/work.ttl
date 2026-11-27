@@ -3269,3 +3269,11 @@ w:portHistoricTooling p:evidence w:rustWasmVerification .
 w:rustWasmVerification a p:Artifact ;
     rdfs:label "Rust orchestrator for two clean component builds, eight releases and Wasmtime, Node and Chromium qualification, with byte-exact historical reports" ;
     p:location "verification/provider-tooling/wasm-verify.json" .
+
+w:portHistoricTooling p:evidence w:rustFramingPilot, w:sealedWorkspaceRustQualifiers .
+w:rustFramingPilot a p:Artifact ;
+    rdfs:label "Fresh original and guard-order recovery, separately compiled native and Wasm framing projections, assembled native tests and full build boundary" ;
+    p:location "verification/provider-tooling/framing-pilot.json" .
+w:sealedWorkspaceRustQualifiers a p:Artifact ;
+    rdfs:label "Six-member MDK, canonical seven-member, and buffered seven-member Darwin workspace qualification receipts at companion commit 7e015a3" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/7e015a316eb366cebb53d2904cb700231347a1e9/verification/whole" .

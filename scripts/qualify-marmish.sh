@@ -32,7 +32,7 @@ elif [[ $mode == verify ]]; then
     exec cargo +1.97.1 run --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-phase7 -- "$upstream" "$report"
 fi
 if [[ $mode == frame ]]; then
-    scripts/marmish/project-frame.sh "$upstream" "$report"
+    cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin project-frame -- "$upstream" "$report"
     echo "Marmish framing observations recorded in $report"
     exit 0
 fi
