@@ -1,16 +1,14 @@
 {
-  "auditedCompanionRevision": "ce28ad604d899b06adaec4e8eabd71e0719abc83",
-  "previousRevision": "335737883d6fc88acba601ca6575368121334213",
-  "reproducedTableSha256": "3c436dd65b0b78e3d6aacc4cc53cec8ec8260be18b46d03cda9b86a3c7033270",
-  "remainingProjectToolFiles": 94,
+  "auditedCompanionRevision": "e097f352e8a72c161e928375590bca3541db3833",
+  "previousRevision": "ce28ad604d899b06adaec4e8eabd71e0719abc83",
+  "reproducedTableSha256": "fb0fc1908dc66d2f352ea2d5fc630c48b1a1de1f5de4f3ef1358e175d27ac0d4",
+  "remainingProjectToolFiles": 93,
   "remainingProjectExtensions": {
-    ".py": 91,
+    ".py": 90,
     ".sh": 3
   },
   "removedSincePrevious": [
-    "verification/whole/command-responses/envelope.py",
-    "verification/whole/command-responses/generated_envelope.py",
-    "verification/whole/command-responses/verify.py"
+    "verification/whole/command-requests/verify.py"
   ],
   "addedSincePrevious": []
 }
