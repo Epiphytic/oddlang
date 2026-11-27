@@ -18,3 +18,7 @@ tempfile = "3"
 [[bin]]
 name = "translation-proof"
 path = "../rust-translation/scripts/runner.rs"
+
+[[bin]]
+name = "rust-capture"
+path = "../rust-recovery/capture.rs"

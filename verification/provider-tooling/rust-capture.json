@@ -1,0 +1,6 @@
+{
+  "compilerCommit": "8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+  "host": "aarch64-apple-darwin",
+  "capture": "shape inventory of a release-mode library with default features disabled and its extra feature enabled",
+  "historicalAndRustStdoutSha256": "1f196a708b532b2dba87896d8aa9c26db40c75cd4aac7dbbd8e8b113cb529ba0"
+}

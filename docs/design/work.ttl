@@ -2157,7 +2157,7 @@ w:recoverFieldConjunctions a p:Task ;
     p:evidence w:fieldConjunctionNativeFixture, w:copySourceConjunctionNativeReceipt .
 w:wholeMarmishProtocols p:dependsOn w:recoverFieldConjunctions .
 w:fieldConjunctionNativeFixture a p:Artifact ;
-    p:location "verification/rust-recovery/field-conjunction/verify.py" .
+    p:location "verification/provider-validation/src/bin/qualify-rust-recovery/field_conjunction.rs" .
 w:fieldConjunctionProvenanceReview a p:Finding ;
     rdfs:label "Pin compiler-read source files and select only inherent methods" ;
     p:source w:fieldConjunctionReview .
@@ -2187,7 +2187,7 @@ w:recoverTaggedFrameEncoder a p:Task ;
     p:addresses w:taggedFrameSourceReview ; p:evidence w:taggedFrameSourceFixture, w:taggedCopyEncoderNativeReceipt .
 w:wholeMarmishProtocols p:dependsOn w:recoverTaggedFrameEncoder .
 w:taggedFrameSourceFixture a p:Artifact ;
-    p:location "verification/rust-recovery/tagged-frame/verify.py" .
+    p:location "verification/provider-validation/src/bin/qualify-rust-recovery/tagged_frame.rs" .
 w:taggedFrameSourceReview a p:Finding ;
     rdfs:label "Require a dominating length guard, complete tag and enum mappings, and payload alias invalidation" ;
     p:source w:taggedFrameSourceReviewArtifact .
@@ -2236,7 +2236,7 @@ w:recoverFramePreflight a p:Task ;
     p:addresses w:frameGuardOrderReview ; p:evidence w:frameGuardFixture, w:copyGuardOrderNativeReceipt .
 w:wholeMarmishProtocols p:dependsOn w:recoverFramePreflight .
 w:frameGuardFixture a p:Artifact ;
-    p:location "verification/rust-recovery/frame-guards/verify.py" .
+    p:location "verification/provider-validation/src/bin/qualify-rust-recovery/frame_guards.rs" .
 w:frameGuardOrderReview a p:Finding ;
     rdfs:label "Require joint failure witnesses, native error identity, and explicit role-specific guard order" ;
     p:source w:frameGuardOrderReviewArtifact .
@@ -2266,7 +2266,7 @@ w:recoverCheckedFrameFragments a p:Task ;
     p:addresses w:checkedFrameFragmentReview ; p:evidence w:checkedFrameFragmentFixture, w:checkedCopyFragmentNativeReceipt .
 w:wholeMarmishProtocols p:dependsOn w:recoverCheckedFrameFragments .
 w:checkedFrameFragmentFixture a p:Artifact ;
-    p:location "verification/rust-recovery/frame-fragments/verify.py" .
+    p:location "verification/provider-validation/src/bin/qualify-rust-recovery/frame_fragments.rs" .
 w:checkedFrameFragmentReview a p:Finding ;
     rdfs:label "Check lossless enum tags and complete option writers while recording checked length and validation dependencies" ;
     p:source w:checkedFrameFragmentReviewArtifact .
@@ -3147,3 +3147,11 @@ w:portHistoricTooling p:evidence w:canonicalWeatherReplay .
 w:canonicalWeatherReplay a p:Artifact ;
     rdfs:label "Native weather package caller, rejection cases and byte comparison with the historical verifier" ;
     p:location "verification/provider-tooling/canonical-weather-replay.json" .
+
+w:portHistoricTooling p:evidence w:nativeCompilerRecoveryFixtureReplay .
+w:nativeCompilerRecoveryFixtureReplay a p:Artifact ;
+    rdfs:label "Four compiler-backed Rust recovery qualifications on macOS ARM64" ;
+    p:location "verification/provider-tooling/compiler-recovery-fixtures-replay.json" .
+
+w:portHistoricTooling p:evidence w:rustCaptureParity .
+w:rustCaptureParity a p:Artifact ; p:location "verification/provider-tooling/rust-capture.json" .

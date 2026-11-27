@@ -207,9 +207,11 @@ fn collect(args: &Args) -> Result<Capture> {
     let dir = tempfile::Builder::new()
         .prefix("oddlang-release-doc-")
         .tempdir()?;
-    let run = Path::new(env!("CARGO_MANIFEST_DIR")).join("../rust-recovery/run.sh");
     let (raw, log) = exec(
-        isolated(&root, &env, run)
+        provider_validation::capture_command()
+            .env_clear()
+            .envs(&env)
+            .current_dir(&root)
             .arg(&manifest)
             .args([&args.package, &args.kind, &args.target, &args.triple])
             .arg(if args.no_default_features {

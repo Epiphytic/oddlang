@@ -72,3 +72,40 @@ pub fn invoke(cli: &Path, root: &Path, args: &[&str], output: &str, error: Optio
 pub mod inherent_members;
 
 pub mod subprocess;
+
+/// Launch the pinned Rust compiler observer from this checkout.
+pub fn capture_command() -> Command {
+    let mut cmd = Command::new("cargo");
+    cmd.args([
+        "+1.97.1",
+        "run",
+        "--quiet",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+    ])
+    .arg(Path::new(env!("CARGO_MANIFEST_DIR")).join("Cargo.toml"))
+    .args(["--bin", "rust-capture", "--"]);
+    // Cargo compiles the launcher before the launcher can isolate its child compiler.
+    for (key, _) in env::vars_os() {
+        let k = key.to_string_lossy();
+        if matches!(
+            k.as_ref(),
+            "RUSTC"
+                | "RUSTC_WRAPPER"
+                | "RUSTC_WORKSPACE_WRAPPER"
+                | "RUSTC_BOOTSTRAP"
+                | "RUSTFLAGS"
+                | "RUSTDOCFLAGS"
+                | "CARGO_BUILD_TARGET"
+        ) || k.starts_with("CARGO_PROFILE_")
+            || k.starts_with("CARGO_ENCODED_")
+            || k.starts_with("CARGO_BUILD_RUST")
+            || (k.starts_with("CARGO_TARGET_")
+                && (k.ends_with("_RUSTFLAGS") || k.ends_with("_RUSTDOCFLAGS")))
+        {
+            cmd.env_remove(key);
+        }
+    }
+    cmd
+}

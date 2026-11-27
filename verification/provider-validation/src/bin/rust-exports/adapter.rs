@@ -70,13 +70,10 @@ pub fn verify(root: &Path) -> Result {
             .current_dir(root)
             .args(["generate-lockfile", "--offline"]),
     )?;
-    let adapter = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../rust-recovery/run.sh")
-        .canonicalize()?;
     let host = host()?;
     let inventory = |source: &str, extra: bool, polluted: bool| -> Result<Value> {
         fs::write(root.join("src/lib.rs"), source)?;
-        let mut c = cmd(&adapter);
+        let mut c = provider_validation::capture_command();
         c.arg(root.join("Cargo.toml"))
             .args(["sample", "lib", "sample", &host, "no-default"]);
         if extra {

@@ -19,13 +19,11 @@ fn check_extent(cli: &Path, root: &Path, width: usize, host: &str) -> Result {
         )?;
     }
     cargo(&dir, &["generate-lockfile", "--offline"])?;
-    let driver = Path::new(env!("CARGO_MANIFEST_DIR")).join("../rust-recovery/run.sh");
     let manifest = dir.join("Cargo.toml");
     let bytes = command(
-        Command::new("bash").env("ODD_RECOVERY_DATA_SHAPES", "1"),
+        provider_validation::capture_command().env("ODD_RECOVERY_DATA_SHAPES", "1"),
         &dir,
         &[
-            driver.to_str().unwrap(),
             manifest.to_str().unwrap(),
             "instrument",
             "lib",
