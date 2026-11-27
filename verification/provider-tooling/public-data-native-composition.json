@@ -1,0 +1,139 @@
+{
+  "binaryOrigin": "frozen-host-executable",
+  "binarySha256": "87b498ef68a76730d633bf4c9227a9d26c7f6384f97b7613c633d5adb0191c4e",
+  "compilerRustc": [
+    "rustc 1.96.1 (31fca3adb 2026-06-26)",
+    "binary: rustc",
+    "commit-hash: 31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd",
+    "commit-date: 2026-06-26",
+    "host: aarch64-apple-darwin",
+    "release: 1.96.1",
+    "LLVM version: 22.1.2"
+  ],
+  "fixtureRustc": [
+    "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+    "binary: rustc",
+    "commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+    "commit-date: 2026-07-14",
+    "host: aarch64-apple-darwin",
+    "release: 1.97.1",
+    "LLVM version: 22.1.6"
+  ],
+  "fixtures": [
+    {
+      "historicFixtureSha256": "f8180e9167d2d272f4cf87419581c486ca72817475c3bee118d5692f83ade25f",
+      "historicPath": "verification/observational-record-defaults/pointer_width.py",
+      "historicStdout": "Pointer-width fields, fixed-width source mutation and explicit shape rejections pass.\nModule candidates record unresolved qualified glob bindings and preserve strict controls.",
+      "rustFixture": {
+        "arguments": [],
+        "binary": "record-pointer-width",
+        "binarySha256": "798e521551eca89a55c29a3c11908cf6b1d6005cd0ad49aab9a57678ba9bd529",
+        "exit": 0,
+        "runtimeInputs": {},
+        "stdout": "Pointer-width records, fixed-width mutation, native observations and module glob controls passed"
+      }
+    },
+    {
+      "historicFixtureSha256": "a8c07493e13a0f0f4c1063a158df3199e8401f18214e73746d0cd0f1fceef537",
+      "historicPath": "verification/plain-value-choices/capabilities.py",
+      "historicStdout": "Both native variants match exact Debug, Eq, Clone, Copy and declaration ordinals.",
+      "rustFixture": {
+        "arguments": [
+          "capabilities"
+        ],
+        "binary": "qualify-choices",
+        "binarySha256": "7dadbfb2455e6102846af75045427be67534a59c42bf4fa400a3acf788000daa",
+        "exit": 0,
+        "runtimeInputs": {},
+        "stdout": "Both native variants match exact Debug, Eq, Clone, Copy and declaration ordinals."
+      }
+    },
+    {
+      "historicFixtureSha256": "398f1e553949df34730fa6c5b2421d5df8c734c80afd4e5d5d96ffc150deb8ca",
+      "historicPath": "verification/shared-declarations/verify.py",
+      "historicStdout": "Shared constants, errors, typed messages, aliases, native ordinals, serde wires and module visibility qualified.",
+      "rustFixture": {
+        "arguments": [],
+        "binary": "shared-declarations",
+        "binarySha256": "bca99b7385a46d638fb31dab60ea0cc35b84be1041857ea1fc4989a1ac86f7b6",
+        "exit": 0,
+        "runtimeInputs": {
+          "tests/fixtures/json-envelope/Cargo.lock": "946d50add315358bd3afe459deb91f6f0d21bcbc82811dd8535ee92dd52d6bc9",
+          "verification/shared-declarations/binding.json": "90a8bed0f39125e5b1975c6d4d60fb4971b0c8d086a7d12fbfec3cb3e2f68232",
+          "verification/shared-declarations/graph.json": "71ef36ce901fca6509384abdbb4ff2b909febc7ce0fab8f743ead39952dd9a7f"
+        },
+        "stdout": "Shared constants, errors, typed messages, aliases, native ordinals, serde wires and module visibility qualified."
+      }
+    },
+    {
+      "historicFixtureSha256": "39423bcdddef743fb082844324faf0e2fa3e033665384e633300da38af4bc3d7",
+      "historicPath": "verification/serde-string-choice/verify.py",
+      "historicStdout": "Pinned Serde string choices, native capabilities, spelling/order mutation and rejection controls pass.",
+      "rustFixture": {
+        "arguments": [
+          "serde-string"
+        ],
+        "binary": "qualify-choices",
+        "binarySha256": "7dadbfb2455e6102846af75045427be67534a59c42bf4fa400a3acf788000daa",
+        "exit": 0,
+        "runtimeInputs": {},
+        "stdout": "Pinned Serde string choices, native capabilities, spelling/order mutation and rejection controls pass."
+      }
+    },
+    {
+      "historicFixtureSha256": "a46d178deb9c1e9e251bb7424e95f3d547ee9e22f68ee99bfe2077fda2163466",
+      "historicPath": "verification/plain-value-choices/typescript_subset.py",
+      "historicStdout": "TypeScript projects the plain choice and rejects clone-only and derived Debug choices.",
+      "rustFixture": {
+        "arguments": [
+          "typescript-subset"
+        ],
+        "binary": "qualify-choices",
+        "binarySha256": "7dadbfb2455e6102846af75045427be67534a59c42bf4fa400a3acf788000daa",
+        "exit": 0,
+        "runtimeInputs": {},
+        "stdout": "TypeScript projects the plain choice and rejects clone-only and derived Debug choices."
+      }
+    },
+    {
+      "historicFixtureSha256": "31cafd1686a5c16b903110c09d4bd9c5b061942535fe271d5d739a28e1aa7713",
+      "historicPath": "verification/plain-value-choices/typescript.py",
+      "historicStdout": "Rust and TypeScript agree on both choice revisions, capability checks and exact ordinals.",
+      "rustFixture": {
+        "arguments": [
+          "typescript"
+        ],
+        "binary": "qualify-choices",
+        "binarySha256": "7dadbfb2455e6102846af75045427be67534a59c42bf4fa400a3acf788000daa",
+        "exit": 0,
+        "runtimeInputs": {},
+        "stdout": "Rust and TypeScript agree on both choice revisions, capability checks and exact ordinals."
+      }
+    }
+  ],
+  "format": "oddlang-public-data-composition-replay-v1",
+  "frozenHostCompositionReceiptSha256": "45ebf0e8a04c503874ecc418ddadcb8428eebec9dc2403e03ebcbd2061a2257b",
+  "historicalFixtureInventorySha256": "45ebf0e8a04c503874ecc418ddadcb8428eebec9dc2403e03ebcbd2061a2257b",
+  "host": "aarch64-apple-darwin",
+  "libraryTests": [
+    "test file_profile::configured::tests::alternate_url_admission_is_rendered_from_policy ... ok",
+    "test file_profile::schema::configured_storage::tests::uses_declared_cursor_width_and_rejects_unknown_floor_column ... ok",
+    "test file_profile::schema::tests::rejects_undeclared_identifiers_and_projects_parameterized_rows ... ok",
+    "test http::corpus::tests::duplicate_key_escapes_supplementary_and_quoted_characters ... ok",
+    "test http::schema::tests::iri_fragments_escape_pointer_and_uri_syntax ... ok",
+    "test native_package::binary_tests::native_entrypoint_passes_process_exit_and_output ... ok",
+    "test native_package::git_sources_tests::admits_revision_pinned_https_only ... ok",
+    "test native_workspace::tests::sibling_patch_cannot_replace_the_fixed_byte_provider ... ok",
+    "test native_workspace::tests::workspace_accepts_agreeing_registry_pins_and_rejects_conflicts ... ok",
+    "test rust_roundtrip::import::tests::captures_package_rust_without_nested_packages_or_target_outputs ... ok",
+    "test rust_roundtrip::import::tests::rejects_a_symlink_to_rust_outside_the_package ... ok",
+    "test rust_roundtrip::parser::tests::preserves_ordered_trivia_and_compound_tokens ... ok",
+    "test rust_roundtrip::parser::tests::rejects_invalid_or_mislabeled_leaves ... ok"
+  ],
+  "matchesFrozenHostExecutable": true,
+  "node": "v22.22.2",
+  "predecessorTestReceiptSha256": "7eeacdf29785d78a7677b9793b43e0178bebb1e01420794b9097f2b40e889a7b",
+  "runnerSha256": "0486974c9396863c22a4120ea82c9d5c9cbf060a99694ff532f1d086ae91d7aa",
+  "runtime": "900cfa517d0136fa80c2b5e92ccf9b1a3b2a71ab",
+  "typescript": "Version 5.9.3"
+}

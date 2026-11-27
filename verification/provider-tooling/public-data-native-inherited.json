@@ -1,0 +1,184 @@
+{
+  "binarySha256": "87b498ef68a76730d633bf4c9227a9d26c7f6384f97b7613c633d5adb0191c4e",
+  "compositionReceiptSha256": "9073f1762746b211486023589a9d3ddf0e0432e313a1d58efbe1657058e16538",
+  "fixtures": [
+    {
+      "historicFixtureSha256": "09e67d27b9b70f60405896399cab5b16cd08da410c70aa42684264b26582f81a",
+      "historicPath": "verification/line-grammar/verify_records.py",
+      "historicStdout": "Typed records, finite relation, checked aggregate, and formatters passed",
+      "rustFixture": {
+        "arguments": [
+          "records"
+        ],
+        "binary": "line-grammar",
+        "binarySha256": "ffa92fbe65fa58c382c36be238df62ceee8c7c3c95d58b1f8183bb825048079e",
+        "exit": 0,
+        "runtimeInputs": {
+          "verification/line-grammar/extras.rs": "3645c45818daa9e0eb4680f5250a3e7058d6c9df25bb9117ef06ffd2018eb778",
+          "verification/line-grammar/inventory-rejections.json": "c5943d125df8af29214df97de7ebc44670330694ba9487ef6a610d7f1862aaf4",
+          "verification/line-grammar/inventory.json": "aa8d8e41c9b70783f57139b559497cb7845059769fd8592968f2d92a24341bdc",
+          "verification/line-grammar/inventory.rs": "c31aa97681f3a664161757f48fd32ac2724a838f9ddc04e005f7ebd05d2e6237",
+          "verification/line-grammar/records-rejections.json": "3bf6e217a5fb7b6181280d080185aa21b7a408155088dfa02cb0c82b0ff7d4dd",
+          "verification/line-grammar/records.json": "09e78a9e2f762249e00df9949ebaa5f7cc822c106776f582508e9f83b5a41c17",
+          "verification/line-grammar/records.rs": "bf55dd08a2fff2107827c1d23c377046bbe1c040571d937b8c5f7904bec2f2a4",
+          "verification/line-grammar/support-rejections.json": "18623a93ca29021db5d8f8205aad49a20afd5a372aa2e36c51938c4fc43a3d2c",
+          "verification/line-grammar/support.json": "056051a23d52e05e5ea7e299628a5e0a5383f01499329ec4e02ed995d0d90815",
+          "verification/line-grammar/support.rs": "c96e94734aac675f9fd3606e12c54029c13aaeb628ce34419d481517e8fddd50"
+        },
+        "stdout": "Line grammar records native witnesses and 15 rejection cases passed"
+      }
+    },
+    {
+      "historicFixtureSha256": "0a96762deed0e9f623986604bece10104d097c1672fd9ae5b37d26296c66d017",
+      "historicPath": "verification/line-grammar/verify_support.py",
+      "historicStdout": "Native crate-visible grammar and finite-choice declarations passed",
+      "rustFixture": {
+        "arguments": [
+          "support"
+        ],
+        "binary": "line-grammar",
+        "binarySha256": "ffa92fbe65fa58c382c36be238df62ceee8c7c3c95d58b1f8183bb825048079e",
+        "exit": 0,
+        "runtimeInputs": {
+          "verification/line-grammar/extras.rs": "3645c45818daa9e0eb4680f5250a3e7058d6c9df25bb9117ef06ffd2018eb778",
+          "verification/line-grammar/inventory-rejections.json": "c5943d125df8af29214df97de7ebc44670330694ba9487ef6a610d7f1862aaf4",
+          "verification/line-grammar/inventory.json": "aa8d8e41c9b70783f57139b559497cb7845059769fd8592968f2d92a24341bdc",
+          "verification/line-grammar/inventory.rs": "c31aa97681f3a664161757f48fd32ac2724a838f9ddc04e005f7ebd05d2e6237",
+          "verification/line-grammar/records-rejections.json": "3bf6e217a5fb7b6181280d080185aa21b7a408155088dfa02cb0c82b0ff7d4dd",
+          "verification/line-grammar/records.json": "09e78a9e2f762249e00df9949ebaa5f7cc822c106776f582508e9f83b5a41c17",
+          "verification/line-grammar/records.rs": "bf55dd08a2fff2107827c1d23c377046bbe1c040571d937b8c5f7904bec2f2a4",
+          "verification/line-grammar/support-rejections.json": "18623a93ca29021db5d8f8205aad49a20afd5a372aa2e36c51938c4fc43a3d2c",
+          "verification/line-grammar/support.json": "056051a23d52e05e5ea7e299628a5e0a5383f01499329ec4e02ed995d0d90815",
+          "verification/line-grammar/support.rs": "c96e94734aac675f9fd3606e12c54029c13aaeb628ce34419d481517e8fddd50"
+        },
+        "stdout": "Line grammar support native witnesses and 3 rejection cases passed"
+      }
+    },
+    {
+      "historicFixtureSha256": "ff3374ec4b3980a656027ef4cba0da1de59cdc8032292090d41e99e2be76a963",
+      "historicPath": "verification/line-grammar/verify.py",
+      "historicStdout": "Ordered line grammar native typed and malformed cases passed",
+      "rustFixture": {
+        "arguments": [
+          "inventory"
+        ],
+        "binary": "line-grammar",
+        "binarySha256": "ffa92fbe65fa58c382c36be238df62ceee8c7c3c95d58b1f8183bb825048079e",
+        "exit": 0,
+        "runtimeInputs": {
+          "verification/line-grammar/extras.rs": "3645c45818daa9e0eb4680f5250a3e7058d6c9df25bb9117ef06ffd2018eb778",
+          "verification/line-grammar/inventory-rejections.json": "c5943d125df8af29214df97de7ebc44670330694ba9487ef6a610d7f1862aaf4",
+          "verification/line-grammar/inventory.json": "aa8d8e41c9b70783f57139b559497cb7845059769fd8592968f2d92a24341bdc",
+          "verification/line-grammar/inventory.rs": "c31aa97681f3a664161757f48fd32ac2724a838f9ddc04e005f7ebd05d2e6237",
+          "verification/line-grammar/records-rejections.json": "3bf6e217a5fb7b6181280d080185aa21b7a408155088dfa02cb0c82b0ff7d4dd",
+          "verification/line-grammar/records.json": "09e78a9e2f762249e00df9949ebaa5f7cc822c106776f582508e9f83b5a41c17",
+          "verification/line-grammar/records.rs": "bf55dd08a2fff2107827c1d23c377046bbe1c040571d937b8c5f7904bec2f2a4",
+          "verification/line-grammar/support-rejections.json": "18623a93ca29021db5d8f8205aad49a20afd5a372aa2e36c51938c4fc43a3d2c",
+          "verification/line-grammar/support.json": "056051a23d52e05e5ea7e299628a5e0a5383f01499329ec4e02ed995d0d90815",
+          "verification/line-grammar/support.rs": "c96e94734aac675f9fd3606e12c54029c13aaeb628ce34419d481517e8fddd50"
+        },
+        "stdout": "Line grammar inventory native witnesses and 23 rejection cases passed"
+      }
+    },
+    {
+      "historicFixtureSha256": "3b9196029bdd7b65d9a9c592444fa72196040cb2a0c10ffefc050b537580420b",
+      "historicPath": "verification/observational-record-defaults/verify.py",
+      "historicStdout": "Unsigned fields, fieldwise defaults, native paths and unresolved macro controls passed.",
+      "rustFixture": {
+        "arguments": [],
+        "binary": "record-defaults",
+        "binarySha256": "64fb6104d82d4aa61f738fb1400bb175862451dd7e074d75558a4c7fff523377",
+        "exit": 0,
+        "runtimeInputs": {},
+        "stdout": ""
+      }
+    },
+    {
+      "historicFixtureSha256": "3a65953c5f7f8346da6aa24ec2a406cbf74138d9ad901a7134cd62fb1f1caae6",
+      "historicPath": "verification/plain-value-choices/equality.py",
+      "historicStdout": "Three original and generated choice equality contracts passed.",
+      "rustFixture": {
+        "arguments": [
+          "equality"
+        ],
+        "binary": "qualify-choices",
+        "binarySha256": "7dadbfb2455e6102846af75045427be67534a59c42bf4fa400a3acf788000daa",
+        "exit": 0,
+        "runtimeInputs": {},
+        "stdout": "Three original and generated choice equality contracts passed."
+      }
+    },
+    {
+      "historicFixtureSha256": "6667bf0eeb3f102f630c4c57036e4c5efced6aafdb4db5e972365f445b0d7aeb",
+      "historicPath": "verification/structured-diagnostics/check.py",
+      "historicStdout": "Two native source revisions match deterministically, including repeated enable, closed sink and text update.",
+      "rustFixture": {
+        "arguments": [],
+        "binary": "structured-diagnostics",
+        "binarySha256": "e808d54f39c18511938b01f426c6ce8645cf57cf8501666d3fbebf178545352d",
+        "exit": 0,
+        "runtimeInputs": {
+          "verification/structured-diagnostics/Cargo.lock": "fa2b9a354c0e321c251b219020fb368e95e559f33468d7970c4a06aa401917ac",
+          "verification/structured-diagnostics/Cargo.toml": "5b29946971c19ee364615e7676c2f33379074061d3618870b95bccbaf3671aed",
+          "verification/structured-diagnostics/caller.rs": "9e1563ff891a0b196ac4b10c944529127679c4a8cd94b3ac5b456a9bef4a0d86",
+          "verification/structured-diagnostics/reference.rs": "da1a038e201abaf73ab8c01739166642edf2340176f1968cabd7d64dbb8924ce"
+        },
+        "stdout": ""
+      }
+    },
+    {
+      "historicFixtureSha256": "d9bc38031e918c869e7d5c699a57b97b903fbbeaa983206fedbe9543192b6bb6",
+      "historicPath": "verification/command-surface/prefix.py",
+      "historicStdout": "13 terminal cases match in both source revisions; successful parsing stays unbound.",
+      "rustFixture": {
+        "arguments": [
+          "prefix"
+        ],
+        "binary": "command-surface",
+        "binarySha256": "8a53653c6e8e625d3751d82cdbdf313d6e5ce1215f34601cdd51f228d06a1dd7",
+        "exit": 0,
+        "runtimeInputs": {
+          "verification/command-surface/Cargo.lock": "9bcee6c21fc5d6e3055cd059ea305b5dea66042ae78e8e05b202126ff802a240",
+          "verification/command-surface/Cargo.toml": "62c47b94af388d1938ed9a39171a7381de47326cce774b525666141b302aba8a",
+          "verification/command-surface/prefix-cases.json": "73524c8ccc601eea4328beb079d3adbaa781ad8c1c6aaa8e1c08fb7c81602efb",
+          "verification/command-surface/prefix-reference.rs": "7a9a2ce45a769bf30b5f0d904bcc789c3c39c3060246949706bcff4a31344ee9"
+        },
+        "stdout": "Command-surface prefix native qualification passed"
+      }
+    },
+    {
+      "historicFixtureSha256": "d2ad24acb7e156b0dfe4716fda0f020e1e643e4d3ff1eb62826a0f96b6a50079",
+      "historicPath": "verification/typed-finite-errors/verify.py",
+      "historicStdout": "Unrelated typed enum, fixed-width product and diagnostic mutation passed.",
+      "rustFixture": {
+        "arguments": [],
+        "binary": "typed-finite-errors",
+        "binarySha256": "a72d515ae523d68acc61bf47dd4a0bdd592208e4bb17df02c282a02821895450",
+        "exit": 0,
+        "runtimeInputs": {},
+        "stdout": "Unrelated typed enum, fixed-width product and diagnostic mutation passed."
+      }
+    },
+    {
+      "historicFixtureSha256": "a18c30b1423db0c1f56bd8317b750422f8b30a16fc9d3695e1273595540a4fa0",
+      "historicPath": "verification/plain-value-choices/verify.py",
+      "historicStdout": "",
+      "rustFixture": {
+        "arguments": [
+          "verify"
+        ],
+        "binary": "qualify-choices",
+        "binarySha256": "7dadbfb2455e6102846af75045427be67534a59c42bf4fa400a3acf788000daa",
+        "exit": 0,
+        "runtimeInputs": {},
+        "stdout": "Verified source order, native trait bounds and 21 rejected enum sources"
+      }
+    }
+  ],
+  "format": "oddlang-public-data-inherited-replay-v1",
+  "historicalFixtureInventorySha256": "110a721118b1e7e3036df6aae948900f2bc1968b48ffe26751b5cbc1b45d454e",
+  "host": "aarch64-apple-darwin",
+  "predecessorTestReceiptSha256": "7eeacdf29785d78a7677b9793b43e0178bebb1e01420794b9097f2b40e889a7b",
+  "runnerSha256": "0486974c9396863c22a4120ea82c9d5c9cbf060a99694ff532f1d086ae91d7aa",
+  "runtime": "900cfa517d0136fa80c2b5e92ccf9b1a3b2a71ab"
+}

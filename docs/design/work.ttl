@@ -3203,3 +3203,11 @@ w:nativeCommandSurfaceReplay a p:Artifact ;
 
 w:portHistoricTooling p:evidence w:rustFramingReplay .
 w:rustFramingReplay a p:Artifact ; p:location "verification/provider-tooling/native-wasm-framing.json" .
+
+w:portHistoricTooling p:evidence w:publicDataNativeComposition, w:publicDataNativeInherited .
+w:publicDataNativeComposition a p:Artifact ;
+    rdfs:label "Six Rust fixture replays and 13 predecessor tests against the archived Darwin public-data compiler" ;
+    p:location "verification/provider-tooling/public-data-native-composition.json" .
+w:publicDataNativeInherited a p:Artifact ;
+    rdfs:label "Nine inherited Rust fixture replays against the same archived Darwin compiler and parent receipt" ;
+    p:location "verification/provider-tooling/public-data-native-inherited.json" .

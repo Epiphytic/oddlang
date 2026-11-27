@@ -1,34 +1,20 @@
 # Public data compiler composition
 
-The runtime at `900cfa517d0136fa80c2b5e92ccf9b1a3b2a71ab` combines
-pointer-width record recovery, checked fieldless choices in Rust and
-TypeScript, clone-only serializable choices, and the source importer for
-Serde string choices. Each fixture receives the same compiler executable
-within a host. The verifier checks its digest before and after the run.
+The compiler at `900cfa517d0136fa80c2b5e92ccf9b1a3b2a71ab` combines pointer-width record recovery, checked Rust and TypeScript choices, clone-only serializable choices and the Serde string-choice importer. The two original native composition receipts and their paired inherited receipts record the historical runs on Darwin and Linux ARM64. Each host used one compiler executable throughout both stages.
 
-Use a clean checkout of that runtime and an external Cargo target. The script
-builds the compiler with Rust 1.96.1. The Rust callers use 1.97.1 and cached
-dependencies. The optional Node check needs Node and cached TypeScript
-5.9.3. Both native ARM64 receipts include the Rust checks and a CLI check of
-which choices the TypeScript backend accepts. Darwin also runs the actual
-TypeScript consumer. Each host must pass the same named library tests as the
-previous combined compiler.
+Run the Rust verifier from the current checkout. Set `RUNTIME_CHECKOUT` to a clean checkout at the commit above and `PINNED_TARGET` to an external Cargo target directory. The default command builds the compiler with Rust 1.96.1. The qualification programs use Rust 1.97.1 and locked offline dependencies. The optional Node consumer requires Node and cached TypeScript 5.9.3. Without `--with-node`, the compiler still exercises the accepted and rejected TypeScript choice profiles.
 
 ```sh
-python3 -B verification/public-data-composition/verify.py \
-    "$RUNTIME_CHECKOUT" "$CARGO_TARGET_DIR" /tmp/public-data-composition.json --with-node
+cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml \
+  --bin public-data-composition -- verify "$RUNTIME_CHECKOUT" "$PINNED_TARGET" \
+  /tmp/public-data-composition.json --with-node
+cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml \
+  --bin public-data-composition -- inherited "$RUNTIME_CHECKOUT" "$PINNED_TARGET/debug/oddlang" \
+  /tmp/public-data-composition.json /tmp/inherited.json
 ```
 
-The result records tool versions, fixture and compiler digests, and named
-library tests. The companion project maintains the separately pinned
-application workspace and downstream import evidence.
+To reproduce a frozen executable run, add `--binary "$ARCHIVED_ODDLANG"` to `verify` and pass that same executable to `inherited`. This mode checks the executable against the recorded SHA-256 for the current host before running fixtures. It still compiles and runs the 13 predecessor library tests from the pinned source. The inherited stage can also take the original host composition receipt as its third positional argument.
 
-The two `inherited-*.json` receipts replay the eight predecessor fixtures
-and the general plain-choice fixture against the same executable on each
-host. Retain the executable from the first run and supply its receipt.
+Each current fixture receives the same compiler. Its report pairs the historical fixture path, digest and captured output with the current Rust program, its binary and runtime-input digests, and its own output. Every historical fixture is checked against the pinned checkout. The verifier checks the compiler digest and checkout cleanliness again before writing a receipt. The inherited stage checks the host, executable, predecessor inventory and named tests against its parent receipt, then replays the eight predecessor fixtures and general plain-choice fixture.
 
-```sh
-python3 -B verification/public-data-composition/inherited.py \
-    "$RUNTIME_CHECKOUT" "$CARGO_TARGET_DIR/debug/oddlang" \
-    /tmp/public-data-composition.json /tmp/inherited.json
-```
+The Darwin replay used the archived executable for six composition fixtures and nine inherited fixtures. Its paired receipts are [composition](../provider-tooling/public-data-native-composition.json) and [inherited](../provider-tooling/public-data-native-inherited.json). The companion project maintains the separately pinned application workspace and downstream import evidence.
