@@ -7,7 +7,7 @@ scripts/setup-marmish.sh
 scripts/qualify-marmish.sh baseline
 ```
 
-To reuse a pinned checkout, set `ODDLANG_MARMISH_SOURCE` for both commands. Supply an explicit checkout and an empty output directory to retain a named run. Check the stored files with `python3 scripts/marmish/receipt.py OUTPUT_DIRECTORY`.
+To reuse a pinned checkout, set `ODDLANG_MARMISH_SOURCE` for both commands. Supply an explicit checkout and an empty output directory to retain a named run. Check the stored files with `cargo +1.97.1 run --quiet --offline --locked --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-receipt -- check OUTPUT_DIRECTORY`.
 
 The source tree has 1,641 tracked paths. The upstream ontology covers 418 files and records 15,797 lexical declarations. Its recovered parses, omissions and lexical references limit what can be inferred about runtime reachability. Cargo independently identifies the selected workspace members, targets, features and resolved dependencies. Qualification reports retain these distinct counts.
 

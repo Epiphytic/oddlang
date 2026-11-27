@@ -1,0 +1,7 @@
+{
+  "archiveSha256": "4c944d14b9260b2300a164cedda7f8721cb0e487efd1ef7e515c5a900f8fea32",
+  "archivedAndResealedReceiptSha256": "d009693219a04612755019678c6a6c074bae7abed2574d20614eb2713a7d5523",
+  "cliProbes": 6,
+  "passedRegressionTests": 8,
+  "target": "aarch64-apple-darwin"
+}

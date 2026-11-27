@@ -5,9 +5,10 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import subprocess
 import tarfile
 
-from receipt import check, sha
+from baseline import sha
 
 ROOT = Path(__file__).resolve().parents[2]
 ARCHIVE = ROOT / "examples/marmish/evidence/original.tar.gz"
@@ -43,7 +44,9 @@ def recover(directory):
             target.parent.mkdir(parents=True, exist_ok=True)
             with target.open("xb") as dest:
                 dest.write(archive.extractfile(entry).read())
-    check(directory)
+    subprocess.run(["cargo", "+1.97.1", "run", "--quiet", "--offline", "--locked",
+                    "--manifest-path", ROOT / "verification/marmish-inventory/Cargo.toml",
+                    "--bin", "marmish-receipt", "--", "check", directory], check=True)
     native = json.loads((directory / "native/baseline.json").read_bytes())
     if native["tree"] != TREE:
         raise ValueError("original Git tree changed")
