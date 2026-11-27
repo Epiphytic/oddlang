@@ -1,16 +1,12 @@
 {
-  "auditedCompanionRevision": "853bf5a7c81fcc97a57934fbaf341b997f4e4ba8",
-  "previousRevision": "ddb19f2b7c4f08823e84c82a8e2da5e463d6375c",
-  "reproducedTableSha256": "a033bb295ee61f2cb0a5c8f3f1bafa9a01601aba7ab7ef9239e72cbea7cb693f",
+  "auditedCompanionRevision": "b8a4a40b3044b8d6d6f78638585f5fee2bb13a2b",
+  "previousRevision": "853bf5a7c81fcc97a57934fbaf341b997f4e4ba8",
+  "reproducedTableSha256": "14a6202b7658459a9f3bb678d9f24db92183678ad608afa2750ed72d6a9bc951",
   "remainingProjectToolFiles": 115,
   "remainingProjectExtensions": {
     ".py": 112,
     ".sh": 3
   },
-  "removedSincePrevious": [
-    "verification/whole/canonical-workspace/compose.py",
-    "verification/whole/converged-diagnostics-cli/compose.py",
-    "verification/whole/converged-diagnostics-cli/test_compose.py"
-  ],
+  "removedSincePrevious": [],
   "addedSincePrevious": []
 }
