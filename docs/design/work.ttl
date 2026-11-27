@@ -3895,3 +3895,8 @@ w:portHistoricTooling p:evidence w:engineLimitRust .
 w:engineLimitRust a p:Artifact ;
     rdfs:label "On macOS the seven-member release workspace and original binaries matched on all ten startup cases and three library descriptor-limit cases. The native Rust runner resolved the engine dependencies using Cargo build records in the presence of two libc artifacts. Its entire receipt matched the historical observer on the same artifacts." ;
     p:location "verification/provider-tooling/engine-limits-rust.json" .
+
+w:portHistoricTooling p:evidence w:prototypeConstantRust .
+w:prototypeConstantRust a p:Artifact ;
+    rdfs:label "The native Rust workspace qualifier reproduced the original and generated MAX_LINE caller outputs, the reordered value from a source expression mutation, and all four buffered-reader cases on macOS ARM64. Fresh source recovery locks matched the historical Python oracle. The current compiler reproduced the pinned compiler's prototype workspace and mutated recovery. The seven-member command-policy release matched all 106 files from 111 inputs, 105 policy decisions and 11 file cases. Each mixed local codec direction matched 4210721 wire bytes." ;
+    p:location "verification/provider-tooling/prototype-constant-rust.json" .

@@ -1,0 +1,155 @@
+{
+  "companionRevision": "8293979fc7dba24830bf3b9fb20308597b70fb86",
+  "auditedCompanionRevision": "5c2d50e453e44b8124945ca312e4dd4eb615f545",
+  "frameworkRevision": "9247e74dcddc411020cf3519dc932a6e473e16c6",
+  "qualifierFrameworkRevision": "c70bc9b3b39f6c4a23641679185dea5d0e5bc32b",
+  "host": "aarch64-apple-darwin",
+  "archivedReceiptPath": "verification/whole/prototype-constant/rust-buffered-callback-aarch64-apple-darwin.json",
+  "archiveSha256": "1fb8f63841490769fabb6631a86ecf3dd9882ebdae453211b43f9709584d1e05",
+  "freshReceiptSha256": "ce93a2d5ef439bef4fefebb5c3eef8381cedc19a474e30708468baea2bc2a09a",
+  "fieldsDifferentFromArchive": [
+    "/companion",
+    "/releaseInfo/originalBinaries/marmish",
+    "/releaseInfo/originalBinaries/marmishd",
+    "/releaseInfo/generatedBinaries/marmish",
+    "/releaseInfo/generatedBinaries/marmishd",
+    "/fixedVault/librarySha256",
+    "/journal/original/libraries/serde_json",
+    "/journal/original/libraries/marmish_native",
+    "/journal/generated/libraries/serde_json",
+    "/journal/generated/libraries/marmish_native",
+    "/mdk/originalLibrarySha256",
+    "/mdk/sealedLibrarySha256",
+    "/publicConstant/nativeOriginal/librarySha256",
+    "/publicConstant/nativeGenerated/librarySha256",
+    "/publicConstant/sourceRecovery/original/rustdocSha256",
+    "/publicConstant/sourceRecovery/original/selectionSha256",
+    "/publicConstant/sourceRecovery/mutation/rustdocSha256",
+    "/publicConstant/sourceRecovery/mutation/selectionSha256"
+  ],
+  "workspaceLockSha256": "fbddb3a4d7bd543fba52f3fb0015b29dcf07e79154aca9ba2984893cb8633142",
+  "stagedInputs": 85,
+  "sourceDenialChecks": [
+    "buffer-caller",
+    "framework-source",
+    "journal-caller",
+    "mdk-caller",
+    "original-journal",
+    "original-mdk",
+    "original-prototype",
+    "original-report",
+    "original-vault",
+    "prototype-constant-caller",
+    "reference-executable",
+    "release-observer",
+    "vault-holdout"
+  ],
+  "publicConstant": {
+    "path": "marmish_prototype::MAX_LINE",
+    "callerSha256": "5b72430941ebb321218c45342401ca372502290892932c679879cfe1c7660f6c",
+    "nativeOriginal": {
+      "librarySha256": "f23472d8138e749acf9585329fd5b2a9369090a42583c32fb7908dbf1d71c128",
+      "stdout": "131072\n"
+    },
+    "nativeGenerated": {
+      "librarySha256": "02b257c7ae4a9e227f7a8dd4d31cb014c16a9d8baf167aa65fedd919e449b668",
+      "stdout": "131072\n"
+    },
+    "sourceRecovery": {
+      "original": {
+        "format": "oddlang-public-constant-recovery-v1",
+        "graphSha256": "aa00b8981325a9431d4401a3ef35be1ba2183103edbd5472c8dd5b94b0aabf79",
+        "overlaySha256": "61359e9f33b338be2866e9cd1a2b760e8e307720e7407761b5ae70dfc7ac0ed0",
+        "rustdocFormatVersion": 57,
+        "rustdocSha256": "d2d3ebf9df38ef12fbfa1e41bffc5d4e696f167d5c91b84161821d3cafef8f38",
+        "selectionSha256": "e8e5f0151fd5ad8e1051ba3da9109b38bd52dabc513af7477e3137dc49ea9320",
+        "sourceFilename": "crates/marmish-prototype/src/lib.rs",
+        "sourceSha256": "3e64bd266a515813a3023859948fb57baea45c82f51f4c234186d7e40019dd1f",
+        "unsignedDecimal": "131072"
+      },
+      "mutation": {
+        "format": "oddlang-public-constant-recovery-v1",
+        "graphSha256": "91fde917f0c410c1c57ce23d0ba11c1b6e685421fa5662cac7741dda9d935465",
+        "overlaySha256": "61359e9f33b338be2866e9cd1a2b760e8e307720e7407761b5ae70dfc7ac0ed0",
+        "rustdocFormatVersion": 57,
+        "rustdocSha256": "6ca341e2914b369f873d311524568548ab5a0e19d2e3f70964a503dd81456b1c",
+        "selectionSha256": "20487344202528f9f5bb395a24dad82ad8e4b99890312d3554821911e84dfa34",
+        "sourceFilename": "crates/marmish-prototype/src/lib.rs",
+        "sourceSha256": "c74c041384aa0ab957dfe494436161ac1fe3e24f1c711afd9ff9ba93fcdadc14",
+        "unsignedDecimal": "132096"
+      }
+    }
+  },
+  "freshLegacyRecoveryLocksMatch": true,
+  "currentCompilerMutatedRecoveryMatchesPinnedCompiler": true,
+  "bufferedInput": {
+    "passed": [
+      "secret_request_tests::private_reader_wipes_consumed_spans",
+      "buffer_contract_observations::retained_span_and_consumed_bytes",
+      "buffer_contract_observations::failed_refill_retains_prior_end",
+      "buffer_contract_observations::zero_output_still_reads_and_eof_can_be_polled_again"
+    ],
+    "privateReaderLeafSha256": "e04583de9468f4b12e1c0a626e68ee42034df5f5f03177f7297f95197fccc690"
+  },
+  "currentCompilerPrototypeTree": {
+    "matchesPinnedCompiler": true,
+    "nativeCallerStdout": "131072\n",
+    "files": 85
+  },
+  "commandPolicyWorkspace": {
+    "compilerSha256": "aebfb19d0430a46d77acb67bb073992ce5e4f4b8370739a22dade8a40d1b3ce9",
+    "inputManifestSha256": "859923216f7a48d14f6975c9625fc809b2f6f1a0da3c4484ff367f96eaa929b4",
+    "pinnedInputs": 111,
+    "policy": {
+      "foregroundSourceSha256": "9ddc9fd6ab6f2fa08e3e80805c18d96a0d0be4c02ca177205bbe5cd692d106e2",
+      "host": "aarch64-apple-darwin",
+      "policyDecisions": {
+        "cases": 105,
+        "inputsSha256": "b392ced173616d91990bb648af275a25776ccc15e22f33faf7388baea451a980",
+        "observationsSha256": "c30e84dc1ec0633fc995d79eda55ece8dfabd27db8cc91bcf72e2270cbbd6f6b"
+      },
+      "rebuiltObserverSha256": {
+        "generated-observer": "fdf106c5b0f12c07460a20a42cac401ad1ab335562f0c7ce7d346e11291ca984",
+        "policy-observer": "bc0eb39712b47febd3a5b5b1d078f742ef6054bfced1d485a94f1ce2b5606cf1",
+        "room-observer": "84a0f09e52a8d2a16c01f0c1ca1343b33613de72ebf54273dd276a7528cf5258"
+      },
+      "roomConfigFileCases": 11,
+      "rustToolchain": "1.97.1",
+      "upstreamCommit": "af54339d250290490d62d4475a77539b7e739071",
+      "workspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c"
+    },
+    "policyToolSha256": "0031e951491fdb9aafdcd7219939473912c5a53932afa6a85167d385f85c0ed8",
+    "workspace": {
+      "directories": 49,
+      "files": 106,
+      "members": 7,
+      "treeSha256": "ed3ba7e04668b2ad346edf880c0c1a261ffefaa47b6838ad9b24e0ab4b8c3524",
+      "workspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c"
+    }
+  },
+  "mixedCodecPipe": {
+    "original": "af54339d250290490d62d4475a77539b7e739071",
+    "generatedWorkspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c",
+    "driverSha256": "d5ec33dd26c651ca82483188862bc43ee459b900fdb39c4ccc9d7199a537dd66",
+    "framesPerDirection": 1260,
+    "payloadSha256": "e8007b4a0a207564767a34fd944d829e984318e4ac4d65522b136ca16794106e",
+    "wireSha256": "a2ad71740d1390383296943473fdfac7ed6515b005e1cae5cb0f5f1cb62f78e5",
+    "originalToGenerated": {
+      "encodeExit": 0,
+      "decodeExit": 0,
+      "wireBytesCompared": 4210721,
+      "payloadBytesCompared": 4194341
+    },
+    "generatedToOriginal": {
+      "encodeExit": 0,
+      "decodeExit": 0,
+      "wireBytesCompared": 4210721,
+      "payloadBytesCompared": 4194341
+    },
+    "truncationAndOffsetControlsPassed": 4
+  },
+  "providerTestResults": [
+    "test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s",
+    "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 24.73s"
+  ]
+}
