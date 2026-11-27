@@ -198,5 +198,38 @@
       ],
       "duplicateDocumentsRejected": true
     }
+  },
+  "nativeCallerEvidence": {
+    "companion": "a624b4978dfc9173aa60b380dd1d7665763471d8",
+    "pullRequest": "https://github.com/Epiphytic/marmish-oddlang/pull/167",
+    "macosReplaySha256": "e6943ab8f82203bf193c956d6d35f5a4cd9ad0e2e9edcc0a27584420ba355120",
+    "framework": "9923e6664899de66915ed3a94e417f261ffed401",
+    "changedReceiptFields": {
+      "companion": "a624b4978dfc9173aa60b380dd1d7665763471d8",
+      "compilerSha256": "a8b23bcd969d1ed5decf0fff49e95d816bcd43e743f4ee18fdd795778bd4d041",
+      "verifierSha256": "970e31ec03631be105822b4d4a7e0b661e7a5ba28840de83050ab17a7a6accb6"
+    },
+    "archivedNativeReceipts": {
+      "aarch64-apple-darwin": "2cd26a75c254fe565a325c3215cc3feaaa4b9b558e1e0a39526b92cc90e2c6dd",
+      "aarch64-unknown-linux-gnu": "cb43d1ca685ee945f1d3a2e8e47b0b652b3ef6c4233ab9429cc237a6546bcf2e"
+    },
+    "observationsComparedPerArchive": {
+      "baseline": 35,
+      "mutation": 35
+    },
+    "freshNativeHost": "aarch64-apple-darwin",
+    "changedNativeRows": [
+      "unknown-field"
+    ],
+    "sourceAccessDenials": 8,
+    "staleSelectorRejected": true,
+    "negativeControls": [
+      "altered compiler metadata",
+      "unmodified source supplied as the mutant",
+      "unchanged result",
+      "reordered rows",
+      "unexpected diagnostic",
+      "extra changed result"
+    ]
   }
 }

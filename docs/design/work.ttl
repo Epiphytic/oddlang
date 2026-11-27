@@ -4009,3 +4009,10 @@ w:nativeRangeRecoveryEvidence a p:Artifact ;
     p:location "verification/provider-tooling/native-range-recovery.json" .
 w:portHistoricTooling p:evidence w:nativeRangeRecoveryEvidence .
 w:nativeRangeRecoveryEvidence rdfs:comment "The Rust checker accepted historical and fresh collector receipts, checked their Rustdoc source, toolchain and recipe pins before and after projection, and rejected nineteen altered evidence sets. Both collectors qualified 35 native cases per source variant." .
+
+w:nativeRangeRecoveryEvidence rdfs:comment "The Rust caller-evidence check reproduced both frozen ARM64 archives. A fresh Darwin run matched all 35 baseline and 35 mutation cases, the eight source-access refusals and the stale-selector refusal. Only the unknown-field case changed." .
+
+w:replaceableWasmProviders p:evidence w:mergedProviderValidation .
+w:mergedProviderValidation a p:Artifact ;
+    rdfs:label "Merged compiler 4ffea99 reproduced all seven command-policy crates, 105 policy decisions, 11 room configuration cases and byte-exact two-way copy Data exchanges between local codecs." ;
+    p:location "verification/provider-tooling/merged-provider-validation.json" .

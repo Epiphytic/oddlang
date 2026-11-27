@@ -1,14 +1,17 @@
 {
-  "auditedCompanionRevision": "27989951fe2f491f7092cf36994937121e9c75fa",
-  "previousRevision": "5c2d50e453e44b8124945ca312e4dd4eb615f545",
-  "reproducedTableSha256": "f6d3294799f972d90a46437766ef76778bc99504ddd0126a25e4e62719247fbb",
-  "remainingProjectToolFiles": 64,
+  "auditedCompanionRevision": "a624b4978dfc9173aa60b380dd1d7665763471d8",
+  "previousRevision": "27989951fe2f491f7092cf36994937121e9c75fa",
+  "reproducedTableSha256": "f271a4d531ce5ca611ac8962b263bfc24c1164a26cecd127e48f92ae33c3f467",
+  "remainingProjectToolFiles": 59,
   "remainingProjectExtensions": {
-    ".py": 64
+    ".py": 59
   },
   "removedSincePrevious": [
-    "verification/whole/engine-native-records/verify.py",
-    "verification/whole/engine-public-error/verify.py"
+    "verification/whole/backend-choice/verify.py",
+    "verification/whole/basic-command-interop/authorized_submit_offline.py",
+    "verification/whole/framework_pin.py",
+    "verification/whole/gap-reason-recovery/verify.py",
+    "verification/whole/workspace/cold_cache.py"
   ],
   "addedSincePrevious": []
 }
