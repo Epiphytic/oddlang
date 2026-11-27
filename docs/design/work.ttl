@@ -3087,3 +3087,12 @@ w:recoverCommandPolicy a p:Task ;
 w:recoveredCommandPolicyReceipt a p:Artifact ;
     rdfs:label "Pinned native and regenerated policy decisions and foreground configuration-file results" ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/51064fa44124b811fdfbe1329cb62de4097eb8de/verification/whole/command-policy/aarch64-apple-darwin.json" .
+
+w:replaceableWasmProviders a p:Task ;
+    rdfs:label "Support replaceable language and library providers with a bounded Wasm interface" ;
+    p:source w:wasmProviderDesign ; p:milestone w:marmishMilestone ;
+    p:acceptance "Replace a source and target provider through workspace configuration, validate the capability boundary, and reproduce the pinned Marmish command-policy validation using Rust or Wasm tooling." ;
+    p:status p:planned .
+w:wasmProviderDesign a p:Artifact ;
+    rdfs:label "Replaceable Oddlang providers design" ;
+    p:location "docs/superpowers/specs/2026-11-26-wasm-provider-design.md" .
