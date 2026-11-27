@@ -3820,3 +3820,8 @@ w:portHistoricTooling p:evidence w:directCommandCorpusRust .
 w:directCommandCorpusRust a p:Artifact ;
     rdfs:label "The native direct replay matched all nine local fixture observations including distinct binary streams, raw arguments, exit 7 and private receipts. Running the historical short fixture reproduced the full archived receipt. With the native short executable only its five executable digests changed. All four finite fixture receipts were identical." ;
     p:location "verification/provider-tooling/direct-command-corpus-rust.json" .
+
+w:portHistoricTooling p:evidence w:commandOutputRust .
+w:commandOutputRust a p:Artifact ;
+    rdfs:label "The direct and mixed-peer harnesses use a shared Rust comparator. Offline replay reproduced nine archived status and stream receipts and twelve historical goodput values. Three native test groups and eighteen Python integration tests exercised exact bytes, receiver identity, duration bounds and failure paths." ;
+    p:location "verification/provider-tooling/command-output-rust.json" .

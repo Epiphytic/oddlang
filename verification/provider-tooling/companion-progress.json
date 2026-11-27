@@ -1,14 +1,14 @@
 {
-  "auditedCompanionRevision": "ca36c9b8fc8b22b3583ee05f9d8771736ea6e3c7",
-  "previousRevision": "ed3d99567ab1cfd9fe224034fce5e00172b095ab",
-  "reproducedTableSha256": "4d9d485eca57ff685bcfd4f387d09662fe234139a6845fdba8c4b6fd9e9856bd",
-  "remainingProjectToolFiles": 88,
+  "auditedCompanionRevision": "45558860cbbd2600d812fdf8c3581f69b5ce3cb8",
+  "previousRevision": "ca36c9b8fc8b22b3583ee05f9d8771736ea6e3c7",
+  "reproducedTableSha256": "68c66b45bbe4f58e30202b332dcd181173b56928b2f3df7a806a37c0f2fa5c3b",
+  "remainingProjectToolFiles": 87,
   "remainingProjectExtensions": {
-    ".py": 87,
+    ".py": 86,
     ".sh": 1
   },
   "removedSincePrevious": [
-    "verification/whole/basic-command-interop/replay_corpus.py"
+    "verification/whole/basic-command-interop/test_qualify.py"
   ],
   "addedSincePrevious": []
 }
