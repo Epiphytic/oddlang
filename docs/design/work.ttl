@@ -3470,3 +3470,8 @@ w:portHistoricTooling p:evidence w:fiveMemberObserverReplay .
 w:fiveMemberObserverReplay a p:Artifact ;
     rdfs:label "Full fresh macOS ARM64 five-member run at a567eb4 with 73 inputs, eight denied source probes, 600 native vault observations, release-info and journal witnesses. Historical fields differed only in companion revision and build artifact hashes." ;
     p:location "verification/provider-tooling/five-member-replay.json" .
+
+w:portHistoricTooling p:evidence w:nativeSuiteControls .
+w:nativeSuiteControls a p:Artifact ;
+    rdfs:label "Native suite controls reproduced both macOS archives and Python outputs byte for byte, including eight passed MDK cases and one host failure, negative signal exit for the copied env executable, and rejection of a zero-test child with successful Cargo status" ;
+    p:location "verification/provider-tooling/suite-controls.json" .
