@@ -1263,7 +1263,7 @@ w:checkedValuesReview a p:Artifact ;
     p:location "docs/design/reviews/checked-value-domains.md" .
 w:wholeMarmishProtocols p:dependsOn w:checkedValueProductProjection .
 w:buildReportFixture a p:Artifact ;
-    p:location "verification/build-report/verify.py" .
+    p:location "verification/provider-validation/src/bin/build-report.rs" .
 w:buildReportPlanReview a p:Finding ;
     rdfs:label "Separate represented revision from compiled artifact provenance and check widths, formats and native guard precedence" ;
     p:source w:buildReportCommandPlan .
@@ -1330,7 +1330,7 @@ w:buildReportBindingReview a p:Finding ;
 w:buildReportSourceRecovery p:addresses w:buildReportBindingReview .
 
 w:buildReportStructuralFixture a p:Artifact ;
-    p:location "verification/build-report-recovery/verify.py" .
+    p:location "verification/provider-validation/src/bin/build-report-recovery.rs" .
 w:buildReportStructuralReceipt a p:Artifact ;
     p:location "companion:verification/whole/release-info-structure/darwin-arm64/receipt.json" .
 w:buildReportRootMacroReview a p:Finding ;
@@ -3121,3 +3121,8 @@ w:portHistoricTooling p:evidence w:rustWorkflowReplay .
 w:rustWorkflowReplay a p:Artifact ;
     rdfs:label "Rust import cleanup, assembly preparation, profile checks and Wasm host receipt replay on macOS ARM64" ;
     p:location "verification/provider-tooling/workflow-replay.json" .
+
+w:portHistoricTooling p:evidence w:rustBuildClosureReplay .
+w:rustBuildClosureReplay a p:Artifact ;
+    rdfs:label "Rust build closure and ordered build report qualification on macOS ARM64" ;
+    p:location "verification/provider-tooling/build-closure-replay.json" .

@@ -10,7 +10,8 @@ import subprocess
 import sys
 import tarfile
 
-from check_build_closure import capture, checked_run, prepare_vendor, profile, require, save, sha
+from stream_baseline import command_output as capture
+from stream_baseline import require, save, sha
 from stream_baseline import LOGICAL_ROOT, ORIGINAL, PACKAGE, PACKAGE_ROOT, RUST, RUST_COMMIT
 from stream_baseline import list_tests
 from stream_baseline import capture as stream_capture
@@ -34,6 +35,31 @@ CONSUMER_CASES = {
 HEX256 = re.compile(r"[0-9a-f]{64}\Z")
 TEST_SUMMARY = re.compile(r"^test result: (?:ok|FAILED)\. (\d+) passed; (\d+) failed; (\d+) ignored;",
                           re.MULTILINE)
+
+
+def closure_request(op, **values):
+    manifest = HERE.parents[1] / "verification/provider-validation/Cargo.toml"
+    result = subprocess.run(
+        ["cargo", "run", "--quiet", "--locked", "--offline", "--manifest-path", manifest,
+         "--bin", "build-closure", "--", "request"],
+        input=json.dumps(dict(op=op, **values), default=os.fspath), text=True,
+        stdout=subprocess.PIPE, check=True,
+    )
+    return json.loads(result.stdout)
+
+
+def profile(trees, writable, literals):
+    return closure_request("profile", trees=trees, writable=writable, literals=literals)
+
+
+def checked_run(command, name, directory, env, output, seatbelt=None, expected_success=True):
+    return closure_request("run", command=command, name=name, dir=directory, env=env,
+                           out=output, sandbox=seatbelt, success=expected_success)
+
+
+def prepare_vendor(cargo, src, vendor, env, output, trees, literals):
+    closure_request("vendor", cargo=cargo, src=src, dest=vendor, env=env, out=output,
+                    trees=trees, literals=literals)
 
 
 def digest(path):

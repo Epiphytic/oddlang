@@ -5,9 +5,9 @@ from pathlib import Path
 import subprocess
 import sys
 
-from check_build_closure import checked_run, profile, require, save, sha
+from stream_baseline import require, save, sha
 from qualify_stream_workspace import (
-    ORACLE, boundaries, clean_environment, denied_reads, digest, git_archive, regular_inputs, tool_paths,
+    ORACLE, boundaries, checked_run, clean_environment, denied_reads, digest, git_archive, profile, regular_inputs, tool_paths,
 )
 
 MODULE = "src/copy_protocol.rs"
