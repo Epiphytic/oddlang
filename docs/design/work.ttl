@@ -3552,3 +3552,8 @@ w:rangeBindingHintReplay a p:Artifact ;
     p:location "verification/provider-tooling/range-binding-hints.json" .
 
 w:rangeBindingHintReplay rdfs:comment "The Rust profile inventory verified seven generated files in each of five profiles against the sealed file hashes and baseline package lock. The published-hint and omitted-hint replays matched their archived behavior. Six negative controls rejected a missing or changed lock, extra file, symlink, changed wire contract and changed case file." .
+
+w:portHistoricTooling p:evidence w:streamMaterializationRust .
+w:streamMaterializationRust a p:Artifact ;
+    rdfs:label "The Rust regeneration entry point materialized all five sealed Marmish stream sources concurrently on Darwin ARM64. Repeat verification, four rejection controls, stage cleanup and all 29 native crate tests passed. The companion inventory now identifies 139 Python and eight shell files of project origin." ;
+    p:location "verification/provider-tooling/stream-materialization.json" .

@@ -1,15 +1,14 @@
 {
-  "auditedCompanionRevision": "2bd155e9d34ce1a696aba8e0a59ecf23a357606c",
-  "previousRevision": "c6ce2dc7ba2328c8646d41d94668a007770d1c4d",
-  "reproducedTableSha256": "3c9434826096597a3a2f02f8d94189871263fc68b9c0c4eaa4ffa1976814cad7",
-  "remainingProjectToolFiles": 148,
+  "auditedCompanionRevision": "0481f4c59496481e17772dc7be4c1ba6215feff1",
+  "previousRevision": "2bd155e9d34ce1a696aba8e0a59ecf23a357606c",
+  "reproducedTableSha256": "86d90e5c79b3c1e33e0ab1c2d1b2c26c8513b544f92b1f91d9ced2cd0059d5bf",
+  "remainingProjectToolFiles": 147,
   "remainingProjectExtensions": {
     ".py": 139,
-    ".sh": 9
+    ".sh": 8
   },
   "removedSincePrevious": [
-    "verification/whole/canonical-recovered-range/workspace_compat.py",
-    "verification/whole/gap-range-endpoint/native.py"
+    "oddlang/regenerate-stream.sh"
   ],
   "addedSincePrevious": []
 }
