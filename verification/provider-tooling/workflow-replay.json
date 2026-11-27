@@ -54,6 +54,7 @@
     "structured-diagnostics",
     "local-file-catalog",
     "record-defaults",
-    "shared-declarations"
+    "shared-declarations",
+    "typed-finite-errors"
   ]
 }

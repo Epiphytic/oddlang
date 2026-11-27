@@ -1650,7 +1650,7 @@ w:vaultModeDarwinReceipt a p:Artifact ; p:location "https://github.com/Epiphytic
 
 w:vaultModeLinuxReceipt a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b75be7c/verification/whole/vault-mode/aarch64-unknown-linux-gnu.json" .
 w:typedFiniteErrorsFixture a p:Artifact ;
-    p:location "verification/typed-finite-errors/verify.py" .
+    p:location "verification/provider-validation/src/bin/typed-finite-errors.rs" .
 w:typedFiniteErrorsDarwin a p:Artifact ;
     p:location "companion:verification/whole/engine-public-error/aarch64-apple-darwin.json" .
 w:typedFiniteErrorsLinux a p:Artifact ;

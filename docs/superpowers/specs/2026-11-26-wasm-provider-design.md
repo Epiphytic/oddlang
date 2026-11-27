@@ -20,9 +20,9 @@ A workspace registers additional capabilities through explicit provider manifest
 
 ## Delivery and acceptance
 
-- [ ] Extract public-record generation behind the host interface. Replace it with a Wasm provider by changing workspace configuration and run the same independent consumer cases against both.
-- [ ] Register a capability unknown when the host was compiled and process its fixture without rebuilding Oddlang.
-- [ ] Provide an equivalent replacement test for source recovery and an example of selecting a library binding. Each example ships its contract version, WIT world, provider lock and expected results.
-- [ ] Test rejection of undeclared imports, resource exhaustion, malformed results, duplicate output paths and incompatible versions. A failure leaves no published partial output.
+- [x] Extract public-record generation behind the host interface. Replace it with a Wasm provider by changing workspace configuration and run the same independent consumer cases against both.
+- [x] Register a capability unknown when the host was compiled and process its fixture without rebuilding Oddlang.
+- [x] Provide an equivalent replacement test for source recovery and an example of selecting a library binding. Each example ships its contract version, WIT world, provider lock and expected results.
+- [x] Test rejection of undeclared imports, resource exhaustion, malformed results, duplicate output paths and incompatible versions. A failure leaves no published partial output.
 - [ ] Inventory project-authored extraction, generation and verification tools and their callers. Port them to Rust or Wasm starting with the four active Marmish command-policy scripts. Keep externally established test expectations independent of the generators. Inherited Marmish tooling is outside this migration.
-- [ ] Regenerate the seven-crate workspace from its 111 pinned inputs and compare the entire emitted tree with the baseline. Replay 105 offline command-policy cases and 11 configuration-file cases on macOS ARM64 and publish the receipt. Baseline workspace lock SHA-256 is `2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c`. Live mixed-peer interoperability has separate acceptance tests.
+- [x] Regenerate the seven-crate workspace from its 111 pinned inputs and compare the entire emitted tree with the baseline. Replay 105 offline command-policy cases and 11 configuration-file cases on macOS ARM64 and publish the receipt. Baseline workspace lock SHA-256 is `2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c`. Live mixed-peer interoperability has separate acceptance tests.

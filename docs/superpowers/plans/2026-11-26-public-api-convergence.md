@@ -30,7 +30,7 @@ From a clean compiler checkout, build with `cargo +1.96.1 build --locked --offli
 
 All seven fixture commands and the 13 library tests passed on Darwin ARM64. They qualify compiler composition. The application results below come from separate sealed builds.
 
-The [compiler qualification receipt](../../../verification/structural-profile-composition/aarch64-apple-darwin.json) also covers the unrelated typed finite error fixture and the two text-grammar integration tests. Repeat these with `python3 -B verification/typed-finite-errors/verify.py "$cli"` and `cargo +1.96.1 test --locked --offline --test text_grammar`.
+The [compiler qualification receipt](../../../verification/structural-profile-composition/aarch64-apple-darwin.json) also covers the unrelated typed finite error fixture and the two text-grammar integration tests. Repeat these with `cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin typed-finite-errors -- "$cli"` and `cargo +1.96.1 test --locked --offline --test text_grammar`.
 
 Both ARM64 hosts built the seven-member application with workspace lock `5abf57c811d641ba126c32dde208334d85d47374bbfbb983231783a403f24df4`. Each matched 164 terminal CLI cases and all 224 private release-parser vectors, including 34 accepted inputs. One separately observed post-parse CLI error still differs per executable. The Darwin import audit passed 77 of the 140 inventoried names. The [application receipts](https://github.com/Epiphytic/marmish-oddlang/pull/103) identify the exact artifacts and probes.
 
