@@ -45,7 +45,7 @@ pub fn verify(cli: &Path, root: &Path) -> Result {
         fs::write(
             &path,
             format!(
-                "{base}adapter={}\nadapterInputs=[\"Cargo.toml\",\"Cargo.lock\",\"driver.rs\",\"shapes.rs\",\"shape_model.rs\"]\nfeatures={}\n",
+                "{base}adapter={}\nadapterInputs=[\"Cargo.toml\",\"Cargo.lock\",\"driver.rs\",\"shapes.rs\",\"shape_model.rs\",\"capture.rs\"]\nfeatures={}\n",
                 json!(adapter),
                 if expanded { "[\"expanded\"]" } else { "[]" }
             ),

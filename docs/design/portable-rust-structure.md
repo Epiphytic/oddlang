@@ -47,7 +47,7 @@ fixture also checks path identity after a formatting change.
 
 ```sh
 cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin rust-exports -- qualify adapter
-verification/rust-recovery/run.sh /path/to/marmish/Cargo.toml \
+cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin rust-capture -- /path/to/marmish/Cargo.toml \
   marmish-stream lib marmish_stream aarch64-apple-darwin default > /tmp/compiler.json
 cargo +stable run --locked --offline --manifest-path verification/rust-inventory/Cargo.toml -- /path/to/marmish \
   marmish-stream /tmp/rustdoc-inventory

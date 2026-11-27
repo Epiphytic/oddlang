@@ -7,17 +7,17 @@ rustup component add rustc-dev --toolchain 1.97.1
 cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin rust-exports -- qualify adapter
 ```
 
-`run.sh` takes an absolute Cargo manifest path, package, `lib` or `bin`,
+The Rust executable `rust-capture` takes an absolute Cargo manifest path, package, `lib` or `bin`,
 target name, Rust target triple, `default` or `no-default`, and zero or
-more Cargo feature names. For example, for a checkout of Marmish at
+more Cargo feature names. Existing executable-adapter profiles can use the compatibility launcher at `run.sh`. For example, for a checkout of Marmish at
 `49fc705408a230bd0ad896248d08dbdd2faad05a` on Apple Silicon:
 
 ```sh
-verification/rust-recovery/run.sh /path/to/marmish/Cargo.toml \
+cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin rust-capture -- /path/to/marmish/Cargo.toml \
   marmish-stream lib marmish_stream aarch64-apple-darwin default
-verification/rust-recovery/run.sh /path/to/marmish/Cargo.toml \
+cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin rust-capture -- /path/to/marmish/Cargo.toml \
   marmish-prototype bin marmish-engine-bridge aarch64-apple-darwin default
-verification/rust-recovery/run.sh /path/to/marmish/Cargo.toml \
+cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin rust-capture -- /path/to/marmish/Cargo.toml \
   marmish-prototype lib marmish_prototype aarch64-apple-darwin default
 ```
 
