@@ -558,7 +558,10 @@ fn project(
         let (vis, id) = match item {
             syn::Item::Struct(i) => (&i.vis, &i.ident),
             syn::Item::Enum(i) => (&i.vis, &i.ident),
+            syn::Item::Union(i) => (&i.vis, &i.ident),
+            syn::Item::Trait(i) => (&i.vis, &i.ident),
             syn::Item::Const(i) => (&i.vis, &i.ident),
+            syn::Item::Static(i) => (&i.vis, &i.ident),
             syn::Item::Type(i) => (&i.vis, &i.ident),
             syn::Item::Mod(i) => (&i.vis, &i.ident),
             syn::Item::Fn(i) => (&i.vis, &i.sig.ident),
