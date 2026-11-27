@@ -63,7 +63,6 @@ Run on macOS Apple Silicon with the pinned checkout and cached Cargo dependencie
 
 ```sh
 upstream=/path/to/pristine/marmish
-asset_dir="$PWD/examples/marmish/portable-bridge"
 build_dir=$(mktemp -d /tmp/oddlang-bridge-build.XXXXXX)
 (
   set -eu
@@ -77,8 +76,9 @@ build_dir=$(mktemp -d /tmp/oddlang-bridge-build.XXXXXX)
     -p marmish-engine --bin marmish-engine-worker --target-dir "$build_dir"
 )
 bins="$build_dir/aarch64-apple-darwin/release"
-python3 -B "$asset_dir/verify.py" "$bins/marmish-engine-bridge" \
+cargo +1.97.1 run --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml \
+  --bin portable-bridge -- "$bins/marmish-engine-bridge" \
   "$bins/marmish-engine-worker" --report "$build_dir/bridge-observations.json"
 ```
 
-The runner passes five observation cases and rejects two controls through the same process comparator. Changing the expected status of argument rejection from 1 to 0 fails on status. Moving the partial-frame reply from its stdout channel to stderr fails on stdout bytes. The executable hashes identify the archived build and can differ across build paths. The fixture SHA-256 is `08dd1637bc59b9b17571f269d538b8ef07e1ed931f8a78e558b2c88e60ee7272`. The transcript SHA-256 is `62ca071d53468e3ee7247596a2d9f1318999e30c201fd2e63dcc94aac705c492`. [Replay driver](../../examples/marmish/portable-bridge/verify.py)
+The runner passes five observation cases and rejects two controls through the same process comparator. Changing the expected status of argument rejection from 1 to 0 fails on status. Moving the partial-frame reply from its stdout channel to stderr fails on stdout bytes. The executable hashes identify the archived build and can differ across build paths. The fixture SHA-256 is `08dd1637bc59b9b17571f269d538b8ef07e1ed931f8a78e558b2c88e60ee7272`. The transcript SHA-256 is `62ca071d53468e3ee7247596a2d9f1318999e30c201fd2e63dcc94aac705c492`. [Rust replay driver](../../verification/marmish-inventory/src/bin/portable-bridge/main.rs) · [Native replay evidence](../../verification/provider-tooling/portable-bridge-rust.json)

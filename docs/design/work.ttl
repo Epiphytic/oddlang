@@ -3163,6 +3163,11 @@ w:rustHttpConformanceReplay a p:Artifact ;
     rdfs:label "Rust HTTP tooling provisioned locked consumers, launched Chromium and verified eight byte-identical fresh Rust, TypeScript and Go receipts" ;
     p:location "verification/provider-tooling/http-conformance-rust-replay.json" .
 
+w:portHistoricTooling p:evidence w:nativeRecoveryEntrypoint .
+w:nativeRecoveryEntrypoint a p:Artifact ;
+    rdfs:label "Native executable recovery adapter reproduced the pinned structure, compiler inventory bytes and independent historical declaration comparison" ;
+    p:location "verification/provider-tooling/native-recovery-entrypoint.json" .
+
 w:portHistoricTooling p:evidence w:rustWorkflowReplay .
 w:rustWorkflowReplay a p:Artifact ;
     rdfs:label "Rust import cleanup, assembly preparation, profile checks and Wasm host receipt replay on macOS ARM64" ;
@@ -3313,3 +3318,8 @@ w:portHistoricTooling p:evidence w:nativeTranslationGate .
 w:nativeTranslationGate a p:Artifact ;
     rdfs:label "Rust setup, differential, proof and replay entry points agreed with the archived 1922-case ledger evidence and all four Kani classifications" ;
     p:location "verification/provider-tooling/translation-gate.json" .
+
+w:portHistoricTooling p:evidence w:rustPortableBridgeReplay .
+w:rustPortableBridgeReplay a p:Artifact ;
+    rdfs:label "Rust verifier reproduced all five local bridge argument, init, and EOF transcripts, plus an independent Linux OFD lock probe" ;
+    p:location "verification/provider-tooling/portable-bridge-rust.json" .

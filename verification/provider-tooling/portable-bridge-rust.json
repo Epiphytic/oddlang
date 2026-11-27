@@ -1,0 +1,45 @@
+{
+  "binarySha256": {
+    "bridge": "58e01c6a8089bd4221aeeb1424e7cc4003d4fb4413c923835c865fd36f93be08",
+    "worker": "7cf1278eed465f9dce9527f9ae12c30a68458c0a6ad8f082234edf6f8aff689f"
+  },
+  "caseIds": [
+    "argument-rejection",
+    "clean-eof",
+    "partial-frame-at-eof",
+    "version-1-init-before-eof",
+    "retry-after-rejected-version-and-double-init"
+  ],
+  "fixtureControls": {
+    "expected_status": "rejected",
+    "wrong_channel": "rejected"
+  },
+  "fixtureSha256": "08dd1637bc59b9b17571f269d538b8ef07e1ed931f8a78e558b2c88e60ee7272",
+  "format": "oddlang-portable-bridge-local-rust-v1",
+  "frozenTranscriptSha256": "62ca071d53468e3ee7247596a2d9f1318999e30c201fd2e63dcc94aac705c492",
+  "fullTranscriptEqualAfterNormalizing": "The unique temporary case directory in cwd and init request bytes only. All other fields, including inherited limits, hashes, exact replies, file modes, lock states and status, matched the archived transcript.",
+  "linuxLockEvidence": {
+    "host": "aarch64-unknown-linux-gnu",
+    "observed": [
+      "available before acquiring an OFD write lock",
+      "held during OFD lock",
+      "available after release"
+    ],
+    "scope": "Local lock probe only. The five-case original bridge transcript was replayed on Apple Silicon."
+  },
+  "nonconformingBinary": "/usr/bin/true failed the first expected exit-status comparison; no report was published",
+  "normalizedTranscriptSha256": "deff95d9133fd1e2c26bdb349515f546a0cfb8c4e374c69b45d1301d2850afd9",
+  "parentSandbox": "macOS Seatbelt, network denied",
+  "platform": "aarch64-apple-darwin",
+  "preEofReplyCount": 4,
+  "rust": "1.97.1",
+  "stateControlsRejected": [
+    "available live lock",
+    "changed key mode",
+    "wrong key length",
+    "wrong key magic",
+    "empty WAL",
+    "extra entry"
+  ],
+  "upstreamRevision": "49fc705408a230bd0ad896248d08dbdd2faad05a"
+}
