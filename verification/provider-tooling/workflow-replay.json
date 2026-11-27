@@ -56,6 +56,7 @@
     "record-defaults",
     "shared-declarations",
     "typed-finite-errors",
-    "record-writer"
+    "record-writer",
+    "binary-frame"
   ]
 }

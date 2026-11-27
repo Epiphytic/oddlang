@@ -1,0 +1,27 @@
+{
+  "format": "oddlang-binary-record-rust-v1",
+  "name": "Header",
+  "names": {
+    "urn:meter:unit": "unit"
+  },
+  "externals": {},
+  "errorType": "crate::Fault",
+  "errors": {
+    "urn:meter:error:unit": {
+      "variant": "Bad",
+      "argument": "unit"
+    },
+    "urn:meter:error:limit": {
+      "variant": "Bad",
+      "argument": "limit"
+    },
+    "urn:meter:error:trailing": {
+      "variant": "Bad",
+      "argument": "trailing"
+    },
+    "urn:meter:error:truncated": {
+      "variant": "Bad",
+      "argument": "truncated"
+    }
+  }
+}

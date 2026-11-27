@@ -1095,7 +1095,7 @@ w:boundedTaggedBinaryFrames a p:Task ; rdfs:label "Project bounded tagged binary
     p:dependsOn w:compositeBinaryRecords, w:copyFieldRelationQualification ;
     p:acceptance "Verify exact envelope tags, header limits, ordered case checks, terminal bytes, nested fragments and incremental poisoned-input behavior against an independent native fixture." ;
     p:evidence w:binaryFrameFixture .
-w:binaryFrameFixture a p:Artifact ; p:location "verification/binary-frame/verify.py" .
+w:binaryFrameFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/binary-frame.rs" .
 w:copyProtocolQualification a p:Task ; rdfs:label "Qualify the complete native copy protocol library surface on macOS ARM64" ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
     p:evidence w:copyProtocolNativeReceipt, w:copyProtocolStructuralInventory ;

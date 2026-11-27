@@ -6,7 +6,7 @@ Slots bind unsigned integers, fixed byte arrays, explicit enum tag tables, termi
 
 A binary record with `fragment: true` exposes crate-private checked encode and prefix-read methods for reuse by framed unions. Prefix read consumes only that record's fields. The frame checks the record's native validator before reading later slots. A Rust overlay may bind a fragment to an already declared native struct through a qualified `existingType`; the projection emits layout methods on that type. A standalone record keeps its normal trailing-byte precedence.
 
-The Rust binding names the public frame and incremental decoder. The decoder retains one bounded incomplete frame, consumes at most one frame per call, and returns the consumed count and completed value. Once a read fails, the decoder rejects further input with the named poison error. Finish succeeds only at a clean boundary and does not mutate state. The package component kind is `binary-frame`. [Independent binary frame fixture](../../verification/binary-frame/verify.py)
+The Rust binding names the public frame and incremental decoder. The decoder retains one bounded incomplete frame, consumes at most one frame per call, and returns the consumed count and completed value. Once a read fails, the decoder rejects further input with the named poison error. Finish succeeds only at a clean boundary and does not mutate state. The package component kind is `binary-frame`. [Independent binary frame fixture](../../verification/provider-validation/src/bin/binary-frame.rs)
 
 ## Compiler-backed encoder structure
 
