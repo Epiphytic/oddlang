@@ -1,0 +1,28 @@
+{
+  "companion": "601b81cee7d141028f4d1ff1e7fd286b9ed62da8",
+  "host": "aarch64-apple-darwin",
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "framework": "ce22923ccc3f0f34b71c08525b455c16bc568d4e",
+  "outputsByteIdentical": {
+    "receipt.json": "2d7dce84b14f713d6b62dc0d531dd516f24c315a3d161ab7a5c6d636efc4e5ca",
+    "shapes.json": "88bf8b8a6a6a7b73fa59fc613c8d4a17c6bd0f9642802ee9fc36439d1e12a719",
+    "shapes.lock": "21f842613c5e3f0afac7650f5a6753bffb2161cd96eaef3057806065445732c3"
+  },
+  "standaloneComparisonSha256": "7eaa158d7966bc318f11583e3abf73f3f34c1b2f8632709b9d98f203424339ed",
+  "declarations": 186,
+  "resolved": 63,
+  "corroboratedByRustdoc": 33,
+  "mutationRejected": "local::marmish_stream::copy_protocol::{type}::Launch::{type}::transfer",
+  "controlsRejectedByBoth": [
+    "wrong extent",
+    "wrong element type",
+    "recursive alias",
+    "extra documented array",
+    "missing documented field",
+    "changed remaining gaps",
+    "unrelated declaration change"
+  ],
+  "controlsAcceptedByBoth": [
+    "array element aliased to unsigned octet"
+  ]
+}

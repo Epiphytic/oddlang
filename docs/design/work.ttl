@@ -3642,3 +3642,8 @@ w:portHistoricTooling p:evidence w:localFileCatalogComposition .
 w:localFileCatalogComposition a p:Artifact ;
     rdfs:label "The Rust composer regenerated five catalog inputs byte for byte. The full macOS qualification matched the archived named test, twelve independent observations, workspace lock and ambiguity mutation. The daemon-independent sandbox probe used the built native test executable. All four Oddlang provider interoperability tests passed." ;
     p:location "verification/provider-tooling/local-file-catalog-composition.json" .
+
+w:portHistoricTooling p:evidence w:arrayShapesReplay .
+w:arrayShapesReplay a p:Artifact ;
+    rdfs:label "The Rust array comparator and full recovery replay reproduced the Python reports, graph and lock byte for byte on macOS ARM64. The graph refined 63 array fields across 186 declarations. Rustdoc corroborated 33 fields. Both comparators rejected seven independent controls and accepted an aliased octet element." ;
+    p:location "verification/provider-tooling/array-shapes-replay.json" .

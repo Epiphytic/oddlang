@@ -1,14 +1,15 @@
 {
-  "auditedCompanionRevision": "a110f3568b982047f0d759baad8c5e4de9bf7549",
-  "previousRevision": "3d25c2615c46d5cc0857604dab641d29b134dd95",
-  "reproducedTableSha256": "4f6335bb01b6975936552c2e03376daa050f53d877117738ab7d47ed93dfc182",
-  "remainingProjectToolFiles": 128,
+  "auditedCompanionRevision": "601b81cee7d141028f4d1ff1e7fd286b9ed62da8",
+  "previousRevision": "a110f3568b982047f0d759baad8c5e4de9bf7549",
+  "reproducedTableSha256": "230fd48f34979bfa329ac3dd8845c85856fce6f211d63045bb70c6520d6598ef",
+  "remainingProjectToolFiles": 126,
   "remainingProjectExtensions": {
-    ".py": 125,
+    ".py": 123,
     ".sh": 3
   },
   "removedSincePrevious": [
-    "verification/whole/local-file-catalog/compose.py"
+    "verification/whole/shapes/arrays/compare.py",
+    "verification/whole/shapes/arrays/replay.py"
   ],
   "addedSincePrevious": []
 }
