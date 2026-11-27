@@ -5,8 +5,8 @@ The experiment recovers two Rust files from Marmish revision `49fc705408a230bd0a
 The published candidate is on `main` in the private Epiphytic repository. GitHub Actions is disabled there because the tree includes Marmish's upstream release workflows. [Qualified source tree](https://github.com/Epiphytic/marmish-oddlang/tree/e0d855874ec2348939175dfa6ec5c71488c8ba35)
 
 ```sh
-scripts/setup-http-conformance.sh
-scripts/setup-wasm.sh
+cargo +1.96.1 run --locked --manifest-path verification/http-conformance/Cargo.toml -- setup
+cargo run --locked --offline --manifest-path verification/wasm-setup/Cargo.toml
 cargo +1.97.1 run --locked --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-setup
 cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-qualify -- rebuild
 cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-qualify -- verify

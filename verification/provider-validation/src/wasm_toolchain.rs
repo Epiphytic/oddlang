@@ -1,25 +1,14 @@
 //! Shared pinned build inputs for the offline WebAssembly qualification tools.
 use crate::{Result, sha};
-use serde::Deserialize;
+#[path = "../../wasm_pins.rs"]
+mod manifest;
+pub use manifest::Pins;
 use sha2::{Digest, Sha256};
 use std::{
-    collections::BTreeMap,
     env, fs,
     path::{Path, PathBuf},
     process::Command,
 };
-
-#[derive(Deserialize)]
-pub struct Pins {
-    pub rust_version: String,
-    rust_commit: String,
-    pub guest_target: String,
-    pub ledger_guest_target: String,
-    pub guest_profile: String,
-    wasm_tools_version: String,
-    #[serde(flatten)]
-    other: BTreeMap<String, String>,
-}
 
 pub fn run(cmd: &mut Command) -> Result {
     cmd.env("CARGO_NET_OFFLINE", "true")
@@ -46,19 +35,12 @@ pub fn copy_tree(src: &Path, dest: &Path) -> Result {
 }
 
 pub fn prepare(root: &Path, cache: &Path, stage: &Path) -> Result<(Pins, PathBuf)> {
-    let pins: Pins = toml::from_str(&fs::read_to_string(
-        root.join("examples/wasm/toolchain.toml"),
-    )?)?;
-    let platform = format!("{}-{}", env::consts::ARCH, env::consts::OS);
-    let expected = pins
-        .other
-        .get(&platform.replace('-', "_"))
-        .ok_or("unsupported wasm-tools host")?;
-    let archive_name = format!("wasm-tools-{}-{platform}", pins.wasm_tools_version);
+    let pins = Pins::load(root)?;
+    let (archive_name, expected) = pins.archive(env::consts::ARCH, env::consts::OS)?;
     let archive = cache.join(format!("{archive_name}.tar.gz"));
     let checked_archive = stage.join("wasm-tools.tar.gz");
     fs::copy(&archive, &checked_archive)?;
-    if sha(&checked_archive)? != *expected {
+    if sha(&checked_archive)? != expected {
         return Err("wasm-tools archive digest mismatch".into());
     }
     let toolchain = format!("+{}", pins.rust_version);

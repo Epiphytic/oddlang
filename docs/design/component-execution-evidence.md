@@ -3,7 +3,7 @@
 The ledger guest uses freestanding Rust and Component Model bindings. While the small integer echo had zero imports on `wasm32-wasip2`, the ledger linked additional WASI imports on that target. The freestanding build exposes the published world, including the production namespace for account and transfer errors. Each guest build checks the extracted binary against that world.
 
 ```sh
-scripts/setup-wasm.sh
+cargo run --locked --offline --manifest-path verification/wasm-setup/Cargo.toml
 cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin wasm-verify
 ```
 

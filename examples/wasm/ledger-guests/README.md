@@ -12,7 +12,7 @@ Hosts should validate incoming snapshots before supplying them. In direct Wasmti
 
 ## Building and checking the components
 
-After running `scripts/setup-wasm.sh`, run the following from the repository root with published `ledger/` and `ledger-test/` bundles and a fresh output directory.
+After running `cargo run --locked --offline --manifest-path verification/wasm-setup/Cargo.toml`, run the following from the repository root with published `ledger/` and `ledger-test/` bundles and a fresh output directory.
 
 ```sh
 cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml \

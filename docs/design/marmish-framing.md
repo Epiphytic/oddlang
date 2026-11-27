@@ -4,7 +4,7 @@
 
 ```sh
 cargo +1.97.1 run --locked --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-setup
-scripts/setup-wasm.sh
+cargo run --locked --offline --manifest-path verification/wasm-setup/Cargo.toml
 cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-qualify -- frame
 cargo test --locked --offline --test framing_import --test framing_projection --test workspace_assembly
 ```

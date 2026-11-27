@@ -54,7 +54,7 @@ pub fn harness(root: &Path) -> Result<Value> {
     for name in [
         "examples/wasm/Cargo.lock",
         "examples/wasm/host/Cargo.toml",
-        "examples/wasm/toolchain.lock",
+        "verification/wasm_pins.rs",
         "examples/wasm/toolchain.toml",
         "verification/provider-validation/src/bin/framing-build.rs",
         "verification/provider-validation/src/wasm_toolchain.rs",

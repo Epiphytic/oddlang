@@ -1,0 +1,9 @@
+[package]
+name = "wasm-setup"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.89"
+publish = false
+
+# Bootstrap with an existing host compiler before fetching the qualification crates.
+[workspace]
