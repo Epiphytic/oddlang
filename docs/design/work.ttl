@@ -3682,3 +3682,8 @@ w:portHistoricTooling p:evidence w:offlineWorkspaceComposition .
 w:offlineWorkspaceComposition a p:Artifact ;
     rdfs:label "Rust reproduced the two package descriptors and two workspace descriptors from the Python compositors. The pinned Oddlang compilers regenerated all 91 diagnostics workspace files and all 98 canonical workspace files byte for byte against their retained releases. Both compositors rejected ten invalid inputs before publishing descriptors." ;
     p:location "verification/provider-tooling/offline-workspace-composition.json" .
+
+w:genericRustSyntax p:evidence w:cargoOutputCaptureControl .
+w:cargoOutputCaptureControl a p:Artifact ;
+    rdfs:label "The CLI capture test pins its child Cargo target and build directories. Both output layouts preserved nine exact Rust source digests, including an inactive file, and excluded the nested package. The provider interoperability suite and six-build Rust round-trip control passed on macOS ARM64." ;
+    p:location "verification/provider-tooling/rust-capture-output-directories.json" .

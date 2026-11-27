@@ -187,7 +187,7 @@ fn rust_path<'a>(root: &Path, path: &'a Path) -> Result<&'a str, String> {
     Ok(relative)
 }
 
-#[cfg(test)]
+#[cfg(all(test, unix))]
 mod tests {
     use super::capture;
     use std::{fs, path::Path};
@@ -202,34 +202,6 @@ mod tests {
         fs::write(root.join("src/lib.rs"), "pub const VALUE: u32 = 18;\n").unwrap();
     }
 
-    #[test]
-    fn captures_package_rust_without_nested_packages_or_target_outputs() {
-        let temp = tempfile::tempdir().unwrap();
-        let root = temp.path();
-        prepare_package(root);
-        fs::create_dir_all(root.join("src/inactive")).unwrap();
-        fs::write(
-            root.join("src/inactive/extra.rs"),
-            b"const EXTRA: u8 = 2;\n",
-        )
-        .unwrap();
-        fs::create_dir_all(root.join("target/out")).unwrap();
-        fs::write(
-            root.join("target/out/old.rs"),
-            b"invalid as standalone Rust",
-        )
-        .unwrap();
-        prepare_package(&root.join("embedded"));
-        let (edition, files) = capture(&root.join("Cargo.toml"), "source-capture-test").unwrap();
-        assert_eq!(edition, "2024");
-        assert_eq!(
-            files.keys().map(String::as_str).collect::<Vec<_>>(),
-            ["src/inactive/extra.rs", "src/lib.rs"]
-        );
-        assert_eq!(files["src/inactive/extra.rs"].0, b"const EXTRA: u8 = 2;\n");
-    }
-
-    #[cfg(unix)]
     #[test]
     fn rejects_a_symlink_to_rust_outside_the_package() {
         let temp = tempfile::tempdir().unwrap();

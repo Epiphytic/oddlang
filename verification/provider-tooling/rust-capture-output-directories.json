@@ -1,0 +1,14 @@
+{
+  "host": "aarch64-apple-darwin",
+  "rust": "1.97.1",
+  "regression": "The previous unit test assumed the active Cargo output directory was target/ even when cargo metadata reported an external CARGO_TARGET_DIR.",
+  "cliTest": "capture_excludes_configured_cargo_outputs_and_nested_packages",
+  "fixtureTargetDirectories": ["target", "local-cache"],
+  "fixtureBuildDirectory": "build-cache",
+  "expectedSourceFilesPerCapture": 9,
+  "checks": ["all source digests", "inactive module", "edition", "nested package exclusion", "configured output exclusions"],
+  "libraryTestsPassed": 32,
+  "providerInteropTestsPassed": 4,
+  "rustRoundtripTestsPassed": 4,
+  "includesSixBuildNativeControl": true
+}

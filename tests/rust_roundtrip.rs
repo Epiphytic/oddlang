@@ -188,6 +188,46 @@ fn change_basic_leaf(graph: &str, spelling: &str) -> String {
 }
 
 #[test]
+fn capture_excludes_configured_cargo_outputs_and_nested_packages() {
+    for target in ["target", "local-cache"] {
+        let control = Control::new();
+        let root = control.source.canonicalize().unwrap();
+        for path in [target, "build-cache", "embedded"] {
+            let dir = root.join(path);
+            fs::create_dir(&dir).unwrap();
+            fs::write(dir.join("old.rs"), "invalid as standalone Rust").unwrap();
+        }
+        fs::write(
+            root.join("embedded/Cargo.toml"),
+            "[package]\nname = \"embedded\"\nversion = \"0.1.0\"\n",
+        )
+        .unwrap();
+        let source = b"const EXTRA: u8 = 2;\n";
+        fs::create_dir(root.join("src/inactive")).unwrap();
+        fs::write(root.join("src/inactive/extra.rs"), source).unwrap();
+
+        let bundle = control.path("bundle");
+        ok(cli()
+            .args(["import", "rust-tree"])
+            .arg(root.join("Cargo.toml"))
+            .arg(PACKAGE)
+            .arg(&bundle)
+            .env("CARGO_TARGET_DIR", root.join(target))
+            .env("CARGO_BUILD_BUILD_DIR", root.join("build-cache"))
+            .output()
+            .unwrap());
+        let captured = inventory(&bundle);
+        assert_eq!(captured.edition, "2024");
+        let expected = FILES
+            .into_iter()
+            .map(|file| (file.to_owned(), sha(&fs::read(root.join(file)).unwrap())))
+            .chain([("src/inactive/extra.rs".into(), sha(source))])
+            .collect::<BTreeMap<_, _>>();
+        assert_eq!(captured.files, expected);
+    }
+}
+
+#[test]
 fn regenerates_all_source_bytes_from_a_reordered_pinned_graph() {
     let control = Control::new();
     let first = control.capture("first-capture", PACKAGE);
