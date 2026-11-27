@@ -16,7 +16,8 @@ Both output directories must be absent. The importer uses offline Cargo metadata
 package and its edition. Locked Cargo checks establish dependency closure
 when building the regenerated package. Its input scope is Rust files
 under the package root, including tests, build scripts and inactive branches.
-Nested packages have their own capture. Compiler inputs outside the capture
+The importer excludes Cargo's configured target and build directories, including
+paths reported through a symlinked package directory. Nested packages have their own capture. Compiler inputs outside the capture
 scope need separately verified producers.
 
 ## Version 1

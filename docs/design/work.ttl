@@ -3685,5 +3685,5 @@ w:offlineWorkspaceComposition a p:Artifact ;
 
 w:genericRustSyntax p:evidence w:cargoOutputCaptureControl .
 w:cargoOutputCaptureControl a p:Artifact ;
-    rdfs:label "The CLI capture test pins its child Cargo target and build directories. Both output layouts preserved nine exact Rust source digests, including an inactive file, and excluded the nested package. The provider interoperability suite and six-build Rust round-trip control passed on macOS ARM64." ;
+    rdfs:label "The CLI capture test pins its child Cargo target and build directories. Both output layouts preserved nine exact Rust source digests, including an inactive file, and excluded the nested package. The importer also handles package aliases and symlinked Cargo output directories. A pristine and an aliased Marmish stream capture produced identical bundles. All five regenerated Rust sources matched the original and passed 29 release tests. The provider interoperability suite and six-build Rust round-trip control passed on macOS ARM64." ;
     p:location "verification/provider-tooling/rust-capture-output-directories.json" .

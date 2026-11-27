@@ -227,6 +227,41 @@ fn capture_excludes_configured_cargo_outputs_and_nested_packages() {
     }
 }
 
+#[cfg(unix)]
+#[test]
+fn capture_handles_cargo_outputs_reported_through_a_package_alias() {
+    let control = Control::new();
+    let alias = control.path("package-alias");
+    std::os::unix::fs::symlink(&control.source, &alias).unwrap();
+    let external = control.path("external-build");
+    fs::create_dir(&external).unwrap();
+    std::os::unix::fs::symlink(&external, control.source.join("build-cache")).unwrap();
+    fs::create_dir(control.source.join("artifacts")).unwrap();
+    fs::write(
+        control.source.join("artifacts/old.rs"),
+        "invalid as standalone Rust",
+    )
+    .unwrap();
+    let bundle = control.path("bundle");
+    ok(cli()
+        .args(["import", "rust-tree"])
+        .arg(alias.join("Cargo.toml"))
+        .arg(PACKAGE)
+        .arg(&bundle)
+        .env("CARGO_TARGET_DIR", alias.join("artifacts"))
+        .env("CARGO_BUILD_BUILD_DIR", alias.join("build-cache"))
+        .output()
+        .unwrap());
+    assert_eq!(
+        inventory(&bundle)
+            .files
+            .keys()
+            .map(String::as_str)
+            .collect::<Vec<_>>(),
+        FILES
+    );
+}
+
 #[test]
 fn regenerates_all_source_bytes_from_a_reordered_pinned_graph() {
     let control = Control::new();

@@ -2,7 +2,7 @@ use super::{FileSyntax, parser};
 use crate::contracts::normal;
 use serde::Deserialize;
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, BTreeSet},
     fs,
     path::{Path, PathBuf},
     process::Command,
@@ -127,6 +127,20 @@ fn rust_paths(
     target_dir: &Path,
     build_dir: Option<&Path>,
 ) -> Result<BTreeMap<String, PathBuf>, String> {
+    let mut outputs = BTreeSet::new();
+    for dir in Some(target_dir).into_iter().chain(build_dir) {
+        outputs.insert(dir.to_owned());
+        // The walk starts at the physical package root. Cargo may report an alias
+        // in any parent, or the configured output may itself be a symlink.
+        if let Some(parent) = dir.parent().and_then(|p| p.canonicalize().ok())
+            && let Some(name) = dir.file_name()
+        {
+            outputs.insert(parent.join(name));
+        }
+        if let Ok(physical) = dir.canonicalize() {
+            outputs.insert(physical);
+        }
+    }
     let mut directories = vec![root.to_owned()];
     let mut paths = BTreeMap::new();
     while let Some(directory) = directories.pop() {
@@ -144,7 +158,7 @@ fn rust_paths(
         }
         for entry in entries {
             let path = entry.path();
-            if entry.file_name() == ".git" || path == target_dir || build_dir == Some(&path) {
+            if entry.file_name() == ".git" || outputs.contains(&path) {
                 continue;
             }
             let kind = entry
