@@ -13,10 +13,16 @@ fn pin(root: &Path, name: &str, bytes: &[u8]) -> Value {
 fn unknown_capability_composes_as_a_rust_library() {
     let dir = tempfile::tempdir().unwrap();
     let root = dir.path();
-    let source = b"pub fn station_id() -> u8 { 37 }";
+    let source = br#"
+        pub fn station_id() -> u8 { 37 }
+        pub trait Station { fn id(&self) -> u8; }
+        pub static DEFAULT_ID: u8 = 37;
+        pub union Measurement { pub raw: u32, pub value: f32 }
+    "#;
+    let exports = ["station_id", "Station", "DEFAULT_ID", "Measurement"];
     let response = json!({"format":"oddlang-provider-output-v1",
         "artifacts":[{"path":"module.rs","base64":STANDARD.encode(source)}],
-        "exports":["station_id"],"dependencies":[],"evidence":[],"gaps":[]})
+        "exports":exports,"dependencies":[],"evidence":[],"gaps":[]})
     .to_string();
     let data = response
         .bytes()
@@ -44,7 +50,7 @@ fn unknown_capability_composes_as_a_rust_library() {
     );
     let graph = pin(root, "graph.json", b"{}");
     let package=pin(root,"package.json",json!({"format":"oddlang-native-package-v1","name":"station","version":"0.1.0","edition":"2024","cargoLock":cargo,
-        "components":[{"kind":"provider","provider":{"capability":"example.fixture","version":"1"},"module":"measurements","graph":graph,"overlay":graph,"reexports":["station_id"]}]}).to_string().as_bytes());
+        "components":[{"kind":"provider","provider":{"capability":"example.fixture","version":"1"},"module":"measurements","graph":graph,"overlay":graph,"reexports":exports}]}).to_string().as_bytes());
     let manifest = root.join("workspace.json");
     fs::write(&manifest,json!({"format":"oddlang-native-workspace-v1","cargoLock":cargo,"providerRegistry":registry,"members":{"station":{"manifest":package}}}).to_string()).unwrap();
     let output = root.join("out");
@@ -60,7 +66,15 @@ fn unknown_capability_composes_as_a_rust_library() {
     fs::create_dir(&test_dir).unwrap();
     fs::write(
         test_dir.join("consumer.rs"),
-        "#[test] fn station() { assert_eq!(station::station_id(), 37); }",
+        r#"use station::{station_id, Station, DEFAULT_ID, Measurement};
+        struct Receiver;
+        impl Station for Receiver { fn id(&self) -> u8 { DEFAULT_ID } }
+        #[test] fn station() {
+            assert_eq!(station_id(), 37);
+            assert_eq!(Receiver.id(), 37);
+            let sample = Measurement { raw: 1 };
+            assert_eq!(std::mem::size_of_val(&sample), 4);
+        }"#,
     )
     .unwrap();
     assert!(
