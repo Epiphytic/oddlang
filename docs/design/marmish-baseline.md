@@ -3,7 +3,7 @@
 The original is Marmish revision `49fc705408a230bd0ad896248d08dbdd2faad05a`. Its application, original protocol tests, lexical index and Cargo workspace supply independent inputs for qualification.
 
 ```sh
-scripts/setup-marmish.sh
+cargo +1.97.1 run --locked --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-setup
 cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-qualify -- baseline
 ```
 

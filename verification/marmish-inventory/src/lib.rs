@@ -24,6 +24,13 @@ pub fn root() -> PathBuf {
         .unwrap()
         .to_owned()
 }
+/// Resolve public setup/qualification inputs relative to the Oddlang checkout.
+pub fn upstream_path(explicit: Option<PathBuf>) -> PathBuf {
+    let configured = explicit.filter(|p| !p.as_os_str().is_empty()).or_else(|| {
+        std::env::var_os("ODDLANG_MARMISH_SOURCE").filter(|p| !p.is_empty()).map(PathBuf::from)
+    });
+    root().join(configured.unwrap_or_else(|| PathBuf::from("target/marmish/upstream")))
+}
 pub fn digest(bytes: &[u8]) -> String {
     format!("{:x}", Sha256::digest(bytes))
 }

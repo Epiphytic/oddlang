@@ -3,7 +3,7 @@
 `oddlang import rust` recognizes the closed framing profile in the pinned Rust source. `oddlang build module` reads its graph and import lock, and produces native Rust, the WIT contract and a Rust projection manifest. `oddlang import replay` re-runs source recovery. `oddlang import verify-build` reprojects all three artifacts and compares the bytes. The separate assembly command reconstructs a workspace using the pinned projection and retained inputs.
 
 ```sh
-scripts/setup-marmish.sh
+cargo +1.97.1 run --locked --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-setup
 scripts/setup-wasm.sh
 cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-qualify -- frame
 cargo test --locked --offline --test framing_import --test framing_projection --test workspace_assembly

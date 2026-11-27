@@ -7,7 +7,7 @@ The published candidate is on `main` in the private Epiphytic repository. GitHub
 ```sh
 scripts/setup-http-conformance.sh
 scripts/setup-wasm.sh
-scripts/setup-marmish.sh
+cargo +1.97.1 run --locked --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-setup
 cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-qualify -- rebuild
 cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-qualify -- verify
 ```

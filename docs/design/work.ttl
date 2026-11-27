@@ -3292,3 +3292,8 @@ w:portHistoricTooling p:evidence w:nativeMarmishEntry .
 w:nativeMarmishEntry a p:Artifact ;
     rdfs:label "Rust Marmish qualification entry and OS network isolation: two pinned rebuilds, 39 byte-identical witnesses, source refusals, process status and socket controls" ;
     p:location "verification/provider-tooling/qualification-entry.json" .
+
+w:portHistoricTooling p:evidence w:nativeMarmishSetup .
+w:nativeMarmishSetup a p:Artifact ;
+    rdfs:label "Rust setup fetched the pinned upstream checkout, resolved the locked native, Wasm and inherited indexer dependencies, and rejected wrong revisions and failed clones" ;
+    p:location "verification/provider-tooling/marmish-setup.json" .

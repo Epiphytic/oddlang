@@ -3,7 +3,7 @@ use anyhow::{Context, Result, ensure};
 use clap::{Parser, ValueEnum};
 use marmish_inventory::{PIN, offline};
 use std::{
-    env, fs,
+    fs,
     path::{Path, PathBuf},
     process::Command,
 };
@@ -19,7 +19,7 @@ enum Mode {
 #[derive(Parser)]
 struct Args {
     mode: Mode,
-    upstream: Option<PathBuf>,
+    upstream: Option<std::ffi::OsString>,
     output: Option<PathBuf>,
     /// Use an already built compiler for frame or rebuild.
     #[arg(long)]
@@ -172,17 +172,13 @@ fn main() -> Result<()> {
         "--oddlang requires frame or rebuild"
     );
     let compiler = args.oddlang.map(fs::canonicalize).transpose()?;
-    let root = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../..")
-        .canonicalize()?;
+    let root = marmish_inventory::root();
     let cache = root.join("target/marmish");
-    let upstream = args
-        .upstream
-        .or_else(|| env::var_os("ODDLANG_MARMISH_SOURCE").map(PathBuf::from))
-        .unwrap_or_else(|| cache.join("upstream"))
-        .canonicalize()?;
+    let upstream =
+        marmish_inventory::upstream_path(args.upstream.map(PathBuf::from)).canonicalize()?;
     check_source(&upstream)?;
     let out = if let Some(out) = args.output {
+        let out = root.join(out);
         fs::create_dir_all(&out)?;
         ensure!(
             fs::read_dir(&out)?.next().is_none(),
