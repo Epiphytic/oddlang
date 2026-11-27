@@ -1,0 +1,12 @@
+{
+  "format": "oddlang-shared-rust-v1",
+  "variantOrder": {
+    "urn:fixture:state": [
+      "urn:fixture:state:collected"
+    ]
+  },
+  "names": {
+    "urn:fixture:state": "State",
+    "urn:fixture:state:collected": "Collected"
+  }
+}

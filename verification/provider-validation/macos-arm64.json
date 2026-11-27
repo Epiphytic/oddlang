@@ -1,0 +1,31 @@
+{
+  "compilerSha256": "3884c423fccb909d69c8a6d5e119d4097b8ea6fade8936274edfe814890a08a4",
+  "inputManifestSha256": "859923216f7a48d14f6975c9625fc809b2f6f1a0da3c4484ff367f96eaa929b4",
+  "pinnedInputs": 111,
+  "policy": {
+    "foregroundSourceSha256": "9ddc9fd6ab6f2fa08e3e80805c18d96a0d0be4c02ca177205bbe5cd692d106e2",
+    "host": "aarch64-apple-darwin",
+    "policyDecisions": {
+      "cases": 105,
+      "inputsSha256": "b392ced173616d91990bb648af275a25776ccc15e22f33faf7388baea451a980",
+      "observationsSha256": "c30e84dc1ec0633fc995d79eda55ece8dfabd27db8cc91bcf72e2270cbbd6f6b"
+    },
+    "rebuiltObserverSha256": {
+      "generated-observer": "f0c717f5ebd3984b5fce7a01e7bac9b14ec7f6fcfb59f53911f4f85c6c07fd02",
+      "policy-observer": "b54ee0b38c21df8f4a5126b1243fed362f3f2b4fc357e004abed89e2cca3d9aa",
+      "room-observer": "b46e6ed1f786d09e4acc7bf69557f9b50aaa62b00a6e7edad14e021a08832f5e"
+    },
+    "roomConfigFileCases": 11,
+    "rustToolchain": "1.97.1",
+    "upstreamCommit": "af54339d250290490d62d4475a77539b7e739071",
+    "workspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c"
+  },
+  "policyToolSha256": "d663b3aef1a8058d48616f7456feb3db10e1bb79fb5379837db9243fec4d7e50",
+  "workspace": {
+    "directories": 49,
+    "files": 106,
+    "members": 7,
+    "treeSha256": "ed3ba7e04668b2ad346edf880c0c1a261ffefaa47b6838ad9b24e0ab4b8c3524",
+    "workspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c"
+  }
+}

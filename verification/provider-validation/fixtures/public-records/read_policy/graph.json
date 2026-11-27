@@ -1,0 +1,47 @@
+{
+  "format": "oddlang-public-records-v1",
+  "modules": [
+    {
+      "id": "urn:fixture:collection",
+      "records": [
+        {
+          "id": "urn:fixture:collection:record",
+          "traits": [
+            "clone",
+            "debug",
+            "partial-eq",
+            "eq",
+            "serialize",
+            "deserialize"
+          ],
+          "readPolicy": {
+            "shape": "object-or-ordered-sequence",
+            "unknownFields": "ignore"
+          },
+          "fields": [
+            {
+              "id": "urn:fixture:collection:index",
+              "wire": "index",
+              "type": "u64"
+            },
+            {
+              "id": "urn:fixture:collection:label",
+              "wire": "label",
+              "type": {
+                "optional": "text"
+              }
+            },
+            {
+              "id": "urn:fixture:collection:state",
+              "wire": "state",
+              "type": {
+                "external": "urn:fixture:state"
+              }
+            }
+          ]
+        }
+      ],
+      "aliases": []
+    }
+  ]
+}

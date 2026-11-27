@@ -107,7 +107,16 @@ impl World {
                         if v.datatype() != datatype {
                             return Err(format!("invalid literal type for {key}"));
                         }
-                        (key, v.value().to_owned())
+                        let value = if key == "entry" {
+                            match v.value() {
+                                "true" | "1" => "true",
+                                "false" | "0" => "false",
+                                _ => return Err(format!("invalid boolean for {id} entry")),
+                            }
+                        } else {
+                            v.value()
+                        };
+                        (key, value.to_owned())
                     }
                     _ => return Err("stable declaration IRI required".into()),
                 }
@@ -468,5 +477,31 @@ impl World {
             out += ".\n";
         }
         Ok(out)
+    }
+}
+
+#[cfg(test)]
+mod entry_tests {
+    use super::*;
+
+    #[test]
+    fn entry_boolean_uses_the_xsd_value_space() {
+        let base = include_str!("../../contracts/wasm/echo/model.ttl");
+        let ontology = |value: &str| {
+            format!(
+                "{base}\ne:second a w:World ; w:name \"other\" .\ne:world w:entry \"{value}\"^^<http://www.w3.org/2001/XMLSchema#boolean> ."
+            )
+        };
+        for yes in ["1", "true"] {
+            assert_eq!(
+                World::from_turtle(ontology(yes).as_bytes()).unwrap().name(),
+                "echo-world"
+            );
+        }
+        assert!(
+            World::from_turtle(ontology("maybe").as_bytes())
+                .unwrap_err()
+                .contains("invalid boolean")
+        );
     }
 }

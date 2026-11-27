@@ -1,0 +1,27 @@
+{
+  "format": "oddlang-native-package-v1",
+  "name": "records",
+  "version": "0.1.0",
+  "edition": "2021",
+  "cargoLock": {
+    "path": "Cargo.lock",
+    "sha256": "484f35b3d54b389f1f62ea630c5b9019c452044ff28f0ea35358936e2ae70ef6"
+  },
+  "components": [
+    {
+      "kind": "public-records",
+      "module": "counter",
+      "reexports": [
+        "Counter"
+      ],
+      "graph": {
+        "path": "graph.json",
+        "sha256": "baddb71929d8146e92f4acdf7353d4868c0b64168547e5ffed22813c8622f373"
+      },
+      "overlay": {
+        "path": "rust.json",
+        "sha256": "9eb2ddbd3150d43eb90a7ad2fb399924b0c1e07b99432960d988b6c2a17ade8b"
+      }
+    }
+  ]
+}

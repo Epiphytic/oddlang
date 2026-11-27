@@ -4,6 +4,10 @@ Oddlang explores compiling a ledger's domain, behavior and target mappings
 from versioned ontologies. See the [ledger design](docs/superpowers/specs/2026-11-25-ledger.md)
 and [implementation plan](docs/superpowers/plans/2026-11-25-ledger.md).
 
+## Compiler plugins
+
+A workspace can pin a Wasm component to replace public-record generation or source recovery, or register a new capability and use it to build a library. See the [provider contract](docs/language/providers.md) and [runnable examples](examples/providers/README.md). Ontology authors can use the [vendored OntoGPT skills](skills/OntoGPT-README.md).
+
 ## HTTP conformance
 
 Publish a pinned HTTP contract with portable test cases, OpenAPI and JSON

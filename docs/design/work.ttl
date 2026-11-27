@@ -1374,7 +1374,7 @@ w:publicRecordImportIdentity a p:Finding ;
 w:publicObservationalRecords p:addresses w:publicRecordImportIdentity .
 
 w:publicRecordFixture a p:Artifact ;
-    p:location "verification/public-records/verify.py" .
+    p:location "verification/provider-validation/src/bin/record-verify.rs" .
 w:publicJournalReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/71> .
 
@@ -1496,7 +1496,7 @@ w:publicConstantRecovery a p:Task ;
     p:acceptance "Bind the declared public symbol to real Rust compiler evidence and preserve its literal or multiplication expression in the existing portable shared-declarations graph. Replay an unrelated baseline and changed source through downstream native callers." ;
     p:status p:done ; p:evidence w:publicConstantFixture .
 w:publicConstantFixture a p:Artifact ;
-    p:location "verification/public-constant/verify.py" .
+    p:location "verification/provider-validation/src/bin/public-constant.rs" .
 
 w:publicApiConvergencePlan a p:Artifact ;
     p:location "docs/superpowers/plans/2026-11-26-public-api-convergence.md" .
@@ -1880,7 +1880,7 @@ w:publicRecordReadPolicy a p:Task ;
     p:acceptance "Check default closure, an explicit open object policy, optional scalars, positional input and external string choices with unrelated and original native cases, and reproduce a source mutation." .
 
 w:publicRecordReadPolicyFixture a p:Artifact ;
-    p:location "verification/public-records/read_policy.py" .
+    p:location "verification/provider-validation/src/bin/record-read-policy.rs" .
 w:publicRecordReadPolicy p:evidence w:publicRecordReadPolicyFixture, w:publicRecordReadPolicyDarwin, w:publicRecordReadPolicyLinux .
 
 w:publicRecordReadPolicyDarwin a p:Artifact ;
@@ -3092,7 +3092,27 @@ w:replaceableWasmProviders a p:Task ;
     rdfs:label "Support replaceable language and library providers with a bounded Wasm interface" ;
     p:source w:wasmProviderDesign ; p:milestone w:marmishMilestone ;
     p:acceptance "Replace a source and target provider through workspace configuration, validate the capability boundary, and reproduce the pinned Marmish command-policy validation using Rust or Wasm tooling." ;
-    p:status p:planned .
+    p:status p:done ; p:evidence w:providerCompatibilityReplay, w:providerClientTests .
+w:providerCompatibilityReplay a p:Artifact ; p:location "verification/provider-validation/macos-arm64.json" .
+w:providerClientTests a p:Artifact ; p:location "tests/provider_interop.rs" .
 w:wasmProviderDesign a p:Artifact ;
     rdfs:label "Replaceable Oddlang providers design" ;
     p:location "docs/superpowers/specs/2026-11-26-wasm-provider-design.md" .
+
+w:ontogptProviderSemantics a p:Task ;
+    rdfs:label "Install OntoGPT ontology authoring skills and enforce explicit entity and literal ranges" ;
+    p:milestone w:marmishMilestone ; p:source w:ontoGPTSkills ;
+    p:acceptance "Verify the four pinned skill directories, distinguish plain text and namespace-constrained identifiers in provider inputs, and check XSD boolean values in the Wasm ontology reader." ;
+    p:status p:done ; p:evidence w:ontoGPTQualification .
+w:ontoGPTQualification a p:Artifact ;
+    p:location "verification/provider-tooling/ontogpt-skills.json" .
+w:ontoGPTSkills a p:Artifact ;
+    p:location "https://github.com/monarch-initiative/ontogpt/tree/b8f3dee7ea7c315a9be892b30a6a263ac4f1e873/skills" .
+
+w:portHistoricTooling a p:Task ;
+    rdfs:label "Migrate remaining project-authored extraction, generation and qualification scripts" ;
+    p:milestone w:marmishMilestone ; p:source w:wasmProviderDesign ;
+    p:acceptance "Port each project-authored tool and its live callers to Rust or Wasm, preserve its independent cases and record equivalent observations." ;
+    p:status p:active ; p:evidence w:providerToolInventory .
+w:providerToolInventory a p:Artifact ;
+    p:location "verification/provider-tooling/baseline.tsv" .

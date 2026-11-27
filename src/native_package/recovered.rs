@@ -63,8 +63,15 @@ impl RecoveredInput {
         };
         let graph = sibling("graph.json", receipt.graph_sha256)?;
         let overlay = sibling("rust.json", receipt.overlay_sha256)?;
-        let graph_bytes = graph.read(base)?;
-        let overlay_bytes = overlay.read(base)?;
+        let read = |pin: &Pin| {
+            if receipt.format == "oddlang-serde-public-record-recovery-lock-v1" {
+                pin.read_document(base)
+            } else {
+                pin.read(base)
+            }
+        };
+        let graph_bytes = read(&graph)?;
+        let overlay_bytes = read(&overlay)?;
         let (kind, module, name, identity) = match receipt.format.as_str() {
             "oddlang-serde-public-record-recovery-lock-v1" => {
                 if !receipt
@@ -104,6 +111,7 @@ impl RecoveredInput {
             }
         };
         Ok(Component {
+            provider: None,
             kind,
             module,
             graph,

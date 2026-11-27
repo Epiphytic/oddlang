@@ -1,0 +1,15 @@
+{
+  "format": "oddlang-native-workspace-v1",
+  "cargoLock": {
+    "path": "fixture/Cargo.lock",
+    "sha256": "484f35b3d54b389f1f62ea630c5b9019c452044ff28f0ea35358936e2ae70ef6"
+  },
+  "members": {
+    "records": {
+      "manifest": {
+        "path": "fixture/package.json",
+        "sha256": "61061c2eccabbc3e5a9423806428fe71379ac41c8bb2bc1f8fb6ed548469b81d"
+      }
+    }
+  }
+}

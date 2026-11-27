@@ -1,0 +1,20 @@
+{
+  "capability": "example.field-list",
+  "dependencies": [],
+  "evidence": [],
+  "exports": [],
+  "files": {
+    "fields.txt": "7b162011529640b50cc531c2222618978218f9ac68ad8a80afe4d3c7769cefc0"
+  },
+  "format": "oddlang-provider-receipt-v1",
+  "gaps": [],
+  "provider": {
+    "componentSha256": "6de1c0648fff9324e860c442af08bb005cab420782da5e6886ccead9ad056655",
+    "configuration": {},
+    "schemaSha256": "3e9a40ef5d38588d71a4f9ac1159490f7224813c73231f1dfd17d0ebb65e189e",
+    "world": "oddlang:provider/generate@1.0.0"
+  },
+  "requestSha256": "e6944823bbcabe414591ab1eea48051de2390bcd0018e59f26f32f9f703e8afb",
+  "role": "generate",
+  "version": "1"
+}

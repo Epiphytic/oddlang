@@ -1,8 +1,11 @@
 //! A distinct root-record profile with no generated module wrapper.
 use super::*;
+use crate::providers::{self, ProviderOutput, Registry};
 use crate::root_data_scope as scope;
+use base64::{Engine as _, engine::general_purpose::STANDARD};
+use serde_json::json;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct Selection {
     format: String,
@@ -13,7 +16,17 @@ struct Selection {
 }
 
 pub fn recover_root(source: &Path, selection: &Path, out: &Path) -> Result<()> {
-    let raw = io(fs::read(selection))?;
+    recover_root_selected(source, selection, out, None)
+}
+
+pub fn recover_root_selected(
+    source: &Path,
+    selection: &Path,
+    out: &Path,
+    registry: Option<&Registry>,
+) -> Result<()> {
+    let raw = providers::read_input(selection)?;
+    let source_bytes = providers::read_input(source)?;
     let selected: Selection = serde_json::from_slice(&raw).map_err(|e| e.to_string())?;
     let syntax_candidate = selected.format == "oddlang-rust-selected-record-selection-v1";
     if (!syntax_candidate && selected.format != "oddlang-rust-root-record-selection-v1")
@@ -21,7 +34,73 @@ pub fn recover_root(source: &Path, selection: &Path, out: &Path) -> Result<()> {
     {
         return Err("invalid root public record selection".into());
     }
-    let rust = recover::select_source(source, &selected.source_sha256)?;
+    if digest(&source_bytes) != selected.source_sha256 {
+        return Err(format!(
+            "public record source digest mismatch: {}",
+            source.display()
+        ));
+    }
+    let fallback = Registry::default();
+    let input = json!({
+        "selection": selected,
+        "sources": [{"path": "source.rs", "base64": STANDARD.encode(&source_bytes)}]
+    });
+    let (mut output, receipt) =
+        registry
+            .unwrap_or(&fallback)
+            .run("recover", "public-records", "1", input, &[], || {
+                recover_bytes(&source_bytes, &selected, syntax_candidate)
+            })?;
+    if output.artifacts.len() != 2
+        || output.evidence != ["source.rs"]
+        || output.gaps.is_empty()
+        || !output.exports.is_empty()
+    {
+        return Err("invalid root public record recovery result or evidence".into());
+    }
+    let graph_bytes = output
+        .artifacts
+        .get("graph.json")
+        .ok_or("provider omitted graph.json")?;
+    let overlay_bytes = output
+        .artifacts
+        .get("rust.json")
+        .ok_or("provider omitted rust.json")?;
+    let graph: Graph = serde_json::from_slice(graph_bytes).map_err(|e| e.to_string())?;
+    let overlay: Overlay = serde_json::from_slice(overlay_bytes).map_err(|e| e.to_string())?;
+    validate(&graph, &overlay, true)?;
+    if !overlay.flatten_module
+        || graph.modules[0].id != selected.id
+        || graph.modules[0]
+            .records
+            .iter()
+            .map(|r| (overlay.name(&r.id), &r.id))
+            .collect::<BTreeMap<_, _>>()
+            != selected
+                .records
+                .iter()
+                .map(|(k, v)| (k.as_str(), v))
+                .collect()
+    {
+        return Err("provider recovered declarations outside the selected root records".into());
+    }
+    let lock = encode(&json!({
+        "format": "oddlang-root-public-record-recovery-lock-v1",
+        "selectionSha256": digest(&raw), "crateSourceSha256": selected.source_sha256,
+        "graphSha256": digest(graph_bytes), "overlaySha256": digest(overlay_bytes),
+        "gap": output.gaps.join("; "),
+    }))?;
+    output.artifacts.insert("recovery.lock".into(), lock);
+    provider::publish_profile(out, output, receipt, registry.is_some())
+}
+
+fn recover_bytes(
+    bytes: &[u8],
+    selected: &Selection,
+    syntax_candidate: bool,
+) -> Result<ProviderOutput> {
+    let rust = syn::parse_file(std::str::from_utf8(bytes).map_err(|e| e.to_string())?)
+        .map_err(|e| format!("invalid Rust source: {e}"))?;
     scope::ordinary_root(&rust)?;
     let names: Vec<_> = selected.records.keys().map(String::as_str).collect();
     if syntax_candidate {
@@ -78,7 +157,7 @@ pub fn recover_root(source: &Path, selection: &Path, out: &Path) -> Result<()> {
         external_types: BTreeMap::new(),
         source_api: None,
     };
-    render(&graph, &overlay, true)?;
+    validate(&graph, &overlay, true)?;
     let graph = encode(&graph)?;
     let overlay = encode(&overlay)?;
     let gap = if syntax_candidate {
@@ -86,18 +165,11 @@ pub fn recover_root(source: &Path, selection: &Path, out: &Path) -> Result<()> {
     } else {
         "Rust derive and type bindings require downstream native compilation"
     };
-    let lock = encode(&serde_json::json!({
-        "format": "oddlang-root-public-record-recovery-lock-v1",
-        "selectionSha256": digest(&raw), "crateSourceSha256": selected.source_sha256,
-        "graphSha256": digest(&graph), "overlaySha256": digest(&overlay),
-        "gap": gap,
-    }))?;
-    emit(
-        out,
-        &[
-            ("graph.json", &graph),
-            ("rust.json", &overlay),
-            ("recovery.lock", &lock),
-        ],
-    )
+    Ok(ProviderOutput {
+        artifacts: BTreeMap::from([("graph.json".into(), graph), ("rust.json".into(), overlay)]),
+        exports: vec![],
+        dependencies: vec![],
+        evidence: vec!["source.rs".into()],
+        gaps: vec![gap.into()],
+    })
 }

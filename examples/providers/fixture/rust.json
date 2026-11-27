@@ -1,0 +1,8 @@
+{
+  "format": "oddlang-public-records-rust-v1",
+  "flattenModule": true,
+  "identifiers": {
+    "urn:example:counter": "root",
+    "urn:example:counter:record": "Counter"
+  }
+}

@@ -3,14 +3,17 @@ name = "oddlang"
 version = "0.1.0"
 edition = "2024"
 publish = false
+default-run = "oddlang"
 
 [dev-dependencies]
+wat = "=1.254.0"
 apache-avro = { version = "=0.23.0", default-features = false }
 arrow-array = "=60.2.0"
 arrow-avro = { version = "=60.2.0", default-features = false }
 postgres = "0.19"
 
 [dependencies]
+wasmtime = { version = "=48.0.7", default-features = false, features = ["anyhow", "component-model", "cranelift", "runtime", "std"] }
 semver = "=1.0.28"
 tempfile = "3.27.0"
 serde = { version = "1", features = ["derive"] }
@@ -27,3 +30,7 @@ ra_ap_syntax = "=0.0.345"
 
 [target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
 rustix = { version = "=1.1.6", features = ["fs"] }
+
+[[bin]]
+name = "publish-wasm-matrix"
+path = "scripts/publish-wasm-matrix.rs"

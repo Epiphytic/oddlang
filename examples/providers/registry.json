@@ -1,0 +1,67 @@
+{
+  "format": "oddlang-provider-registry-v1",
+  "providers": [
+    {
+      "role": "generate",
+      "capability": "public-records",
+      "version": "1",
+      "world": "oddlang:provider/generate@1.0.0",
+      "component": {
+        "path": "generate.wasm",
+        "sha256": "6de1c0648fff9324e860c442af08bb005cab420782da5e6886ccead9ad056655"
+      },
+      "schema": {
+        "path": "generate-schema.json",
+        "sha256": "3b3d2cfd41d34415ebd352bb12a00974f5f91b9ebb7e009ce7500e90b7b5ff62"
+      },
+      "configuration": {}
+    },
+    {
+      "role": "recover",
+      "capability": "public-records",
+      "version": "1",
+      "world": "oddlang:provider/recover@1.0.0",
+      "component": {
+        "path": "recover.wasm",
+        "sha256": "b37c5802874544df0c3b5c9e12ad3b749bafd0bb3db9ffdd80762b8239492e32"
+      },
+      "schema": {
+        "path": "recover-schema.json",
+        "sha256": "23a28fb71d7b455da8cbe59dd2d5c543f3ff97f2533ba1f9c45c96fc5a34999d"
+      },
+      "configuration": {}
+    },
+    {
+      "role": "generate",
+      "capability": "example.field-list",
+      "version": "1",
+      "world": "oddlang:provider/generate@1.0.0",
+      "component": {
+        "path": "generate.wasm",
+        "sha256": "6de1c0648fff9324e860c442af08bb005cab420782da5e6886ccead9ad056655"
+      },
+      "schema": {
+        "path": "fields-schema.json",
+        "sha256": "3e9a40ef5d38588d71a4f9ac1159490f7224813c73231f1dfd17d0ebb65e189e"
+      },
+      "configuration": {}
+    },
+    {
+      "role": "generate",
+      "capability": "example.library-binding",
+      "version": "1",
+      "world": "oddlang:provider/generate@1.0.0",
+      "component": {
+        "path": "generate.wasm",
+        "sha256": "6de1c0648fff9324e860c442af08bb005cab420782da5e6886ccead9ad056655"
+      },
+      "schema": {
+        "path": "binding-schema.json",
+        "sha256": "c489e5d5b9c57d71048b5f8b47c1bbd333af8fa97f13fa619e4ba441a32d8084"
+      },
+      "configuration": {
+        "rustType": "std::time::Duration"
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "format": "oddlang-skill-installation-check-v1",
+  "source": "https://github.com/monarch-initiative/ontogpt",
+  "revision": "b8f3dee7ea7c315a9be892b30a6a263ac4f1e873",
+  "verified": {
+    "upstreamDirectoryDifferences": 0,
+    "licenseByteIdentical": true,
+    "repositoryDiscoveryLinksResolved": 4
+  },
+  "skills": ["ontogpt-author-template", "ontogpt-extract", "ontogpt-select-template", "ontogpt-troubleshoot"],
+  "semanticChecks": [
+    "providers::schema::tests::entity_ranges_apply_to_every_list_item_and_keep_prose_free",
+    "providers::schema::tests::reject_ambiguous_namespace_boundaries_and_mistyped_schema",
+    "wasm::model::entry_tests::entry_boolean_uses_the_xsd_value_space",
+    "library_binding_rejects_ids_outside_its_declared_namespace"
+  ]
+}

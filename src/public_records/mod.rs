@@ -1,11 +1,14 @@
 //! Portable ordered public records with native name and re-export bindings.
+mod provider;
+pub use provider::build_selected;
+pub(crate) use provider::generate;
 mod recover;
 mod root;
 mod serde_recovery;
 
 pub use recover::recover;
 pub(crate) use recover::{imports, item_type_binding};
-pub use root::recover_root;
+pub use root::{recover_root, recover_root_selected};
 pub use serde_recovery::recover_serde;
 
 use crate::shared_declarations::unique_map;
@@ -327,6 +330,17 @@ pub(crate) fn recovered_component(
 }
 
 fn render(graph: &Graph, overlay: &Overlay, serde_available: bool) -> Result<String> {
+    let records = validate(graph, overlay, serde_available)?;
+    Ok(render_validated(graph, overlay, &records))
+}
+
+type RecordNames<'a> = BTreeMap<&'a String, (&'a String, &'a String)>;
+
+fn validate<'a>(
+    graph: &'a Graph,
+    overlay: &'a Overlay,
+    serde_available: bool,
+) -> Result<RecordNames<'a>> {
     if graph.format != GRAPH || overlay.format != OVERLAY || graph.modules.is_empty() {
         return Err("invalid or empty public record contract".into());
     }
@@ -425,6 +439,15 @@ fn render(graph: &Graph, overlay: &Overlay, serde_available: bool) -> Result<Str
     if let Some(binding) = &overlay.source_api {
         binding.check(graph)?;
     }
+    for alias in graph.modules.iter().flat_map(|module| &module.aliases) {
+        if !records.contains_key(&alias.target) {
+            return Err(format!("unresolved public record re-export: {}", alias.id));
+        }
+    }
+    Ok(records)
+}
+
+fn render_validated(graph: &Graph, overlay: &Overlay, records: &RecordNames<'_>) -> String {
     let mut code = String::from("// Generated from the portable public record contract.\n");
     let indent = if overlay.flatten_module { "" } else { "    " };
     for module in &graph.modules {
@@ -469,9 +492,7 @@ fn render(graph: &Graph, overlay: &Overlay, serde_available: bool) -> Result<Str
             writeln!(code, "{indent}}}").unwrap();
         }
         for alias in &module.aliases {
-            let (owner, type_name) = records
-                .get(&alias.target)
-                .ok_or_else(|| format!("unresolved public record re-export: {}", alias.id))?;
+            let (owner, type_name) = records[&alias.target];
             writeln!(
                 code,
                 "    pub use super::{owner}::{type_name} as {};",
@@ -483,7 +504,7 @@ fn render(graph: &Graph, overlay: &Overlay, serde_available: bool) -> Result<Str
             code.push_str("}\n");
         }
     }
-    Ok(code)
+    code
 }
 
 fn io<T>(result: std::io::Result<T>) -> Result<T> {
@@ -508,41 +529,5 @@ fn emit(out: &Path, files: &[(&str, &[u8])]) -> Result<()> {
 }
 
 pub fn build(graph: &Path, overlay: &Path, out: &Path) -> Result<()> {
-    build_bytes(
-        &io(fs::read(graph))?,
-        &io(fs::read(overlay))?,
-        None,
-        out,
-        true,
-    )
-}
-
-pub(crate) fn build_bytes(
-    graph: &[u8],
-    overlay: &[u8],
-    source_api: Option<&[u8]>,
-    out: &Path,
-    serde_available: bool,
-) -> Result<()> {
-    let model = serde_json::from_slice(graph).map_err(|e| e.to_string())?;
-    let mut binding: Overlay = serde_json::from_slice(overlay).map_err(|e| e.to_string())?;
-    if let Some(assertion) = source_api {
-        let assertion: Overlay = serde_json::from_slice(assertion).map_err(|e| e.to_string())?;
-        binding.select_source_api(assertion)?;
-    }
-    let code = render(&model, &binding, serde_available)?;
-    let mut lock = serde_json::json!({
-        "format":"oddlang-public-record-projection-lock-v1",
-        "graphSha256":digest(graph),
-        "overlaySha256":digest(overlay),
-        "sourceSha256":digest(code.as_bytes()),
-    });
-    if let Some(assertion) = source_api {
-        lock["sourceApiSha256"] = serde_json::json!(digest(assertion));
-    }
-    let lock = encode(&lock)?;
-    emit(
-        out,
-        &[("records.rs", code.as_bytes()), ("projection.lock", &lock)],
-    )
+    build_selected(graph, overlay, out, None)
 }

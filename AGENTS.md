@@ -70,3 +70,7 @@ semble find-related src/model.rs 42 .
 ## Finish a branch
 
 After successful verification, push the feature branch and create a pull request against its base branch. Leave merging to the user. Present integration options only when push or PR creation is impossible or the user requests a different outcome.
+
+## OntoGPT ontology authoring skills
+
+The [four OntoGPT skills](skills/OntoGPT-README.md) are vendored from [OntoGPT revision b8f3dee](https://github.com/monarch-initiative/ontogpt/tree/b8f3dee7ea7c315a9be892b30a6a263ac4f1e873/skills) under its [BSD license](skills/OntoGPT-LICENSE). Use the template-selection and authoring guides when defining extraction inputs. Record the root, field cardinalities, literal types and identifier namespaces, and test a known example before applying a template broadly. Keep extraction candidates and their source evidence available for review before promoting them into a pinned contract. The upstream helpers run in OntoGPT's own environment.

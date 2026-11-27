@@ -1,0 +1,25 @@
+{
+  "capability": "public-records",
+  "dependencies": [],
+  "evidence": [
+    "source.rs"
+  ],
+  "exports": [],
+  "files": {
+    "graph.json": "6e3ebf58dcb40af6bf5850de0c72257fe2459799307518aa4458b4ba2aa82e45",
+    "rust.json": "46bb6186feb93aca26fc72c5d2ca3500817a851f4cb0026cfe2e6d7bc0c94f93"
+  },
+  "format": "oddlang-provider-receipt-v1",
+  "gaps": [
+    "Rust derive and type bindings require downstream native compilation"
+  ],
+  "provider": {
+    "componentSha256": "b37c5802874544df0c3b5c9e12ad3b749bafd0bb3db9ffdd80762b8239492e32",
+    "configuration": {},
+    "schemaSha256": "23a28fb71d7b455da8cbe59dd2d5c543f3ff97f2533ba1f9c45c96fc5a34999d",
+    "world": "oddlang:provider/recover@1.0.0"
+  },
+  "requestSha256": "14c14933b7713b19ffcf0be107963ad1c8bf5bce59f85c0b4d2046e9080e38b4",
+  "role": "recover",
+  "version": "1"
+}

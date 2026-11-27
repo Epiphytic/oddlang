@@ -15,6 +15,7 @@ type Result<T> = std::result::Result<T, String>;
 struct Workspace {
     format: String,
     cargo_lock: Pin,
+    provider_registry: Option<Pin>,
     members: BTreeMap<String, Member>,
 }
 #[derive(Deserialize)]
@@ -62,6 +63,11 @@ fn assemble(path: &Path, destination: &Path, cache: DependencyCache) -> Result<(
     if workspace.format != "oddlang-native-workspace-v1" || workspace.members.is_empty() {
         return Err("invalid or empty native workspace".into());
     }
+    let registry = workspace
+        .provider_registry
+        .as_ref()
+        .map(|pin| crate::providers::Registry::load_pinned(&pin.resolve(base)?, &pin.sha256))
+        .transpose()?;
     if destination.symlink_metadata().is_ok() {
         return Err("workspace destination already exists".into());
     }
@@ -103,6 +109,7 @@ fn assemble(path: &Path, destination: &Path, cache: DependencyCache) -> Result<(
             &dir,
             Some(&member.dependencies),
             cache,
+            registry.as_ref(),
         )?);
         let cargo_file = dir.join("Cargo.toml");
         let mut cargo: toml::Table = std::str::from_utf8(&read(&cargo_file)?)

@@ -1,0 +1,14 @@
+{
+  "format": "oddlang-public-records-rust-v1",
+  "flattenModule": true,
+  "identifiers": {
+    "urn:fixture:collection": "catalog",
+    "urn:fixture:collection:record": "Sample"
+  },
+  "externalTypes": {
+    "urn:fixture:state": [
+      "crate",
+      "State"
+    ]
+  }
+}

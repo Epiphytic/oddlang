@@ -1,0 +1,8 @@
+{
+  "format": "oddlang-public-records-rust-v1",
+  "flattenModule": true,
+  "identifiers": {
+    "urn:calendar:appointments": "calendar",
+    "urn:calendar:appointment": "Appointment"
+  }
+}

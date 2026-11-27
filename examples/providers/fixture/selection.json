@@ -1,0 +1,8 @@
+{
+  "format": "oddlang-rust-root-record-selection-v1",
+  "id": "urn:example:counter",
+  "sourceSha256": "d59df4821e3fb46fac8bd7f32d4b741117b00ed458ca1b0e1035726a7026f648",
+  "records": {
+    "Counter": "urn:example:counter:record"
+  }
+}

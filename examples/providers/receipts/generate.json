@@ -1,0 +1,22 @@
+{
+  "capability": "public-records",
+  "dependencies": [],
+  "evidence": [],
+  "exports": [
+    "Counter"
+  ],
+  "files": {
+    "records.rs": "d59df4821e3fb46fac8bd7f32d4b741117b00ed458ca1b0e1035726a7026f648"
+  },
+  "format": "oddlang-provider-receipt-v1",
+  "gaps": [],
+  "provider": {
+    "componentSha256": "6de1c0648fff9324e860c442af08bb005cab420782da5e6886ccead9ad056655",
+    "configuration": {},
+    "schemaSha256": "3b3d2cfd41d34415ebd352bb12a00974f5f91b9ebb7e009ce7500e90b7b5ff62",
+    "world": "oddlang:provider/generate@1.0.0"
+  },
+  "requestSha256": "d64f2e8a7f675cb60012c3602eb74e8c6a9b3707af1d3e9e32935e98f5dea091",
+  "role": "generate",
+  "version": "1"
+}

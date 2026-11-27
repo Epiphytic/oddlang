@@ -17,7 +17,7 @@ prepare() {
     printf '%s  %s\n' "$archive_sha256" "$cache/$archive_name.tar.gz" | shasum -a 256 -c -
     tar -xOzf "$cache/$archive_name.tar.gz" "$archive_name/wasm-tools" > "$out/wasm-tools"
     chmod +x "$out/wasm-tools"
-    cargo build --locked --offline --bin oddlang
+    cargo build --locked --offline --bin oddlang --bin publish-wasm-matrix
     compiler=$(cargo metadata --locked --offline --format-version 1 --no-deps | python3 -c 'import json,sys;print(json.load(sys.stdin)["target_directory"]+"/debug/oddlang")')
     ledger_key=$(printf %s 'urn:oddlang:ledger:wasm:package' | shasum -a 256 | cut -d ' ' -f 1)
     release_store="$out/cache"
@@ -26,7 +26,7 @@ prepare() {
     cp -R "$out/ledger" "$release_store/wasm/$ledger_key/1.0.0"
     "$compiler" wasm publish contracts/wasm/ledger-test contracts/wasm/ledger-test/dependencies.lock.json "$release_store" "$out/ledger-test"
     "$compiler" wasm publish contracts/wasm/echo contracts/wasm/empty.lock.json "$release_store" "$out/echo"
-    python3 scripts/publish-wasm-matrix.py "$compiler" "$out"
+    "$(dirname "$compiler")/publish-wasm-matrix" "$out"
     WASM_TOOLS="$out/wasm-tools" scripts/build-wasm-guests.sh "$out" "$out/guests"
     cargo +"$rust_version" build --locked --offline --manifest-path examples/wasm/Cargo.toml \
         --target-dir target/wasm-host -p runtime-host

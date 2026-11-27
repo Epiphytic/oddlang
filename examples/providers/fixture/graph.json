@@ -1,0 +1,27 @@
+{
+  "format": "oddlang-public-records-v1",
+  "modules": [
+    {
+      "id": "urn:example:counter",
+      "records": [
+        {
+          "id": "urn:example:counter:record",
+          "traits": [],
+          "fields": [
+            {
+              "id": "urn:example:counter:record/field/active",
+              "wire": "active",
+              "type": "bool"
+            },
+            {
+              "id": "urn:example:counter:record/field/count",
+              "wire": "count",
+              "type": "u32"
+            }
+          ]
+        }
+      ],
+      "aliases": []
+    }
+  ]
+}

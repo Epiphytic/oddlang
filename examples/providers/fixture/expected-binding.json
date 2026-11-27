@@ -1,0 +1,4 @@
+{
+  "id": "urn:example:duration",
+  "rustType": "std::time::Duration"
+}
