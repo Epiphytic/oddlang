@@ -1,0 +1,39 @@
+{
+  "platform": "aarch64-apple-darwin",
+  "rootCommand": "marmish-qualify rebuild",
+  "oddlangSha256": "ccd3aa5caeac7c57dddb5d8c04e6cc619c7580e446edb8139bc00f0c6555e09f",
+  "upstream": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+  "candidate": "e0d855874ec2348939175dfa6ec5c71488c8ba35",
+  "cleanRebuilds": 2,
+  "archivedFilesByteIdentical": 39,
+  "sourceAndOutputRefusals": [
+    "nonempty output",
+    "untracked file",
+    "unstaged change",
+    "staged change",
+    "wrong revision",
+    "wrong revision through ODDLANG_MARMISH_SOURCE",
+    "inapplicable compiler override"
+  ],
+  "processFixture": {
+    "orderedRoutes": [
+      "baseline",
+      "frame",
+      "rebuild",
+      "verify"
+    ],
+    "childFailureCode": 37,
+    "stoppedAtFirstFailure": true
+  },
+  "macosNetworkIsolation": {
+    "positiveControlConnected": true,
+    "isolatedConnectDenied": true,
+    "allByteValuesRoundTripped": true,
+    "stderrAndExitStatusPreserved": true
+  },
+  "linuxNetworkIsolation": {
+    "platform": "aarch64",
+    "result": "Guest refused unprivileged user namespace UID mapping; payload did not start."
+  },
+  "phase7ArchivedVerdict": "baseline failures remain"
+}

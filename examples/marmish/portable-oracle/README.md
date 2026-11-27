@@ -19,8 +19,8 @@ state after rejection. [Original receipt](original-receipt.json)
 | Corpus | Source and covered behavior |
 | --- | --- |
 | Prior | The archived vectors cover canonical wire JSON, malformed and overlapping copy frame errors, incremental decoder recovery or failure, compressed input, send-window consumption and receive retries. The historical caller also passed independently against this pin. [Vectors](../stream-vectors.json) · [Runner](../stream-driver/) |
-| Authored | Python derives exact bytes from the pinned wire and copy layouts and computes SHA-256 and base64 with its standard library. Cases cover every frame tag and JSON request and response variant in both directions, manifest and checkpoint encoding, helper context, launch bindings and digests, injectable time, codec block methods, public constants and the full u8 domain for numbered enum conversions. Expected error precedence comes from the original Rust guard ordering. [Cases](spec_cases.py) |
-| Seeded | The public seed supplies Data offsets at zero, interior positions and the signed-64-bit ceiling, arbitrary binary payloads, input splits across headers and records, tag/length precedence and post-error observations. Receive cases track the complete public state across conflict, gap, bad acknowledgement, rejected EOF, exact retry and delivery. An additional case checks receipt capacity and eviction. [Cases](seeded_cases.py) |
+| Authored | The language-neutral fixture preserves the independently authored bytes, hashes and canonical envelopes. Rust expands paired decoders and all 256 discriminants for each numbered enum. Cases cover every frame tag and JSON request and response variant in both directions, manifest and checkpoint encoding, helper context, launch bindings and digests, injectable time, codec block methods, public constants and the full u8 domain for numbered enum conversions. Expected error precedence comes from the original Rust guard ordering. [Fixture](authored-cases.json) · [Original layout derivations](https://github.com/Epiphytic/oddlang/blob/1fc9eb65398c6e530862576aad3848e99996541d/examples/marmish/portable-oracle/spec_cases.py) |
+| Seeded | The public seed supplies Data offsets at zero, interior positions and the signed-64-bit ceiling, arbitrary binary payloads, input splits across headers and records, tag/length precedence and post-error observations. Receive cases track the complete public state across conflict, gap, bad acknowledgement, rejected EOF, exact retry and delivery. An additional case checks receipt capacity and eviction. [Seed generator](../../../verification/marmish-inventory/src/bin/portable-oracle/corpus.rs) |
 | Holdout | An independent random 32-byte seed supplied 128 cases before target generation. Qualification owns the sealed input and expectations. The macOS sandbox denies the caller access to the capsule directory during sealed replay, and a direct read probe verifies that denial. Only case identifiers, operations and inputs reach the adapter. [Commitments](freeze.json) |
 
 The upstream copy design describes the helper context, record encodings and
@@ -56,11 +56,12 @@ the same generator domains with a separate seed.
 
 ## Replay
 
-Use Python 3.11 or later and Rust 1.97.1 on Apple Silicon. Populate the offline
+Use Rust 1.97.1 on Apple Silicon. Populate the offline
 Cargo cache for the pinned upstream lock and use a clean upstream checkout.
 
 ```sh
-python3 examples/marmish/portable-oracle/run.py \
+cargo +1.97.1 run --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml \
+  --bin portable-oracle -- \
   --upstream /path/to/pinned/marmish \
   --receipt /tmp/marmish-portable-oracle.json \
   --observations /tmp/marmish-portable-observations.json.gz
@@ -79,6 +80,18 @@ binary frames and canonical JSON envelopes in both directions. The adapter
 reads one JSON array from stdin with `name`, `operation` and `input` keys
 per row. It writes one JSON object with a `cases` array of `{name, actual}`
 observations in the requested order. [Native caller](stream.rs)
+
+The current Rust runner also checks the alternate encoding with system zlib. The frozen receipt and public observation archive retain their original tool identities. The Rust replay recovered the same public observation digest, alternate compressed bytes and three failing mutation identifiers. [Rust qualification](../../../verification/provider-tooling/portable-oracle-rust.json)
+
+The generated Data qualifier compares both generated targets with the independent oracle and the original caller. It builds the approved graph with and without hints, retags a separate graph, checks direct-read denial at each build boundary, and exchanges actual packets between each pair of readers and writers.
+
+```sh
+cargo +1.97.1 run --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml \
+  --bin qualify-tagged -- --oddlang /absolute/path/to/oddlang \
+  --upstream /path/to/pinned/marmish --receipt /tmp/tagged.json
+```
+
+On macOS, add the private capsule with `--holdout` for sealed replay. For Linux public replay, specify the native `--original-target` triple. The Linux namespace requires bubblewrap. Where local user namespaces require privileged mount setup, `--linux-privileged-mounts` drops privileges before the caller runs. The qualification accepts blind input lines on stdin with `--external-judge` and emits the two observed output arrays on stdout.
 
 ## Remaining obligations
 

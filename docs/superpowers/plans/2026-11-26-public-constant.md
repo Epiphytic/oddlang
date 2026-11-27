@@ -25,4 +25,4 @@ recovery-time inputs, and the existing shared-declarations build consumes
 only the portable graph and Rust overlay.
 
 Run the generic acceptance fixture with
-`python3 -B verification/public-constant/verify.py path/to/oddlang`.
+`cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin public-constant -- path/to/oddlang`.

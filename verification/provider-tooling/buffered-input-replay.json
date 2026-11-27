@@ -1,0 +1,16 @@
+{
+  "format": "oddlang-buffered-input-replay-v1",
+  "host": "aarch64-apple-darwin",
+  "rustcCommit": "8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+  "cliSha256": "3884c423fccb909d69c8a6d5e119d4097b8ea6fade8936274edfe814890a08a4",
+  "passedRunners": ["policies", "observed"],
+  "compilerShapesCaptured": 4,
+  "generatedPolicyTests": 8,
+  "nativeReferenceTraceTests": 2,
+  "generatedTraceTests": 2,
+  "malformedTraceRejections": 10,
+  "traceBytesIdenticalAcrossLegacyReferenceRustReferenceAndProjection": {
+    "baseline": "4ced0ec5438405b86dea4dbe99f5c24fb79e31f902b443b8388f0300a6998abf",
+    "mutated": "0d97cf6e9a435b8dfce50c6a4b79f9b64bd3951d40a18f1966097cfa4cc7eda1"
+  }
+}

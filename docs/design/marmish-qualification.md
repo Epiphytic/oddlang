@@ -5,16 +5,23 @@ The experiment recovers two Rust files from Marmish revision `49fc705408a230bd0a
 The published candidate is on `main` in the private Epiphytic repository. GitHub Actions is disabled there because the tree includes Marmish's upstream release workflows. [Qualified source tree](https://github.com/Epiphytic/marmish-oddlang/tree/e0d855874ec2348939175dfa6ec5c71488c8ba35)
 
 ```sh
-scripts/setup-http-conformance.sh
-scripts/setup-wasm.sh
-scripts/setup-marmish.sh
-scripts/qualify-marmish.sh rebuild
-scripts/qualify-marmish.sh verify
+cargo +1.96.1 run --locked --manifest-path verification/http-conformance/Cargo.toml -- setup
+cargo run --locked --offline --manifest-path verification/wasm-setup/Cargo.toml
+cargo +1.97.1 run --locked --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-setup
+cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-qualify -- rebuild
+cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-qualify -- verify
 ```
 
-Run the public commands from the Oddlang repository root on Apple Silicon macOS with the setup dependencies installed. Each run prints its output directory. To retain a named report, pass the frozen Marmish checkout and a new directory, for example `scripts/qualify-marmish.sh verify "$ODDLANG_MARMISH_SOURCE" target/marmish/qualification-local`. The original archive and the native comparison protocol are documented separately. [Frozen baseline](marmish-baseline.md) · [Candidate comparison](marmish-candidate-boundaries.md)
+Run the public commands from the Oddlang repository root on Apple Silicon macOS with the setup dependencies installed. Each run prints its output directory. To retain a named report, pass the frozen Marmish checkout and a new directory, for example `cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-qualify -- verify "$ODDLANG_MARMISH_SOURCE" target/marmish/qualification-local`. The original archive and the native comparison protocol are documented separately. [Frozen baseline](marmish-baseline.md) · [Candidate comparison](marmish-candidate-boundaries.md)
 
 `rebuild` leaves a local Git repository in `candidate/`. It recovers and projects twice in separately named directories, creates each project manifest from immutable Git objects, verifies every file mode and SHA-256, and compares the Git trees and commits. Both builds update Marmish's staged source index, create an immutable local commit, and pass the upstream indexer's `check --ref HEAD`. The upstream indexer uses historical release tags. The tag lock identifies each locally supplied Git object. [Pinned release tags](../../examples/marmish/ontology-tags.lock)
+
+The Rust `marmish-rebuild` command runs both recoveries and checks the receipt against the staged files and immutable Git objects. Pass `--oddlang /absolute/path/to/oddlang` to use a prebuilt compiler. Recheck an extracted `rebuild/` evidence directory without rebuilding the candidate with the command below. A fresh Rust run reproduced all 39 archived witness files byte-for-byte. [Rebuild evidence](../../verification/provider-tooling/marmish-rebuild-rust.json)
+
+```sh
+cargo +1.97.1 run --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml \
+    --bin marmish-rebuild -- --replay /path/to/pinned/marmish /path/to/extracted/rebuild
+```
 
 The framing and façade modules replace two of 1,641 paths. All 1,639 retained paths initially reproduce their original bytes and Git modes. Regenerating the lexical index then changes three of those retained files. The two builds produced candidate commit `e0d855874ec2348939175dfa6ec5c71488c8ba35`, tree `6c0c7b16e3cb7b013a360c1b19e26ed19a238e65`.
 
@@ -24,14 +31,14 @@ The frozen inventory counts 19 regenerated lexical declaration sites and 5,830 r
 
 ## Replay the archived run
 
-The [qualification archive](../../examples/marmish/evidence/qualification.tar.gz) has SHA-256 `60a0cb9b231d200cb2c03b043f1bd335d5c43fc362b17352fd5ce7017e4d425a`. The native observations originated in a clean Oddlang checkout at `957433a`. Two fresh rebuilds at `481bec7` supplied the Git object witnesses for that same immutable candidate. The comparator and aggregate verifier at `bccd6c3` replayed the observations. Replay trusts the Oddlang checkout that supplies the verifier, the assembly and emitter release pins, and the frozen inventory and original observation archive. The lexical ontology checks ran during each build. Replay binds those ontology blobs to their Git tree, commit and check logs. Keep the extracted directory for the named comparisons, individual logs and compiler input receipts.
+The [qualification archive](../../examples/marmish/evidence/qualification.tar.gz) has SHA-256 `60a0cb9b231d200cb2c03b043f1bd335d5c43fc362b17352fd5ce7017e4d425a`. The native observations originated in a clean Oddlang checkout at `957433a`. Two fresh rebuilds at `481bec7` supplied the Git object witnesses for that same immutable candidate. The comparator and aggregate verifier at `bccd6c3` replayed the observations. The Rust replay accepts the complete framing harness identities from that historical revision or a freshly collected harness from the checkout. Replay trusts the Oddlang checkout that supplies the verifier, the assembly and emitter release pins, and the frozen inventory and original observation archive. The lexical ontology checks ran during each build. Replay binds those ontology blobs to their Git tree, commit and check logs. Keep the extracted directory for the named comparisons, individual logs and compiler input receipts.
 
 ```sh
 archive=examples/marmish/evidence/qualification.tar.gz
 printf '%s  %s\n' 60a0cb9b231d200cb2c03b043f1bd335d5c43fc362b17352fd5ce7017e4d425a "$archive" | shasum -a 256 -c -
 report=$(mktemp -d)
 tar -xzf "$archive" -C "$report"
-python3 -B scripts/marmish/phase7.py replay "$report"
+cargo +1.97.1 run --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-phase7 -- replay "$report"
 ```
 
 ## Observed reconstruction and interoperability
@@ -65,7 +72,7 @@ The original failures include three DNS fixture cases in the denied-network envi
 Run the focused negative controls from the repository root.
 
 ```sh
-python3 -B -m unittest discover -s scripts/marmish -p 'test_phase7.py' -v
+cargo +1.97.1 test --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-phase7
 cargo test --locked --offline --test workspace_assembly
 ```
 

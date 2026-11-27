@@ -8,8 +8,8 @@ from matching. The legacy field-meter replay still uses member-only paths and
 scalar literals.
 
 ```sh
-python3 -B verification/local-owner-workflow/delivery.py "$ODDLANG"
-python3 -B verification/local-owner-workflow/check.py "$ODDLANG"
+cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin local-owner-workflow -- delivery "$ODDLANG"
+cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin local-owner-workflow -- workflow "$ODDLANG"
 ```
 
 Both replays and eighteen release library tests passed with Rust 1.97.1. Both

@@ -47,5 +47,5 @@ message. Both changes reach the recovered graph and emitted binaries.
 
 ```sh
 cargo +1.97.1 build --release --locked --offline
-python3 verification/structured-diagnostics/check.py target/release/oddlang
+cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin structured-diagnostics -- target/release/oddlang
 ```

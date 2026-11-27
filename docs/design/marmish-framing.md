@@ -3,9 +3,9 @@
 `oddlang import rust` recognizes the closed framing profile in the pinned Rust source. `oddlang build module` reads its graph and import lock, and produces native Rust, the WIT contract and a Rust projection manifest. `oddlang import replay` re-runs source recovery. `oddlang import verify-build` reprojects all three artifacts and compares the bytes. The separate assembly command reconstructs a workspace using the pinned projection and retained inputs.
 
 ```sh
-scripts/setup-marmish.sh
-scripts/setup-wasm.sh
-scripts/qualify-marmish.sh frame
+cargo +1.97.1 run --locked --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-setup
+cargo run --locked --offline --manifest-path verification/wasm-setup/Cargo.toml
+cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-qualify -- frame
 cargo test --locked --offline --test framing_import --test framing_projection --test workspace_assembly
 ```
 
@@ -13,7 +13,7 @@ The [recognizer specification](../language/rust-framing-recognizers.md) gives th
 
 The component exports encode and decode through a pure WIT interface and contains no host imports. The native and Wasm projections reuse the documented Rust crate versions for JSON, derives and base64. The expected bytes and named errors come from the frozen [observation contract](../../examples/marmish/observations.json). They include overlapping invalid conditions and both sides of the resource boundaries.
 
-At the end of Phase 6 the module register identified 97 retained files with 5,832 lexical declaration sites. Seventeen sites in the framing module are in the recovered source slice. The denominator for compiled runtime declarations remains unknown. Recreate the register with `python3 scripts/marmish/gaps.py --framing-only INVENTORY.json.gz gaps.json`. The [current register](../../examples/marmish/gaps.json) also accounts for the Phase 7 façade. Each module links to a named work-graph task and a proposed fixture with positive and rejection criteria.
+At the end of Phase 6 the module register identified 97 retained files with 5,832 lexical declaration sites. Seventeen sites in the framing module are in the recovered source slice. The denominator for compiled runtime declarations remains unknown. Recreate the register with `cargo +1.97.1 run --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-gaps -- --framing-only INVENTORY.json.gz gaps.json`. The [current register](../../examples/marmish/gaps.json) also accounts for the Phase 7 façade. Each module links to a named work-graph task and a proposed fixture with positive and rejection criteria.
 
 The [framing archive](../../examples/marmish/evidence/framing.tar.gz) contains both semantic graphs, both source projections, instantiated component bytes, and the native and Wasm observations for the positive and negative cases. Two independent builds emitted the same regenerated component SHA-256, `05a793337c0c7154faa7a01ff66ec2837688a231876eb3843af2fd2cb68ccc05`. Both guard-order mutants changed precisely the version-before-size outcome.
 
@@ -26,3 +26,5 @@ The qualifier builds a complete project manifest, reads retained Git blobs from 
 The corrected gate pinned the import lock at `e39cf8da02d75442a98c1a338f694931ce5b7b2b5cb70c2759c50f1efea8bdcc` and the complete project manifest at `d4e3466831b0506ce0418db35afdbf93a65b544a09c475457a239431f54faf1d`. It measured 90 assembled compiler inputs, including the generated module and retained native build script. A modified retained build script received PermissionDenied when it tried to read an external canary. The [build boundary record](marmish-build-boundary.md) names the permitted reads and the limits of dep-info. The complete [replay archive](../../examples/marmish/evidence/framing.tar.gz) includes the actual assembly manifest and transcripts.
 
 Claude CLI approved the corrected implementation at `36c6fb3` after reproducing the framing gate, the new assembly and provenance rejection controls, and compiler closure on native Apple Silicon. The closure run checks the core and native libraries under default features. Other crates and features have separate runtime evidence.
+
+The Rust `framing-observer` verifies the pinned core and runs local original-to-reconstruction and reconstruction-to-original codec exchanges. The `frame-matrix` binary runs the native and Wasm implementations against the same frozen inputs, including the error-order mutation. [Port qualification](../../verification/provider-tooling/native-wasm-framing.json)

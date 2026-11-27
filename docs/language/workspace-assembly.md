@@ -202,6 +202,17 @@ structure, trace-inferred policies and provider assumptions. The output
 graph and overlay use the existing buffered-input formats.
 See the [trace contract](../superpowers/specs/2026-11-26-observed-buffered-input.md).
 
+Run both native qualifications with Rust 1.97.1 and its `rustc-dev` component.
+The `policies` runner compiles all eight combinations of the three transitions.
+The `observed` runner records traces from the reference and its three-policy
+mutation, then executes the same probe against each assembled projection.
+
+```sh
+for suite in policies observed; do
+  cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin qualify-buffered-input -- "$suite" target/debug/oddlang
+done
+```
+
 ### Bounded local JSON test input
 
 A bounded JSON input component declares one maximum byte count, a record
@@ -232,3 +243,12 @@ the fixed-name branch. Native bindings select
 the typed parser, asset fields and file policy. Assembly checks the grammar
 and policy identities, constructor order, field widths, error roles and
 private exports. The contract operates on inert local files.
+
+## Materialize the Marmish input store
+
+The Rust materializer reads retained blobs from the Git revision pinned in `examples/marmish/project.toml`, verifies each producer against its published release and checks the complete manifest digest. Supply a fresh or empty output directory. The resulting `project.toml` and `store` are the inputs to `oddlang assemble`.
+
+```sh
+cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin marmish-prepare -- v1 UPSTREAM FRAME_IMPORT FRAME_PROJECTION OUTPUT
+cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin marmish-prepare -- v2 UPSTREAM FRAME_IMPORT FRAME_PROJECTION FACADE_IMPORT FACADE_PROJECTION OUTPUT
+```

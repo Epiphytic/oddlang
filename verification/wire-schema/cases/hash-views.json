@@ -1,0 +1,140 @@
+{
+  "graph": {
+    "format": "oddlang-json-wire-schema-v1",
+    "id": "urn:sensor:schema",
+    "types": [
+      {
+        "kind": "record",
+        "id": "urn:sensor:sample",
+        "fields": [
+          {
+            "id": "urn:sensor:seq",
+            "name": "sequence",
+            "type": {
+              "kind": "unsigned",
+              "bits": 16
+            }
+          },
+          {
+            "id": "urn:sensor:payload",
+            "name": "payload",
+            "type": {
+              "kind": "bounded-base64",
+              "policy": {
+                "maxBytes": 8,
+                "encodedLimitMessage": "too long",
+                "decodedLimitMessage": "decoded length",
+                "syntaxMessage": "wrong encoding"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "external",
+        "id": "urn:sensor:state"
+      }
+    ],
+    "guards": [
+      {
+        "id": "urn:sensor:payload-length",
+        "owner": "urn:sensor:sample",
+        "error": "urn:sensor:bounds",
+        "require": {
+          "kind": "count",
+          "field": "urn:sensor:payload",
+          "minimum": 1,
+          "maximum": 8
+        }
+      }
+    ],
+    "hashTags": {
+      "urn:sensor:state": {
+        "urn:sensor:on": 42,
+        "urn:sensor:off": 17
+      }
+    },
+    "hashViews": [
+      {
+        "id": "urn:sensor:digest",
+        "owner": "urn:sensor:sample",
+        "algorithm": "sha256",
+        "domain": [
+          0,
+          255
+        ],
+        "validate": true,
+        "parameters": [
+          {
+            "id": "urn:sensor:parameter",
+            "external": "urn:sensor:state"
+          }
+        ],
+        "fields": [
+          {
+            "field": "urn:sensor:seq",
+            "encoding": "unsigned-be"
+          },
+          {
+            "field": "urn:sensor:payload",
+            "encoding": "u32-be-length-prefixed-bytes"
+          },
+          {
+            "parameter": "urn:sensor:parameter",
+            "encoding": "external-tag-u8"
+          }
+        ],
+        "output": {
+          "kind": "bytes"
+        }
+      },
+      {
+        "id": "urn:sensor:label",
+        "owner": "urn:sensor:sample",
+        "algorithm": "sha256",
+        "domain": [
+          71
+        ],
+        "fields": [
+          {
+            "field": "urn:sensor:seq",
+            "encoding": "unsigned-be"
+          }
+        ],
+        "output": {
+          "kind": "lower-hex",
+          "prefix": "sensor-"
+        }
+      }
+    ]
+  },
+  "binding": {
+    "format": "oddlang-json-wire-schema-rust-v1",
+    "names": {
+      "urn:sensor:sample": "Sample",
+      "urn:sensor:seq": "seq",
+      "urn:sensor:payload": "payload"
+    },
+    "derives": {},
+    "externals": {
+      "urn:sensor:state": "crate::State"
+    },
+    "hashVariants": {
+      "urn:sensor:on": "On",
+      "urn:sensor:off": "Off"
+    },
+    "hashViews": {
+      "urn:sensor:digest": {
+        "method": "checksum",
+        "library": "sha2",
+        "parameters": {
+          "urn:sensor:parameter": "state"
+        }
+      },
+      "urn:sensor:label": {
+        "method": "label",
+        "library": "sha2"
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "format": "oddlang-finite-error-domain-v1",
+  "id": "urn:test:errors",
+  "error": "urn:test:fault",
+  "categories": {},
+  "equality": true,
+  "variants": {
+    "urn:test:capacity": {
+      "payload": {
+        "kind": "unit"
+      },
+      "message": {
+        "kind": "literal",
+        "text": "capacity"
+      },
+      "source": false,
+      "from": false
+    },
+    "urn:test:bad-input": {
+      "payload": {
+        "kind": "unit"
+      },
+      "message": {
+        "kind": "literal",
+        "text": "bad input"
+      },
+      "source": false,
+      "from": false
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "files": {
+    "examples/wasm/Cargo.lock": "b499e4bccc7295ac684c385579aedab39fdcd394f949a3a900d06cb58f1bef3c",
+    "examples/wasm/framing/Cargo.lock": "80b5bbbc60dd6a089dcfc6b363ec9d79834ecee3358e18f554b597187816ce16",
+    "examples/wasm/framing/Cargo.toml": "fe0b1922ce39867f7a12fdbe8403c92d2b8bbda7d8c2c2240b279e507c453f8b",
+    "examples/wasm/framing/batch.rs": "826e9a746af431b4d1148f486c9a60ab55c386ecfe8f4b1e198c09cacb8e9145",
+    "examples/wasm/framing/consumer/Cargo.toml": "db46424533bce9d1dda62223f7009e5711ae46c66fb514b57be8607f59f8cc85",
+    "examples/wasm/framing/consumer/src/main.rs": "19de74c1c5fda51a74a2541c16d76da6d7b6a9c64159f7de76ef27b701ed35d6",
+    "examples/wasm/framing/core/Cargo.toml": "ebdb213dd609c844ba4e92a4c4ed110138de4b3308ef9e04a320b0997ab09c28",
+    "examples/wasm/framing/core/src/lib.rs": "23c2afe4a97242f6bcc961661b5666b4594b5d3f88350ec02e14a138a7730974",
+    "examples/wasm/framing/guest/Cargo.toml": "0ad517028975885bffa85bcf2097df6013782d3c617a6718df23b171dc2995ea",
+    "examples/wasm/framing/guest/src/lib.rs": "6d07c8c7edd982383f7672a63f0a0219268cab49ece1a664237f9cf0c9b46eb6",
+    "examples/wasm/framing/host.rs": "0e90ef414a2b65388faaebadafbc114224717dc34d46acf3c985f54fb2e2aac6",
+    "examples/wasm/framing/host.wit": "24e4eb19ea04206af4477edbd5670165b3a5f5c2ccb4ee8eb64fb0bacad148e9",
+    "examples/wasm/host/Cargo.toml": "9af50872bf7c323e54895a4144e207a2a741b3a0fdd75d04bd2c9e0d87ef1a45",
+    "examples/wasm/toolchain.lock": "fbbd5f747c737c1a147be46463c5b93a4f77b0b81838df739dba60cf6230b144",
+    "scripts/marmish/frame.sh": "bbfd230ac7a5b707e3e075bb34107e1af443515597c9e464da396b8a498d6ec6",
+    "scripts/marmish/frame_runner.py": "2a801975986c63a93e69177d5b960318356c0988b7e042cb4dc225600e698970",
+    "scripts/marmish/observations.py": "5f8519951d491dc14b0e6802e63b381132233a85e196aba2b79d4be7b1504544"
+  },
+  "revision": "bccd6c3ded7c2bbb56fe538a3fefd4a823e7f5fa"
+}

@@ -1,0 +1,28 @@
+{
+  "host": "aarch64-apple-darwin",
+  "companion": "38d4b7c1d4139e370256fa1a6378179a537066e8",
+  "previousPythonCompanion": "2107fe5ca39cbd07671baaddc6d7e50f7c7e2d8a",
+  "framework": "1d3b45fb79f775a445ae874c06ed89c818b1f697",
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "compilerSha256": "5941029b8dcc1552d72b31aec8414a3dae95a6ca6ac269a9b7ef7919c0d3942b",
+  "receipt": "verification/whole/mdk-json-input/rust-aarch64-apple-darwin.json",
+  "coldAndWarmReceiptSha256": "15589f7eeeefe399b7b03ddf92cce44bc83a4bf67d49946e831b09213573cc02",
+  "freshPythonReceiptSha256": "3da0f29600537ab064830b7d381bb98a358d55fa9422a5e08309cb6e627d594e",
+  "differencesFromFreshPython": [
+    "companion"
+  ],
+  "sourceDenialProbes": 4,
+  "probeSha256": "8686c15202ae69193c4ab2f5c87deae57ade2a4b16394b02ee7d276dae3a322b",
+  "pinnedTestSha256": "04916e33e73f6e8856688823f8af5af965677a7403e195477de9f4a19d1a6ad7",
+  "packageLockSha256": {
+    "baseline": "52d7ba3cd3ee77eb46490f8720c1ef793a34791cf9a9cd71c131c2648c38cd92",
+    "mutation": "da4d79fd19ec18222e38e95e1d30148bbf301d484364d3cfc727de4162a6cef8"
+  },
+  "matchingBehaviorCases": 11,
+  "controls": [
+    "ordinary verification rejected a modified companion checkout",
+    "prepare restored three altered pinned outputs byte for byte and wrote no qualification receipt",
+    "prepare rejected a changed input with a stale digest before publishing outputs"
+  ],
+  "workspaceWitnessUnitTestsPassed": 4
+}

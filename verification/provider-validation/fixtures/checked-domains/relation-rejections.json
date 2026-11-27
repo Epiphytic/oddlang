@@ -1,0 +1,163 @@
+[
+  {
+    "error": "unused argument",
+    "graph": [
+      [
+        "/relations/urn:invoice:names-owner/arguments",
+        null,
+        [
+          {
+            "id": "urn:invoice:candidate",
+            "value": {
+              "kind": "text"
+            }
+          },
+          {
+            "id": "urn:invoice:unused",
+            "value": {
+              "kind": "unsigned",
+              "bits": 64
+            }
+          }
+        ]
+      ]
+    ],
+    "binding": [
+      [
+        "/relations/urn:invoice:names-owner/arguments",
+        "urn:invoice:unused",
+        "unused"
+      ]
+    ]
+  },
+  {
+    "error": "requires Copy",
+    "graph": [
+      [
+        "/types",
+        "urn:invoice:Denomination",
+        {
+          "fields": {}
+        }
+      ],
+      [
+        "/calls/urn:invoice:quote-total/arguments/0",
+        null,
+        {
+          "kind": "named",
+          "id": "urn:invoice:Denomination"
+        }
+      ],
+      [
+        "/relations/urn:invoice:accepts/arguments/1/value",
+        null,
+        {
+          "kind": "named",
+          "id": "urn:invoice:Denomination"
+        }
+      ]
+    ],
+    "binding": [
+      [
+        "/types",
+        "urn:invoice:Denomination",
+        "crate::Denomination"
+      ]
+    ]
+  },
+  {
+    "error": "unknown field",
+    "graph": [
+      [
+        "/types/urn:invoice:Approval/fields/urn:invoice:owner",
+        "extra",
+        true
+      ],
+      [
+        "/types/urn:invoice:Quote/fields/urn:invoice:payee",
+        "extra",
+        true
+      ],
+      [
+        "/relations/urn:invoice:names-owner/arguments/0/value",
+        "extra",
+        true
+      ]
+    ],
+    "binding": []
+  },
+  {
+    "error": "reflexive comparison",
+    "graph": [
+      [
+        "/relations/urn:invoice:accepts/steps/1/right/object",
+        null,
+        "receiver"
+      ],
+      [
+        "/relations/urn:invoice:accepts/steps/1/right/field",
+        null,
+        "urn:invoice:owner"
+      ]
+    ],
+    "binding": []
+  },
+  {
+    "error": "unknown field",
+    "graph": [
+      [
+        "/relations/urn:invoice:accepts/steps/1/right/field",
+        null,
+        "urn:invoice:amount"
+      ]
+    ],
+    "binding": []
+  },
+  {
+    "error": "incompatible types",
+    "graph": [
+      [
+        "/relations/urn:invoice:accepts/steps/1/right",
+        null,
+        {
+          "kind": "argument",
+          "id": "urn:invoice:units"
+        }
+      ]
+    ],
+    "binding": []
+  },
+  {
+    "error": "ill-typed fallible relation call",
+    "graph": [
+      [
+        "/relations/urn:invoice:accepts/steps/2/right/call/arguments",
+        null,
+        []
+      ]
+    ],
+    "binding": []
+  },
+  {
+    "error": "ill-typed fallible relation call",
+    "graph": [
+      [
+        "/relations/urn:invoice:accepts/failure",
+        null,
+        null
+      ]
+    ],
+    "binding": []
+  },
+  {
+    "error": "duplicate native relation",
+    "graph": [],
+    "binding": [
+      [
+        "/relations/urn:invoice:accepts/name",
+        null,
+        "valid"
+      ]
+    ]
+  }
+]

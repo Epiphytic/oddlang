@@ -1,0 +1,301 @@
+[
+  {
+    "name": "accepted"
+  },
+  {
+    "name": "repeat",
+    "base": "accepted"
+  },
+  {
+    "name": "short-cap",
+    "error": "nested codec minimum exceeds slot",
+    "base": "accepted",
+    "changes": [
+      {
+        "set": "/components/1/graph/layout/1/encoding/maximum",
+        "value": 5
+      }
+    ]
+  },
+  {
+    "name": "wide-cap",
+    "base": "accepted",
+    "changes": [
+      {
+        "set": "/components/1/graph/layout/1/encoding/maximum",
+        "value": 7
+      }
+    ]
+  },
+  {
+    "name": "independent-caps",
+    "base": "accepted",
+    "changes": [
+      {
+        "set": "/components/1/graph/maximum",
+        "value": 18
+      },
+      {
+        "set": "/components/1/graph/layout/1/encoding/maximum",
+        "value": 11
+      },
+      {
+        "set": "/components/1/graph/externalRecords/urn:geology:layer/codecMaximum",
+        "value": 12
+      },
+      {
+        "set": "/components/2/graph/maximum",
+        "value": 12
+      },
+      {
+        "set": "/components/2/graph/layout",
+        "value": [
+          {
+            "id": "urn:geology:depth",
+            "encoding": {
+              "kind": "signed-be",
+              "bits": 16
+            }
+          },
+          {
+            "id": "urn:geology:mark",
+            "encoding": {
+              "kind": "fixed-bytes",
+              "size": 4
+            }
+          },
+          {
+            "id": "urn:geology:note",
+            "encoding": {
+              "kind": "bytes",
+              "minimum": 0,
+              "maximum": 2,
+              "overflow": "urn:geology:error:invalid"
+            }
+          }
+        ]
+      },
+      {
+        "set": "/components/2/overlay/names/urn:geology:note",
+        "value": "note"
+      },
+      {
+        "set": "/components/2/rootReexports",
+        "value": [
+          "Layer"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "missing",
+    "error": "nested codec identity has no pinned package export",
+    "base": "accepted",
+    "dropLastComponent": true
+  },
+  {
+    "name": "duplicate",
+    "error": "ambiguous pinned nested codec",
+    "base": "accepted",
+    "duplicateLayer": true
+  },
+  {
+    "name": "renamed",
+    "error": "nested codec member mismatch",
+    "base": "accepted",
+    "changes": [
+      {
+        "set": "/components/2/overlay/names/urn:geology:depth",
+        "value": "position"
+      }
+    ]
+  },
+  {
+    "name": "sign-width",
+    "error": "nested codec member mismatch",
+    "base": "accepted",
+    "changes": [
+      {
+        "set": "/components/2/graph/layout/0/encoding/bits",
+        "value": 8
+      }
+    ]
+  },
+  {
+    "name": "array-width",
+    "error": "nested codec member mismatch",
+    "base": "accepted",
+    "changes": [
+      {
+        "set": "/components/2/graph/layout/1/encoding/size",
+        "value": 3
+      }
+    ]
+  },
+  {
+    "name": "unsigned",
+    "error": "nested codec member mismatch",
+    "base": "accepted",
+    "changes": [
+      {
+        "set": "/components/2/graph/layout/0/encoding/kind",
+        "value": "unsigned-be"
+      },
+      {
+        "set": "/components/2/graph/layout/0/encoding/minimum",
+        "value": 0
+      },
+      {
+        "set": "/components/2/graph/layout/0/encoding/maximum",
+        "value": 15
+      }
+    ]
+  },
+  {
+    "name": "untrusted-pin",
+    "error": "input digest mismatch",
+    "base": "accepted",
+    "changes": [
+      {
+        "set": "/components/2/stalePin",
+        "value": "graph"
+      }
+    ]
+  },
+  {
+    "name": "wrong-identity",
+    "error": "nested codec identity mismatch",
+    "base": "accepted",
+    "changes": [
+      {
+        "set": "/components/2/graph/id",
+        "value": "urn:geology:other-layer"
+      }
+    ]
+  },
+  {
+    "name": "missing-member",
+    "error": "nested codec member mismatch",
+    "base": "accepted",
+    "changes": [
+      {
+        "remove": "/components/1/graph/externalRecords/urn:geology:layer/fields/urn:geology:mark"
+      },
+      {
+        "set": "/components/1/graph/externalRecords/urn:geology:layer/fields/urn:geology:unknown",
+        "value": {
+          "kind": "fixed-bytes",
+          "size": 4
+        }
+      },
+      {
+        "remove": "/components/1/overlay/externalRecords/urn:geology:layer/fields/urn:geology:mark"
+      },
+      {
+        "set": "/components/1/overlay/externalRecords/urn:geology:layer/fields/urn:geology:unknown",
+        "value": "mark"
+      }
+    ]
+  },
+  {
+    "name": "standalone-fragment",
+    "base": "accepted",
+    "changes": [
+      {
+        "set": "/components/2/graph/fragment",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "cycle",
+    "error": "cyclic required nested codec slots",
+    "base": "accepted",
+    "changes": [
+      {
+        "set": "/components/1/graph/layout/1/encoding/maximum",
+        "value": 12
+      },
+      {
+        "set": "/components/2/graph/maximum",
+        "value": 12
+      },
+      {
+        "set": "/components/2/graph/layout",
+        "value": [
+          {
+            "id": "urn:geology:depth",
+            "encoding": {
+              "kind": "signed-be",
+              "bits": 16
+            }
+          },
+          {
+            "id": "urn:geology:mark",
+            "encoding": {
+              "kind": "fixed-bytes",
+              "size": 4
+            }
+          },
+          {
+            "id": "urn:geology:cycle",
+            "encoding": {
+              "kind": "nested",
+              "record": "urn:geology:sample",
+              "maximum": 12,
+              "overflow": "urn:geology:error:invalid"
+            }
+          }
+        ]
+      },
+      {
+        "set": "/components/2/graph/externalRecords",
+        "value": {
+          "urn:geology:sample": {
+            "fields": {}
+          }
+        }
+      },
+      {
+        "set": "/components/2/overlay/names/urn:geology:cycle",
+        "value": "cycle"
+      },
+      {
+        "set": "/components/2/overlay/externalRecords",
+        "value": {
+          "urn:geology:sample": {
+            "path": "crate::Sample",
+            "fields": {}
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "unexported",
+    "error": "nested codec identity has no pinned package export",
+    "base": "accepted",
+    "changes": [
+      {
+        "set": "/components/1/overlay/externalRecords/urn:geology:layer/path",
+        "value": "crate::Layer"
+      }
+    ]
+  },
+  {
+    "name": "root-export",
+    "base": "accepted",
+    "changes": [
+      {
+        "set": "/components/1/overlay/externalRecords/urn:geology:layer/path",
+        "value": "crate::Layer"
+      },
+      {
+        "set": "/components/2/rootReexports",
+        "value": [
+          "Layer"
+        ]
+      }
+    ]
+  }
+]

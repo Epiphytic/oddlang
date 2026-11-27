@@ -1,0 +1,43 @@
+{
+  "host": "aarch64-apple-darwin",
+  "rust": "1.97.1",
+  "regression": "The previous unit test assumed the active Cargo output directory was target/ even when cargo metadata reported an external CARGO_TARGET_DIR.",
+  "cliTest": "capture_excludes_configured_cargo_outputs_and_nested_packages",
+  "fixtureTargetDirectories": [
+    "target",
+    "local-cache"
+  ],
+  "fixtureBuildDirectory": "build-cache",
+  "expectedSourceFilesPerCapture": 9,
+  "checks": [
+    "all source digests",
+    "inactive module",
+    "edition",
+    "nested package exclusion",
+    "configured output exclusions"
+  ],
+  "libraryTestsPassed": 32,
+  "providerInteropTestsPassed": 4,
+  "rustRoundtripTestsPassed": 5,
+  "includesSixBuildNativeControl": true,
+  "packageAliasRegression": {
+    "cliTest": "capture_handles_cargo_outputs_reported_through_a_package_alias",
+    "beforeFix": "The importer read an invalid generated .rs file under a Cargo output directory whose parent was a symlink to the package.",
+    "configurations": [
+      "package alias in target directory path",
+      "package alias and symlink leaf in build directory path"
+    ],
+    "originalMarmishRevision": "af54339d250290490d62d4475a77539b7e739071",
+    "crate": "marmish-stream",
+    "sourceFiles": [
+      "codec.rs",
+      "copy_protocol.rs",
+      "lib.rs",
+      "windows.rs",
+      "wire.rs"
+    ],
+    "bundleComparison": "Recursive comparison of a pristine capture and capture through the package alias found identical files. Each regenerated Rust source matched its original.",
+    "lockSha256": "f936373f48aae38e67302a425737e2ceaa888a2a404442399ace21d58925d709",
+    "regeneratedReleaseTestsPassed": 29
+  }
+}

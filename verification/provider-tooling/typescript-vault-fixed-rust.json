@@ -1,0 +1,69 @@
+{
+  "companionRevision": "ce71a5b662d5a8a703ac2b7b0c71e78052e50106",
+  "historicalVerifierRevision": "5f5b49304a93db00112954a7ceda35eecb492c07",
+  "historicalReplayDifferences": [
+    "companionRevision",
+    "verifierSha256"
+  ],
+  "archivedReceiptDifferences": [
+    "companionRevision",
+    "compilerSha256",
+    "verifierSha256"
+  ],
+  "archiveSha256": "5a758eb4641bf18781f9dc1a9337e732d7eba3fb77e34a3ebd74d5c6932c044c",
+  "dirtyQualificationInputsRejected": true,
+  "receipt": {
+    "frameworkCommit": "0f8410636148e3afa96005c9c24390fbd32eb602",
+    "companionRevision": "ce71a5b662d5a8a703ac2b7b0c71e78052e50106",
+    "node": "v22.22.2",
+    "platform": "aarch64-apple-darwin",
+    "graphSha256": "f87cf4fad9f37189dd02c5a4179e90017380bfbc8affb867eab5fc23a2d6047b",
+    "nativeGraphQualificationSha256": "5b3667cef31a601c0a9c366400c4a24525582dec5a4b2790c113da0ec8277b4b",
+    "compilerSha256": "6bd35774e909bb30994e48588191edc88a51839f30757a8e196a7a1ccf63807e",
+    "verifierSha256": "e4c6681812bc72a3aed7c809c0c265605e0e9160aefe1aad6780cc64a28eaf91",
+    "nodeWitnessSha256": "3fb641acd38345a19d55422b7adbcfdcaead632cb6d51f477f607d781ef734c9",
+    "deniedReadProbes": [
+      "rustBinding",
+      "rustWitness"
+    ],
+    "inputFiles": [
+      "domain.json"
+    ],
+    "artifactSha256": {
+      "obligations.json": "27bbc6a027e783d6da552ef8f463870567fb8c352a3e4fb73fbd008f85d92562",
+      "projection.lock": "76b8f0fbcf47d2a21cf6753774223528496f0340b2c20919afba0f0b006e114f",
+      "values.mts": "55b6e2a351875cc584be90f7da8f9029d4a01230bab94513a6f654526060ba82"
+    },
+    "reorderedGraphEmitsIdenticalArtifacts": true,
+    "baseline": {
+      "short": "urn:marmish:vault:error:malformed",
+      "long": "urn:marmish:vault:error:malformed",
+      "owned": {
+        "id": "urn:marmish:vault:secret",
+        "width": 32,
+        "inputCopy": true,
+        "outputCopy": true
+      },
+      "shadowedWidth": "urn:marmish:vault:error:malformed",
+      "crossRealm": true,
+      "detached": "urn:marmish:vault:error:malformed"
+    },
+    "widthMutation": {
+      "short": "urn:marmish:vault:error:malformed",
+      "long": "urn:marmish:vault:error:malformed",
+      "owned": {
+        "id": "urn:marmish:vault:secret",
+        "width": 31,
+        "inputCopy": true,
+        "outputCopy": true
+      },
+      "shadowedWidth": "urn:marmish:vault:error:malformed",
+      "crossRealm": true,
+      "detached": "urn:marmish:vault:error:malformed"
+    },
+    "disposal": {
+      "qualification": "unsupported",
+      "reason": "Node.js provides no deterministic destruction or storage erasure for this value."
+    }
+  }
+}

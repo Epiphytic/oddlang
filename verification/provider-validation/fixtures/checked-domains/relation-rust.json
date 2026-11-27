@@ -1,0 +1,38 @@
+{
+  "format": "oddlang-field-relation-rust-v1",
+  "types": {
+    "urn:invoice:Approval": "crate::Approval",
+    "urn:invoice:Quote": "crate::Quote"
+  },
+  "fields": {
+    "urn:invoice:owner": "owner",
+    "urn:invoice:amount": "amount",
+    "urn:invoice:payee": "payee"
+  },
+  "calls": {
+    "urn:invoice:approval-valid": "valid",
+    "urn:invoice:quote-total": "total"
+  },
+  "relations": {
+    "urn:invoice:accepts": {
+      "name": "accepts",
+      "arguments": {
+        "urn:invoice:quote": "quote",
+        "urn:invoice:units": "units"
+      }
+    },
+    "urn:invoice:names-owner": {
+      "name": "names_owner",
+      "arguments": {
+        "urn:invoice:candidate": "candidate"
+      }
+    }
+  },
+  "errorType": "crate::Fault",
+  "errors": {
+    "urn:invoice:mismatch": {
+      "variant": "Reason",
+      "argument": "wrong quote"
+    }
+  }
+}

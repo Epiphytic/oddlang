@@ -1,0 +1,14 @@
+{
+  "auditedCompanionRevision": "27989951fe2f491f7092cf36994937121e9c75fa",
+  "previousRevision": "5c2d50e453e44b8124945ca312e4dd4eb615f545",
+  "reproducedTableSha256": "f6d3294799f972d90a46437766ef76778bc99504ddd0126a25e4e62719247fbb",
+  "remainingProjectToolFiles": 64,
+  "remainingProjectExtensions": {
+    ".py": 64
+  },
+  "removedSincePrevious": [
+    "verification/whole/engine-native-records/verify.py",
+    "verification/whole/engine-public-error/verify.py"
+  ],
+  "addedSincePrevious": []
+}

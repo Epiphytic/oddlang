@@ -17,7 +17,9 @@ The independent [observatory fixture](../../verification/command-surface/) compa
 
 ```sh
 cargo build --locked --offline
-python3 verification/command-surface/check.py target/debug/oddlang
+for suite in check prefix terminal; do
+  cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin command-surface -- "$suite" target/debug/oddlang
+done
 ```
 
 A graph may declare `terminal_subparsers`, keyed by canonical immediate

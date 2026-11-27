@@ -1,0 +1,27 @@
+impl CommandRestrictions {
+    pub fn from_json(bytes: &[u8]) -> Result<Self, &'static str> {
+        let policy: Self = serde_json::from_slice(bytes).map_err(|_| "config_schema")?;
+        policy.validate_bounds()?;
+        Ok(policy)
+    }
+
+    fn validate_bounds(&self) -> Result<(), &'static str> {
+        if self.version != POLICY_VERSION || self.entries.len() > POLICY_KEYS {
+            return Err("config_policy_bounds");
+        }
+        for entry in &self.entries {
+            restriction_principal(&entry.principal)?;
+        }
+        let mut count = 0;
+        for (pattern, _) in self.defaults.patterns(true).chain(
+            self.entries
+                .iter()
+                .flat_map(|entry| entry.restrictions.patterns(false)),
+        ) {
+            count += 1;
+            if count > POLICY_PATTERNS || pattern.len() > POLICY_PATTERN_BYTES {
+                return Err("config_policy_bounds");
+            }
+        }
+        Ok(())
+    }

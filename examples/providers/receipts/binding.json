@@ -1,0 +1,22 @@
+{
+  "capability": "example.library-binding",
+  "dependencies": [],
+  "evidence": [],
+  "exports": [],
+  "files": {
+    "binding.json": "8d29f71629f656fb040d97c418747aba7f4a5f92c17cc8d97a4ef8d20c65c050"
+  },
+  "format": "oddlang-provider-receipt-v1",
+  "gaps": [],
+  "provider": {
+    "componentSha256": "6de1c0648fff9324e860c442af08bb005cab420782da5e6886ccead9ad056655",
+    "configuration": {
+      "rustType": "std::time::Duration"
+    },
+    "schemaSha256": "c489e5d5b9c57d71048b5f8b47c1bbd333af8fa97f13fa619e4ba441a32d8084",
+    "world": "oddlang:provider/generate@1.0.0"
+  },
+  "requestSha256": "4202d422cfbce52262fd544cfc173f404aedf9f44ba8f2078a01b377010ee36d",
+  "role": "generate",
+  "version": "1"
+}

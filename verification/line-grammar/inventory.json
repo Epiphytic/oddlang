@@ -1,0 +1,172 @@
+{
+  "graph": {
+    "format": "oddlang-line-grammar-v1",
+    "id": "urn:inventory:receipt",
+    "maxBytes": 120,
+    "forbiddenBytes": [
+      9,
+      13
+    ],
+    "textGrammars": [
+      {
+        "format": "oddlang-text-grammar-v1",
+        "id": "urn:inventory:batch-grammar",
+        "prefixes": [
+          "v5."
+        ],
+        "body": {
+          "notation": "canonical-ascii-decimal",
+          "bits": 16,
+          "minimum": 0
+        },
+        "suffix": {
+          "delimiter": "-rc.",
+          "body": {
+            "notation": "canonical-ascii-decimal",
+            "bits": 16,
+            "minimum": 1
+          }
+        },
+        "consumption": "entire-input"
+      }
+    ],
+    "rows": [
+      [
+        {
+          "kind": "literal",
+          "text": "stock"
+        },
+        {
+          "kind": "literal",
+          "text": "1"
+        }
+      ],
+      [
+        {
+          "kind": "literal",
+          "text": "batch"
+        },
+        {
+          "kind": "text",
+          "capture": "batch",
+          "grammar": "urn:inventory:batch-grammar"
+        }
+      ],
+      [
+        {
+          "kind": "literal",
+          "text": "track"
+        },
+        {
+          "kind": "split",
+          "capture": "track",
+          "delimiter": "=",
+          "left": {
+            "kind": "text",
+            "capture": "family",
+            "choices": [
+              "east",
+              "west"
+            ]
+          },
+          "right": {
+            "kind": "split",
+            "delimiter": ".",
+            "left": {
+              "kind": "decimal",
+              "bits": 16,
+              "minimum": 0
+            },
+            "right": {
+              "kind": "decimal",
+              "bits": 8,
+              "minimum": 1,
+              "capture": "count"
+            }
+          }
+        }
+      ],
+      [
+        {
+          "kind": "literal",
+          "text": "unit"
+        },
+        {
+          "kind": "literal",
+          "text": "probe",
+          "capture": "item"
+        },
+        {
+          "kind": "split",
+          "delimiter": "=",
+          "left": {
+            "kind": "text",
+            "choices": [
+              "A",
+              "B"
+            ]
+          },
+          "right": {
+            "kind": "decimal",
+            "bits": 8,
+            "minimum": 1
+          }
+        },
+        {
+          "kind": "radix16",
+          "capture": "hash",
+          "digits": 4,
+          "decode": true
+        },
+        {
+          "kind": "integer-token",
+          "text": "0664",
+          "bits": 16,
+          "value": 436,
+          "capture": "limit"
+        },
+        {
+          "kind": "decimal",
+          "bits": 32,
+          "minimum": 1,
+          "maximum": 16,
+          "capture": "amount"
+        }
+      ],
+      [
+        {
+          "kind": "literal",
+          "text": "ready"
+        },
+        {
+          "kind": "boolean",
+          "capture": "ready",
+          "falseToken": "no",
+          "trueToken": "yes"
+        }
+      ],
+      [
+        {
+          "kind": "literal",
+          "text": "end"
+        }
+      ]
+    ]
+  },
+  "overlay": {
+    "format": "oddlang-line-captures-rust-v1",
+    "reader": "read_report",
+    "record": "Report",
+    "captureNames": {
+      "batch": "batch",
+      "track": "track",
+      "family": "family",
+      "count": "count",
+      "item": "item",
+      "hash": "hash",
+      "limit": "limit",
+      "amount": "amount",
+      "ready": "ready"
+    }
+  }
+}

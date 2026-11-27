@@ -1,0 +1,217 @@
+{
+  "graph": {
+    "format": "oddlang-binary-record-v1",
+    "id": "urn:reading:record",
+    "maximum": 32,
+    "layout": [
+      {
+        "id": "urn:reading:count",
+        "encoding": {
+          "kind": "unsigned-be",
+          "bits": 16,
+          "minimum": 0,
+          "maximum": 10,
+          "readError": "urn:reading:error:counter",
+          "valueError": "urn:reading:error:counter"
+        }
+      },
+      {
+        "id": "urn:reading:has_flags",
+        "encoding": {
+          "kind": "bool",
+          "error": "urn:reading:error:bool"
+        }
+      },
+      {
+        "id": "urn:reading:flags",
+        "encoding": {
+          "kind": "optional",
+          "payload": {
+            "kind": "unsigned-be",
+            "bits": 8
+          },
+          "error": "urn:reading:error:option"
+        }
+      },
+      {
+        "id": "urn:reading:position",
+        "encoding": {
+          "kind": "optional",
+          "payload": {
+            "kind": "record",
+            "id": "urn:reading:Position"
+          },
+          "error": "urn:reading:error:option"
+        }
+      },
+      {
+        "id": "urn:reading:seed",
+        "encoding": {
+          "kind": "fixed-bytes",
+          "size": 3
+        }
+      },
+      {
+        "id": "urn:reading:route",
+        "encoding": {
+          "kind": "enum-u8",
+          "external": "urn:reading:Route",
+          "tags": {
+            "urn:reading:Local": 7
+          },
+          "error": "urn:reading:error:route"
+        }
+      },
+      {
+        "id": "urn:reading:cluster",
+        "encoding": {
+          "kind": "bytes",
+          "minimum": 1,
+          "maximum": 4,
+          "excludes": [
+            0
+          ],
+          "overflow": "urn:reading:error:large",
+          "valueError": "urn:reading:error:cluster"
+        }
+      }
+    ],
+    "errors": {
+      "value": "urn:reading:error:counter",
+      "decodeSize": "urn:reading:error:large",
+      "encodeSize": "urn:reading:error:large",
+      "truncated": "urn:reading:error:short",
+      "trailing": "urn:reading:error:extra"
+    },
+    "records": {
+      "urn:reading:Position": {
+        "fields": [
+          {
+            "id": "urn:reading:degrees",
+            "bits": 64,
+            "signed": true
+          },
+          {
+            "id": "urn:reading:fraction",
+            "bits": 16
+          }
+        ]
+      }
+    },
+    "guards": [
+      {
+        "id": "urn:reading:guard:presence",
+        "error": "urn:reading:error:metadata",
+        "condition": {
+          "kind": "presence-equals",
+          "flag": "urn:reading:has_flags",
+          "optional": "urn:reading:flags"
+        }
+      },
+      {
+        "id": "urn:reading:guard:mask",
+        "error": "urn:reading:error:metadata",
+        "condition": {
+          "kind": "optional-mask",
+          "optional": "urn:reading:flags",
+          "allowed": 7,
+          "required": 2
+        }
+      },
+      {
+        "id": "urn:reading:guard:fraction",
+        "error": "urn:reading:error:metadata",
+        "condition": {
+          "kind": "optional-member-range",
+          "optional": "urn:reading:position",
+          "member": "urn:reading:fraction",
+          "minimum": 0,
+          "maximum": 999
+        }
+      }
+    ],
+    "hashViews": {
+      "urn:reading:index": {
+        "algorithm": "sha256",
+        "domain": [
+          5,
+          0
+        ],
+        "fields": [
+          "urn:reading:seed",
+          "urn:reading:route"
+        ],
+        "prefix": "r-"
+      }
+    }
+  },
+  "binding": {
+    "format": "oddlang-binary-record-rust-v1",
+    "name": "Reading",
+    "names": {
+      "urn:reading:count": "count",
+      "urn:reading:has_flags": "has_flags",
+      "urn:reading:flags": "flags",
+      "urn:reading:position": "position",
+      "urn:reading:seed": "seed",
+      "urn:reading:Position": "Position",
+      "urn:reading:degrees": "degrees",
+      "urn:reading:fraction": "fraction",
+      "urn:reading:route": "route",
+      "urn:reading:cluster": "cluster"
+    },
+    "externals": {
+      "urn:reading:Route": {
+        "path": "crate::Route",
+        "variants": {
+          "urn:reading:Local": "Local"
+        }
+      }
+    },
+    "errorType": "crate::Fault",
+    "errors": {
+      "urn:reading:error:bool": {
+        "variant": "Code",
+        "argument": "bool"
+      },
+      "urn:reading:error:option": {
+        "variant": "Code",
+        "argument": "option"
+      },
+      "urn:reading:error:large": {
+        "variant": "Code",
+        "argument": "large"
+      },
+      "urn:reading:error:short": {
+        "variant": "Code",
+        "argument": "short"
+      },
+      "urn:reading:error:extra": {
+        "variant": "Code",
+        "argument": "extra"
+      },
+      "urn:reading:error:metadata": {
+        "variant": "Code",
+        "argument": "metadata"
+      },
+      "urn:reading:error:counter": {
+        "variant": "Code",
+        "argument": "counter"
+      },
+      "urn:reading:error:route": {
+        "variant": "Code",
+        "argument": "route"
+      },
+      "urn:reading:error:cluster": {
+        "variant": "Code",
+        "argument": "cluster"
+      }
+    },
+    "hashViews": {
+      "urn:reading:index": {
+        "method": "index",
+        "library": "sha2"
+      }
+    }
+  }
+}

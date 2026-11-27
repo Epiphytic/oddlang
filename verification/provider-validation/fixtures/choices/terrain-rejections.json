@@ -1,0 +1,57 @@
+[
+  [
+    "use serde::{Deserialize, Serialize as WireSerialize};\n#[derive(Debug, Clone, PartialEq, Eq, WireSerialize, Deserialize)]\npub enum Terrain {\n    Granite,\n    #[serde(rename = \"shallow-marsh\")]\n    Marsh,\n}\n",
+    "stale",
+    "source digest mismatch"
+  ],
+  [
+    "use other::{Deserialize, Serialize as WireSerialize};\n#[derive(Debug, Clone, PartialEq, Eq, WireSerialize, Deserialize)]\npub enum Terrain {\n    #[serde(rename = \"wet-ground\")]\n    Marsh,\n    Granite,\n}\n",
+    "wrong-import",
+    "unresolved Serde derive"
+  ],
+  [
+    "use fault::Serialize as WireSerialize;\nuse serde::{Deserialize, Serialize as WireSerialize};\n#[derive(Debug, Clone, PartialEq, Eq, WireSerialize, Deserialize)]\npub enum Terrain {\n    #[serde(rename = \"wet-ground\")]\n    Marsh,\n    Granite,\n}\n",
+    "ambiguous-import",
+    "ambiguous derive binding"
+  ],
+  [
+    "use serde::{Deserialize, Serialize as WireSerialize};\n#[derive(Debug, Clone, PartialEq, Eq, WireSerialize, Deserialize)]\npub enum Terrain {\n    #[serde(rename(serialize = \"wet-ground\"))]\n    Marsh,\n    Granite,\n}\n",
+    "directional",
+    "unsupported Serde variant attribute"
+  ],
+  [
+    "use serde::{Deserialize, Serialize as WireSerialize};\n#[derive(Debug, Clone, PartialEq, Eq, WireSerialize, Deserialize)]\npub enum Terrain {\n    #[serde(rename = \"wet-ground\")]\n    Marsh,\n    Granite(u64),\n}\n",
+    "payload",
+    "expected unconditional unit variant"
+  ],
+  [
+    "use serde::{Deserialize, Serialize as WireSerialize};\n#[derive(Debug, Clone, PartialEq, Eq, WireSerialize, Deserialize)]\npub enum Terrain {\n    #[serde(rename = \"wet-ground\")]\n    Marsh,\n    Granite = 2,\n}\n",
+    "discriminant",
+    "expected unconditional unit variant"
+  ],
+  [
+    "use serde::{Deserialize, Serialize as WireSerialize};\n#[derive(Debug, Clone, PartialEq, Eq, WireSerialize, Deserialize)]\n#[serde(rename_all = \"snake_case\")]\npub enum Terrain {\n    #[serde(rename = \"wet-ground\")]\n    Marsh,\n    Granite,\n}\n",
+    "rename-all",
+    "unsupported enum attribute"
+  ],
+  [
+    "use serde::{Deserialize, Serialize as WireSerialize};\n#[derive(Debug, Clone, PartialEq, Eq, WireSerialize, Deserialize)]\npub enum Terrain {\n    #[serde(rename = \"wet-ground\")]\n    Marsh,\n    Granite,\n}\n\nimpl Terrain { pub fn extra(&self) {} }",
+    "extra-impl",
+    "selected enum has an additional binding"
+  ],
+  [
+    "use serde::{Deserialize, Serialize as WireSerialize};\n#[derive(Debug, Clone, PartialEq, Eq, WireSerialize, Deserialize)]\npub enum Terrain {\n    #[serde(rename = \"wet-ground\")]\n    Marsh,\n    Granite,\n}\n\nuse local::*;",
+    "glob",
+    "unsupported derive scope"
+  ],
+  [
+    "use serde::{Deserialize, Serialize as WireSerialize};\n#[derive(Debug, Clone, PartialEq, Eq, WireSerialize, Deserialize)]\npub enum Terrain {\n    #[serde(rename = \"wet-ground\")]\n    Marsh,\n    Granite,\n}\n\nuse std::clone::Clone as Debug;",
+    "stock-shadow",
+    "shadowed Serde or stock derive"
+  ],
+  [
+    "use serde::{Deserialize, Serialize as WireSerialize};\n#[derive(Debug, Clone, PartialEq, Eq, WireSerialize, Deserialize)]\npub enum Terrain {\n    #[serde(rename = \"wet-ground\")]\n    Marsh,\n    Granite,\n}\n\n#[macro_use] mod extra {}",
+    "macro-use",
+    "unsupported derive scope"
+  ]
+]

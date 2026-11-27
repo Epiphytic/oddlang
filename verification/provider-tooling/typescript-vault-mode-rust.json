@@ -1,0 +1,56 @@
+{
+  "host": "aarch64-apple-darwin",
+  "companionRevision": "5f5b49304a93db00112954a7ceda35eecb492c07",
+  "historicalVerifierRevision": "9d7bb12b129d6bc6873fec50e67e6dcfbd85a4fd",
+  "archiveSha256": "b2394be9b813f4f77b5e0239203feb1f2d6831c0e76732b9cda9251118e38302",
+  "differentReceiptFields": [
+    "verifierSha256"
+  ],
+  "rejectedBeforeWritingReceipt": [
+    "wrong compiler checkout",
+    "external target argument inside compiler checkout"
+  ],
+  "receipt": {
+    "publication": "154ab6d9a085eac755acd197b2a55e53158a5999",
+    "framework": "86b23552d02f67ee7156a4ce0ece3e07c1fc3fb0",
+    "compilerSha256": "4d25a91ff8aeee9b728b92a9a5930ce52862b48eea3a4a700bbb18ffb0678351",
+    "node": "v22.22.2",
+    "typescript": "Version 5.9.3",
+    "graphSha256": "96e2f288f7279b7639d72d460efda9c93b3a0b0ea8cea2b6494baf4785e1de73",
+    "verifierSha256": "17f8896c9bd0eb46ff6d38761ce224efa54fa658619af92e64972eab93d8490c",
+    "nativeWitnessRevision": "622f2a23f3549a902d4bd96d4214ffe05330991b",
+    "nativeWitnessSha256": {
+      "aarch64-apple-darwin": "3f364159883db1c66fe0566cb769c9dcdbe86d2921b169f4473000f37293ea00",
+      "aarch64-unknown-linux-gnu": "7772f6b38131a61b4091a53b97f0f2a1f0cc77b7a9a848321fcad5a3942c3141"
+    },
+    "typescriptBindingSha256": "80b5aad3eb1c0dd04daaac86d89cc0662b5bcac57af9bbe96776ae1aa750b52f",
+    "projection": {
+      "bindingSha256": "e07026c5d4544e8c93b779a95a76ea21c31fc2584526882e2b0290537b216677",
+      "domainSha256": "96e2f288f7279b7639d72d460efda9c93b3a0b0ea8cea2b6494baf4785e1de73",
+      "format": "oddlang-checked-values-typescript-lock-v1",
+      "obligationsSha256": "260e705b6b864df3ebcefafa2eae1744a17e32b5d774f54d3a823fc982a39911",
+      "sourceSha256": "cb9089490b57a82c8a58f0a4471fffd8a3e8178ca6dc38bcdf24db40d7d78b96"
+    },
+    "declarationSha256": "8e089ef4d164a1c90784bc148ab545c53fc046cec0aaadff6344841afb9b9022",
+    "observations": {
+      "ordinals": [
+        0,
+        1
+      ],
+      "recovered": [
+        0,
+        1
+      ],
+      "equality": "none",
+      "hostStrictEquality": {
+        "sameOrdinal": true,
+        "distinctOrdinals": false
+      }
+    },
+    "staticRejections": [
+      "unchecked ordinal",
+      "total equality",
+      "partial equality"
+    ]
+  }
+}

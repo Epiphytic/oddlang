@@ -1,0 +1,73 @@
+{
+  "format": "oddlang-json-wire-protocol-rust-v1",
+  "errorType": "crate::Failure",
+  "errors": {
+    "urn:radio:size:variant": "Oversize",
+    "urn:radio:bad:variant": "Malformed",
+    "urn:radio:range:variant": "Range",
+    "urn:radio:early:variant": "Early"
+  },
+  "constants": {
+    "urn:radio:protocol": "PROTOCOL",
+    "urn:radio:version": "FORMAT"
+  },
+  "fields": {
+    "urn:radio:tx:seq": "sequence",
+    "urn:radio:tx:level": "gain",
+    "urn:radio:rx:seq": "sequence",
+    "urn:radio:rx:bit": "reading",
+    "urn:radio:scan-plan": "plan",
+    "urn:radio:scan-seq": "sequence"
+  },
+  "endpoints": {
+    "urn:radio:tx": {
+      "type": "Transmit",
+      "encode": "encode_message",
+      "decode": "decode_message",
+      "derives": [
+        "Clone",
+        "PartialEq",
+        "Eq"
+      ],
+      "timed": "validate_at"
+    },
+    "urn:radio:rx": {
+      "type": "Readback",
+      "encode": "encode_reply",
+      "decode": "decode_reply",
+      "derives": [
+        "Clone",
+        "PartialEq",
+        "Eq"
+      ],
+      "timed": "validate_at"
+    },
+    "urn:radio:scan-operation": {
+      "type": "Scan",
+      "encode": "encode_scan",
+      "decode": "decode_scan",
+      "derives": [
+        "Clone",
+        "PartialEq",
+        "Eq"
+      ]
+    }
+  },
+  "auxiliary": {
+    "urn:radio:raw-digest": "raw_digest",
+    "urn:radio:tx-digest": "transmit_digest",
+    "urn:radio:level-arg": "gain",
+    "urn:radio:token-alias": "Token",
+    "urn:radio:token-encoding": "token_hex",
+    "urn:radio:cal-hash": "cal_digest",
+    "urn:radio:burst-hash": "burst_digest",
+    "urn:radio:samples-arg": "budget",
+    "urn:radio:sensor-arg": "sensor",
+    "urn:radio:token-arg": "token"
+  },
+  "foreignMembers": {
+    "urn:radio:probe-check": "permit",
+    "urn:radio:probe-estimate": "estimate"
+  },
+  "internalEnvelope": true
+}

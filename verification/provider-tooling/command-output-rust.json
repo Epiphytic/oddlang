@@ -1,0 +1,16 @@
+{
+  "host": "aarch64-apple-darwin",
+  "companionRevision": "45558860cbbd2600d812fdf8c3581f69b5ce3cb8",
+  "scope": "Offline verifier and harness regression tests",
+  "archivedDirectReceiptSha256": "704b175b96d5372f031ed2b8f210d6329a7cc1955c399431180e1e98e7aec2af",
+  "historicalDirectReceiptByteIdentical": true,
+  "matchedStatusAndStreamReceipts": 9,
+  "matchedGoodputComparisons": 12,
+  "elapsedNanosecondsCompared": [
+    1,
+    2000000000,
+    330000000000
+  ],
+  "nativeTestGroupsPassed": 3,
+  "pythonHarnessTestsPassed": 18
+}

@@ -1,0 +1,214 @@
+[
+  {
+    "name": "tagged-short-offset",
+    "operation": "frame_decode",
+    "input": "050000000700000000000000",
+    "expected": {
+      "error": "Invalid",
+      "detail": "copy_truncated"
+    }
+  },
+  {
+    "name": "tagged-control-cap-minus-one",
+    "operation": "frame_decode",
+    "input": "ff00003fff",
+    "expected": {
+      "error": "Invalid",
+      "detail": "copy_frame_length"
+    }
+  },
+  {
+    "name": "tagged-control-cap",
+    "operation": "frame_decode",
+    "input": "ff00004000",
+    "expected": {
+      "error": "Invalid",
+      "detail": "copy_frame_length"
+    }
+  },
+  {
+    "name": "tagged-data-payload-minus-one",
+    "operation": "frame_encode",
+    "input": {
+      "kind": "data",
+      "offset": 0,
+      "bytes": {
+        "prefix": "",
+        "byte": 255,
+        "repeat": 8191
+      }
+    },
+    "expected": {
+      "prefix": "05000020070000000000000000",
+      "byte": 255,
+      "repeat": 8191
+    }
+  },
+  {
+    "name": "tagged-encode-8193-valid-offset",
+    "operation": "frame_encode",
+    "input": {
+      "kind": "data",
+      "offset": 0,
+      "bytes": {
+        "prefix": "",
+        "byte": 255,
+        "repeat": 8193
+      }
+    },
+    "expected": {
+      "error": "Limit"
+    }
+  },
+  {
+    "name": "tagged-encode-8193-invalid-offset",
+    "operation": "frame_encode",
+    "input": {
+      "kind": "data",
+      "offset": 18446744073709551615,
+      "bytes": {
+        "prefix": "",
+        "byte": 255,
+        "repeat": 8193
+      }
+    },
+    "expected": {
+      "error": "Limit"
+    }
+  },
+  {
+    "name": "tagged-encode-u64-max",
+    "operation": "frame_encode",
+    "input": {
+      "kind": "data",
+      "offset": 18446744073709551615,
+      "bytes": "ff"
+    },
+    "expected": {
+      "error": "Offset"
+    }
+  },
+  {
+    "name": "tagged-decode-u64-max",
+    "operation": "frame_decode",
+    "input": "0500000009ffffffffffffffffff",
+    "expected": {
+      "error": "Offset"
+    }
+  },
+  {
+    "name": "tagged-data-length-mismatch",
+    "operation": "frame_decode",
+    "input": "05000000090000000000000000",
+    "expected": {
+      "error": "Invalid",
+      "detail": "copy_frame_length"
+    }
+  },
+  {
+    "name": "tagged-bytewise-stream",
+    "operation": "frame_fragments",
+    "input": [
+      "05",
+      "00",
+      "00",
+      "00",
+      "09",
+      "00",
+      "00",
+      "00",
+      "00",
+      "00",
+      "00",
+      "00",
+      "00",
+      "ff",
+      "finish"
+    ],
+    "expected": [
+      {
+        "consumed": 1,
+        "frame": null
+      },
+      {
+        "consumed": 1,
+        "frame": null
+      },
+      {
+        "consumed": 1,
+        "frame": null
+      },
+      {
+        "consumed": 1,
+        "frame": null
+      },
+      {
+        "consumed": 1,
+        "frame": null
+      },
+      {
+        "consumed": 1,
+        "frame": null
+      },
+      {
+        "consumed": 1,
+        "frame": null
+      },
+      {
+        "consumed": 1,
+        "frame": null
+      },
+      {
+        "consumed": 1,
+        "frame": null
+      },
+      {
+        "consumed": 1,
+        "frame": null
+      },
+      {
+        "consumed": 1,
+        "frame": null
+      },
+      {
+        "consumed": 1,
+        "frame": null
+      },
+      {
+        "consumed": 1,
+        "frame": null
+      },
+      {
+        "consumed": 1,
+        "frame": {
+          "kind": "data",
+          "offset": 0,
+          "bytes": "ff"
+        }
+      },
+      "ok"
+    ]
+  },
+  {
+    "name": "tagged-latched-cap",
+    "operation": "frame_fragments",
+    "input": [
+      "ff00004001",
+      "05000000090000000000000000ff",
+      "finish"
+    ],
+    "expected": [
+      {
+        "error": "Limit"
+      },
+      {
+        "error": "Invalid",
+        "detail": "copy_decoder_failed"
+      },
+      {
+        "error": "Invalid",
+        "detail": "copy_truncated"
+      }
+    ]
+  }
+]

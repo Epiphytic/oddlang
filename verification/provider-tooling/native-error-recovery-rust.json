@@ -1,0 +1,44 @@
+{
+  "companionRevision": "ad8700882e2deb81ecba45a7e87ca187722211af",
+  "frameworkRevision": "0813a35b7da0ccf9af56d5b6c068175c362fcfed",
+  "host": "aarch64-apple-darwin",
+  "recoveryFrameworkRevision": "40148302be04b3452bb5f1512207c0b7b31ad9c2",
+  "originalRevision": "af54339d250290490d62d4475a77539b7e739071",
+  "byteIdenticalRecoveryEvidence": {
+    "receipt.json": "7cc34a72547e08a5cf88acf707393e823bed9c126a2cb3a6ae2f4c35565cccd5",
+    "baseline.txt": "b00a963d4a03f8d237f05bee23e2d6964b271e8d9abf7fa2fa3a7b7e7a210c6c",
+    "mutant.txt": "61b9929c83254cfab3f25e02c748e96759f5ecff9e6b0dca4453d16f9b8013ee"
+  },
+  "currentCompilerRecovery": {
+    "graph.json": "846d248e700cd6572be06e882f6b1075608361cc646656a6dd1b4ca723ba5d34",
+    "rust.json": "28fc57f8fe5241d391b275200eaed55c96a26c928834fc6f2ed45aae85d2df8a",
+    "observation.json": "fedcdd523a252a473458994f6f6da518b56ae26e2a2954d3f2ba13a0384ad5e5"
+  },
+  "freshCombinedReceiptSha256": "09c5c8aa6c3d3aac3728ca65277f949fed1fc839ea4eb427cfbf860bb402a9bd",
+  "archivedCombinedReceiptSha256": "ce48c4a1bec2a88ff0392a336de3990c742815cd7bd4b36fd61455688edf436e",
+  "combinedFrameworkRevision": "da0ea5dedd1adfa8513b7f3f8d536713958bcecb",
+  "pythonComparisonRevision": "3baf30f16d1bb2654c95c0c03117475159a3796a",
+  "freshRustAndPythonReceiptsByteIdentical": true,
+  "combinedBinaryComparison": {
+    "marmish": {
+      "archived": "d23e4f3e5f3dbf42022041c9fd2093d8b02ad1c49f1757b949978abcf8f5cfe6",
+      "fresh": "f1383fdb3f111c0f3b948288133ccd6e87e0e6f083df64842189bfca8f8096cb",
+      "checkedInvocations": 16
+    },
+    "marmishd": {
+      "archived": "4d62f1b9cfc75ba65a7ef72724f62f2a409cccaaa72ae82135ca697d53c33e4f",
+      "fresh": "b73da9437e2ac144ff01c9d217f2b6cc3ea13b57d9a0297e10af834c174a7cff",
+      "checkedInvocations": 16
+    }
+  },
+  "combinedStagedInputs": 59,
+  "combinedWorkspaceLockSha256": "485c9ff1ec5da1e901d8a426d514b8c17ddce61c49d2a15dbde781357d6e4857",
+  "unifiedWorkspaceObservation": {
+    "nativeErrorRows": 32,
+    "nativeErrorStdoutSha256": "b00a963d4a03f8d237f05bee23e2d6964b271e8d9abf7fa2fa3a7b7e7a210c6c"
+  },
+  "controls": [
+    "Mutating the single copy quota category changed capacity to transfer_limit on both the original and regenerated libraries. Both 32-row transcripts equal the archived expectations.",
+    "The combined verifier rejected the wrong framework checkout. The recovery verifier preserved the contents of an existing output directory."
+  ]
+}

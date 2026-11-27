@@ -22,15 +22,15 @@ The [combined workspace qualification](https://github.com/Epiphytic/marmish-oddl
 - [x] Combine the native package inputs in the companion, checking each changed member against its parent. Include the two private parser tests, the observational records, the copy-only vault mode, terminal CLI metadata and structured diagnostics.
 - [x] Cold-build on native Darwin and Linux ARM64 with the original source hidden and publish the resulting workspace lock. Run the public import audit, named upstream tests and CLI comparisons against those artifacts. Keep separately tested cases out of the counts for the combined workspace.
 
-From a clean compiler checkout, build with `cargo +1.96.1 build --locked --offline`, then run `cargo +1.96.1 test --locked --offline --lib`. Set `cli=$PWD/target/debug/oddlang` and run each of the following with `python3 -B verification/PATH "$cli"`:
+From a clean compiler checkout, build with `cargo +1.96.1 build --locked --offline`, then run `cargo +1.96.1 test --locked --offline --lib`. Set `cli=$PWD/target/debug/oddlang`. Run the Rust qualification binaries with `cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin BIN -- [SUBCOMMAND] "$cli"`.
 
-- `line-grammar/verify_records.py`, `line-grammar/verify_support.py` and `line-grammar/verify.py`
-- `observational-record-defaults/verify.py` and `plain-value-choices/equality.py`
-- `structured-diagnostics/check.py` and `command-surface/prefix.py`
+- `line-grammar` with each of the `records`, `support` and `inventory` subcommands
+- `record-defaults` and the `equality` subcommand of `qualify-choices`
+- `structured-diagnostics` and the `prefix` subcommand of `command-surface`
 
 All seven fixture commands and the 13 library tests passed on Darwin ARM64. They qualify compiler composition. The application results below come from separate sealed builds.
 
-The [compiler qualification receipt](../../../verification/structural-profile-composition/aarch64-apple-darwin.json) also covers the unrelated typed finite error fixture and the two text-grammar integration tests. Repeat these with `python3 -B verification/typed-finite-errors/verify.py "$cli"` and `cargo +1.96.1 test --locked --offline --test text_grammar`.
+The [compiler qualification receipt](../../../verification/structural-profile-composition/aarch64-apple-darwin.json) also covers the unrelated typed finite error fixture and the two text-grammar integration tests. Repeat these with `cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin typed-finite-errors -- "$cli"` and `cargo +1.96.1 test --locked --offline --test text_grammar`.
 
 Both ARM64 hosts built the seven-member application with workspace lock `5abf57c811d641ba126c32dde208334d85d47374bbfbb983231783a403f24df4`. Each matched 164 terminal CLI cases and all 224 private release-parser vectors, including 34 accepted inputs. One separately observed post-parse CLI error still differs per executable. The Darwin import audit passed 77 of the 140 inventoried names. The [application receipts](https://github.com/Epiphytic/marmish-oddlang/pull/103) identify the exact artifacts and probes.
 

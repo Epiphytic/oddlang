@@ -1,0 +1,52 @@
+{
+  "format": "oddlang-binary-record-v1",
+  "id": "urn:parts:Copy",
+  "maximum": 64,
+  "fragment": true,
+  "errors": {
+    "value": "urn:parts:invalid",
+    "decodeSize": "urn:parts:limit",
+    "encodeSize": "urn:parts:limit",
+    "trailing": "urn:parts:invalid",
+    "truncated": "urn:parts:invalid"
+  },
+  "layout": [
+    {
+      "id": "urn:parts:count",
+      "encoding": {
+        "kind": "optional",
+        "payload": {
+          "kind": "unsigned-be",
+          "bits": 32
+        },
+        "error": "urn:parts:invalid"
+      }
+    },
+    {
+      "id": "urn:parts:first",
+      "encoding": {
+        "kind": "fixed-bytes",
+        "size": 2
+      }
+    },
+    {
+      "id": "urn:parts:second",
+      "encoding": {
+        "kind": "fixed-bytes",
+        "size": 2
+      }
+    }
+  ],
+  "guards": [
+    {
+      "id": "urn:parts:odd",
+      "error": "urn:parts:invalid",
+      "condition": {
+        "kind": "optional-mask",
+        "optional": "urn:parts:count",
+        "allowed": 4294967295,
+        "required": 1
+      }
+    }
+  ]
+}

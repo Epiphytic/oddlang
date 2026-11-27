@@ -1,0 +1,33 @@
+{
+  "companion": "61f69a9df4192a1d765298c56b431e1b4214ed79",
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "framework": "da1b0033ae9345c2d8288b4164d4fd1dbf5bcade",
+  "host": "aarch64-apple-darwin",
+  "workspaceLockSha256": "a09599c28e2f7349cd83aa5a61cd26d49568c89940373fbc9ed19d047fa5a57a",
+  "parser": {
+    "harness": "marmish-native/lib/marmish_native",
+    "cases": {
+      "native_manifest::tests::shared_release_version_vectors": 1,
+      "native_manifest::tests::strict_vectors": 1
+    },
+    "leaf": "marmish-native/src/group_10/__projection_10.rs",
+    "prefix": "native_manifest::__projection_10",
+    "vector": "tools/release-version-vectors.json",
+    "digests": {
+      "manifestTests": "6012150c30678a0ccaddd4475249132528d174ab0bf62750dd9c9e5073dcfae8",
+      "releaseVersionVectors": "b07696eda226714f8bd5f6a725be662d1a7df4ec1693c2bfd30a78df0dc3b6c1"
+    },
+    "denied": [
+      "companionCaller",
+      "externalCheckoutExample",
+      "frameworkLibrary",
+      "originalLibrary",
+      "referenceExecutable"
+    ]
+  },
+  "stagedFilesByteIdentical": true,
+  "archivedParserCaseCountsMatched": true,
+  "unstagedSuccessfulZeroTestFilterRejected": true,
+  "suiteCrateTests": 10,
+  "workspaceProductTests": 3
+}

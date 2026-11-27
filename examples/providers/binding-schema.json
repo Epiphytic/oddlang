@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "iri",
+      "iriNamespaces": [
+        "urn:example:"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

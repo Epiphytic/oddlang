@@ -1,0 +1,15 @@
+{
+  "format": "oddlang-shared-declarations-v1",
+  "id": "urn:fixture:choice-domain",
+  "stringEnums": [
+    {
+      "id": "urn:fixture:state",
+      "variants": [
+        {
+          "id": "urn:fixture:state:collected",
+          "wire": "collected"
+        }
+      ]
+    }
+  ]
+}

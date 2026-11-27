@@ -6,11 +6,13 @@ Both tests ran through their ordinary generated CLI binaries. The earlier statel
 
 ```sh
 cargo +1.97.1 build --locked --offline --release --bin oddlang
-python3 -B verification/local-owner-workflow/check.py target/release/oddlang
-python3 -B verification/local-command-client/check.py target/release/oddlang
+cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin local-owner-workflow -- workflow target/release/oddlang
+cargo +1.97.1 run --offline --locked --manifest-path verification/provider-validation/Cargo.toml --bin field-meter-projection -- --with-sockets target/release/oddlang
 cargo +1.97.1 test --locked --offline --release --lib
 ```
 
 Claude Opus 5.5 approved the scoped primitive in Claude Code auto mode. The review found that captures could otherwise survive a path that failed to refresh them. Incoming-state analysis and explicit transfer now constrain their lifetime. Request encoding, build-time size checks and fixture coverage were expanded after review.
 
 The companion's [pinned upstream local-owner witness](https://github.com/Epiphytic/marmish-oddlang/blob/2c986260f6cbebf489b3330899ab1067fe03b7b7/verification/whole/basic-command-interop/upstream-local-owner-aarch64-apple-darwin.json) separately measures status, room preparation and submit. The workflow's fixture establishes the reusable mechanics. Marmish's local application policy and the actual generated client and owner need separate runtime evidence.
+
+The Rust verifier reads the case files in `workflow/`, `delivery/`, and `deferred/`. They preserve the independent peer’s exact JSON bytes, process status, and hexadecimal stdout and stderr from the historical meter fixtures.

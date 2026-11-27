@@ -1,0 +1,48 @@
+{
+  "companionRevision": "4d7d17011396084e431dbf8b6d66ddccca225055",
+  "host": "aarch64-apple-darwin",
+  "matchingArchivedObservations": {
+    "engine-public-error": {
+      "archiveSha256": "410f18455e3f0b0a77aea19313190931fc6d7f2bf7876b3792b197a8bef680d0",
+      "workspaceLockSha256": "d89469b03c3cb808181a154424b07ad43fcaee8191dee191e5cb5d3da950cc3c",
+      "bufferedInput": {
+        "scope": "Private in-memory buffered reader",
+        "standalonePackageLockSha256": "f22e68aedf8f1c842e1dc5eca928d9aa3e0976e194ad6f6f88ab301bb8b6e34f",
+        "originalWitnessSha256": "543bbfe72bcb8bb5c1a8b81480c142facfc09c0e764239ca38936319588f77fc",
+        "standaloneGeneratedWitnessSha256": "d65a804c689892a8967943b3840a728ef3f50a5a05d528562a4d83cf26386553",
+        "observationsSha256": "93d7d4773a6dd43cde84f68bef973876a295b5a468e5a1b2f58da06089f64f5f",
+        "erasureProvider": {
+          "name": "zeroize",
+          "version": "1.9.1",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "e13084392c5e4bc371903e2935a5eaeed24905a7511356b883835e18a78f6879"
+        },
+        "passed": [
+          "secret_request_tests::private_reader_wipes_consumed_spans",
+          "buffer_contract_observations::retained_span_and_consumed_bytes",
+          "buffer_contract_observations::failed_refill_retains_prior_end",
+          "buffer_contract_observations::zero_output_still_reads_and_eof_can_be_polled_again"
+        ]
+      }
+    },
+    "prototype-constant": {
+      "archiveSha256": "1fb8f63841490769fabb6631a86ecf3dd9882ebdae453211b43f9709584d1e05",
+      "workspaceLockSha256": "fbddb3a4d7bd543fba52f3fb0015b29dcf07e79154aca9ba2984893cb8633142",
+      "bufferedInput": {
+        "passed": [
+          "secret_request_tests::private_reader_wipes_consumed_spans",
+          "buffer_contract_observations::retained_span_and_consumed_bytes",
+          "buffer_contract_observations::failed_refill_retains_prior_end",
+          "buffer_contract_observations::zero_output_still_reads_and_eof_can_be_polled_again"
+        ],
+        "privateReaderLeafSha256": "e04583de9468f4b12e1c0a626e68ee42034df5f5f03177f7297f95197fccc690"
+      }
+    }
+  },
+  "changedPredecessorRejectedWithoutReceipt": true,
+  "verifiedDownstreamImports": [
+    "canonical-workspace",
+    "converged-public-api",
+    "engine-native-records"
+  ]
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "name": "bad-mask",
+    "error": "invalid binary record guard",
+    "changes": [
+      {
+        "set": "/graph/guards/1/condition/required",
+        "value": 8
+      }
+    ]
+  },
+  {
+    "name": "bad-method",
+    "error": "invalid binary hash method",
+    "changes": [
+      {
+        "set": "/binding/hashViews/urn:reading:index/method",
+        "value": "clone"
+      }
+    ]
+  }
+]

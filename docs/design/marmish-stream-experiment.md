@@ -21,7 +21,7 @@ feature selection.
 | Distinct inputs in each mode | 348, including all five package Rust sources |
 | Independent wire and state corpus | 50 passed |
 
-The [baseline collector](../../scripts/marmish/stream_baseline.py) records
+The [baseline collector](../../verification/marmish-inventory/src/bin/stream-baseline.rs) records
 compiler invocations, file hashes, environment dependencies, test module
 spans, and named test results. The frozen
 [stable receipt](../../examples/marmish/evidence/stream-baseline/stable-original.json.gz)
@@ -69,7 +69,7 @@ Its bootstrap materializes the crate at its existing path with the same
 name, version, dependencies and Rust bytes. No package code was added to
 the generic importer or emitter for this experiment.
 
-The [qualification runner](../../scripts/marmish/qualify_stream_workspace.py)
+The [qualification runner](../../verification/marmish-inventory/src/bin/stream-workspace.rs)
 unpacks a Git archive in a fresh directory. Separate Seatbelt profiles
 isolate the graph emitter, repository bootstrap, and native Cargo build.
 Permission probes cover the upstream checkout, Git object data from both
@@ -98,7 +98,7 @@ per direction. Each executable records its binding to the package
 sources, role, workspace provenance and freshly built library hashes.
 A reauthorized graph changed one Data tag from 5 to 12. That graph built
 under isolation and failed exactly the two encoding cases in the
-[independent mutation check](../../scripts/marmish/stream_mutation.py).
+[independent mutation check](../../verification/marmish-inventory/src/bin/stream-mutation.rs).
 
 The separately pinned [nightly adapter](../../verification/rust-inventory/README.md)
 matched 1,247 Rustdoc definitions and 41 compiler invocations across the

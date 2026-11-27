@@ -1,0 +1,180 @@
+[
+  {
+    "name": "warm-ready-reserve-sample",
+    "unit": true,
+    "exchanges": [
+      {
+        "request": "{\"probe\":\"probe\"}",
+        "response": "{\"state\":\"warming\"}"
+      },
+      {
+        "request": "{\"probe\":\"probe\"}",
+        "response": "{\"state\":\"ready\",\"mode\":\"priority\"}"
+      },
+      {
+        "request": "{\"reserve\":\"reserve\",\"unit\":\"kelvin\"}",
+        "response": "{\"result\":\"registered\",\"slot\":\"b00c\"}"
+      },
+      {
+        "request": "{\"sample\":\"measure\",\"slot\":\"b00c\"}",
+        "response": "{\"result\":\"done\"}"
+      }
+    ],
+    "status": 0,
+    "stdoutHex": "",
+    "stderrHex": ""
+  },
+  {
+    "name": "busy",
+    "unit": true,
+    "exchanges": [
+      {
+        "request": "{\"probe\":\"probe\"}",
+        "response": "{\"state\":\"ready\",\"mode\":\"priority\"}"
+      },
+      {
+        "request": "{\"reserve\":\"reserve\",\"unit\":\"kelvin\"}",
+        "response": "{\"result\":\"registered\",\"slot\":\"b00c\"}"
+      },
+      {
+        "request": "{\"sample\":\"measure\",\"slot\":\"b00c\"}",
+        "response": "{\"result\":\"unavailable\"}"
+      }
+    ],
+    "status": 14,
+    "stdoutHex": "",
+    "stderrHex": "64657669636520627573790a"
+  },
+  {
+    "name": "malformed-capture",
+    "unit": true,
+    "exchanges": [
+      {
+        "request": "{\"probe\":\"probe\"}",
+        "response": "{\"state\":\"ready\",\"mode\":\"priority\"}"
+      },
+      {
+        "request": "{\"reserve\":\"reserve\",\"unit\":\"kelvin\"}",
+        "response": "{\"result\":\"registered\",\"slot\":\"oops\"}"
+      }
+    ],
+    "status": 12,
+    "stdoutHex": "",
+    "stderrHex": "756e6578706563746564207265706c790a"
+  },
+  {
+    "name": "exchange-budget",
+    "unit": true,
+    "exchanges": [
+      {
+        "request": "{\"probe\":\"probe\"}",
+        "response": "{\"state\":\"warming\"}"
+      },
+      {
+        "request": "{\"probe\":\"probe\"}",
+        "response": "{\"state\":\"warming\"}"
+      },
+      {
+        "request": "{\"probe\":\"probe\"}",
+        "response": "{\"state\":\"warming\"}"
+      },
+      {
+        "request": "{\"probe\":\"probe\"}",
+        "response": "{\"state\":\"warming\"}"
+      }
+    ],
+    "status": 13,
+    "stdoutHex": "",
+    "stderrHex": "65786368616e6765206275646765740a"
+  },
+  {
+    "name": "unexpected-state",
+    "unit": true,
+    "exchanges": [
+      {
+        "request": "{\"probe\":\"probe\"}",
+        "response": "{\"state\":\"unexpected\"}"
+      }
+    ],
+    "status": 15,
+    "stdoutHex": "",
+    "stderrHex": "756e6b6e6f776e2073746174650a"
+  },
+  {
+    "name": "duplicate-key",
+    "unit": true,
+    "exchanges": [
+      {
+        "request": "{\"probe\":\"probe\"}",
+        "response": "{\"state\":\"warming\",\"state\":\"ready\"}"
+      }
+    ],
+    "status": 10,
+    "stdoutHex": "",
+    "stderrHex": "626164206672616d65204a534f4e0a"
+  },
+  {
+    "name": "deadline",
+    "unit": true,
+    "exchanges": [
+      {
+        "request": "{\"probe\":\"probe\"}",
+        "response": null
+      }
+    ],
+    "status": 11,
+    "stdoutHex": "",
+    "stderrHex": "646561646c696e650a"
+  },
+  {
+    "name": "frame-bound",
+    "unit": true,
+    "exchanges": [
+      {
+        "request": "{\"probe\":\"probe\"}",
+        "response": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    ],
+    "status": 9,
+    "stdoutHex": "",
+    "stderrHex": "626164206672616d652073697a650a"
+  },
+  {
+    "name": "missing-unit",
+    "unit": false,
+    "exchanges": [
+      {
+        "request": "{\"probe\":\"probe\"}",
+        "response": "{\"state\":\"ready\",\"mode\":\"priority\"}"
+      }
+    ],
+    "status": 6,
+    "stdoutHex": "",
+    "stderrHex": "6d697373696e6720617267756d656e740a"
+  },
+  {
+    "name": "explicit-carry",
+    "unit": true,
+    "exchanges": [
+      {
+        "request": "{\"probe\":\"probe\"}",
+        "response": "{\"state\":\"ready\",\"mode\":\"priority\"}"
+      },
+      {
+        "request": "{\"reserve\":\"reserve\",\"unit\":\"kelvin\"}",
+        "response": "{\"result\":\"registered\",\"slot\":\"b00c\"}"
+      },
+      {
+        "request": "{\"sample\":\"measure\",\"slot\":\"b00c\"}",
+        "response": "{\"result\":\"refresh\"}"
+      },
+      {
+        "request": "{\"sample\":\"measure\",\"slot\":\"b00c\"}",
+        "response": "{\"result\":\"done\"}"
+      }
+    ],
+    "status": 0,
+    "stdoutHex": "",
+    "stderrHex": ""
+  }
+]

@@ -1,0 +1,84 @@
+{
+  "host": "aarch64-apple-darwin",
+  "companionRevision": "a3b34ffd1e6431b46f1d0f620216ed3adc4196fa",
+  "archivedFieldDifferences": [
+    "preflightSha256"
+  ],
+  "replays": [
+    {
+      "archive": "generated-preflight-aarch64-apple-darwin.json",
+      "buildReceiptSha256": "d4c7c74cc03b3b3b18682188a8439ffc0e3485bc508760cfcd49fbae86447ddd",
+      "cases": 6,
+      "exitCodes": {
+        "authorize": 125,
+        "daemonWithoutState": 125,
+        "detachedSubmit": 125,
+        "foregroundSubmit": 125,
+        "setup": 125,
+        "wait": 125
+      },
+      "newReceiptSha256": "1b5a083c180df678dc2a8df7ac45c3d147ad5329c9178fbdfb6e0a05eaf2993e"
+    },
+    {
+      "archive": "profile-setup-preflight-macos-arm64.json",
+      "buildReceiptSha256": "a002231a2c51b18bcc08ed866e2eb517b38ef7e9a960abda744102ce6fc8e6ae",
+      "cases": 6,
+      "exitCodes": {
+        "authorize": 125,
+        "daemonWithoutState": 125,
+        "detachedSubmit": 125,
+        "foregroundSubmit": 125,
+        "setup": 1,
+        "wait": 125
+      },
+      "newReceiptSha256": "a4c8a6ba1f0024832f83e6fc849b82ea265ecdde0fd0a09a436a6a546debcf97"
+    },
+    {
+      "archive": "profile-setup-initial-preflight-macos-arm64.json",
+      "buildReceiptSha256": "5b14a6f48156cb0f8f6e59a33e7a8111ec131f5bb01cf65135a342935971b222",
+      "cases": 6,
+      "exitCodes": {
+        "authorize": 125,
+        "daemonWithoutState": 125,
+        "detachedSubmit": 125,
+        "foregroundSubmit": 125,
+        "setup": 1,
+        "wait": 125
+      },
+      "newReceiptSha256": "eab8b2c08a474a5b9a30e6f05923fc3f141af9258c428cef6a95e12785fb2e4c"
+    },
+    {
+      "archive": "bounded-owner-prepare-preflight-aarch64-apple-darwin.json",
+      "buildReceiptSha256": "9f6da7040b955fb85272572a1a3fa12e87addf22305398dec8e06fcd882af9d7",
+      "cases": 2,
+      "exitCodes": {
+        "setupWithoutFileProvider": 1,
+        "foregroundWithoutState": 125
+      },
+      "newReceiptSha256": "cef62d1d8e689ea7ce2a62e36eb75598dfe26d4784acbafe2302474a4c1802f5"
+    },
+    {
+      "archive": "bounded-owner-prepare-fixed-preflight-aarch64-apple-darwin.json",
+      "buildReceiptSha256": "ced6d82150d00bfb4dc385a941ab85a9eef7fe994424fc80fc1da51281d60df5",
+      "cases": 2,
+      "exitCodes": {
+        "setupWithoutFileProvider": 1,
+        "foregroundWithoutState": 125
+      },
+      "newReceiptSha256": "f5053faa531ddf41d693da8327e37657c04d4e86f1c6062efa379f64e7fa32cf"
+    }
+  ],
+  "negativeControls": {
+    "wrong receipt digest": true,
+    "read denial": true,
+    "composition pin": true,
+    "artifact set": true,
+    "symlink receipt": true,
+    "symlink marmish": true,
+    "changed marmish": true,
+    "symlink marmishd": true,
+    "changed marmishd": true,
+    "existing receipt preserved": true
+  },
+  "seatbeltPolicyTest": "preflight_and_build_limit_reads_writes_and_network"
+}

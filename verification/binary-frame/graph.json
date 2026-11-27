@@ -1,0 +1,127 @@
+{
+  "format": "oddlang-binary-frame-v1",
+  "id": "urn:meter:messages",
+  "maximum": 16,
+  "errors": {
+    "header": "urn:meter:error:header",
+    "length": "urn:meter:error:length",
+    "limit": "urn:meter:error:limit",
+    "tag": "urn:meter:error:tag",
+    "truncated": "urn:meter:error:truncated",
+    "trailing": "urn:meter:error:trailing",
+    "decoderFailed": "urn:meter:error:decoderFailed"
+  },
+  "types": {
+    "urn:meter:header": {
+      "kind": "fragment"
+    },
+    "urn:meter:existing-type": {
+      "kind": "fragment"
+    }
+  },
+  "cases": {
+    "urn:meter:panel": {
+      "tag": 22,
+      "form": "tuple",
+      "slots": [
+        {
+          "id": "urn:meter:device",
+          "encoding": {
+            "kind": "fragment",
+            "id": "urn:meter:header"
+          }
+        }
+      ]
+    },
+    "urn:meter:samples": {
+      "tag": 23,
+      "form": "named",
+      "slots": [
+        {
+          "id": "urn:meter:index",
+          "encoding": {
+            "kind": "unsigned",
+            "bits": 64,
+            "maximum": 12,
+            "error": "urn:meter:error:range"
+          }
+        },
+        {
+          "id": "urn:meter:data",
+          "encoding": {
+            "kind": "rest",
+            "minimum": 1,
+            "maximum": 8,
+            "error": "urn:meter:error:data"
+          }
+        }
+      ],
+      "encodeGuards": [
+        {
+          "id": "urn:meter:count",
+          "error": "urn:meter:error:data",
+          "require": {
+            "kind": "count",
+            "field": "urn:meter:data"
+          }
+        },
+        {
+          "id": "urn:meter:encode-end",
+          "error": "urn:meter:error:range",
+          "require": {
+            "kind": "end-at-most",
+            "offset": "urn:meter:index",
+            "bytes": "urn:meter:data",
+            "maximum": 12
+          }
+        }
+      ],
+      "decodeGuards": [
+        {
+          "id": "urn:meter:decode-end",
+          "error": "urn:meter:error:range",
+          "require": {
+            "kind": "end-at-most",
+            "offset": "urn:meter:index",
+            "bytes": "urn:meter:data",
+            "maximum": 12
+          }
+        }
+      ]
+    },
+    "urn:meter:existing-case": {
+      "tag": 25,
+      "form": "tuple",
+      "slots": [
+        {
+          "id": "urn:meter:existing",
+          "encoding": {
+            "kind": "fragment",
+            "id": "urn:meter:existing-type"
+          }
+        }
+      ]
+    },
+    "urn:meter:seal": {
+      "tag": 24,
+      "form": "tuple",
+      "slots": [
+        {
+          "id": "urn:meter:seal-id",
+          "encoding": {
+            "kind": "fixed",
+            "size": 2
+          }
+        },
+        {
+          "id": "urn:meter:stamp",
+          "encoding": {
+            "kind": "literal",
+            "value": 91,
+            "error": "urn:meter:error:stamp"
+          }
+        }
+      ]
+    }
+  }
+}

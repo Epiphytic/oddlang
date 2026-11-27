@@ -1,0 +1,26 @@
+{
+  "alteredPeerRejections": 8,
+  "baselineSha256": "91dbfd538635c8bdd92503df9553de761df77560e335fe59011b4d6eadd10514",
+  "candidateArchiveSha256": "495558839a82960e321693e1be3cbe59b8358c576070f75ca6aca0060dcbbd93",
+  "candidateBundleSha256": "f936373f48aae38e67302a425737e2ceaa888a2a404442399ace21d58925d709",
+  "candidateCases": 50,
+  "candidateCommit": "7eca9d87ae696ba7cc790f735c7e596618f4d317",
+  "candidateToOriginalRecords": 9,
+  "driverSourceSha256": "6b5caa2a7d19af3960248ae86e7f175d4d142939efa7074c65ea6126eced8b1e",
+  "format": "oddlang-stream-driver-rust-replay-v1",
+  "historicalObservationRowsMatch": true,
+  "mutationMismatches": [
+    "binary-data-encode",
+    "maximum-data-encode"
+  ],
+  "originalCases": 50,
+  "originalCommit": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+  "originalDriverBinarySha256": "8d20caeb6a64d723d6a982984bdaebfd557f263984d432d954f2c4463feb6090",
+  "originalReceiptSha256": "8c1270112f4811c9c91db0c6c7c949b43b146700cc524566ccb970c706cdbc6e",
+  "originalToCandidateRecords": 9,
+  "platform": "aarch64-apple-darwin",
+  "qualifiedCaller": "scripts/marmish/qualify_stream_workspace.py run_oracle with network-denying Seatbelt profile",
+  "rust": "1.97.1",
+  "samePathNonincrementalOriginalReceiptsByteIdentical": true,
+  "vectorsSha256": "8bf576e1223d9cd916be67595b94ae4064aa7f3c87365a977bc5dd303273ec52"
+}

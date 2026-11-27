@@ -1,0 +1,40 @@
+{
+  "format": "oddlang-binary-frame-rust-v1",
+  "name": "Packet",
+  "decoder": "PacketDecoder",
+  "errorType": "crate::Fault",
+  "errors": {
+    "urn:packet:header": {
+      "variant": "Header"
+    },
+    "urn:packet:length": {
+      "variant": "Length"
+    },
+    "urn:packet:limit": {
+      "variant": "Limit"
+    },
+    "urn:packet:tag": {
+      "variant": "Tag"
+    },
+    "urn:packet:truncated": {
+      "variant": "Truncated"
+    },
+    "urn:packet:trailing": {
+      "variant": "Trailing"
+    },
+    "urn:packet:decoderFailed": {
+      "variant": "DecoderFailed"
+    }
+  },
+  "cases": {
+    "urn:packet:Key": "Key",
+    "urn:packet:Reading": "Reading"
+  },
+  "fields": {
+    "urn:packet:Key:first": "first",
+    "urn:packet:Key:second": "second",
+    "urn:packet:Reading:footer": "footer",
+    "urn:packet:Reading:value": "value"
+  },
+  "types": {}
+}

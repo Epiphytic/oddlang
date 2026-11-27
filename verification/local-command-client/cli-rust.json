@@ -1,0 +1,1 @@
+{"executable": "field-meter", "invalid_exit": 2, "uncovered_exit": 125, "operations": {"read": "urn:field:read"}, "handlers": {"urn:field:read": ["device", "measure"]}}

@@ -1,0 +1,22 @@
+{
+  "host": "aarch64-apple-darwin",
+  "companionRevision": "b9c546e34895e92037908c428c33e1005d849221",
+  "historicalObserverRevision": "388caf95ccf6eafebba9a51bcf8265dac4c3703c",
+  "archivedReceiptPath": "verification/whole/legacy/macos-arm64.json",
+  "identicalReceiptBytes": 1929,
+  "receiptSha256": "a4802b629f2e65cfe96d8727018bb3567df645a24f4557af92fb63a5a961f1ce",
+  "fixtureRevision": "37c248a11239e108afc9bd4ee62b8f60542012e3",
+  "upstreamRevision": "af54339d250290490d62d4475a77539b7e739071",
+  "wnBinarySha256": "5c14580ee968fa7514e4e98462e77e3ed030eaecd8e6f5dfa0fb7fbdfbe259ec",
+  "probeSha256": "ff5b1713273a883fd6d7e58ceb04687bb9ce5b9fe5a838eb547d07c1ac8ca661",
+  "versionStdout": "Unverified binary observation; no runtime provenance or live egress approval.\nwn 0.10.3\n",
+  "versionStderr": "",
+  "exitStatus": 0,
+  "rejectedWithoutReceipt": [
+    "wrong checkout revision",
+    "wrong wnd manifest digest",
+    "different original probe executable",
+    "exact stdout with exit 7",
+    "exact stdout with stderr"
+  ]
+}

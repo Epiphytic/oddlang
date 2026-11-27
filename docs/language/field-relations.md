@@ -8,7 +8,7 @@ A relation with a `failure` returns a typed result and stops at the first unequa
 
 The Rust overlay supplies crate-local type paths, field names, native call names and method names. It binds each mismatch to a Rust error variant and optional static text argument. Record arguments are borrowed, opaque named arguments are passed by value and must declare Copy when passed to a fallible call, and byte and text arguments borrow slices. Byte and text fields and return values use owned vectors and strings. Equality borrows native operands. A comparison may directly use a checked return value without storing or subsequently exposing it.
 
-The package component `field-relation` adds inherent methods to generated types. Its package entry has no reexports of its own. [Independent precedence fixture](../../verification/field-relation/verify.py)
+The package component `field-relation` adds inherent methods to generated types. Its package entry has no reexports of its own. Run the independent precedence fixture with `cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin qualify-domains -- field-relation /path/to/oddlang`.
 
 ## Compiler-backed recovery of direct conjunctions
 
@@ -18,4 +18,4 @@ The receipt contains the compiler commit, selected method, source line, Cargo-re
 
 Run `oddlang recover field-conjunction CRATE_ROOT SOURCE EVIDENCE SELECTION TEMPLATE OVERLAY GRAPH`. The selection provides the stable relation IRI and the SHA-256 of both the selected source and the receipt. The template supplies a vacant boolean relation and a stable record vocabulary. The Rust overlay associates names with stable identities. A successful recovery populates the ordered comparisons and checks the normal graph invariants. Build the projected package using the resulting graph and target overlay. Receipt, source tree and recovery toolchain are provenance inputs for verification.
 
-Run the unrelated native verifier with `python3 verification/rust-recovery/field-conjunction/verify.py target/debug/oddlang`. It compares independent native outputs for two source revisions, checks that an edited secondary Rust file invalidates old evidence, and exercises rejected equality and effects.
+Run the unrelated native verifier with `cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin qualify-rust-recovery -- field-conjunction target/debug/oddlang`. It compares independent native outputs for two source revisions, checks that an edited secondary Rust file invalidates old evidence, and exercises rejected equality and effects.

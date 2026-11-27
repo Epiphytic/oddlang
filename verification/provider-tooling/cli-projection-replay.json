@@ -1,0 +1,44 @@
+{
+  "companionRevision": "dbff4aa5e06f62f1e6fbd20062bd53965ebaf49d",
+  "host": "aarch64-apple-darwin",
+  "frameworkRevision": "c01279eb61ed9e86b51b2eeaf0c5b744397c74a3",
+  "originalRevision": "af54339d250290490d62d4475a77539b7e739071",
+  "recoveredGraphSha256": "588e5599a68b007aea109b61b85a3d2130050842f0d08171e24a5253cc188e08",
+  "stagedInputs": {
+    "graph.json": "588e5599a68b007aea109b61b85a3d2130050842f0d08171e24a5253cc188e08",
+    "marmish.json": "9216373cf3da52811232b6b2b9b89d08b078cae19f16d3fab42a8907412f7a77",
+    "marmishd.json": "b26a47cf3c2127e29800e3282c8509ea32de2ebc7fe36c31f82a580e3bbce923",
+    "package.json": "036c06ce2c8f7d94cc7ba98e1cd84d86efdecdb8e376373826adad3ebe9cdac2",
+    "package.lock": "8487fb792d4963b1f517ecc3f169b918d88358ebd7e0fe81fc728064a4126736",
+    "parser-Cargo.lock": "00b7cc3d2119a6c2e7bea84707c90335d05710d86515a2166d97c56cbfc3ea17",
+    "workspace.json": "af87cab60f4130ecd5b08ae635dd61126e025d55dad60dfedac5a424dc158ae0",
+    "workspace.lock": "a9185b4f7dd3e9b69fdc971f287dcc82e7d289b3e823327f51f625519107feb2"
+  },
+  "identicalGeneratedFiles": {
+    "Cargo.lock": "00b7cc3d2119a6c2e7bea84707c90335d05710d86515a2166d97c56cbfc3ea17",
+    "Cargo.toml": "196cd269aaf822aacab86f8b4090be32869c533603a2339714ac9b5e5ed32cb7",
+    "marmish-native/Cargo.toml": "e6b1b6fe8b8764044ca9c89e0161798e02183d9ef68418af6c8935c30a3efa01",
+    "marmish-native/package.lock": "8487fb792d4963b1f517ecc3f169b918d88358ebd7e0fe81fc728064a4126736",
+    "marmish-native/src/bin/marmish.rs": "d589eb9672c68e2526bafd908b7225063788281b8f8e07daed08b24d6fc5e196",
+    "marmish-native/src/bin/marmishd.rs": "51c608d76c242d4d67a3e5e7299aa187d395ce2dcf0ec139872efdc29bd474ee",
+    "marmish-native/src/group_0/__projection_0.rs": "cb395e293ae05348947b9a45095a69d1d3c9d9be13b89168728ad3d9332dbeaa",
+    "marmish-native/src/group_0/mod.rs": "a9c2e789f6882103d5ae711c4cd67cc0a3e47f403187996c4d68cbdb8bb3802e",
+    "marmish-native/src/group_1/__projection_1.rs": "263fab5cd253a2a8a4226f8ee47cd39b0e71a79ddb5225643056f67f3789a648",
+    "marmish-native/src/group_1/mod.rs": "0fe0db8e24b424125c76a051fd10499c77eea422cd4f38a69f9e555ba9b81f8e",
+    "marmish-native/src/lib.rs": "fc5ae47eb9cb70f14b7d901a0fb4137a517b3b51591539217a464f9794776106",
+    "workspace.lock": "a9185b4f7dd3e9b69fdc971f287dcc82e7d289b3e823327f51f625519107feb2"
+  },
+  "parseOnlyRows": {
+    "marmish": 34,
+    "marmishd": 34
+  },
+  "transcriptSha256": "e3de629983416f1c2823d526916b0426ab98e7e2f5b69f6e24bf396f51fc2746",
+  "rejectedControls": [
+    "original revision",
+    "recovered graph drift",
+    "registry checksum drift",
+    "workspace lock drift",
+    "package lock drift"
+  ],
+  "downstreamStatusRecoveryPassed": true
+}

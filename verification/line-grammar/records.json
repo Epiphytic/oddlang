@@ -1,0 +1,298 @@
+{
+  "graph": {
+    "format": "oddlang-line-grammar-v1",
+    "id": "urn:inventory:structured-log",
+    "maxBytes": 128,
+    "forbiddenBytes": [
+      9,
+      13
+    ],
+    "rows": [
+      [
+        {
+          "kind": "literal",
+          "text": "log",
+          "capture": null
+        },
+        {
+          "kind": "literal",
+          "text": "2",
+          "capture": null
+        }
+      ],
+      [
+        {
+          "kind": "literal",
+          "text": "mode",
+          "capture": null
+        },
+        {
+          "kind": "text",
+          "capture": "mode",
+          "choices": [
+            "indoor",
+            "outdoor"
+          ]
+        },
+        {
+          "kind": "boolean",
+          "capture": "active",
+          "trueToken": "active",
+          "falseToken": "inactive"
+        }
+      ],
+      [
+        {
+          "kind": "literal",
+          "text": "rows",
+          "capture": null
+        },
+        {
+          "kind": "decimal",
+          "capture": "countA",
+          "bits": 16,
+          "minimum": 1
+        },
+        {
+          "kind": "decimal",
+          "capture": "countB",
+          "bits": 16,
+          "minimum": 1
+        }
+      ],
+      [
+        {
+          "kind": "literal",
+          "text": "item",
+          "capture": null
+        },
+        {
+          "kind": "literal",
+          "text": "top",
+          "capture": "nameA"
+        },
+        {
+          "kind": "decimal",
+          "capture": "amountA",
+          "bits": 64,
+          "minimum": 1
+        }
+      ],
+      [
+        {
+          "kind": "literal",
+          "text": "item",
+          "capture": null
+        },
+        {
+          "kind": "literal",
+          "text": "lower",
+          "capture": "nameB"
+        },
+        {
+          "kind": "decimal",
+          "capture": "amountB",
+          "bits": 64,
+          "minimum": 1
+        }
+      ]
+    ],
+    "constraints": [
+      {
+        "kind": "allowed-tuples",
+        "captures": [
+          "mode",
+          "active"
+        ],
+        "allowed": [
+          [
+            "indoor",
+            true
+          ],
+          [
+            "outdoor",
+            false
+          ]
+        ],
+        "afterRow": 2
+      },
+      {
+        "kind": "checked-sum",
+        "captures": [
+          "amountA",
+          "amountB"
+        ],
+        "maximum": 16,
+        "afterRow": 5
+      }
+    ],
+    "recordResult": {
+      "failure": {
+        "id": "urn:inventory:bad-log",
+        "code": "bad_log"
+      },
+      "records": {
+        "book": [
+          {
+            "id": "mode",
+            "type": {
+              "kind": "owned-text"
+            }
+          },
+          {
+            "id": "counts",
+            "type": {
+              "kind": "unsigned-array",
+              "bits": 16,
+              "length": 2
+            }
+          },
+          {
+            "id": "samples",
+            "type": {
+              "kind": "record-vector",
+              "record": "sample"
+            }
+          }
+        ],
+        "sample": [
+          {
+            "id": "name",
+            "type": {
+              "kind": "static-text"
+            }
+          },
+          {
+            "id": "amount",
+            "type": {
+              "kind": "unsigned",
+              "bits": 64
+            }
+          }
+        ]
+      },
+      "entry": {
+        "record": "book",
+        "fields": {
+          "mode": {
+            "kind": "capture",
+            "id": "mode"
+          },
+          "counts": {
+            "kind": "array",
+            "captures": [
+              "countA",
+              "countB"
+            ]
+          },
+          "samples": {
+            "kind": "vector",
+            "items": [
+              {
+                "record": "sample",
+                "fields": {
+                  "name": {
+                    "kind": "capture",
+                    "id": "nameA"
+                  },
+                  "amount": {
+                    "kind": "capture",
+                    "id": "amountA"
+                  }
+                }
+              },
+              {
+                "record": "sample",
+                "fields": {
+                  "name": {
+                    "kind": "capture",
+                    "id": "nameB"
+                  },
+                  "amount": {
+                    "kind": "capture",
+                    "id": "amountB"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "formatters": [
+        {
+          "id": "key",
+          "argument": false,
+          "parts": [
+            {
+              "kind": "field",
+              "field": "mode"
+            }
+          ]
+        },
+        {
+          "id": "resource",
+          "argument": true,
+          "parts": [
+            {
+              "kind": "argument"
+            },
+            {
+              "kind": "literal",
+              "text": ":"
+            },
+            {
+              "kind": "field",
+              "field": "mode"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "overlay": {
+    "format": "oddlang-line-record-rust-v1",
+    "parser": "parse",
+    "visibility": "crate",
+    "error": {
+      "id": "urn:inventory:bad-log",
+      "type": [
+        "crate",
+        "Fault"
+      ],
+      "variant": "Invalid"
+    },
+    "records": {
+      "book": {
+        "name": "LogBook",
+        "fields": {
+          "mode": "mode",
+          "counts": "counts",
+          "samples": "samples"
+        },
+        "derives": [
+          "clone",
+          "debug",
+          "partial-eq",
+          "eq"
+        ]
+      },
+      "sample": {
+        "name": "Sample",
+        "fields": {
+          "name": "name",
+          "amount": "amount"
+        },
+        "derives": [
+          "clone",
+          "debug",
+          "partial-eq",
+          "eq"
+        ]
+      }
+    },
+    "formatters": {
+      "key": "key",
+      "resource": "resource"
+    }
+  }
+}

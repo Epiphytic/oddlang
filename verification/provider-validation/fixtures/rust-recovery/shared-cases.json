@@ -1,0 +1,54 @@
+[
+  [
+    "\npub const CAP: u16 = 3 * 17;\npub const SOFT: u16 = CAP;\n#[derive(Debug, Copy, Clone, Eq, PartialEq, thiserror::Error)]\npub enum Alarm {\n    #[error(\"sensor {{limit}}: {0}\")]\n    Reading(u64),\n    #[error(\"no signal\")]\n    Missing,\n}\npub type ReadingResult<T> = core::result::Result<T, Alarm>;\n",
+    true
+  ],
+  [
+    "\npub const CAP: u16 = 4 * 19;\npub const SOFT: u16 = CAP;\n#[derive(Debug, Copy, Clone, Eq, PartialEq, thiserror::Error)]\npub enum Alarm {\n    #[error(\"sensor {{limit}}: {0}\")]\n    Reading(u64),\n    #[error(\"disconnected\")]\n    Missing,\n}\npub type ReadingResult<T> = core::result::Result<T, Alarm>;\n",
+    true
+  ],
+  [
+    "\n#[cfg(unix)] pub const CAP: u16 = 3 * 17;\npub const SOFT: u16 = CAP;\n#[derive(Debug, Copy, Clone, Eq, PartialEq, thiserror::Error)]\npub enum Alarm {\n    #[error(\"sensor {{limit}}: {0}\")]\n    Reading(u64),\n    #[error(\"no signal\")]\n    Missing,\n}\npub type ReadingResult<T> = core::result::Result<T, Alarm>;\n",
+    false
+  ],
+  [
+    "\npub const CAP: u16 = 3 * 17;\npub const SOFT: u16 = CAP;\n#[derive(Debug, Copy, Clone, Eq, PartialEq, thiserror::Error)]\npub enum Alarm {\n    #[error(\"sensor {{limit}}: {0:?}\")]\n    Reading(u64),\n    #[error(\"no signal\")]\n    Missing,\n}\npub type ReadingResult<T> = core::result::Result<T, Alarm>;\n",
+    false
+  ],
+  [
+    "\npub const CAP: u16 = 3 * 17;\npub const SOFT: u16 = unknown();\n#[derive(Debug, Copy, Clone, Eq, PartialEq, thiserror::Error)]\npub enum Alarm {\n    #[error(\"sensor {{limit}}: {0}\")]\n    Reading(u64),\n    #[error(\"no signal\")]\n    Missing,\n}\npub type ReadingResult<T> = core::result::Result<T, Alarm>;\n",
+    false
+  ],
+  [
+    "\npub const CAP: u16 = 3 * 17;\npub const SOFT: u16 = CAP;\n#[derive(Debug, Copy, Clone, Eq, PartialEq, thiserror::Error)]\npub enum Alarm {\n    #[error(\"sensor {{limit}}: {0}\")]\n    Reading(u64,u64),\n    #[error(\"no signal\")]\n    Missing,\n}\npub type ReadingResult<T> = core::result::Result<T, Alarm>;\n",
+    false
+  ],
+  [
+    "\npub const CAP: u16 = 3 * 17;\npub const SOFT: u16 = CAP;\n#[derive(Debug, Copy, Clone, Eq, PartialEq, thiserror::Error)]\n#[non_exhaustive] pub enum Alarm {\n    #[error(\"sensor {{limit}}: {0}\")]\n    Reading(u64),\n    #[error(\"no signal\")]\n    Missing,\n}\npub type ReadingResult<T> = core::result::Result<T, Alarm>;\n",
+    false
+  ],
+  [
+    "\npub const CAP: u16 = 3 * 17;\npub const SOFT: u16 = CAP;\n#[derive(Debug, Copy, Clone, Eq, PartialEq, thiserror::Error)]\n#[repr(u8)] pub enum Alarm {\n    #[error(\"sensor {{limit}}: {0}\")]\n    Reading(u64),\n    #[error(\"no signal\")]\n    Missing,\n}\npub type ReadingResult<T> = core::result::Result<T, Alarm>;\n",
+    false
+  ],
+  [
+    "\npub const CAP: u16 = 3 * 17;\npub const SOFT: u16 = CAP;\n#[derive(Debug, Copy, Clone, Eq, PartialEq, thiserror::Error)]\npub enum Alarm {\n    #[error(\"sensor {{limit}}: {0}\")]\n    Reading(#[from] u64),\n    #[error(\"no signal\")]\n    Missing,\n}\npub type ReadingResult<T> = core::result::Result<T, Alarm>;\n",
+    false
+  ],
+  [
+    "\npub const CAP: u16 = 3 * 17;\npub const SOFT: u16 = CAP;\n#[derive(Debug, Copy, Clone, Eq, PartialEq, thiserror::Error)]\n#[error(transparent)] pub enum Alarm {\n    #[error(\"sensor {{limit}}: {0}\")]\n    Reading(u64),\n    #[error(\"no signal\")]\n    Missing,\n}\npub type ReadingResult<T> = core::result::Result<T, Alarm>;\n",
+    false
+  ],
+  [
+    "\nconst CAP: u16 = 3 * 17;\npub const SOFT: u16 = CAP;\n#[derive(Debug, Copy, Clone, Eq, PartialEq, thiserror::Error)]\npub enum Alarm {\n    #[error(\"sensor {{limit}}: {0}\")]\n    Reading(u64),\n    #[error(\"no signal\")]\n    Missing,\n}\npub type ReadingResult<T> = core::result::Result<T, Alarm>;\n",
+    false
+  ],
+  [
+    "\npub const CAP: u16 = 3 * 17;\npub const SOFT: u16 = CAP;\n#[derive(Debug, Copy, Clone, Eq, PartialEq, thiserror::Error)]\npub enum Alarm {\n    #[error(\"sensor {{limit}}: {0}\")]\n    Reading(u64),\n    #[error(\"no signal {0}\")]\n    Missing,\n}\npub type ReadingResult<T> = core::result::Result<T, Alarm>;\n",
+    false
+  ],
+  [
+    "\npub const CAP: u16 = 3 * 17;\npub const SOFT: u16 = CAP;\n#[derive(Debug, Clone, Eq, PartialEq, thiserror::Error)]\npub enum Alarm {\n    #[error(\"sensor {{limit}}: {0}\")]\n    Reading(u64),\n    #[error(\"no signal\")]\n    Missing,\n}\npub type ReadingResult<T> = core::result::Result<T, Alarm>;\n",
+    false
+  ]
+]

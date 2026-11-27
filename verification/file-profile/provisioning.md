@@ -7,7 +7,7 @@ The survey-registration unit test accepts a lower-hex panel membership declarati
 ```sh
 cargo +1.97.1 test --locked --offline --lib
 cargo +1.97.1 build --locked --offline --bin oddlang
-python3 verification/file-profile/check.py target/debug/oddlang
+cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin file-profile -- target/debug/oddlang
 ```
 
 On macOS ARM64 the library suite passed 17 tests and the unrelated executable fixture passed. The Marmish consumer separately compares generated and mainline setup over isolated temporary state. This page covers local profile operations only.

@@ -1,0 +1,100 @@
+{
+  "format": "oddlang-checked-values-rust-v1",
+  "types": {
+    "urn:example:detector:tone": {
+      "name": "Tone",
+      "order": [
+        "urn:example:detector:quiet",
+        "urn:example:detector:loud"
+      ],
+      "traits": [
+        "copy",
+        "hash"
+      ],
+      "view": "speaker",
+      "parse": "identify"
+    },
+    "urn:example:detector:octave": {
+      "name": "Octave",
+      "order": [
+        "urn:example:detector:low",
+        "urn:example:detector:high"
+      ],
+      "traits": [
+        "copy"
+      ],
+      "view": "index"
+    },
+    "urn:example:detector:caption": {
+      "name": "Caption",
+      "order": [
+        "urn:example:detector:caption:text"
+      ],
+      "shape": "tuple",
+      "constructor": "make",
+      "members": {
+        "urn:example:detector:caption:text": {
+          "name": "value",
+          "getter": "text"
+        }
+      }
+    },
+    "urn:example:detector:station": {
+      "name": "Station",
+      "order": [
+        "urn:example:detector:station:number",
+        "urn:example:detector:station:tone",
+        "urn:example:detector:station:code"
+      ],
+      "shape": "named",
+      "constructor": "make",
+      "traits": [
+        "hash"
+      ],
+      "members": {
+        "urn:example:detector:station:number": {
+          "name": "number",
+          "getter": "number"
+        },
+        "urn:example:detector:station:tone": {
+          "name": "tone",
+          "getter": "tone"
+        },
+        "urn:example:detector:station:code": {
+          "name": "code",
+          "getter": "code"
+        }
+      }
+    },
+    "urn:example:detector:metadata": {
+      "name": "Metadata",
+      "order": [
+        "urn:example:detector:metadata:station",
+        "urn:example:detector:metadata:caption"
+      ],
+      "shape": "named",
+      "members": {
+        "urn:example:detector:metadata:station": {
+          "name": "station",
+          "public": true
+        },
+        "urn:example:detector:metadata:caption": {
+          "name": "caption",
+          "public": true
+        }
+      }
+    }
+  },
+  "variants": {
+    "urn:example:detector:quiet": "Quiet",
+    "urn:example:detector:loud": "Loud",
+    "urn:example:detector:low": "Low",
+    "urn:example:detector:high": "High"
+  },
+  "errors": {
+    "urn:example:detector:invalid": {
+      "errorType": "crate::Fault",
+      "variant": "Invalid"
+    }
+  }
+}

@@ -28,7 +28,7 @@ Two fresh CLI recoveries of the stream library produced identical
 The installed toolchain and profile are recorded in
 [the adapter instructions](../../verification/rust-recovery/README.md).
 Use the same adapter and Cargo lock when comparing a fresh result.
-The adapter executable is produced from Oddlang's revision. The lock records the checked source revision, manifests, entry script, adapter source inputs and resulting graph. [Profile](../../examples/marmish/portable-contract/structure.toml) · [Structure lock](../../examples/marmish/portable-contract/structure.lock.json)
+The adapter executable is produced from Oddlang's revision. The lock records the checked source revision, manifests, adapter executable, adapter source inputs and resulting graph. [Profile](../../examples/marmish/portable-contract/structure.toml) · [Structure lock](../../examples/marmish/portable-contract/structure.lock.json)
 
 The independent Rustdoc comparator matched 378 ordinary declaration keys,
 with six compiler-only and 145 Rustdoc-only keys. Including compiler-marked
@@ -46,13 +46,14 @@ independently confirms the original and redirected direct calls. The
 fixture also checks path identity after a formatting change.
 
 ```sh
-python3 verification/rust-recovery/test_adapter.py
-verification/rust-recovery/run.sh /path/to/marmish/Cargo.toml \
+cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin rust-exports -- qualify adapter
+cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin rust-capture -- /path/to/marmish/Cargo.toml \
   marmish-stream lib marmish_stream aarch64-apple-darwin default > /tmp/compiler.json
-python3 verification/rust-inventory/inventory.py /path/to/marmish \
+cargo +stable run --locked --offline --manifest-path verification/rust-inventory/Cargo.toml -- /path/to/marmish \
   marmish-stream /tmp/rustdoc-inventory
-python3 verification/rust-recovery/reconcile_rustdoc.py /tmp/compiler.json \
+cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin rust-exports -- reconcile /tmp/compiler.json \
   /tmp/rustdoc-inventory/rust-inventory.json
+cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin rust-capture -- --install-adapter
 target/debug/oddlang recover rust /path/to/marmish/Cargo.toml \
   --profile examples/marmish/portable-contract/structure.toml --out /tmp/stream-structure
 cargo test --locked --offline --test rust_recovery

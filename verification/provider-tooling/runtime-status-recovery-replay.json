@@ -1,0 +1,43 @@
+{
+  "host": "aarch64-apple-darwin",
+  "companion": "72a15b63475112888977e21475938623b9c24959",
+  "framework": "63c5f54459a193c8852c192f6e23d7fc8445fdcc",
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "workspaceLockSha256": "cd3ca304611f48b30a58b37449beb572add5de2dbaa3b282197771c6c700d210",
+  "receipts": {
+    "verification/whole/runtime-status-data/rust-aarch64-apple-darwin.json": "8e646e71a5ccf1e4bc0e9e84200c4221aed7e57a55f7e193144b477f4cc75ba2"
+  },
+  "coldReplaySha256": "c575f398820257201446cc4e579f7bff2e041298930d67fc3923ebb3eaf04224",
+  "historicalPythonReceiptSha256": "7ca640ef3cafd5e41c2cc3c2a822782afe4cdca0817358b183d5b48bc814bbd1",
+  "freshPythonReplaySha256": "6cfa2752fff622dfc2f5677be957c907110064d03d8c23d3df0718147db2c3dd",
+  "coldWarmDifferences": [
+    "generatedNativeLibrarySha256",
+    "originalMutantLibrarySha256",
+    "projectedMutantLibrarySha256"
+  ],
+  "historicalDifferences": [
+    "companion",
+    "compilerSha256",
+    "originalNativeLibraries",
+    "generatedNativeLibrarySha256",
+    "originalMutantLibrarySha256",
+    "projectedMutantLibrarySha256"
+  ],
+  "matchingStagedInputs": 101,
+  "serializationObservations": 4,
+  "compilerDiagnostics": 6,
+  "sourceDenials": 3,
+  "features": [
+    "default",
+    "installed-checks"
+  ],
+  "mutation": "Both original and projected serialization followed the reordered source fields on both runs.",
+  "controls": [
+    "missing and ambiguous compatible Serde libraries rejected",
+    "incomplete or unsuccessful Cargo transcript rejected",
+    "duplicate native library rejected",
+    "occupied publication directory rejected",
+    "restored original graph after source reorder rejected"
+  ],
+  "cacheRegression": "With a shared target directory Cargo marked both original and reordered native sources fresh and reused the original artifact. Separate targets keyed by source-model digest preserved the mutation on the cold and warm replay."
+}

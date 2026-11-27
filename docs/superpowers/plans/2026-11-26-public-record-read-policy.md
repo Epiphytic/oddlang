@@ -44,5 +44,5 @@ seal and package lock.
 
 Run the receipt's fixture paths with the combined compiler as the argument.
 Compare legacy artifacts by passing both compiled executables to
-`python3 -B verification/public-records/composition.py OLD NEW`.
+`cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin record-composition -- OLD NEW`.
 This gate covers the generic compiler and unrelated offline fixtures.

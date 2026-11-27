@@ -1,0 +1,34 @@
+{
+  "host": "aarch64-apple-darwin",
+  "companionRevision": "ca7e01509f8ced93d3e1314ce39b87f1dde85ee8",
+  "qualifiedOddlangRevision": "227bca9e563bfbf3960483d0b5f4e12cb4301ef4",
+  "originalRevision": "af54339d250290490d62d4475a77539b7e739071",
+  "qualifiedReaderVariants": [
+    "original",
+    "empty",
+    "consume",
+    "error",
+    "combined"
+  ],
+  "originalTraceReceiptSha256": "7350b4ae356df3516ad1b76b55ad9090e5a24d9fca881be764fc9bbab80de400",
+  "matchingArchivedAndFreshQualificationSha256": "f3ccb33f8a26d7b7a9eb580264d23128e85800c29d606af7c9803c73a8beb142",
+  "wrongFrameworkRejectedBeforeBuilding": true,
+  "providerTestsOddlangRevision": "e24509473060f303e90c6b27aa090300f202f7b7",
+  "providerIntegration": [
+    "workspace_rejects_registry_configuration_drift_before_projection",
+    "library_binding_rejects_ids_outside_its_declared_namespace",
+    "unknown_capability_and_selected_library_binding_use_the_same_host",
+    "same_native_consumer_and_portable_recovery_for_both_providers"
+  ],
+  "providerUnitSelection": [
+    "native_workspace::tests::sibling_patch_cannot_replace_the_fixed_byte_provider",
+    "providers::schema::tests::reject_ambiguous_namespace_boundaries_and_mistyped_schema",
+    "providers::schema::tests::entity_ranges_apply_to_every_list_item_and_keep_prose_free",
+    "providers::tests::collisions_leave_destination_absent",
+    "providers::tests::pinned_schema_and_version_are_enforced_before_invocation",
+    "providers::tests::native_and_external_share_policy_and_receipt",
+    "provider_runtime::tests::both_worlds_receive_exact_document_bytes",
+    "provider_runtime::tests::checks_component_imports_and_export_shape_before_instantiation",
+    "provider_runtime::tests::limits_initial_memory_execution_and_document_sizes"
+  ]
+}

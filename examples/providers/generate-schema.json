@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "required": [
+    "graph",
+    "overlay",
+    "serdeAvailable"
+  ],
+  "properties": {
+    "graph": {
+      "type": "object"
+    },
+    "overlay": {
+      "type": "object"
+    },
+    "serdeAvailable": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false
+}

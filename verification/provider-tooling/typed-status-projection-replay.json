@@ -1,0 +1,76 @@
+{
+  "frameworkRevision": "ee4ba72af452aecb0d50c193c6b642552f8f0a79",
+  "originalRevision": "af54339d250290490d62d4475a77539b7e739071",
+  "candidateSha256": "5be9aaed6bc5e4391cd0d0465ff08ad86b5252eee2405371966a524c4178795f",
+  "realDaemon": {
+    "exit": 0,
+    "stderr": "",
+    "stdout": "{\"ok\":true,\"result\":{\"state\":\"activating\"},\"error\":null}\n"
+  },
+  "parserObservations": {
+    "marmish": 34,
+    "marmishd": 34
+  },
+  "shutdown": {
+    "engine_stop_complete": true,
+    "mdk_stop_complete": true,
+    "runtime_cleanup_complete": true
+  },
+  "companionRevision": "d982b368f55c3311a17f1ac4c409b380af544613",
+  "host": "aarch64-apple-darwin",
+  "finalReceiptSha256": "6fd4c358b441efdfe4ca39b8c7d62592de1d5aac78621e8f81aae122a3fe2829",
+  "legacyReceiptSha256": "66022720bb25570168e1f877e36c86785110fca0d7e7a90a5fed0d5a34ace9b6",
+  "archiveSha256": "c2f5bcc4fbabc2b3406ded270828b94d03a653d33a641c357b9c0860241ea7c5",
+  "matchingGeneratedFiles": {
+    "Cargo.lock": "ac0bbdbbb0d206d2ba45c9706a34de5015b2caf6212a7a7418306a6ef0ee3932",
+    "Cargo.toml": "d0dc97c4b5675124cbc39ce02d4a9edb94145545fbf6ad62e84e670f53d0c0ba",
+    "package.lock": "fb5bc2bef3f754c6d74107301f55b83e477e41121ecb491c4b610a337a9059a2",
+    "src/bin/marmish.rs": "d589eb9672c68e2526bafd908b7225063788281b8f8e07daed08b24d6fc5e196",
+    "src/bin/marmishd.rs": "51c608d76c242d4d67a3e5e7299aa187d395ce2dcf0ec139872efdc29bd474ee",
+    "src/group_0/__projection_0.rs": "f969d520840e0e94ba69d697e8de4c5c0507750d54d0c12fab44434213c15e21",
+    "src/group_0/mod.rs": "a9c2e789f6882103d5ae711c4cd67cc0a3e47f403187996c4d68cbdb8bb3802e",
+    "src/group_1/__projection_1.rs": "263fab5cd253a2a8a4226f8ee47cd39b0e71a79ddb5225643056f67f3789a648",
+    "src/group_1/mod.rs": "0fe0db8e24b424125c76a051fd10499c77eea422cd4f38a69f9e555ba9b81f8e",
+    "src/group_2/__projection_2.rs": "0ef92f1c82a85c0aabdb62979768d77a758a7f4710af0ae751f9447108a47e26",
+    "src/group_2/mod.rs": "22104158e0b623c1c801d960fb7c6ba84ff1b025e7ff847b00b1033f4539c1f8",
+    "src/lib.rs": "001e97fe1fe2964ea1ecc515cdc0a67391fa5dab1236c87a483d36e25ce9f791"
+  },
+  "previouslyDivergentReplies": {
+    "positional-response": {
+      "replyHex": "5b747275652c6e756c6c2c6e756c6c5d",
+      "observed": {
+        "exit": 0,
+        "stdout": "{\"ok\":true,\"result\":null,\"error\":null}\n",
+        "stderr": ""
+      }
+    },
+    "non-null-command": {
+      "replyHex": "7b226f6b223a747275652c22636f6d6d616e64223a7b227374617465223a226c6f63616c5f62757379222c226578747261223a317d7d",
+      "observed": {
+        "exit": 0,
+        "stdout": "{\"ok\":true,\"result\":null,\"error\":null,\"command\":{\"state\":\"local_busy\"}}\n",
+        "stderr": ""
+      }
+    },
+    "non-null-stream": {
+      "replyHex": "7b226f6b223a747275652c2273747265616d223a7b227374617465223a2270656e64696e67227d7d",
+      "observed": {
+        "exit": 0,
+        "stdout": "{\"ok\":true,\"result\":null,\"error\":null,\"stream\":{\"state\":\"pending\"}}\n",
+        "stderr": ""
+      }
+    }
+  },
+  "matchingReplyCases": {
+    "extendedReplies": 16,
+    "nestedReplies": 33
+  },
+  "controlledCases": 17,
+  "controls": [
+    "revision drift",
+    "source hash drift",
+    "stale input digest",
+    "escaping input path",
+    "package lock drift"
+  ]
+}

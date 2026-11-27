@@ -1,0 +1,52 @@
+{
+  "graph": {
+    "format": "oddlang-binary-record-v1",
+    "id": "urn:survey:header-type",
+    "maximum": 128,
+    "layout": [
+      {
+        "id": "urn:survey:quantity",
+        "encoding": {
+          "kind": "unsigned-be",
+          "bits": 32,
+          "minimum": 1,
+          "maximum": 9
+        }
+      }
+    ],
+    "errors": {
+      "value": "urn:survey:error:value",
+      "truncated": "urn:survey:error:short",
+      "trailing": "urn:survey:error:trailing",
+      "decodeSize": "urn:survey:error:limit",
+      "encodeSize": "urn:survey:error:limit"
+    }
+  },
+  "binding": {
+    "format": "oddlang-binary-record-rust-v1",
+    "name": "Header",
+    "names": {
+      "urn:survey:quantity": "quantity"
+    },
+    "externals": {},
+    "errorType": "crate::Failure",
+    "errors": {
+      "urn:survey:error:value": {
+        "variant": "Bad",
+        "argument": "value"
+      },
+      "urn:survey:error:short": {
+        "variant": "Bad",
+        "argument": "short"
+      },
+      "urn:survey:error:trailing": {
+        "variant": "Bad",
+        "argument": "trailing"
+      },
+      "urn:survey:error:limit": {
+        "variant": "Bad",
+        "argument": "limit"
+      }
+    }
+  }
+}

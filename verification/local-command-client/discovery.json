@@ -1,0 +1,143 @@
+{
+  "id": "urn:meter:endpoint",
+  "state_argument": "folder",
+  "profile_argument": "station",
+  "default_profile": "bench",
+  "socket_leaf": "sock",
+  "socket_maximum_exclusive": 104,
+  "state_sources": [
+    {
+      "variable": "METER_STORE",
+      "require_absolute": true,
+      "suffix": [
+        "meter"
+      ]
+    }
+  ],
+  "missing_state": {
+    "exit": 8,
+    "stderr": "missing meter store"
+  },
+  "profile_atom": {
+    "maximum_bytes": 10,
+    "punctuation": "-",
+    "invalid": {
+      "exit": 8,
+      "stderr": "invalid station"
+    }
+  },
+  "private_directory_mode": 448,
+  "private_file_mode": 384,
+  "unsafe_directory": {
+    "exit": 8,
+    "stderr": "unsafe station directory"
+  },
+  "unsafe_file": {
+    "exit": 8,
+    "stderr": "unsafe station file"
+  },
+  "invalid_runtime_component": {
+    "exit": 8,
+    "stderr": "invalid component"
+  },
+  "socket_too_long": {
+    "exit": 8,
+    "stderr": "long path"
+  },
+  "profile": {
+    "id": "urn:meter:station",
+    "leaf": "station.json",
+    "maximum_bytes": 128,
+    "overflow": "reject",
+    "invalid": {
+      "exit": 8,
+      "stderr": "invalid station document"
+    },
+    "missing": {
+      "exit": 8,
+      "stderr": "missing station document"
+    },
+    "fields": [
+      {
+        "id": "urn:meter:station:slot",
+        "key": "slot",
+        "type": {
+          "kind": "text"
+        }
+      }
+    ],
+    "checks": [
+      {
+        "id": "urn:meter:slot-hex",
+        "require": {
+          "kind": "lower_hex",
+          "value": {
+            "kind": "profile_field",
+            "id": "urn:meter:station:slot"
+          },
+          "bytes": 2,
+          "nullable": false
+        },
+        "rejected": {
+          "exit": 8,
+          "stderr": "invalid station slot"
+        }
+      }
+    ]
+  },
+  "runtime": [
+    {
+      "kind": "literal",
+      "value": "meter-"
+    },
+    {
+      "kind": "effective_uid"
+    },
+    {
+      "kind": "literal",
+      "value": "-"
+    },
+    {
+      "kind": "profile_field",
+      "id": "urn:meter:station:slot"
+    }
+  ],
+  "binding": {
+    "id": "urn:meter:link",
+    "leaf": "link.json",
+    "maximum_bytes": 128,
+    "overflow": "reject",
+    "invalid": {
+      "exit": 8,
+      "stderr": "invalid link"
+    },
+    "fields": [
+      {
+        "id": "urn:meter:link:path",
+        "key": "path",
+        "type": {
+          "kind": "text"
+        }
+      }
+    ],
+    "checks": [
+      {
+        "id": "urn:meter:link-owner",
+        "require": {
+          "kind": "equal",
+          "left": {
+            "kind": "binding_field",
+            "id": "urn:meter:link:path"
+          },
+          "right": {
+            "kind": "profile_path"
+          }
+        },
+        "rejected": {
+          "exit": 8,
+          "stderr": "incorrect station binding"
+        }
+      }
+    ]
+  }
+}

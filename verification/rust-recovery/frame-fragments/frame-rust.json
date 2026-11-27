@@ -1,0 +1,38 @@
+{
+  "format": "oddlang-binary-frame-rust-v1",
+  "name": "Envelope",
+  "decoder": "EnvelopeDecoder",
+  "errorType": "crate::Fault",
+  "errors": {
+    "urn:parts:invalid": {
+      "variant": "Invalid"
+    },
+    "urn:parts:limit": {
+      "variant": "Limit"
+    }
+  },
+  "cases": {
+    "urn:parts:Head": "Head",
+    "urn:parts:Copy": "Copy"
+  },
+  "fields": {
+    "urn:parts:head-value": "head_value",
+    "urn:parts:level-value": "level_value",
+    "urn:parts:copy-value": "copy_value"
+  },
+  "types": {
+    "urn:parts:Level": {
+      "path": "crate::Level",
+      "variants": {
+        "urn:parts:low": "Low",
+        "urn:parts:high": "High"
+      }
+    },
+    "urn:parts:head-fragment": {
+      "path": "crate::Head"
+    },
+    "urn:parts:copy-fragment": {
+      "path": "crate::Copy"
+    }
+  }
+}

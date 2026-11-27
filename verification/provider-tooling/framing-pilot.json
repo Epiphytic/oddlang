@@ -1,0 +1,43 @@
+{
+  "upstream": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+  "platform": "aarch64-apple-darwin",
+  "compilerSha256": "ccd3aa5caeac7c57dddb5d8c04e6cc619c7580e446edb8139bc00f0c6555e09f",
+  "framingHostSha256": "343170b4aaa4f391fb6cd31914eec4045a186d57a57de6301271960703f478d2",
+  "treesMatchingArchive": [
+    "import",
+    "projection",
+    "mutant-import",
+    "mutant-projection"
+  ],
+  "assemblyManifestSha256": "d4e3466831b0506ce0418db35afdbf93a65b544a09c475457a239431f54faf1d",
+  "poisonedSourceDiagnosticSha256": "65d7321d9bd5543e3059edfe0f58b4d08f337536d705a5505797ca2733756d2c",
+  "framingCasesPerImplementation": 33,
+  "mutantDifferences": [
+    {
+      "actual": {
+        "error": "SizeLimit"
+      },
+      "case": "version-before-size",
+      "expected": {
+        "error": "InvalidVersion"
+      }
+    }
+  ],
+  "framingReportFieldsDifferingFromArchive": [
+    "harnessSha256"
+  ],
+  "cargoDepfiles": 650,
+  "assembledCompilerInputs": 90,
+  "buildSandboxControl": "permission denied",
+  "cargoSandboxControlExit": 101,
+  "buildScriptSandboxControlExit": 73,
+  "nativeContractTests": [
+    "bounded_opaque_bytes_round_trip",
+    "canonical_urls_deduplicate_in_order",
+    "diagnostics_never_echo_raw_values",
+    "hostile_json_version_and_encoding_are_rejected",
+    "loopback_is_explicit_and_private_literals_stay_denied",
+    "no_defaults_or_extra_url_components",
+    "retention_distinguishes_default_from_disabled_and_bounds_numbers"
+  ]
+}

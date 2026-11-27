@@ -1,0 +1,77 @@
+{
+  "frameworkCommit": "d322eca7fdfa2e5e257512ea477a09bb2022e9fa",
+  "originalCommit": "af54339d250290490d62d4475a77539b7e739071",
+  "companionRevision": "dfdfc3771f1c08e5cfb32ec05adec5ab911d13ca",
+  "platform": "aarch64-apple-darwin",
+  "deniedReadProbes": [
+    "originalModule",
+    "sourceControl"
+  ],
+  "equivalentGraphEmitsIdenticalArtifacts": true,
+  "authoredInputs": [
+    "stable graph IRI",
+    "entry function",
+    "two-function source selection"
+  ],
+  "sourceSelectionSha256": "65a1a808e0a4c26b977818a2494b8dab4a0f493600eb58bf31702d1f313c39eb",
+  "sourceOriginSha256": "f106bb1d506b63b26b2df75376051faf478ce5ffd85af332d370466a8897f88f",
+  "unmodifiedVectorsSha256": "b07696eda226714f8bd5f6a725be662d1a7df4ec1693c2bfd30a78df0dc3b6c1",
+  "unmodifiedVectors": 33,
+  "changedBoundaryOutcomes": 8,
+  "verifierSha256": "76b07728b4664aacbc68601a08c95ec0568ff78b2441e56ecf51c7b0f6c6f30e",
+  "lanes": {
+    "baseline": {
+      "sourceSha256": "e11224fa0dd59f656beb94ee29b07baff9be0698896f450ebf45a40847a2ba70",
+      "sourceSpan": {
+        "start": 1818,
+        "end": 2496
+      },
+      "enclosingNativeModule": {
+        "name": "native_manifest::oddlang_release_version_scope::matches_native_contract",
+        "matchingCases": 48,
+        "witnessSha256": "ad01963dd8dafb98a7a65745bee32ae452510efd08bc82144d041bb0b0c3e2cf"
+      },
+      "graphSha256": "a5eadd49587ffe3dea7af64e32625f6324b946c63cf0f2083056d5b018474669",
+      "projectionLockSha256": "c34ed487724b38642b2a9ebdf46870bf07041ab62cff9f6086df1ecbfecc9b80",
+      "sourceOfNativeWitnessSha256": "e59af559a23c33849df83dc1b238fe00a183758c4e3550bd7768613830b253cf",
+      "matchingCases": 48,
+      "outcomesSha256": "89cf941a2b1b5ba925a7a54a380d6f22f707ce9c956dfb6fb310b844b09e1059"
+    },
+    "mutation": {
+      "sourceSha256": "2a261421fcde9d96bd7368a1075dd1628dae07fd102951455a67cb5065a634e9",
+      "sourceSpan": {
+        "start": 1818,
+        "end": 2566
+      },
+      "enclosingNativeModule": {
+        "name": "native_manifest::oddlang_release_version_scope::matches_native_contract",
+        "matchingCases": 15,
+        "witnessSha256": "94d017d5fe084785cca54d09e02753f1b9df9baf0fa3426763185809f8a46d42"
+      },
+      "graphSha256": "1533a4ebe90edfb0d1ed33c31f0f8a6e3317348b7cc534742c2d44275fcf3cdb",
+      "projectionLockSha256": "a6775e5e370fa32c89b7e88a60a3d129bd878267b7d8a99c3223370f130f68a3",
+      "sourceOfNativeWitnessSha256": "6ef9c0d2577d63da3f6dcb8440cf6ef9ac12283a690f9a022bf38f9972aaca1a",
+      "matchingCases": 15,
+      "outcomesSha256": "f03817cb4842cda616dd9fa371b360999611dc8506d61672f42744158b5e5988"
+    }
+  },
+  "nativeUpstreamHarnesses": [
+    {
+      "name": "native_manifest::tests::strict_vectors",
+      "passed": 1
+    },
+    {
+      "name": "native_manifest::tests::shared_release_version_vectors",
+      "passed": 1
+    }
+  ],
+  "rustc": [
+    "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+    "binary: rustc",
+    "commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+    "commit-date: 2026-07-14",
+    "host: aarch64-apple-darwin",
+    "release: 1.97.1",
+    "LLVM version: 22.1.6"
+  ]
+}

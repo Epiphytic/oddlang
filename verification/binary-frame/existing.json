@@ -1,0 +1,33 @@
+{
+  "format": "oddlang-binary-record-v1",
+  "id": "urn:meter:existing-type",
+  "fragment": true,
+  "maximum": 7,
+  "layout": [
+    {
+      "id": "urn:meter:quantity",
+      "encoding": {
+        "kind": "unsigned-be",
+        "bits": 16,
+        "minimum": 1,
+        "maximum": 13
+      }
+    },
+    {
+      "id": "urn:meter:sample",
+      "encoding": {
+        "kind": "bytes",
+        "minimum": 1,
+        "maximum": 8,
+        "overflow": "urn:meter:error:limit"
+      }
+    }
+  ],
+  "errors": {
+    "value": "urn:meter:error:unit",
+    "encodeSize": "urn:meter:error:limit",
+    "decodeSize": "urn:meter:error:limit",
+    "trailing": "urn:meter:error:trailing",
+    "truncated": "urn:meter:error:truncated"
+  }
+}

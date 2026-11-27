@@ -1,0 +1,23 @@
+[
+  "#[derive(PartialEq, Copy, Eq, Clone)]\npub enum Compass { Inland(u8), Coast, Ridge }\n",
+  "#[derive(PartialEq, Copy, Eq, Clone)]\npub enum Compass { Inland(), Coast, Ridge }\n",
+  "#[derive(PartialEq, Copy, Eq, Clone)]\npub enum Compass { Inland {}, Coast, Ridge }\n",
+  "#[derive(PartialEq, Copy, Eq, Clone)]\npub enum Compass { Inland = 3, Coast, Ridge }\n",
+  "#[repr(u8)]\n#[derive(PartialEq, Copy, Eq, Clone)]\npub enum Compass { Inland, Coast, Ridge }\n",
+  "#[non_exhaustive]\n#[derive(PartialEq, Copy, Eq, Clone)]\npub enum Compass { Inland, Coast, Ridge }\n",
+  "#[derive(PartialEq, Copy, Eq, Clone, Debug)]\npub enum Compass { Inland, Coast, Ridge }\n",
+  "#[derive(PartialEq, Copy, Eq, Clone)]\npub enum Compass { Inland, Coast, Ridge }\n\nimpl ::core::fmt::Debug for Compass {}",
+  "#[derive(PartialEq, Copy, Eq, Clone)]\npub enum Compass { Inland, Coast, Ridge }\n\nmod other { impl ::core::fmt::Debug for super::Compass {} }",
+  "#[derive(PartialEq, Copy, Eq, Clone)]\npub enum Compass { Inland, Coast, Ridge }\n\ntype Alias = Compass; impl ::core::fmt::Debug for Alias {}",
+  "#[derive(PartialEq, Copy, Eq, Clone)]\npub enum Compass { Inland, Coast, Ridge }\n\nmod other { use super::Compass as Alias; impl ::core::fmt::Debug for Alias {} }",
+  "#[derive(PartialEq, Copy, Eq, Clone)]\npub enum Compass { Inland, Coast, Ridge }\n\nimpl ::core::fmt::Debug for r#Compass {}",
+  "#[derive(PartialEq, Copy, Eq, Clone)]\npub enum Compass { Inland, Coast, Ridge }\n\nimpl ::core::fmt::Debug for (Compass) {}",
+  "#[derive(PartialEq, Copy, Eq, Clone)]\npub enum Compass { Inland, Coast, Ridge }\n\nimpl From<Compass> for u8 { fn from(_: Compass) -> Self { 7 } }",
+  "#[derive(PartialEq, Copy, Eq, Clone)]\npub enum Compass { Inland, Coast, Ridge }\n\nimpl PartialEq<Compass> for u8 { fn eq(&self, _: &Compass) -> bool { false } }",
+  "#[derive(PartialEq, Copy, Eq, Clone)]\npub enum Compass { Inland, Coast, Ridge }\n\ntrait Projection { type Choice; }\nimpl Projection for () { type Choice = Compass; }\nimpl ::core::fmt::Debug for <() as Projection>::Choice {\n    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {\n        f.write_str(\"compass\")\n    }\n}\n",
+  "#[derive(PartialEq, Copy, Eq, Clone)]\npub enum Compass { Inland, Coast, Ridge }\n\ntrait Projection { type Choice; }\nimpl Projection for () { type Choice = Compass; }\nimpl From<<() as Projection>::Choice> for u8 {\n    fn from(_: <() as Projection>::Choice) -> Self { 7 }\n}\n",
+  "#[derive(PartialEq, Copy, Eq, Clone)]\npub enum Compass { Inland, Coast, Ridge }\n\nmacro_rules! display { () => {\n    impl ::core::fmt::Debug for Compass {\n        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {\n            f.write_str(\"compass\")\n        }\n    }\n}; }\ndisplay!();\n",
+  "use other::Replacement as Copy;\n#[derive(PartialEq, Copy, Eq, Clone)]\npub enum Compass { Inland, Coast, Ridge }\n",
+  "#[derive(PartialEq, Copy, Eq, Clone)]\npub enum Compass { #[cfg(any())] Inland, Coast, Ridge }\n",
+  "#[derive(PartialEq, Copy, Eq, Clone)]\nenum Compass { Inland, Coast, Ridge }\n"
+]

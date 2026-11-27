@@ -1,0 +1,536 @@
+{
+  "format": "marmish-unified-recovered-vault-journal-v1",
+  "platform": "aarch64-apple-darwin",
+  "framework": "84b173b288ef41b60c87aa45291f3f20ccb44bed",
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "companion": "a567eb453ad9b64648c78bb7e620581c848b6887",
+  "recoveredVaultAncestor": "e54db134a2cf649c5cffcf3822f4e98b3439f141",
+  "journalAncestor": "380043bf9e7686e24cc00436486396ef4308edfb",
+  "compilerSha256": "ff84c7db312fb8fa59dd3ad64075f58b03561347a17a52b027198e0792f1641f",
+  "workspaceManifestSha256": "c76cc23638a73d07a9d2e3f52dd0353c2639f82067520107c4b5a41b6fa9761e",
+  "workspaceLockSha256": "085db1d86c0b30d48e7a373db115efe54849f980c72363b8d8caeb5314d0edea",
+  "cargoLockSha256": "ef446976e123e264284b59f464bf53300d125bb332d142abbb6eab165681d970",
+  "unchangedMemberLocks": [
+    "marmish-core",
+    "marmish-engine",
+    "marmish-stream",
+    "marmish-vault"
+  ],
+  "stagedInputs": {
+    "copy-checkpoint-v1/graph.json": "cf560b07a2086aa66cc146d0f4231b7a3d4f45b8feae0b1f14e65e892f2d6322",
+    "copy-checkpoint-v1/rust.json": "985f95338f4f09314398e769bde4e9c2a05962f023b53a62691435985cc85a5c",
+    "copy-field-relations-v1/graph.json": "d3a484322807add5874e82880155cb8812fa3f395fa4963164b1e85d962db158",
+    "copy-field-relations-v1/rust.json": "ff276384088a131aa5e5cfcb5dadfc88b4578851217ee3e8cf3506b40c75bf0f",
+    "copy-frame-v1/constants-rust.json": "b4e4ce4c80434a599ef8f85b5d867cab1711661d948e916222874750535ddd5c",
+    "copy-frame-v1/constants.json": "ebc8284d84200480f35122ebe909580a1f5058018ea2938d056492188ac534ea",
+    "copy-frame-v1/graph.json": "909a97e80be036ffffa97e453a35ac3d269df5e044c5f6e919a41664c327da3b",
+    "copy-frame-v1/launch-fragment-rust.json": "c1e49d11ec35dcbb75c3138ecf48a7f2e236aaa24add1d9827271630a1bdb54e",
+    "copy-frame-v1/launch-fragment.json": "a28a0cf76848891ee352d55b6c7af7a8a94ae1e3c8178e1327f3b5317d26ebd2",
+    "copy-frame-v1/manifest-fragment.json": "0d0c304e08267aa6913a65d2fb100a30332c351b0b02a7897e0cf7a652954bac",
+    "copy-frame-v1/rust.json": "5af45802a8275511afe6a515b708b6435b9ea4b97d00e2a34cbfd9c1d8520904",
+    "copy-helper-context-v1/graph.json": "6d7c578287b4b8e92bb8a7e62a40b49f9a73767dab2ac7ff5d7359b4966b2d0e",
+    "copy-helper-context-v1/rust.json": "5533266567625ce4bc5779ce1a95d5df5fa921c0050f78681acf1197e1be0548",
+    "copy-launch-hash-v1/launch-rust.json": "cade9a637d57bb150ca09988e342299e0007387ac888840a24441c015bdfb9cc",
+    "copy-launch-hash-v1/launch.json": "5e02a133153617370d168fb99cba20962d019f74715a4f2cde29bab8ecb64535",
+    "copy-launch-v1/enums-rust.json": "5ddd8100e68af2391d48ffdfca1ac3470c978f3741042a9acda46151500df512",
+    "copy-launch-v1/enums.json": "9ea5cc2f6ba85350ec16ba7c24465b5ec066502450fcabd8fcd2551ceee5d11b",
+    "copy-manifest-v1/rust.json": "a235e87f50c6c70cdbc27ef702f576b3419447497bf43c80a171badcc7d20480",
+    "core-config-v1/domain.ttl": "47a043d5e93b577ed7e59c6ce6e2e04b3988a92af18436cac2e61828d226d1bc",
+    "core-config-v1/rust.json": "e40105ffefb5cb6d62df6705c0b248e1bacf6e1e36d8c9bca6e4756b184155e5",
+    "core-frame-v1/domain.ttl": "a3429c691990835d1ee3ad13e90ce56fbcc15d84f28c6a2eedcf7f7135b9a0e8",
+    "core-frame-v1/rust.json": "325f13b37cb311aefdf0348b26b897785cdc9ebb78bba22965b0c267adb8318d",
+    "core-package-v1/Cargo.lock": "2e8cb5d183d18b85059dc5af723677169e07aff37ef5648fe098ac5b4d3f9d95",
+    "core-package.json": "89292d721acd668379be55e762b963bfac16f0c57fad916c450ca14f0658e1d4",
+    "core-relays-v1/graph.json": "98a204fcc53e7809fc5c79938e651a1df9d30bf7d650b40abee55805b597beff",
+    "core-relays-v1/rust.json": "e81c31da8d756d441600e3012d5217e89531b7c054b3c5172eed1747cd0f260c",
+    "engine-process-limits-package.json": "82ea9036fa466629433dcd3384a5305f13e5422a1d3bb96bcb9dc6e88046eb06",
+    "native-build-report-recovered-v1/graph.json": "20358d51451b80ffc68f2044a2e32e996373267d3f262a94796b34bfb590d5d7",
+    "native-build-report-v1/marmish-cli.json": "9bbbad3ed635092cad4a9075f6d3f83f06506ff8a1ace43c9aaec1cb95ddc95b",
+    "native-build-report-v1/marmishd-cli.json": "0de5666b77f6b6a816c33d40a52bf88aace7b7f36633263ef64c68de0f2095d2",
+    "native-build-report-v1/rust.json": "4070dd46da9c8db378501b0e9fa3973a184eb42ea34a5e173c548ba55df1b91a",
+    "native-cli-v1/graph.json": "588e5599a68b007aea109b61b85a3d2130050842f0d08171e24a5253cc188e08",
+    "native-configured-init-v1/graph.json": "a036570a7069c20d278b49c33590117284a32332c162fbab55d850db2509f043",
+    "native-error-v1/graph.json": "846d248e700cd6572be06e882f6b1075608361cc646656a6dd1b4ca723ba5d34",
+    "native-error-v1/rust.json": "28fc57f8fe5241d391b275200eaed55c96a26c928834fc6f2ed45aae85d2df8a",
+    "native-foreground-lifecycle-v1/Cargo.lock": "fcc8ad72282f71523b0564500fcbaeac75ad8504d1ffc0dffa2366e69a9a89c4",
+    "native-foreground-lifecycle-v1/encrypted-stores-rust.json": "99feaef62fdccca6f1618d2e44e0d484717fc9ef82cfdd565b55efd15a25f6d0",
+    "native-foreground-lifecycle-v1/rust.json": "9c95a74b50d528d9c5a8e35b0b70058cd4f91d265e581a5b73b5ed9138de539c",
+    "native-journal-records-v1/graph.json": "466852c624970b2edfb91823b19ca75e59fad8a1fe0eee2532881547e75c33d2",
+    "native-journal-records-v1/rust.json": "e34efdd5a30b62c7fab43260f78891ba215beeb521de5e2d6cf9c9e00cbaffe5",
+    "native-recovered-vault-journal-package.json": "154e6563c6ad9b50be8c8f765c4a065e9245a85c95c764e975a2b4954588372b",
+    "native-status-discovery-v1/graph.json": "5516fc8b7ca45648b1744ae7489f8c2e2cbf70057bfa6057fbb5d868eb026700",
+    "native-status-owner-v1/graph.json": "de931c53fdda71fd23065684d6a07081e0792a25b27ff78075247f775625e63d",
+    "native-status-owner-v1/rust.json": "6032fa174be89a54abae5fb1dbb4ca381f903dd6687b7141cfbb3f654c6493f2",
+    "native-status-v1/rust.json": "75dbf409efc8af694f094b0759e8c224c15767e8b76f211675dfe005347de5ea",
+    "stream-block-package-v1/Cargo.lock": "3be93c19a2802d43ee707f6b6c61bacc8aceb0882e387b2cef061ae5494ef84e",
+    "stream-integrity-v1/graph.json": "d04f6a13cee52ce3037b718c8dd4a798fb1cfde7b7822e2afaa038ff4b6879ec",
+    "stream-integrity-v1/rust.json": "35cdda2fa76213986656a8fa6fbf576cd3faf15abb21826cebe40d9fb90af088",
+    "stream-package-v5.json": "b2da27a8489518672c2c93adc15adc1ef1649c768abefde3c95770a03aabe9b8",
+    "stream-shared-v1/graph.json": "899ec8d4f6d4bf233c2f3c1ba32e78973bcf24e1a191638928f72acf3b31ac2e",
+    "stream-shared-v1/rust.json": "664dbc2b71f2188491acb7699676b6be3373ac4d653902d9538298d4b2b6449e",
+    "stream-windows-v1/graph.json": "9915405d2ba95ef10cdc18e5c80525053a9479ef963091a60100b633a1dec228",
+    "stream-windows-v1/rust.json": "26e77394884f1f0415e7b57995587aac9bcc6690dc9df5ebd80839597d0b5d9b",
+    "stream-wire-operations-v1/enums.graph.json": "397d6e3a0aa48cf2b01a17247ff0735d1eb631e54861318b70b1bf849dbf0e99",
+    "stream-wire-operations-v1/enums.rust.json": "83b2141977206474d6d38fb0737819b9f9ca57496a94dadee3174df2f3c10a9f",
+    "stream-wire-operations-v1/graph.json": "2cbb1fb931456d727210479cad40e79f236fd7d8ce50bd6fc4a0197e92c8b8d1",
+    "stream-wire-operations-v1/rust.json": "e2a4146ff118815f5f205e5910751f9a059b99d87a1362ab5e62d18042647a28",
+    "stream-wire-schema-v1/graph.json": "a11e74fb48304341bc9bf9665cdabe2f7756fff12848700d0ac19f0f1abec0fd",
+    "stream-wire-schema-v1/rust.json": "c8baf6886e7cff283ea37b5d8ee1f6cb9a31107988ec4c94b091bc46507bc640",
+    "vault-fixed-bytes-v1/Cargo.lock": "1e7f93b188b5894a7bc4af9f2ade14f0bcc48f5a45b3f61fdc474fb1460edddd",
+    "vault-fixed-bytes-v1/graph.json": "f87cf4fad9f37189dd02c5a4179e90017380bfbc8affb867eab5fc23a2d6047b",
+    "vault-fixed-bytes-v1/rust.json": "1d40c1fbca36166021c7138ba6f00c57850c213c3cfd2204b5260944bfeaf736",
+    "vault-fixed-value-package.json": "22ac94e18a4f89f4650876c1a2abf173133a0325cad748a0631b88b1ee4fce90",
+    "vault-values-v1/errors-rust.json": "003dd332ac183b81f4e352e47352366e29c22f4d158ef482dfbe8071e1461a64",
+    "vault-values-v1/errors.json": "335d69a5b1c9942c47684ea1429a915d6b392a2c75b39d7abaffdf86df6d1764",
+    "vault-values-v1/graph.json": "e553ac9935a5b21bb73c8353c61ab99b143a9c0aa8c8b70577c45fa6ddf3d9be",
+    "vault-values-v1/rust.json": "b1cb23a31b3c799c2abfa2f6330b8d7b82c8c3988d0fdc499db04d269db31af0",
+    "workspace-engine-limits/engine-Cargo.lock": "7d2d4dea13b4ae00ad0f22a8c39078a6222319fc4edc4bdd3dda4cf454a1bac7",
+    "workspace-engine-limits/graph.json": "2bf28e9c2d4cb9543afb87a525baf33374928748f5a42cf5dd5dbf96e020a6c5",
+    "workspace-engine-limits/rust.json": "61a0c8717640a5b6bb10b3877e847a0e017bfc741289ab5f28749d9d8e85a18a",
+    "workspace-v6/foreground-graph.json": "0212b6eaa08f7b650ee13ded76561007c39b6fa143c43192cc7286d93a5151a2",
+    "workspace-v7-recovered-vault-engine/Cargo.lock": "ef446976e123e264284b59f464bf53300d125bb332d142abbb6eab165681d970",
+    "workspace-v7-recovered-vault-engine-journal.json": "c76cc23638a73d07a9d2e3f52dd0353c2639f82067520107c4b5a41b6fa9761e"
+  },
+  "deniedSourceProbes": [
+    "framework-source",
+    "journal-caller",
+    "original-journal",
+    "original-report",
+    "original-vault",
+    "reference-executable",
+    "release-observer",
+    "vault-holdout"
+  ],
+  "gitProviders": {
+    "https://github.com/marmot-protocol/mdk": "8abc51befbf71a1ae3bdbb25eb0860c731e75db2",
+    "https://github.com/rusqlite/rusqlite.git": "5ae7fdf83085c595fd54f977b3a56ccacabaf16b",
+    "https://github.com/erskingardner/rust-nostr": "48801bf6f2f1cd55bb1729e94159946c8832a786",
+    "https://github.com/erskingardner/openmls.git": "94f57b829d95840fc5b415b7a86f547f5c1f65ba"
+  },
+  "releaseInfo": {
+    "cases": {
+      "marmish": [
+        {
+          "argv": [
+            "release-info"
+          ],
+          "exit": 0,
+          "stdout": "{\"schema\":1,\"version\":\"0.3.1\",\"target\":\"aarch64-apple-darwin\",\"commit\":\"af54339d250290490d62d4475a77539b7e739071\",\"formats\":[2,7,1,1,1]}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "--state-dir",
+            "absent",
+            "release-info"
+          ],
+          "exit": 0,
+          "stdout": "{\"schema\":1,\"version\":\"0.3.1\",\"target\":\"aarch64-apple-darwin\",\"commit\":\"af54339d250290490d62d4475a77539b7e739071\",\"formats\":[2,7,1,1,1]}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "release-info",
+            "--state-dir",
+            "absent"
+          ],
+          "exit": 0,
+          "stdout": "{\"schema\":1,\"version\":\"0.3.1\",\"target\":\"aarch64-apple-darwin\",\"commit\":\"af54339d250290490d62d4475a77539b7e739071\",\"formats\":[2,7,1,1,1]}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "--key-storage",
+            "file",
+            "--tor",
+            "off",
+            "--relay",
+            "unused",
+            "release-info"
+          ],
+          "exit": 0,
+          "stdout": "{\"schema\":1,\"version\":\"0.3.1\",\"target\":\"aarch64-apple-darwin\",\"commit\":\"af54339d250290490d62d4475a77539b7e739071\",\"formats\":[2,7,1,1,1]}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "--foreground",
+            "release-info"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "marmish: invalid input: foreground_operation\n"
+        },
+        {
+          "argv": [
+            "release-info",
+            "--new-session"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "marmish: invalid input: new_session_operation\n"
+        },
+        {
+          "argv": [
+            "--max-commands",
+            "1",
+            "release-info"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "marmish: invalid input: server_limit_operation\n"
+        },
+        {
+          "argv": [
+            "release-info",
+            "--max-commands",
+            "invalid"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "marmish: invalid input: server_limit_operation\n"
+        },
+        {
+          "argv": [
+            "release-info",
+            "--max-uptime",
+            "invalid"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "marmish: invalid input: server_limit_operation\n"
+        },
+        {
+          "argv": [
+            "--new-session",
+            "--max-uptime",
+            "1",
+            "release-info"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "marmish: invalid input: server_limit_operation\n"
+        },
+        {
+          "argv": [
+            "--new-session",
+            "--max-commands",
+            "1",
+            "release-info"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "marmish: invalid input: server_limit_operation\n"
+        },
+        {
+          "argv": [
+            "--foreground",
+            "--max-commands",
+            "1",
+            "--new-session",
+            "release-info"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "marmish: invalid input: foreground_operation\n"
+        },
+        {
+          "argv": [
+            "release-info",
+            "--not-an-option"
+          ],
+          "exit": 255,
+          "stdout": "",
+          "stderr": "error: unexpected argument '--not-an-option' found\n\nUsage: marmish release-info [OPTIONS]\n\nFor more information, try '--help'.\nmarmish: invalid_arguments\n"
+        },
+        {
+          "argv": [
+            "release-info",
+            "--max-commands"
+          ],
+          "exit": 255,
+          "stdout": "",
+          "stderr": "error: a value is required for '--max-commands <MAX_COMMANDS>' but none was supplied\n\nFor more information, try '--help'.\nmarmish: invalid_arguments\n"
+        },
+        {
+          "argv": [
+            "release-info",
+            "extra"
+          ],
+          "exit": 255,
+          "stdout": "",
+          "stderr": "error: unexpected argument 'extra' found\n\nUsage: marmish release-info [OPTIONS]\n\nFor more information, try '--help'.\nmarmish: invalid_arguments\n"
+        },
+        {
+          "argv": [
+            "release-info",
+            "--help"
+          ],
+          "exit": 0,
+          "stdout": "Print this binary's native version, build target and source commit\n\nUsage: marmish release-info [OPTIONS]\n\nOptions:\n      --debug\n          \n      --foreground\n          Keep the daemon attached to the terminal or service supervisor\n      --state-dir <STATE_DIR>\n          \n  -i, --identity <IDENTITY>\n          [default: default]\n      --socket <SOCKET>\n          \n      --relay <RELAY>\n          \n      --tor <TOR>\n          \n      --key-storage <KEY_STORAGE>\n          [default: auto] [possible values: auto, keychain, file]\n      --allow-peer <ALLOW_PEER>\n          \n      --retention-seconds <RETENTION_SECONDS>\n          [default: 86400]\n  -u, --user <USER>\n          \n      --srv <SRV>\n          \n      --stdin\n          \n      --stdin-none\n          \n      --detach\n          \n      --new-session\n          Open a fresh independent command room instead of reusing the default\n      --wait-seconds <WAIT_SECONDS>\n          [default: 180]\n      --no-autostart\n          \n      --max-commands <MAX_COMMANDS>\n          \n      --max-uptime <MAX_UPTIME>\n          \n  -h, --help\n          Print help\n",
+          "stderr": ""
+        }
+      ],
+      "marmishd": [
+        {
+          "argv": [
+            "release-info"
+          ],
+          "exit": 0,
+          "stdout": "{\"schema\":1,\"version\":\"0.3.1\",\"target\":\"aarch64-apple-darwin\",\"commit\":\"af54339d250290490d62d4475a77539b7e739071\",\"formats\":[2,7,1,1,1]}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "--state-dir",
+            "absent",
+            "release-info"
+          ],
+          "exit": 0,
+          "stdout": "{\"schema\":1,\"version\":\"0.3.1\",\"target\":\"aarch64-apple-darwin\",\"commit\":\"af54339d250290490d62d4475a77539b7e739071\",\"formats\":[2,7,1,1,1]}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "release-info",
+            "--state-dir",
+            "absent"
+          ],
+          "exit": 0,
+          "stdout": "{\"schema\":1,\"version\":\"0.3.1\",\"target\":\"aarch64-apple-darwin\",\"commit\":\"af54339d250290490d62d4475a77539b7e739071\",\"formats\":[2,7,1,1,1]}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "--key-storage",
+            "file",
+            "--tor",
+            "off",
+            "--relay",
+            "unused",
+            "release-info"
+          ],
+          "exit": 0,
+          "stdout": "{\"schema\":1,\"version\":\"0.3.1\",\"target\":\"aarch64-apple-darwin\",\"commit\":\"af54339d250290490d62d4475a77539b7e739071\",\"formats\":[2,7,1,1,1]}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "--foreground",
+            "release-info"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "marmish: invalid input: foreground_operation\n"
+        },
+        {
+          "argv": [
+            "release-info",
+            "--new-session"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "marmish: invalid input: new_session_operation\n"
+        },
+        {
+          "argv": [
+            "--max-commands",
+            "1",
+            "release-info"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "marmish: invalid input: server_limit_operation\n"
+        },
+        {
+          "argv": [
+            "release-info",
+            "--max-commands",
+            "invalid"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "marmish: invalid input: server_limit_operation\n"
+        },
+        {
+          "argv": [
+            "release-info",
+            "--max-uptime",
+            "invalid"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "marmish: invalid input: server_limit_operation\n"
+        },
+        {
+          "argv": [
+            "--new-session",
+            "--max-uptime",
+            "1",
+            "release-info"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "marmish: invalid input: server_limit_operation\n"
+        },
+        {
+          "argv": [
+            "--new-session",
+            "--max-commands",
+            "1",
+            "release-info"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "marmish: invalid input: server_limit_operation\n"
+        },
+        {
+          "argv": [
+            "--foreground",
+            "--max-commands",
+            "1",
+            "--new-session",
+            "release-info"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "marmish: invalid input: foreground_operation\n"
+        },
+        {
+          "argv": [
+            "release-info",
+            "--not-an-option"
+          ],
+          "exit": 255,
+          "stdout": "",
+          "stderr": "error: unexpected argument '--not-an-option' found\n\nUsage: marmishd release-info [OPTIONS]\n\nFor more information, try '--help'.\nmarmish: invalid_arguments\n"
+        },
+        {
+          "argv": [
+            "release-info",
+            "--max-commands"
+          ],
+          "exit": 255,
+          "stdout": "",
+          "stderr": "error: a value is required for '--max-commands <MAX_COMMANDS>' but none was supplied\n\nFor more information, try '--help'.\nmarmish: invalid_arguments\n"
+        },
+        {
+          "argv": [
+            "release-info",
+            "extra"
+          ],
+          "exit": 255,
+          "stdout": "",
+          "stderr": "error: unexpected argument 'extra' found\n\nUsage: marmishd release-info [OPTIONS]\n\nFor more information, try '--help'.\nmarmish: invalid_arguments\n"
+        },
+        {
+          "argv": [
+            "release-info",
+            "--help"
+          ],
+          "exit": 0,
+          "stdout": "Print this binary's native version, build target and source commit\n\nUsage: marmishd release-info [OPTIONS]\n\nOptions:\n      --debug\n          \n      --foreground\n          Keep the daemon attached to the terminal or service supervisor\n      --state-dir <STATE_DIR>\n          \n  -i, --identity <IDENTITY>\n          [default: default]\n      --socket <SOCKET>\n          \n      --relay <RELAY>\n          \n      --tor <TOR>\n          \n      --key-storage <KEY_STORAGE>\n          [default: auto] [possible values: auto, keychain, file]\n      --allow-peer <ALLOW_PEER>\n          \n      --retention-seconds <RETENTION_SECONDS>\n          [default: 86400]\n  -u, --user <USER>\n          \n      --srv <SRV>\n          \n      --stdin\n          \n      --stdin-none\n          \n      --detach\n          \n      --new-session\n          Open a fresh independent command room instead of reusing the default\n      --wait-seconds <WAIT_SECONDS>\n          [default: 180]\n      --no-autostart\n          \n      --max-commands <MAX_COMMANDS>\n          \n      --max-uptime <MAX_UPTIME>\n          \n  -h, --help\n          Print help\n",
+          "stderr": ""
+        }
+      ]
+    },
+    "formats": [
+      {
+        "role": "profile",
+        "source": "crates/marmish-native/src/identity.rs",
+        "sourceSha256": "0f8d1e4bcc9865ada76cc757b8bddcbc3a15397f0075c57d0eb6bd967b2a349d",
+        "identifier": "PROFILE_FORMAT",
+        "declaredType": "u8",
+        "value": 2,
+        "generatedValue": 2
+      },
+      {
+        "role": "journal",
+        "source": "crates/marmish-native/src/journal.rs",
+        "sourceSha256": "e5d3f8734f7a3f7817f44a3b69a391ada84826a211bed487cc5ad0d56a96da3f",
+        "identifier": "JOURNAL_FORMAT",
+        "declaredType": "i64",
+        "value": 7,
+        "generatedValue": 7
+      },
+      {
+        "role": "engine",
+        "source": "crates/marmish-engine/src/store.rs",
+        "sourceSha256": "4e1a8a9787e5db80098e08e5dfc36835cadb1df6161a0a149156ed9d41d954c7",
+        "identifier": "ENGINE_FORMAT",
+        "declaredType": "i64",
+        "value": 1,
+        "generatedValue": null
+      },
+      {
+        "role": "configuration",
+        "source": "crates/marmish-native/src/command_config.rs",
+        "sourceSha256": "f84f4d8d13f5cb1d4912c236a16797f27b946dd11584b1f5b9776590f05cae19",
+        "identifier": "CONFIG_FORMAT",
+        "declaredType": "u32",
+        "value": 1,
+        "generatedValue": 1
+      },
+      {
+        "role": "command",
+        "source": "crates/marmish-native/src/command_wire.rs",
+        "sourceSha256": "01b272575c0dbf9ebf327090d6abf1a63ce4342eb4eec15076210899fe51a4dc",
+        "identifier": "COMMAND_FORMAT",
+        "declaredType": "u32",
+        "value": 1,
+        "generatedValue": null
+      }
+    ],
+    "originalBinaries": {
+      "marmish": "8097469a154ba7cf3a5a4d4848537f7ce72ba9f767f90ab7362aba8074842ac7",
+      "marmishd": "f35024f7a3a342392d36b83e4348f7bf0ea65d9e39b9358425c8249592038f41"
+    },
+    "generatedBinaries": {
+      "marmish": "6e788ee732eeadda07079be1c79943d1ad1bf1739650a1ae6e5747668b7914be",
+      "marmishd": "8a1ad266788d471d7884d6c2ba8fe273be5f7bf04e7526486f1d415175907f42"
+    }
+  },
+  "recoveredReport": {
+    "graphSha256": "20358d51451b80ffc68f2044a2e32e996373267d3f262a94796b34bfb590d5d7",
+    "recoveryReceiptSha256": "99f863e4f34fdc8f3bc92675fa992dc8b3c041eb708f2f2217f47108a06f2065"
+  },
+  "fixedVault": {
+    "name": "tests::strict_public_values",
+    "unchangedModuleSha256": "5389218be38e60288371fe63a79ae71d2e9dbb8408a34bc53e8010f03117359c",
+    "originalAndGeneratedPassed": true,
+    "standaloneReceiptSha256": "5b3667cef31a601c0a9c366400c4a24525582dec5a4b2790c113da0ec8277b4b",
+    "fromBytesHoldout": {
+      "name": "from_bytes_owns_the_input_and_requires_drop",
+      "sourceSha256": "d4d0f17448e0a2aab6199f4ca232f4869739c4e6fe25b660d8851d13fb074e72",
+      "originalAndGeneratedPassed": true
+    },
+    "librarySha256": "3c38be8d8a28843fdf65d8747ec46382ef7cb353a473f4e65bf83ad453b929e5",
+    "publicValueRows": 600
+  },
+  "journal": {
+    "baselineRecoveryLockSha256": "967e7e7b391121c754e2b28b1549d4bdf15fadb4c22c08c8f8b2c69e8c9e02f2",
+    "reorderedRecoveryLockSha256": "1d09d84e39007aa79acf3d460c9d11f62fa77242ebc12b33dc4b16d9e10ea4f1",
+    "original": {
+      "jsonLines": [
+        "{\"session\":\"s\\n1\",\"group_id\":\"group\",\"peer\":\"\u5317\",\"revoked\":true}",
+        "{\"application_id\":\"app\",\"app_event_id\":\"event\",\"state\":\"sent\"}",
+        "{\"cursor\":18446744073709551615,\"session\":\"s\\n1\",\"application_id\":\"app\",\"sender\":\"\u5317\",\"data\":[0,127,255],\"invalidated\":false}"
+      ],
+      "libraries": {
+        "serde_json": "b37bd58c7bcec5c6f7fe0389d4a138b79252c881193b28f6c30354fe09797568",
+        "marmish_native": "6e2948ded0e8f97f1f01185dc02ffcce3f751a0cc9360e8f89d8351a37154743"
+      }
+    },
+    "generated": {
+      "jsonLines": [
+        "{\"session\":\"s\\n1\",\"group_id\":\"group\",\"peer\":\"\u5317\",\"revoked\":true}",
+        "{\"application_id\":\"app\",\"app_event_id\":\"event\",\"state\":\"sent\"}",
+        "{\"cursor\":18446744073709551615,\"session\":\"s\\n1\",\"application_id\":\"app\",\"sender\":\"\u5317\",\"data\":[0,127,255],\"invalidated\":false}"
+      ],
+      "libraries": {
+        "serde_json": "3e77d472048b3f60fdb121827e7632a01840f9108d4941bb559413d08e779f0f",
+        "marmish_native": "afe1be55bb4321e06aa200e5b7432ffc36b1d23bb2a274800f622d95aee8cea7"
+      }
+    }
+  }
+}

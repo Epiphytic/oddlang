@@ -1,0 +1,44 @@
+{
+  "companionRevision": "12087cda848e460c36c2d308e73f400b94d09bde",
+  "host": "aarch64-apple-darwin",
+  "originalTestHarnessSha256": "7e81308aeb2e9086db1209e431fdb0ea73f2290a1d54c0241e18f8cec88cb800",
+  "oddlangSha256": "ccd3aa5caeac7c57dddb5d8c04e6cc619c7580e446edb8139bc00f0c6555e09f",
+  "byteIdenticalAcrossRustPythonAndArchive": {
+    "mdk": "0df2ec58f623bd54ba11072e4ad8a27a947911dcb991493d432778a03560b9dc",
+    "child": "08baf6a39e53bd3b90c21ef0fc0e57a67efc26d2f8de5e2858744d2c7d567a91"
+  },
+  "mdk": {
+    "environmentExecutable": {
+      "system": {
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stderrBytes": 0
+      },
+      "copy": {
+        "exit": -9,
+        "stdoutBytes": 0,
+        "stderrBytes": 0
+      }
+    },
+    "freshProcessPerTest": {
+      "tests::concurrent_output_is_separate_and_capped": 0,
+      "tests::deadline_covers_descendants_holding_both_pipes_after_parent_exit": 0,
+      "tests::environment_is_exactly_empty_even_when_ambient_is_poisoned": 101,
+      "tests::explicit_executable_and_version_only": 0,
+      "tests::fixture_runner_refuses_paths_outside_owned_directory": 0,
+      "tests::network_plans_are_inert_and_gated_before_any_spawn": 0,
+      "tests::nonzero_exit_and_diagnostic_control_bytes_are_rejected": 0,
+      "tests::synthetic_json_and_ndjson_are_bounded_and_structural_only": 0,
+      "tests::timeout_reaps_direct_child": 0
+    }
+  },
+  "child": {
+    "case": "process_limits_tests::lower_soft_hard_and_descriptor_flags_are_unchanged",
+    "packageManifestSha256": "82ea9036fa466629433dcd3384a5305f13e5422a1d3bb96bcb9dc6e88046eb06",
+    "baselinePassingProcesses": 2,
+    "mutantPassingProcesses": 1,
+    "childMatchedZero": true,
+    "mutantCargoExit": 0,
+    "coverageGateRejected": true
+  }
+}

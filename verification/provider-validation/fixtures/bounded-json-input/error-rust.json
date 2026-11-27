@@ -1,0 +1,13 @@
+{
+  "format": "oddlang-finite-error-rust-v1",
+  "variantOrder": [
+    "urn:test:capacity",
+    "urn:test:bad-input"
+  ],
+  "categoryTypes": {},
+  "names": {
+    "urn:test:fault": "Fault",
+    "urn:test:capacity": "Capacity",
+    "urn:test:bad-input": "Input"
+  }
+}

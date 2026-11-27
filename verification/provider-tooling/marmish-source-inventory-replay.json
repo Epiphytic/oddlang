@@ -1,0 +1,65 @@
+{
+  "byteIdenticalFiles": {
+    "inventory/inventory-summary.json": "eecd6192669c09be74b3cd383c786a640bf2f050b5ec633979c0afd9712c8fb9",
+    "inventory/inventory.json.gz": "98933a98c3ac1c0d195a0f0e2c82d8cbe1381ab03b866acb2b8b733d156e591d"
+  },
+  "counts": {
+    "cargoTargets": 29,
+    "externalPackages": 746,
+    "fileClasses": {
+      "build-input": 49,
+      "cargo-source": 173,
+      "generated-artifact": 6,
+      "static-asset": 1222,
+      "test": 95,
+      "test-fixture": 4,
+      "tooling": 92
+    },
+    "files": 1641,
+    "lexicalReferences": 92724,
+    "ontologyFiles": 418,
+    "parseStatus": {
+      "inventory": 60,
+      "parsed": 326,
+      "parsed_with_omissions": 16,
+      "recovered": 16
+    },
+    "runtimeLexicalSitesByDisposition": {
+      "imported": 0,
+      "retained-native": 5849,
+      "unsupported": 0
+    },
+    "symbolClasses": {
+      "build-input": 2,
+      "example": 1,
+      "qualification-tool": 2784,
+      "retained-native": 5849,
+      "test": 5051,
+      "tooling": 2110
+    },
+    "symbols": 15797,
+    "workspaceMembers": 7
+  },
+  "format": "oddlang-marmish-source-inventory-replay-v1",
+  "gaps": [
+    "Lexical callees, generated declarations and workspace-wide symbol reachability remain unresolved.",
+    "Source parser recovery and omission markers preclude a complete declaration denominator."
+  ],
+  "historicalArchive": "examples/marmish/evidence/original.tar.gz",
+  "host": "aarch64-apple-darwin",
+  "parser": {
+    "tree-sitter": "0.25.2",
+    "tree-sitter-rust": "0.24.0"
+  },
+  "portedTestsPassed": 8,
+  "project": "examples/marmish/project.toml",
+  "requireComplete": "rejected",
+  "sourceInventorySha256": "93c06136a939fb9d3c2cd6b5e99b43b5e9f8fb3d2de5329a7d3e9874e575d1fe",
+  "testSitesByTarget": {
+    "aarch64-apple-darwin": 1199,
+    "aarch64-unknown-linux-gnu": 1172,
+    "x86_64-unknown-linux-gnu": 1172
+  },
+  "toolchain": "1.97.1",
+  "upstreamRevision": "49fc705408a230bd0ad896248d08dbdd2faad05a"
+}

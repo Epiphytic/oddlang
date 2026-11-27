@@ -96,10 +96,16 @@ fn one_pin_builds_both_hybrid_entries_against_live_versions() {
             .args(["build", "--ssr", "ssr/server.ts", "--outDir", "dist/ssr"]);
         check(ssr);
 
+        let mut server = Command::new("node");
+        server
+            .arg(app.join("dist/ssr/server.js"))
+            .env("ODDLANG_PROVIDER_URL", format!("http://{}", provider.addr))
+            .env("ODDLANG_HYBRID_PORT", "0");
+        let ssr = live::Provider::start(server, std::time::Duration::from_secs(5));
         let mut browser = Command::new("node");
         browser
             .arg(root.join("tests/support/http-hybrid.cjs"))
-            .arg(app.join("dist/ssr/server.js"))
+            .arg(format!("http://{}", ssr.addr))
             .arg(workspace.path().join("node_modules/playwright"))
             .arg(format!("http://{}", provider.addr))
             .arg(wire);

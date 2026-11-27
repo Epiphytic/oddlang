@@ -18,11 +18,13 @@ Decode checks the aggregate limit, then reads slots in declaration order. A fixe
 
 Encode validates the native record first, computes its exact length and rejects excess before allocating the output. `decodeSize` and `encodeSize` select the aggregate errors independently. The profile covers fixed ordered layouts and one-byte enum fields. Optional payloads, tagged unions and cross-record constraints need separate declarations.
 
-An `oddlang-binary-record-rust-v1` overlay binds the public record `name`, field `names`, external enum paths and variant names, and each named error to a Rust `errorType`, variant and optional text argument. Paths are absolute through `crate::` or a leading `::`. The resulting struct exposes checked `validate`, `encode` and `decode` methods. The build emits `record.rs`, declaration-keyed `obligations.json` and `projection.lock`. A pinned native package can use the `binary-record` component kind. [Independent fixture](../../verification/binary-record/verify.py)
+An `oddlang-binary-record-rust-v1` overlay binds the public record `name`, field `names`, external enum paths and variant names, and each named error to a Rust `errorType`, variant and optional text argument. Paths are absolute through `crate::` or a leading `::`. The resulting struct exposes checked `validate`, `encode` and `decode` methods. The build emits `record.rs`, declaration-keyed `obligations.json` and `projection.lock`. A pinned native package can use the `binary-record` component kind. [Independent fixture](../../verification/binary-record/cases/telemetry-oracle.rs)
 
 ```sh
 oddlang build binary-record rust graph.json rust.json output
-python3 verification/binary-record/verify.py target/debug/oddlang
+for suite in telemetry metadata composite package; do
+  cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin binary-record -- "$suite" target/debug/oddlang
+done
 ```
 
 ## Binary metadata
@@ -33,7 +35,7 @@ An unsigned slot may supply a `readError` to check its range immediately after r
 
 A `presence-equals` guard equates a boolean with optional presence. An `optional-mask` guard requires all `required` bits and forbids bits outside `allowed` when an unsigned value is present. An `optional-member-range` guard applies an inclusive unsigned range to a member of a present inline record. Each guard has a stable identity and a named validation error.
 
-Binary `hashViews` select an ordered list of fixed byte arrays and enumerated tag fields. The digest is SHA-256 of the declared domain bytes and selected wire representations. The output is the supplied prefix followed by lowercase hexadecimal digest bytes. The corresponding native binding selects the method name and SHA-256 library. These views operate independently of validation. [Independent metadata fixture](../../verification/binary-record/metadata.py)
+Binary `hashViews` select an ordered list of fixed byte arrays and enumerated tag fields. The digest is SHA-256 of the declared domain bytes and selected wire representations. The output is the supplied prefix followed by lowercase hexadecimal digest bytes. The corresponding native binding selects the method name and SHA-256 library. These views operate independently of validation. [Independent metadata fixture](../../verification/binary-record/cases/metadata-oracle.rs)
 
 ## Composite binary records
 
@@ -43,10 +45,10 @@ A `signed-be` slot stores a signed fixed-width integer. An `inline` slot stores 
 
 A composite constraint compares typed local fields, declared nested fields or exact literals. It can require enum membership or optional presence, compare a present inline record with another field, impose a checked minimum signed time difference, and combine predicates by implication and equivalence. An overflowing time difference fails the constraint. Constraints run in order after the field guards and named record guards.
 
-Optional `integrity` specifies a SHA-256 checksum over explicit domain bytes and the record payload. The encoded footer is 32 bytes and counts toward the complete byte bound. Decode first checks the maximum and the presence of the full footer, then compares the digest, then parses the payload. The graph supplies separate errors for short and mismatching footers. [Independent composite fixture](../../verification/binary-record/composite.py)
+Optional `integrity` specifies a SHA-256 checksum over explicit domain bytes and the record payload. The encoded footer is 32 bytes and counts toward the complete byte bound. Decode first checks the maximum and the presence of the full footer, then compares the digest, then parses the payload. The graph supplies separate errors for short and mismatching footers. [Independent composite fixture](../../verification/binary-record/cases/composite-oracle.rs)
 
 ### Nested codec contracts in a native package
 
 A nested slot identifies its provider by stable record ID. The native overlay selects one of the provider’s exported paths. The assembler requires one digest-pinned provider for the referenced ID and checks its exported path, including each inspected field’s ID, primitive type, width and native spelling. A record may expose prefix operations alongside its full encode/decode methods. A fragment that only extends an existing type cannot supply a complete codec by itself. The current package checker resolves providers declared in the same package. Nested errors propagate through the same native error type. Its root re-export and module spelling are interchangeable. Standalone record projection can still describe an external codec.
 
-A slot’s `maximum` limits the length accepted by that enclosing slot. An external record declaration may also specify `codecMaximum` to require the provider’s exact aggregate limit. The two limits can differ. The assembler propagates structural minimum widths through required nested slots, counting length prefixes and integrity footers, and rejects cycles and impossible byte budgets. A passing width check establishes that the declared widths fit. Value predicates can further restrict the encodable records. [Pinned package fixture](../../verification/binary-record/package.py)
+A slot’s `maximum` limits the length accepted by that enclosing slot. An external record declaration may also specify `codecMaximum` to require the provider’s exact aggregate limit. The two limits can differ. The assembler propagates structural minimum widths through required nested slots, counting length prefixes and integrity footers, and rejects cycles and impossible byte budgets. A passing width check establishes that the declared widths fit. Value predicates can further restrict the encodable records. [Pinned package fixture](../../verification/binary-record/cases/geology-linkage.json)

@@ -1,0 +1,68 @@
+{
+  "frameworkRevision": "497c96ddacaddffbc185c7093edfb942494ccd11",
+  "companionRevision": "5f5b49304a93db00112954a7ceda35eecb492c07",
+  "compilerSha256": "3215ef69f8753c01facb3b31bbb40c23a8d968a2e7335e329f14d0de8ce50146",
+  "inputManifestSha256": "859923216f7a48d14f6975c9625fc809b2f6f1a0da3c4484ff367f96eaa929b4",
+  "pinnedInputs": 111,
+  "workspace": {
+    "directories": 49,
+    "files": 106,
+    "members": 7,
+    "treeSha256": "ed3ba7e04668b2ad346edf880c0c1a261ffefaa47b6838ad9b24e0ab4b8c3524",
+    "workspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c"
+  },
+  "copyDataPipe": {
+    "original": "af54339d250290490d62d4475a77539b7e739071",
+    "generatedWorkspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c",
+    "driverSha256": "d5ec33dd26c651ca82483188862bc43ee459b900fdb39c4ccc9d7199a537dd66",
+    "framesPerDirection": 1260,
+    "payloadSha256": "e8007b4a0a207564767a34fd944d829e984318e4ac4d65522b136ca16794106e",
+    "wireSha256": "a2ad71740d1390383296943473fdfac7ed6515b005e1cae5cb0f5f1cb62f78e5",
+    "originalToGenerated": {
+      "encodeExit": 0,
+      "decodeExit": 0,
+      "wireBytesCompared": 4210721,
+      "payloadBytesCompared": 4194341
+    },
+    "generatedToOriginal": {
+      "encodeExit": 0,
+      "decodeExit": 0,
+      "wireBytesCompared": 4210721,
+      "payloadBytesCompared": 4194341
+    },
+    "truncationAndOffsetControlsPassed": 4
+  },
+  "policyToolSha256": "f16f926defc895c139bc774f2cdb8cdb8609256582027d9ffd4c5a6f4e5bcd29",
+  "policy": {
+    "rebuiltObserverSha256": {
+      "policy-observer": "5d6a96c470d91dc88b1d29124071540ac3c352d7af6b56eca5664b8161e135b1",
+      "generated-observer": "8947b99cd5b23e696ac141152f4ebebb32dbd979dbd1f87481b8d237b1d9fe76",
+      "room-observer": "58c90a940efefffd08e5c755b83d6ae245b83e6db94fa9d8ed9e4040ab0db784"
+    },
+    "upstreamCommit": "af54339d250290490d62d4475a77539b7e739071",
+    "rustToolchain": "1.97.1",
+    "host": "aarch64-apple-darwin",
+    "workspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c",
+    "foregroundSourceSha256": "9ddc9fd6ab6f2fa08e3e80805c18d96a0d0be4c02ca177205bbe5cd692d106e2",
+    "policyDecisions": {
+      "cases": 105,
+      "inputsSha256": "b392ced173616d91990bb648af275a25776ccc15e22f33faf7388baea451a980",
+      "observationsSha256": "c30e84dc1ec0633fc995d79eda55ece8dfabd27db8cc91bcf72e2270cbbd6f6b"
+    },
+    "roomConfigFileCases": 11
+  },
+  "host": "aarch64-apple-darwin",
+  "providerAndRecoveryTests": {
+    "frameworkRevision": "7e368cb1bd20e738e4effcdc2a8bcfe609fab2c2",
+    "host": "aarch64-apple-darwin",
+    "rustToolchain": "1.97.1",
+    "libraryPassed": 33,
+    "providerInteropPassed": 4,
+    "rustRoundtripPassed": 5,
+    "sixBuildControlExecuted": true,
+    "commands": [
+      "cargo +1.97.1 test --locked --offline --lib --test provider_interop --test rust_roundtrip",
+      "cargo +1.97.1 test --locked --offline --test rust_roundtrip -- --ignored"
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+package oddlang:provider@1.0.0;
+
+/// The request and result are UTF-8 JSON documents validated by the host.
+/// A generation result describes artifacts to publish or structured diagnostics.
+world generate {
+    export generate: func(request: list<u8>) -> list<u8>;
+}
+
+/// The request contains host-selected logical source names and their content.
+/// A recovery result describes a candidate graph, evidence and explicit gaps.
+world recover {
+    export recover: func(request: list<u8>) -> list<u8>;
+}

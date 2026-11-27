@@ -1,0 +1,36 @@
+{
+  "companion": "30b601aac38871bf1aaa36918f60c0613c348c0d",
+  "framework": "de69fc83b21d595837ff29fdc49e6ba55558960f",
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "compilerSha256": "0dd8c20829a675af29f13641dec4ab88c5a55ece2ec67282c06d14f33b071993",
+  "host": "aarch64-apple-darwin",
+  "mutations": {
+    "records": {
+      "freshPythonAndRustReceiptSha256": "415235149eda08f941a2d536439f2fe1d97d71e5d9bca09dff68527534413e78",
+      "historicalReceiptSha256": "f5a7157fd76e05a619161f69b4fcbc62467db9db18a002131273b4db06129092",
+      "historicalDifferences": [
+        "framework",
+        "compilerSha256"
+      ],
+      "negativeDiagnostics": 21,
+      "generatedPackageLockSha256": "dbb83eeec4b582ea35661d52e1cfcfa7e3c827e5f46ed13a141068ea637a0a17",
+      "unchangedGraphAndOverlayRejected": true
+    },
+    "errors": {
+      "freshPythonAndRustReceiptSha256": "7b04cb77420d3a6243373530722c4ef4fdb2dda19641af960a1576bcd5068989",
+      "historicalReceiptSha256": "1e1fb1fe9f94453931245c3a222e0bf5ccbf211b3107b4ee19c2b8b3ff21c896",
+      "historicalDifferences": [
+        "framework",
+        "compilerSha256"
+      ],
+      "negativeDiagnostics": 38,
+      "generatedPackageLockSha256": "62837fb2646e5eceb69657e53e3fa6a7743a9cd82120928676ffbe98c4c6c9a4",
+      "unchangedGraphAndOverlayRejected": true
+    }
+  },
+  "workspaceCallbackDiagnostics": {
+    "engineRecords": 21,
+    "engineErrors": 38,
+    "nativePathRecord": 11
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "format": "oddlang-shared-declarations-v1",
+  "id": "urn:example:detector:faults",
+  "errors": [
+    {
+      "id": "urn:example:detector:fault",
+      "variants": [
+        {
+          "id": "urn:example:detector:invalid",
+          "payload": "none",
+          "category": "invalid",
+          "message": [
+            {
+              "text": "bad detector input"
+            }
+          ]
+        },
+        {
+          "id": "urn:example:detector:other-fault",
+          "payload": "none",
+          "category": "other",
+          "message": [
+            {
+              "text": "different error"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

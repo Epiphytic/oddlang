@@ -1,0 +1,57 @@
+{
+  "archivedNativeQualificationSha256": "9307daecdb4bf4bb3fa018496d83e983b6189fe49fe9a46e4259d202fccc051e",
+  "candidateCommit": "e0d855874ec2348939175dfa6ec5c71488c8ba35",
+  "candidateTestsPassed": 8,
+  "candidateTree": "6c0c7b16e3cb7b013a360c1b19e26ed19a238e65",
+  "checkedOutCandidateComparison": {
+    "command": "--compare-existing",
+    "historicalVerifierSha256": "1f7c5c311dc8f71c8b43927f048ec27d396ae94476650a5ef853da057ae92205",
+    "onlyDifferentField": "verifierSha256",
+    "rustReportSha256": "7d49091916edd05205e4b3066d31a31875cb1fa42295bf0eb3fe592cadbb1496",
+    "rustVerifierSha256": "83808058a812e58a8aca6f36a13922c820e546356635ab1ca249c4d33a2e409a"
+  },
+  "format": "oddlang-marmish-native-candidate-replay-v1",
+  "mutationControls": [
+    "edited original receipt",
+    "candidate transcript digest mismatch",
+    "altered install-status stderr"
+  ],
+  "nativeCommands": 22,
+  "newRegressions": [],
+  "originalArchiveSha256": "4c944d14b9260b2300a164cedda7f8721cb0e487efd1ef7e515c5a900f8fea32",
+  "originalCommit": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+  "originalOutcomesSha256": "790fa94a119eb2045152080e1ad9334c53e84f9763cbd7be9149f703fee02eec",
+  "phase7TestsPassed": 9,
+  "platform": "aarch64-apple-darwin",
+  "qualificationArchive": "examples/marmish/evidence/qualification.tar.gz",
+  "qualificationArchiveSha256": "60a0cb9b231d200cb2c03b043f1bd335d5c43fc362b17352fd5ce7017e4d425a",
+  "recomputedArchiveReportByteIdentical": true,
+  "recoveredOriginalOutcomesByteIdentical": true,
+  "testCounts": {
+    "installed": {
+      "candidate": {
+        "FAILED": 8,
+        "ignored": 3,
+        "ok": 907
+      },
+      "original": {
+        "FAILED": 8,
+        "ignored": 3,
+        "ok": 907
+      }
+    },
+    "workspace": {
+      "candidate": {
+        "FAILED": 9,
+        "ignored": 5,
+        "ok": 906
+      },
+      "original": {
+        "FAILED": 9,
+        "ignored": 5,
+        "ok": 906
+      }
+    }
+  },
+  "verdict": "baseline failures remain"
+}

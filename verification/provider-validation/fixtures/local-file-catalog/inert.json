@@ -1,0 +1,34 @@
+{
+  "format": "oddlang-local-file-catalog-v1",
+  "id": "urn:test:catalog:specimens",
+  "manifestGrammar": "urn:test:catalog:line-grammar",
+  "filePolicy": "urn:test:catalog:descriptor",
+  "fixedCatalog": "catalog.txt",
+  "prefixes": [
+    "v1-report.",
+    "v2-report."
+  ],
+  "candidateNameEncoding": "utf8",
+  "attributeChecks": "fixed-owner-and-mode",
+  "suffix": ".idx",
+  "namingAnchor": "record",
+  "assetNames": [
+    "record",
+    "extra"
+  ],
+  "maximumCatalogBytes": 256,
+  "digest": "sha256",
+  "guards": [
+    "unique-name",
+    "bounded-read",
+    "catalog-digest",
+    "parse",
+    "canonical-name",
+    "ordered-assets"
+  ],
+  "error": {
+    "id": "urn:test:invalid",
+    "ambiguous": "catalog_path",
+    "digest": "checksum"
+  }
+}

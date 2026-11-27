@@ -4,7 +4,7 @@ Verified on macOS ARM64 using Rust 1.97.1 and the locked offline radio fixture. 
 
 ```sh
 cargo +1.97.1 build --locked --offline --bin oddlang
-python3 verification/canonical-wire/verify.py target/debug/oddlang
+cargo +1.97.1 run --offline --locked --manifest-path verification/provider-validation/Cargo.toml --bin canonical-wire -- target/debug/oddlang
 ```
 
 The flat fixture checks the exact tag, payload and envelope order, recursive sorting, malformed and duplicate keys, an unsupported layout, a promoted key collision, the exact size limit and one byte over. Its case digest assertion pins the independent digest representation. Peer execution is tracked separately in the basic-command interoperability plan.

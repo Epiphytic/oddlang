@@ -1,0 +1,65 @@
+{
+  "host": "aarch64-apple-darwin",
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "companion": "aec3779035748965a8e2f74b6af35bb8bcd639e5",
+  "workspaceLockSha256": "0bf735fda63690510b21827669e79dcb54a055921f1ee0b91151a9d59f13c49d",
+  "profiles": {
+    "recovered": {
+      "receiptSha256": "374a20f17eca68f63432114d7aba10fb8ebaa2b97252480c91257884be09f423",
+      "registeredCases": 2,
+      "passingProcesses": 3
+    },
+    "seven": {
+      "receiptSha256": "66c07653648d877d5f372f71d7382f23b8698308c34719438dc5f5231353cb19",
+      "registeredCases": 3,
+      "passingProcesses": 4
+    },
+    "manifest": {
+      "receiptSha256": "66c07653648d877d5f372f71d7382f23b8698308c34719438dc5f5231353cb19",
+      "registeredCases": 3,
+      "passingProcesses": 4
+    },
+    "manifest-mdk": {
+      "receiptSha256": "6eccce53e7d48d60c7ba92d5cffda2f9c8fe2eff2c32b9b53debe85ba5c35105",
+      "registeredCases": 4,
+      "passingProcesses": 5
+    }
+  },
+  "additionalManifestCases": {
+    "native_manifest::tests::shared_release_version_vectors": 1,
+    "native_manifest::tests::strict_vectors": 1
+  },
+  "staging": "All workspace files after Rust vault, engine, reader and MDK staging matched the prior staging path byte for byte.",
+  "controls": [
+    "access denied to the original MDK library and tests, the companion witness source and the framework library during selected-case execution",
+    "unexpected additional registered case rejected",
+    "duplicate reader and MDK staging rejected",
+    "a second harness summary invalidated an otherwise passing case",
+    "absent MDK selector returned exactly one successful zero-test result"
+  ],
+  "mdkRecovery": {
+    "framework": "1d3b45fb79f775a445ae874c06ed89c818b1f697",
+    "receipt": "verification/whole/mdk-json-input/rust-stage-aarch64-apple-darwin.json",
+    "coldAndWarmReceiptSha256": "862c5bfd74523bb585ddbe1482c0ad3d990945a5d2d8d3ea0365b0ca197a1068",
+    "historicalDifferences": [
+      "companion",
+      "compilerSha256"
+    ],
+    "originalAndProjectedBounds": {
+      "baseline": {
+        "acceptedRecords": 200,
+        "acceptedValueBytes": 65536,
+        "rejectedRecords": 201,
+        "rejectedValueBytes": 65537
+      },
+      "mutation": {
+        "acceptedRecords": 181,
+        "acceptedValueBytes": 32768,
+        "rejectedRecords": 182,
+        "rejectedValueBytes": 32769
+      }
+    },
+    "matchingBehaviorCases": 11,
+    "sourceDenials": 4
+  }
+}

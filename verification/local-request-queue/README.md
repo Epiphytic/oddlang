@@ -8,7 +8,7 @@ The owner checks the application contract and supplies the already canonicalized
 
 ```sh
 cargo +1.97.1 build --offline --locked --bin oddlang
-python3 -B verification/local-request-queue/check.py target/debug/oddlang
+cargo +1.97.1 run --offline --locked --manifest-path verification/provider-validation/Cargo.toml --bin local-request-queue -- target/debug/oddlang
 ```
 
 The river gauge fixture compiles with warnings denied and exercises commit, duplicate replay, scope and digest rejection, bounds, collisions, rollback, and exact recovery in a separate process against a keyed SQLCipher database with WAL, full synchronization, and pre-existing owner state. It also checks stored digest corruption, malformed queue schema, a rejected commit caused by a deferred constraint, and a concurrent replay from two processes. It verifies that an unkeyed connection cannot read the state. The outcome records local queue acceptance and recovery across process restart. Power-loss persistence depends on the owner’s SQLite configuration, filesystem, and storage device.

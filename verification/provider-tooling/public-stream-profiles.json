@@ -1,0 +1,99 @@
+{
+  "companionRevision": "7308e14cf63caf482f0b7dc32b9e6d318428e044",
+  "runner": "public-stream-replay",
+  "nativeHost": {
+    "frameworkRevision": "b653f1ada68791cd2fb70293bf227c5665850d1e",
+    "kernel": "25.6.0",
+    "libc": [
+      "",
+      ""
+    ],
+    "oracleRevision": "08373b871aeac0f76cb1675748fd604cea2a79a2",
+    "oracleSha256": "6ac80220ece2352c4ea091c0c9bd33f89171d1b49ea905eeea0df75c00de3331",
+    "os": "macOS 26.6",
+    "receipts": {
+      "dev": "b3f11ccfc627da4f52b3bc6b9843c44e6000088e079457a8047133f9f5a99dc6",
+      "release": "297ac939035357ddffe2fc4bce30ef3e98583c16ec70c1bdcc4a2924fc327b37"
+    },
+    "rustHost": "aarch64-apple-darwin"
+  },
+  "matchingObservations": {
+    "publicObservationSha256": "00693291df0b7ded5774ff7ba9a508a71b59162e0cdf210cbab4cb29b7e87ff5",
+    "priorCases": 50,
+    "authoredCases": 96,
+    "seededCases": 257,
+    "mixedBinaryAndJson": {
+      "writerToReader": [
+        "binary-data-decode",
+        "maximum-data-decode",
+        "checkpoint-decode",
+        "progress-decode",
+        "error-record-decode",
+        "hello-request-decode",
+        "gap-response-decode",
+        "spec-frame-start-decode",
+        "spec-frame-manifest-decode",
+        "spec-frame-resume-decode",
+        "spec-frame-prefix-decode",
+        "spec-frame-data-decode",
+        "spec-frame-checkpoint-decode",
+        "spec-frame-done-decode",
+        "spec-frame-commit-decode",
+        "spec-frame-finish-decode",
+        "spec-frame-progress-decode",
+        "spec-frame-error-decode",
+        "spec-request-hello-decode",
+        "spec-request-copy_hello-decode",
+        "spec-request-open_copy-decode",
+        "spec-request-open-decode",
+        "spec-request-exchange-decode",
+        "spec-request-cancel-decode",
+        "spec-request-status-decode",
+        "spec-response-copy_hello-decode",
+        "spec-response-copy_refused-decode",
+        "spec-response-hello-decode",
+        "spec-response-opened-decode",
+        "spec-response-exchange-decode",
+        "spec-response-error-decode"
+      ]
+    },
+    "negativeControls": {
+      "copy-data-tag": [
+        "binary-data-encode"
+      ],
+      "error-precedence": [
+        "codec-block-length-before-offset"
+      ],
+      "rejected-transition": [
+        "seed-0-receive-retry"
+      ]
+    },
+    "freezeSha256": "9744b5727f86e472b76d69e6a7043d5e2e0f3715c79140d6086ce4ca2e20d339"
+  },
+  "linuxArchiveProfileDigests": {
+    "aarch64-unknown-linux-gnu": {
+      "dev": "07e55db079bd0746fe2cd9bd85e692724c5fdc151acedd677098967210188f74",
+      "release": "44d8ef5bb219883e8fbddd2179eb37c376a2289efe29a21eed5b4515a4981962"
+    },
+    "x86_64-unknown-linux-gnu": {
+      "dev": "f424233fd7fc8a6a8022497ab81177ec51fe27c7e919a853aa624b16296e5e7a",
+      "release": "0703ed36db56df2dea37f90dc1cdfa0e0d01c3990e5bb284d3157b37e5f7ca26"
+    }
+  },
+  "negativeControlsRejected": [
+    "publicObservationSha256",
+    "priorCases",
+    "authoredCases",
+    "seededCases",
+    "mixedBinaryAndJson",
+    "negativeControls",
+    "freezeSha256",
+    "provenance.revision",
+    "provenance.cargoLockSha256",
+    "provenance.target",
+    "provenance.profile",
+    "receipts.dev"
+  ],
+  "partialPublicationRollbackPassed": true,
+  "linuxExecution": "Archived profile checks only. One ARM64 guest reset SSH and the other returned a shell I/O error."
+}

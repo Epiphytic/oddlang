@@ -1,0 +1,55 @@
+{
+  "host": "aarch64-apple-darwin",
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "framework": "a635eec8e0f71d2dabc9aee28655e26494a7506f",
+  "companion": "7dd3fba7b17f4b4b051d9d7006aececab6659783",
+  "receiptSha256": "51f8b24becb49c9e84daf8d651e3a659506a242a9aafe74828655b4fbc2379c8",
+  "archivedReceiptByteIdentical": true,
+  "stagedInputsByteIdentical": true,
+  "matchingNativeObservations": 1735,
+  "mutationWitnesses": [
+    "frame-error-order",
+    "frame-version",
+    "relay-rule-order",
+    "retention-bound"
+  ],
+  "rejectedPackageControls": [
+    "extra root file",
+    "generated source modification",
+    "component graph digest mismatch",
+    "Cargo.lock modification"
+  ],
+  "linux": "Runner syntax checked. Native replay pending VM shell access.",
+  "rustLinuxRunner": {
+    "companionRevision": "469960d55737ea59d8b54ce5ea05444967534275",
+    "entryPoint": "core-package-inputs linux",
+    "nativeLinuxExecution": "Pending. One configured ARM64 guest reset its SSH connection and the other reported a shell I/O error.",
+    "testedHost": "aarch64-apple-darwin",
+    "pinnedCompilerRebuilt": true,
+    "freshGeneratedPackageLockSha256": "b30e3ad85232743da965f0ca1d823baea25095d66e883005ceb1f790ee44794c",
+    "referenceAndGeneratedTranscriptSha256": "a0eba1d3a32c7238ba8f6f8b665d92f5205fc6bfc56a150f637f07516a856c0e",
+    "matchingObservations": 1735,
+    "upstreamTestsPerImplementation": 7,
+    "differentialCallersPerImplementation": 1,
+    "acceptedLoopbackConnectionRejectedByProbe": true,
+    "closedPortAcceptedByProbe": true,
+    "nonLinuxInvocationRejectedBeforeReceipt": true
+  },
+  "rustMacosRunner": {
+    "companionRevision": "09cf82cd0859df5efe5813152abb7d3b967151a1",
+    "entryPoint": "core-package-inputs macos",
+    "platform": "aarch64-apple-darwin",
+    "receiptSha256": "51f8b24becb49c9e84daf8d651e3a659506a242a9aafe74828655b4fbc2379c8",
+    "bothEntryPointsMatchedArchiveBytes": true,
+    "matchingObservationsPerRun": 1735,
+    "mutationWitnesses": [
+      "frame-error-order",
+      "frame-version",
+      "relay-rule-order",
+      "retention-bound"
+    ],
+    "legacyEnvironmentAndReadRootsMatched": true,
+    "bothPoliciesPassedPrivateReadAndExternalReadDenial": true,
+    "wrongCheckoutRejectedBeforeReceipt": true
+  }
+}

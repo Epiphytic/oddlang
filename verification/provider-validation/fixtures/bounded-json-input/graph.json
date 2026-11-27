@@ -1,0 +1,16 @@
+{
+  "format": "oddlang-bounded-json-input-v1",
+  "id": "urn:test:metadata",
+  "maximumValueBytes": 24,
+  "maximumRecords": 2,
+  "framing": "lf-terminated",
+  "sizeBoundary": "include-delimiter",
+  "duplicateMembers": "last-value",
+  "guardOrder": [
+    "byte-limit",
+    "record-limit",
+    "parse"
+  ],
+  "capacityError": "urn:test:capacity",
+  "invalidError": "urn:test:bad-input"
+}

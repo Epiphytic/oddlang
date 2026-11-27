@@ -1,11 +1,8 @@
 use std::{fs, path::Path, process::Command};
 
 fn helper(args: &[&str], dir: &Path) -> std::process::Output {
-    Command::new("python3")
-        .arg(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/skills/oddlang-import-cleanup/scripts/cleanup.py"
-        ))
+    Command::new(env!("CARGO_BIN_EXE_oddlang"))
+        .arg("cleanup")
         .args(args)
         .current_dir(dir)
         .output()

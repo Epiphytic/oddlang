@@ -1,0 +1,6 @@
+{
+  "domain": "urn:sample:calibration-domain",
+  "value": "urn:sample:calibration",
+  "failure": "urn:sample:width-error",
+  "source": "local::instrument::Calibration::{type}"
+}

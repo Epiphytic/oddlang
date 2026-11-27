@@ -1,0 +1,124 @@
+[
+  {
+    "file": "protocol.json",
+    "pointer": "/endpoints/0/steps/1/value",
+    "value": {
+      "scope": "value",
+      "fields": [
+        "urn:weather:native-label"
+      ]
+    },
+    "diagnostic": "guard iteration requires a typed list"
+  },
+  {
+    "file": "protocol.json",
+    "pointer": "/endpoints/0/steps/1/steps/0/bind",
+    "value": "batch",
+    "diagnostic": "empty or shadowed guard scope name"
+  },
+  {
+    "file": "protocol.json",
+    "pointer": "/endpoints/0/steps/1/steps/0/id",
+    "value": "urn:weather:apply-sample-check",
+    "diagnostic": "duplicate wire declaration"
+  },
+  {
+    "file": "protocol.json",
+    "pointer": "/recordChecks/urn:weather:check:text/steps/0/predicate/items/0/value",
+    "value": {
+      "scope": "value",
+      "fields": []
+    },
+    "diagnostic": "guard expects text"
+  },
+  {
+    "file": "protocol.json",
+    "pointer": "/recordChecks/urn:weather:check:sample/steps/1/predicate/left/value",
+    "value": {
+      "scope": "value",
+      "fields": []
+    },
+    "diagnostic": "guard expects text"
+  },
+  {
+    "file": "protocol.json",
+    "pointer": "/endpoints/0/steps/1/steps/0/steps/0/check",
+    "value": "urn:weather:missing-check",
+    "diagnostic": "undeclared record check"
+  },
+  {
+    "file": "protocol.json",
+    "pointer": "/endpoints/0/steps/1/steps/0/steps/0/value",
+    "value": {
+      "scope": "batch",
+      "fields": []
+    },
+    "diagnostic": "record check requires its declared type"
+  },
+  {
+    "file": "protocol.json",
+    "pointer": "/recordChecks/urn:weather:check:sample/owner",
+    "value": "urn:weather:envelope",
+    "diagnostic": "record check requires its declared type"
+  },
+  {
+    "file": "protocol.json",
+    "pointer": "/recordChecks/urn:weather:check:unused/owner",
+    "value": "urn:weather:direction",
+    "diagnostic": "a shared check requires a named record"
+  },
+  {
+    "file": "protocol.json",
+    "pointer": "/recordChecks/urn:weather:check:unused/owner",
+    "value": "urn:weather:unknown-record",
+    "diagnostic": "unknown guard type"
+  },
+  {
+    "file": "protocol.json",
+    "pointer": "/recordChecks/urn:weather:check:unused/steps",
+    "value": [
+      {
+        "kind": "check-record",
+        "id": "urn:weather:recurse",
+        "value": {
+          "scope": "value",
+          "fields": []
+        },
+        "check": "urn:weather:check:unused"
+      }
+    ],
+    "diagnostic": "recursive shared record checks"
+  },
+  {
+    "file": "protocol.json",
+    "pointer": "/recordChecks/urn:weather:check:empty/steps",
+    "value": [
+      {
+        "kind": "check-record",
+        "id": "urn:weather:cycle",
+        "value": {
+          "scope": "value",
+          "fields": []
+        },
+        "check": "urn:weather:check:sample"
+      }
+    ],
+    "diagnostic": "recursive shared record checks"
+  },
+  {
+    "file": "protocol.json",
+    "pointer": "/recordChecks/urn:weather:send",
+    "value": {
+      "owner": "urn:weather:sample",
+      "steps": []
+    },
+    "diagnostic": "duplicate wire declaration",
+    "insert": true
+  },
+  {
+    "file": "protocol-rust.json",
+    "pointer": "/endpoints/urn:weather:send/encode",
+    "value": "__oddlang_record_check_0",
+    "diagnostic": "invalid native endpoint API name"
+  }
+]

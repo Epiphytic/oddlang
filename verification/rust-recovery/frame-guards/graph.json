@@ -1,0 +1,41 @@
+{
+  "format": "oddlang-binary-frame-v1",
+  "id": "urn:parcel:union",
+  "maximum": 64,
+  "errors": {
+    "header": "urn:parcel:Header",
+    "length": "urn:parcel:Length",
+    "limit": "urn:parcel:Capacity",
+    "tag": "urn:parcel:Tag",
+    "truncated": "urn:parcel:Truncated",
+    "trailing": "urn:parcel:Trailing",
+    "decoderFailed": "urn:parcel:DecoderFailed"
+  },
+  "types": {},
+  "cases": {
+    "urn:parcel:chunk": {
+      "tag": 43,
+      "form": "named",
+      "slots": [
+        {
+          "id": "urn:parcel:chunk:seq",
+          "encoding": {
+            "kind": "unsigned",
+            "bits": 64,
+            "maximum": 9,
+            "error": "urn:parcel:End"
+          }
+        },
+        {
+          "id": "urn:parcel:chunk:contents",
+          "encoding": {
+            "kind": "rest",
+            "minimum": 1,
+            "maximum": 4,
+            "error": "urn:parcel:Capacity"
+          }
+        }
+      ]
+    }
+  }
+}

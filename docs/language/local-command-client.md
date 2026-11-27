@@ -32,5 +32,5 @@ The [field meter fixture](../../verification/local-command-client/) builds an un
 
 ```sh
 cargo build --locked --offline
-python3 verification/local-command-client/check.py target/debug/oddlang
+cargo +1.97.1 run --offline --locked --manifest-path verification/provider-validation/Cargo.toml --bin field-meter-projection -- --with-sockets target/debug/oddlang
 ```

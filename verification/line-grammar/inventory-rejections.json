@@ -1,0 +1,283 @@
+[
+  {
+    "case": "format",
+    "diagnostic": "invalid bounded",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/graph/format",
+        "value": "else"
+      }
+    ]
+  },
+  {
+    "case": "zero",
+    "diagnostic": "invalid bounded",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/graph/maxBytes",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "case": "rows",
+    "diagnostic": "invalid bounded",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/graph/rows",
+        "value": []
+      }
+    ]
+  },
+  {
+    "case": "empty row",
+    "diagnostic": "invalid bounded",
+    "changes": [
+      {
+        "op": "add",
+        "path": "/graph/rows/-",
+        "value": []
+      }
+    ]
+  },
+  {
+    "case": "LF",
+    "diagnostic": "invalid bounded",
+    "changes": [
+      {
+        "op": "add",
+        "path": "/graph/forbiddenBytes/-",
+        "value": 10
+      }
+    ]
+  },
+  {
+    "case": "non-ASCII",
+    "diagnostic": "invalid bounded",
+    "changes": [
+      {
+        "op": "add",
+        "path": "/graph/forbiddenBytes/-",
+        "value": 255
+      }
+    ]
+  },
+  {
+    "case": "duplicate byte",
+    "diagnostic": "invalid bounded",
+    "changes": [
+      {
+        "op": "add",
+        "path": "/graph/forbiddenBytes/-",
+        "value": 9
+      }
+    ]
+  },
+  {
+    "case": "space",
+    "diagnostic": "invalid bounded",
+    "changes": [
+      {
+        "op": "add",
+        "path": "/graph/forbiddenBytes/-",
+        "value": 32
+      }
+    ]
+  },
+  {
+    "case": "forbidden literal",
+    "diagnostic": "literal token",
+    "changes": [
+      {
+        "op": "add",
+        "path": "/graph/forbiddenBytes/-",
+        "value": 107
+      }
+    ]
+  },
+  {
+    "case": "forbidden grammar text",
+    "diagnostic": "admissible token",
+    "changes": [
+      {
+        "op": "add",
+        "path": "/graph/forbiddenBytes/-",
+        "value": 118
+      }
+    ]
+  },
+  {
+    "case": "unused",
+    "diagnostic": "unused nested",
+    "changes": [
+      {
+        "op": "remove",
+        "path": "/graph/rows/1/1/grammar"
+      }
+    ]
+  },
+  {
+    "case": "unresolved",
+    "diagnostic": "unresolved nested",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/graph/rows/1/1/grammar",
+        "value": "urn:missing"
+      }
+    ]
+  },
+  {
+    "case": "duplicate grammar",
+    "diagnostic": "duplicate nested",
+    "changes": [
+      {
+        "op": "add",
+        "path": "/graph/textGrammars/-",
+        "value": {
+          "format": "oddlang-text-grammar-v1",
+          "id": "urn:inventory:batch-grammar",
+          "prefixes": [
+            "v5."
+          ],
+          "body": {
+            "notation": "canonical-ascii-decimal",
+            "bits": 16,
+            "minimum": 0
+          },
+          "suffix": {
+            "delimiter": "-rc.",
+            "body": {
+              "notation": "canonical-ascii-decimal",
+              "bits": 16,
+              "minimum": 1
+            }
+          },
+          "consumption": "entire-input"
+        }
+      }
+    ]
+  },
+  {
+    "case": "decimal bounds",
+    "diagnostic": "decimal bounds",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/graph/rows/3/5/bits",
+        "value": 8
+      },
+      {
+        "op": "replace",
+        "path": "/graph/rows/3/5/maximum",
+        "value": 256
+      }
+    ]
+  },
+  {
+    "case": "odd hex",
+    "diagnostic": "hexadecimal extent",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/graph/rows/3/3/digits",
+        "value": 3
+      }
+    ]
+  },
+  {
+    "case": "boolean",
+    "diagnostic": "boolean encoding",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/graph/rows/4/1/trueToken",
+        "value": "no"
+      }
+    ]
+  },
+  {
+    "case": "integer width",
+    "diagnostic": "integer-valued",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/graph/rows/3/4/bits",
+        "value": 8
+      }
+    ]
+  },
+  {
+    "case": "capture duplicate",
+    "diagnostic": "duplicate capture",
+    "changes": [
+      {
+        "op": "add",
+        "path": "/graph/rows/3/-",
+        "value": {
+          "kind": "decimal",
+          "bits": 32,
+          "minimum": 1,
+          "capture": "amount"
+        }
+      }
+    ]
+  },
+  {
+    "case": "overlay missing",
+    "diagnostic": "distinct valid names",
+    "changes": [
+      {
+        "op": "remove",
+        "path": "/overlay/captureNames/batch"
+      }
+    ]
+  },
+  {
+    "case": "overlay extra",
+    "diagnostic": "distinct valid names",
+    "changes": [
+      {
+        "op": "add",
+        "path": "/overlay/captureNames/extra",
+        "value": "extra"
+      }
+    ]
+  },
+  {
+    "case": "overlay invalid",
+    "diagnostic": "distinct valid names",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/overlay/captureNames/batch",
+        "value": "new-batch"
+      }
+    ]
+  },
+  {
+    "case": "overlay duplicate",
+    "diagnostic": "distinct valid names",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/overlay/captureNames/batch",
+        "value": "item"
+      }
+    ]
+  },
+  {
+    "case": "overlay collision",
+    "diagnostic": "distinct valid names",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/overlay/reader",
+        "value": "Report"
+      }
+    ]
+  }
+]

@@ -1,0 +1,47 @@
+{
+  "companionRevision": "eb0147696799292d6e4730f72b462a8da034d4ac",
+  "host": "aarch64-apple-darwin",
+  "sameBinaryRustAndPythonReplays": {
+    "extended-original": {
+      "identicalReceiptSha256": "130c17cc25b44872311f27e30568228db1d1e60af91833f05cddd3c385cd5039",
+      "binarySha256": "8097469a154ba7cf3a5a4d4848537f7ce72ba9f767f90ab7362aba8074842ac7",
+      "caseSha256": "f3f28234d9c2b0068e1ca17f91dd59e45783056cad4ef7199b7af8add5f6765f",
+      "observations": 16
+    },
+    "extended-candidate": {
+      "identicalReceiptSha256": "e2e685aeba61f115e322cf78f856d7e8c85c30e8b8222d13aafb75eec463c4b3",
+      "binarySha256": "0df07c8ce8654e40c6a14dbf0be1ad020a18b09fa5ec535af84bfd54998beace",
+      "caseSha256": "f3f28234d9c2b0068e1ca17f91dd59e45783056cad4ef7199b7af8add5f6765f",
+      "observations": 16
+    },
+    "nested-original": {
+      "identicalReceiptSha256": "cb8b9c9a6e4616d2f4bd2fc60696aee8533e8027f3f9049b21f7234e6fd6a714",
+      "binarySha256": "8097469a154ba7cf3a5a4d4848537f7ce72ba9f767f90ab7362aba8074842ac7",
+      "caseSha256": "b03ef7aa8d26e3f47647e4f0b8f8fa89cd3d7ed3442b6063765a92641681d3a2",
+      "observations": 33
+    },
+    "nested-candidate": {
+      "identicalReceiptSha256": "9afd9d61d7251429f2489dd98c9ad3bb49aa7ed27b9aa9468ce2a39b1ff27503",
+      "binarySha256": "0df07c8ce8654e40c6a14dbf0be1ad020a18b09fa5ec535af84bfd54998beace",
+      "caseSha256": "b03ef7aa8d26e3f47647e4f0b8f8fa89cd3d7ed3442b6063765a92641681d3a2",
+      "observations": 33
+    }
+  },
+  "integratedTypedReceiptSha256": "1dbcc5152ca99a5a7ebd1d4372fe26c1129d5f2252576e52652ddd0d33e4366d",
+  "integratedArchiveSha256": "c2f5bcc4fbabc2b3406ded270828b94d03a653d33a641c357b9c0860241ea7c5",
+  "liveDaemon": {
+    "exit": 0,
+    "stderr": "",
+    "stdout": "{\"ok\":true,\"result\":{\"state\":\"activating\"},\"error\":null}\n"
+  },
+  "rejectedControls": [
+    "changed stdout",
+    "changed stderr",
+    "changed exit status",
+    "wrong corpus digest",
+    "wrong reference mode",
+    "different case names",
+    "unpinned original client",
+    "invalid status request bytes"
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "format": "oddlang-companion-tool-inventory-v1",
+  "oddlangBaselineBlob": "0dfc3709d85e471f7039965da2b74b6a70821fe0",
+  "companionBaseline": "51064fa44124b811fdfbe1329cb62de4097eb8de",
+  "upstreamOriginal": "af54339d250290490d62d4475a77539b7e739071",
+  "auditedCompanionRevision": "b95fd5161e75c47913a17a2ee3e68e13da5e8748",
+  "tableSha256": "9cd4a5eaccfb53b305d286f7de6f2a7366e6c7d2fa5d4e9711767ea15c919244",
+  "rows": 396,
+  "baselinePaths": 382,
+  "currentPaths": 355,
+  "statusCounts": {
+    "changed-blob": 12,
+    "outside-baseline": 14,
+    "removed": 41,
+    "same-blob": 329
+  },
+  "currentRoleCounts": {
+    "adapted-original-indexer": 1,
+    "generated-release-installer": 1,
+    "inherited-original": 166,
+    "native-observation-fixture": 2,
+    "native-target-consumer": 3,
+    "project-python-caller-adapter": 3,
+    "project-tooling": 179
+  },
+  "remainingProjectToolFiles": 182,
+  "remainingProjectExtensions": {
+    ".sh": 9,
+    ".py": 173
+  },
+  "remainingProjectWithCodeReference": 89,
+  "remainingProjectWithDocReference": 129,
+  "remainingProjectWithEitherReference": 166,
+  "baselineRemovalsByCommit": {
+    "0a1d816a84f4f3c148ea37427ab83e508a86b660": 4,
+    "266821f550ddab77ee9db6edef4eebd7a4a762a4": 3,
+    "3179b2fa77300383f3c0a04a4f1e26f02a977741": 2,
+    "60e05ad3e496465103588b151ae103008a821ed5": 2,
+    "77ea0ed1a9a79f6bbf0e358da549f9562280ad95": 1,
+    "89a6f9a648c119d8d304bb29a82ca175a07786af": 3,
+    "8df69cebb1960ca51d95fc2e1eb63860a2488636": 3,
+    "95ed2befbb32dc425136c28b66339fe5f84afa9a": 3,
+    "9731a3625c4eff8400184dc5cbd1875b761e2e90": 4,
+    "a51c2e8def8309645eeb15103b7e0723a67d7c77": 3,
+    "a660f5f55bb2ea5366cecd79d4975590a1c4ae12": 2,
+    "b95fd5161e75c47913a17a2ee3e68e13da5e8748": 2,
+    "d1c9b193fa501cedec287409e1265677bc24797d": 3,
+    "d3a022a65a1f6d3d6fb035294e547f779086b7d7": 2,
+    "dfdfc3771f1c08e5cfb32ec05adec5ab911d13ca": 1,
+    "f8fa6e88ce9120efd7def9e46760ea04b9fb0a1b": 3
+  }
+}

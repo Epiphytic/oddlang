@@ -1,0 +1,77 @@
+{
+  "fixture": {
+    "allCommandsPassed": true,
+    "commands": [
+      "rustc",
+      "cargo",
+      "uv",
+      "python",
+      "git",
+      "clang",
+      "sdk",
+      "cfg",
+      "ontology",
+      "metadata",
+      "installed-metadata",
+      "workspace",
+      "workspace-ignored",
+      "installed",
+      "installed-ignored",
+      "release",
+      "marmish-version",
+      "marmish-help",
+      "marmishd-version",
+      "marmishd-help",
+      "marmish-worker-version",
+      "marmish-worker-help"
+    ],
+    "comparedHistoricalFields": [
+      "command name",
+      "portable argv",
+      "stdout and stderr paths",
+      "tools",
+      "flags",
+      "isolation",
+      "platforms"
+    ],
+    "controls": [
+      "timeout kills command process group including sleeping descendant",
+      "sandbox rejects an attempted write outside the temporary workspace"
+    ],
+    "inactiveInstalledStatus": "exact bytes and unchanged seeded fixture",
+    "recordedStreamHashesVerified": true,
+    "releaseBinaries": [
+      "marmish",
+      "marmishd",
+      "marmish-worker",
+      "marmish-release-tool"
+    ]
+  },
+  "format": "oddlang-marmish-native-baseline-collector-v1",
+  "fullUpstreamMatrix": "Archive replay. Fresh full workspace tests and four release builds were exercised in the isolated fixture; the complete pinned upstream workspace matrix was not rebuilt in this run.",
+  "originalCheckout": {
+    "additionalCargoTest": "marmish-core --test contracts",
+    "commandsPassed": [
+      "rustc",
+      "cargo",
+      "uv",
+      "python",
+      "git",
+      "clang",
+      "sdk",
+      "cfg",
+      "ontology",
+      "metadata",
+      "installed-metadata"
+    ],
+    "originalOntologyStdoutSha256": "5eb3e7fc4a8fc5495d9d9fc2b983911e3284683aa4d279172a9481dbc67ad301",
+    "passedContractTests": 7,
+    "scope": "Pinned toolchain and host tools, ontology, both metadata profiles, and the seven native core contract tests in a fresh isolated target."
+  },
+  "platform": "aarch64-apple-darwin",
+  "profileSha256": "ed8ba04c280c73a9826e802cae09c22233f9f723ee9880c33e09ade6e4ba147b",
+  "sourceRevision": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+  "sourceTree": "c78b36ae6720565170bc6dce578531f58ab671c7",
+  "timeoutSeconds": 900,
+  "toolchain": "1.97.1"
+}

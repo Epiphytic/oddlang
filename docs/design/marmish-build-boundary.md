@@ -1,6 +1,6 @@
 # Marmish build inputs on Apple Silicon
 
-`scripts/marmish/check_build_closure.py ASSEMBLED_DIR MANIFEST_PATH EMPTY_OUTPUT` checks the default-feature `marmish-core` and `marmish-native` libraries for `aarch64-apple-darwin`. Cargo compiles and executes the retained native build script during this check. The command inspects compiler prerequisites and enforces a separate filesystem boundary for dynamic reads by build scripts, procedural macros and their children.
+`cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin build-closure -- ASSEMBLED_DIR MANIFEST_PATH EMPTY_OUTPUT` checks the default-feature `marmish-core` and `marmish-native` libraries for `aarch64-apple-darwin`. Cargo compiles and executes the retained native build script during this check. The command inspects compiler prerequisites and enforces a separate filesystem boundary for dynamic reads by build scripts, procedural macros and their children.
 
 The verifier compares every regular file, mode and SHA-256 digest with the supplied assembly manifest before copying it to a private directory. The compiler sees this snapshot read-only. The caller supplies the authenticated manifest. The source-preparation sandbox runs `cargo vendor --locked --offline --versioned-dirs` using a private Cargo home and read-only registry and Git caches. It checks the entire set of vendored package identities against Cargo.lock, checks registry checksums, and records each Git revision and vendored checksum manifest in `locked-packages.json`.
 
@@ -11,3 +11,5 @@ The build uses a second deny-default macOS Seatbelt profile. It allows data read
 The negative control adds an attempted read to a disposable copy of the retained build script. An independently readable canary sits outside the candidate, dependency and scratch trees. The control accepts a permission-denied error only, then emits a dedicated marker and exits with status 73. The checker requires both the marker and the child status in Cargo's captured failure. This verifies the operating-system restriction even when the file name never appears in compiler dep-info.
 
 This evidence covers the specified compile-time configuration. Workspace tests, installed-feature checks, product runtime behavior and Linux build environments have separate qualification obligations.
+
+Replay a stored closure report against its assembly manifest with the same binary and the arguments `replay MANIFEST_PATH BUILD_CLOSURE_DIRECTORY`.

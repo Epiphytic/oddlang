@@ -1,0 +1,46 @@
+{
+  "format": "oddlang-checked-values-rust-v1",
+  "types": {
+    "urn:fixture:survey:choices:Sky": {
+      "name": "Sky",
+      "order": [
+        "urn:fixture:survey:choices:Sky:Cloud",
+        "urn:fixture:survey:choices:Sky:Clear",
+        "urn:fixture:survey:choices:Sky:Mist"
+      ],
+      "traits": [
+        "copy"
+      ]
+    },
+    "urn:fixture:survey:choices:Side": {
+      "name": "Side",
+      "order": [
+        "urn:fixture:survey:choices:Side:Left",
+        "urn:fixture:survey:choices:Side:Right"
+      ],
+      "traits": [
+        "copy"
+      ]
+    },
+    "urn:fixture:survey:choices:Tier": {
+      "name": "Tier",
+      "order": [
+        "urn:fixture:survey:choices:Tier:Local",
+        "urn:fixture:survey:choices:Tier:Wide"
+      ],
+      "traits": [
+        "copy"
+      ]
+    }
+  },
+  "variants": {
+    "urn:fixture:survey:choices:Sky:Cloud": "Cloud",
+    "urn:fixture:survey:choices:Sky:Clear": "Clear",
+    "urn:fixture:survey:choices:Sky:Mist": "Mist",
+    "urn:fixture:survey:choices:Side:Left": "Left",
+    "urn:fixture:survey:choices:Side:Right": "Right",
+    "urn:fixture:survey:choices:Tier:Local": "Local",
+    "urn:fixture:survey:choices:Tier:Wide": "Wide"
+  },
+  "errors": {}
+}

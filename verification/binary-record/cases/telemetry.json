@@ -1,0 +1,160 @@
+{
+  "graph": {
+    "format": "oddlang-binary-record-v1",
+    "id": "urn:telemetry:record",
+    "layout": [
+      {
+        "id": "urn:telemetry:header",
+        "encoding": {
+          "kind": "literal",
+          "bytes": [
+            84,
+            0
+          ],
+          "error": "urn:telemetry:error:header"
+        }
+      },
+      {
+        "id": "urn:telemetry:counter",
+        "encoding": {
+          "kind": "unsigned-be",
+          "bits": 32,
+          "minimum": 2,
+          "maximum": 10
+        }
+      },
+      {
+        "id": "urn:telemetry:fingerprint",
+        "encoding": {
+          "kind": "fixed-bytes",
+          "size": 2
+        }
+      },
+      {
+        "id": "urn:telemetry:payload",
+        "encoding": {
+          "kind": "bytes",
+          "minimum": 1,
+          "maximum": 6,
+          "overflow": "urn:telemetry:error:payload-overflow"
+        }
+      },
+      {
+        "id": "urn:telemetry:state",
+        "encoding": {
+          "kind": "enum-u8",
+          "external": "urn:telemetry:Mode",
+          "tags": {
+            "urn:telemetry:New": 2,
+            "urn:telemetry:Closed": 4
+          },
+          "error": "urn:telemetry:error:tag"
+        }
+      },
+      {
+        "id": "urn:telemetry:label",
+        "encoding": {
+          "kind": "ascii-atom",
+          "minimum": 1,
+          "maximum": 3,
+          "punctuation": [
+            95
+          ],
+          "overflow": "urn:telemetry:error:atom-overflow",
+          "error": "urn:telemetry:error:encoding"
+        }
+      },
+      {
+        "id": "urn:telemetry:trailer",
+        "encoding": {
+          "kind": "length-prefixed-literal",
+          "bytes": [
+            33
+          ],
+          "maximum": 2,
+          "overflow": "urn:telemetry:error:trailer-overflow",
+          "error": "urn:telemetry:error:trailer"
+        }
+      }
+    ],
+    "maximum": 27,
+    "errors": {
+      "value": "urn:telemetry:error:record",
+      "decodeSize": "urn:telemetry:error:decode-size",
+      "encodeSize": "urn:telemetry:error:encode-size",
+      "truncated": "urn:telemetry:error:short",
+      "trailing": "urn:telemetry:error:extra"
+    }
+  },
+  "binding": {
+    "format": "oddlang-binary-record-rust-v1",
+    "name": "Sample",
+    "names": {
+      "urn:telemetry:counter": "counter",
+      "urn:telemetry:fingerprint": "fingerprint",
+      "urn:telemetry:payload": "payload",
+      "urn:telemetry:label": "label",
+      "urn:telemetry:state": "state"
+    },
+    "externals": {
+      "urn:telemetry:Mode": {
+        "path": "crate::Mode",
+        "variants": {
+          "urn:telemetry:New": "New",
+          "urn:telemetry:Closed": "Closed"
+        }
+      }
+    },
+    "errorType": "crate::Error",
+    "errors": {
+      "urn:telemetry:error:record": {
+        "variant": "Bad",
+        "argument": "record"
+      },
+      "urn:telemetry:error:decode-size": {
+        "variant": "Bad",
+        "argument": "decode-size"
+      },
+      "urn:telemetry:error:encode-size": {
+        "variant": "Bad",
+        "argument": "encode-size"
+      },
+      "urn:telemetry:error:header": {
+        "variant": "Bad",
+        "argument": "header"
+      },
+      "urn:telemetry:error:short": {
+        "variant": "Bad",
+        "argument": "short"
+      },
+      "urn:telemetry:error:extra": {
+        "variant": "Bad",
+        "argument": "extra"
+      },
+      "urn:telemetry:error:encoding": {
+        "variant": "Bad",
+        "argument": "encoding"
+      },
+      "urn:telemetry:error:tag": {
+        "variant": "Bad",
+        "argument": "tag"
+      },
+      "urn:telemetry:error:trailer": {
+        "variant": "Bad",
+        "argument": "trailer"
+      },
+      "urn:telemetry:error:payload-overflow": {
+        "variant": "Bad",
+        "argument": "payload-overflow"
+      },
+      "urn:telemetry:error:atom-overflow": {
+        "variant": "Bad",
+        "argument": "atom-overflow"
+      },
+      "urn:telemetry:error:trailer-overflow": {
+        "variant": "Bad",
+        "argument": "trailer-overflow"
+      }
+    }
+  }
+}

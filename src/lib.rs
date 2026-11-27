@@ -14,6 +14,7 @@ pub mod field_relation;
 pub mod finite_error_domain;
 pub mod file_profile;
 pub mod foreground_profile_owner;
+mod stored_policy;
 mod source_observation;
 pub mod framing_import;
 pub mod framing_projection;
@@ -49,3 +50,5 @@ pub mod wasm;
 
 pub mod native_workspace;
 pub mod wire_schema;
+pub mod providers;
+mod provider_runtime;

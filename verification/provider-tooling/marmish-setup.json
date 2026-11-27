@@ -1,0 +1,14 @@
+{
+  "platform": "aarch64-apple-darwin",
+  "rust": "1.97.1",
+  "upstream": "https://github.com/Epiphytic/marmish.git",
+  "checkedOutCommit": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+  "remoteClone": "fresh staging directory, detached pinned commit",
+  "dependencies": "locked Cargo and upstream uv resolutions completed with offline caches",
+  "targets": ["native", "wasm32-unknown-unknown"],
+  "freshCheckoutPassed": true,
+  "existingCheckoutPassed": true,
+  "wrongRevisionRejectedBeforeFetching": true,
+  "failedCloneLeftDestinationAbsent": true,
+  "trackedWorktreeCleanAfterSetup": true
+}

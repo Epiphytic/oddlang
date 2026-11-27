@@ -1,0 +1,91 @@
+{
+  "companion": "3d25c2615c46d5cc0857604dab641d29b134dd95",
+  "host": "aarch64-apple-darwin",
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "framework": "9923e6664899de66915ed3a94e417f261ffed401",
+  "nativeReceiptSha256": "ddb8a108f4964f555f6c0c03c0ac9e3aa9491500f32222912dd0caa164de25be",
+  "matchedCaseFields": [
+    "generatedFiles",
+    "graphSha256",
+    "manifestSha256",
+    "observations",
+    "overlaySha256",
+    "packageLockSha256",
+    "unknownFields"
+  ],
+  "rowCounts": {
+    "baseline": 35,
+    "mutation": 35
+  },
+  "changedNativeRows": [
+    "unknown-field"
+  ],
+  "scopeSourceDenials": 8,
+  "staleSelectorRejected": true,
+  "acceptedRustdocVersions": [
+    1,
+    2
+  ],
+  "rejectedControls": [
+    "wrong runner hash",
+    "unknown evidence version",
+    "wrong evidence host",
+    "existing evidence directory",
+    "target inside source checkout"
+  ],
+  "freshRustdocEvidence": {
+    "cargoArgs": [
+      "cargo",
+      "+1.97.1",
+      "rustdoc",
+      "--locked",
+      "--offline",
+      "--lib",
+      "-p",
+      "marmish-engine",
+      "--target",
+      "aarch64-apple-darwin",
+      "--target-dir",
+      "<target-dir>",
+      "--",
+      "-Z",
+      "unstable-options",
+      "--output-format",
+      "json",
+      "--document-private-items"
+    ],
+    "cargoLockSha256": "9c5f7dde5c0f7d340e22dbefaa8a1c6ddb94c119011ba3e49ac8044c9b4cb0b3",
+    "crateRootSha256": "382457f30531b992c700fbc46bc41216b067499b0c6de5ea93a8ce4f2f698316",
+    "format": "marmish-linked-range-rustdoc-v2",
+    "host": "aarch64-apple-darwin",
+    "inputs": {
+      "baseline": {
+        "rustdocFile": "baseline.json",
+        "rustdocSha256": "8c2db8ae8e7540d456067801e36dbf35889112cc4ce12fd1081b31e150ffdf19",
+        "sourceSha256": "f147e2d08551d7d758a89b46857805820567a78f70571a663f33ea91672c9d53"
+      },
+      "mutation": {
+        "rustdocFile": "mutation.json",
+        "rustdocSha256": "f99518d4c4a2a029298ca14c2ea0d7ed4b9c003ceec3b5fb6549235e39695486",
+        "sourceSha256": "97e3ed38fe2b7f80e0be0d438e894722ce335ee4b62e069acb075974ca0a9833"
+      }
+    },
+    "original": "af54339d250290490d62d4475a77539b7e739071",
+    "profileEnvironment": {
+      "CARGO_INCREMENTAL": "0",
+      "CARGO_PROFILE_DEV_DEBUG": "0",
+      "RUSTC_BOOTSTRAP": "1"
+    },
+    "runnerSha256": "8d76ab7ba09ef5f6b1434dcd2fb278cdc9a27fd2e363832bbb01eb7b9e067394",
+    "rustdoc": [
+      "rustdoc 1.97.1 (8bab26f4f 2026-07-14)",
+      "binary: rustdoc",
+      "commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+      "commit-date: 2026-07-14",
+      "host: aarch64-apple-darwin",
+      "release: 1.97.1",
+      "LLVM version: 22.1.6"
+    ],
+    "source": "crates/marmish-engine/src/model.rs"
+  }
+}

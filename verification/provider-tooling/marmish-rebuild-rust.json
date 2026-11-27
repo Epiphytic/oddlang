@@ -1,0 +1,57 @@
+{
+  "archiveSha256": "60a0cb9b231d200cb2c03b043f1bd335d5c43fc362b17352fd5ce7017e4d425a",
+  "archiveWitnessFilesByteIdentical": 39,
+  "assemblySha256": "a293552e29ffb32fca1a7dcd448df035f36270ba36bf78a8261e72ca0af7a58d",
+  "candidateCommit": "e0d855874ec2348939175dfa6ec5c71488c8ba35",
+  "candidateTree": "6c0c7b16e3cb7b013a360c1b19e26ed19a238e65",
+  "format": "oddlang-two-producer-rust-rebuild-v1",
+  "freshCompilerGateway": {
+    "archiveWitnessFilesByteIdentical": 39,
+    "build": "cargo +1.97.1 build --locked --offline --bin oddlang",
+    "candidateCommit": "e0d855874ec2348939175dfa6ec5c71488c8ba35",
+    "candidateTree": "6c0c7b16e3cb7b013a360c1b19e26ed19a238e65",
+    "commandAtRevision": "scripts/qualify-marmish.sh rebuild UPSTREAM OUTPUT",
+    "independentBuilds": 2,
+    "oddlangSha256": "0472f33df812b112d9cf4a68a4984411a55781265228b70dcce5589f2c016bf2",
+    "profile": "dev, debug=0, incremental=false",
+    "revision": "8560516"
+  },
+  "generated": {
+    "crates/marmish-core/src/frame.rs": {
+      "candidateBlob": "fb334bc3b020c0c906fc58aaddf5c0ac0a3cb325",
+      "originalBlob": "6b86589e6f751637ac393a1d28c0dc9deb9f8fcb",
+      "sha256": "53fcb6067ccbfa0e9923e69ae0eee0b73d3d2e84d204d635161e25b2bf574f14"
+    },
+    "crates/marmish-core/src/lib.rs": {
+      "candidateBlob": "f5625a3e4f1739de032575b0251015e5e75faa40",
+      "originalBlob": "124622b0d4b30c6a0f93c1ebb007857311ebcea3",
+      "sha256": "c6b5d326e36390c55b9ff464bd6907777f612072f1395abb2686aff28aac43ca"
+    }
+  },
+  "independentBuilds": 2,
+  "negativeControls": {
+    "coordinated commit substitution": "candidate Git commit disagrees",
+    "coordinated manifest mode substitution": "assembly manifest differs",
+    "coordinated ontology-byte substitution": "candidate Git tree disagrees",
+    "coordinated projection substitution": "generated output differs",
+    "nonempty destination": "expected an empty output directory",
+    "one recovery added file": "independent membership differs",
+    "unpinned upstream": "unexpected original revision"
+  },
+  "networkBoundary": "Seatbelt for source imports and the inherited upstream indexer",
+  "oddlangSelection": "--oddlang /tmp/odd-final-provider-qualified-cli",
+  "oddlangSha256": "3884c423fccb909d69c8a6d5e119d4097b8ea6fade8936274edfe814890a08a4",
+  "ontologyCheck": "code ontology check: 418 source_files, 15,797 symbols, 92,727 code_references",
+  "originalCommit": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+  "originalReadDeniedDuringProjectionAndAssembly": true,
+  "platform": "aarch64-apple-darwin",
+  "rebuildSummarySha256": "91c1edf4c07040d025a10686ee0ee3a3cecfcd05cf5be7bb3698abbbeaa6a8f3",
+  "regeneratedOntology": [
+    "docs/ontology/code_references.jsonl",
+    "docs/ontology/source_files.jsonl",
+    "docs/ontology/symbols.jsonl"
+  ],
+  "retainedFiles": 1639,
+  "sourceFiles": 1641,
+  "stagedAssemblyTree": "93b941b07e5670d2141c73d0b241413bcc425648"
+}

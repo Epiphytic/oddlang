@@ -1,0 +1,109 @@
+{
+  "format": "oddlang-json-wire-schema-v1",
+  "id": "urn:weather:shape",
+  "guards": [],
+  "types": [
+    {
+      "kind": "record",
+      "id": "urn:weather:sample",
+      "fields": [
+        {
+          "id": "urn:weather:sample-tag",
+          "name": "tag",
+          "type": {
+            "kind": "text"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "record",
+      "id": "urn:weather:envelope",
+      "fields": [
+        {
+          "id": "urn:weather:format",
+          "name": "format",
+          "type": {
+            "kind": "unsigned",
+            "bits": 32
+          }
+        },
+        {
+          "id": "urn:weather:seq",
+          "name": "seq",
+          "type": {
+            "kind": "unsigned",
+            "bits": 32
+          }
+        },
+        {
+          "id": "urn:weather:packet",
+          "name": "packet",
+          "type": {
+            "kind": "ref",
+            "id": "urn:weather:direction"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "adjacent",
+      "id": "urn:weather:direction",
+      "tag": "tag",
+      "content": "data",
+      "variants": [
+        {
+          "id": "urn:weather:upload",
+          "name": "upload",
+          "payload": {
+            "kind": "record",
+            "fields": [
+              {
+                "id": "urn:weather:count",
+                "name": "count",
+                "type": {
+                  "kind": "unsigned",
+                  "bits": 32
+                }
+              },
+              {
+                "id": "urn:weather:bytes",
+                "name": "bytes",
+                "type": {
+                  "kind": "bounded-base64",
+                  "policy": {
+                    "maxBytes": 4,
+                    "encodedLimitMessage": "encoded weather bytes",
+                    "decodedLimitMessage": "decoded weather bytes",
+                    "syntaxMessage": "weather byte format"
+                  }
+                }
+              },
+              {
+                "id": "urn:weather:label",
+                "name": "label",
+                "type": {
+                  "kind": "text"
+                }
+              },
+              {
+                "id": "urn:weather:samples",
+                "name": "samples",
+                "type": {
+                  "kind": "list",
+                  "item": {
+                    "kind": "list",
+                    "item": {
+                      "kind": "ref",
+                      "id": "urn:weather:sample"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

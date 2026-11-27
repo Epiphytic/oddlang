@@ -1,0 +1,53 @@
+{
+  "format": "oddlang-read-only-file-v1",
+  "maximumLinks": 1,
+  "profile": {
+    "id": "urn:test:catalog:descriptor",
+    "modeMask": 511,
+    "digest": {
+      "algorithm": "sha256",
+      "chunkBytes": 17
+    },
+    "open": [
+      "read-only",
+      "no-follow-final-link",
+      "close-on-exec"
+    ],
+    "guards": [
+      "regular",
+      "links",
+      "maximum-size",
+      "exact-size",
+      "effective-owner",
+      "masked-mode",
+      "digest"
+    ],
+    "readCeiling": "requested-size-plus-one",
+    "safety": {
+      "preflightFileType": "regular-or-final-symlink",
+      "nonblockingOpen": true,
+      "hashCeiling": "exact-size-plus-one"
+    },
+    "errors": {
+      "descriptor": {
+        "id": "urn:test:invalid",
+        "code": "invalid_descriptor"
+      },
+      "boundedRead": {
+        "id": "urn:test:invalid",
+        "code": "invalid_size"
+      },
+      "metadata": {
+        "id": "urn:test:invalid",
+        "code": "invalid_metadata"
+      },
+      "digest": {
+        "id": "urn:test:invalid",
+        "code": "invalid_hash"
+      },
+      "io": {
+        "id": "urn:test:catalog:io"
+      }
+    }
+  }
+}

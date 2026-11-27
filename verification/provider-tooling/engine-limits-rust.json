@@ -1,0 +1,167 @@
+{
+  "companionRevision": "b410b1ef9d5db8e9c76ebfc0f9de77f3ee28a633",
+  "previousCompanionRevision": "ad8700882e2deb81ecba45a7e87ca187722211af",
+  "host": "aarch64-apple-darwin",
+  "originalRevision": "af54339d250290490d62d4475a77539b7e739071",
+  "observations": {
+    "argvCases": [
+      {
+        "arguments": [
+          "--help"
+        ],
+        "binary": "marmish",
+        "exit": 0,
+        "fault": null,
+        "stderr": "",
+        "stdout": "Marmish native identity and encrypted transport foundation\n\nUsage: marmish [OPTIONS] [COMMAND]\n\nCommands:\n  copy-receipts       Inspect retained local download receipts or acknowledge an uncertain record\n  put                 Copy one local regular file to a remote literal path\n  get                 Copy one remote regular file to a local literal path\n  rsh                 Rsync remote shell: rsync -s -e 'marmish rsh'. Global options go before rsh\n  stream              Execute with binary stdin/stdout streams and explicit remote cancellation\n  streams             List locally recorded streams and their last known remote states\n  stream-reconcile    Acknowledge that an uncertain orphan may still be running, releasing credit\n  keychain-authorize  Ask macOS for access to this existing profile, then verify without UI\n  release-info        Print this binary's native version, build target and source commit\n  install             Install a verified v0.2 bundle or select an already installed version\n  install-status      \n  uninstall           \n  setup               Create or update this named identity and its offline command configuration\n  init                Initialize encrypted native storage without connecting to relays\n  commands            List durable command handles without command arguments or output\n  command-status      Query an explicitly selected remote invocation\n  cancel              Explicitly request cancellation of an invocation\n  wait                Resume waiting and copying output using durable cursors\n  output              \n  daemon              Run this identity's serialized transport owner\n  status              \n  open-conversation   \n  send                Send a bounded foundation test payload, encoded as canonical base64\n  received            \n  foundation-check    Fresh-key encrypted exchange, restart, and receipt validation. No commands\n  command-check       Disposable-key live remote-command validation through explicit relays\n  help                Print this message or the help of the given subcommand(s)\n\nOptions:\n      --debug\n          \n      --foreground\n          Keep the daemon attached to the terminal or service supervisor\n      --state-dir <STATE_DIR>\n          \n  -i, --identity <IDENTITY>\n          [default: default]\n      --socket <SOCKET>\n          \n      --relay <RELAY>\n          \n      --tor <TOR>\n          \n      --key-storage <KEY_STORAGE>\n          [default: auto] [possible values: auto, keychain, file]\n      --allow-peer <ALLOW_PEER>\n          \n      --retention-seconds <RETENTION_SECONDS>\n          [default: 86400]\n  -u, --user <USER>\n          \n      --srv <SRV>\n          \n      --stdin\n          \n      --stdin-none\n          \n      --detach\n          \n      --new-session\n          Open a fresh independent command room instead of reusing the default\n      --wait-seconds <WAIT_SECONDS>\n          [default: 180]\n      --no-autostart\n          \n      --max-commands <MAX_COMMANDS>\n          \n      --max-uptime <MAX_UPTIME>\n          \n  -h, --help\n          Print help\n  -V, --version\n          Print version\n"
+      },
+      {
+        "arguments": [
+          "--version"
+        ],
+        "binary": "marmish",
+        "exit": 0,
+        "fault": null,
+        "stderr": "",
+        "stdout": "marmish-native 0.3.1\n"
+      },
+      {
+        "arguments": [
+          "--an-unknown-argument"
+        ],
+        "binary": "marmish",
+        "exit": 255,
+        "fault": null,
+        "stderr": "error: unexpected argument '--an-unknown-argument' found\n\nUsage: marmish [OPTIONS] [COMMAND]\n\nFor more information, try '--help'.\nmarmish: invalid_arguments\n",
+        "stdout": ""
+      },
+      {
+        "arguments": [
+          "release-info"
+        ],
+        "binary": "marmish",
+        "exit": 0,
+        "fault": null,
+        "stderr": "",
+        "stdout": "{\"schema\":1,\"version\":\"0.3.1\",\"target\":\"aarch64-apple-darwin\",\"commit\":\"af54339d250290490d62d4475a77539b7e739071\",\"formats\":[2,7,1,1,1]}\n"
+      },
+      {
+        "arguments": [
+          "--an-unknown-argument"
+        ],
+        "binary": "marmish",
+        "exit": 1,
+        "fault": "getrlimit NOFILE returns EPERM",
+        "stderr": "marmish: process_limits\n",
+        "stdout": ""
+      },
+      {
+        "arguments": [
+          "--help"
+        ],
+        "binary": "marmishd",
+        "exit": 0,
+        "fault": null,
+        "stderr": "",
+        "stdout": "Marmish native identity and encrypted transport foundation\n\nUsage: marmishd [OPTIONS] [COMMAND]\n\nCommands:\n  copy-receipts       Inspect retained local download receipts or acknowledge an uncertain record\n  put                 Copy one local regular file to a remote literal path\n  get                 Copy one remote regular file to a local literal path\n  rsh                 Rsync remote shell: rsync -s -e 'marmish rsh'. Global options go before rsh\n  stream              Execute with binary stdin/stdout streams and explicit remote cancellation\n  streams             List locally recorded streams and their last known remote states\n  stream-reconcile    Acknowledge that an uncertain orphan may still be running, releasing credit\n  keychain-authorize  Ask macOS for access to this existing profile, then verify without UI\n  release-info        Print this binary's native version, build target and source commit\n  install             Install a verified v0.2 bundle or select an already installed version\n  install-status      \n  uninstall           \n  setup               Create or update this named identity and its offline command configuration\n  init                Initialize encrypted native storage without connecting to relays\n  commands            List durable command handles without command arguments or output\n  command-status      Query an explicitly selected remote invocation\n  cancel              Explicitly request cancellation of an invocation\n  wait                Resume waiting and copying output using durable cursors\n  output              \n  daemon              Run this identity's serialized transport owner\n  status              \n  open-conversation   \n  send                Send a bounded foundation test payload, encoded as canonical base64\n  received            \n  foundation-check    Fresh-key encrypted exchange, restart, and receipt validation. No commands\n  command-check       Disposable-key live remote-command validation through explicit relays\n  help                Print this message or the help of the given subcommand(s)\n\nOptions:\n      --debug\n          \n      --foreground\n          Keep the daemon attached to the terminal or service supervisor\n      --state-dir <STATE_DIR>\n          \n  -i, --identity <IDENTITY>\n          [default: default]\n      --socket <SOCKET>\n          \n      --relay <RELAY>\n          \n      --tor <TOR>\n          \n      --key-storage <KEY_STORAGE>\n          [default: auto] [possible values: auto, keychain, file]\n      --allow-peer <ALLOW_PEER>\n          \n      --retention-seconds <RETENTION_SECONDS>\n          [default: 86400]\n  -u, --user <USER>\n          \n      --srv <SRV>\n          \n      --stdin\n          \n      --stdin-none\n          \n      --detach\n          \n      --new-session\n          Open a fresh independent command room instead of reusing the default\n      --wait-seconds <WAIT_SECONDS>\n          [default: 180]\n      --no-autostart\n          \n      --max-commands <MAX_COMMANDS>\n          \n      --max-uptime <MAX_UPTIME>\n          \n  -h, --help\n          Print help\n  -V, --version\n          Print version\n"
+      },
+      {
+        "arguments": [
+          "--version"
+        ],
+        "binary": "marmishd",
+        "exit": 0,
+        "fault": null,
+        "stderr": "",
+        "stdout": "marmish-native 0.3.1\n"
+      },
+      {
+        "arguments": [
+          "--an-unknown-argument"
+        ],
+        "binary": "marmishd",
+        "exit": 255,
+        "fault": null,
+        "stderr": "error: unexpected argument '--an-unknown-argument' found\n\nUsage: marmishd [OPTIONS] [COMMAND]\n\nFor more information, try '--help'.\nmarmish: invalid_arguments\n",
+        "stdout": ""
+      },
+      {
+        "arguments": [
+          "release-info"
+        ],
+        "binary": "marmishd",
+        "exit": 0,
+        "fault": null,
+        "stderr": "",
+        "stdout": "{\"schema\":1,\"version\":\"0.3.1\",\"target\":\"aarch64-apple-darwin\",\"commit\":\"af54339d250290490d62d4475a77539b7e739071\",\"formats\":[2,7,1,1,1]}\n"
+      },
+      {
+        "arguments": [
+          "--an-unknown-argument"
+        ],
+        "binary": "marmishd",
+        "exit": 1,
+        "fault": "getrlimit NOFILE returns EPERM",
+        "stderr": "marmish: process_limits\n",
+        "stdout": ""
+      }
+    ],
+    "darwinFaultObserverSha256": "e8cd3a1518a1728cdf07af4fec9ae91a81adc0674704df0e6fae3004ed24b4db",
+    "generatedBinaries": {
+      "marmish": "988d928d1a36a646cfd4d5e8cfcfbf8d8a692b29dbfdf6af714359fe3e7f2765",
+      "marmishd": "5e1974c0d775fc52f77fdc54439ca18c9d0ea2b8d3bfb30553b72564ad528643"
+    },
+    "generatedLibraries": {
+      "libc": "4719d2f293f53098df0e86e347346eef5cfda8444ae2bec77448a079aaaea4e5",
+      "marmish_engine": "9016437031edc876331d9fd0fd0355f13da8677fcf831a1d2bd77826552e1e20"
+    },
+    "libraryCases": [
+      {
+        "afterSoft": 1024,
+        "beforeSoft": 1024,
+        "bothDescriptorFlagsPreserved": true,
+        "hard": 9223372036854775807,
+        "twoCallsIdempotent": true
+      },
+      {
+        "afterSoft": 65536,
+        "beforeSoft": 65536,
+        "bothDescriptorFlagsPreserved": true,
+        "hard": 9223372036854775807,
+        "twoCallsIdempotent": true
+      },
+      {
+        "afterSoft": 65536,
+        "beforeSoft": 65537,
+        "bothDescriptorFlagsPreserved": true,
+        "hard": 9223372036854775807,
+        "twoCallsIdempotent": true
+      }
+    ],
+    "observerSha256": "2a56cdb8b4dbb24fae86780e7f70e3507458b3be4e6283ef31e34b276365415d",
+    "originalBinaries": {
+      "marmish": "8097469a154ba7cf3a5a4d4848537f7ce72ba9f767f90ab7362aba8074842ac7",
+      "marmishd": "f35024f7a3a342392d36b83e4348f7bf0ea65d9e39b9358425c8249592038f41"
+    },
+    "originalLibraries": {
+      "libc": "4719d2f293f53098df0e86e347346eef5cfda8444ae2bec77448a079aaaea4e5",
+      "marmish_engine": "4a216da48f75a064fac8d69016e56b9e19ddb934db4fd5e2ec1312d58b48fd30"
+    }
+  },
+  "canonicalSortedJsonSha256": "b54c339f34346f6fe7e58a9fec7d2a432799848034ca59ea30698c0008db4106",
+  "legacyComparison": "The original Python observer ran against a directory view exposing the libc artifact selected by Cargo. Its full sorted JSON matched the native observer.",
+  "archivedReceipt": "verification/whole/engine-limits/aarch64-apple-darwin.json",
+  "archiveDifferences": {
+    "generatedBinaries": [
+      "marmish",
+      "marmishd"
+    ],
+    "generatedLibraries": [
+      "libc",
+      "marmish_engine"
+    ],
+    "originalLibraries": [
+      "marmish_engine"
+    ]
+  }
+}

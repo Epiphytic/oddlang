@@ -1,0 +1,13 @@
+{
+  "runner": "tests/adoption.rs",
+  "target": "aarch64-apple-darwin",
+  "rust": "1.97.1",
+  "go": "go1.26.3",
+  "nativeTestRuns": [
+    "publisher v1", "client v1", "publisher v2", "client remains on v1",
+    "client upgrades to v2", "restored v2 client"
+  ],
+  "observedRejections": ["digest mismatch for client.go", "unreviewed source extra.go"],
+  "historicalShellRunnerPassed": true,
+  "rustRunnerPassed": true
+}

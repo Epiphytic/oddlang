@@ -1,0 +1,21 @@
+{
+  "format": "oddlang-command-surface-process-replay-v1",
+  "host": "aarch64-apple-darwin",
+  "rustc": "1.97.1",
+  "cliSha256": "3884c423fccb909d69c8a6d5e119d4097b8ea6fade8936274edfe814890a08a4",
+  "processRecord": "Compact JSON array of binary basename, argv tail, integer exit status, stdout SHA-256 and stderr SHA-256. The auxiliary executable basename generated is normalized to candidate. Sort records lexically and hash each record followed by LF, including repeated invocations.",
+  "suites": {
+    "check": {
+      "identicalProcessRecords": 33,
+      "processRecordsSha256": "413d8fd0880746e8ad81886b121e39c7a98429e7f39f046e3fefb753030ceff9"
+    },
+    "prefix": {
+      "identicalProcessRecords": 62,
+      "processRecordsSha256": "39be2a1ceed164060f1588d87c116d2300b163dc7257e766183e9ab3cafd4e63"
+    },
+    "terminal": {
+      "identicalProcessRecords": 24,
+      "processRecordsSha256": "1c00a0ff5f02dc5a6401ae83dd2db83b7a5e7a365e1faa68c2dd1c2d27157744"
+    }
+  }
+}

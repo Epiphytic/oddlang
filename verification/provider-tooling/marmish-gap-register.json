@@ -1,0 +1,7 @@
+{
+  "inventoryGzipSha256": "98933a98c3ac1c0d195a0f0e2c82d8cbe1381ab03b866acb2b8b733d156e591d",
+  "historicalAndRustRegisterSha256": {
+    "framingOnly": "bbad37cbe26c55ddf217cd29075d17c530c176aebd8497ec9a330b5dae125979",
+    "framingAndFacade": "e5c9690e8f8c32b4b5c3035e570f13cc04cd90d18c4adff1a7e84cdde46f56ea"
+  }
+}

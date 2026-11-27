@@ -1,0 +1,54 @@
+{
+  "companionCommit": "b0cd9f99ad03d87054420fcaca9d4964bdd9d7d6",
+  "host": "aarch64-apple-darwin",
+  "compilerSource": "e2ec7338dcf141f95d2f1e24d9bee20cc1cec44b",
+  "compilerToolchain": "1.96.1",
+  "releaseToolchain": "1.97.1",
+  "receipts": [
+    {
+      "path": "verification/whole/workspace/cold-cache-aarch64-apple-darwin.json",
+      "sha256": "f85c0a9c5356b426e177df8207cda5e42e2addbe1f30693535b4d64e5448cb60"
+    },
+    {
+      "path": "verification/whole/workspace/cold-cache-rust-aarch64-apple-darwin.json",
+      "sha256": "93201073d958c93844d5898634a40f3965f12469facb350bc478d5a56eb14fb3"
+    }
+  ],
+  "identicalFields": [
+    "framework",
+    "initialAcquisitionCacheFiles",
+    "inputs",
+    "offlineColdRejected",
+    "parserCases",
+    "rustc",
+    "workspaceLockSha256"
+  ],
+  "differentFields": [
+    "compilerSha256",
+    "offlineReleaseBinaries"
+  ],
+  "inputDigests": 55,
+  "workspaceLockSha256": "12f45ddf99163d5a4ea64361e38289c7cbd00f3717b6e5ae1899e4c87d5470fd",
+  "parserCases": {
+    "marmish": 34,
+    "marmishd": 34
+  },
+  "productVerificationControls": {
+    "v5": true,
+    "v5 altered lock": false,
+    "v5 altered root manifest pin": true,
+    "v5 extra directory": true,
+    "v5 modified source": false,
+    "policy": true,
+    "policy altered lock": false,
+    "policy altered root manifest pin": false,
+    "policy extra directory": false,
+    "policy modified source": false
+  },
+  "negativeChecks": [
+    "changed expected help status rejected",
+    "wrong compiler source revision refused before receipt"
+  ],
+  "projectPythonFilesRemaining": 62,
+  "inventorySha256": "1fae7c2f19209a03b2bc2a2bd7200c1aff6d6518b5d593ac00ac4ef23d3e1fc8"
+}

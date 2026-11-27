@@ -16,7 +16,7 @@ Run the unrelated image-format exercise from the repository root:
 
 ```sh
 cargo build --locked --offline --bin oddlang
-python3 -B verification/native-package/verify.py target/debug/oddlang
+cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin native-package -- target/debug/oddlang
 ```
 
 It generates two codecs into one private module, exercises the public API from an integration test, compares independently generated directories and rejects stale pins, an inconsistent Cargo lock, invalid or duplicate exports, a symlink escape and preexisting output. On macOS and Linux it also inserts an empty destination after generation begins and verifies the competing directory stays empty.

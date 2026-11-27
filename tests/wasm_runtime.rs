@@ -16,7 +16,9 @@ fn read(path: &Path) -> Value {
     serde_json::from_slice(&fs::read(path).unwrap()).unwrap()
 }
 fn write(path: &Path, value: &Value) {
-    fs::write(path, serde_json::to_vec_pretty(value).unwrap()).unwrap();
+    let mut sorted = value.clone();
+    sorted.sort_all_objects();
+    fs::write(path, serde_json::to_vec_pretty(&sorted).unwrap()).unwrap();
 }
 fn digest(path: &Path) -> String {
     Sha256::digest(fs::read(path).unwrap())
@@ -215,8 +217,19 @@ fn exercise_released_components_and_reject_counterexamples() {
         None => {
             let root = temp.path().join("built");
             success(
-                Command::new("scripts/verify-wasm.sh")
-                    .arg("--prepare")
+                Command::new("cargo")
+                    .args([
+                        "+1.97.1",
+                        "run",
+                        "--locked",
+                        "--offline",
+                        "--manifest-path",
+                        "verification/provider-validation/Cargo.toml",
+                        "--bin",
+                        "wasm-verify",
+                        "--",
+                        "--prepare",
+                    ])
                     .arg(&root)
                     .output()
                     .unwrap(),

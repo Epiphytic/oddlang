@@ -1,0 +1,41 @@
+{
+  "platform": "aarch64-apple-darwin",
+  "compilerToolchain": "1.97.1",
+  "oddlangSha256": "3884c423fccb909d69c8a6d5e119d4097b8ea6fade8936274edfe814890a08a4",
+  "historicalSourceSha256": {
+    "check.py": "ebe0e592d5dcadff1f0b77365982b236ae8a3605c698f7962cbee54bf5fd60b3",
+    "delivery.py": "9b21ee71297c169030e7aaf44a775e2a2730493bb20271fb6414bb0aa5f8945f"
+  },
+  "transport": "private Unix-domain stream socket, u32 big-endian frames",
+  "suites": {
+    "workflow": {
+      "cases": 10,
+      "exchanges": 22,
+      "casesSha256": "6e62d027c4ae4823dddb503521918288c500c7b2e070fd9135117fc0dc134cdc",
+      "graphSha256": "6e34f38b75f91c3ad4c743852411ab7f02cf3c0b47dacabba7cab286e7c6de36",
+      "historicalAndRustObligationsSha256": "413dd168d99252747ba3de92eac7d0dde3c112f82a3ae9185ef8a354573001fa"
+    },
+    "delivery": {
+      "cases": 17,
+      "exchanges": 36,
+      "casesSha256": "00c45a7ca5e9db519588dffa992ac4ba1456703af31e99e0d84e1f6c405228d6",
+      "graphSha256": "bd0b47caee031dc7b5342607c6cc91d4fa6bde1d039f375b82c9b46500ef1d3d",
+      "historicalAndRustObligationsSha256": "014d03c2a721fe4985f9a4c99f4e9ec682a0bf9fd52b557862b9e2dc6f8041db"
+    },
+    "deferred": {
+      "cases": 4,
+      "exchanges": 8,
+      "casesSha256": "cf2cab5946a6d00335b30efd5004a3b0c02e40a5955880e48f7dc063d001aed4",
+      "graphSha256": "f6cc04f2d046737dd570e5520ec4c9f7ca4a6fa3c4d7cf45412fe8a6de1352e0",
+      "historicalAndRustObligationsSha256": "2872f0ae620c8173d505e4cc0bf8499d5f09b2cae87713325af721eff3689100"
+    }
+  },
+  "graphRejections": [
+    "cannot carry workflow capture slot before assignment",
+    "undeclared workflow capture ghost",
+    "invalid workflow reply predicate",
+    "minimum workflow request exceeds frame limit",
+    "invalid workflow capture retained-reply"
+  ],
+  "qualification": "Both implementations generated and compiled the unrelated field-meter workflow with locked offline builds and ran the same 31 exact socket and process observations. The checked-in cases preserve the historical peer inputs and expected output bytes, including NUL stdout and non-UTF-8 stderr."
+}

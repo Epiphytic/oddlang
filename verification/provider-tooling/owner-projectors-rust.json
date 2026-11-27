@@ -1,0 +1,48 @@
+{
+  "host": "aarch64-apple-darwin",
+  "companionRevision": "ed3d99567ab1cfd9fe224034fce5e00172b095ab",
+  "controls": [
+    "changed status owner graph pin rejected",
+    "changed foreground owner graph pin rejected",
+    "changed foreground runtime prefix rejected during discovery comparison"
+  ],
+  "marmishdAfterBothRuns": 0,
+  "status": {
+    "frameworkRevision": "526da0a7533d54bb71bd358dc3e3b26bcefe00bf",
+    "packageLockSha256": "f7dafa3847566b11f9145039d81bbdc57cd09b40eb5a6e8aaa5c41493a34869a",
+    "candidateSha256": "813219547964a26a26d8902d95026c01325a1708b6de7e51dfce701f4c23ed07",
+    "archive": "verification/whole/status-owner/generated-macos-arm64.json",
+    "archiveSha256": "06bc2939a743a81e7054f263bc1fe7ffbf59f05d8129abd6c9cde7b2cf0cbb3c",
+    "nativeReceiptSha256": "af299de8b7090a76179a10f7fe8001e77d1b31226ee8d2686d0f798e060cf0c5",
+    "changedFields": [
+      "candidateSha256",
+      "companionRevision"
+    ],
+    "matchingStagedDataFiles": 5,
+    "admissionControls": [
+      "long-path",
+      "non-private-parent",
+      "occupied-file",
+      "stale-socket"
+    ]
+  },
+  "foreground": {
+    "frameworkRevision": "543ebcd3cb47de0f74a4da70990b1c3d584e7c63",
+    "packageLockSha256": "dadc59d6e6e5d853e64fdfc4ea094d33b4a5e598e133d255408f82b5e326037c",
+    "candidateSha256": "31032facacc9410985cac558dc7d4e309aecb88fcd822639b8b54c496dcf9f21",
+    "archive": "verification/whole/foreground-owner/generated-macos-arm64.json",
+    "archiveSha256": "1c3576609454693ea27afd8ab866b377f9dcb1ae91c0cc288e42e02f1866d8e7",
+    "nativeReceiptSha256": "651ab00d0e8c4be50639d840dd8dc1629ff0f4816c2e6a298a7f2f105ebb4483",
+    "changedFields": [
+      "candidateSha256",
+      "companionRevision"
+    ],
+    "matchingStagedDataFiles": 12,
+    "admissionControls": [
+      "identity-mismatch",
+      "plaintext-relay",
+      "runtime-collision",
+      "unsafe-credential"
+    ]
+  }
+}

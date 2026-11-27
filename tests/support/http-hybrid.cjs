@@ -1,34 +1,11 @@
 const assert = require("node:assert/strict");
-const {spawn} = require("node:child_process");
-const readline = require("node:readline");
 
-const [serverFile, playwrightPath, provider, balanceKey] = process.argv.slice(2);
+const [origin, playwrightPath, provider, balanceKey] = process.argv.slice(2);
 const {chromium} = require(playwrightPath);
 
-async function ready(child) {
-  const lines = readline.createInterface({input: child.stdout});
-  const port = await Promise.race([
-    new Promise((resolve, reject) => {
-      lines.once("line", line => {
-        if (!line.startsWith("listening ")) reject(new Error(line));
-        else resolve(line.slice("listening ".length));
-      });
-      child.once("exit", code => reject(new Error(`SSR exited with ${code}`)));
-    }),
-    new Promise((_, reject) => setTimeout(() => reject(new Error("SSR readiness timeout")), 5000).unref()),
-  ]);
-  lines.close();
-  return `http://${port}`;
-}
-
 async function run() {
-  const server = spawn(process.execPath, [serverFile], {
-    env: {...process.env, ODDLANG_PROVIDER_URL: provider, ODDLANG_HYBRID_PORT: "0"},
-    stdio: ["ignore", "pipe", "inherit"],
-  });
   let browser;
   try {
-    const origin = await ready(server);
     const ssr = await fetch(origin, {signal: AbortSignal.timeout(5000)});
     assert.equal(ssr.status, 200);
     const html = await ssr.text();
@@ -64,7 +41,6 @@ async function run() {
     }
   } finally {
     if (browser) await browser.close();
-    server.kill();
   }
 }
 run().catch(error => { console.error(error); process.exitCode = 1; });

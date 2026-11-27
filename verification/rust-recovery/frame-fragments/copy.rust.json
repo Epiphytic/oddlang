@@ -1,0 +1,19 @@
+{
+  "format": "oddlang-binary-record-rust-v1",
+  "name": "Copy",
+  "errorType": "crate::Fault",
+  "names": {
+    "urn:parts:first": "first",
+    "urn:parts:second": "second",
+    "urn:parts:count": "count"
+  },
+  "externals": {},
+  "errors": {
+    "urn:parts:invalid": {
+      "variant": "Invalid"
+    },
+    "urn:parts:limit": {
+      "variant": "Limit"
+    }
+  }
+}

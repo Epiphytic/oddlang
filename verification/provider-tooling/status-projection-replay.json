@@ -1,0 +1,181 @@
+{
+  "host": "aarch64-apple-darwin",
+  "companionRevision": "6ff62d1c97a931b6643f53ef2c9f38ca9fe001ce",
+  "framework": "c94b678a9672a75df9fe761dad62cfba9aaff33f",
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "legacyReceiptSha256": "0322cc4a6ec44d61ebb2556e2e202b4f98541e6bb2ddce82ddc602e020428761",
+  "currentReceiptSha256": "f2b691a7a57acfe92eb74456754ce91f77d1a3e7f75db9bfad070eac8e8587b5",
+  "publishedReceiptSha256": "4798ee46c43c936bf37409099ae9f4fcfdd2ff6981fa3827673478a0d5a40a00",
+  "changedFromLegacy": [
+    "candidateSha256",
+    "companionRevision"
+  ],
+  "changedFromPublished": [
+    "candidateSha256",
+    "companionRevision"
+  ],
+  "generatedFiles": {
+    "Cargo.lock": "418835df33c0c6ec50f879b2e855b7b6533e5689d4f64585c7237dc8cfc2a88f",
+    "Cargo.toml": "196cd269aaf822aacab86f8b4090be32869c533603a2339714ac9b5e5ed32cb7",
+    "marmish-native/Cargo.toml": "1b009941ea9c62eb7a6091a6baeb366a37accbb6c7f383e257995d9aebbe2bbd",
+    "marmish-native/package.lock": "8833cc18ce0dfbcf52a7fb6a39f1d17d35e1734d9350e9bfc46f8978d54271f8",
+    "marmish-native/src/bin/marmish.rs": "d589eb9672c68e2526bafd908b7225063788281b8f8e07daed08b24d6fc5e196",
+    "marmish-native/src/bin/marmishd.rs": "51c608d76c242d4d67a3e5e7299aa187d395ce2dcf0ec139872efdc29bd474ee",
+    "marmish-native/src/group_0/__projection_0.rs": "f969d520840e0e94ba69d697e8de4c5c0507750d54d0c12fab44434213c15e21",
+    "marmish-native/src/group_0/mod.rs": "a9c2e789f6882103d5ae711c4cd67cc0a3e47f403187996c4d68cbdb8bb3802e",
+    "marmish-native/src/group_1/__projection_1.rs": "263fab5cd253a2a8a4226f8ee47cd39b0e71a79ddb5225643056f67f3789a648",
+    "marmish-native/src/group_1/mod.rs": "0fe0db8e24b424125c76a051fd10499c77eea422cd4f38a69f9e555ba9b81f8e",
+    "marmish-native/src/group_2/__projection_2.rs": "87c8377fe2e520aace97f8834dee22fc59f22ca739e810305fa47b1600103f1f",
+    "marmish-native/src/group_2/mod.rs": "22104158e0b623c1c801d960fb7c6ba84ff1b025e7ff847b00b1033f4539c1f8",
+    "marmish-native/src/lib.rs": "001e97fe1fe2964ea1ecc515cdc0a67391fa5dab1236c87a483d36e25ce9f791",
+    "workspace.lock": "0cbe85169281b2b1943c4286e178d67d68f0cd235f8c14f5282222df25cee6d8"
+  },
+  "candidateSha256": "59f847a13e5d2411d14203a42214070321ef03155d27fc32a278aa851651bd68",
+  "expectedRequestHex": "000000167b226f7065726174696f6e223a22737461747573227d",
+  "realDaemon": {
+    "exit": 0,
+    "stderr": "",
+    "stdout": "{\"ok\":true,\"result\":{\"state\":\"activating\"},\"error\":null}\n"
+  },
+  "knownDifferences": {
+    "non-null-command": {
+      "candidate": {
+        "exit": 1,
+        "stderr": "marmish: invalid input: ipc_frame_json\n",
+        "stdout": ""
+      },
+      "original": {
+        "exit": 0,
+        "stderr": "",
+        "stdout": "{\"ok\":true,\"result\":null,\"error\":null,\"command\":{\"state\":\"local_busy\"}}\n"
+      }
+    },
+    "non-null-stream": {
+      "candidate": {
+        "exit": 1,
+        "stderr": "marmish: invalid input: ipc_frame_json\n",
+        "stdout": ""
+      },
+      "original": {
+        "exit": 0,
+        "stderr": "",
+        "stdout": "{\"ok\":true,\"result\":null,\"error\":null,\"stream\":{\"state\":\"pending\"}}\n"
+      }
+    },
+    "positional-response": {
+      "candidate": {
+        "exit": 1,
+        "stderr": "marmish: invalid input: ipc_frame_json\n",
+        "stdout": ""
+      },
+      "original": {
+        "exit": 0,
+        "stderr": "",
+        "stdout": "{\"ok\":true,\"result\":null,\"error\":null}\n"
+      }
+    }
+  },
+  "controlledCases": {
+    "actor-failure": {
+      "exit": 1,
+      "stderr": "",
+      "stdout": "{\"ok\":false,\"result\":null,\"error\":\"busy\"}\n"
+    },
+    "defaults": {
+      "exit": 0,
+      "stderr": "",
+      "stdout": "{\"ok\":true,\"result\":null,\"error\":null}\n"
+    },
+    "duplicate-success": {
+      "exit": 1,
+      "stderr": "marmish: invalid input: ipc_frame_json\n",
+      "stdout": ""
+    },
+    "extra-frame": {
+      "exit": 0,
+      "stderr": "",
+      "stdout": "{\"ok\":true,\"result\":null,\"error\":null}\n"
+    },
+    "malformed": {
+      "exit": 1,
+      "stderr": "marmish: invalid input: ipc_frame_json\n",
+      "stdout": ""
+    },
+    "max-frame": {
+      "exit": 0,
+      "stderr": "",
+      "stdout": "{\"ok\":true,\"result\":null,\"error\":null}\n"
+    },
+    "missing-socket": {
+      "exit": 1,
+      "stderr": "marmish: local I/O failed\n",
+      "stdout": ""
+    },
+    "missing-success": {
+      "exit": 1,
+      "stderr": "marmish: invalid input: ipc_frame_json\n",
+      "stdout": ""
+    },
+    "no-header": {
+      "exit": 1,
+      "stderr": "marmish: local I/O failed\n",
+      "stdout": ""
+    },
+    "null-extensions": {
+      "exit": 0,
+      "stderr": "",
+      "stdout": "{\"ok\":true,\"result\":null,\"error\":null}\n"
+    },
+    "object-order": {
+      "exit": 0,
+      "stderr": "",
+      "stdout": "{\"ok\":true,\"result\":{\"a\":[3],\"z\":1},\"error\":null}\n"
+    },
+    "over-limit": {
+      "exit": 1,
+      "stderr": "marmish: invalid input: ipc_frame_size\n",
+      "stdout": ""
+    },
+    "partial-header": {
+      "exit": 1,
+      "stderr": "marmish: local I/O failed\n",
+      "stdout": ""
+    },
+    "short-body": {
+      "exit": 1,
+      "stderr": "marmish: local I/O failed\n",
+      "stdout": ""
+    },
+    "unknown-field": {
+      "exit": 1,
+      "stderr": "marmish: invalid input: ipc_frame_json\n",
+      "stdout": ""
+    },
+    "wrong-success-type": {
+      "exit": 1,
+      "stderr": "marmish: invalid input: ipc_frame_json\n",
+      "stdout": ""
+    },
+    "zero-frame": {
+      "exit": 1,
+      "stderr": "marmish: invalid input: ipc_frame_size\n",
+      "stdout": ""
+    }
+  },
+  "parserObservations": {
+    "marmish": 34,
+    "marmishd": 34
+  },
+  "shutdown": {
+    "engine_stop_complete": true,
+    "mdk_stop_complete": true,
+    "runtime_cleanup_complete": true
+  },
+  "controls": [
+    "stage path escape",
+    "stage pin drift",
+    "workspace lock drift",
+    "package lock drift",
+    "recovery registry checksum drift"
+  ]
+}

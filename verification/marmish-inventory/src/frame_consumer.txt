@@ -1,0 +1,7 @@
+use marmish_core::{FrameError,Limits,ProbeEnvelope};
+type Codec = fn(&[u8]) -> Result<Vec<u8>, FrameError>;
+const _: Codec = ProbeEnvelope::encode;
+const _: Codec = ProbeEnvelope::decode;
+const _: [usize;3] = [Limits::RAW_BYTES,Limits::JSON_BYTES,Limits::NDJSON_BYTES];
+const _: [FrameError;4] = [FrameError::SizeLimit,FrameError::InvalidJson,
+                           FrameError::InvalidVersion,FrameError::InvalidEncoding];

@@ -1,0 +1,20 @@
+{
+  "format": "oddlang-shared-declarations-v1",
+  "id": "urn:invoice:fault",
+  "errors": [
+    {
+      "id": "urn:invoice:WireFault",
+      "variants": [
+        {
+          "id": "urn:invoice:Bad",
+          "payload": "text",
+          "message": [
+            {
+              "payload": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1658 @@
+{
+  "cases": [
+    {
+      "name": "spec-frame-start-encode",
+      "operation": "frame_encode",
+      "input": {
+        "kind": "start",
+        "launch": {
+          "version": 1,
+          "mode": "resume",
+          "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333",
+          "direction": "get",
+          "source": "Yf8=",
+          "destination": "Yi9j",
+          "overwrite": false,
+          "preserve_mode": true,
+          "preserve_mtime": true
+        },
+        "codec": "zlib"
+      },
+      "expected": "01000000770000000102111111111111111111111111111111111111111111111111111111111111111122222222222222222222222222222222222222222222222222222222222222223333333333333333333333333333333333333333333333333333333333333333020000000261ff00000003622f6300010101",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-frame-manifest-encode",
+      "operation": "frame_encode",
+      "input": {
+        "kind": "manifest",
+        "manifest": {
+          "version": 1,
+          "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333",
+          "direction": "get",
+          "source": "Yf8=",
+          "destination": "Yi9j",
+          "overwrite": false,
+          "preserve_mode": true,
+          "preserve_mtime": true,
+          "size": 4,
+          "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "mode": 416,
+          "mtime": {
+            "seconds": -2,
+            "nanos": 999999999
+          }
+        }
+      },
+      "expected": "02000000af00000001111111111111111111111111111111111111111111111111111111111111111122222222222222222222222222222222222222222222222222222222222222223333333333333333333333333333333333333333333333333333333333333333020000000261ff00000003622f6300010100000000000000049f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a0801000001a001fffffffffffffffe3b9ac9ff",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-frame-resume-encode",
+      "operation": "frame_encode",
+      "input": {
+        "kind": "resume",
+        "phase": 2,
+        "offset": 4,
+        "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      },
+      "expected": "03000000290200000000000000049f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-frame-prefix-encode",
+      "operation": "frame_encode",
+      "input": {
+        "kind": "prefix",
+        "offset": 4,
+        "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      },
+      "expected": "040000002800000000000000049f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-frame-data-encode",
+      "operation": "frame_encode",
+      "input": {
+        "kind": "data",
+        "offset": 4,
+        "bytes": "ff"
+      },
+      "expected": "05000000090000000000000004ff",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-frame-checkpoint-encode",
+      "operation": "frame_encode",
+      "input": {
+        "kind": "checkpoint",
+        "offset": 4,
+        "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      },
+      "expected": "060000002800000000000000049f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-frame-done-encode",
+      "operation": "frame_encode",
+      "input": {
+        "kind": "done",
+        "size": 4,
+        "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      },
+      "expected": "070000002800000000000000049f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-frame-commit-encode",
+      "operation": "frame_encode",
+      "input": {
+        "kind": "commit",
+        "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+        "size": 4,
+        "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      },
+      "expected": "0800000049111111111111111111111111111111111111111111111111111111111111111100000000000000049f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a0801",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-frame-finish-encode",
+      "operation": "frame_encode",
+      "input": {
+        "kind": "finish",
+        "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+        "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      },
+      "expected": "090000004011111111111111111111111111111111111111111111111111111111111111119f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-frame-progress-encode",
+      "operation": "frame_encode",
+      "input": {
+        "kind": "progress",
+        "stage": "PrefixHash",
+        "examined": 1,
+        "total": 4
+      },
+      "expected": "0a000000110200000000000000010000000000000004",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-frame-error-encode",
+      "operation": "frame_encode",
+      "input": {
+        "kind": "error",
+        "code": "HashMismatch"
+      },
+      "expected": "0b000000020900",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-record-manifest-validate",
+      "operation": "manifest_validate",
+      "input": {
+        "version": 1,
+        "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+        "client": "2222222222222222222222222222222222222222222222222222222222222222",
+        "server": "3333333333333333333333333333333333333333333333333333333333333333",
+        "direction": "get",
+        "source": "Yf8=",
+        "destination": "Yi9j",
+        "overwrite": false,
+        "preserve_mode": true,
+        "preserve_mtime": true,
+        "size": 4,
+        "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "mode": 416,
+        "mtime": {
+          "seconds": -2,
+          "nanos": 999999999
+        }
+      },
+      "expected": "ok"
+    },
+    {
+      "name": "spec-record-manifest-encode",
+      "operation": "manifest_encode",
+      "input": {
+        "version": 1,
+        "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+        "client": "2222222222222222222222222222222222222222222222222222222222222222",
+        "server": "3333333333333333333333333333333333333333333333333333333333333333",
+        "direction": "get",
+        "source": "Yf8=",
+        "destination": "Yi9j",
+        "overwrite": false,
+        "preserve_mode": true,
+        "preserve_mtime": true,
+        "size": 4,
+        "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "mode": 416,
+        "mtime": {
+          "seconds": -2,
+          "nanos": 999999999
+        }
+      },
+      "expected": "00000001111111111111111111111111111111111111111111111111111111111111111122222222222222222222222222222222222222222222222222222222222222223333333333333333333333333333333333333333333333333333333333333333020000000261ff00000003622f6300010100000000000000049f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a0801000001a001fffffffffffffffe3b9ac9ff",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-record-checkpoint-validate",
+      "operation": "checkpoint_validate",
+      "input": {
+        "manifest": {
+          "version": 1,
+          "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333",
+          "direction": "get",
+          "source": "Yf8=",
+          "destination": "Yi9j",
+          "overwrite": false,
+          "preserve_mode": true,
+          "preserve_mtime": true,
+          "size": 4,
+          "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "mode": 416,
+          "mtime": {
+            "seconds": -2,
+            "nanos": 999999999
+          }
+        },
+        "phase": 5,
+        "normalized_path": "622f63",
+        "parent": {
+          "device": 101,
+          "inode": 202
+        },
+        "private": {
+          "device": 101,
+          "inode": 203
+        },
+        "data": {
+          "device": 101,
+          "inode": 204
+        },
+        "durable_offset": 4,
+        "prefix_sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "last_stream": "44444444444444444444444444444444",
+        "created": -4,
+        "updated": -3,
+        "expires": 604857,
+        "committed_final": {
+          "device": 101,
+          "inode": 204
+        }
+      },
+      "expected": "ok"
+    },
+    {
+      "name": "spec-record-checkpoint-encode",
+      "operation": "checkpoint_encode",
+      "input": {
+        "manifest": {
+          "version": 1,
+          "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333",
+          "direction": "get",
+          "source": "Yf8=",
+          "destination": "Yi9j",
+          "overwrite": false,
+          "preserve_mode": true,
+          "preserve_mtime": true,
+          "size": 4,
+          "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "mode": 416,
+          "mtime": {
+            "seconds": -2,
+            "nanos": 999999999
+          }
+        },
+        "phase": 5,
+        "normalized_path": "622f63",
+        "parent": {
+          "device": 101,
+          "inode": 202
+        },
+        "private": {
+          "device": 101,
+          "inode": 203
+        },
+        "data": {
+          "device": 101,
+          "inode": 204
+        },
+        "durable_offset": 4,
+        "prefix_sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "last_stream": "44444444444444444444444444444444",
+        "created": -4,
+        "updated": -3,
+        "expires": 604857,
+        "committed_final": {
+          "device": 101,
+          "inode": 204
+        }
+      },
+      "expected": "00000001000000af00000001111111111111111111111111111111111111111111111111111111111111111122222222222222222222222222222222222222222222222222222222222222223333333333333333333333333333333333333333333333333333333333333333020000000261ff00000003622f6300010100000000000000049f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a0801000001a001fffffffffffffffe3b9ac9ff0500000003622f63000000000000006500000000000000ca000000000000006500000000000000cb000000000000006500000000000000cc00000000000000049f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a0844444444444444444444444444444444fffffffffffffffcfffffffffffffffd0000000000093ab901000000000000006500000000000000cc87aac16df9a92c7cc41f95b1c5401f7d9c5cb9c56bc8e057284259f28585b17b",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-record-context-validate",
+      "operation": "context_validate",
+      "input": {
+        "context_version": 1,
+        "helper_protocol": 1,
+        "client": "2222222222222222222222222222222222222222222222222222222222222222",
+        "server": "3333333333333333333333333333333333333333333333333333333333333333",
+        "group": "ff00",
+        "session": "55555555555555555555555555555555",
+        "stream": "66666666666666666666666666666666",
+        "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+        "direction": 2,
+        "launch_digest": "8e0146d9978d1eb4faeaeb393d727587556b9e94f64149e2564bf624f287aae8",
+        "retention_seconds": 604860,
+        "expected_version": "0.2.3",
+        "expected_target": "aarch64-apple-darwin",
+        "expected_commit": "7777777777777777777777777777777777777777"
+      },
+      "expected": "ok"
+    },
+    {
+      "name": "spec-record-context-encode",
+      "operation": "context_encode",
+      "input": {
+        "context_version": 1,
+        "helper_protocol": 1,
+        "client": "2222222222222222222222222222222222222222222222222222222222222222",
+        "server": "3333333333333333333333333333333333333333333333333333333333333333",
+        "group": "ff00",
+        "session": "55555555555555555555555555555555",
+        "stream": "66666666666666666666666666666666",
+        "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+        "direction": 2,
+        "launch_digest": "8e0146d9978d1eb4faeaeb393d727587556b9e94f64149e2564bf624f287aae8",
+        "retention_seconds": 604860,
+        "expected_version": "0.2.3",
+        "expected_target": "aarch64-apple-darwin",
+        "expected_commit": "7777777777777777777777777777777777777777"
+      },
+      "expected": "6d61726d6973682d636f70792d636f6e746578742f310000000001000000012222222222222222222222222222222222222222222222222222222222222222333333333333333333333333333333333333333333333333333333333333333300000002ff0055555555555555555555555555555555666666666666666666666666666666661111111111111111111111111111111111111111111111111111111111111111028e0146d9978d1eb4faeaeb393d727587556b9e94f64149e2564bf624f287aae80000000000093abc00000005302e322e3300000014616172636836342d6170706c652d64617277696e7777777777777777777777777777777777777777000000105f5f636f70792d68656c7065722d7631",
+      "pairedDecode": true
+    },
+    {
+      "name": "launch-validate",
+      "operation": "launch_validate",
+      "input": {
+        "version": 1,
+        "mode": "resume",
+        "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+        "client": "2222222222222222222222222222222222222222222222222222222222222222",
+        "server": "3333333333333333333333333333333333333333333333333333333333333333",
+        "direction": "get",
+        "source": "Yf8=",
+        "destination": "Yi9j",
+        "overwrite": false,
+        "preserve_mode": true,
+        "preserve_mtime": true
+      },
+      "expected": "ok"
+    },
+    {
+      "name": "launch-invalid-version",
+      "operation": "launch_validate",
+      "input": {
+        "version": 0,
+        "mode": "resume",
+        "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+        "client": "2222222222222222222222222222222222222222222222222222222222222222",
+        "server": "3333333333333333333333333333333333333333333333333333333333333333",
+        "direction": "get",
+        "source": "Yf8=",
+        "destination": "Yi9j",
+        "overwrite": false,
+        "preserve_mode": true,
+        "preserve_mtime": true
+      },
+      "expected": {
+        "error": "Invalid",
+        "detail": "copy_version"
+      }
+    },
+    {
+      "name": "launch-digest",
+      "operation": "launch_digest",
+      "input": {
+        "launch": {
+          "version": 1,
+          "mode": "resume",
+          "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333",
+          "direction": "get",
+          "source": "Yf8=",
+          "destination": "Yi9j",
+          "overwrite": false,
+          "preserve_mode": true,
+          "preserve_mtime": true
+        },
+        "codec": "zlib"
+      },
+      "expected": "8e0146d9978d1eb4faeaeb393d727587556b9e94f64149e2564bf624f287aae8"
+    },
+    {
+      "name": "launch-namespace",
+      "operation": "launch_namespace",
+      "input": {
+        "version": 1,
+        "mode": "resume",
+        "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+        "client": "2222222222222222222222222222222222222222222222222222222222222222",
+        "server": "3333333333333333333333333333333333333333333333333333333333333333",
+        "direction": "get",
+        "source": "Yf8=",
+        "destination": "Yi9j",
+        "overwrite": false,
+        "preserve_mode": true,
+        "preserve_mtime": true
+      },
+      "expected": ".marmish-copy-v1-b173179bf91c8df840df8e420136251c0538709f16a4ecb517bb118f8212c42c"
+    },
+    {
+      "name": "manifest-namespace",
+      "operation": "manifest_namespace",
+      "input": {
+        "version": 1,
+        "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+        "client": "2222222222222222222222222222222222222222222222222222222222222222",
+        "server": "3333333333333333333333333333333333333333333333333333333333333333",
+        "direction": "get",
+        "source": "Yf8=",
+        "destination": "Yi9j",
+        "overwrite": false,
+        "preserve_mode": true,
+        "preserve_mtime": true,
+        "size": 4,
+        "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "mode": 416,
+        "mtime": {
+          "seconds": -2,
+          "nanos": 999999999
+        }
+      },
+      "expected": ".marmish-copy-v1-b173179bf91c8df840df8e420136251c0538709f16a4ecb517bb118f8212c42c"
+    },
+    {
+      "name": "launch-matches-manifest-ignores-attempt-mode",
+      "operation": "launch_matches_manifest",
+      "input": {
+        "launch": {
+          "version": 1,
+          "mode": "resume",
+          "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333",
+          "direction": "get",
+          "source": "Yf8=",
+          "destination": "Yi9j",
+          "overwrite": false,
+          "preserve_mode": true,
+          "preserve_mtime": true
+        },
+        "manifest": {
+          "version": 1,
+          "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333",
+          "direction": "get",
+          "source": "Yf8=",
+          "destination": "Yi9j",
+          "overwrite": false,
+          "preserve_mode": true,
+          "preserve_mtime": true,
+          "size": 4,
+          "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "mode": 416,
+          "mtime": {
+            "seconds": -2,
+            "nanos": 999999999
+          }
+        }
+      },
+      "expected": true
+    },
+    {
+      "name": "launch-mismatches-manifest",
+      "operation": "launch_matches_manifest",
+      "input": {
+        "launch": {
+          "version": 1,
+          "mode": "resume",
+          "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333",
+          "direction": "get",
+          "source": "Yf8=",
+          "destination": "Yi9j",
+          "overwrite": false,
+          "preserve_mode": true,
+          "preserve_mtime": true
+        },
+        "manifest": {
+          "version": 1,
+          "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333",
+          "direction": "get",
+          "source": "Yf8=",
+          "destination": "Yi9j",
+          "overwrite": true,
+          "preserve_mode": true,
+          "preserve_mtime": true,
+          "size": 4,
+          "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "mode": 416,
+          "mtime": {
+            "seconds": -2,
+            "nanos": 999999999
+          }
+        }
+      },
+      "expected": false
+    },
+    {
+      "name": "manifest-offset-before-metadata",
+      "operation": "manifest_validate",
+      "input": {
+        "version": 1,
+        "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+        "client": "2222222222222222222222222222222222222222222222222222222222222222",
+        "server": "3333333333333333333333333333333333333333333333333333333333333333",
+        "direction": "get",
+        "source": "Yf8=",
+        "destination": "Yi9j",
+        "overwrite": false,
+        "preserve_mode": true,
+        "preserve_mtime": true,
+        "size": 9223372036854775808,
+        "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "mode": null,
+        "mtime": {
+          "seconds": -2,
+          "nanos": 999999999
+        }
+      },
+      "expected": {
+        "error": "Offset"
+      }
+    },
+    {
+      "name": "manifest-mode-required",
+      "operation": "manifest_validate",
+      "input": {
+        "version": 1,
+        "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+        "client": "2222222222222222222222222222222222222222222222222222222222222222",
+        "server": "3333333333333333333333333333333333333333333333333333333333333333",
+        "direction": "get",
+        "source": "Yf8=",
+        "destination": "Yi9j",
+        "overwrite": false,
+        "preserve_mode": true,
+        "preserve_mtime": true,
+        "size": 4,
+        "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "mode": null,
+        "mtime": {
+          "seconds": -2,
+          "nanos": 999999999
+        }
+      },
+      "expected": {
+        "error": "Invalid",
+        "detail": "copy_metadata"
+      }
+    },
+    {
+      "name": "manifest-nanos-plus-one",
+      "operation": "manifest_validate",
+      "input": {
+        "version": 1,
+        "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+        "client": "2222222222222222222222222222222222222222222222222222222222222222",
+        "server": "3333333333333333333333333333333333333333333333333333333333333333",
+        "direction": "get",
+        "source": "Yf8=",
+        "destination": "Yi9j",
+        "overwrite": false,
+        "preserve_mode": true,
+        "preserve_mtime": true,
+        "size": 4,
+        "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "mode": 416,
+        "mtime": {
+          "seconds": -2,
+          "nanos": 1000000000
+        }
+      },
+      "expected": {
+        "error": "Invalid",
+        "detail": "copy_metadata"
+      }
+    },
+    {
+      "name": "checkpoint-corrupt-checksum",
+      "operation": "checkpoint_decode",
+      "input": "00000001000000af00000001111111111111111111111111111111111111111111111111111111111111111122222222222222222222222222222222222222222222222222222222222222223333333333333333333333333333333333333333333333333333333333333333020000000261ff00000003622f6300010100000000000000049f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a0801000001a001fffffffffffffffe3b9ac9ff0500000003622f63000000000000006500000000000000ca000000000000006500000000000000cb000000000000006500000000000000cc00000000000000049f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a0844444444444444444444444444444444fffffffffffffffcfffffffffffffffd0000000000093ab901000000000000006500000000000000cc87aac16df9a92c7cc41f95b1c5401f7d9c5cb9c56bc8e057284259f28585b17a",
+      "expected": {
+        "error": "Invalid",
+        "detail": "copy_checkpoint_checksum"
+      }
+    },
+    {
+      "name": "checkpoint-invalid-offset",
+      "operation": "checkpoint_validate",
+      "input": {
+        "manifest": {
+          "version": 1,
+          "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333",
+          "direction": "get",
+          "source": "Yf8=",
+          "destination": "Yi9j",
+          "overwrite": false,
+          "preserve_mode": true,
+          "preserve_mtime": true,
+          "size": 4,
+          "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "mode": 416,
+          "mtime": {
+            "seconds": -2,
+            "nanos": 999999999
+          }
+        },
+        "phase": 5,
+        "normalized_path": "622f63",
+        "parent": {
+          "device": 101,
+          "inode": 202
+        },
+        "private": {
+          "device": 101,
+          "inode": 203
+        },
+        "data": {
+          "device": 101,
+          "inode": 204
+        },
+        "durable_offset": 3,
+        "prefix_sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "last_stream": "44444444444444444444444444444444",
+        "created": -4,
+        "updated": -3,
+        "expires": 604857,
+        "committed_final": {
+          "device": 101,
+          "inode": 204
+        }
+      },
+      "expected": {
+        "error": "Invalid",
+        "detail": "copy_checkpoint"
+      }
+    },
+    {
+      "name": "checkpoint-retention-minus-one",
+      "operation": "checkpoint_validate",
+      "input": {
+        "manifest": {
+          "version": 1,
+          "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333",
+          "direction": "get",
+          "source": "Yf8=",
+          "destination": "Yi9j",
+          "overwrite": false,
+          "preserve_mode": true,
+          "preserve_mtime": true,
+          "size": 4,
+          "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "mode": 416,
+          "mtime": {
+            "seconds": -2,
+            "nanos": 999999999
+          }
+        },
+        "phase": 5,
+        "normalized_path": "622f63",
+        "parent": {
+          "device": 101,
+          "inode": 202
+        },
+        "private": {
+          "device": 101,
+          "inode": 203
+        },
+        "data": {
+          "device": 101,
+          "inode": 204
+        },
+        "durable_offset": 4,
+        "prefix_sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "last_stream": "44444444444444444444444444444444",
+        "created": -4,
+        "updated": -3,
+        "expires": 604856,
+        "committed_final": {
+          "device": 101,
+          "inode": 204
+        }
+      },
+      "expected": {
+        "error": "Invalid",
+        "detail": "copy_checkpoint"
+      }
+    },
+    {
+      "name": "context-start",
+      "operation": "context_start",
+      "input": {
+        "context": {
+          "context_version": 1,
+          "helper_protocol": 1,
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333",
+          "group": "ff00",
+          "session": "55555555555555555555555555555555",
+          "stream": "66666666666666666666666666666666",
+          "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+          "direction": 2,
+          "launch_digest": "8e0146d9978d1eb4faeaeb393d727587556b9e94f64149e2564bf624f287aae8",
+          "retention_seconds": 604860,
+          "expected_version": "0.2.3",
+          "expected_target": "aarch64-apple-darwin",
+          "expected_commit": "7777777777777777777777777777777777777777"
+        },
+        "launch": {
+          "version": 1,
+          "mode": "resume",
+          "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333",
+          "direction": "get",
+          "source": "Yf8=",
+          "destination": "Yi9j",
+          "overwrite": false,
+          "preserve_mode": true,
+          "preserve_mtime": true
+        },
+        "codec": "zlib"
+      },
+      "expected": "ok"
+    },
+    {
+      "name": "context-different-start-codec",
+      "operation": "context_start",
+      "input": {
+        "context": {
+          "context_version": 1,
+          "helper_protocol": 1,
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333",
+          "group": "ff00",
+          "session": "55555555555555555555555555555555",
+          "stream": "66666666666666666666666666666666",
+          "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+          "direction": 2,
+          "launch_digest": "8e0146d9978d1eb4faeaeb393d727587556b9e94f64149e2564bf624f287aae8",
+          "retention_seconds": 604860,
+          "expected_version": "0.2.3",
+          "expected_target": "aarch64-apple-darwin",
+          "expected_commit": "7777777777777777777777777777777777777777"
+        },
+        "launch": {
+          "version": 1,
+          "mode": "resume",
+          "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333",
+          "direction": "get",
+          "source": "Yf8=",
+          "destination": "Yi9j",
+          "overwrite": false,
+          "preserve_mode": true,
+          "preserve_mtime": true
+        },
+        "codec": "none"
+      },
+      "expected": {
+        "error": "Invalid",
+        "detail": "copy_context_launch"
+      }
+    },
+    {
+      "name": "context-build",
+      "operation": "context_build",
+      "input": {
+        "context": {
+          "context_version": 1,
+          "helper_protocol": 1,
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333",
+          "group": "ff00",
+          "session": "55555555555555555555555555555555",
+          "stream": "66666666666666666666666666666666",
+          "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+          "direction": 2,
+          "launch_digest": "8e0146d9978d1eb4faeaeb393d727587556b9e94f64149e2564bf624f287aae8",
+          "retention_seconds": 604860,
+          "expected_version": "0.2.3",
+          "expected_target": "aarch64-apple-darwin",
+          "expected_commit": "7777777777777777777777777777777777777777"
+        },
+        "version": "0.2.3",
+        "target": "aarch64-apple-darwin",
+        "commit": "7777777777777777777777777777777777777777"
+      },
+      "expected": "ok"
+    },
+    {
+      "name": "context-different-build-commit",
+      "operation": "context_build",
+      "input": {
+        "context": {
+          "context_version": 1,
+          "helper_protocol": 1,
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333",
+          "group": "ff00",
+          "session": "55555555555555555555555555555555",
+          "stream": "66666666666666666666666666666666",
+          "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+          "direction": 2,
+          "launch_digest": "8e0146d9978d1eb4faeaeb393d727587556b9e94f64149e2564bf624f287aae8",
+          "retention_seconds": 604860,
+          "expected_version": "0.2.3",
+          "expected_target": "aarch64-apple-darwin",
+          "expected_commit": "7777777777777777777777777777777777777777"
+        },
+        "version": "0.2.3",
+        "target": "aarch64-apple-darwin",
+        "commit": "6666666666666666666666666666666666666666"
+      },
+      "expected": {
+        "error": "Invalid",
+        "detail": "copy_context_build"
+      }
+    },
+    {
+      "name": "context-retention-minus-one",
+      "operation": "context_validate",
+      "input": {
+        "context_version": 1,
+        "helper_protocol": 1,
+        "client": "2222222222222222222222222222222222222222222222222222222222222222",
+        "server": "3333333333333333333333333333333333333333333333333333333333333333",
+        "group": "ff00",
+        "session": "55555555555555555555555555555555",
+        "stream": "66666666666666666666666666666666",
+        "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+        "direction": 2,
+        "launch_digest": "8e0146d9978d1eb4faeaeb393d727587556b9e94f64149e2564bf624f287aae8",
+        "retention_seconds": 604859,
+        "expected_version": "0.2.3",
+        "expected_target": "aarch64-apple-darwin",
+        "expected_commit": "7777777777777777777777777777777777777777"
+      },
+      "expected": {
+        "error": "Invalid",
+        "detail": "copy_context"
+      }
+    },
+    {
+      "name": "context-retention-maximum",
+      "operation": "context_validate",
+      "input": {
+        "context_version": 1,
+        "helper_protocol": 1,
+        "client": "2222222222222222222222222222222222222222222222222222222222222222",
+        "server": "3333333333333333333333333333333333333333333333333333333333333333",
+        "group": "ff00",
+        "session": "55555555555555555555555555555555",
+        "stream": "66666666666666666666666666666666",
+        "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+        "direction": 2,
+        "launch_digest": "8e0146d9978d1eb4faeaeb393d727587556b9e94f64149e2564bf624f287aae8",
+        "retention_seconds": 31536000,
+        "expected_version": "0.2.3",
+        "expected_target": "aarch64-apple-darwin",
+        "expected_commit": "7777777777777777777777777777777777777777"
+      },
+      "expected": "ok"
+    },
+    {
+      "name": "context-retention-plus-one",
+      "operation": "context_validate",
+      "input": {
+        "context_version": 1,
+        "helper_protocol": 1,
+        "client": "2222222222222222222222222222222222222222222222222222222222222222",
+        "server": "3333333333333333333333333333333333333333333333333333333333333333",
+        "group": "ff00",
+        "session": "55555555555555555555555555555555",
+        "stream": "66666666666666666666666666666666",
+        "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+        "direction": 2,
+        "launch_digest": "8e0146d9978d1eb4faeaeb393d727587556b9e94f64149e2564bf624f287aae8",
+        "retention_seconds": 31536001,
+        "expected_version": "0.2.3",
+        "expected_target": "aarch64-apple-darwin",
+        "expected_commit": "7777777777777777777777777777777777777777"
+      },
+      "expected": {
+        "error": "Invalid",
+        "detail": "copy_context"
+      }
+    },
+    {
+      "name": "context-unsupported-entrypoint",
+      "operation": "context_decode",
+      "input": "6d61726d6973682d636f70792d636f6e746578742f310000000001000000012222222222222222222222222222222222222222222222222222222222222222333333333333333333333333333333333333333333333333333333333333333300000002ff0055555555555555555555555555555555666666666666666666666666666666661111111111111111111111111111111111111111111111111111111111111111028e0146d9978d1eb4faeaeb393d727587556b9e94f64149e2564bf624f287aae80000000000093abc00000005302e322e3300000014616172636836342d6170706c652d64617277696e7777777777777777777777777777777777777777000000105f5f636f70792d68656c7065722d7678",
+      "expected": {
+        "error": "Invalid",
+        "detail": "copy_context_entrypoint"
+      }
+    },
+    {
+      "name": "spec-request-hello-encode",
+      "operation": "request_encode",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "body": {
+          "op": "hello",
+          "data": {
+            "codecs": [
+              "none",
+              "zlib"
+            ]
+          }
+        }
+      },
+      "expected": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"00000000000dbba01111111111111111\",\"session\":\"12121212121212121212121212121212\",\"client\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"server\":\"3333333333333333333333333333333333333333333333333333333333333333\"},\"sequence\":42,\"message\":{\"direction\":\"request\",\"data\":{\"op\":\"hello\",\"data\":{\"codecs\":[\"none\",\"zlib\"]}}}}",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-request-copy_hello-encode",
+      "operation": "request_encode",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "body": {
+          "op": "copy_hello",
+          "data": {
+            "versions": [
+              1,
+              2
+            ],
+            "codecs": [
+              "none"
+            ]
+          }
+        }
+      },
+      "expected": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"00000000000dbba01111111111111111\",\"session\":\"12121212121212121212121212121212\",\"client\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"server\":\"3333333333333333333333333333333333333333333333333333333333333333\"},\"sequence\":42,\"message\":{\"direction\":\"request\",\"data\":{\"op\":\"copy_hello\",\"data\":{\"versions\":[1,2],\"codecs\":[\"none\"]}}}}",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-request-open_copy-encode",
+      "operation": "request_encode",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "body": {
+          "op": "open_copy",
+          "data": {
+            "launch": {
+              "version": 1,
+              "mode": "resume",
+              "transfer": "1111111111111111111111111111111111111111111111111111111111111111",
+              "client": "2222222222222222222222222222222222222222222222222222222222222222",
+              "server": "3333333333333333333333333333333333333333333333333333333333333333",
+              "direction": "get",
+              "source": "Yf8=",
+              "destination": "Yi9j",
+              "overwrite": false,
+              "preserve_mode": true,
+              "preserve_mtime": true
+            },
+            "codec": "zlib"
+          }
+        }
+      },
+      "expected": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"00000000000dbba01111111111111111\",\"session\":\"12121212121212121212121212121212\",\"client\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"server\":\"3333333333333333333333333333333333333333333333333333333333333333\"},\"sequence\":42,\"message\":{\"direction\":\"request\",\"data\":{\"op\":\"open_copy\",\"data\":{\"launch\":{\"version\":1,\"mode\":\"resume\",\"transfer\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"client\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"server\":\"3333333333333333333333333333333333333333333333333333333333333333\",\"direction\":\"get\",\"source\":\"Yf8=\",\"destination\":\"Yi9j\",\"overwrite\":false,\"preserve_mode\":true,\"preserve_mtime\":true},\"codec\":\"zlib\"}}}}",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-request-open-encode",
+      "operation": "request_encode",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "body": {
+          "op": "open",
+          "data": {
+            "argv": [
+              "L3A=",
+              "/w=="
+            ],
+            "codec": "none"
+          }
+        }
+      },
+      "expected": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"00000000000dbba01111111111111111\",\"session\":\"12121212121212121212121212121212\",\"client\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"server\":\"3333333333333333333333333333333333333333333333333333333333333333\"},\"sequence\":42,\"message\":{\"direction\":\"request\",\"data\":{\"op\":\"open\",\"data\":{\"argv\":[\"L3A=\",\"/w==\"],\"codec\":\"none\"}}}}",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-request-exchange-encode",
+      "operation": "request_encode",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "body": {
+          "op": "exchange",
+          "data": {
+            "stdin": null,
+            "stdin_eof": 0,
+            "stdout_ack": 0,
+            "stderr_ack": 0
+          }
+        }
+      },
+      "expected": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"00000000000dbba01111111111111111\",\"session\":\"12121212121212121212121212121212\",\"client\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"server\":\"3333333333333333333333333333333333333333333333333333333333333333\"},\"sequence\":42,\"message\":{\"direction\":\"request\",\"data\":{\"op\":\"exchange\",\"data\":{\"stdin\":null,\"stdin_eof\":0,\"stdout_ack\":0,\"stderr_ack\":0}}}}",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-request-cancel-encode",
+      "operation": "request_encode",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "body": {
+          "op": "cancel"
+        }
+      },
+      "expected": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"00000000000dbba01111111111111111\",\"session\":\"12121212121212121212121212121212\",\"client\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"server\":\"3333333333333333333333333333333333333333333333333333333333333333\"},\"sequence\":42,\"message\":{\"direction\":\"request\",\"data\":{\"op\":\"cancel\"}}}",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-request-status-encode",
+      "operation": "request_encode",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "body": {
+          "op": "status"
+        }
+      },
+      "expected": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"00000000000dbba01111111111111111\",\"session\":\"12121212121212121212121212121212\",\"client\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"server\":\"3333333333333333333333333333333333333333333333333333333333333333\"},\"sequence\":42,\"message\":{\"direction\":\"request\",\"data\":{\"op\":\"status\"}}}",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-response-copy_hello-encode",
+      "operation": "response_encode",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "body": {
+          "op": "copy_hello",
+          "data": {
+            "version": 1,
+            "codecs": [
+              "none"
+            ],
+            "frame_bytes": 8192,
+            "window_bytes": 262144
+          }
+        },
+        "request_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expected": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"00000000000dbba01111111111111111\",\"session\":\"12121212121212121212121212121212\",\"client\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"server\":\"3333333333333333333333333333333333333333333333333333333333333333\"},\"sequence\":42,\"message\":{\"direction\":\"response\",\"data\":{\"request_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"body\":{\"op\":\"copy_hello\",\"data\":{\"version\":1,\"codecs\":[\"none\"],\"frame_bytes\":8192,\"window_bytes\":262144}}}}}",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-response-copy_refused-encode",
+      "operation": "response_encode",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "body": {
+          "op": "copy_refused",
+          "data": {
+            "code": "busy",
+            "prior_binding": {
+              "stream": "00000000000dbba01111111111111111",
+              "session": "12121212121212121212121212121212",
+              "client": "2222222222222222222222222222222222222222222222222222222222222222",
+              "server": "3333333333333333333333333333333333333333333333333333333333333333"
+            }
+          }
+        },
+        "request_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expected": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"00000000000dbba01111111111111111\",\"session\":\"12121212121212121212121212121212\",\"client\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"server\":\"3333333333333333333333333333333333333333333333333333333333333333\"},\"sequence\":42,\"message\":{\"direction\":\"response\",\"data\":{\"request_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"body\":{\"op\":\"copy_refused\",\"data\":{\"code\":\"busy\",\"prior_binding\":{\"stream\":\"00000000000dbba01111111111111111\",\"session\":\"12121212121212121212121212121212\",\"client\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"server\":\"3333333333333333333333333333333333333333333333333333333333333333\"}}}}}}",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-response-hello-encode",
+      "operation": "response_encode",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "body": {
+          "op": "hello",
+          "data": {
+            "codecs": [
+              "none"
+            ],
+            "frame_bytes": 8192,
+            "window_bytes": 262144
+          }
+        },
+        "request_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expected": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"00000000000dbba01111111111111111\",\"session\":\"12121212121212121212121212121212\",\"client\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"server\":\"3333333333333333333333333333333333333333333333333333333333333333\"},\"sequence\":42,\"message\":{\"direction\":\"response\",\"data\":{\"request_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"body\":{\"op\":\"hello\",\"data\":{\"codecs\":[\"none\"],\"frame_bytes\":8192,\"window_bytes\":262144}}}}}",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-response-opened-encode",
+      "operation": "response_encode",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "body": {
+          "op": "opened",
+          "data": {
+            "codec": "zlib",
+            "open_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "disposition": "existing"
+          }
+        },
+        "request_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expected": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"00000000000dbba01111111111111111\",\"session\":\"12121212121212121212121212121212\",\"client\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"server\":\"3333333333333333333333333333333333333333333333333333333333333333\"},\"sequence\":42,\"message\":{\"direction\":\"response\",\"data\":{\"request_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"body\":{\"op\":\"opened\",\"data\":{\"codec\":\"zlib\",\"open_sha256\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"disposition\":\"existing\"}}}}}",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-response-exchange-encode",
+      "operation": "response_encode",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "body": {
+          "op": "exchange",
+          "data": {
+            "stdin_accepted": 0,
+            "stdin_delivered": 0,
+            "stdin_closed": true,
+            "stdout": null,
+            "stderr": null,
+            "stdout_eof": 0,
+            "stderr_eof": 0,
+            "cancel_requested": false,
+            "terminal": {
+              "kind": "exited",
+              "data": {
+                "code": 7
+              }
+            }
+          }
+        },
+        "request_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expected": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"00000000000dbba01111111111111111\",\"session\":\"12121212121212121212121212121212\",\"client\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"server\":\"3333333333333333333333333333333333333333333333333333333333333333\"},\"sequence\":42,\"message\":{\"direction\":\"response\",\"data\":{\"request_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"body\":{\"op\":\"exchange\",\"data\":{\"stdin_accepted\":0,\"stdin_delivered\":0,\"stdin_closed\":true,\"stdout\":null,\"stderr\":null,\"stdout_eof\":0,\"stderr_eof\":0,\"cancel_requested\":false,\"terminal\":{\"kind\":\"exited\",\"data\":{\"code\":7}}}}}}}",
+      "pairedDecode": true
+    },
+    {
+      "name": "spec-response-error-encode",
+      "operation": "response_encode",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "body": {
+          "op": "error",
+          "data": {
+            "code": "closed"
+          }
+        },
+        "request_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expected": "{\"protocol\":\"marmish-stream/1\",\"version\":1,\"binding\":{\"stream\":\"00000000000dbba01111111111111111\",\"session\":\"12121212121212121212121212121212\",\"client\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"server\":\"3333333333333333333333333333333333333333333333333333333333333333\"},\"sequence\":42,\"message\":{\"direction\":\"response\",\"data\":{\"request_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"body\":{\"op\":\"error\",\"data\":{\"code\":\"closed\"}}}}}",
+      "pairedDecode": true
+    },
+    {
+      "name": "open-digest",
+      "operation": "open_digest",
+      "input": {
+        "argv": [
+          "2f70",
+          "ff"
+        ],
+        "codec": "none"
+      },
+      "expected": "e60a2bbf12b65251cd43f6a083646a6710ca97de4dc9ad48445de9fd9344e77e"
+    },
+    {
+      "name": "open-age--61",
+      "operation": "request_age",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "body": {
+          "op": "open",
+          "data": {
+            "argv": [
+              "L3A=",
+              "/w=="
+            ],
+            "codec": "none"
+          }
+        },
+        "now": 899939
+      },
+      "expected": {
+        "error": "Invalid",
+        "detail": "stream_age"
+      }
+    },
+    {
+      "name": "open-age--60",
+      "operation": "request_age",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "body": {
+          "op": "open",
+          "data": {
+            "argv": [
+              "L3A=",
+              "/w=="
+            ],
+            "codec": "none"
+          }
+        },
+        "now": 899940
+      },
+      "expected": "ok"
+    },
+    {
+      "name": "open-age--59",
+      "operation": "request_age",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "body": {
+          "op": "open",
+          "data": {
+            "argv": [
+              "L3A=",
+              "/w=="
+            ],
+            "codec": "none"
+          }
+        },
+        "now": 899941
+      },
+      "expected": "ok"
+    },
+    {
+      "name": "open-age-604799",
+      "operation": "request_age",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "body": {
+          "op": "open",
+          "data": {
+            "argv": [
+              "L3A=",
+              "/w=="
+            ],
+            "codec": "none"
+          }
+        },
+        "now": 1504799
+      },
+      "expected": "ok"
+    },
+    {
+      "name": "open-age-604800",
+      "operation": "request_age",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "body": {
+          "op": "open",
+          "data": {
+            "argv": [
+              "L3A=",
+              "/w=="
+            ],
+            "codec": "none"
+          }
+        },
+        "now": 1504800
+      },
+      "expected": "ok"
+    },
+    {
+      "name": "open-age-604801",
+      "operation": "request_age",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "body": {
+          "op": "open",
+          "data": {
+            "argv": [
+              "L3A=",
+              "/w=="
+            ],
+            "codec": "none"
+          }
+        },
+        "now": 1504801
+      },
+      "expected": {
+        "error": "Invalid",
+        "detail": "stream_age"
+      }
+    },
+    {
+      "name": "open-argv-before-age",
+      "operation": "request_age",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "body": {
+          "op": "open",
+          "data": {
+            "argv": [],
+            "codec": "none"
+          }
+        },
+        "now": 0
+      },
+      "expected": {
+        "error": "Limit"
+      }
+    },
+    {
+      "name": "exchange-ack-before-unclean-terminal",
+      "operation": "response_encode",
+      "input": {
+        "binding": {
+          "stream": "00000000000dbba01111111111111111",
+          "session": "12121212121212121212121212121212",
+          "client": "2222222222222222222222222222222222222222222222222222222222222222",
+          "server": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "sequence": 42,
+        "request_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "body": {
+          "op": "exchange",
+          "data": {
+            "stdin_accepted": 0,
+            "stdin_delivered": 1,
+            "stdin_closed": false,
+            "stdout": null,
+            "stderr": null,
+            "stdout_eof": 0,
+            "stderr_eof": 0,
+            "cancel_requested": false,
+            "terminal": {
+              "kind": "exited",
+              "data": {
+                "code": 7
+              }
+            }
+          }
+        }
+      },
+      "expected": {
+        "error": "Ack"
+      }
+    },
+    {
+      "name": "codec-block-end-boundary",
+      "operation": "codec_end",
+      "input": {
+        "offset": 9223372036854775806,
+        "codec": "none",
+        "raw_len": 1,
+        "sha256": "2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+        "data": "eA=="
+      },
+      "expected": 9223372036854775807
+    },
+    {
+      "name": "codec-block-end-overflow",
+      "operation": "codec_end",
+      "input": {
+        "offset": 9223372036854775807,
+        "codec": "none",
+        "raw_len": 1,
+        "sha256": "2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+        "data": "eA=="
+      },
+      "expected": {
+        "error": "Offset"
+      }
+    },
+    {
+      "name": "codec-block-is-valid",
+      "operation": "codec_validate",
+      "input": {
+        "offset": 9223372036854775806,
+        "codec": "none",
+        "raw_len": 1,
+        "sha256": "2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+        "data": "eA=="
+      },
+      "expected": "ok"
+    },
+    {
+      "name": "codec-block-length-before-offset",
+      "operation": "codec_validate",
+      "input": {
+        "offset": 9223372036854775807,
+        "codec": "none",
+        "raw_len": 8193,
+        "sha256": "2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+        "data": "eA=="
+      },
+      "expected": {
+        "error": "Limit"
+      }
+    },
+    {
+      "name": "codec-block-offset-before-codec",
+      "operation": "codec_validate",
+      "input": {
+        "offset": 9223372036854775807,
+        "codec": "zlib",
+        "raw_len": 1,
+        "sha256": "2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+        "data": "eA=="
+      },
+      "expected": {
+        "error": "Offset"
+      }
+    },
+    {
+      "name": "codec-block-validate-does-not-check-hash",
+      "operation": "codec_validate",
+      "input": {
+        "offset": 9223372036854775806,
+        "codec": "none",
+        "raw_len": 1,
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "data": "eA=="
+      },
+      "expected": "ok"
+    },
+    {
+      "name": "codec-block-decode-does-check-hash",
+      "operation": "codec_decode",
+      "input": {
+        "block": {
+          "offset": 9223372036854775806,
+          "codec": "none",
+          "raw_len": 1,
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+          "data": "eA=="
+        },
+        "negotiated": "none"
+      },
+      "expected": {
+        "error": "Codec"
+      }
+    },
+    {
+      "name": "public-constants",
+      "operation": "constants",
+      "input": null,
+      "expected": {
+        "MAX_BLOCK": 8192,
+        "MAX_ENCODED": 8192,
+        "MAX_CONTENT": 32768,
+        "WINDOW_BYTES": 262144,
+        "MAX_OFFSET": 9223372036854775807,
+        "MAX_RECORDS": 256,
+        "PROTOCOL": "marmish-stream/1",
+        "FORMAT": 1,
+        "VERSION": 1,
+        "MAX_PATH": 4096,
+        "MAX_CONTROL": 16384,
+        "DURABLE_WINDOW": 2097152,
+        "CHECKPOINT_INTERVAL": 1048576,
+        "MIN_RETENTION_SECS": 604860,
+        "MAX_RETENTION_SECS": 31536000,
+        "CONTEXT_VERSION": 1,
+        "MAX_CONTEXT": 4096,
+        "HELPER_ENTRYPOINT": "__copy-helper-v1"
+      }
+    }
+  ],
+  "numberedEnums": {
+    "name": "numbered-enums-all-u8",
+    "operation": "enum_conversions",
+    "input": null,
+    "expected": {
+      "AttemptMode": [
+        "Create",
+        "Resume"
+      ],
+      "Direction": [
+        "Put",
+        "Get"
+      ],
+      "Phase": [
+        "Created",
+        "Receiving",
+        "Verifying",
+        "CommitPrepared",
+        "Committed"
+      ],
+      "Stage": [
+        "Hashing",
+        "PrefixHash",
+        "Verifying",
+        "Syncing"
+      ],
+      "CopyError": [
+        "Unsupported",
+        "Protocol",
+        "PermissionDenied",
+        "NotFound",
+        "UnsafePath",
+        "Busy",
+        "Conflict",
+        "SourceChanged",
+        "HashMismatch",
+        "DiskFull",
+        "Quota",
+        "CommitUncertain",
+        "LocalIo",
+        "IdentityChanged"
+      ]
+    }
+  }
+}

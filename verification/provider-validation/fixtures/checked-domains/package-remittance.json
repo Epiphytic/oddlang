@@ -1,0 +1,23 @@
+{
+  "format": "oddlang-binary-record-v1",
+  "id": "urn:invoice:Remittance",
+  "layout": [
+    {
+      "id": "urn:invoice:remittance:amount",
+      "encoding": {
+        "kind": "unsigned-be",
+        "bits": 64,
+        "minimum": 0,
+        "maximum": 99
+      }
+    }
+  ],
+  "maximum": 8,
+  "errors": {
+    "value": "urn:invoice:remittance:value",
+    "truncated": "urn:invoice:remittance:truncated",
+    "trailing": "urn:invoice:remittance:trailing",
+    "decodeSize": "urn:invoice:remittance:decodeSize",
+    "encodeSize": "urn:invoice:remittance:encodeSize"
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "companion": "9e47e160179fdba84aed43141ea238350d5aa7e4",
+  "framework": "b653f1ada68791cd2fb70293bf227c5665850d1e",
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "host": "aarch64-apple-darwin",
+  "compilerGraphDigest": "82ddfed871221091be6b42adf6d0b009cb5ce10f864c414bdbaed5e19e4dad56",
+  "frameworkControls": [
+    "wrong revision",
+    "untracked change",
+    "existing output",
+    "output inside source",
+    "failed cargo build",
+    "inherited compiler overrides removed"
+  ],
+  "structuralReplaySha256": {
+    "marmish-engine-bridge/structure.lock": "89da54fb0be1348a706591fa60684014351f2b37d7fba4d1e58d009d629dde74",
+    "marmish-engine-bridge/structure.ttl": "fd2ad796f64e132c83d21c89366ae5009c9f91fcbf34ecdd520959208ee4b9dd",
+    "marmish_prototype/structure.lock": "47724d242e2ef2aae0e62ce12535678bf09ce084b1a95cae12b0ca3725b58336",
+    "marmish_prototype/structure.ttl": "f86cc5d198771697536d96b2070dfd77d5845d1fc9623dae6498aecbcc706d72",
+    "marmish_stream/structure.lock": "47ccc56528c701c868f22393de45819c0d0104533abfc2d34ca43368d8dd3e03",
+    "marmish_stream/structure.ttl": "b4246a9713db14cb7a95ac528c9150ae786fc1dfa8685fc564b479fa35575c8c"
+  },
+  "beforeArchiveSha256": "12154aae615cd751f514d5033d609599ed2adab9b3023c7c366195f50116f420",
+  "compressedBytes": 13011,
+  "publicArchiveSha256": "68aa67d0e97b880f2b123253884165f19c75138787ef9d1c792b5bbbab0e9637",
+  "originalCasesPerProfile": 403,
+  "profiles": [
+    "dev",
+    "release"
+  ],
+  "publicDataCases": 253,
+  "mixedDataPairs": {
+    "rustToTypescript": {
+      "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+      "records": 36,
+      "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+    },
+    "rustToUpstream": {
+      "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+      "records": 36,
+      "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+    },
+    "typescriptToRust": {
+      "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+      "records": 36,
+      "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+    },
+    "typescriptToUpstream": {
+      "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+      "records": 36,
+      "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+    },
+    "upstreamToRust": {
+      "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+      "records": 36,
+      "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+    },
+    "upstreamToTypescript": {
+      "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+      "records": 36,
+      "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+    }
+  },
+  "sealedCasesExercised": 0
+}

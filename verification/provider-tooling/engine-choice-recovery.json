@@ -1,0 +1,62 @@
+{
+  "companionRevision": "ddb19f2b7c4f08823e84c82a8e2da5e463d6375c",
+  "framework": "8e3320aacb0106d543c3e21ab1faf60a02132c04",
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "host": "aarch64-apple-darwin",
+  "receipts": {
+    "verification/whole/engine-fieldless-choices/rust-recovery-aarch64-apple-darwin.json": "737903ff753fd4d9a071fe04f8b37a484f67dc8b70e251a5b2e9d360437a2ea0",
+    "verification/whole/canonical-engine-choices/rust-recovery-aarch64-apple-darwin.json": "ba40248977628f467b29a3de66ea0523d6fb6792a197be3db3e46821ceaeaa07"
+  },
+  "scenarios": {
+    "baseline": {
+      "matchingStagedFiles": 10,
+      "graphSha256": "6deb21fc373f950b47665ecea7b5a85d59e551f500ffc77d127ae560c2c72077",
+      "overlaySha256": "e877b08426227fa656b21320d751e8da09dbb67b8bcd21f2d3d3c2c275b20581",
+      "packageLockSha256": "3a3ee8eee0991e685c491bcfdc9a4bd66b2296b2593b47fc9d15f779e48a603d",
+      "valueObservations": [
+        "Stream:Stdout:Stdout:0",
+        "Stream:Stderr:Stderr:1",
+        "SubmitDisposition:Accepted:Accepted:0",
+        "SubmitDisposition:Existing:Existing:1"
+      ],
+      "traitAndVisibilityChecks": 17,
+      "submitDispositionCopy": "E0277"
+    },
+    "mutation": {
+      "matchingStagedFiles": 10,
+      "graphSha256": "19ed45c050a7bf79de3da61cb4fedbe8d736cedd96891ad5212dd1ae34d4a5bf",
+      "overlaySha256": "9ca3d3054ab34a965ea71d27d1278f8fadaf1668b7de8211db86bc39a998dbd4",
+      "packageLockSha256": "6a514af5f87863a3a87bdc0546036900e7410d32025bf25c7767deec2acdeed1",
+      "valueObservations": [
+        "Stream:Stdout:Stdout:1",
+        "Stream:Stderr:Stderr:0",
+        "SubmitDisposition:Accepted:Accepted:1",
+        "SubmitDisposition:Existing:Existing:0"
+      ],
+      "traitAndVisibilityChecks": 17,
+      "submitDispositionCopy": "available"
+    }
+  },
+  "controls": [
+    "duplicate declaration rejected",
+    "stale inherited graph rejected before publication",
+    "existing stage preserved",
+    "stale published graph rejected and regenerated"
+  ],
+  "canonicalImports": {
+    "attempted": 140,
+    "baseline": 77,
+    "candidate": 79,
+    "added": [
+      [
+        "engine",
+        "Stream"
+      ],
+      [
+        "engine",
+        "SubmitDisposition"
+      ]
+    ]
+  },
+  "canonicalMembers": 7
+}

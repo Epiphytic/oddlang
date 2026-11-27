@@ -1,0 +1,29 @@
+{
+  "format": "oddlang-binary-record-rust-v1",
+  "name": "Existing",
+  "names": {
+    "urn:meter:quantity": "quantity",
+    "urn:meter:sample": "sample"
+  },
+  "externals": {},
+  "errorType": "crate::Fault",
+  "errors": {
+    "urn:meter:error:unit": {
+      "variant": "Bad",
+      "argument": "unit"
+    },
+    "urn:meter:error:limit": {
+      "variant": "Bad",
+      "argument": "limit"
+    },
+    "urn:meter:error:trailing": {
+      "variant": "Bad",
+      "argument": "trailing"
+    },
+    "urn:meter:error:truncated": {
+      "variant": "Bad",
+      "argument": "truncated"
+    }
+  },
+  "existingType": "crate::Existing"
+}

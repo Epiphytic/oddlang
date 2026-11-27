@@ -1,0 +1,147 @@
+{
+  "companionRevision": "ca36c9b8fc8b22b3583ee05f9d8771736ea6e3c7",
+  "platform": "aarch64-apple-darwin",
+  "scope": "Direct local fixture execution",
+  "historicalReceiptSha256": "704b175b96d5372f031ed2b8f210d6329a7cc1955c399431180e1e98e7aec2af",
+  "historicalReceiptByteIdentical": true,
+  "nativeShortDifferences": [
+    "executable_sha256"
+  ],
+  "finiteCaseDifferences": [],
+  "controls": {
+    "unknown case": 125,
+    "wrong input": 125,
+    "invalid nonce": 125,
+    "existing receipt preserved": true,
+    "wrong fixture pin rejected": true
+  },
+  "nativeReplay": {
+    "cases": [
+      {
+        "case": "success",
+        "executable_sha256": "b5a19a96a195d9d436ead8d5a37731da682b930d60a43815b7527f47d7da6fb2",
+        "exit": 0,
+        "schema": 1,
+        "stderr_bytes": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdin_bytes": 5,
+        "stdin_sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+        "stdout_bytes": 5,
+        "stdout_sha256": "d117fa006ba9208500b2930ce69cbde436c647afa917cb7396a9bc9111a46dd2"
+      },
+      {
+        "case": "separate-streams",
+        "executable_sha256": "b5a19a96a195d9d436ead8d5a37731da682b930d60a43815b7527f47d7da6fb2",
+        "exit": 0,
+        "schema": 1,
+        "stderr_bytes": 8,
+        "stderr_sha256": "13fcbddb8f4fde20b91c0e6da94ceb17ccd5ad73c3d74a87a13d03cfa3ca3403",
+        "stdin_bytes": 3,
+        "stdin_sha256": "c0b40cd468f3d47a1d104f7a157cfc73a322781a2fc34a75ab811095c0efc0d4",
+        "stdout_bytes": 8,
+        "stdout_sha256": "21ac14b8e05b545a070ae542d6bbbd7c0df158324591d0ea5aaad4075102948a"
+      },
+      {
+        "case": "empty",
+        "executable_sha256": "b5a19a96a195d9d436ead8d5a37731da682b930d60a43815b7527f47d7da6fb2",
+        "exit": 0,
+        "schema": 1,
+        "stderr_bytes": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdin_bytes": 0,
+        "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_bytes": 0,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "case": "trailing-newlines",
+        "executable_sha256": "b5a19a96a195d9d436ead8d5a37731da682b930d60a43815b7527f47d7da6fb2",
+        "exit": 0,
+        "schema": 1,
+        "stderr_bytes": 3,
+        "stderr_sha256": "3fc4ccfe745870e2c0d99f71f30ff0656c8dedd41cc1d7d3d376b0dbe685e2f3",
+        "stdin_bytes": 5,
+        "stdin_sha256": "8a0956311647187d73d47ac672d55da73c8feae40cd9fd177414b72e75e0693f",
+        "stdout_bytes": 6,
+        "stdout_sha256": "abda83810cd8e90e544dfcf81a6652cd097ab8d30923061dea62b460780df545"
+      },
+      {
+        "case": "nonzero",
+        "executable_sha256": "b5a19a96a195d9d436ead8d5a37731da682b930d60a43815b7527f47d7da6fb2",
+        "exit": 7,
+        "schema": 1,
+        "stderr_bytes": 17,
+        "stderr_sha256": "849e16b17ac1175bc358117ebf7093b8a7587d961325ffdc28289195343974c7",
+        "stdin_bytes": 6,
+        "stdin_sha256": "42af43e3616eba4a133a755540a88e6c61085dfe66c6e49e6ab8eaf9daf0c0da",
+        "stdout_bytes": 8,
+        "stdout_sha256": "95aebb28195b8d737effe0df18d71d39c8d8ba6569286fd3930fbc9f9767181e"
+      },
+      {
+        "executable_sha256": "d9230b3ab14404a5f8abc95958e364070747fa610716217a309f2f29bc82854a",
+        "exit": 7,
+        "repetition": 0,
+        "schema": 1,
+        "stderr_bytes": 131072,
+        "stderr_sha256": "14abdba36ad878cb2974b98fbdd8f2b84123b9483fe74f805b0756f9f384cdbb",
+        "stdin_bytes": 16384,
+        "stdin_sha256": "074fd0e99918d116fb92c6922db45eea4e4ecf3fe7e9f293af1f27c22313594d",
+        "stdout_bytes": 131072,
+        "stdout_sha256": "9b7dd6e8634ff02875beb3de30ec510c11f68df054f59b11abfeeb0539fc7460",
+        "vector": 0
+      },
+      {
+        "executable_sha256": "d9230b3ab14404a5f8abc95958e364070747fa610716217a309f2f29bc82854a",
+        "exit": 7,
+        "repetition": 1,
+        "schema": 1,
+        "stderr_bytes": 131072,
+        "stderr_sha256": "35eea2372dc65454799e938448c41b5563c500dbb3827f8b73972fbf74104407",
+        "stdin_bytes": 16384,
+        "stdin_sha256": "15fa5608306d0039aafa6b0e2d83bd170252ae6dd5e0cd7d7bd59a68dc17655a",
+        "stdout_bytes": 131072,
+        "stdout_sha256": "63f835c4de5adaefe849bb3f83c3a605d93c2033e68fe518431eef34cb30d401",
+        "vector": 0
+      },
+      {
+        "executable_sha256": "d9230b3ab14404a5f8abc95958e364070747fa610716217a309f2f29bc82854a",
+        "exit": 7,
+        "repetition": 2,
+        "schema": 1,
+        "stderr_bytes": 131072,
+        "stderr_sha256": "0b08fd069de4f4fbcadc81a4ece8a90115f1faa14348a20de22377e414190c90",
+        "stdin_bytes": 16384,
+        "stdin_sha256": "4a636560172b1ecaa8aa4202b084db31b551139124489f33840432b7f82c375d",
+        "stdout_bytes": 131072,
+        "stdout_sha256": "5fd08b0c859f6f0efae455c11d3629b2ce3a8dd517148620af1aa6befb5db745",
+        "vector": 0
+      },
+      {
+        "executable_sha256": "d9230b3ab14404a5f8abc95958e364070747fa610716217a309f2f29bc82854a",
+        "exit": 7,
+        "repetition": 3,
+        "schema": 1,
+        "stderr_bytes": 131072,
+        "stderr_sha256": "a6d32971daa816caca3b8784f98099133615074a9f2ed8947a39560f51ca8310",
+        "stdin_bytes": 16384,
+        "stdin_sha256": "5d06009ac941539a0d804b8bb7bb4fd0172366667cd25a5cebca79c52d81c513",
+        "stdout_bytes": 131072,
+        "stdout_sha256": "1215706c8cf321e132cba9d93265549a88103f77c2b4dc9a5a0a9918265e0637",
+        "vector": 0
+      }
+    ],
+    "schema": 1,
+    "workspace_removed": true
+  },
+  "regressionReplay": {
+    "companionRevision": "f592e813e5d524bdac7b61a05204ff1b8d509aac",
+    "originalPythonCorpusTestsPassed": 4,
+    "rustCorpusTestsPassed": 4,
+    "rustCommandOutputTestsPassed": 3,
+    "historicalReportByteIdentical": true,
+    "historicalReportSha256": "704b175b96d5372f031ed2b8f210d6329a7cc1955c399431180e1e98e7aec2af",
+    "nativeReportSha256": "4ac4ba21ab4ea94a2c4a39ed2460b651d5978ec78fa210be3ed48c1a17292ff8",
+    "casesCompared": 9,
+    "differingFields": "Only executable_sha256 in the five short cases."
+  }
+}

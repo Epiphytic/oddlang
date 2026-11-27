@@ -12,8 +12,8 @@ Configure the PostgreSQL 16.6 test connection described in the
 [repository README](../../../README.md) for the existing ledger suite.
 
 ```bash
-scripts/setup-http-conformance.sh
-scripts/verify-http-conformance.sh
+cargo +1.96.1 run --locked --manifest-path verification/http-conformance/Cargo.toml -- setup
+cargo +1.96.1 run --locked --offline --manifest-path verification/http-conformance/Cargo.toml -- verify
 ```
 
 The pinned runtimes are Rust 1.96.1, Node 22.22.2, npm 10.9.7 and Go 1.26.3.

@@ -1,0 +1,76 @@
+[
+  {
+    "name": "baseline",
+    "edits": [],
+    "expected": [
+      "Capacity",
+      "Capacity",
+      "Capacity",
+      "End",
+      "2b00000009000000000000000851",
+      "End",
+      "Capacity",
+      "2b0000000a00000000000000005151"
+    ]
+  },
+  {
+    "name": "mutated",
+    "edits": [
+      {
+        "before": "                upper(*number, contents.len())?;\n",
+        "after": ""
+      },
+      {
+        "before": "            Self::Chunk { seq: number, contents } => {\n",
+        "after": "            Self::Chunk { seq: number, contents } => {\n                upper(*number, contents.len())?;\n"
+      }
+    ],
+    "expected": [
+      "End",
+      "End",
+      "Capacity",
+      "End",
+      "2b00000009000000000000000851",
+      "End",
+      "End",
+      "2b0000000a00000000000000005151"
+    ]
+  },
+  {
+    "name": "effect",
+    "edits": [
+      {
+        "before": "    sequence.checked_add(count as u64).filter(|end| *end <= WINDOW).ok_or(Fault::End)\n",
+        "after": "    eprintln!(\"effect\"); sequence.checked_add(count as u64).filter(|end| *end <= WINDOW).ok_or(Fault::End)\n"
+      }
+    ],
+    "unresolved": "unproven statements"
+  },
+  {
+    "name": "interleaving",
+    "edits": [
+      {
+        "before": "                payload.extend((*number).to_be_bytes());\n",
+        "after": ""
+      },
+      {
+        "before": "                }\n",
+        "after": "                }\n                payload.extend((*number).to_be_bytes());\n"
+      }
+    ],
+    "unresolved": "interleave"
+  },
+  {
+    "name": "conversion",
+    "edits": [
+      {
+        "append": "\nenum Different { Failure }\nimpl From<Different> for Fault {\n    fn from(_: Different) -> Fault { Fault::Capacity }\n}\n"
+      },
+      {
+        "before": "fn upper(sequence: u64, count: usize) -> Result<u64, Fault> {\n    sequence.checked_add(count as u64).filter(|end| *end <= WINDOW).ok_or(Fault::End)\n",
+        "after": "fn upper(sequence: u64, count: usize) -> Result<u64, Different> {\n    sequence.checked_add(count as u64).filter(|end| *end <= WINDOW).ok_or(Different::Failure)\n"
+      }
+    ],
+    "unresolved": "error conversion"
+  }
+]

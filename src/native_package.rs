@@ -1,4 +1,5 @@
 //! Assemble a native library from pinned semantic components and Rust overlays.
+mod provider;
 mod recovered;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -166,11 +167,11 @@ impl GitSource {
 #[serde(deny_unknown_fields)]
 pub(super) struct Pin {
     pub(super) path: String,
-    sha256: String,
+    pub(super) sha256: String,
 }
 
 impl Pin {
-    pub(super) fn read(&self, base: &Path) -> Result<Vec<u8>> {
+    pub(super) fn resolve(&self, base: &Path) -> Result<std::path::PathBuf> {
         let path = Path::new(&self.path);
         if path.as_os_str().is_empty()
             || path
@@ -186,7 +187,18 @@ impl Pin {
                 self.path
             ));
         }
-        let bytes = io(fs::read(full))?;
+        Ok(full)
+    }
+
+    pub(super) fn read(&self, base: &Path) -> Result<Vec<u8>> {
+        self.verify(io(fs::read(self.resolve(base)?))?)
+    }
+
+    fn read_document(&self, base: &Path) -> Result<Vec<u8>> {
+        self.verify(crate::providers::read_input(&self.resolve(base)?)?)
+    }
+
+    fn verify(&self, bytes: Vec<u8>) -> Result<Vec<u8>> {
         if digest(&bytes) != self.sha256 {
             return Err(format!("input digest mismatch: {}", self.path));
         }
@@ -197,6 +209,7 @@ impl Pin {
 #[derive(Deserialize, Serialize, Copy, Clone)]
 #[serde(rename_all = "kebab-case")]
 enum Kind {
+    Provider,
     BufferedInput,
     BoundedJsonInput,
     ReadOnlyFile,
@@ -232,6 +245,7 @@ enum Kind {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct Component {
     kind: Kind,
+    provider: Option<provider::Selection>,
     module: String,
     graph: Pin,
     overlay: Pin,
@@ -280,17 +294,41 @@ fn project(
     base: &Path,
     stage: &Path,
     dependencies: &BTreeMap<String, Dependency>,
-) -> Result<(Vec<u8>, serde_json::Value)> {
+    registry: Option<&crate::providers::Registry>,
+) -> Result<(Vec<u8>, serde_json::Value, Option<serde_json::Value>)> {
     if component.wire_shape.is_some() && !matches!(component.kind, Kind::WireProtocol) {
         return Err("wireShape is only valid for wire-protocol components".into());
     }
-    let graph = component.graph.read(base)?;
+    if component.provider.is_some() != matches!(component.kind, Kind::Provider) {
+        return Err("kind provider requires a provider selection, exclusive to that kind".into());
+    }
+    let read_pin = |pin: &Pin| match component.kind {
+        Kind::Provider | Kind::PublicRecords => pin.read_document(base),
+        _ => pin.read(base),
+    };
+    let graph = read_pin(&component.graph)?;
     let overlay = stage.join("rust.json");
-    io(fs::write(&overlay, component.overlay.read(base)?))?;
+    io(fs::write(&overlay, read_pin(&component.overlay)?))?;
     let input = stage.join("graph");
     io(fs::create_dir(&input))?;
     let output = stage.join("projection");
+    let mut provider_receipt = None;
     let source = match component.kind {
+        Kind::Provider => {
+            let selection = component
+                .provider
+                .as_ref()
+                .ok_or("missing provider selection")?;
+            provider_receipt = Some(selection.generate(
+                registry,
+                component,
+                &graph,
+                &io(fs::read(&overlay))?,
+                dependencies,
+                &output,
+            )?);
+            "module.rs"
+        }
         Kind::BufferedInput => {
             crate::buffered_input::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
             "buffer.rs"
@@ -332,15 +370,22 @@ fn project(
                 .recovery
                 .as_ref()
                 .and_then(|recovery| recovery.source_api.as_ref())
-                .map(|pin| pin.read(base))
+                .map(|pin| pin.read_document(base))
                 .transpose()?;
-            crate::public_records::build_bytes(
+            let (projected, receipt) = crate::public_records::generate(
                 &graph,
                 &io(fs::read(&overlay))?,
                 assertion.as_deref(),
-                &output,
                 serde_available,
+                registry,
             )?;
+            io(fs::create_dir(&output))?;
+            for (name, bytes) in projected.artifacts {
+                io(fs::write(output.join(name), bytes))?;
+            }
+            if registry.is_some() {
+                provider_receipt = Some(receipt);
+            }
             "records.rs"
         }
         Kind::ProcessLimit => {
@@ -474,7 +519,9 @@ fn project(
         }
         Kind::LocalRequestQueue => {
             if !(dependencies.contains_key("rusqlite") && dependencies.contains_key("sha2")) {
-                return Err("local-request-queue requires pinned rusqlite and sha2 dependencies".into());
+                return Err(
+                    "local-request-queue requires pinned rusqlite and sha2 dependencies".into(),
+                );
             }
             crate::local_request_queue::build_bytes(&graph, &io(fs::read(&overlay))?, &output)?;
             "queue.rs"
@@ -536,7 +583,7 @@ fn project(
             return Err(format!("unknown {scope} projected type or item: {missing}"));
         }
     }
-    Ok((bytes, lock))
+    Ok((bytes, lock, provider_receipt))
 }
 
 fn export_paths(component: &Component, entry: &str) -> Vec<Vec<String>> {
@@ -692,8 +739,8 @@ fn validate_public_record_links(components: &[Component], base: &Path) -> Result
         .filter(|part| matches!(part.kind, Kind::PublicRecords))
     {
         let links = crate::public_records::external_choice_links(
-            &record.graph.read(base)?,
-            &record.overlay.read(base)?,
+            &record.graph.read_document(base)?,
+            &record.overlay.read_document(base)?,
         )?;
         if links.is_empty() {
             continue;
@@ -1018,7 +1065,9 @@ fn validate_command_callbacks(components: &[Component], base: &Path) -> Result<(
             Kind::FileProfile => {
                 let graph = component.graph.read(base)?;
                 let overlay = component.overlay.read(base)?;
-                if let Some(callback) = crate::file_profile::provisioning_callback(&graph, &overlay)? {
+                if let Some(callback) =
+                    crate::file_profile::provisioning_callback(&graph, &overlay)?
+                {
                     callbacks.push((component, callback));
                 }
                 crate::file_profile::callback(&graph, &overlay)?
@@ -1156,7 +1205,7 @@ pub fn build(path: &Path, output: &Path) -> Result<()> {
     let path = io(path.canonicalize())?;
     let base = path.parent().ok_or("missing manifest directory")?;
     let raw = io(fs::read(&path))?;
-    build_pinned(&raw, base, output, None, DependencyCache::Offline).map(|_| ())
+    build_pinned(&raw, base, output, None, DependencyCache::Offline, None).map(|_| ())
 }
 #[derive(Clone, Copy)]
 pub(super) enum DependencyCache {
@@ -1188,6 +1237,7 @@ pub(super) fn build_pinned(
     output: &Path,
     siblings: Option<&BTreeSet<String>>,
     cache: DependencyCache,
+    registry: Option<&crate::providers::Registry>,
 ) -> Result<BTreeSet<RegistryProvider>> {
     let input: Manifest<recovered::ComponentInput> =
         serde_json::from_slice(raw).map_err(|e| format!("package manifest: {e}"))?;
@@ -1235,6 +1285,7 @@ pub(super) fn build_pinned(
         io(fs::write(package.join("build.rs"), script))?;
         generated_files.insert("build.rs".into(), digest(script.as_bytes()));
     }
+    let mut provider_receipts = BTreeMap::new();
     let mut records = Vec::new();
     let mut root_exports = String::new();
     for (index, component) in manifest.components.iter().enumerate() {
@@ -1311,7 +1362,11 @@ pub(super) fn build_pinned(
         let leaf = format!("__projection_{index}");
         let stage = work.path().join(&leaf);
         io(fs::create_dir(&stage))?;
-        let (source, projection) = project(component, base, &stage, &manifest.dependencies)?;
+        let (source, projection, provider_receipt) =
+            project(component, base, &stage, &manifest.dependencies, registry)?;
+        if let Some(receipt) = provider_receipt {
+            provider_receipts.insert(index, receipt);
+        }
         let directory = &group.directory;
         let module = src.join(directory);
         io(fs::create_dir_all(&module))?;
@@ -1415,6 +1470,13 @@ pub(super) fn build_pinned(
         package.join("package.lock"),
         serde_json::to_vec_pretty(&receipt).map_err(|e| e.to_string())?,
     ))?;
+    if !provider_receipts.is_empty() {
+        let receipt = serde_json::json!({"format":"oddlang-package-provider-receipts-v1","components":provider_receipts});
+        io(fs::write(
+            package.join("provider-receipt.json"),
+            serde_json::to_vec_pretty(&receipt).map_err(|e| e.to_string())?,
+        ))?;
+    }
     publish(&package, output)?;
     Ok(required)
 }

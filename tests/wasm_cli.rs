@@ -30,9 +30,7 @@ fn pinned_diff_reports_surface_in_both_directions() {
         old.to_str().unwrap(),
     ]);
     success(
-        std::process::Command::new("python3")
-            .arg("scripts/publish-wasm-matrix.py")
-            .arg(env!("CARGO_BIN_EXE_oddlang"))
+        std::process::Command::new(env!("CARGO_BIN_EXE_publish-wasm-matrix"))
             .arg(root)
             .output()
             .unwrap(),

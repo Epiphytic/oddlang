@@ -8,4 +8,4 @@ The portable field type is `pointer-unsigned`. It has the unsigned domain of the
 
 The module selection format `oddlang-rust-public-record-candidate-selection-v1` permits unresolved qualified globs that do not start with crate, self or super and, for relative paths, whose prefix is not locally bound, including by a pinned glob. Its recovery lock records their spellings and requires independent native confirmation of selected types, traits and public paths. The strict format still rejects those globs, and candidates retain pinned validation of recognized local glob sources. Generation consumes the portable graph and overlay.
 
-Run `python3 verification/observational-record-defaults/pointer_width.py target/debug/oddlang`.
+Run `cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin record-pointer-width -- target/debug/oddlang`.

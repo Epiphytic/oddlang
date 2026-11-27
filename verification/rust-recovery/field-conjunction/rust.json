@@ -1,0 +1,28 @@
+{
+  "calls": {},
+  "errorType": null,
+  "errors": {},
+  "fields": {
+    "urn:sample:invoice:flags": "flags",
+    "urn:sample:invoice:serial": "serial",
+    "urn:sample:invoice:stage": "stage",
+    "urn:sample:receipt:backup": "backup",
+    "urn:sample:receipt:flags": "flags",
+    "urn:sample:receipt:serial": "serial",
+    "urn:sample:receipt:stage": "stage"
+  },
+  "format": "oddlang-field-relation-rust-v1",
+  "relations": {
+    "urn:sample:agrees": {
+      "arguments": {
+        "urn:sample:other": "other"
+      },
+      "name": "agrees"
+    }
+  },
+  "types": {
+    "urn:sample:invoice": "crate::Invoice",
+    "urn:sample:receipt": "crate::Receipt",
+    "urn:sample:stage": "crate::types::Stage"
+  }
+}

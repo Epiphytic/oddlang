@@ -4,6 +4,10 @@ Oddlang explores compiling a ledger's domain, behavior and target mappings
 from versioned ontologies. See the [ledger design](docs/superpowers/specs/2026-11-25-ledger.md)
 and [implementation plan](docs/superpowers/plans/2026-11-25-ledger.md).
 
+## Compiler plugins
+
+A workspace can pin a Wasm component to replace public-record generation or source recovery, or register a new capability and use it to build a library. See the [provider contract](docs/language/providers.md) and [runnable examples](examples/providers/README.md). Ontology authors can use the [vendored OntoGPT skills](skills/OntoGPT-README.md).
+
 ## HTTP conformance
 
 Publish a pinned HTTP contract with portable test cases, OpenAPI and JSON
@@ -23,9 +27,11 @@ cargo run --locked --offline -- wasm import-wit target/wasm-ledger/wit ledger ta
 
 Each publication includes WIT, a manifest, a workspace lock and conformance cases. Pin the workspace lock independently when consuming a release. A WIT import recovers the interface. The release ontology carries additional behavior and constraints.
 
-Run `scripts/setup-wasm.sh` once with network access. Then run `scripts/verify-wasm-spike.sh` to compile the pure echo guest, inspect its imports and call it from an empty Wasmtime linker offline.
+From the repository root, run `cargo run --locked --offline --manifest-path verification/wasm-setup/Cargo.toml` once with network access, rustup, an existing Rust 1.89 or later host compiler, curl and npm. Cargo builds the dependency-free bootstrap offline. The bootstrap then downloads and verifies the release inputs, installs both pinned Rust targets, and prepares the locked Cargo, JavaScript and Chromium dependencies. Linux uses sha256sum and macOS uses shasum. [Toolchain pins](examples/wasm/toolchain.toml)
 
-Run `scripts/verify-wasm.sh` for ledger execution. It publishes fresh bundles, builds handwritten and generated Rust components in two directories, and runs portable cases against Wasmtime, Node and headless Chromium. Its output directory holds release pins, Rust source, component binaries, host observations and a build digest comparison. Ledger guests use `wasm32-unknown-unknown` with Component Model bindings. The integer echo uses `wasm32-wasip2`.
+Run `cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin wasm-spike` to compile the pure echo guest, inspect its imports and call it from an empty Wasmtime linker offline.
+
+Run `cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin wasm-verify` for ledger execution. It publishes fresh bundles, builds handwritten and generated Rust components in two directories, and runs portable cases against Wasmtime, Node and headless Chromium. Its output directory holds release pins, Rust source, component binaries, host observations and a build digest comparison. Ledger guests use `wasm32-unknown-unknown` with Component Model bindings. The integer echo uses `wasm32-wasip2`.
 
 ## Recovering Rust structure and portable wire contracts
 

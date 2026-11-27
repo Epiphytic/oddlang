@@ -1,0 +1,48 @@
+
+#[cfg(test)]
+mod tests {
+    use super::Lookahead;
+    use std::io::{self, BufRead, Read};
+
+    #[test]
+    fn observable_transitions() {
+        struct Samples(u8);
+        impl Read for Samples {
+            fn read(&mut self, out: &mut [u8]) -> io::Result<usize> {
+                self.0 += 1;
+                match self.0 {
+                    1 => { out[..3].copy_from_slice(&[17, 41, 83]); Ok(3) }
+                    2 => Err(io::ErrorKind::BrokenPipe.into()),
+                    _ => Ok(0),
+                }
+            }
+        }
+
+        let mut reader = Lookahead {
+            feed: Samples(0), octets: zeroize::Zeroizing::new([0; 7]), used: 0, loaded: 0,
+        };
+        fn needs_erasing_drop<T: zeroize::ZeroizeOnDrop>(_: &T) {}
+        needs_erasing_drop(&reader.octets);
+        assert_eq!(reader.read(&mut []).unwrap(), 0);
+        assert_eq!(reader.feed.0, EMPTY_CALLS);
+        assert_eq!(reader.fill_buf().unwrap(), &[17, 41, 83]);
+        assert_eq!(reader.feed.0, 1);
+        let mut first = [0; 2];
+        assert_eq!(reader.read(&mut first).unwrap(), 2);
+        assert_eq!(first, [17, 41]);
+        assert_eq!(&reader.octets[..3], &[AFTER_TWO, 83]);
+        reader.consume(usize::MAX);
+        assert_eq!(reader.used, 3);
+        assert_eq!(&reader.octets[..3], &[AFTER_ALL]);
+        assert_eq!(reader.fill_buf().unwrap_err().kind(), io::ErrorKind::BrokenPipe);
+        assert_eq!((reader.used, reader.loaded), (0, OLD_END));
+        if OLD_END != 0 {
+            assert_eq!(reader.fill_buf().unwrap(), &[AFTER_ALL]);
+            assert_eq!(reader.feed.0, 2);
+            reader.consume(3);
+        }
+        assert!(reader.fill_buf().unwrap().is_empty());
+        assert_eq!((reader.used, reader.loaded, reader.feed.0), (0, 0, 3));
+        assert_eq!(reader.read(&mut first).unwrap(), 0);
+    }
+}

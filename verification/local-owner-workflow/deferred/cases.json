@@ -1,0 +1,70 @@
+[
+  {
+    "name": "binary-output",
+    "unit": false,
+    "exchanges": [
+      {
+        "request": "{\"action\":\"read\"}",
+        "response": "{\"encoded\":\"eyJ0eXBlIjoibWVhc3VyZW1lbnQiLCJpbmRleGVzIjpbOCw5XSwiYmluZGluZyI6IjRjYTdjZmEyNDUyMGVjYTZmMDI4OGRkMDYzNjZlZWU1OGFmZGY1MDA1YWI1MmRlZTgwYzk3NTFjNzYyZjVhMzEiLCJzdGRvdXQiOiJiV1ZoYzNWeVpXMWxiblFBIiwic3RkZXJyIjoiZDJGeWJtbHVaLzg9Iiwib3V0Q3Vyc29yIjoxNywiZXJyQ3Vyc29yIjo4LCJyZXRhaW5lZCI6MTcsInByb2R1Y2VkIjoxNywiZXhpdCI6N30=\",\"digest\":\"a016fc2fcf8184247f5c8be4178614309580e0ff96fe31c7f82da4f99c877297\",\"state\":\"answer\"}"
+      },
+      {
+        "request": "{\"cursor\":\"lookup\"}",
+        "response": "{\"ready\":true,\"previous\":5}"
+      },
+      {
+        "request": "{\"confirm\":\"measurement\"}",
+        "response": "{\"confirmed\":true}"
+      }
+    ],
+    "status": 7,
+    "stdoutHex": "6d6561737572656d656e7400",
+    "stderrHex": "7761726e696e67ff"
+  },
+  {
+    "name": "captured-hash",
+    "unit": false,
+    "exchanges": [
+      {
+        "request": "{\"action\":\"read\"}",
+        "response": "{\"encoded\":\"eyJ0eXBlIjoibWVhc3VyZW1lbnQiLCJpbmRleGVzIjpbOCw5XSwiYmluZGluZyI6IjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAiLCJzdGRvdXQiOiJiV1ZoYzNWeVpXMWxiblFBIiwic3RkZXJyIjoiZDJGeWJtbHVaLzg9Iiwib3V0Q3Vyc29yIjoxNywiZXJyQ3Vyc29yIjo4LCJyZXRhaW5lZCI6MTcsInByb2R1Y2VkIjoxNywiZXhpdCI6N30=\",\"digest\":\"bec77d7d035b348ed1cecdbfd968beaf617605a02c911685b92d439fe4c36015\",\"state\":\"answer\"}"
+      },
+      {
+        "request": "{\"cursor\":\"lookup\"}",
+        "response": "{\"ready\":true,\"previous\":5}"
+      }
+    ],
+    "status": 12,
+    "stdoutHex": "",
+    "stderrHex": "70726f746f636f6c0a"
+  },
+  {
+    "name": "inconsistent-cursor",
+    "unit": false,
+    "exchanges": [
+      {
+        "request": "{\"action\":\"read\"}",
+        "response": "{\"encoded\":\"eyJ0eXBlIjoibWVhc3VyZW1lbnQiLCJpbmRleGVzIjpbOCw5XSwiYmluZGluZyI6ImI5NDJhMmE2NDVkYzU4NjRhM2Q4ODQ3ZGMzMzNhOGQ2NzgyZDM0M2I5ZDE5Nzc2ZGE0OTVmMjhjYjhkMzgxZjciLCJzdGRvdXQiOiJiV1ZoYzNWeVpXMWxiblFBIiwic3RkZXJyIjoiZDJGeWJtbHVaLzg9Iiwib3V0Q3Vyc29yIjoxNywiZXJyQ3Vyc29yIjo4LCJyZXRhaW5lZCI6MTcsInByb2R1Y2VkIjoxNywiZXhpdCI6N30=\",\"digest\":\"e8f7a8de583ae70693fa0acd6478d90ea85356b1e8c9fd2fd5ae7b3b48933ffb\",\"state\":\"answer\"}"
+      },
+      {
+        "request": "{\"cursor\":\"lookup\"}",
+        "response": "{\"ready\":true,\"previous\":6}"
+      }
+    ],
+    "status": 12,
+    "stdoutHex": "",
+    "stderrHex": "70726f746f636f6c0a"
+  },
+  {
+    "name": "retained-object-bound",
+    "unit": false,
+    "exchanges": [
+      {
+        "request": "{\"action\":\"read\"}",
+        "response": "{\"encoded\":\"eyJ0eXBlIjoibWVhc3VyZW1lbnQiLCJpbmRleGVzIjpbOCw5XSwiYmluZGluZyI6IjRjYTdjZmEyNDUyMGVjYTZmMDI4OGRkMDYzNjZlZWU1OGFmZGY1MDA1YWI1MmRlZTgwYzk3NTFjNzYyZjVhMzEiLCJzdGRvdXQiOiJiV1ZoYzNWeVpXMWxiblFBIiwic3RkZXJyIjoiZDJGeWJtbHVaLzg9Iiwib3V0Q3Vyc29yIjoxNywiZXJyQ3Vyc29yIjo4LCJyZXRhaW5lZCI6MTcsInByb2R1Y2VkIjoxNywiZXhpdCI6NywicGFkZGluZyI6Inh4eHh4eHh4eHh4eHh4eHgifQ==\",\"digest\":\"41cca4c8c071ba5d6da377761b2a99899ac72dcf3ebdd84d1afaa91730ef628b\",\"state\":\"answer\"}"
+      }
+    ],
+    "status": 12,
+    "stdoutHex": "",
+    "stderrHex": "70726f746f636f6c0a"
+  }
+]

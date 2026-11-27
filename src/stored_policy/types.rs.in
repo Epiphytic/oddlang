@@ -1,0 +1,64 @@
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CommandRestrictions {
+    #[serde(rename = __version__)]
+    version: u32,
+    #[serde(default, rename = __defaults__)]
+    defaults: RestrictionLayer,
+    #[serde(default, rename = __entries__)]
+    entries: Vec<PrincipalRestriction>,
+}
+
+#[derive(Default, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct RestrictionLayer {
+    #[serde(default, rename = __allow__, deserialize_with = "explicit_allow_list")]
+    allow: Option<Vec<String>>,
+    #[serde(default, rename = __deny__)]
+    deny: Vec<String>,
+}
+
+fn explicit_allow_list<'de, D: serde::Deserializer<'de>>(
+    d: D,
+) -> Result<Option<Vec<String>>, D::Error> {
+    <Vec<String> as serde::Deserialize>::deserialize(d).map(Some)
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct PrincipalRestriction {
+    #[serde(rename = __principal__)]
+    principal: String,
+    #[serde(rename = __restrictions__)]
+    restrictions: RestrictionLayer,
+}
+
+fn restriction_principal(value: &str) -> Result<[u8; 32], &'static str> {
+    use nostr::nips::nip19::FromBech32;
+    if value.starts_with("npub1") {
+        return PublicKey::from_bech32(value)
+            .map(|key| key.to_bytes())
+            .map_err(|_| "config_account");
+    }
+    if value.len() != 64
+        || !value
+            .bytes()
+            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+    {
+        return Err("config_account");
+    }
+    PublicKey::from_hex(value)
+        .map(|key| key.to_bytes())
+        .map_err(|_| "config_account")
+}
+
+impl RestrictionLayer {
+    fn patterns(&self, is_default: bool) -> impl Iterator<Item = (&str, bool)> {
+        let fallback = (is_default && self.allow.is_none()).then_some(POLICY_DEFAULT);
+        fallback
+            .into_iter()
+            .chain(self.allow.iter().flatten().map(String::as_str))
+            .map(|p| (p, false))
+            .chain(self.deny.iter().map(|p| (p.as_str(), true)))
+    }
+}

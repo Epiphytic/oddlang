@@ -3,8 +3,8 @@
 The production build uses the independently pinned source fixture and the graph emitted by the public Rust importer. The translation gate recompiles the generated code, compares its outputs and full state with the original implementation and the independent oracle, and runs a bounded verification experiment on both production function bodies. Each proof result identifies its input domain and assumptions.
 
 ```sh
-verification/rust-translation/scripts/setup.sh
-scripts/verify-rust-translation.sh
+cargo run --locked --manifest-path verification/provider-validation/Cargo.toml --bin translation-setup
+cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin translation-verify
 ```
 
 The verification directory contains the original pin, import lock, generated native code, differential results, verifier output and a reproducible summary. Evidence from the Wasm guests applies to the specific component releases in the [component execution record](component-execution-evidence.md).
@@ -22,4 +22,4 @@ The separate populated harness used three fixed keys, an unrelated bystander, sy
 
 Claude CLI in auto mode approved the scoped claims at `0f56c51` after independently rerunning the gate. Claude rejected a fabricated populated proof and detected changes to the native build and playback transcript. Four further mutations changed observed behavior. A fifth, special-casing the literal key “x”, survived the corpus. The empty-map proof exercises only SourceMissing. The early-debit witness exercises the overflow return. Downstream work should cite individual classifications in the archived summary.
 
-[Download the complete replay archive](../../examples/rust-import/evidence/translation.tar.gz). Extract it to an empty directory, then run `python3 verification/translation-evidence/verify.py "$PWD" EXTRACTED_DIRECTORY` in the reviewed checkout.
+[Download the complete replay archive](../../examples/rust-import/evidence/translation.tar.gz). Extract it to an empty directory. From the current checkout, run `cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin translation-evidence -- REVIEWED_SOURCE_ROOT EXTRACTED_DIRECTORY`. Use the matching historical checkout as the source root to verify the recorded source inventory.

@@ -1,0 +1,14 @@
+{
+  "host": "aarch64-apple-darwin",
+  "rust": "1.97.1",
+  "corpusRevision": "89a6f9a648c119d8d304bb29a82ca175a07786af",
+  "sevenMemberWorkspaceLockSha256": "a09599c28e2f7349cd83aa5a61cd26d49568c89940373fbc9ed19d047fa5a57a",
+  "blindInputsSha256": "8ee7f76d039723f9b481cbdaadabf8feed0156c215a7f6a4e45b65ae132c40bd",
+  "caller": "verification/whole/release-manifest/probe.rs",
+  "test": "manifest_oracle::manifest_contract_probe",
+  "resultRows": 224,
+  "accepted": 34,
+  "nativeResultsSha256": "602e037a6b3a5c02726fd90d1e3205a4c3b4af2d832ddb6459cf97aa4cfd333f",
+  "comparedWith": "verification/whole/release-manifest-projection/aarch64-apple-darwin.json#/lanes/baseline/resultsSha256",
+  "scope": "Fresh native parser probe compiled against a disposable copy of the previously generated seven-member product."
+}

@@ -1,0 +1,85 @@
+{
+  "format": "oddlang-native-package-v1",
+  "name": "telemetry-fixture",
+  "version": "0.0.0",
+  "edition": "2024",
+  "dependencies": {
+    "serde": {
+      "version": "1.0.229",
+      "features": [
+        "derive"
+      ]
+    }
+  },
+  "components": [
+    {
+      "kind": "shared-declarations",
+      "module": "shared",
+      "reexports": [
+        "Error",
+        "Mode"
+      ],
+      "graph": {
+        "format": "oddlang-shared-declarations-v1",
+        "id": "urn:telemetry:native-shared",
+        "errors": [
+          {
+            "id": "urn:telemetry:Error",
+            "variants": [
+              {
+                "id": "urn:telemetry:Bad",
+                "payload": "text",
+                "message": [
+                  {
+                    "payload": true
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "stringEnums": [
+          {
+            "id": "urn:telemetry:Mode",
+            "variants": [
+              {
+                "id": "urn:telemetry:New",
+                "wire": "new"
+              },
+              {
+                "id": "urn:telemetry:Closed",
+                "wire": "closed"
+              }
+            ]
+          }
+        ]
+      },
+      "overlay": {
+        "format": "oddlang-shared-rust-v1",
+        "names": {
+          "urn:telemetry:Error": "Error",
+          "urn:telemetry:Bad": "Bad",
+          "urn:telemetry:Mode": "Mode",
+          "urn:telemetry:New": "New",
+          "urn:telemetry:Closed": "Closed"
+        },
+        "variantOrder": {
+          "urn:telemetry:Error": [
+            "urn:telemetry:Bad"
+          ],
+          "urn:telemetry:Mode": [
+            "urn:telemetry:New",
+            "urn:telemetry:Closed"
+          ]
+        }
+      }
+    },
+    {
+      "kind": "binary-record",
+      "module": "frame",
+      "reexports": [
+        "Sample"
+      ]
+    }
+  ]
+}

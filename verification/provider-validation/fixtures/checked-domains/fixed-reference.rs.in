@@ -1,0 +1,13 @@
+
+pub enum Fault { Width }
+pub struct Calibration(zeroize::Zeroizing<[u8; WIDTH]>);
+impl Calibration {
+    pub fn take(value: [u8; WIDTH]) -> Self { Self(zeroize::Zeroizing::new(value)) }
+    pub fn read(bytes: &[u8]) -> Result<Self, Fault> {
+        let mut fixed = [0; WIDTH];
+        if fixed.len() != bytes.len() { return Err(Fault::Width); }
+        fixed.copy_from_slice(bytes);
+        Ok(Self::take(fixed))
+    }
+    pub fn sample(&self) -> &[u8; WIDTH] { &self.0 }
+}

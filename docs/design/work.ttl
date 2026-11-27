@@ -703,13 +703,13 @@ w:wholeMarmishProtocols p:dependsOn w:endpointSetNormalization .
 w:orderedEndpointPolicyReview a p:Finding ;
     rdfs:label "Require typed address classification and explicit loopback opt-in before projection" ;
     p:source w:orderedEndpointPolicyGuardFixture .
-w:orderedEndpointPolicyGuardFixture a p:Artifact ; p:location "verification/endpoint-set/verify.py" .
+w:orderedEndpointPolicyGuardFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/endpoint-set.rs" .
 w:endpointSetNormalization p:addresses w:orderedEndpointPolicyReview ; p:evidence w:orderedEndpointPolicyGuardFixture .
 w:nativePackageAssembly a p:Task ; rdfs:label "Assemble pinned semantic projections into a native Rust library" ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
     p:acceptance "Independently project two unrelated codecs into one private module, expose their selected public types, compile the consumer offline with its pinned dependency closure, and reject stale pins, inconsistent bindings and competing publication on the qualified hosts." ;
     p:evidence w:nativePackageFixture .
-w:nativePackageFixture a p:Artifact ; p:location "verification/native-package/verify.py" .
+w:nativePackageFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/native-package.rs" .
 
 w:boundedIntegrityBlocks a p:Task ;
     rdfs:label "Project positioned integrity blocks from portable semantics" ;
@@ -727,7 +727,7 @@ w:sharedTypedDeclarations a p:Task ; rdfs:label "Project typed constants, named 
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:dependsOn w:nativePackageAssembly ; p:status p:done ;
     p:acceptance "Qualify an unrelated native consumer against constant references and bounds, interpolated errors, native ordering, Serde wire values, and public and crate-private paths. Bind every declaration to a portable obligation." ;
     p:evidence w:sharedTypedFixture .
-w:sharedTypedFixture a p:Artifact ; p:location "verification/shared-declarations/verify.py" .
+w:sharedTypedFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/shared-declarations.rs" .
 
 w:sharedFormatterReview a p:Finding ; rdfs:label "Forwarding outer formatter options into an embedded payload changes its observable text" ; p:source w:sharedTypedFixture .
 w:sharedTypedDeclarations p:addresses w:sharedFormatterReview .
@@ -763,20 +763,20 @@ w:commandSurface a p:Task ;
     p:status p:done ; p:dependsOn w:nativePackageAssembly ; p:evidence w:commandSurfaceFixture ;
     p:acceptance "Compare independent derived and generated Rust executables on exact help, version, error, alias, requirement, default and parsed dispatch observations. Detect unsupported syntax and graph changes." .
 w:commandSurfaceFixture a p:Artifact ;
-    p:location "verification/command-surface/check.py" .
+    p:location "verification/provider-validation/src/bin/command-surface/check.rs" .
 
 w:wholeWorkspaceAssembly a p:Task ; rdfs:label "Compose native packages and link declared binary targets" ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
     p:acceptance "Generate two pinned packages into one locked Cargo workspace, compile a consumer across a declared local dependency, reject invalid members and run a native binary entry with its expected exit status." ;
     p:evidence w:wholeWorkspaceIntegration .
-w:wholeWorkspaceIntegration a p:Artifact ; p:location "verification/native-workspace/verify.py" .
+w:wholeWorkspaceIntegration a p:Artifact ; p:location "verification/provider-validation/src/bin/native-workspace.rs" .
 w:wholeWindowQualification a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/commit/525301c5718b9d8831392a08c76cafeb781ded0f" .
 w:wholeErrorFormatting a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/commit/d34ce43674bbcd27232a36c62d8bffb1ddc51fbc" .
 w:wholeWireCandidates a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/commit/ddd27f3487759cd5c5939426be797608e7278697" .
 w:wholeMarmishStructure p:evidence w:wholeWindowQualification,w:wholeErrorFormatting,w:wholeWireCandidates .
 
 w:wholeWorkspaceAssembly p:evidence w:wholeProcessFixture, w:wholeCombinedWorkspace .
-w:wholeProcessFixture a p:Artifact ; p:location "verification/native-workspace/cli.py" .
+w:wholeProcessFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/native-workspace-cli.rs" .
 w:wholeCombinedWorkspace a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/commit/6a8becd1a4f712f5464604d640775a85c2d08b6c" .
 
 w:commandSurfaceValidationReview a p:Finding ;
@@ -799,7 +799,7 @@ w:localCommandClient a p:Task ;
     p:acceptance "Generate a Rust operation with a bounded framed request, ordered preconditions, structured response, and finite diagnostics. Compare a generated command against an unrelated real Unix peer." .
 
 w:localCommandClientFixture a p:Artifact ;
-    p:location "verification/local-command-client/check.py" .
+    p:location "verification/provider-validation/src/bin/field-meter-projection/main.rs" .
 
 w:localClientReleaseGuardFinding a p:Finding ;
     rdfs:label "Reject release CLI bindings that would silently omit local client arguments" ;
@@ -840,7 +840,7 @@ w:canonicalWireNativePackage a p:Task ;
     p:dependsOn w:jsonWireCanonicalOperations ;
     p:acceptance "Pin the structural shape and overlay separately from the operation inputs, project a package module, preserve the pins in its lock, and verify exact width and writer limits with an external native caller." ;
     p:evidence w:canonicalWirePackageFixture .
-w:canonicalWirePackageFixture a p:Artifact ; p:location "verification/canonical-wire/package.py" .
+w:canonicalWirePackageFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/canonical-wire-package.rs" .
 w:wholeMarmishProtocols p:dependsOn w:canonicalWireNativePackage .
 
 w:jsonWireSchemaReview a p:Finding ;
@@ -851,13 +851,13 @@ w:jsonWireStructuralSchema p:addresses w:jsonWireSchemaReview .
 w:jsonWireMacroScopeReview a p:Finding ;
     rdfs:label "Preserve a structural gap for unexpanded macros and parser-verbatim module items" ;
     p:source w:jsonWireMacroScopeEvidence .
-w:jsonWireMacroScopeEvidence a p:Artifact ; p:location "verification/wire-schema/verify.py" .
+w:jsonWireMacroScopeEvidence a p:Artifact ; p:location "verification/provider-validation/src/bin/wire-schema/garden.rs" .
 w:jsonWireStructuralSchema p:addresses w:jsonWireMacroScopeReview ; p:evidence w:jsonWireMacroScopeEvidence .
 
 w:wireByteValues a p:Task ; rdfs:label "Recover bounded scalar byte fields and bind ordered guard failures to native errors" ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
     p:acceptance "Rebuild an unrelated byte field from a source-pinned selector, verify encoded and decoded bounds independently, and compile validation into a native result." ; p:evidence w:wireByteFixture .
-w:wireByteFixture a p:Artifact ; p:location "verification/wire-schema/byte_value.py" .
+w:wireByteFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/wire-schema/scalar.rs" .
 w:numberedErrorResolution a p:Finding ; rdfs:label "A byte rejection must resolve to a typed variant and a portable display expectation" ; p:source w:sharedTypedFixture .
 w:sharedNumberedEnum p:addresses w:numberedErrorResolution .
 
@@ -916,7 +916,7 @@ w:typedHashViews a p:Task ; rdfs:label "Project ordered typed hashing and hexade
     p:dependsOn w:wireByteValues, w:nativePackageAssembly ;
     p:acceptance "Project independent SHA-256 views with portable field order, binary encodings, stable enum tag identities and named validation. Qualify an unrelated native consumer with independent expected bytes and negative controls." ;
     p:evidence w:typedHashViewsFixture .
-w:typedHashViewsFixture a p:Artifact ; p:location "verification/wire-schema/hash_views.py" .
+w:typedHashViewsFixture a p:Artifact ; p:location "verification/wire-schema/cases/hash-views-oracle.rs" .
 w:wholeMarmishProtocols p:dependsOn w:typedHashViews .
 w:typedHashIdentityReview a p:Finding ;
     rdfs:label "Reject hash tag case IRIs that alias a view, parameter or existing declaration" ;
@@ -928,7 +928,7 @@ w:boundedBinaryRecords a p:Task ; rdfs:label "Project ordered bounded tagged bin
     p:dependsOn w:nativePackageAssembly, w:sharedNumberedEnum ;
     p:acceptance "Generate checked encoding and decoding for an ordered tagged record with declared lengths, validation, and typed errors. Verify bytes, limits and parse precedence against an independent native fixture." ;
     p:evidence w:binaryRecordFixture .
-w:binaryRecordFixture a p:Artifact ; p:location "verification/binary-record/verify.py" .
+w:binaryRecordFixture a p:Artifact ; p:location "verification/binary-record/cases/telemetry-oracle.rs" .
 w:wholeMarmishProtocols p:dependsOn w:boundedBinaryRecords .
 w:binaryRecordReview a p:Finding ;
     rdfs:label "Disambiguate binary record errors and compile the native package composition" ;
@@ -940,7 +940,7 @@ w:typedFieldRelations a p:Task ; rdfs:label "Project typed ordered cross-record 
     p:dependsOn w:boundedBinaryRecords, w:typedHashViews ;
     p:acceptance "Compare typed fields and arguments with explicit short-circuit order and propagate a checked operation error only when reached. Verify each outcome and reject invalid operands." ;
     p:evidence w:typedFieldRelationFixture .
-w:typedFieldRelationFixture a p:Artifact ; p:location "verification/field-relation/verify.py" .
+w:typedFieldRelationFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/qualify-domains/relation.rs" .
 w:wholeMarmishProtocols p:dependsOn w:typedFieldRelations .
 
 w:binaryMetadataRecords a p:Task ; rdfs:label "Project optional binary metadata and ordered constraints" ;
@@ -948,7 +948,7 @@ w:binaryMetadataRecords a p:Task ; rdfs:label "Project optional binary metadata 
     p:dependsOn w:boundedBinaryRecords, w:typedHashViews ;
     p:acceptance "Check exact boolean and optional tags, signed inline records, typed metadata guards, early and deferred errors, and pure namespace views with an unrelated native fixture." ;
     p:evidence w:binaryMetadataFixture .
-w:binaryMetadataFixture a p:Artifact ; p:location "verification/binary-record/metadata.py" .
+w:binaryMetadataFixture a p:Artifact ; p:location "verification/binary-record/cases/metadata-oracle.rs" .
 w:wholeMarmishProtocols p:dependsOn w:binaryMetadataRecords .
 
 w:typedFieldRelationReview a p:Finding ;
@@ -970,7 +970,7 @@ w:orderedRecordWrites a p:Task ; rdfs:label "Recover ordered binary field writes
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
     p:acceptance "Observe native field order, encoding and width without storing source and compare an independent graph consumer with original and reordered native outputs." ;
     p:evidence w:orderedWriterFixture .
-w:orderedWriterFixture a p:Artifact ; p:location "verification/record-writer/verify.py" .
+w:orderedWriterFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/record-writer.rs" .
 w:localStatusOwnerPlan a p:Artifact ;
     p:location "docs/superpowers/plans/2026-11-26-local-status-owner.md" .
 w:localStatusOwner a p:Task ;
@@ -981,7 +981,12 @@ w:localStatusOwner a p:Task ;
     p:acceptance "Exercise private socket ownership, guarded state publication, bounded status requests, and process signal cleanup on an unrelated fixture." .
 
 w:localStatusOwnerFixture a p:Artifact ;
-    p:location "verification/local-status-owner/check.py" .
+    p:location "verification/provider-validation/src/bin/local-status-owner.rs" .
+w:portHistoricTooling p:evidence w:gaugeOwnerRustReplay .
+w:localStatusOwner p:evidence w:gaugeOwnerRustReplay .
+w:gaugeOwnerRustReplay a p:Artifact ;
+    rdfs:label "Native Unix-domain gauge verifier checked response bytes, admission limits, routing, shutdown signals, and replacement pathname ownership" ;
+    p:location "verification/provider-tooling/local-status-owner-rust-replay.json" .
 
 w:localStatusOwnerShutdownReview a p:Finding ;
     rdfs:label "Keep every lifecycle frame bounded and unlink the owned socket before releasing its descriptor" ;
@@ -1036,7 +1041,7 @@ w:foregroundProfileOwner a p:Task ;
     p:acceptance "Acquire and validate a native file-backed profile, bind a private discoverable runtime, and preserve source-free operation and explicit provider readiness scope." .
 
 w:foregroundProfileOwnerFixture a p:Artifact ;
-    p:location "verification/foreground-profile-owner/check.py" .
+    p:location "verification/provider-validation/src/bin/foreground-profile-owner/main.rs" .
 
 w:foregroundProfileReview a p:Finding ;
     rdfs:label "Recover a matching dead runtime under the lease and bind explicit backend choices" ;
@@ -1066,7 +1071,7 @@ w:nativeFileProfilePreparation p:addresses w:nativeFileProfileWitnessReview .
 w:nativeFileProfilePlan a p:Artifact ;
     p:location "docs/superpowers/plans/2026-11-26-native-file-profile.md" .
 w:nativeFileProfileFixture a p:Artifact ;
-    p:location "verification/file-profile/check.py" .
+    p:location "verification/provider-validation/src/bin/file-profile/unix.rs" .
 w:nativeFileProfileStores a p:Task ;
     rdfs:label "Complete native initialization after encrypted storage opens and verified counts" ;
     p:milestone w:marmishMilestone ; p:source w:nativeFileProfilePlan ; p:status p:done ;
@@ -1087,7 +1092,7 @@ w:compositeBinaryRecords a p:Task ; rdfs:label "Project checked nested and check
     p:dependsOn w:binaryMetadataRecords ;
     p:acceptance "Verify exact nested binary codecs, fixed records, typed checked timing and optional member checks, and integrity-domain ordering." ;
     p:evidence w:binaryCompositeFixture .
-w:binaryCompositeFixture a p:Artifact ; p:location "verification/binary-record/composite.py" .
+w:binaryCompositeFixture a p:Artifact ; p:location "verification/binary-record/cases/composite-oracle.rs" .
 w:copyCheckpointQualification p:dependsOn w:compositeBinaryRecords .
 
 w:boundedTaggedBinaryFrames a p:Task ; rdfs:label "Project bounded tagged binary frames and incremental parsers" ;
@@ -1095,7 +1100,7 @@ w:boundedTaggedBinaryFrames a p:Task ; rdfs:label "Project bounded tagged binary
     p:dependsOn w:compositeBinaryRecords, w:copyFieldRelationQualification ;
     p:acceptance "Verify exact envelope tags, header limits, ordered case checks, terminal bytes, nested fragments and incremental poisoned-input behavior against an independent native fixture." ;
     p:evidence w:binaryFrameFixture .
-w:binaryFrameFixture a p:Artifact ; p:location "verification/binary-frame/verify.py" .
+w:binaryFrameFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/binary-frame.rs" .
 w:copyProtocolQualification a p:Task ; rdfs:label "Qualify the complete native copy protocol library surface on macOS ARM64" ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
     p:evidence w:copyProtocolNativeReceipt, w:copyProtocolStructuralInventory ;
@@ -1123,7 +1128,7 @@ w:compositeExternalContractLinkage a p:Task ;
     p:dependsOn w:compositeBinaryRecords ;
     p:acceptance "Verify external codec identities, independently declared inner limits and exact native types before emitting a composed package." .
 w:compositePackageFixture a p:Artifact ;
-    p:location "verification/binary-record/package.py" .
+    p:location "verification/binary-record/cases/geology-linkage.json" .
 
 w:provisionedNativeWorkspacePlan a p:Artifact ;
     p:location "docs/superpowers/plans/2026-11-26-native-provisioned-workspace.md" .
@@ -1161,7 +1166,7 @@ w:localProviderReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/53> .
 
 w:localProviderBarrierFixture a p:Artifact ;
-    p:location "verification/foreground-profile-owner/stages.py" .
+    p:location "verification/foreground-profile-owner/shutdown/src/lib.rs" .
 
 w:localProviderBarrierReview a p:Finding ;
     rdfs:label "Prove terminal account database release and join the native forwarder's delivery worker" ;
@@ -1226,7 +1231,7 @@ w:finiteErrorDomains a p:Task ;
     p:status p:done ; p:dependsOn w:unifiedProfileWorkspace ;
     p:acceptance "Recover pinned named diagnostics, exhaustive category tables, and explicit error-source and conversion rules. Compile an independent caller against original and sealed generated native packages, and observe a source mutation through both." .
 w:finiteErrorDomainFixture a p:Artifact ;
-    p:location "verification/finite-error-domains/verify.py" .
+    p:location "verification/provider-validation/src/bin/finite-error-domain.rs" .
 w:nativeErrorDomainReceipt a p:Artifact ;
     p:location "companion:verification/whole/native-error/darwin-arm64/receipt.json" .
 w:finiteErrorDomains p:evidence w:finiteErrorDomainFixture, w:nativeErrorDomainReceipt .
@@ -1255,7 +1260,7 @@ w:checkedValueProductProjection a p:Task ;
     p:acceptance "Compile an unrelated consumer with borrowed inputs and getters and public metadata, reject bypassed constructors, and reproject a detectable byte limit mutation." ;
     p:addresses w:checkedValuesFidelityReview ; p:evidence w:checkedValuesFixture .
 w:checkedValuesFixture a p:Artifact ;
-    p:location "verification/checked-values/verify.py" .
+    p:location "verification/provider-validation/src/bin/qualify-domains/checked.rs" .
 w:checkedValuesFidelityReview a p:Finding ;
     rdfs:label "Retain accessible product construction and getters, protect trait calls, and verify exact Cc and deterministic capabilities" ;
     p:source w:checkedValuesReview .
@@ -1263,7 +1268,7 @@ w:checkedValuesReview a p:Artifact ;
     p:location "docs/design/reviews/checked-value-domains.md" .
 w:wholeMarmishProtocols p:dependsOn w:checkedValueProductProjection .
 w:buildReportFixture a p:Artifact ;
-    p:location "verification/build-report/verify.py" .
+    p:location "verification/provider-validation/src/bin/build-report.rs" .
 w:buildReportPlanReview a p:Finding ;
     rdfs:label "Separate represented revision from compiled artifact provenance and check widths, formats and native guard precedence" ;
     p:source w:buildReportCommandPlan .
@@ -1320,7 +1325,7 @@ w:processLimitCompanionRelease a p:Artifact ;
 w:unifiedVaultEngineReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/blob/aee87208cdfe403a77e652902f65d5b77804f42c/verification/whole/unified-vault/darwin-arm64/receipt.json> .
 
-w:fixedByteFrameworkFixture a p:Artifact ; p:location "verification/checked-values/fixed_bytes.py" .
+w:fixedByteFrameworkFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/qualify-domains/fixed.rs" .
 w:fixedByteDarwin a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/blob/2f5934a6cf01aa0316d76c1725d0ec885ae07cc0/verification/whole/vault-fixed-bytes/aarch64-apple-darwin.json> .
 w:fixedByteLinux a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/blob/2f5934a6cf01aa0316d76c1725d0ec885ae07cc0/verification/whole/vault-fixed-bytes/aarch64-unknown-linux-gnu.json> .
 
@@ -1330,7 +1335,7 @@ w:buildReportBindingReview a p:Finding ;
 w:buildReportSourceRecovery p:addresses w:buildReportBindingReview .
 
 w:buildReportStructuralFixture a p:Artifact ;
-    p:location "verification/build-report-recovery/verify.py" .
+    p:location "verification/provider-validation/src/bin/build-report-recovery.rs" .
 w:buildReportStructuralReceipt a p:Artifact ;
     p:location "companion:verification/whole/release-info-structure/darwin-arm64/receipt.json" .
 w:buildReportRootMacroReview a p:Finding ;
@@ -1374,7 +1379,7 @@ w:publicRecordImportIdentity a p:Finding ;
 w:publicObservationalRecords p:addresses w:publicRecordImportIdentity .
 
 w:publicRecordFixture a p:Artifact ;
-    p:location "verification/public-records/verify.py" .
+    p:location "verification/provider-validation/src/bin/record-verify.rs" .
 w:publicJournalReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/71> .
 
@@ -1399,7 +1404,7 @@ w:rootPublicData a p:Task ;
     p:dependsOn w:finiteErrorDomains, w:publicObservationalRecords ;
     p:acceptance "Compare all seven MDK public error variants and the ordered public version record against original Rust. Change their pinned source and observe the exact Display and Debug changes through a native consumer." .
 w:rootPublicDataFixture a p:Artifact ;
-    p:location "verification/root-public-data/verify.py" .
+    p:location "verification/provider-validation/src/bin/root-public-data.rs" .
 w:mdkPublicDataReceipt a p:Artifact ;
     p:location "companion:verification/whole/mdk-public-data/darwin-arm64/receipt.json" .
 w:rootPublicData p:evidence w:rootPublicDataFixture, w:mdkPublicDataReceipt .
@@ -1440,7 +1445,7 @@ w:recoveredWorkspaceNamedSuiteReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/75> .
 
 w:privateBufferedInputFixture a p:Artifact ;
-    p:location "verification/buffered-input/verify.py" .
+    p:location "verification/provider-validation/src/bin/qualify-buffered-input/policies.rs" .
 
 w:sevenMemberBufferedWorkspacePlan a p:Artifact ;
     p:location "docs/superpowers/plans/2026-11-26-seven-member-buffered-workspace.md" .
@@ -1464,7 +1469,7 @@ w:plainValueChoices a p:Task ;
     p:acceptance "Compare original and generated native exhaustiveness, exact capabilities and declaration-order casts. Reorder a pinned ordinary choice at its Rust source, and verify only the intended ordinal observations change." ;
     p:evidence w:plainChoiceFixture, w:nativeBackendChoiceReceipt .
 w:plainChoiceFixture a p:Artifact ;
-    p:location "verification/plain-value-choices/verify.py" .
+    p:location "verification/provider-validation/src/bin/qualify-choices/native.rs" .
 w:nativeBackendChoiceReceipt a p:Artifact ;
     p:location "companion:verification/whole/backend-choice/darwin-arm64/receipt.json" .
 
@@ -1496,7 +1501,7 @@ w:publicConstantRecovery a p:Task ;
     p:acceptance "Bind the declared public symbol to real Rust compiler evidence and preserve its literal or multiplication expression in the existing portable shared-declarations graph. Replay an unrelated baseline and changed source through downstream native callers." ;
     p:status p:done ; p:evidence w:publicConstantFixture .
 w:publicConstantFixture a p:Artifact ;
-    p:location "verification/public-constant/verify.py" .
+    p:location "verification/provider-validation/src/bin/public-constant.rs" .
 
 w:publicApiConvergencePlan a p:Artifact ;
     p:location "docs/superpowers/plans/2026-11-26-public-api-convergence.md" .
@@ -1525,7 +1530,7 @@ w:terminalCliDispatchReview a p:Finding ;
 w:terminalAuxiliaryCli p:addresses w:terminalCliDispatchReview .
 
 w:terminalCliFixture a p:Artifact ;
-    p:location "verification/command-surface/terminal.py" .
+    p:location "verification/provider-validation/src/bin/command-surface/terminal.rs" .
 w:terminalCliDarwin a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/blob/b11a2040323ec134f51bb6827b64d4429bf79459/verification/whole/offline-cli/aarch64-apple-darwin.json> .
 w:terminalCliPrefixGap a p:Finding ;
@@ -1581,7 +1586,7 @@ w:orderedLineGrammar a p:Task ;
     p:acceptance "Emit native parsers for exact byte framing, rows, tokens and typed captures. Verify unrelated native typed capture and malformed boundary cases." ;
     p:status p:done ; p:evidence w:orderedLineGrammarFixture .
 w:orderedLineGrammarFixture a p:Artifact ;
-    p:location "verification/line-grammar/verify.py" .
+    p:location "verification/provider-validation/src/bin/line-grammar/inventory.rs" .
 w:checkedRecordGrammar a p:Task ;
     rdfs:label "Project finite relations, aggregate limits and typed record results from line grammars" ;
     p:milestone w:marmishMilestone ; p:source w:orderedLineGrammarPlan ;
@@ -1589,7 +1594,7 @@ w:checkedRecordGrammar a p:Task ;
     p:acceptance "Apply checked finite and aggregate constraints and construct native typed records, stable parse errors and controlled name formatters." ;
     p:status p:done ; p:evidence w:checkedRecordGrammarFixture .
 w:checkedRecordGrammarFixture a p:Artifact ;
-    p:location "verification/line-grammar/verify_records.py" .
+    p:location "verification/provider-validation/src/bin/line-grammar/records.rs" .
 w:pureReleaseManifestGrammar a p:Task ;
     rdfs:label "Qualify native release manifest parsing and identifiers" ;
     p:milestone w:marmishMilestone ; p:source w:orderedLineGrammarPlan ;
@@ -1625,7 +1630,7 @@ w:lineGrammarNativeSupport a p:Task ;
     p:acceptance "Compile ordered native text arrays and nested predicates from a selected graph with an unrelated crate-visible fixture. Reject unknown or colliding overlay bindings." ;
     p:status p:done ; p:evidence w:lineGrammarNativeSupportFixture .
 w:lineGrammarNativeSupportFixture a p:Artifact ;
-    p:location "verification/line-grammar/verify_support.py" .
+    p:location "verification/provider-validation/src/bin/line-grammar/support.rs" .
 w:convergedReleaseManifest a p:Task ;
     rdfs:label "Qualify the pure parser inside the converged native package" ;
     p:milestone w:marmishMilestone ; p:source w:convergedReleaseManifestPlan ;
@@ -1639,7 +1644,7 @@ w:choiceEqualityRecovery a p:Task ;
     p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;
     p:dependsOn w:plainValueChoices ; p:status p:done ; p:evidence w:choiceEqualityFixture ;
     p:acceptance "Original and projected Rust types expose equal Copy, Clone, PartialEq and Eq bounds for unrelated choices with no, partial, or total equality, preserving the older graph and consumer behavior." .
-w:choiceEqualityFixture a p:Artifact ; p:location "verification/plain-value-choices/equality.py" .
+w:choiceEqualityFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/qualify-choices/native.rs" .
 w:vaultHelperChoice a p:Task ;
     rdfs:label "Qualify the public copy-only vault helper mode type" ;
     p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;
@@ -1650,7 +1655,7 @@ w:vaultModeDarwinReceipt a p:Artifact ; p:location "https://github.com/Epiphytic
 
 w:vaultModeLinuxReceipt a p:Artifact ; p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b75be7c/verification/whole/vault-mode/aarch64-unknown-linux-gnu.json" .
 w:typedFiniteErrorsFixture a p:Artifact ;
-    p:location "verification/typed-finite-errors/verify.py" .
+    p:location "verification/provider-validation/src/bin/typed-finite-errors.rs" .
 w:typedFiniteErrorsDarwin a p:Artifact ;
     p:location "companion:verification/whole/engine-public-error/aarch64-apple-darwin.json" .
 w:typedFiniteErrorsLinux a p:Artifact ;
@@ -1669,7 +1674,7 @@ w:observationalRecordDefaults a p:Task ;
     p:acceptance "Recover pinned engine and native records within one reusable profile. Compare independent native callers for field widths, exact traits, default values and exported paths. Show a source-only mutation and preserve preceding sealed workspace behavior." .
 
 w:observationalRecordDefaultsFixture a p:Artifact ;
-    p:location "verification/observational-record-defaults/verify.py" .
+    p:location "verification/provider-validation/src/bin/record-defaults.rs" .
 w:observationalRecordDefaults p:evidence w:observationalRecordDefaultsFixture .
 
 w:observationalPathWireScope a p:Finding ;
@@ -1685,7 +1690,7 @@ w:publicApiLinux a p:Artifact ;
 w:publicImportAudit a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4f39fe3da13635d66b5a09fbe55e52fe27d17962/verification/whole/converged-public-api/darwin-imports.json" .
 w:structuredDiagnosticsFixture a p:Artifact ;
-    p:location "verification/structured-diagnostics/check.py" .
+    p:location "verification/provider-validation/src/bin/structured-diagnostics.rs" .
 
 w:publicDiagnosticsCliConvergence a p:Task ;
     rdfs:label "Converge qualified public imports, terminal CLI and structured diagnostics" ;
@@ -1803,7 +1808,7 @@ w:typescriptChoiceHostEquality a p:Finding ;
 w:typescriptPlainChoices p:addresses w:typescriptChoiceHostEquality .
 
 w:typescriptPlainChoiceFixture a p:Artifact ;
-    p:location "verification/plain-value-choices/typescript.py" .
+    p:location "verification/provider-validation/src/bin/qualify-choices/typescript.rs" .
 w:typescriptVaultModeReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/blob/8621f49d40217132c8d3842a54531e066e93dfec/verification/whole/vault-mode-typescript/receipt.json> .
 
@@ -1815,7 +1820,7 @@ w:pointerWidthPublicRecords a p:Task ;
     p:dependsOn w:observationalRecordDefaults ; p:status p:done ; p:evidence w:pointerWidthRecordFixture ;
     p:acceptance "A native fixture observes the pointer-width primitive at zero and maximum and distinguishes a fixed-width source mutation and a shadowed type." .
 w:pointerWidthRecordFixture a p:Artifact ;
-    p:location "verification/observational-record-defaults/pointer_width.py" .
+    p:location "verification/provider-validation/src/bin/record-pointer-width.rs" .
 w:pointerWidthLocalGlobReview a p:Finding ;
     rdfs:label "Keep locally bound glob prefixes out of the unresolved dependency path" ;
     p:source w:pointerWidthRecordFixture .
@@ -1828,7 +1833,7 @@ w:sharedWireChoiceCopy a p:Task ;
     p:evidence w:sharedWireChoiceCopyFixture .
 w:sharedWireChoiceCopyFixture a p:Artifact ;
     rdfs:label "Native string-choice numbering, wire and Copy controls" ;
-    p:location "verification/shared-declarations/verify.py" .
+    p:location "verification/provider-validation/src/bin/shared-declarations.rs" .
 w:wholeMarmishStructure p:dependsOn w:sharedWireChoiceCopy .
 
 w:linuxKnownPublicImports a p:Task ;
@@ -1864,7 +1869,7 @@ w:serdeStringChoiceRecovery a p:Task ;
     p:evidence w:serdeStringChoiceRecoveryFixture ;
     p:acceptance "Recover a checked shared-declarations graph and disjoint Rust bindings from pinned source and qualify target semantics and a true source mutation with native consumers." .
 w:serdeStringChoiceRecoveryFixture a p:Artifact ;
-    p:location "verification/serde-string-choice/verify.py" .
+    p:location "verification/provider-validation/src/bin/qualify-choices/terrain.rs" .
 w:serdeStringChoiceDeriveFixtureReview a p:Finding ;
     rdfs:label "Exercise qualified Serde derives and reject explicit stock-derive or macro-use shadows" ;
     p:source w:serdeStringChoiceRecoveryFixture .
@@ -1880,7 +1885,7 @@ w:publicRecordReadPolicy a p:Task ;
     p:acceptance "Check default closure, an explicit open object policy, optional scalars, positional input and external string choices with unrelated and original native cases, and reproduce a source mutation." .
 
 w:publicRecordReadPolicyFixture a p:Artifact ;
-    p:location "verification/public-records/read_policy.py" .
+    p:location "verification/provider-validation/src/bin/record-read-policy.rs" .
 w:publicRecordReadPolicy p:evidence w:publicRecordReadPolicyFixture, w:publicRecordReadPolicyDarwin, w:publicRecordReadPolicyLinux .
 
 w:publicRecordReadPolicyDarwin a p:Artifact ;
@@ -2107,7 +2112,7 @@ w:wholeValueApiWitness a p:Task ; rdfs:label "Compare native public value APIs a
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
     p:acceptance "Match equivalent concrete value facades after a private rename and distinguish changed argument borrowing, return surface, enum order, constant type and traits." ;
     p:evidence w:wholeApiMutations .
-w:wholeApiMutations a p:Artifact ; p:location "verification/rust-recovery/test_public_api.py" .
+w:wholeApiMutations a p:Artifact ; p:location "verification/provider-validation/src/bin/rust-exports/semantics.rs" .
 w:wholeAmd64Effects a p:Artifact ; p:location "https://github.com/Epiphytic/oddlang/actions/runs/45775359148" .
 w:wholeMarmishFreeze p:evidence w:wholeAmd64Effects .
 
@@ -2115,7 +2120,7 @@ w:wholeRecoverShared a p:Task ; rdfs:label "Recover bounded shared declarations 
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
     p:acceptance "Derive constants, typed error templates, variant order and result aliases as structured facts at a pinned Git blob. Detect changed native declarations and reject unsupported selections." ;
     p:evidence w:wholeSharedRecoveryFixture .
-w:wholeSharedRecoveryFixture a p:Artifact ; p:location "verification/rust-recovery/test_shared_source.py" .
+w:wholeSharedRecoveryFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/rust-exports/semantics.rs" .
 
 w:wholeCoreBuild a p:Task ; rdfs:label "Build the core package without first-party source inputs" ;
     p:source w:wholeMarmishPlan ; p:milestone w:marmishMilestone ; p:status p:done ;
@@ -2132,7 +2137,7 @@ w:structuralArrayExtents a p:Task ; rdfs:label "Retain fixed and parameter-sized
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
     p:acceptance "Preserve element type, zero and nested dimensions and constant parameter identity across a source mutation in an unrelated fixture." ;
     p:evidence w:arrayExtentFixture .
-w:arrayExtentFixture a p:Artifact ; p:location "verification/rust-recovery/test_shapes.py" .
+w:arrayExtentFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/rust-exports/shapes.rs" .
 
 w:structuralArrayExtents p:evidence w:streamArrayExtentEvidence .
 w:streamArrayExtentEvidence a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/45> .
@@ -2157,7 +2162,7 @@ w:recoverFieldConjunctions a p:Task ;
     p:evidence w:fieldConjunctionNativeFixture, w:copySourceConjunctionNativeReceipt .
 w:wholeMarmishProtocols p:dependsOn w:recoverFieldConjunctions .
 w:fieldConjunctionNativeFixture a p:Artifact ;
-    p:location "verification/rust-recovery/field-conjunction/verify.py" .
+    p:location "verification/provider-validation/src/bin/qualify-rust-recovery/field_conjunction.rs" .
 w:fieldConjunctionProvenanceReview a p:Finding ;
     rdfs:label "Pin compiler-read source files and select only inherent methods" ;
     p:source w:fieldConjunctionReview .
@@ -2187,7 +2192,7 @@ w:recoverTaggedFrameEncoder a p:Task ;
     p:addresses w:taggedFrameSourceReview ; p:evidence w:taggedFrameSourceFixture, w:taggedCopyEncoderNativeReceipt .
 w:wholeMarmishProtocols p:dependsOn w:recoverTaggedFrameEncoder .
 w:taggedFrameSourceFixture a p:Artifact ;
-    p:location "verification/rust-recovery/tagged-frame/verify.py" .
+    p:location "verification/provider-validation/src/bin/qualify-rust-recovery/tagged_frame.rs" .
 w:taggedFrameSourceReview a p:Finding ;
     rdfs:label "Require a dominating length guard, complete tag and enum mappings, and payload alias invalidation" ;
     p:source w:taggedFrameSourceReviewArtifact .
@@ -2220,7 +2225,7 @@ w:publicTypeBindingPlan a p:Artifact ;
 w:publicTypeBindingReceipt a p:Artifact ;
     p:location "companion:verification/whole/public-types/provenance.json" .
 w:publicTypeBindingFixture a p:Artifact ;
-    p:location "verification/rust-recovery/test_exports.py" .
+    p:location "verification/provider-validation/src/bin/rust-exports/tests.rs" .
 w:publicTypeLegacyRecoveryReceipt a p:Artifact ;
     p:location "companion:verification/whole/public-types/legacy-recovery.json" .
 w:publicTypeBindingCutFinding a p:Finding ;
@@ -2236,7 +2241,7 @@ w:recoverFramePreflight a p:Task ;
     p:addresses w:frameGuardOrderReview ; p:evidence w:frameGuardFixture, w:copyGuardOrderNativeReceipt .
 w:wholeMarmishProtocols p:dependsOn w:recoverFramePreflight .
 w:frameGuardFixture a p:Artifact ;
-    p:location "verification/rust-recovery/frame-guards/verify.py" .
+    p:location "verification/provider-validation/src/bin/qualify-rust-recovery/frame_guards.rs" .
 w:frameGuardOrderReview a p:Finding ;
     rdfs:label "Require joint failure witnesses, native error identity, and explicit role-specific guard order" ;
     p:source w:frameGuardOrderReviewArtifact .
@@ -2266,7 +2271,7 @@ w:recoverCheckedFrameFragments a p:Task ;
     p:addresses w:checkedFrameFragmentReview ; p:evidence w:checkedFrameFragmentFixture, w:checkedCopyFragmentNativeReceipt .
 w:wholeMarmishProtocols p:dependsOn w:recoverCheckedFrameFragments .
 w:checkedFrameFragmentFixture a p:Artifact ;
-    p:location "verification/rust-recovery/frame-fragments/verify.py" .
+    p:location "verification/provider-validation/src/bin/qualify-rust-recovery/frame_fragments.rs" .
 w:checkedFrameFragmentReview a p:Finding ;
     rdfs:label "Check lossless enum tags and complete option writers while recording checked length and validation dependencies" ;
     p:source w:checkedFrameFragmentReviewArtifact .
@@ -2303,7 +2308,7 @@ w:vaultValueDomainNativeReceipt a p:Artifact ;
 w:wholeMarmishProtocols p:dependsOn w:vaultValueDomainQualification .
 
 w:processLimitFixture a p:Artifact ;
-    p:location "verification/process-limits/verify.py" .
+    p:location "verification/provider-validation/src/bin/process-limit.rs" .
 w:processLimitReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/65> .
 
@@ -2346,7 +2351,7 @@ w:observedBufferedInput a p:Task ;
     p:acceptance "Infer only the declared empty-read, retirement and refill-error policy choices. Reject inconsistent observations, preserve observed structure and replay both a real source baseline and a shape-invariant behavior mutation." .
 
 w:observedBufferedInputFixture a p:Artifact ;
-    p:location "verification/observed-buffered-input/verify.py" .
+    p:location "verification/provider-validation/src/bin/qualify-buffered-input/observed.rs" .
 
 w:observedBufferedInputCompanion a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/80> .
@@ -2386,7 +2391,7 @@ w:privateManifestSuiteLinux a p:Artifact ;
 
 w:terminalPrefixCli p:addresses w:terminalCliPrefixGap .
 w:terminalPrefixFixture a p:Artifact ;
-    p:location "verification/command-surface/prefix.py" .
+    p:location "verification/provider-validation/src/bin/command-surface/prefix.rs" .
 w:terminalPrefixDarwin a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/blob/faacb6133e3db379ad037979b28261d773b37e95/verification/whole/terminal-prefix/aarch64-apple-darwin.json> .
 w:terminalPrefixLinux a p:Artifact ;
@@ -2404,7 +2409,7 @@ w:boundedJsonInput a p:Task ;
     p:acceptance "Recover a pure byte parser contract with explicit bounds and error precedence, detect a source mutation, and execute the unchanged private native parser case." .
 
 w:boundedJsonInputFixture a p:Artifact ;
-    p:location "verification/bounded-json-input/verify.py" .
+    p:location "verification/provider-validation/src/bin/bounded-json-input.rs" .
 w:boundedJsonInput p:evidence w:boundedJsonInputFixture .
 
 w:boundedJsonInputNativeReceipts a p:Artifact ;
@@ -2417,7 +2422,7 @@ w:directObserverBindings a p:Task ;
     p:acceptance "Trace each alias to one compiler build producer and its locked package identity. Distinguish swapped package versions and identify host proc-macros in the unrelated release fixture." ;
     p:status p:done ; p:evidence w:directObserverBindingFixture .
 w:directObserverBindingFixture a p:Artifact ;
-    p:location "verification/rust-recovery/test_release_rustdoc.py" .
+    p:location "verification/provider-validation/src/bin/release-rustdoc/tests.rs" .
 w:wholeMarmishStructure p:dependsOn w:directObserverBindings .
 
 w:crossTargetObserverReview a p:Finding ;
@@ -2492,7 +2497,7 @@ w:readOnlyFileIntegrity a p:Task ;
     p:acceptance "Observe ordered file admission, bounded reads and digest checks on both native ARM64 hosts using inert files, and independently detect a source mutation." .
 
 w:readOnlyFileIntegrityFixture a p:Artifact ;
-    p:location "verification/read-only-file/check.py" .
+    p:location "verification/provider-validation/src/bin/read-only-file.rs" .
 w:readOnlyFileIntegrity p:evidence w:readOnlyFileIntegrityFixture, w:readOnlyFileDarwin, w:readOnlyFileLinux .
 
 w:readOnlyFileDarwin a p:Artifact ;
@@ -2515,9 +2520,9 @@ w:localFileCatalogLinkage a p:Task ;
     p:acceptance "Compile and run a linked grammar and descriptor catalog, then refuse six incompatible native compositions." .
 
 w:localFileCatalogAssemblyFixture a p:Artifact ;
-    p:location "verification/local-file-catalog/assembly.py" .
+    p:location "verification/provider-validation/src/bin/local-file-catalog.rs" .
 w:verifiedLocalFileCatalogFixture a p:Artifact ;
-    p:location "verification/local-file-catalog/check.py" .
+    p:location "verification/provider-validation/src/bin/local-file-catalog.rs" .
 
 w:localFileCatalogDarwin a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/88a771e63032b98ee62a97f9a09a2786692dcf6c/verification/whole/local-file-catalog/aarch64-apple-darwin.json" .
@@ -2678,6 +2683,12 @@ w:localOwnerWorkflow a p:Task ;
     p:acceptance "Generate a linked native CLI request sequence. Verify ordered response decisions, capture validation, fixed request bytes, and one finite deadline and budget with an independent Unix peer." .
 w:basicCommandInterop p:dependsOn w:localOwnerWorkflow .
 
+w:portHistoricTooling p:evidence w:fieldMeterWorkflowRustReplay .
+w:localOwnerWorkflow p:evidence w:fieldMeterWorkflowRustReplay .
+w:fieldMeterWorkflowRustReplay a p:Artifact ;
+    rdfs:label "Rust replay of 31 independent field-meter cases and process outcomes across workflow, embedded delivery and deferred output scenarios" ;
+    p:location "verification/provider-tooling/local-owner-workflow-rust-replay.json" .
+
 w:localOwnerWorkflowVerification a p:Artifact ;
     p:location "verification/local-owner-workflow/runtime-verification.md" .
 w:localSubmitHandoffReference a p:Artifact ;
@@ -2741,7 +2752,7 @@ w:requiredNullableWire a p:Task ;
     p:status p:done ; p:evidence w:requiredNullableGarden ;
     p:acceptance "Generate and compile an unrelated fixture where a missing nullable member fails, null and the full u64 range round-trip, and the historical optional form continues accepting omission." .
 w:requiredNullableGarden a p:Artifact ;
-    p:location "verification/wire-schema/verify.py" .
+    p:location "verification/provider-validation/src/bin/wire-schema/garden.rs" .
 w:basicCommandInterop p:dependsOn w:requiredNullableWire .
 
 w:composedBasicOwnerCandidate a p:Task ;
@@ -3092,7 +3103,843 @@ w:replaceableWasmProviders a p:Task ;
     rdfs:label "Support replaceable language and library providers with a bounded Wasm interface" ;
     p:source w:wasmProviderDesign ; p:milestone w:marmishMilestone ;
     p:acceptance "Replace a source and target provider through workspace configuration, validate the capability boundary, and reproduce the pinned Marmish command-policy validation using Rust or Wasm tooling." ;
-    p:status p:planned .
+    p:status p:done ; p:evidence w:providerCompatibilityReplay, w:providerClientTests .
+w:providerCompatibilityReplay a p:Artifact ; p:location "verification/provider-validation/macos-arm64.json" .
+w:providerClientTests a p:Artifact ; p:location "tests/provider_interop.rs" .
 w:wasmProviderDesign a p:Artifact ;
     rdfs:label "Replaceable Oddlang providers design" ;
     p:location "docs/superpowers/specs/2026-11-26-wasm-provider-design.md" .
+
+w:ontogptProviderSemantics a p:Task ;
+    rdfs:label "Install OntoGPT ontology authoring skills and enforce explicit entity and literal ranges" ;
+    p:milestone w:marmishMilestone ; p:source w:ontoGPTSkills ;
+    p:acceptance "Verify the four pinned skill directories, distinguish plain text and namespace-constrained identifiers in provider inputs, and check XSD boolean values in the Wasm ontology reader." ;
+    p:status p:done ; p:evidence w:ontoGPTQualification .
+w:ontoGPTQualification a p:Artifact ;
+    p:location "verification/provider-tooling/ontogpt-skills.json" .
+w:ontoGPTSkills a p:Artifact ;
+    p:location "https://github.com/monarch-initiative/ontogpt/tree/b8f3dee7ea7c315a9be892b30a6a263ac4f1e873/skills" .
+
+w:portHistoricTooling a p:Task ;
+    rdfs:label "Migrate remaining project-authored extraction, generation and qualification scripts" ;
+    p:milestone w:marmishMilestone ; p:source w:wasmProviderDesign ;
+    p:acceptance "Port each project-authored tool and its live callers to Rust or Wasm, preserve its independent cases and record equivalent observations." ;
+    p:status p:active ; p:evidence w:providerToolInventory .
+w:providerToolInventory a p:Artifact ;
+    p:location "verification/provider-tooling/baseline.tsv" .
+
+w:portHistoricTooling p:evidence w:marmishSourceInventoryReplay .
+w:marmishSourceInventoryReplay a p:Artifact ;
+    rdfs:label "Rust replay of the pinned Marmish source inventory, Cargo configurations, static tests and packaging inputs" ;
+    p:location "verification/provider-tooling/marmish-source-inventory-replay.json" .
+
+w:portHistoricTooling p:evidence w:marmishPhase7RustReplay .
+w:marmishPhase7RustReplay a p:Artifact ;
+    rdfs:label "Historical Phase 7 verifier and Rust replay compared against the published qualification and coverage" ;
+    p:location "verification/provider-tooling/marmish-phase7-replay.json" .
+
+w:portHistoricTooling p:evidence w:marmishNativeCandidateRustReplay .
+w:marmishNativeCandidateRustReplay a p:Artifact ;
+    rdfs:label "Native candidate report and original outcomes reproduced from authenticated archives by the Rust comparator" ;
+    p:location "verification/provider-tooling/marmish-native-candidate-replay.json" .
+
+w:portHistoricTooling p:evidence w:marmishNativeBaselineCollector .
+w:marmishNativeBaselineCollector a p:Artifact ;
+    rdfs:label "Rust Seatbelt collector checked against the archived command matrix, pinned ontology, Cargo metadata and native core tests" ;
+    p:location "verification/provider-tooling/native-baseline-collector-replay.json" .
+
+w:portHistoricTooling p:evidence w:marmishStreamDriverRustReplay .
+w:marmishStreamDriverRustReplay a p:Artifact ;
+    rdfs:label "Rust stream driver matched the historical original receipt, both mixed wire directions and the discriminating tag mutation" ;
+    p:location "verification/provider-tooling/stream-driver-rust-replay.json" .
+
+w:portHistoricTooling p:evidence w:stableStreamInputsRustReplay .
+w:stableStreamInputsRustReplay a p:Artifact ;
+    rdfs:label "Rust collector reproduced the original and candidate stream compiler inventories and 29 native test outcomes across all three Cargo modes" ;
+    p:location "verification/provider-tooling/stream-baseline-rust-replay.json" .
+
+w:portHistoricTooling p:evidence w:rustStreamGraphMutation .
+w:rustStreamGraphMutation a p:Artifact ;
+    rdfs:label "Isolated Rust graph mutation reproduced both denied file reads, the released bundle digest and all 50 wire observations" ;
+    p:location "verification/provider-tooling/stream-graph-mutation-replay.json" .
+
+w:portHistoricTooling p:evidence w:rustStreamWorkspaceReplay .
+w:rustStreamWorkspaceReplay a p:Artifact ;
+    rdfs:label "Rust workspace qualification regenerated the sealed stream crate, exercised both compiler controls, and reran the six selected cases on both retained consumer builds" ;
+    p:location "verification/provider-tooling/stream-workspace-rust-replay.json" .
+
+w:portHistoricTooling p:evidence w:rustHttpConformanceReplay .
+w:httpHybrid p:evidence w:rustHttpConformanceReplay .
+w:rustHttpConformanceReplay a p:Artifact ;
+    rdfs:label "Rust HTTP tooling provisioned locked consumers, launched Chromium and verified eight byte-identical fresh Rust, TypeScript and Go receipts" ;
+    p:location "verification/provider-tooling/http-conformance-rust-replay.json" .
+
+w:portHistoricTooling p:evidence w:nativeRecoveryEntrypoint .
+w:nativeRecoveryEntrypoint a p:Artifact ;
+    rdfs:label "Native executable recovery adapter reproduced 3,296 declarations and 9,534 edges, the compiler inventory bytes and the independent historical declaration comparison" ;
+    p:location "verification/provider-tooling/native-recovery-entrypoint.json" .
+
+w:portHistoricTooling p:evidence w:rustWorkflowReplay .
+w:rustWorkflowReplay a p:Artifact ;
+    rdfs:label "Rust import cleanup, assembly preparation, profile checks and Wasm host receipt replay on macOS ARM64" ;
+    p:location "verification/provider-tooling/workflow-replay.json" .
+
+w:portHistoricTooling p:evidence w:rustBuildClosureReplay .
+w:rustBuildClosureReplay a p:Artifact ;
+    rdfs:label "Rust build closure and ordered build report qualification on macOS ARM64" ;
+    p:location "verification/provider-tooling/build-closure-replay.json" .
+
+w:portHistoricTooling p:evidence w:rustNativeAssemblyReplay .
+w:rustNativeAssemblyReplay a p:Artifact ;
+    rdfs:label "Rust qualification of native package assembly, linked workspaces, locked Git bootstrap and native process observations" ;
+    p:location "verification/provider-tooling/native-assembly-replay.json" .
+
+w:portHistoricTooling p:evidence w:rustBinaryRecordWireSchemaReplay .
+w:rustBinaryRecordWireSchemaReplay a p:Artifact ;
+    rdfs:label "Seven Rust binary-record and JSON wire-schema qualification suites on macOS ARM64" ;
+    p:location "verification/provider-tooling/binary-record-wire-schema-replay.json" .
+
+w:portHistoricTooling p:evidence w:canonicalRadioReplay .
+w:canonicalRadioReplay a p:Artifact ; rdfs:label "Native nested and flat canonical JSON radio caller and rejection checks" ; p:location "verification/provider-validation/src/bin/canonical-wire.rs" .
+
+w:portHistoricTooling p:evidence w:integrityBlockNativeReplay .
+w:integrityBlockNativeReplay a p:Artifact ; p:location "verification/provider-validation/src/bin/integrity-block.rs" .
+
+w:portHistoricTooling p:evidence w:canonicalWeatherReplay .
+w:canonicalWeatherReplay a p:Artifact ;
+    rdfs:label "Native weather package caller, rejection cases and byte comparison with the historical verifier" ;
+    p:location "verification/provider-tooling/canonical-weather-replay.json" .
+
+w:portHistoricTooling p:evidence w:nativeCompilerRecoveryFixtureReplay .
+w:nativeCompilerRecoveryFixtureReplay a p:Artifact ;
+    rdfs:label "Four compiler-backed Rust recovery qualifications on macOS ARM64" ;
+    p:location "verification/provider-tooling/compiler-recovery-fixtures-replay.json" .
+
+w:portHistoricTooling p:evidence w:rustCaptureParity .
+w:rustCaptureParity a p:Artifact ; p:location "verification/provider-tooling/rust-capture.json" .
+
+w:portHistoricTooling p:evidence w:sealedRecordReplay .
+w:sealedRecordReplay a p:Artifact ; p:location "verification/provider-validation/src/bin/sealed-record-package.rs", "verification/provider-validation/src/bin/sealed-record-api.rs" .
+
+w:rustCaptureParity rdfs:comment "The original executable-adapter path forwards to rust-capture for historical callers. Current native tools launch the Rust observer directly." .
+
+w:portHistoricTooling p:evidence w:nativeBufferedInputReplay .
+w:nativeBufferedInputReplay a p:Artifact ;
+    rdfs:label "Buffered-input native policy matrix, compiler shape recovery and observed trace parity on macOS ARM64" ;
+    p:location "verification/provider-tooling/buffered-input-replay.json" .
+
+w:portHistoricTooling p:evidence w:marmishGapRegisterRust, w:marmishCompanionCoreRoles .
+w:marmishGapRegisterRust a p:Artifact ; p:location "verification/provider-tooling/marmish-gap-register.json" .
+w:marmishCompanionCoreRoles a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/0a1d816a84f4f3c148ea37427ab83e508a86b660/verification/whole/core-ownership/rust-qualification-macos-arm64.json" .
+
+w:portHistoricTooling p:evidence w:nativeStorageContractReplay .
+w:nativeStorageContractReplay a p:Artifact ;
+    rdfs:label "POSIX file-profile credential preparation and native sequence-journal qualification on macOS ARM64" ;
+    p:location "verification/provider-tooling/storage-contract-replay.json" .
+
+w:portHistoricTooling p:evidence w:historicalReceiptRust .
+w:historicalReceiptRust a p:Artifact ; p:location "verification/provider-tooling/original-receipt.json" .
+
+w:historicalReceiptRust rdfs:comment "The independently pinned candidate comparator also revalidates the archived original through its historical check entry point." .
+
+w:portHistoricTooling p:evidence w:nativeCommandSurfaceReplay .
+w:nativeCommandSurfaceReplay a p:Artifact ;
+    rdfs:label "Offline native CLI parser and terminal prefix qualification on macOS ARM64" ;
+    p:location "verification/provider-tooling/command-surface-replay.json" .
+
+w:portHistoricTooling p:evidence w:rustFramingReplay .
+w:rustFramingReplay a p:Artifact ; p:location "verification/provider-tooling/native-wasm-framing.json" .
+
+w:portHistoricTooling p:evidence w:publicDataNativeComposition, w:publicDataNativeInherited .
+w:publicDataNativeComposition a p:Artifact ;
+    rdfs:label "Six Rust fixture replays and 13 predecessor tests against the archived Darwin public-data compiler" ;
+    p:location "verification/provider-tooling/public-data-native-composition.json" .
+w:publicDataNativeInherited a p:Artifact ;
+    rdfs:label "Nine inherited Rust fixture replays against the same archived Darwin compiler and parent receipt" ;
+    p:location "verification/provider-tooling/public-data-native-inherited.json" .
+
+w:portHistoricTooling p:evidence w:rustTaggedCandidate .
+w:rustTaggedCandidate a p:Artifact ;
+    rdfs:label "Rust tagged-contract observer reproduced the original report for pinned Marmish revision 49fc705, tag and writer mutations" ;
+    p:location "verification/provider-tooling/tagged-candidate.txt" .
+
+w:portHistoricTooling p:evidence w:nativeEndpointSetReplay .
+w:nativeEndpointSetReplay a p:Artifact ;
+    rdfs:label "Locked Rust 2021 and 2024 consumer replay of reordered, bound, free and modified endpoint policies with nine refusal controls" ;
+    p:location "verification/provider-tooling/endpoint-set.txt" .
+
+w:portHistoricTooling p:evidence w:rustAdoptionReplay .
+w:rustAdoptionReplay a p:Artifact ;
+    rdfs:label "Rust adoption test replayed six native Go client runs with offline toolchain and module lookup, and rejected both edits to reviewed source" ;
+    p:location "verification/provider-tooling/go-adoption.json" .
+
+w:portHistoricTooling p:evidence w:rustGuestComponentMatrix .
+w:rustGuestComponentMatrix a p:Artifact ;
+    rdfs:label "Twelve Wasm components and their WIT rebuilt byte-for-byte with the Rust runner; Wasmtime counterexamples and independent ledger oracle replayed" ;
+    p:location "verification/provider-tooling/wasm-guests.json" .
+
+w:rustGuestComponentMatrix rdfs:comment "The native witness sorts JSON object members before writing evidence. Its 38 files reproduce the archive byte-for-byte even with serde_json preserve_order enabled." .
+
+w:portHistoricTooling p:evidence w:rustWasmSpike .
+w:rustWasmSpike a p:Artifact ;
+    rdfs:label "Rust offline spike reproduced the echo observation transcript and four archived component interfaces; a successful process returning no observations was rejected" ;
+    p:location "verification/provider-tooling/wasm-spike.json" .
+
+w:portHistoricTooling p:evidence w:portableOracleRustReplay .
+w:portableOracleRustReplay a p:Artifact ;
+    rdfs:label "Rust stream and tagged Data replay against the frozen independent Marmish corpus" ;
+    p:location "verification/provider-tooling/portable-oracle-rust.json" ;
+    rdfs:comment "Native Apple Silicon replay matched the 403 public observations and 128 sealed cases. Both generated Data targets passed 253 public and 112 sealed cases with 628 public result lines each, six 36-record writer-reader exchanges and the retagged graph controls. A separate Linux namespace probe observed a readable stage, an inaccessible withheld sibling and zero effective capabilities." .
+
+w:portHistoricTooling p:evidence w:rustWasmVerification .
+w:rustWasmVerification a p:Artifact ;
+    rdfs:label "Rust orchestrator for two clean component builds, eight releases and Wasmtime, Node and Chromium qualification, with byte-exact historical reports" ;
+    p:location "verification/provider-tooling/wasm-verify.json" .
+
+w:portHistoricTooling p:evidence w:rustFramingPilot, w:sealedWorkspaceRustQualifiers .
+w:rustFramingPilot a p:Artifact ;
+    rdfs:label "Fresh original and guard-order recovery, separately compiled native and Wasm framing projections, assembled native tests and full build boundary" ;
+    p:location "verification/provider-tooling/framing-pilot.json" .
+w:sealedWorkspaceRustQualifiers a p:Artifact ;
+    rdfs:label "Six-member MDK, canonical seven-member, and buffered seven-member Darwin workspace qualification receipts at companion commit 7e015a3" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/7e015a316eb366cebb53d2904cb700231347a1e9/verification/whole" .
+
+w:portHistoricTooling p:evidence w:marmishRebuildRustReplay .
+w:marmishRebuildRustReplay a p:Artifact ;
+    rdfs:label "Independent builds with the pinned compiler and a freshly compiled Oddlang CLI reproduced the 39 archived Phase 7 witnesses" ;
+    p:location "verification/provider-tooling/marmish-rebuild-rust.json" .
+
+w:portHistoricTooling p:evidence w:nativeMarmishEntry .
+w:nativeMarmishEntry a p:Artifact ;
+    rdfs:label "Rust Marmish qualification entry and OS network isolation: two pinned rebuilds, 39 byte-identical witnesses, source refusals, process status and socket controls" ;
+    p:location "verification/provider-tooling/qualification-entry.json" .
+
+w:portHistoricTooling p:evidence w:nativeMarmishSetup .
+w:nativeMarmishSetup a p:Artifact ;
+    rdfs:label "Rust setup fetched the pinned upstream checkout, resolved the locked native, Wasm and inherited indexer dependencies, and rejected wrong revisions and failed clones" ;
+    p:location "verification/provider-tooling/marmish-setup.json" .
+
+w:portHistoricTooling p:evidence w:wasmBootstrapRustReplay .
+w:wasmBootstrapRustReplay a p:Artifact ;
+    rdfs:label "Dependency-free bootstrap built with an older host compiler and installed the pinned Rust toolchain, two Wasm targets and a checked archive into fresh staging" ;
+    p:location "verification/provider-tooling/wasm-setup-rust.json" .
+
+w:portHistoricTooling p:evidence w:nativeTranslationGate .
+w:nativeTranslationGate a p:Artifact ;
+    rdfs:label "Rust setup, differential, proof and replay entry points agreed with the archived 1922-case ledger evidence and all four Kani classifications" ;
+    p:location "verification/provider-tooling/translation-gate.json" .
+
+w:portHistoricTooling p:evidence w:rustPortableBridgeReplay .
+w:rustPortableBridgeReplay a p:Artifact ;
+    rdfs:label "Rust verifier reproduced all five local bridge argument, init, and EOF transcripts, plus an independent Linux OFD lock probe" ;
+    p:location "verification/provider-tooling/portable-bridge-rust.json" .
+
+w:portHistoricTooling p:evidence w:nativeWaitProfileDiagnostics .
+w:nativeWaitProfileDiagnostics a p:Artifact ;
+    rdfs:label "Rust local profile observer reproduced all three archived diagnostic reports, including the prior build's thirteen mismatches and failing comparison status" ;
+    p:location "verification/provider-tooling/profile-diagnostics.json" .
+
+w:portHistoricTooling p:evidence w:nativeLocalRequestQueue .
+w:nativeLocalRequestQueue a p:Artifact ;
+    rdfs:label "Rust queue qualifier ran separate write and recovery processes, two concurrent submitters, and eight invalid graph controls against the independent gauge consumer" ;
+    p:location "verification/provider-tooling/local-request-queue.json" .
+
+w:portHistoricTooling p:evidence w:rustForegroundStationReplay .
+w:rustForegroundStationReplay a p:Artifact ;
+    rdfs:label "Rust replay of the independently named foreground station and two telemetry shutdown barrier cases" ;
+    p:location "verification/provider-tooling/foreground-station-rust.json" .
+
+w:portHistoricTooling p:evidence w:fieldMeterProjectionRust .
+w:fieldMeterProjectionRust a p:Artifact ;
+    rdfs:label "Rust verified the field-meter request and reply declaration catalogs, accepted the exact minimum frame, rejected eleven invalid graphs and six altered catalogs, and passed within the independent local client fixture" ;
+    p:location "verification/provider-tooling/field-meter-projection.json" .
+
+w:portHistoricTooling p:evidence w:nativeFieldMeterSocketCases .
+w:nativeFieldMeterSocketCases a p:Artifact ;
+    rdfs:label "Python and Rust field-meter runners agreed on 24 private Unix peer exchanges, eight additional process outcomes and the graph and linkage rejection controls" ;
+    p:location "verification/provider-tooling/field-meter-socket.json" .
+
+w:portHistoricTooling p:evidence w:oddlangToolingAndConsumers .
+w:oddlangToolingAndConsumers a p:Artifact ;
+    rdfs:label "Oddlang tracked tooling and native consumers, with 36 Wasm observations, three refusal controls and the live two-version hybrid test" ;
+    p:location "verification/provider-tooling/oddlang-root-audit.md" .
+
+w:portHistoricTooling p:evidence w:companionInventoryRust, w:companionBufferedRust, w:companionPublicComposersRust .
+w:companionInventoryRust a p:Artifact ;
+    rdfs:label "Native release inventory reproduced both pinned workspaces, 30 Cargo targets, 15 independently checked release assets and all 1286 RDF triples. The verifier rejected the omitted workspace, unknown feature, missing witness and unclassified file controls." ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/266821f550ddab77ee9db6edef4eebd7a4a762a4/verification/whole-marmish/inventory/rust-replay-macos-arm64.json" .
+w:companionBufferedRust a p:Artifact ;
+    rdfs:label "Buffered seven-member native gate and its successor callback replays" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/48bd4ddbbadc2d3837b4f785042f56aa77e2f602/verification/whole/unified-buffered/native-aarch64-apple-darwin.json" .
+w:companionPublicComposersRust a p:Artifact ;
+    rdfs:label "Six prototype constant, engine error and converged public API descriptors reproduced byte for byte, with 14 rejected drift cases" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/3460c689e219e4ab6bc22e41ee8e4a867d99461c/verification/whole/converged-public-api/rust-composition-macos-arm64.json" .
+
+w:portHistoricTooling p:evidence w:companionArchivedSuiteReceipts .
+w:companionArchivedSuiteReceipts a p:Artifact ;
+    rdfs:label "Rust reproduced 14 archived suite totals and ten build-target reports for ARM64 macOS and Linux, retained four missing-library refusals, and rejected 66 altered receipts" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/d1c9b193fa501cedec287409e1265677bc24797d/verification/whole/suite/README.md#archived-receipt-verifier" .
+
+w:portHistoricTooling p:evidence w:rustReleaseManifestConformance, w:rustReleaseManifestConsumer, w:rustRangeReference, w:rustCanonicalRangeComposers .
+w:rustReleaseManifestConformance a p:Artifact ;
+    rdfs:label "Rust corpus generator and strict checker reproduced the blind inputs, 224 published vectors, both host observations and the changed size-limit expectation" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/89a6f9a648c119d8d304bb29a82ca175a07786af/verification/whole/release-manifest/rust-conformance-macos-arm64.json" .
+w:rustReleaseManifestConsumer a p:Artifact ;
+    rdfs:label "Generated Rust parser executed the independent manifest probe and returned the archived output digest for 224 freshly generated blind inputs" ;
+    p:location "verification/provider-tooling/release-manifest-consumer.json" .
+w:rustRangeReference a p:Artifact ;
+    rdfs:label "Rust observers reproduced 35 original range and reason outcomes, 17 projected outcomes and the original compiler rejection" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/3179b2fa77300383f3c0a04a4f1e26f02a977741/verification/whole/gap-range-reference/rust-replay-aarch64-apple-darwin.json" .
+w:rustCanonicalRangeComposers a p:Artifact ;
+    rdfs:label "Native canonical engine choice, authored range and recovered range composers reproduced five descriptors and fourteen rejection controls" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/9099eac2bbcab1dde1946ff45e3030435a3a8f08/verification/whole/canonical-range-data/rust-composition-macos-arm64.json" .
+
+w:portHistoricTooling p:evidence w:companionRustManifestProjection .
+w:companionRustManifestProjection a p:Artifact ;
+    rdfs:label "A source-denied Rust replay matched 224 native baseline and 224 mutant release-manifest cases, both native record shapes, both package locks and both compiler-observed Rustdoc hashes on ARM64 macOS" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/7c893079db9dffda68fe1e02e5e2a1223274f190/verification/whole/release-manifest-projection/rust-replay-macos-arm64.json" .
+
+w:portHistoricTooling p:evidence w:companionGitToolAudit, w:companionNativeWireReplays .
+w:companionGitToolAudit a p:Artifact ;
+    rdfs:label "Companion Git tree audit reconciles 382 baseline entries and classifies 355 current paths, including 182 remaining project Python and shell tooling files" ;
+    p:location "verification/provider-tooling/companion-audit.md" .
+w:companionNativeWireReplays a p:Artifact ;
+    rdfs:label "Rust reproduced the archived structural wire receipt and all 81 native operation records byte for byte" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b95fd5161e75c47913a17a2ee3e68e13da5e8748/verification/whole/stream-wire/native-replay-macos-arm64.json" .
+
+w:portHistoricTooling p:evidence w:releaseVersionGrammarNative .
+w:releaseVersionGrammarNative a p:Artifact ;
+    rdfs:label "Rust release-version verifier reproduced the baseline and changed source spans, recovered graphs, projection locks, 48 baseline outcomes, 15 changed-grammar outcomes and both enclosing-module witness hashes from the pinned ARM64 archive" ;
+    p:source w:releaseVersionGrammarNativeSource ;
+    p:location "verification/provider-tooling/release-version-grammar.json" .
+w:releaseVersionGrammarNativeSource a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/dfdfc3771f1c08e5cfb32ec05adec5ab911d13ca/verification/whole/canonical-public-data/src/bin/release-version-grammar" .
+
+w:portHistoricTooling p:evidence w:nativeReleaseObserverCaller, w:nativeRetentionRecheck, w:nativeReleaseInfoStructure .
+w:nativeReleaseObserverCaller a p:Artifact ;
+    rdfs:label "The shared Rust release-info observer matched all 32 process observations on the same pinned upstream and generated binaries and rejected absent, null and changed format versions" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/6d87add48e3e2857ad4213d7ae81ca037522a03d/verification/whole/build-report/rust-macos-arm64.json" .
+w:nativeRetentionRecheck a p:Artifact ;
+    rdfs:label "Native retention recovery reproduced the seven archived files and passed 28 contract test executions" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/7a632f665e8ad27c928c96730681ad57741165b6/verification/whole/retention-structure/README.md" .
+w:nativeReleaseInfoStructure a p:Artifact ;
+    rdfs:label "Native report recovery and type probe compared four digest-bound retained upstream metadata executables and both freshly generated role pairs" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/7a632f665e8ad27c928c96730681ad57741165b6/verification/whole/release-info-structure/README.md" .
+
+w:portHistoricTooling p:evidence w:reconstructionScratchReplay .
+w:reconstructionScratchReplay a p:Artifact ;
+    rdfs:label "Two macOS ARM64 runs with RAM-backed reconstruction produced identical receipts across global and dedicated scratch settings. The archived seven-member workspace and 116 local cases matched. Only the three observer executable digests differed from the archive, with cause undetermined." ;
+    p:location "verification/provider-tooling/reconstruction-scratch.json" .
+
+w:portHistoricTooling p:evidence w:nativeCargoLogSummary, w:nativeBlockWindow, w:nativeJournalInputs .
+w:nativeCargoLogSummary a p:Artifact ;
+    rdfs:label "Rust Cargo log summary matched its predecessor byte for byte on a real unit, ignored and documentation test fixture and on a nested summary. Both refused ten incomplete, inconsistent or ambiguous inputs without writing output." ;
+    p:source w:nativeCargoLogSource ; p:location "verification/provider-tooling/cargo-log-summary.json" .
+w:nativeCargoLogSource a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/2ab10d89440f03089e34177a0257ab4d31c86ce6/verification/whole/suite/src/bin/summarize-cargo.rs" .
+w:nativeBlockWindow a p:Artifact ;
+    rdfs:label "Rust local codec gates reproduced both archived macOS receipts with 192 encodes, 82 decodes, 160 cross-reads per peer, and 13031 window results" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/aa64fbb7734d33a410f2b81ab602f252f51da084/verification/whole/stream-wire/block-window-rust-replay.json" .
+w:nativeJournalInputs a p:Artifact ;
+    rdfs:label "Rust journal recovery and native package witness matched both archived layout locks, six ordered JSON records and five source denial controls on macOS ARM64" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/91e89e447c1361cd20fef7b54b8da2e20891a125/verification/whole/journal-records/README.md" .
+
+w:portHistoricTooling p:evidence w:integratedParserRustComparison, w:checkpointRustReplay .
+w:integratedParserRustComparison a p:Artifact ;
+    rdfs:label "Full seven-member macOS parser replay matched the archived 224-row stream, including 34 accepted rows, with source denial and original and generated Rust compiler controls" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4891ad7c92ef0f39ded5ada87e73d1fb53f2b550/verification/whole/converged-release-manifest/rust-comparison-aarch64-apple-darwin.json" .
+w:checkpointRustReplay a p:Artifact ;
+    rdfs:label "Native checkpoint gates matched archived ARM64 receipts for 290 constructions, 1827 decodes, a checksum mutation, two successful linkage builds and five refusal diagnostics" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4179171d7e473c51737940be7ce596f95d495cc9/verification/whole/copy-checkpoint/rust-replay-macos-arm64.json" .
+
+w:portHistoricTooling p:evidence w:nativeSuiteInventories .
+w:nativeSuiteInventories a p:Artifact ;
+    rdfs:label "Native Git test inventory reproduced archived bytes. Native and predecessor harness enumerators matched on the same clean build of 24 harnesses, 909 runnable and five ignored cases. All archived fields apart from build-dependent harness digests matched." ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/6962494babb1fb4114c4069d7f9419b23807746a/verification/whole/suite/rust-inventory-macos-arm64.json" .
+
+w:portHistoricTooling p:evidence w:fiveSelectedSuiteCases, w:companionToolProgress .
+w:fiveSelectedSuiteCases a p:Artifact ;
+    rdfs:label "Rust test staging matched predecessor files and reader module bytes; five exact upstream cases executed on the seven-member generated workspace" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a567eb453ad9b64648c78bb7e620581c848b6887/verification/whole/suite/rust-selected-inputs-macos-arm64.json" .
+w:companionToolProgress a p:Artifact ;
+    rdfs:label "Pinned companion inventory found 158 project-authored Python and shell entries at df96434" ;
+    p:location "verification/provider-tooling/companion-progress.json" .
+
+w:portHistoricTooling p:evidence w:fiveMemberObserverReplay .
+w:fiveMemberObserverReplay a p:Artifact ;
+    rdfs:label "Full fresh macOS ARM64 five-member run at a567eb4 with 73 inputs, eight denied source probes, 600 native vault observations, release-info and journal witnesses. Historical fields differed only in companion revision and build artifact hashes." ;
+    p:location "verification/provider-tooling/five-member-replay.json" .
+
+w:portHistoricTooling p:evidence w:nativeSuiteControls .
+w:nativeSuiteControls a p:Artifact ;
+    rdfs:label "Native suite controls reproduced both macOS archives and Python outputs byte for byte, including eight passed MDK cases and one host failure, negative signal exit for the copied env executable, and rejection of a zero-test child with successful Cargo status" ;
+    p:location "verification/provider-tooling/suite-controls.json" .
+
+w:portHistoricTooling p:evidence w:copyManifestRustCases, w:copyRelationsRustCases .
+w:copyManifestRustCases a p:Artifact ;
+    rdfs:label "Native macOS ARM64 manifest verifier reproduced the archived 631 constructions, 2363 decodes and 197 digests" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a15c46af9633d3e5223fc148b2c2e77a4ee79cd2/verification/whole/copy-manifest/rust-replay-macos-arm64.json" .
+w:copyRelationsRustCases a p:Artifact ;
+    rdfs:label "Native field-relation and source-correspondence checks reproduced 94 relation cases and 15 cases per original and projected build, including the five changed outcomes" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a15c46af9633d3e5223fc148b2c2e77a4ee79cd2/verification/whole/copy-field-relations/rust-replay-macos-arm64.json" .
+
+w:portHistoricTooling p:evidence w:privateReaderRustBaseline .
+w:privateReaderRustBaseline a p:Artifact ;
+    rdfs:label "Independent Rust and Python private-buffer baselines matched archived receipt 543bbfe72bcb8bb5c1a8b81480c142facfc09c0e764239ca38936319588f77fc byte for byte on macOS ARM64 with four passed reader cases and two rejected mutations" ;
+    p:source w:privateReaderRustSource ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a784c66336932b84ab736ded119bb451a17ed61e/verification/whole/private-buffer/original-aarch64-apple-darwin.json" .
+w:privateReaderRustSource a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a784c66336932b84ab736ded119bb451a17ed61e/verification/whole/canonical-public-data/src/bin/buffer-baseline.rs" .
+
+w:portHistoricTooling p:evidence w:fiveMemberNativeRustReplay, w:canonicalRangeRustReplay, w:copySourceRustReplay .
+w:fiveMemberNativeRustReplay a p:Artifact ;
+    rdfs:label "The five-member native Rust driver reproduced the original and fresh predecessor results across 73 inputs, eight denied source probes, 600 vault values, 32 release-info cases and all three journal records. Nine build identity fields differed." ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/8ec6b04787094d843f7212aa74ddcde8a9a47498/verification/whole/unified-vault-journal/rust-aarch64-apple-darwin.json" .
+w:canonicalRangeRustReplay a p:Artifact ;
+    rdfs:label "On Darwin ARM64 native range qualifiers matched 35 original observations and reproduced 84 generated Rust files. Eight provenance fields in two locks changed." ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b0534678866bc0b790a95587e99d62da7749287f/verification/whole/canonical-range-data/qualification-comparison-aarch64-apple-darwin.json" .
+w:copySourceRustReplay a p:Artifact ;
+    rdfs:label "The Rust copy-source qualification reconstructed its archived macOS receipt across four builds, 15 cases per build, and five changed outcomes" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b599c7c17ad5d621442b53375af249848418cfc5/verification/whole/copy-source-correspondence/rust-replay-macos-arm64.json" .
+
+w:portHistoricTooling p:evidence w:fullNativeBufferInference, w:standaloneNativeBuffer .
+w:fullNativeBufferInference a p:Artifact ;
+    rdfs:label "Native Rust inference replay from published companion source matched both archived macOS receipts for five reader variants. All four Oddlang provider integration tests and nine provider-filtered unit tests passed." ;
+    p:location "verification/provider-tooling/buffer-inference-native.json" .
+w:standaloneNativeBuffer a p:Artifact ;
+    rdfs:label "Full native standalone private-buffer driver reproduced the Darwin archive, including the source extent compiler control and three policy mutants. Linux replay did not complete." ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/df964346e51f69af65e6d8cb7f55ff278ed379e4/verification/whole/private-buffer/README.md" .
+
+w:portHistoricTooling p:evidence w:nativeSuiteReconciliation .
+w:nativeSuiteReconciliation a p:Artifact ;
+    rdfs:label "Live suite producer uses Rust for named-case accounting. On macOS, all 14 archived Darwin and Linux role receipts matched the historical producer and independently qualified archive verifier. Six invalid inventories or observation sets were rejected and the empty catalog preserved all four counts." ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/2a509f0449c65e7cde7406dec473c5fbc33f5933/verification/whole/suite/tests/reconcile.rs" .
+
+w:portHistoricTooling p:evidence w:nativeSuiteSelection .
+w:nativeSuiteSelection a p:Artifact ;
+    rdfs:label "Rust producer checks both canonical archive digests and compares exact named registrations. A differential replay against the prior Python producer matched seven core and 29 stream registrations on each of the two platform archives. Four malformed stream names were rejected. The three producer controls passed." ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/3dc92e28d4c53985e605332afc602f49d5d86bf9/verification/whole/suite/src/bin/suite-selection.rs" .
+
+w:portHistoricTooling p:evidence w:suiteProcessLimitsNative .
+w:suiteProcessLimitsNative a p:Artifact ;
+    rdfs:label "On macOS ARM64 the Rust and Python process-limit verifiers produced identical receipts both with and without the Cargo harness control. Both empty-output role replacements failed the expected assertion. The archived original was reproduced apart from the two executable hashes and optional harness hash. The companion inventory now contains 147 project Python tools and 9 shell tools." ;
+    p:location "verification/provider-tooling/process-limit-native.json" .
+
+w:portHistoricTooling p:evidence w:canonicalMdkRuntimeComposition .
+w:canonicalMdkRuntimeComposition a p:Artifact ;
+    rdfs:label "Rust rebuilt both canonical MDK and runtime-status compositions byte-for-byte across five outputs and rejected eleven drift or input mutations. A fresh Oddlang build regenerated the seven-member workspace, including 106 files and 49 directories, from 111 pinned inputs. All 105 local policy and eleven room configuration observations matched the archive. Four provider integration and nine unit tests passed on macOS ARM64." ;
+    p:location "verification/provider-tooling/canonical-mdk-runtime-composition.json" .
+
+w:portHistoricTooling p:evidence w:recordRangeRoleComposition .
+w:recordRangeRoleComposition a p:Artifact ;
+    rdfs:label "Rust composers reproduced five observational-record and range-role descriptors. Both rebuilt workspace trees matched retained references with 92 and 101 files respectively. The sealed ARM64 Darwin range qualification reproduced its complete archived receipt with the pinned compiler. Both live verifier composition calls, five drift checks, and six input rejection controls passed." ;
+    p:location "verification/provider-tooling/record-range-role-composition.json" .
+
+w:portHistoricTooling p:evidence w:rangeRoleNativeQualification .
+w:rangeRoleNativeQualification a p:Artifact ;
+    rdfs:label "Native range workspace and import verification reproduced the complete sealed Darwin receipt and all 140 consumer outcomes across seven libraries. Only the verifier source hash changed in the import receipt. Wrong predecessor and artifact-log controls produced no receipt." ;
+    p:location "verification/provider-tooling/range-role-native.json" .
+
+w:portHistoricTooling p:evidence w:rangeEndpointNativeReplay .
+w:rangeEndpointNativeReplay a p:Artifact ;
+    rdfs:label "The Rust endpoint observer compiled independent callers against the pinned original and retained generated engines on macOS ARM64. Seven encoded outcomes and four rejection diagnostics matched the prior Python run and archive; only the observer source digest changed. The last user of the recovered range Python adapter was migrated." ;
+    p:location "verification/provider-tooling/range-endpoint-native.json" .
+
+w:portHistoricTooling p:evidence w:rangeBindingHintReplay .
+w:rangeBindingHintReplay a p:Artifact ;
+    rdfs:label "The Rust endpoint checker and profile stager reproduced all six legacy staged input trees. Fresh macOS ARM64 receipt comparisons with published and physically absent hints matched both archives apart from verifier and revision provenance. All five profiles in each run passed eleven Rust and TypeScript cases with four source-denial probes. A private binding was rejected." ;
+    p:location "verification/provider-tooling/range-binding-hints.json" .
+
+w:rangeBindingHintReplay rdfs:comment "The Rust profile inventory verified seven generated files in each of five profiles against the sealed file hashes and baseline package lock. The published-hint and omitted-hint replays matched their archived behavior. Six negative controls rejected a missing or changed lock, extra file, symlink, changed wire contract and changed case file." .
+
+w:portHistoricTooling p:evidence w:streamMaterializationRust .
+w:streamMaterializationRust a p:Artifact ;
+    rdfs:label "The Rust regeneration entry point materialized all five sealed Marmish stream sources concurrently on Darwin ARM64. Repeat verification, four rejection controls, stage cleanup and all 29 native crate tests passed. The companion inventory now identifies 139 Python and eight shell files of project origin." ;
+    p:location "verification/provider-tooling/stream-materialization.json" .
+
+w:portHistoricTooling p:evidence w:bufferedReaderDirectCallbacks .
+w:bufferedReaderDirectCallbacks a p:Artifact ;
+    rdfs:label "Both direct Rust reader callbacks reproduced the archived bufferedInput object, including four native reader cases each, on the pinned engine-error and prototype-constant workspaces. A changed predecessor was rejected without a receipt and three downstream verification entry points loaded after removal of the Python adapter." ;
+    p:location "verification/provider-tooling/buffered-reader-callbacks.json" .
+
+w:portHistoricTooling p:evidence w:rustReleaseReference .
+w:rustReleaseReference a p:Artifact ;
+    rdfs:label "The Rust release comparison reproduced the Python output and checked-in adjacent-release report byte for byte. Five pinned build objects matched across revisions. Changes to a build input and measurement provenance each failed without a receipt." ;
+    p:location "verification/provider-tooling/release-reference.json" .
+
+w:portHistoricTooling p:evidence w:originalStructureReplayRust .
+w:originalStructureReplayRust a p:Artifact ;
+    rdfs:label "The Rust structural recovery replay rebuilt the pinned compiler and regenerated the original stream library, prototype library and engine bridge graphs on macOS ARM64. All six files matched a fresh historical Python replay byte for byte. All three locks matched the archive. Four rejection controls included a mismatch on the final role with no partially published directory." ;
+    p:location "verification/provider-tooling/structural-recovery-replay.json" .
+
+w:portHistoricTooling p:evidence w:cliTranscriptReplayRust .
+w:cliTranscriptReplayRust a p:Artifact ;
+    rdfs:label "The Rust CLI transcript runner captured all 68 observations from pinned macOS ARM64 original executables and reproduced the checked-in fixture and legacy capture byte for byte. The generated parser-only client and daemon passed both readers. Seven negative controls covered changed arguments, output, exit, ordering, capture origin and existing fixture preservation." ;
+    p:location "verification/provider-tooling/cli-transcript-replay.json" .
+
+w:portHistoricTooling p:evidence w:cliProjectRust .
+w:cliProjectRust a p:Artifact ;
+    rdfs:label "Rust recovery reproduced the pinned CLI parser graph. Source-isolated Rust and historical Python generation on macOS ARM64 used the same eight inputs, reproduced all twelve generated files, and each passed 34 client and 34 daemon parser transcript cases. Five rejection controls and the downstream status recovery entry point passed." ;
+    p:location "verification/provider-tooling/cli-projection-replay.json" .
+
+w:portHistoricTooling p:evidence w:localStatusProjectRust .
+w:localStatusProjectRust a p:Artifact ;
+    rdfs:label "The native status workspace projector reproduced all fourteen generated files from the prior source-isolated build. On macOS ARM64 the generated client read the activating state from a pinned original daemon over its private socket. All comparable receipt fields matched the previous run apart from the executable digest and companion revision, including three known reply-shape differences. Five negative controls and typed-client recovery passed." ;
+    p:location "verification/provider-tooling/status-projection-replay.json" .
+
+w:portHistoricTooling p:evidence w:typedStatusProjectRust .
+w:typedStatusProjectRust a p:Artifact ;
+    rdfs:label "The Rust projector regenerated the typed status package under source isolation on macOS ARM64. The candidate matched the original on all three exact replies that diverged in the earlier untyped baseline, all 16 extended and 33 nested reply cases, and the activating response from a live original daemon. Package outputs matched the previous projector and the complete qualification matched the archive apart from binary digest fields." ;
+    p:location "verification/provider-tooling/typed-status-projection-replay.json" .
+
+w:portHistoricTooling p:evidence w:discoveryStatusProjectRust .
+w:discoveryStatusProjectRust a p:Artifact ;
+    rdfs:label "The shared Rust driver reproduced twelve generated discovery package files. All 43 controlled discovery cases and live status from an original daemon via default and explicit state directories matched the macOS ARM64 archive apart from executable provenance. Five rejection controls and the separate typed-client qualification passed." ;
+    p:location "verification/provider-tooling/status-discovery-projection.json" .
+
+w:portHistoricTooling p:evidence w:macosQualificationLauncher .
+w:macosQualificationLauncher a p:Artifact ;
+    rdfs:label "Four macOS shell launchers were replaced with a shared Rust command. All four documented entry points regenerated their previously qualified files and matched the parser, status, typed status and discovery archives apart from revision and binary provenance. No marmishd was running before or after any qualification. Existing-receipt and wrong-framework controls passed." ;
+    p:location "verification/provider-tooling/macos-qualification-launcher.json" .
+
+w:portHistoricTooling p:evidence w:statusReplyCorporaRust .
+w:statusReplyCorporaRust a p:Artifact ;
+    rdfs:label "One Rust observer reproduced all four original and generated extended and nested reply receipts byte for byte on macOS ARM64. It checked the complete framed status request and EOF before sending each response. Eight negative controls and the complete typed-client run with a pinned original daemon passed." ;
+    p:location "verification/provider-tooling/status-reply-corpora.json" .
+
+w:portHistoricTooling p:evidence w:statusQualificationDriversRust .
+w:statusQualificationDriversRust a p:Artifact ;
+    rdfs:label "Rust baseline and typed status qualification drivers reproduced the previous results on the same binaries. The typed receipt was byte-identical and the baseline differed only in companion revision. Fresh isolated builds matched both published archives apart from executable and revision provenance, including the live original daemon reply, diagnostic precedence and known scope gaps. An unpinned reference executable produced no receipt." ;
+    p:location "verification/provider-tooling/status-qualification-drivers.json" .
+
+w:portHistoricTooling p:evidence w:macosNativeBuildIsolation .
+w:macosNativeBuildIsolation a p:Artifact ;
+    rdfs:label "The Rust build sandbox reproduced all four parser and status package trees and their macOS ARM64 behavior, including staging from a historical Python projector. Each generation checked denied source reads, external writes and loopback access against a reachable listener. Cross-volume publication preserved modes and symlinks, and an existing output was preserved." ;
+    p:location "verification/provider-tooling/macos-native-build-isolation.json" .
+
+w:portHistoricTooling p:evidence w:corePackagePinQualification .
+w:corePackagePinQualification a p:Artifact ;
+    rdfs:label "Shared Rust core-package checks staged the same pinned inputs and rejected four independent package mutations. The macOS ARM64 differential replay matched the archived receipt byte for byte across 1735 observations and four semantic mutants. The Linux runner passed shell syntax validation and awaits native replay." ;
+    p:location "verification/provider-tooling/core-package-inputs.json" .
+
+w:portHistoricTooling p:evidence w:coreObservationChecks .
+w:coreObservationChecks a p:Artifact ;
+    rdfs:label "The shared Rust differential checker validated 24 portable expectations across 1735 core observations and rejected five transcript mutations. The full macOS qualification receipt matched the archive byte for byte." ;
+    p:location "verification/provider-tooling/core-observation-checks.json" .
+
+w:portHistoricTooling p:evidence w:coreMutationInputs .
+w:coreMutationInputs a p:Artifact ;
+    rdfs:label "The Rust core-package stager matched the baseline, four semantic mutants and a stale-digest fixture byte for byte with Python. The macOS qualification reproduced the archived receipt. Invalid inputs left no destination and concurrent writers published once." ;
+    p:location "verification/provider-tooling/core-mutation-inputs.json" .
+
+w:portHistoricTooling p:evidence w:linkedRangeRustdocCollector .
+w:linkedRangeRustdocCollector a p:Artifact ;
+    rdfs:label "Rust collected the pinned original and mutated MissingRange compiler documents. The full macOS ARM64 recovery matched both archived graphs, overlays, generated file inventories, package locks and native observations. Only the unknown-field case changed between the two source versions. Both rustdoc evidence formats passed validation." ;
+    p:location "verification/provider-tooling/linked-range-rustdoc.json" .
+
+w:portHistoricTooling p:evidence w:localFileCatalogComposition .
+w:localFileCatalogComposition a p:Artifact ;
+    rdfs:label "The Rust composer regenerated five catalog inputs byte for byte. The full macOS qualification matched the archived named test, twelve independent observations, workspace lock and ambiguity mutation. The daemon-independent sandbox probe used the built native test executable. All four Oddlang provider interoperability tests passed." ;
+    p:location "verification/provider-tooling/local-file-catalog-composition.json" .
+
+w:portHistoricTooling p:evidence w:arrayShapesReplay .
+w:arrayShapesReplay a p:Artifact ;
+    rdfs:label "The Rust array comparator and full recovery replay reproduced the Python reports, graph and lock byte for byte on macOS ARM64. The graph refined 63 array fields across 186 declarations. Rustdoc corroborated 33 fields. Both comparators rejected seven independent controls and accepted an aliased octet element." ;
+    p:location "verification/provider-tooling/array-shapes-replay.json" .
+
+w:portHistoricTooling p:evidence w:workspaceShapeArchiveRust .
+w:workspaceShapeArchiveRust a p:Artifact ;
+    rdfs:label "Rust recovered the core and stream shape profiles on macOS ARM64 and verified a resumed core cell. Sealing 72 existing profile observations reproduced all 98 archive payloads byte for byte. The runner rejected 17 archive corruptions, including repinned changes, and duplicate seal inputs." ;
+    p:location "verification/provider-tooling/workspace-shape-archive.json" .
+
+w:portHistoricTooling p:evidence w:suiteParserExecution .
+w:suiteParserExecution a p:Artifact ;
+    rdfs:label "The Rust parser test runner executed both pinned upstream cases exactly once on a freshly generated macOS ARM64 workspace. Its staged source, vectors, case counts and source hashes matched the historical producer. The sandbox denied all five source probes and the runner rejected a real zero-test invocation before staging. Rust producer controls checked baseline substitution, registration and execution counts." ;
+    p:location "verification/provider-tooling/suite-parser-execution.json" .
+
+w:portHistoricTooling p:evidence w:baselineBuildStreamArchive .
+w:baselineBuildStreamArchive a p:Artifact ;
+    rdfs:label "The shared Rust checkout checker and fresh compiler reproduced the published Data graph digest and six structural artifacts. The native oracle now writes the 13011-byte historical observation archive exactly in both development and release builds. The local Data replay matched six directed 36-record exchanges across Rust, TypeScript and the original caller." ;
+    p:location "verification/provider-tooling/baseline-build-stream-archive.json" .
+
+w:portHistoricTooling p:evidence w:streamReleaseReplayRust .
+w:streamReleaseReplayRust a p:Artifact ;
+    rdfs:label "The Rust release replay verified 403 public original stream cases in each of two profiles, the complete archived gzip and six cross-implementation Data exchanges on macOS ARM64. The runner refused an occupied destination and a mismatched tooling revision." ;
+    p:location "verification/provider-tooling/stream-release-replay.json" .
+
+w:portHistoricTooling p:evidence w:engineSourceMutationReplay .
+w:engineSourceMutationReplay a p:Artifact ;
+    rdfs:label "Rust reran the engine record and error source mutations against the original and projected libraries on macOS ARM64. Both receipts matched the historical Python runners byte for byte with the same fresh compiler. Restoring the unmodified graphs caused both runs to fail. All three workspace caller adapters reproduced the positive observations and the 21, 38 and 11 expected compiler diagnostics." ;
+    p:location "verification/provider-tooling/engine-mutation-replay.json" .
+
+w:portHistoricTooling p:evidence w:engineChoiceRustInputs .
+w:engineChoiceRustInputs a p:Artifact ;
+    rdfs:label "Rust recovered Stream and SubmitDisposition and reproduced every staged package input in the baseline and mutation. On macOS ARM64, the generated package matched the original caller in all four value observations and seventeen trait and visibility checks per case. The canonical replay reproduced all 140 public import verdicts and diagnostics across seven libraries." ;
+    p:location "verification/provider-tooling/engine-choice-recovery.json" .
+
+w:portHistoricTooling p:evidence w:offlineWorkspaceComposition .
+w:offlineWorkspaceComposition a p:Artifact ;
+    rdfs:label "Rust reproduced the two package descriptors and two workspace descriptors from the Python compositors. The pinned Oddlang compilers regenerated all 91 diagnostics workspace files and all 98 canonical workspace files byte for byte against their retained releases. Both compositors rejected ten invalid inputs before publishing descriptors." ;
+    p:location "verification/provider-tooling/offline-workspace-composition.json" .
+
+w:genericRustSyntax p:evidence w:cargoOutputCaptureControl .
+w:cargoOutputCaptureControl a p:Artifact ;
+    rdfs:label "The CLI capture test pins its child Cargo target and build directories. Both output layouts preserved nine exact Rust source digests, including an inactive file, and excluded the nested package. The importer also handles package aliases and symlinked Cargo output directories. A pristine and an aliased Marmish stream capture produced identical bundles. All five regenerated Rust sources matched the original and passed 29 release tests. The provider interoperability suite and six-build Rust round-trip control passed on macOS ARM64." ;
+    p:location "verification/provider-tooling/rust-capture-output-directories.json" .
+
+w:portHistoricTooling p:evidence w:runtimeStatusRecoveryRust .
+w:runtimeStatusRecoveryRust a p:Artifact ;
+    rdfs:label "Cold and warm Rust recovery and native caller runs matched 101 staged inputs, six compiler diagnostics and the baseline and reordered serialization observations on ARM64 macOS. Native reference builds use separate cache directories for the two source-model digests." ;
+    p:location "verification/provider-tooling/runtime-status-recovery-replay.json" .
+
+w:portHistoricTooling p:evidence w:selectedSuiteRust .
+w:selectedSuiteRust a p:Artifact ;
+    rdfs:label "The isolated Rust suite witness matched the archived named executions in all four selected-library profiles on ARM64 macOS, including the engine child and the absent MDK selector. Cold and warm standalone MDK recoveries reproduced the original and mutated JSON size and record limits, eleven behavioral cases and four source-denial controls." ;
+    p:location "verification/provider-tooling/selected-suite-rust.json" .
+
+w:portHistoricTooling p:evidence w:boundedMdkRecoveryRust .
+w:boundedMdkRecoveryRust a p:Artifact ;
+    rdfs:label "The complete Rust MDK JSON qualifier reproduced fresh Python observations, recovered graph and package locks, the four source-denial probes and the original field-bound mutations. Cold and warm receipts on macOS ARM64 were byte-identical. Prepare mode restored the three portable outputs and rejected a stale dependency pin." ;
+    p:location "verification/provider-tooling/bounded-mdk-json-recovery.json" .
+
+w:ontoGPTQualification rdfs:label "Four pinned skills and provider schema semantics. The Rust schema reader distinguishes omission from a mistyped explicit null in six optional keywords, including nested identifier namespace constraints. The macOS CLI rejected the invalid binding schema before creating output." .
+
+w:replaceableWasmProviders p:evidence w:providerSchemaWorkspaceReplay .
+w:providerSchemaWorkspaceReplay a p:Artifact ;
+    rdfs:label "After strict optional schema keyword validation, the current compiler regenerated 106 files in 49 directories from 111 pinned inputs on macOS ARM64. The seven workspace members, file bytes and permissions, 105 policy decisions and 11 configuration cases matched the archive. All 42 library, provider interoperability and Rust round-trip tests passed including the six-build control." ;
+    p:location "verification/provider-tooling/provider-schema-reconstruction.json" .
+
+w:portHistoricTooling p:evidence w:publicTypeCoverageRust .
+w:publicTypeCoverageRust a p:Artifact ;
+    rdfs:label "Rust reproduced six archived v5 and v6 public export comparisons and both workspace summaries on ARM64 macOS. Independent recompilation reproduced the seven caller receipts byte for byte, with 82 accepted imports and 74 E0432 diagnostics." ;
+    p:location "verification/provider-tooling/public-type-coverage-rust.json" .
+
+w:wholeStreamBlock p:evidence w:copyDataPipeInterop .
+w:copyDataPipeInterop a p:Artifact ;
+    rdfs:label "The original and reconstructed copy Data libraries exchanged 1,260 contiguous frames in each direction through local pipes on ARM64 macOS. Each run matched 4,210,721 wire bytes against the independent frame encoder and 4,194,341 decoded bytes against the input. Both decoders rejected truncation and a noncontiguous offset." ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/ff7b923bdbb3596cbef7b117683f0be847fe77c0/verification/whole/copy-frame/pipe-aarch64-apple-darwin.json" .
+
+w:portHistoricTooling p:evidence w:sourceCopyGuardReplayRust .
+w:sourceCopyGuardReplayRust a p:Artifact ;
+    rdfs:label "On ARM64 macOS the Rust replay reproduced the archived guard receipt across seven variants, nine rules and 72 caller observations. Three named errors changed when the two Data encoder checks were reversed. Substituted baseline compiler evidence failed the mutation source pin." ;
+    p:location "verification/provider-tooling/source-copy-guard-replay.json" .
+
+w:portHistoricTooling p:evidence w:publicDiagnosticObserverRust .
+w:publicDiagnosticObserverRust a p:Artifact ;
+    rdfs:label "The Rust diagnostic observer reproduced the Python receipt from the same rebuilt library byte for byte on macOS ARM64. Four native caller scenarios matched the archived behavior and the generated library, including Unicode event bytes, cross-thread state and a closed stderr pipe. Only the upstream library digest differed from the historical receipt." ;
+    p:location "verification/provider-tooling/public-diagnostics-rust.json" .
+
+w:portHistoricTooling p:evidence w:cliCompositionRust .
+w:cliCompositionRust a p:Artifact ;
+    rdfs:label "Rust recovered the offline auxiliary CLI grammar and terminal prefix policy, regenerating all eight composition outputs byte for byte. On ARM64 macOS the offline transcript matched the archive. The rebuilt terminal workspace matched 91 pinned files across seven members, 164 original CLI observations and both recorded out-of-profile comparisons." ;
+    p:location "verification/provider-tooling/cli-composition-rust.json" .
+
+w:portHistoricTooling p:evidence w:offlineCliRust .
+w:offlineCliRust a p:Artifact ;
+    rdfs:label "The Rust offline CLI builder reproduced all 83 workspace files for each of the baseline and successor builds on macOS ARM64. The Rust and historical observers produced identical receipts on the same binaries. Both builds preserved the historical help and usage results, and the downstream prefix verifier reproduced 164 scoped CLI comparisons and both outside-profile controls." ;
+    p:location "verification/provider-tooling/offline-cli-rust.json" .
+
+w:replaceableWasmProviders p:evidence w:offlineCliRust .
+w:wholeStreamBlock p:evidence w:offlineCliRust .
+
+w:portHistoricTooling p:evidence w:canonicalWorkspaceSealRust .
+w:canonicalWorkspaceSealRust a p:Artifact ;
+    rdfs:label "The canonical workspace verifier reconstructs the inherited native package seal in Rust and checks seven member records. On ARM64 macOS it rejected five modified products. The Rust parser witness read the Cargo artifact log and reproduced all 58,760 archived result bytes for 224 parser cases, including 34 acceptances. The complete canonical replay reproduced 99 staged inputs, 31 source denial probes, 164 terminal comparisons and 77 importable public spellings out of 140." ;
+    p:location "verification/provider-tooling/canonical-workspace-seal-rust.json" .
+
+w:portHistoricTooling p:evidence w:sevenPublicImportsRust .
+w:sevenPublicImportsRust a p:Artifact ;
+    rdfs:label "The Rust seven-library public import verifier reproduced the archived verifier's 140 import outcomes and diagnostics and both prototype caller checks on ARM64 macOS. Its locked offline build replay preserved every caller result. The canonical engine-choice replay matched the archived two gains, Stream and SubmitDisposition." ;
+    p:location "verification/provider-tooling/seven-public-imports-rust.json" .
+
+w:sevenPublicImportsRust rdfs:comment "Historical callers now verify the returned release manifest and select Cargo metadata, libraries and linker paths through the same Rust routines as the native audit. Both implementations rejected a truncated build, artifacts outside the target and one altered member. On ARM64 macOS the Rust command with a rebuilt upstream prototype matched all 140 archived canonical-engine-choice observations." .
+
+w:portHistoricTooling p:evidence w:referenceRelayRust .
+w:referenceRelayRust a p:Artifact ;
+    rdfs:label "The Rust reference relay verifier ran all three pinned upstream loopback tests on ARM64 macOS and reproduced the archived 637-byte receipt. It rejected dirty and wrong-revision checkouts before building. The companion removed its Python relay fixture runner." ;
+    p:location "verification/provider-tooling/reference-relay-rust.json" .
+
+w:portHistoricTooling p:evidence w:legacyVersionProbeRust .
+w:legacyVersionProbeRust a p:Artifact ;
+    rdfs:label "The Rust observer verified the pinned optional CLI with the original local version probe on macOS ARM64. Its full 1,929-byte receipt matched the historical observer and archive. Five controls rejected changed provenance, a failing exit or unexpected stderr. The companion removed the Python observer." ;
+    p:location "verification/provider-tooling/legacy-version-probe-rust.json" .
+
+w:portHistoricTooling p:evidence w:stateCapsuleRust .
+w:stateCapsuleRust a p:Artifact ;
+    rdfs:label "The native v1 state runner and its historical predecessor read each other's fresh capsules on ARM64 macOS with the pinned original bridge and worker. Both reproduced every healthy and corrupt reply, retained the key, and emitted identical receipts per capsule. The Rust runner bounds piped sessions and publishes captures after the checks pass." ;
+    p:location "verification/provider-tooling/state-capsule-rust.json" .
+
+w:portHistoricTooling p:evidence w:typescriptVaultModeRust .
+w:typescriptVaultModeRust a p:Artifact ;
+    rdfs:label "The Rust verifier regenerated the published TypeScript vault choice and compared Node's observed ordinals with Darwin and Linux native witnesses. All three static rejection cases passed. The compiler, projection, declaration and runtime fields matched the historical verifier's archived receipt." ;
+    p:location "verification/provider-tooling/typescript-vault-mode-rust.json" .
+
+w:replaceableWasmProviders p:evidence w:postRefactorWorkspaceReplay .
+w:postRefactorWorkspaceReplay a p:Artifact ;
+    rdfs:label "A fresh compiler at 497c96d regenerated the seven Marmish crates from 111 pinned inputs. The complete tree matched the baseline bytes and modes. Fresh original and generated observers matched 105 policy cases and 11 file cases. Mixed stream-library processes reproduced the complete wire and payload in both directions and rejected all four malformed inputs." ;
+    p:location "verification/provider-tooling/post-refactor-workspace-replay.json" .
+
+w:portHistoricTooling p:evidence w:typescriptVaultWidthRust .
+w:typescriptVaultWidthRust a p:Artifact ;
+    rdfs:label "The native verifier reproduced the TypeScript fixed-byte projection and its lock and obligations while Seatbelt denied both Rust input probes. Node accepted the published 32-byte width and the mutated 31-byte width with the same ownership and rejection observations as the historical verifier." ;
+    p:location "verification/provider-tooling/typescript-vault-fixed-rust.json" .
+w:postRefactorWorkspaceReplay rdfs:comment "Fresh ARM64 macOS runs at 7e368cb passed 33 library tests, four provider interoperability tests and five Rust round-trip tests, including the separately invoked six-build native comparison." .
+
+w:portHistoricTooling p:evidence w:generatedDiagnosticsRust .
+w:generatedDiagnosticsRust a p:Artifact ;
+    rdfs:label "The complete Rust diagnostics verifier staged 85 pinned inputs, denied twelve source and caller reads and built all seven crates on ARM64 macOS. Its four downstream diagnostic scenarios matched the original including cross-thread state and closed stderr. All archived observations matched; only build artifact digests and the companion revision changed. Four altered products failed the native seal check." ;
+    p:location "verification/provider-tooling/generated-diagnostics-rust.json" .
+
+w:portHistoricTooling p:evidence w:convergedPublicApiRust .
+w:convergedPublicApiRust a p:Artifact ;
+    rdfs:label "Three ARM64 macOS release qualifications replayed the shared Rust public API verifier. All archived observations matched, including both prototype constant reads, 26 engine error variants and 50 negative compiler diagnostics. The canonical release reproduced 77 importable symbols across 140 attempts." ;
+    p:location "verification/provider-tooling/converged-public-api-rust.json" .
+
+w:portHistoricTooling p:evidence w:commandRoomBindingRust .
+w:commandRoomBindingRust a p:Artifact ;
+    rdfs:label "The Rust room-binding verifier reproduced all four archived projection locks and the complete observation stream for ten valid packets and forty incorrect peer or session bindings. The historical Python and Rust runners agreed on every receipt field with a common compiler." ;
+    p:location "verification/provider-tooling/command-room-binding-rust.json" .
+
+w:portHistoricTooling p:evidence w:commandResponsesRust .
+w:commandResponsesRust a p:Artifact ;
+    rdfs:label "The Rust runners reproduced the original 117 complete response observations and the independent 108-case structure receipt on ARM64 macOS. The generated codec matched all accepted bytes and refused all twenty wrong decoder pairings. Both the pre-refactor and provider compilers emitted the same complete delivery workspace, including two source files that differ from the historical delivery release." ;
+    p:location "verification/provider-tooling/command-responses-rust.json" .
+
+w:portHistoricTooling p:evidence w:commandRequestsRust .
+w:commandRequestsRust a p:Artifact ;
+    rdfs:label "The Rust verifier compared 66 request packets across isolated mainline and projected codecs on ARM64 macOS. All six accepted packets returned their exact bytes. The original Python and Rust receipts matched byte for byte on the same compiler. Three modified package inputs were refused and the shared observer reproduced the archived 108-case response structure receipt." ;
+    p:location "verification/provider-tooling/command-requests-rust.json" .
+
+w:portHistoricTooling p:evidence w:ownerProjectorsRust .
+w:ownerProjectorsRust a p:Artifact ;
+    rdfs:label "Both native macOS owner launchers recovered and staged the historical inputs, generated and built release executables under Seatbelt and replayed the independent status and foreground qualification. All archived observations matched, including admission, cleanup and foreground recovery. Three altered inputs were rejected." ;
+    p:location "verification/provider-tooling/owner-projectors-rust.json" .
+
+w:portHistoricTooling p:evidence w:directCommandCorpusRust .
+w:directCommandCorpusRust a p:Artifact ;
+    rdfs:label "The native direct replay matched all nine local fixture observations including distinct binary streams, raw arguments, exit 7 and private receipts. Running the historical short fixture reproduced the full archived receipt. With the native short executable only its five executable digests changed. All four finite fixture receipts were identical. The Rust corpus tests now independently check stream boundaries, status mismatches, fixed vector bytes and nonce bounds." ;
+    p:location "verification/provider-tooling/direct-command-corpus-rust.json" .
+
+w:portHistoricTooling p:evidence w:commandOutputRust .
+w:commandOutputRust a p:Artifact ;
+    rdfs:label "The direct and mixed-peer harnesses use a shared Rust comparator. Offline replay reproduced nine archived status and stream receipts and twelve historical goodput values. Three native test groups and eighteen Python integration tests exercised exact bytes, receiver identity, duration bounds and failure paths." ;
+    p:location "verification/provider-tooling/command-output-rust.json" .
+
+w:portHistoricTooling p:evidence w:candidatePreflightRust .
+w:candidatePreflightRust a p:Artifact ;
+    rdfs:label "Two preflight verifiers now use the shared native Seatbelt policy. Five ARM64 macOS candidate exports reproduced all 22 archived exit statuses, stdout and stderr, contract pins and cleanup observations. Ten negative controls passed. A separate test exercised permitted and denied file operations and verified that Seatbelt denied a reachable loopback listener." ;
+    p:location "verification/provider-tooling/candidate-preflight-rust.json" .
+
+w:portHistoricTooling p:evidence w:composedOwnerPreflightRust .
+w:composedOwnerPreflightRust a p:Artifact ;
+    rdfs:label "The composed-owner preflight and its downstream artifact inspection now use the native verifier. All 24 CLI observations from six exports matched their ARM64 macOS archives, and eight altered provenance records failed inspection. The activation caller received both expected binary digests and all three contract pins." ;
+    p:location "verification/provider-tooling/composed-preflight-rust.json" .
+
+w:portHistoricTooling p:evidence w:offlineProfileSetupRust .
+w:offlineProfileSetupRust a p:Artifact ;
+    rdfs:label "Rust offline profile setup replay reproduced the archived macOS receipt across 15 cases for each of two relay spellings and two builds, including private file credentials and rejected grants." ;
+    p:location "verification/provider-tooling/offline-profile-setup.json" .
+
+w:portHistoricTooling p:evidence w:coreLinuxRunnerRust .
+w:coreLinuxRunnerRust a p:Artifact ;
+    rdfs:label "Rust Linux core-package launcher and macOS controls. A fresh projection matched 1,735 original observations and the archived transcript digest. Native Linux execution of this launcher is pending guest access." ;
+    p:location "verification/provider-tooling/core-package-inputs.json" .
+
+w:portHistoricTooling p:evidence w:coreMacosQualificationRust .
+w:coreMacosQualificationRust a p:Artifact ;
+    rdfs:label "The Rust macOS core-package qualifier and the compatibility entry point each reproduced the archived receipt byte for byte, including all four distinct mutation outcomes. The legacy and native sandbox interfaces produced the same environment and read roots." ;
+    p:location "verification/provider-tooling/core-package-inputs.json" .
+
+w:portHistoricTooling p:evidence w:publicStreamProfilesRust .
+w:publicStreamProfilesRust a p:Artifact ;
+    rdfs:label "Pinned Rust public stream oracle replayed 403 cases, 31 wire pairs and three behavioral controls in each of the macOS ARM64 dev and release profiles. Both archived Linux architectures matched the frozen baseline and profile provenance. Twelve receipt alterations were rejected." ;
+    p:location "verification/provider-tooling/public-stream-profiles.json" .
+
+w:portHistoricTooling p:evidence w:sourceCopyFrameRecoveryRust .
+w:sourceCopyFrameRecoveryRust a p:Artifact ;
+    rdfs:label "The Rust encoder, fragment and guard verifiers reproduced all three archived receipts. The rebuilt framework regenerated the exact seven-crate tree from 111 pinned inputs. Local original/generated copy Data encoders and decoders exchanged 1,260 frames in each direction with all bytes matching and all four malformed-stream controls detected." ;
+    p:location "verification/provider-tooling/source-copy-frames-rust.json" .
+
+w:portHistoricTooling p:evidence w:copyFrameDecodeRust .
+w:copyFrameDecodeRust a p:Artifact ;
+    rdfs:label "Rust replay of the complete copy-frame release reproduced the archived receipt. Both libraries passed 11 upstream and nine exact checks. The composed package passed the Manifest and Checkpoint corpora, and the mutated encoder and decoder returned the predicted opposite errors." ;
+    p:location "verification/provider-tooling/copy-frame-decode-rust.json" .
+
+w:portHistoricTooling p:evidence w:launchLayoutRust .
+w:launchLayoutRust a p:Artifact ;
+    rdfs:label "Rust replay recovered all eleven Launch writer slots and reproduced the archived macOS receipt byte for byte. All 227 native observations matched for the release and reordered builds. The source mutation changed 201 digests. The independent Rust corpus matched the historical requests and both sets of expected outputs." ;
+    p:location "verification/provider-tooling/launch-layout-rust.json" .
+
+w:portHistoricTooling p:evidence w:launchHashRust .
+w:launchHashRust a p:Artifact ;
+    rdfs:label "The Rust Launch hash verifier matched 227 digest and namespace cases and the predicted field-order mutation. The shared Rust construction and decoding corpus exactly matched its historical inputs and construction expectations. The Launch hash, base Launch, Manifest and field-relations runs each reproduced the archived macOS receipt byte for byte." ;
+    p:location "verification/provider-tooling/launch-hash-rust.json" .
+
+w:portHistoricTooling p:evidence w:launchRecoveryHelperContextRust .
+w:launchRecoveryHelperContextRust a p:Artifact ;
+    rdfs:label "Rust Launch recovery rebuilt both graphs and Rust bindings from the source, compiler inventory and native enum witness. Both the Launch and helper-context qualification receipts matched the macOS archives. The current compiler reproduced the seven-crate workspace from 111 pinned inputs. Independent observers matched all 105 policy decisions and 11 configuration cases, and the mixed local codec pairs matched every wire and payload byte." ;
+    p:location "verification/provider-tooling/launch-recovery-helper-context-rust.json" .
+
+w:portHistoricTooling p:evidence w:vaultValueChecksRust .
+w:vaultValueChecksRust a p:Artifact ;
+    rdfs:label "Both Rust vault qualifiers reproduced their archived macOS receipts. The original strict test rejected a 31-byte array at compile time. Four of 600 public-value results changed when the label limit moved from 128 to 127 bytes in both the reference and projected implementations. The plugin-enabled and pre-refactor compilers produced identical package trees and fixed-byte recovery output. The current packages passed the strict and ownership tests and the public-value stdout comparison." ;
+    p:location "verification/provider-tooling/vault-value-replay-rust.json" .
+
+w:portHistoricTooling p:evidence w:nativeErrorRecoveryRust .
+w:nativeErrorRecoveryRust a p:Artifact ;
+    rdfs:label "Rust reproduced the independent baseline and mutated native error transcripts and their archived receipt byte for byte. The fresh Rust and historical Python runners produced identical combined receipts, including both executable hashes, all 59 input pins and 32 release-info exit, stdout and stderr comparisons. Only the executable hashes differ from the older combined archive. The current compiler reproduced the finite error graph, binding and source observation, and the seven-member workspace caller matched all 32 reference rows." ;
+    p:location "verification/provider-tooling/native-error-recovery-rust.json" .
+
+w:portHistoricTooling p:evidence w:engineLimitRust .
+w:engineLimitRust a p:Artifact ;
+    rdfs:label "On macOS the seven-member release workspace and original binaries matched on all ten startup cases and three library descriptor-limit cases. The native Rust runner resolved the engine dependencies using Cargo build records in the presence of two libc artifacts. Its entire receipt matched the historical observer on the same artifacts." ;
+    p:location "verification/provider-tooling/engine-limits-rust.json" .
+
+w:portHistoricTooling p:evidence w:prototypeConstantRust .
+w:prototypeConstantRust a p:Artifact ;
+    rdfs:label "The native Rust workspace qualifier reproduced the original and generated MAX_LINE caller outputs, the reordered value from a source expression mutation, and all four buffered-reader cases on macOS ARM64. Fresh source recovery locks matched the historical Python oracle. The current compiler reproduced the pinned compiler's prototype workspace and mutated recovery. The seven-member command-policy release matched all 106 files from 111 inputs, 105 policy decisions and 11 file cases. Each mixed local codec direction matched 4210721 wire bytes." ;
+    p:location "verification/provider-tooling/prototype-constant-rust.json" .
+
+w:portHistoricTooling p:evidence w:publicTypeReleasesRust .
+w:publicTypeReleasesRust a p:Artifact ;
+    rdfs:label "Both seven-member public type qualifiers ran in Rust on macOS ARM64. Original and regenerated libraries matched on 26 error variants, 38 error diagnostic checks, 12 backend choice diagnostics and 32 record diagnostics. Both receipts reproduced their archived observations. The plugin-enabled compiler matched every generated byte and mode for both releases, and downstream callers reproduced the error, record, identity and buffered-reader results on its observational-records workspace." ;
+    p:location "verification/provider-tooling/public-type-releases-rust.json" .
+
+w:storedProfileRestrictionFinding a p:Finding ;
+    rdfs:label "Initialization compared the stored policy to its initial value and refused a valid explicit allowlist with exit 125." ;
+    p:source w:storedProfileRestrictionEvidence .
+w:storedProfileRestrictionReader a p:Task ;
+    rdfs:label "Project the recovered policy schema into the existing profile reader" ;
+    p:milestone w:marmishMilestone ; p:source w:storedProfileRestrictionFinding ;
+    p:acceptance "Fresh isolated profiles in both mixed pairings preserve the explicit policy and match mainline for invalid inputs, output and status." ;
+    p:status p:done ; p:evidence w:storedProfileRestrictionEvidence .
+w:storedProfileRestrictionEvidence a p:Artifact ;
+    p:location "verification/provider-tooling/mixed-profile-setup-rust.json" .
+
+w:retainedRoomRustReplay a p:Artifact ;
+    rdfs:label "Rust retained-room fixture replay and 104-file pre/post-provider workspace comparison" ;
+    p:location "verification/provider-tooling/retained-room-fixture-rust.json" .
+w:portHistoricTooling p:evidence w:retainedRoomRustReplay .
+
+w:workspaceInputStagingReplay a p:Artifact ;
+    rdfs:label "Rust staging matched 48 release manifests, 19 distinct dependency locks and three native test configurations. The full test configuration passed all 45 tests." ;
+    p:location "verification/provider-tooling/workspace-inputs-rust.json" .
+w:portHistoricTooling p:evidence w:workspaceInputStagingReplay .
+
+w:profilePolicyLocalPacketEvidence a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/19e4506dc18927a287e482285bc809f9b2e4c5a3/verification/whole/basic-command-interop/LOCAL-PROGRESS.md" .
+w:profilePolicySubmitOmission a p:Finding ;
+    rdfs:label "The profile policy workspace omits the separate retained-room submit declaration and queue. Its foreground handler declines the submit operation." ;
+    p:source w:profilePolicyLocalPacketEvidence .
+w:basicCommandInterop p:evidence w:profilePolicyLocalPacketEvidence .
+
+w:coldWorkspaceRustEvidence a p:Artifact ;
+    rdfs:label "Rust v5 cold-cache qualification, offline release and parser transcripts, and historical product layout controls" ;
+    p:location "verification/provider-tooling/cold-workspace-rust.json" .
+w:portHistoricTooling p:evidence w:coldWorkspaceRustEvidence .
+
+w:cleanupAfterMerge a p:Decision ;
+    rdfs:label "Remove task scratch when its last consumer finishes, clean merged branches and repeat the worktree inventory after merges" ;
+    p:source w:branchCleanupInstructions .
+w:branchCleanupInstructions a p:Artifact ; p:location "AGENTS.md#finish-a-branch" .

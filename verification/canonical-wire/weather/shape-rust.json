@@ -1,0 +1,25 @@
+{
+  "format": "oddlang-json-wire-schema-rust-v1",
+  "derives": {
+    "urn:weather:sample": [
+      "Clone",
+      "PartialEq",
+      "Eq"
+    ]
+  },
+  "externals": {},
+  "names": {
+    "urn:weather:envelope": "Frame",
+    "urn:weather:format": "revision",
+    "urn:weather:seq": "sequence",
+    "urn:weather:packet": "message",
+    "urn:weather:direction": "Direction",
+    "urn:weather:upload": "Upload",
+    "urn:weather:count": "count",
+    "urn:weather:bytes": "bytes",
+    "urn:weather:label": "label",
+    "urn:weather:samples": "samples",
+    "urn:weather:sample": "Sample",
+    "urn:weather:sample-tag": "tag"
+  }
+}

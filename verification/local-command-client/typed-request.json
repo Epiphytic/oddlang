@@ -1,0 +1,44 @@
+[
+  {
+    "key": "verb",
+    "value": "read",
+    "id": "urn:field:request:verb"
+  },
+  {
+    "key": "sensor",
+    "argument": {
+      "id": "sensor",
+      "kind": "unsigned64"
+    },
+    "id": "urn:field:request:sensor"
+  },
+  {
+    "key": "label",
+    "argument": {
+      "id": "label",
+      "kind": "string"
+    },
+    "id": "urn:field:request:label"
+  },
+  {
+    "key": "waiting",
+    "argument": {
+      "id": "waiting",
+      "kind": "flag"
+    },
+    "id": "urn:field:request:waiting"
+  },
+  {
+    "key": "probes",
+    "argument": {
+      "id": "probe",
+      "kind": "repeated_string"
+    },
+    "id": "urn:field:request:probes"
+  },
+  {
+    "key": "comment",
+    "value": null,
+    "id": "urn:field:request:comment"
+  }
+]

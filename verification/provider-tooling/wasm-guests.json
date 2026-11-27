@@ -1,0 +1,33 @@
+{
+  "rust": "1.97.1",
+  "platform": "aarch64-apple-darwin",
+  "compilerSha256": "ccd3aa5caeac7c57dddb5d8c04e6cc619c7580e446edb8139bc00f0c6555e09f",
+  "hostSha256": "6f467e057815cfae5b5f7dd18e0a728e4fc6e8509956d17c657f019c8ad99651",
+  "toolchainPins": "examples/wasm/toolchain.toml",
+  "sourceFilesByteIdentical": 27,
+  "componentsSha256": {
+    "double-import.wasm": "5685df1daa741076baf249c3b86386bd7a6a05984feb21a8b6de14a97b3a3035",
+    "echo-import.wasm": "fb1f63dbb5548c5f76111aa4bb7011e07ba1ff4a5fde617e3ff53b7ba89b9e85",
+    "echo-rename.wasm": "18d367e6e1ac297449233fff092c458e78ac00b7bca8c844fc427467795850bc",
+    "echo-tags.wasm": "73827af54ac2d8314c9603f7b024713187e89c81f249d251a6b2051303f64167",
+    "echo.wasm": "aaac6937047319b56feafbf0a09e64cab1f2cc85efa08021c3922abd633c05c9",
+    "generated-ledger-test.wasm": "2511bfe18ed5462a20c5217521d2976c577744e145fc07c0ccbd1c2f29a1d55a",
+    "generated-ledger.wasm": "045ac8b323be378729eb85200b519a4a0b1eadb072d6748f7fd03832e1a4bfe2",
+    "manual-ledger-test.wasm": "33803972ec143be3bf2727378318df927c9d786da7cb6b6f48775b21761bb398",
+    "manual-ledger.wasm": "5ccfc0c61fb9bb11fd8d9f3d8f4e1271c8a40f359c66509587f03f8138f3c38d",
+    "max-exclusive.wasm": "a425863918eda82e615fa86e8dfc6d6a7c19036b7ddecd68ccceb94c702d7c99",
+    "probe.wasm": "3ce378b8c86feb095e2e7ab72d0f4dbe69b8808831a64e0070a634bdac299aee",
+    "trap.wasm": "377cdbdd80c0b49a98a990787f508fe6e7714df0500b62558710f44bcab4de91"
+  },
+  "extractedWitFilesByteIdentical": 12,
+  "wasmtimeTests": [
+    "portable_cases_match_independent_ledger_oracle",
+    "exercise_released_components_and_reject_counterexamples"
+  ],
+  "reportDirectory": {
+    "files": 38,
+    "byteIdentical": 38,
+    "serdeJsonPreserveOrderEnabledInTest": true
+  },
+  "archiveDigestMismatchRejectedBeforeGuestOutput": true
+}

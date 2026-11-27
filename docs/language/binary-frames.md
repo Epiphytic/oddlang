@@ -6,7 +6,7 @@ Slots bind unsigned integers, fixed byte arrays, explicit enum tag tables, termi
 
 A binary record with `fragment: true` exposes crate-private checked encode and prefix-read methods for reuse by framed unions. Prefix read consumes only that record's fields. The frame checks the record's native validator before reading later slots. A Rust overlay may bind a fragment to an already declared native struct through a qualified `existingType`; the projection emits layout methods on that type. A standalone record keeps its normal trailing-byte precedence.
 
-The Rust binding names the public frame and incremental decoder. The decoder retains one bounded incomplete frame, consumes at most one frame per call, and returns the consumed count and completed value. Once a read fails, the decoder rejects further input with the named poison error. Finish succeeds only at a clean boundary and does not mutate state. The package component kind is `binary-frame`. [Independent binary frame fixture](../../verification/binary-frame/verify.py)
+The Rust binding names the public frame and incremental decoder. The decoder retains one bounded incomplete frame, consumes at most one frame per call, and returns the consumed count and completed value. Once a read fails, the decoder rejects further input with the named poison error. Finish succeeds only at a clean boundary and does not mutate state. The package component kind is `binary-frame`. [Independent binary frame fixture](../../verification/provider-validation/src/bin/binary-frame.rs)
 
 ## Compiler-backed encoder structure
 
@@ -16,7 +16,7 @@ A case with an unknown write, unsupported encoding, or a possible payload alias 
 
 Run `oddlang recover tagged-frame CRATE_ROOT SOURCE EVIDENCE SELECTION TEMPLATE OVERLAY OUTPUT`. Recovery publishes the graph and a declaration-keyed obligation report together. The selection pins the source and receipt. The template supplies a sorted slot inventory and vacant tag, literal and maximum values. Positional hints bind existing tuple indices to stable slot identities. Rust source and compiler evidence are inputs to recovery. The generated library consumes the portable graph and Rust overlay.
 
-The unrelated native fixture lives at `verification/rust-recovery/tagged-frame/verify.py`. It includes direct and helper-based writes, baseline and mutated native byte comparisons, and rejections for overlapping tags, an altered output header, local buffer aliasing, unproven buffer mutation and unsupported endianness.
+The unrelated native fixture lives at `verification/rust-recovery/tagged-frame/cases.json`. It includes direct and helper-based writes, baseline and mutated native byte comparisons, and rejections for overlapping tags, an altered output header, local buffer aliasing, unproven buffer mutation and unsupported endianness.
 
 ## Compiler-backed encoder preflight
 
@@ -24,7 +24,7 @@ The frame guard observer selects the encoder and named cases with `ODD_RECOVERY_
 
 Run `oddlang recover frame-guards CRATE_ROOT SOURCE EVIDENCE SELECTION TEMPLATE OVERLAY GRAPH` to populate vacant encoder guard lists. The selection pins the source and receipt, and maps each rule's semantic field role to an existing stable identifier. Count and range bounds must agree with the paired slot policy. The decoder's ordered checks remain defined by its own graph contracts. The generated encoder checks preconditions in the observed source order.
 
-The unrelated witness in `verification/rust-recovery/frame-guards/verify.py` exercises simultaneous failures, maximum boundaries, checked overflow and exact valid bytes. It also exercises proof failures for a side effect, altered error conversion and interleaving a check with a write.
+The unrelated witness in `verification/rust-recovery/frame-guards/cases.json` exercises simultaneous failures, maximum boundaries, checked overflow and exact valid bytes. It also exercises proof failures for a side effect, altered error conversion and interleaving a check with a write.
 
 ## Compiler-backed checked record fragments
 
@@ -34,4 +34,12 @@ Record writers can supply direct fixed bytes, big-endian primitive values, one-b
 
 Run `oddlang recover frame-fragment CRATE_ROOT SOURCE EVIDENCE SELECTION TEMPLATE OVERLAY OUTPUT`. The selection binds the source proof to an unordered portable catalog of field encodings and reviewed independent record bounds. Recovery writes `graph.json` and `dependencies.json`. The latter records the checked validator, expected validation order, any length bounds required before narrowing, and the outstanding independent qualification of validator and decoder bodies. The recovered writer order must preserve the existing validation order for fields that can reject.
 
-The unrelated native fixture at `verification/rust-recovery/frame-fragments/verify.py` recompiles both delegation forms before and after a source edit. It checks valid bytes and named rejections, including omitted prechecks, changed option markers, incomplete inline writes and unknown buffer mutation.
+The unrelated native fixture at `verification/rust-recovery/frame-fragments/cases.json` recompiles both delegation forms before and after a source edit. It checks valid bytes and named rejections, including omitted prechecks, changed option markers, incomplete inline writes and unknown buffer mutation.
+
+Run all three native recovery qualifications with the pinned Rust compiler and its `rustc-dev` component installed.
+
+```sh
+for suite in tagged-frame frame-guards frame-fragments; do
+  cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin qualify-rust-recovery -- "$suite" target/debug/oddlang
+done
+```

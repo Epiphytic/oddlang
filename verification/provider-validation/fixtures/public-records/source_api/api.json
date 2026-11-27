@@ -1,0 +1,12 @@
+{
+  "role": "rust-drop-in-source-api",
+  "fields": {
+    "urn:calendar:appointment:until": {
+      "name": "until",
+      "visibility": "public",
+      "type": {
+        "optional": "u64"
+      }
+    }
+  }
+}

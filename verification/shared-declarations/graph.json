@@ -1,0 +1,104 @@
+{
+  "format": "oddlang-shared-declarations-v1",
+  "id": "urn:meter:domain",
+  "constants": [
+    {
+      "id": "urn:meter:step",
+      "value": 17
+    },
+    {
+      "id": "urn:meter:period",
+      "value": {
+        "multiply": [
+          3,
+          {
+            "ref": "urn:meter:step"
+          }
+        ]
+      }
+    }
+  ],
+  "results": [
+    {
+      "id": "urn:meter:outcome",
+      "error": "urn:meter:fault"
+    }
+  ],
+  "errors": [
+    {
+      "id": "urn:meter:fault",
+      "variants": [
+        {
+          "id": "urn:meter:paused",
+          "payload": "none",
+          "message": [
+            {
+              "text": "paused"
+            }
+          ]
+        },
+        {
+          "id": "urn:meter:label",
+          "payload": "text",
+          "message": [
+            {
+              "text": "sensor {"
+            },
+            {
+              "payload": true
+            },
+            {
+              "text": "}"
+            }
+          ]
+        },
+        {
+          "id": "urn:meter:count",
+          "payload": "u64",
+          "message": [
+            {
+              "payload": true
+            },
+            {
+              "text": " cycles"
+            }
+          ]
+        },
+        {
+          "id": "urn:meter:flag",
+          "payload": "bool",
+          "message": [
+            {
+              "payload": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "stringEnums": [
+    {
+      "id": "urn:meter:mode",
+      "numbers": {
+        "tags": {
+          "urn:meter:cold": 3,
+          "urn:meter:hot": 11
+        },
+        "unknown": {
+          "id": "urn:meter:label",
+          "argument": "mode code"
+        }
+      },
+      "variants": [
+        {
+          "id": "urn:meter:hot",
+          "wire": "h.ot"
+        },
+        {
+          "id": "urn:meter:cold",
+          "wire": "COLD"
+        }
+      ]
+    }
+  ]
+}

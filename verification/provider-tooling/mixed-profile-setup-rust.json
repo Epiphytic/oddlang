@@ -1,0 +1,21 @@
+{
+  "host": "aarch64-apple-darwin",
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "companion": "89442a8529416a60829d62fb5c1bde33fe28802a",
+  "previousWorkspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c",
+  "workspaceLockSha256": "889017343f0fdb092dee203264aa4f6d6d194bad8ef396e336f2dd2cf6ec9b76",
+  "previousProjectionByteIdentical": true,
+  "repeatProjectionByteIdentical": true,
+  "historicalProfileReceiptByteIdentical": true,
+  "casesPerPairingPerRoute": 19,
+  "pairings": 4,
+  "relayAddressFormats": 2,
+  "distinctDisposableIdentities": 16,
+  "explicitAllowlist": ["/usr/bin/true"],
+  "rejectedPolicyDiagnostics": ["config_schema", "config_account", "config_policy_bounds"],
+  "networkDeniedDuringSetup": true,
+  "profileReceipt": "verification/whole/basic-command-interop/mixed-profile-command-policy-macos-arm64.json",
+  "codecReceipt": "verification/whole/copy-frame/profile-command-policy-macos-arm64.json",
+  "reproduction": "verification/whole/basic-command-interop/BUILD.md",
+  "liveCommandDeliveryVerified": false
+}

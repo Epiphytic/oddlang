@@ -1,0 +1,38 @@
+{
+  "format": "oddlang-json-wire-schema-rust-v1",
+  "names": {
+    "urn:radio:envelope": "Envelope",
+    "urn:radio:message": "Message",
+    "urn:radio:send": "Send",
+    "urn:radio:read": "Read",
+    "urn:radio:envelope:protocol": "protocol",
+    "urn:radio:envelope:version": "version",
+    "urn:radio:envelope:sequence": "sequence",
+    "urn:radio:envelope:message": "message",
+    "urn:radio:send:gain": "gain",
+    "urn:radio:sweep": "Sweep",
+    "urn:radio:scan": "Scan",
+    "urn:radio:burst": "Burst",
+    "urn:radio:cal": "Calibration",
+    "urn:radio:burst:samples": "samples",
+    "urn:radio:burst:sensor": "sensor",
+    "urn:radio:burst:token": "token"
+  },
+  "derives": {
+    "urn:radio:sweep": [
+      "Clone",
+      "PartialEq",
+      "Eq"
+    ]
+  },
+  "externals": {
+    "urn:radio:probe": "crate::Probe"
+  },
+  "externalDerives": {
+    "urn:radio:probe": [
+      "Clone",
+      "PartialEq",
+      "Eq"
+    ]
+  }
+}

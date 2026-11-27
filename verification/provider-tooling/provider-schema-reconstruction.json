@@ -1,0 +1,43 @@
+{
+  "oddlangRevision": "64b3e5d54030beed290f6e92f0db10edb1550da9",
+  "companionToolsRevision": "84e94d27c68a9f70f9b5aaf1a8aab85a95598e4d",
+  "inputsRevision": "058e5d3f473380ced323db756a96d37a6a37476a",
+  "preFixCompilerSha256": "13eb8d23ed67cecfc599c6dd804786fdbb5890e7461b740e03a6798f70d9ec76",
+  "testsPassed": {
+    "unit": 33,
+    "providerInterop": 4,
+    "rustRoundtrip": 5
+  },
+  "invalidSchemaDiagnostic": "invalid type: null, expected a sequence",
+  "postFixReplay": {
+    "compilerSha256": "fc63fc708588bf1f52b39bb1f70b3cf911f6fd5c48a765e60bdadb3ef8d2e309",
+    "inputManifestSha256": "859923216f7a48d14f6975c9625fc809b2f6f1a0da3c4484ff367f96eaa929b4",
+    "pinnedInputs": 111,
+    "policy": {
+      "foregroundSourceSha256": "9ddc9fd6ab6f2fa08e3e80805c18d96a0d0be4c02ca177205bbe5cd692d106e2",
+      "host": "aarch64-apple-darwin",
+      "policyDecisions": {
+        "cases": 105,
+        "inputsSha256": "b392ced173616d91990bb648af275a25776ccc15e22f33faf7388baea451a980",
+        "observationsSha256": "c30e84dc1ec0633fc995d79eda55ece8dfabd27db8cc91bcf72e2270cbbd6f6b"
+      },
+      "rebuiltObserverSha256": {
+        "generated-observer": "0bfc2b368b0e6d412e984c431c0b293a9059fb22d53490db35af3c90db27658f",
+        "policy-observer": "b3ad414b294dd05945e57bd640872f26365815c307e7afd94472a70759a5dc74",
+        "room-observer": "b580717c23431033a4fb61ca2601e3817b0055192c38e5bcbf20d329e7dd6d84"
+      },
+      "roomConfigFileCases": 11,
+      "rustToolchain": "1.97.1",
+      "upstreamCommit": "af54339d250290490d62d4475a77539b7e739071",
+      "workspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c"
+    },
+    "policyToolSha256": "0031e951491fdb9aafdcd7219939473912c5a53932afa6a85167d385f85c0ed8",
+    "workspace": {
+      "directories": 49,
+      "files": 106,
+      "members": 7,
+      "treeSha256": "ed3ba7e04668b2ad346edf880c0c1a261ffefaa47b6838ad9b24e0ab4b8c3524",
+      "workspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c"
+    }
+  }
+}

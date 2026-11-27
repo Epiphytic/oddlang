@@ -1,0 +1,67 @@
+{
+  "format": "oddlang-binary-frame-v1",
+  "id": "urn:packet:graph",
+  "maximum": 0,
+  "errors": {
+    "header": "urn:packet:header",
+    "length": "urn:packet:length",
+    "limit": "urn:packet:limit",
+    "tag": "urn:packet:tag",
+    "truncated": "urn:packet:truncated",
+    "trailing": "urn:packet:trailing",
+    "decoderFailed": "urn:packet:decoderFailed"
+  },
+  "types": {},
+  "cases": {
+    "urn:packet:Key": {
+      "form": "named",
+      "tag": 0,
+      "slots": [
+        {
+          "id": "urn:packet:Key:first",
+          "encoding": {
+            "kind": "fixed",
+            "size": 2
+          }
+        },
+        {
+          "id": "urn:packet:Key:second",
+          "encoding": {
+            "kind": "fixed",
+            "size": 2
+          }
+        }
+      ]
+    },
+    "urn:packet:Reading": {
+      "form": "named",
+      "tag": 0,
+      "slots": [
+        {
+          "id": "urn:packet:Reading:footer",
+          "encoding": {
+            "kind": "fixed",
+            "size": 2
+          }
+        },
+        {
+          "id": "urn:packet:Reading:stamp",
+          "encoding": {
+            "kind": "literal",
+            "value": 0,
+            "error": "urn:packet:truncated"
+          }
+        },
+        {
+          "id": "urn:packet:Reading:value",
+          "encoding": {
+            "kind": "unsigned",
+            "bits": 64,
+            "maximum": 18446744073709551615,
+            "error": "urn:packet:limit"
+          }
+        }
+      ]
+    }
+  }
+}

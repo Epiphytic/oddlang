@@ -1,0 +1,22 @@
+{
+  "companion": "0481f4c59496481e17772dc7be4c1ba6215feff1",
+  "host": "aarch64-apple-darwin",
+  "compilerSha256": "80bf57800165968c12f1fcf72232ee8ae992b8fc009456bebd59c476cf71a10d",
+  "sourceFiles": {
+    "src/codec.rs": "a0e5f99775d8122516341cf64166c2b620b664276722728fbad8b769ea7012df",
+    "src/copy_protocol.rs": "cd25b010838a5f2d29d49550abe7ea99092064c5303d727a05efb1868612cbf2",
+    "src/lib.rs": "34a195e548fb5c8b97c746bdb54147677758684873140c624a9480472f2409eb",
+    "src/windows.rs": "385c27084cbe251987d320d8eddf8904c6f44df963e1f136bd5d15fd27422949",
+    "src/wire.rs": "54254ed91540dd6eef2237b174a6834d200b933b9061ff255f61305248fbecf8"
+  },
+  "simultaneousFirstWriters": 2,
+  "repeatVerification": true,
+  "rejections": [
+    "altered source bytes",
+    "extra empty directory",
+    "destination symlink",
+    "wrong bundle SHA-256"
+  ],
+  "stageDirectoriesAfterRuns": 0,
+  "streamCrateTestsPassed": 29
+}

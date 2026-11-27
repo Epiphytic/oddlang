@@ -1,0 +1,129 @@
+{
+  "libraryTestModes": [
+    {
+      "wire": false,
+      "copy": false,
+      "filesCompared": 107,
+      "modules": {
+        "coreContracts": "c60165759a7b61d8973010129a6056a3190158f83946c269d26d8e6c0c6cd88a",
+        "codec": "8f22f6113ec0ccf903ba62127b84e73d77841fbca2ca00d26d6ac6f8d0332d2c",
+        "windows": "34cdb8cbbdc542171ae9602d857520bd82c35cf9fb921f2143664fa82e73cff7"
+      }
+    },
+    {
+      "wire": true,
+      "copy": false,
+      "filesCompared": 108,
+      "modules": {
+        "coreContracts": "c60165759a7b61d8973010129a6056a3190158f83946c269d26d8e6c0c6cd88a",
+        "codec": "8f22f6113ec0ccf903ba62127b84e73d77841fbca2ca00d26d6ac6f8d0332d2c",
+        "windows": "34cdb8cbbdc542171ae9602d857520bd82c35cf9fb921f2143664fa82e73cff7",
+        "wire": "770b8765497ea5b53ae08505c390700594b1f9d21068fa5a0316f5b02c9f4d02"
+      }
+    },
+    {
+      "wire": true,
+      "copy": true,
+      "filesCompared": 110,
+      "modules": {
+        "coreContracts": "c60165759a7b61d8973010129a6056a3190158f83946c269d26d8e6c0c6cd88a",
+        "codec": "8f22f6113ec0ccf903ba62127b84e73d77841fbca2ca00d26d6ac6f8d0332d2c",
+        "windows": "34cdb8cbbdc542171ae9602d857520bd82c35cf9fb921f2143664fa82e73cff7",
+        "wire": "770b8765497ea5b53ae08505c390700594b1f9d21068fa5a0316f5b02c9f4d02",
+        "copyProtocol": "61d932f4d9c7c00874e10c09485da340a719dd9e5cfb6039f56d82fcb040a259",
+        "exactCopyFrames": "4ff9bb79ff7e2264eb9f02b5a59c6ff0e269fbeb13b4c7a04b947b57262e66b8"
+      }
+    }
+  ],
+  "workspaceManifests": 48,
+  "totalComparedFiles": 4087,
+  "distinctRootCargoLocks": 19,
+  "currentFiles": 111,
+  "providerRevisions": {
+    "https://github.com/marmot-protocol/mdk": "8abc51befbf71a1ae3bdbb25eb0860c731e75db2",
+    "https://github.com/rusqlite/rusqlite.git": "5ae7fdf83085c595fd54f977b3a56ccacabaf16b",
+    "https://github.com/erskingardner/rust-nostr": "48801bf6f2f1cd55bb1729e94159946c8832a786",
+    "https://github.com/erskingardner/openmls.git": "94f57b829d95840fc5b415b7a86f547f5c1f65ba"
+  },
+  "rejectionCases": [
+    "stale-input",
+    "revision-mismatch",
+    "unknown-provider"
+  ],
+  "host": "aarch64-apple-darwin",
+  "companionRevision": "14715909a0a989b1f701ab4b2eab3af35d7303e8",
+  "comparisonRevision": "8410a133576336a0109cf4f16f22d4c8c9a12227",
+  "originalRevision": "af54339d250290490d62d4475a77539b7e739071",
+  "frameworkRevision": "b27cf34783d06abd760104152b1689a5f6d10dcd",
+  "workspaceLockSha256": "889017343f0fdb092dee203264aa4f6d6d194bad8ef396e336f2dd2cf6ec9b76",
+  "workspaceComparedByteForByte": true,
+  "passingTests": [
+    "retention_distinguishes_default_from_disabled_and_bounds_numbers",
+    "diagnostics_never_echo_raw_values",
+    "no_defaults_or_extra_url_components",
+    "canonical_urls_deduplicate_in_order",
+    "loopback_is_explicit_and_private_literals_stay_denied",
+    "bounded_opaque_bytes_round_trip",
+    "hostile_json_version_and_encoding_are_rejected",
+    "copy_caller::tests::sizes_offsets_and_metadata_are_checked_before_encoding",
+    "codec::__projection_1::tests::rejects_bounds_and_length",
+    "windows::__projection_13::tests::boundary_failures_do_not_mutate_windows",
+    "copy_caller::tests::launch_digest_binds_codec_mode_paths_and_metadata_but_not_attempt_binding",
+    "copy_caller::tests::helper_context_roundtrip_limits_and_start_binding",
+    "copy_caller::tests::helper_context_retention_has_replay_floor_and_config_ceiling",
+    "codec::__projection_1::tests::rejects_nonbeneficial_zlib_representation",
+    "copy_caller::tests::malformed_lengths_unknown_tags_enums_and_options_fail_closed",
+    "copy_caller::tests::namespace_separates_principals_direction_and_transfer",
+    "windows::__projection_13::tests::exact_retry_conflict_gap_eof_and_partial_delivery",
+    "copy_caller::tests::one_byte_reassembly_and_multiple_frames",
+    "copy_caller::tests::helper_context_rejects_missing_trailing_unknown_and_entrypoint_fields",
+    "windows::__projection_13::tests::bounded_output_reclaims_only_consumed_prefix",
+    "wire_caller::tests::age_only_checks_open_and_immutable_digest_excludes_sequence",
+    "wire_caller::tests::base64_is_strict_and_nested_unknown_fields_fail",
+    "copy_caller::tests::maximum_checkpoint_stays_below_control_cap",
+    "wire_caller::tests::rejects_noncanonical_unknown_and_oversized_envelopes",
+    "codec::__projection_1::tests::rejects_corruption_truncation_frames_and_dictionary",
+    "codec::__projection_1::tests::incompressible_maximum_block_uses_none",
+    "wire_caller::tests::copy_wire_is_closed_bounded_and_byte_preserving",
+    "copy_caller::tests::all_frames_roundtrip_every_split_without_buffering_next_frame",
+    "wire_caller::tests::rejects_invalid_argv_offsets_and_snapshots",
+    "codec::__projection_1::tests::roundtrips_and_fallback",
+    "wire_caller::tests::cancelled_terminal_requires_accepted_cancellation",
+    "windows::__projection_13::tests::receipt_memory_and_tiny_chunk_counts_are_bounded",
+    "wire_caller::tests::input_closed_is_required_and_truthful_for_terminal_and_cancel",
+    "copy_caller::tests::checkpoint_rejects_corruption_trailing_fields_and_impossible_states",
+    "wire_caller::tests::worst_case_fit_and_roundtrip_every_variant",
+    "windows::__projection_13::tests::many_windows_remain_binary_exact_and_bounded",
+    "data_decode_rejects_offset_before_empty_body",
+    "commit_constant_and_poisoned_decoder_outcomes_are_exact",
+    "frame_headers_precede_tag_and_slot_checks",
+    "data_and_progress_guards_have_directional_precedence",
+    "launch_fragment_reports_early_read_errors",
+    "public_copy_protocol_constants_and_signatures",
+    "remaining_case_errors_preserve_exact_order",
+    "all_case_tags_and_canonical_payloads",
+    "inline_validation_precedes_codec_and_trailing"
+  ],
+  "copyFramePipe": {
+    "original": "af54339d250290490d62d4475a77539b7e739071",
+    "generatedWorkspaceLockSha256": "889017343f0fdb092dee203264aa4f6d6d194bad8ef396e336f2dd2cf6ec9b76",
+    "driverSha256": "d5ec33dd26c651ca82483188862bc43ee459b900fdb39c4ccc9d7199a537dd66",
+    "framesPerDirection": 1260,
+    "payloadSha256": "e8007b4a0a207564767a34fd944d829e984318e4ac4d65522b136ca16794106e",
+    "wireSha256": "a2ad71740d1390383296943473fdfac7ed6515b005e1cae5cb0f5f1cb62f78e5",
+    "originalToGenerated": {
+      "encodeExit": 0,
+      "decodeExit": 0,
+      "wireBytesCompared": 4210721,
+      "payloadBytesCompared": 4194341
+    },
+    "generatedToOriginal": {
+      "encodeExit": 0,
+      "decodeExit": 0,
+      "wireBytesCompared": 4210721,
+      "payloadBytesCompared": 4194341
+    },
+    "truncationAndOffsetControlsPassed": 4
+  },
+  "liveCommandDeliveryTested": false
+}

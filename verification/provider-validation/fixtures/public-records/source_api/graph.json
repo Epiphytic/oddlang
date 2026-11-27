@@ -1,0 +1,28 @@
+{
+  "format": "oddlang-public-records-v1",
+  "modules": [
+    {
+      "id": "urn:calendar:appointments",
+      "aliases": [],
+      "records": [
+        {
+          "id": "urn:calendar:appointment",
+          "traits": [
+            "debug",
+            "serialize",
+            "deserialize"
+          ],
+          "fields": [
+            {
+              "id": "urn:calendar:appointment:until",
+              "wire": "until",
+              "type": {
+                "optional": "u64"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

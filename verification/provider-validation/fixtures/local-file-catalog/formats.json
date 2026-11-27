@@ -1,0 +1,192 @@
+{
+  "format": "oddlang-line-grammar-v1",
+  "id": "urn:test:catalog:line-grammar",
+  "maxBytes": 256,
+  "forbiddenBytes": [],
+  "rows": [
+    [
+      {
+        "kind": "literal",
+        "text": "header",
+        "capture": "family"
+      }
+    ],
+    [
+      {
+        "kind": "literal",
+        "text": "record",
+        "capture": "name0"
+      },
+      {
+        "kind": "decimal",
+        "capture": "length0",
+        "bits": 64,
+        "minimum": 1
+      },
+      {
+        "kind": "decimal",
+        "capture": "mode0",
+        "bits": 32,
+        "minimum": 1
+      },
+      {
+        "kind": "radix16",
+        "capture": "digest0",
+        "digits": 64,
+        "decode": true
+      }
+    ],
+    [
+      {
+        "kind": "literal",
+        "text": "extra",
+        "capture": "name1"
+      },
+      {
+        "kind": "decimal",
+        "capture": "length1",
+        "bits": 64,
+        "minimum": 1
+      },
+      {
+        "kind": "decimal",
+        "capture": "mode1",
+        "bits": 32,
+        "minimum": 1
+      },
+      {
+        "kind": "radix16",
+        "capture": "digest1",
+        "digits": 64,
+        "decode": true
+      }
+    ]
+  ],
+  "recordResult": {
+    "failure": {
+      "id": "urn:test:invalid",
+      "code": "bad_catalog"
+    },
+    "records": {
+      "book": [
+        {
+          "id": "family",
+          "type": {
+            "kind": "static-text"
+          }
+        },
+        {
+          "id": "items",
+          "type": {
+            "kind": "record-vector",
+            "record": "asset"
+          }
+        }
+      ],
+      "asset": [
+        {
+          "id": "name",
+          "type": {
+            "kind": "static-text"
+          }
+        },
+        {
+          "id": "length",
+          "type": {
+            "kind": "unsigned",
+            "bits": 64
+          }
+        },
+        {
+          "id": "mode",
+          "type": {
+            "kind": "unsigned",
+            "bits": 32
+          }
+        },
+        {
+          "id": "digest",
+          "type": {
+            "kind": "bytes",
+            "length": 32
+          }
+        }
+      ]
+    },
+    "entry": {
+      "record": "book",
+      "fields": {
+        "family": {
+          "kind": "capture",
+          "id": "family"
+        },
+        "items": {
+          "kind": "vector",
+          "items": [
+            {
+              "record": "asset",
+              "fields": {
+                "name": {
+                  "kind": "capture",
+                  "id": "name0"
+                },
+                "length": {
+                  "kind": "capture",
+                  "id": "length0"
+                },
+                "mode": {
+                  "kind": "capture",
+                  "id": "mode0"
+                },
+                "digest": {
+                  "kind": "capture",
+                  "id": "digest0"
+                }
+              }
+            },
+            {
+              "record": "asset",
+              "fields": {
+                "name": {
+                  "kind": "capture",
+                  "id": "name1"
+                },
+                "length": {
+                  "kind": "capture",
+                  "id": "length1"
+                },
+                "mode": {
+                  "kind": "capture",
+                  "id": "mode1"
+                },
+                "digest": {
+                  "kind": "capture",
+                  "id": "digest1"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "formatters": [
+      {
+        "id": "file",
+        "argument": true,
+        "parts": [
+          {
+            "kind": "argument"
+          },
+          {
+            "kind": "literal",
+            "text": "."
+          },
+          {
+            "kind": "field",
+            "field": "family"
+          }
+        ]
+      }
+    ]
+  }
+}

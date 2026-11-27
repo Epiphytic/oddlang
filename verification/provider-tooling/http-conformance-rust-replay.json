@@ -1,0 +1,84 @@
+{
+  "runner": "verification/http-conformance",
+  "toolVersions": {
+    "rustc": "1.96.1",
+    "go": "1.26.3",
+    "node": "22.22.2",
+    "npm": "10.9.7",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "chromium": "145.0.7632.6",
+    "ajv": "8.20.0",
+    "vite": "8.3.8",
+    "react": "19.2.7",
+    "reactDom": "19.2.7",
+    "postgresVersionNum": 160006
+  },
+  "openApiSchemaSha256": "da01ba28852cac0de53893797cb8d1942bc3b05084f526dcc216717dec314ed0",
+  "packageLockSha256": {
+    "scripts/http-tools/package-lock.json": "beeaa33918b8b1666c9e868b8776baf9c20eb82f87f7f091b11bcae2046afd74",
+    "examples/http/hybrid/package-lock.json": "ec4e58e3c96382f8ac94039fe38f25071cd4573d9b9ecc0ac3176d97fb38e061"
+  },
+  "retainedNativeTestExecutables": {
+    "bundle": {
+      "passed": 9,
+      "nativeTestExecutableSha256": "60664a4d02ef87dae7fc5250f5f610025974a94b6554ea00a8370a2c66aab8c2"
+    },
+    "provider": {
+      "passed": 3,
+      "nativeTestExecutableSha256": "01dccf2f9c3e14dbc4e4e4ac4a9150e6b02c3c0427104b79d4301b16227ad226"
+    },
+    "consumers": {
+      "passed": 2,
+      "nativeTestExecutableSha256": "f34d93dd8e7ea095e33cdc750e7ae66433713c65f6df5f86524af59e86e4048d"
+    },
+    "evolution": {
+      "passed": 5,
+      "nativeTestExecutableSha256": "05264553050a5a6a979fdac4f02a861ddaffd23caced575dac8ac7b6616cc5ac"
+    },
+    "shapes": {
+      "passed": 3,
+      "nativeTestExecutableSha256": "f67fdd1948fe13f569d74ead36614c2ba21db19d69a47d53bff642fbc6fe0146"
+    },
+    "hybrid": {
+      "passed": 1,
+      "nativeTestExecutableSha256": "a29a3969a8afcec6cf2e8a0fe645beaa9463c8747fa1f711d1cec5d7ead6a05b"
+    }
+  },
+  "freshReceipts": {
+    "go-v1.json": {
+      "rows": 193,
+      "sha256": "4751b1cb0c1b3b5cc1aaa6c8af6d6a3c30ed2c553a06addbbebe7def8d229dee"
+    },
+    "provider-v1.json": {
+      "rows": 117,
+      "sha256": "cf2eef4983ba7242d0cbbc668619b74e781760c7f2a316e67df0508cd34ea31c"
+    },
+    "provider-v2.json": {
+      "rows": 117,
+      "sha256": "9641e53d29c0e751d51b6822b21c9e18625dcd431375418b58fad17c49864fb4"
+    },
+    "shapes-go.json": {
+      "rows": 82,
+      "sha256": "dc1bd05960765e33b70ba3823872d586dab12812e376a82a1545aa7daa9772dd"
+    },
+    "shapes-rust.json": {
+      "rows": 82,
+      "sha256": "dc1bd05960765e33b70ba3823872d586dab12812e376a82a1545aa7daa9772dd"
+    },
+    "shapes-typescript.json": {
+      "rows": 82,
+      "sha256": "dc1bd05960765e33b70ba3823872d586dab12812e376a82a1545aa7daa9772dd"
+    },
+    "typescript-v1.json": {
+      "rows": 193,
+      "sha256": "075d2fae22a23b21e6902fea872d18cc966cdbcd1bbf48dbc173437c1ccda973"
+    },
+    "typescript-v2.json": {
+      "rows": 193,
+      "sha256": "d4645ebe983d1955613e977e89fdfe7baaa9db061218113e8eda6036433ce1df"
+    }
+  },
+  "verifiedByOddlangSha256": "3884c423fccb909d69c8a6d5e119d4097b8ea6fade8936274edfe814890a08a4",
+  "qualificationScope": "Ran the new setup command, browser and schema pins, and offline npm installation. Executed the historical native HTTP test harnesses against this checkout, including fresh local provider builds, TypeScript and Go clients and codec runs, and SSR/browser checks for both versions. All eight new receipt files matched the retained capture byte-for-byte and passed the current qualified verifier. The repository-wide cargo test invocation inside verify was retained; this replay ran the HTTP-specific tests."
+}

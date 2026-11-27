@@ -1,0 +1,141 @@
+{
+  "host": "aarch64-apple-darwin",
+  "companionRevision": "a3764d5f56172f5ae84d86d41f75418ce2bbe5c9",
+  "historicalVerifierRevision": "b62317e6a156de50627e995df3ea272a55f13681",
+  "workspaceLockSha256": "fdfa5b16d9172fe97705ee5794251c6168d0e226ea159334a52286e2e7172b68",
+  "savedLogComparison": {
+    "differingFields": [
+      "verifierSha256"
+    ],
+    "candidateArtifactLogSha256": "01606dfeda0fca56361c5f1b03ae0e1032f6c5e305d11213a8aefc24376e4a55",
+    "originalArtifactLogSha256": "992af0ad8304efbc504e3fadcdc7d36e0d19f8f8927f321a75fd487c57fa48d5",
+    "rustVerifierSha256": "695b9bbb4e4eb59d1451cbf9cbd4b9b5546bc66c218c4326ef2bff35ea9af904",
+    "totals": {
+      "importable": 65,
+      "missing": 75
+    },
+    "prototype": {
+      "original": {
+        "MAX_LINE": {
+          "compiles": true,
+          "diagnostics": [],
+          "value": 131072
+        },
+        "serve": {
+          "compiles": true,
+          "diagnostics": []
+        },
+        "librarySha256": "e4af062c117db83bdd2578bc2902e9baa37237f7a039b06090a9d4a2869477df"
+      },
+      "generated": {
+        "MAX_LINE": {
+          "compiles": false,
+          "diagnostics": [
+            {
+              "code": "E0425",
+              "message": "cannot find value `MAX_LINE` in crate `observed`",
+              "rendered": "error[E0425]: cannot find value `MAX_LINE` in crate `observed`\n --> caller.rs:1:32\n  |\n1 | const BOUND: usize = observed::MAX_LINE;\n  |                                ^^^^^^^^ not found in `observed`\n\n"
+            }
+          ]
+        },
+        "serve": {
+          "compiles": false,
+          "diagnostics": [
+            {
+              "code": "E0425",
+              "message": "cannot find value `serve` in crate `observed`",
+              "rendered": "error[E0425]: cannot find value `serve` in crate `observed`\n --> caller.rs:4:15\n  |\n4 |     observed::serve\n  |               ^^^^^ not found in `observed`\n\n"
+            }
+          ]
+        },
+        "librarySha256": "16f28b4839336b3b314d1c0ef89e09e69b1b50a3eddf5003b331428dac164dfb"
+      }
+    }
+  },
+  "offlineBuildReplay": "All per-import observations and prototype results matched. Cargo reported cached builds as fresh.",
+  "incompleteBuildControl": "Rejected before writing a receipt.",
+  "canonicalEngineChoices": {
+    "workspaceLockSha256": "a72d0b0538b3afc272fcd7f5cf8cc900935fd4cc920261fa4bd6bcea46270292",
+    "attempted": 140,
+    "baseline": 77,
+    "candidate": 79,
+    "added": [
+      [
+        "engine",
+        "Stream"
+      ],
+      [
+        "engine",
+        "SubmitDisposition"
+      ]
+    ],
+    "archivedImportObservationsMatched": 140
+  },
+  "rustLibraryTestsPassed": 9,
+  "nativeManifestAndArtifactSelection": {
+    "companionRevision": "f2862d2cdcd28426d423141eee9cb003f3d2a3d5",
+    "historicalAdapterRevision": "a3764d5f56172f5ae84d86d41f75418ce2bbe5c9",
+    "baselineManifestMembersMatched": 7,
+    "artifactSelectionsMatched": [
+      {
+        "role": "generated",
+        "libraries": 7,
+        "linkedPaths": 4
+      },
+      {
+        "role": "upstream",
+        "libraries": 1,
+        "linkedPaths": 2
+      }
+    ],
+    "rejectedByBoth": [
+      "truncated Cargo log",
+      "library outside target",
+      "modified generated member"
+    ],
+    "canonicalEngineChoices": {
+      "workspaceLockSha256": "a72d0b0538b3afc272fcd7f5cf8cc900935fd4cc920261fa4bd6bcea46270292",
+      "candidateArtifactLogSha256": "abb7a2bc9fbb6f388fed647e9e96144049733b0ee28ca1f0f6c792ac25d0f4ea",
+      "originalArtifactLogSha256": "4f2f666e5565e5426f071ad6a817cfd5c01423413904c05dcbcdb7db1505e4b5",
+      "verifierSha256": "6f682257cdef86155411313ff4438f4cfc957c65d3591a43c335e5318e90a2da",
+      "totals": {
+        "importable": 79,
+        "missing": 61
+      },
+      "prototypeValueProbes": {
+        "original": {
+          "MAX_LINE": {
+            "compiles": true,
+            "diagnostics": [],
+            "value": 131072
+          },
+          "serve": {
+            "compiles": true,
+            "diagnostics": []
+          },
+          "librarySha256": "c16b6d01db6c438e5fdf0dea9b805ac26d9f6adce947ffcc3b8b9f2d7589da45"
+        },
+        "generated": {
+          "MAX_LINE": {
+            "compiles": true,
+            "diagnostics": [],
+            "value": 131072
+          },
+          "serve": {
+            "compiles": false,
+            "diagnostics": [
+              {
+                "code": "E0425",
+                "message": "cannot find value `serve` in crate `observed`",
+                "rendered": "error[E0425]: cannot find value `serve` in crate `observed`\n --> caller.rs:4:15\n  |\n4 |     observed::serve\n  |               ^^^^^ not found in `observed`\n\n"
+              }
+            ]
+          },
+          "librarySha256": "3f05dc752554581388803e10b7b69254761b421383ca8c2792865884ee193104"
+        }
+      }
+    },
+    "archivedImportObservationsMatched": 140,
+    "staleUpstreamCache": "The replay stopped on rustc E0460 when using the existing upstream Cargo log and artifacts. A fresh locked offline upstream build passed using the same generated workspace and candidate artifacts."
+  }
+}

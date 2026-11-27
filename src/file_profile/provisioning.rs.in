@@ -145,7 +145,7 @@ fn validate_provision_fields(
             if provision_members(&values, false)?.len() != values.len() {
                 return Err(CONFIG_FORMAT);
             }
-        } else if key != PROVISION_ROLE_FIELD && fields[key] != *default {
+@STORED_RESTRICTIONS@        } else if key != PROVISION_ROLE_FIELD && fields[key] != *default {
             return Err(CONFIGURATION);
         }
     }

@@ -1,0 +1,77 @@
+{
+  "format": "oddlang-native-package-v1",
+  "name": "field-meter",
+  "version": "1.0.0",
+  "edition": "2021",
+  "dependencies": {
+    "clap": {
+      "version": "4.6.7"
+    },
+    "libc": {
+      "version": "0.2.189"
+    },
+    "serde": {
+      "version": "1.0.229",
+      "features": [
+        "derive"
+      ]
+    },
+    "serde_json": {
+      "version": "1.0.151"
+    },
+    "tokio": {
+      "version": "1.54.1",
+      "features": [
+        "io-util",
+        "net",
+        "rt",
+        "time"
+      ]
+    }
+  },
+  "cargoLock": {
+    "path": "Cargo.lock",
+    "sha256": "d4f9bf641df98cfabec11a194323cf4dd85c2bfed6268b3cb56c747099656e36"
+  },
+  "components": [
+    {
+      "kind": "cli-surface",
+      "module": "cli",
+      "graph": {
+        "path": "cli.json",
+        "sha256": "c0f2810ad5ff495edc6bffb4dcb32187ba789baece45834ecc4de246af7cf1b1"
+      },
+      "overlay": {
+        "path": "cli-rust.json",
+        "sha256": "c9a74c91da02cddaaa3cd33936a9f89b201015f49b8bec10f7d58ed0418a0c15"
+      },
+      "reexports": [
+        "run_cli"
+      ]
+    },
+    {
+      "kind": "local-command-client",
+      "module": "device",
+      "graph": {
+        "path": "graph.json",
+        "sha256": "f56bc5328fd1ab1e44e762935953c17c94665c56f3afd4ab347975b517f46faa"
+      },
+      "overlay": {
+        "path": "binding.json",
+        "sha256": "10b11c4f68766a365c146badd9dbb895e25283fa27d4091cf47147573119289e"
+      },
+      "reexports": [
+        "measure"
+      ],
+      "rootReexports": []
+    }
+  ],
+  "binaries": [
+    {
+      "name": "field-meter",
+      "entry": [
+        "run_cli"
+      ]
+    }
+  ]
+}

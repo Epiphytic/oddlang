@@ -1,0 +1,181 @@
+[
+  {
+    "case": "future capture",
+    "diagnostic": "unavailable capture",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/graph/constraints/1/afterRow",
+        "value": 4
+      }
+    ]
+  },
+  {
+    "case": "wrong scalar",
+    "diagnostic": "matching scalar",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/graph/constraints/0/allowed/0/1",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "case": "duplicate tuple",
+    "diagnostic": "distinct complete",
+    "changes": [
+      {
+        "op": "add",
+        "path": "/graph/constraints/0/allowed/-",
+        "value": [
+          "indoor",
+          true
+        ]
+      }
+    ]
+  },
+  {
+    "case": "sum of text",
+    "diagnostic": "requires unsigned",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/graph/constraints/1/captures/1",
+        "value": "mode"
+      }
+    ]
+  },
+  {
+    "case": "duplicate sum input",
+    "diagnostic": "distinct capture",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/graph/constraints/1/captures/1",
+        "value": "amountA"
+      }
+    ]
+  },
+  {
+    "case": "unknown child",
+    "diagnostic": "unknown record",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/graph/recordResult/records/book/2/type/record",
+        "value": "missing"
+      }
+    ]
+  },
+  {
+    "case": "field mismatch",
+    "diagnostic": "incompatible typed",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/graph/recordResult/entry/fields/mode/id",
+        "value": "active"
+      }
+    ]
+  },
+  {
+    "case": "array length",
+    "diagnostic": "incompatible typed",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/graph/recordResult/entry/fields/counts/captures",
+        "value": [
+          "countA"
+        ]
+      }
+    ]
+  },
+  {
+    "case": "array width",
+    "diagnostic": "array capture width",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/graph/recordResult/entry/fields/counts/captures/0",
+        "value": "amountA"
+      }
+    ]
+  },
+  {
+    "case": "derive propagation",
+    "diagnostic": "required native derive",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/overlay/records/sample/derives",
+        "value": [
+          "debug",
+          "partial-eq",
+          "eq"
+        ]
+      }
+    ]
+  },
+  {
+    "case": "derive dependency",
+    "diagnostic": "invalid record fields or derives",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/overlay/records/book/derives",
+        "value": [
+          "clone",
+          "debug",
+          "eq"
+        ]
+      }
+    ]
+  },
+  {
+    "case": "formatter nontext",
+    "diagnostic": "formatter requires text",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/graph/recordResult/formatters/0/parts/0/field",
+        "value": "counts"
+      }
+    ]
+  },
+  {
+    "case": "formatter argument",
+    "diagnostic": "formatter requires text",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/graph/recordResult/formatters/1/argument",
+        "value": false
+      }
+    ]
+  },
+  {
+    "case": "formatter binding",
+    "diagnostic": "invalid formatter",
+    "changes": [
+      {
+        "op": "remove",
+        "path": "/overlay/formatters/key"
+      }
+    ]
+  },
+  {
+    "case": "bad error path",
+    "diagnostic": "invalid stable failure",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/overlay/error/type",
+        "value": [
+          "Fault"
+        ]
+      }
+    ]
+  }
+]

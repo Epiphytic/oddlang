@@ -1,0 +1,33 @@
+{
+  "aggregateSha256": {
+    "coverage.json": "ba1151b5fceaaaee40dc57e081fc4d0e64553944c1c9d7dce01c1dbbebc57f49",
+    "qualification.json": "f8edf0ada804b1a3b2046771441bde45fee3bc4ad84f4f075dc6aa5370cc86c4"
+  },
+  "archive": "examples/marmish/evidence/qualification.tar.gz",
+  "archiveSha256": "60a0cb9b231d200cb2c03b043f1bd335d5c43fc362b17352fd5ce7017e4d425a",
+  "candidateCommit": "e0d855874ec2348939175dfa6ec5c71488c8ba35",
+  "candidateTree": "6c0c7b16e3cb7b013a360c1b19e26ed19a238e65",
+  "controlsPassed": 9,
+  "format": "oddlang-marmish-phase7-replay-v1",
+  "frameCases": 33,
+  "historicalAndRustVerdictsMatch": true,
+  "historicalVerifierRevision": "bccd6c3ded7c2bbb56fe538a3fefd4a823e7f5fa",
+  "independentBuilds": 2,
+  "lexicalSites": {
+    "knownSites": 5849,
+    "regeneratedSites": 19,
+    "retainedSites": 5830
+  },
+  "mixedWireExchanges": 6,
+  "nativeVerdict": "baseline failures remain",
+  "newRegressions": [],
+  "originalCommit": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+  "platforms": {
+    "aarch64-apple-darwin": "observed",
+    "aarch64-unknown-linux-gnu": "unobserved",
+    "x86_64-unknown-linux-gnu": "unobserved"
+  },
+  "qualification": "offline replay of archived observations",
+  "sourceFiles": 1641,
+  "testedOn": "aarch64-apple-darwin"
+}

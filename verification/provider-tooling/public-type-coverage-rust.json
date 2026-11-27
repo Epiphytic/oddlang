@@ -1,0 +1,58 @@
+{
+  "host": "aarch64-apple-darwin",
+  "frameworkToolsRevision": "21424913c7355c7660eadbf08d9a0256c9b01fe6",
+  "companionCheckerRevision": "1423f17834d38e2ebb59da7cde84b4606150446e",
+  "upstream": "af54339d250290490d62d4475a77539b7e739071",
+  "archiveProvenanceSha256": "ff769f436363fd984ded1c9e3879b63b2b9597dd6d8f49210d65880617b9430f",
+  "summarySha256": {
+    "v5": "ec1de75dd4e139f944502ded8e9356625e6262b1523a2e36f0082c12cf82f674",
+    "v6": "cf3ae2b032d0090357491b560cf94c935ea503254f2becf6fa654b9fcee82b69"
+  },
+  "originalLibrariesPerRelease": 7,
+  "generatedLibrariesPerRelease": 3,
+  "matchingComparisonFiles": 6,
+  "freshCallerReceipts": {
+    "core-callers-v5.json": {
+      "sha256": "e0656fb107b5f9e686b803a74b79c707ab9914d81faabd3b9a7312bfecae7d1d",
+      "compiled": 6,
+      "unresolved": 0
+    },
+    "core-callers-v6.json": {
+      "sha256": "22c58dc7c4212c13377ca76b945315a57c5f8e5ef36ecd9ba3b1b7b734bf6250",
+      "compiled": 6,
+      "unresolved": 0
+    },
+    "native-callers-rev.json": {
+      "sha256": "f3116c22c64666f81b2b23a126b019104a77e7bb1abec23dbfceb7c916be77be",
+      "compiled": 0,
+      "unresolved": 2
+    },
+    "native-callers-v5.json": {
+      "sha256": "6c800aeb05a7bae92dec45a595beafb56ff41d3f8b5b4bd66fac8b40c70c9be1",
+      "compiled": 0,
+      "unresolved": 36
+    },
+    "native-callers-v6.json": {
+      "sha256": "4a5845c83a02942e15b680501156728effd4dc3381bd60ec7ad688bd1c5a7597",
+      "compiled": 0,
+      "unresolved": 36
+    },
+    "stream-callers-v5.json": {
+      "sha256": "29478fdd7ffb052e3f2d7f798da4184a3e2a12922d98d93237360f8c78604a95",
+      "compiled": 35,
+      "unresolved": 0
+    },
+    "stream-callers-v6.json": {
+      "sha256": "89916ede0d2950e0b6a82c318b6c79d7b70ecc83ec42f9cd970813db639132b3",
+      "compiled": 35,
+      "unresolved": 0
+    }
+  },
+  "controls": [
+    "wrong release lock rejected",
+    "extra and changed generated source rejected",
+    "added build script rejected",
+    "equal-count import substitution rejected",
+    "changed binding, unresolved names, host, package, lock, verdict and diagnostic rejected"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "upstream": "witness",
+  "namedInventorySha256": "70848e1819cb0870be17c666cfb357a09e349fd1fe37e6ea0d84ed8b28b02b2f",
+  "logSha256": "b5d8a40798495e009c1f7eb1c7b181aacfcf562894d395a1ffb85341b4accb65",
+  "selection": "witness",
+  "harnesses": {
+    "witness/lib/log_witness": {
+      "passed": 1,
+      "ignored": 1
+    }
+  },
+  "doctests": {
+    "log_witness": {
+      "passed": 1,
+      "ignored": 0
+    }
+  }
+}

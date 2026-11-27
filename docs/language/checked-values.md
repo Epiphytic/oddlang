@@ -6,13 +6,13 @@ Products have a typed field catalog and an optional ordered constructor program.
 
 The shared declarations profile provides the named error type. Its optional category table supplies a unit variant's stable category separately from its Display segments. Rust maps the record's error IRI to the declared local error constructor. Generated method names preserve common trait call sites. The existing nullable unsigned profile continues to define optional range values, and the shared string-enum profile defines Serde wire spellings.
 
-Run `oddlang build checked-values rust GRAPH OVERLAY OUTPUT`. The Rust projection emits a deterministic source artifact, portable declaration-level obligations, and a lock. A native package can assemble checked values with shared declarations. The unrelated verifier in `verification/checked-values/verify.py` compiles the assembled crate, exercises a UTF-8 length mutation, and checks canonical output and guard rejection.
+Run `oddlang build checked-values rust GRAPH OVERLAY OUTPUT`. The Rust projection emits a deterministic source artifact, portable declaration-level obligations, and a lock. A native package can assemble checked values with shared declarations. The independent validator compiles the assembled crate, exercises a UTF-8 length mutation, and checks canonical output and guard rejection. Run it with `cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin qualify-domains -- checked-values /path/to/oddlang`.
 
 The native package assembler resolves every checked error binding against a unit error variant emitted by a shared declaration or finite error domain in the same package. It checks the stable variant identity and the crate export path together. The projection lock format `oddlang-checked-values-lock-v1` uses `domainSha256` and `bindingSha256` for canonical declarations, while the package manifest pins the supplied file bytes.
 
 An opaque `fixed-bytes` type declares an unsigned 32-bit `length`, a `failure` IRI for length mismatch, and `onDrop: "erase"`. Its native binding supplies a by-value constructor, a checked sequence constructor and a read-only array view through the `constructor`, `parse` and `view` keys. Supply empty `order` and omit fields and traits. The owner stores its own bytes, has a private backing field and exposes a borrow tied to its lifetime. The Rust backend uses the locked registry provider zeroize 1.9.1. Its destruction guarantee covers the object's current storage on drop. There is no requirement to clear a caller's separate input or copies left behind by moves.
 
-Run `oddlang recover fixed-bytes OBSERVATION SELECTION OUTPUT` on a v2 rustc shape observation. Select the source declaration identity, domain IRI, output value IRI and failure IRI in the JSON keys `source`, `domain`, `value` and `failure`. Recovery reads the monomorphic tuple member, provider type, element and extent. The failure mapping and the public construction and borrowing interface require independent caller qualification. The resulting graph contains no source syntax or provider path. Run `python3 -B verification/checked-values/fixed_bytes.py /path/to/oddlang` to exercise an independent source-width change.
+Run `oddlang recover fixed-bytes OBSERVATION SELECTION OUTPUT` on a v2 rustc shape observation. Select the source declaration identity, domain IRI, output value IRI and failure IRI in the JSON keys `source`, `domain`, `value` and `failure`. Recovery reads the monomorphic tuple member, provider type, element and extent. The failure mapping and the public construction and borrowing interface require independent caller qualification. The resulting graph contains no source syntax or provider path. Run `cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin qualify-domains -- fixed-bytes /path/to/oddlang` to exercise an independent source-width change.
 
 ### Clone-only choices and derived Debug
 
@@ -42,7 +42,7 @@ Pass the pre-convergence TypeScript compiler as a second argument to
 compare the supported projection and lock bytes.
 
 ```sh
-python3 verification/plain-value-choices/typescript_subset.py target/release/oddlang
+cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin qualify-choices -- typescript-subset target/release/oddlang
 ```
 
 ## TypeScript plain choices
@@ -77,7 +77,7 @@ observations, including a source-order change, TypeScript type rejections
 and deterministic graph and binding output.
 
 ```sh
-python3 verification/plain-value-choices/typescript.py target/release/oddlang
+cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin qualify-choices -- typescript target/release/oddlang
 ```
 
 ## TypeScript on Node.js

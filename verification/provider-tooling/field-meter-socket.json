@@ -1,0 +1,12 @@
+{
+  "platform": "aarch64-apple-darwin",
+  "rust": "1.97.1",
+  "compilerSha256": "ccd3aa5caeac7c57dddb5d8c04e6cc619c7580e446edb8139bc00f0c6555e09f",
+  "predecessorVerifierSha256": "233ed90e55e9b9fe408067474de5ae9e997f2089e0d5e9494fd7a65d314c7245",
+  "socketCasesSha256": "24b88a6d97009853fbc207745bcddea910020000c65931dd91561bec1cb68d53",
+  "bothVerifiersPassed": true,
+  "byteCheckedSocketExchanges": {"literal":9,"typedRequest":2,"typedReply":11,"endpointDiscovery":2},
+  "additionalProcessOutcomes": {"literal":3,"typedRequest":2,"endpointDiscovery":3},
+  "checkedPerExchange": ["u32be length","request body","request EOF","exit status","stdout","stderr"],
+  "compileRejections": {"projection":11,"incompatibleDynamicArguments":3,"endpointDiscovery":2,"commandLinkage":4,"constantFrameBound":1}
+}

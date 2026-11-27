@@ -1,0 +1,46 @@
+{
+  "buildReport": {
+    "cliSha256": "3884c423fccb909d69c8a6d5e119d4097b8ea6fade8936274edfe814890a08a4",
+    "passedRunners": [
+      "build-report",
+      "build-report-recovery"
+    ]
+  },
+  "byteIdenticalToPublishedArchive": {
+    "dep-info.json": "cdabb8b48133c0cfc2a448f74c86894d2d7e12370c9b449fc225ce9c167d3c4e",
+    "locked-packages.json": "87e047548d83cd4fad20351efa91d57ee7465413a56eb66b5371de62664b7795",
+    "native-build-script.txt": "c36b3d5ea5de7e0506a2f77e5a1bc3f1bb2fc39a96e628e057ced9311cf28f40"
+  },
+  "closureUnitTests": 3,
+  "format": "oddlang-build-closure-tool-replay-v1",
+  "freshRun": {
+    "assembledCompilerInputs": 90,
+    "compiler": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6",
+    "compilerDepfiles": 650,
+    "developerDirectory": "/Library/Developer/CommandLineTools",
+    "generatedModule": {
+      "path": "crates/marmish-core/src/frame.rs",
+      "sha256": "53fcb6067ccbfa0e9923e69ae0eee0b73d3d2e84d204d635161e25b2bf574f14"
+    },
+    "lockedPackages": 746,
+    "nativeBuildScript": {
+      "path": "crates/marmish-native/build.rs",
+      "sha256": "53fb1040a17b74ce41cc2a2e8ad34be1d2e0e7db642a1054c48c414d0d7c9887",
+      "stdoutSha256": "c36b3d5ea5de7e0506a2f77e5a1bc3f1bb2fc39a96e628e057ced9311cf28f40"
+    },
+    "negative": {
+      "buildScriptExitCode": 73,
+      "cargoExitCode": 101,
+      "status": "permission denied",
+      "stderrSha256": "29d191cc30bb1293360abaf2b023e1c6c57286919ef227991e49c6b599800973"
+    },
+    "reportSha256": "9808d669f446d14dd507540e3ab25d7cd6c6b7aee9eb72e2de6537437cd40252"
+  },
+  "manifestSha256": "d4e3466831b0506ce0418db35afdbf93a65b544a09c475457a239431f54faf1d",
+  "platform": "aarch64-apple-darwin",
+  "publishedArchive": {
+    "path": "examples/marmish/evidence/framing.tar.gz",
+    "reportSha256": "2cfb6d9f7bf0160970aaae2a44c5b2a38eb5608be90d455efd71cce009bad5b8",
+    "sha256": "192ca9e8b8748c1761fe7ae40b9db3a9df1048776571f08c7bdee1f743b3631d"
+  }
+}

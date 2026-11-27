@@ -1,0 +1,29 @@
+{
+  "host": "aarch64-apple-darwin",
+  "companionRevision": "388caf95ccf6eafebba9a51bcf8265dac4c3703c",
+  "historicalRunnerRevision": "f2862d2cdcd28426d423141eee9cb003f3d2a3d5",
+  "receipt": {
+    "commit": "b38b2841b081952dc7728da391fe0e26fc7c6181",
+    "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6",
+    "lockSha256": "6f1a5b34660f36b0a456c9045c41e19fa3e38eddedadbe43c9a38f2785dcf362",
+    "profile": "release",
+    "transport": "loopback websocket",
+    "passed": [
+      "challenges_first_and_finishes_accepted_publish_after_sender_disconnect",
+      "challenge_precedes_a_pipelined_client_request",
+      "cli_reports_actual_bind_and_structured_logs_redact_wire_data"
+    ]
+  },
+  "archivedReceiptPath": "verification/whole/relay/macos-arm64.json",
+  "identicalReceiptBytes": 637,
+  "receiptSha256": "a75eb4a12c300ba53187da3ec6b8c0e1b5f81ec7e25b1565b23b6e54a8b32039",
+  "rejectedBeforeCargo": [
+    "untracked file in pinned fixture checkout",
+    "clean checkout at parent revision"
+  ],
+  "unitControls": [
+    "different test name",
+    "eleven tests passed",
+    "one test failed"
+  ]
+}

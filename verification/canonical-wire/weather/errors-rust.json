@@ -1,0 +1,14 @@
+{
+  "format": "oddlang-shared-rust-v1",
+  "names": {
+    "urn:weather:error": "Failure",
+    "urn:weather:symbol:limit": "Limit",
+    "urn:weather:symbol:invalid": "Invalid"
+  },
+  "variantOrder": {
+    "urn:weather:error": [
+      "urn:weather:symbol:limit",
+      "urn:weather:symbol:invalid"
+    ]
+  }
+}

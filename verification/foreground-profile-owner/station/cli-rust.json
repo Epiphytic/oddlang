@@ -1,0 +1,1 @@
+{"executable": "field-station", "invalid_exit": 2, "uncovered_exit": 125, "operations": {"": "urn:station:run", "serve": "urn:station:run"}, "handlers": {"urn:station:run": ["startup", "attach"]}}

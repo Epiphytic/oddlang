@@ -1,0 +1,96 @@
+{
+  "companionRevision": "c9b6f8bc5cad35f3dad542277664ab89c99b31e7",
+  "host": "aarch64-apple-darwin",
+  "frameworkRevision": "cff611af71aa9ceaf649d6e3d8b97d181eaf351b",
+  "upstream": "af54339d250290490d62d4475a77539b7e739071",
+  "workspaceLockSha256": "08c526f909c71a9f8290e20c7c0fc7c9dc996a5162be973fe35884ca7637fc00",
+  "archiveSha256": "0a9a62dd4ee52b46f31ced7dbee14c5407b582208c620f818a3aed90190a830a",
+  "nativeReceiptSha256": "d395306cdd36839304af3f1b1045d97286afee715ae686e4bfd07886f2bf8a2a",
+  "differencesFromArchive": [
+    "companion",
+    "compilerSha256",
+    "diagnostics.librarySha256",
+    "fixedVault.librarySha256",
+    "journal.generated.libraries.marmish_native",
+    "journal.generated.libraries.serde_json",
+    "journal.original.libraries.marmish_native",
+    "mdk.originalLibrarySha256",
+    "mdk.sealedLibrarySha256",
+    "releaseInfo.generatedBinaries.marmish",
+    "releaseInfo.generatedBinaries.marmishd"
+  ],
+  "physicalMembers": [
+    "marmish-core",
+    "marmish-engine",
+    "marmish-mdk",
+    "marmish-native",
+    "marmish-prototype",
+    "marmish-stream",
+    "marmish-vault"
+  ],
+  "unchangedMemberLocks": [
+    "marmish-core",
+    "marmish-engine",
+    "marmish-mdk",
+    "marmish-prototype",
+    "marmish-stream",
+    "marmish-vault"
+  ],
+  "stagedInputCount": 85,
+  "deniedSourceProbes": [
+    "diagnostic-consumer",
+    "diagnostic-source",
+    "framework-source",
+    "journal-caller",
+    "mdk-caller",
+    "original-journal",
+    "original-mdk",
+    "original-report",
+    "original-vault",
+    "reference-executable",
+    "release-observer",
+    "vault-holdout"
+  ],
+  "matchingReleaseInfoCasesByBinary": {
+    "marmish": 16,
+    "marmishd": 16
+  },
+  "diagnostics": {
+    "consumerSha256": "d05a851521554e306f6d52f94d7581c967b397ef650c9163de50834869282f3a",
+    "graphSha256": "a517354acc5ead6297cff9d8d78fe1e5a4678e6b7f2ea305f7fb6b9eb690a353",
+    "originalLibrarySha256": "cbadad236629e47ee63bd3bb8633e303a531115f9c0d91d298ace5f4cb43040b",
+    "librarySha256": "33f9ac1da28f8847fac043a0f7288c4eb686bf5a3de743b587b3f476489c931d",
+    "observations": {
+      "disabled": {
+        "exitCode": 0,
+        "stdout": "before\n",
+        "stderr": "",
+        "sink": "captured"
+      },
+      "sequence": {
+        "exitCode": 0,
+        "stdout": "after\n",
+        "stderr": "{\"architecture\":\"aarch64\",\"event\":\"context\",\"platform\":\"macos\",\"schema\":1,\"version\":\"0.3.1\"}\n{\"category\":\"unicode \u96ea\\n\\t\\u0001\",\"event\":\"diagnostic\",\"schema\":1,\"stage\":\"quoted \\\"\\\\\"}\n{\"category\":\"begin\",\"event\":\"diagnostic\",\"schema\":1,\"stage\":\"after\"}\n{\"architecture\":\"aarch64\",\"event\":\"context\",\"platform\":\"macos\",\"schema\":1,\"version\":\"0.3.1\"}\n{\"category\":\"\",\"event\":\"diagnostic\",\"schema\":1,\"stage\":\"\"}\n",
+        "sink": "captured"
+      },
+      "cross-thread": {
+        "exitCode": 0,
+        "stdout": "initial\n",
+        "stderr": "{\"architecture\":\"aarch64\",\"event\":\"context\",\"platform\":\"macos\",\"schema\":1,\"version\":\"0.3.1\"}\n{\"category\":\"visible\",\"event\":\"diagnostic\",\"schema\":1,\"stage\":\"joined\"}\n",
+        "sink": "captured"
+      },
+      "closed-sink": {
+        "exitCode": 0,
+        "stdout": "after-error\n",
+        "stderr": "",
+        "sink": "closed pipe"
+      }
+    }
+  },
+  "rejectedModifiedFiles": [
+    "workspace.lock",
+    "marmish-native/src/group_9/__projection_9.rs",
+    "marmish-native/package.lock",
+    "marmish-stream/src/lib.rs"
+  ]
+}

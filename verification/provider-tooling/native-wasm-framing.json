@@ -1,0 +1,18 @@
+{
+  "target": "aarch64-apple-darwin",
+  "source": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+  "reconstruction": "e0d855874ec2348939175dfa6ec5c71488c8ba35",
+  "cases": 33,
+  "identicalOriginalReportSha256": "52f750f2b8ff75a50b4da9e4d30a9933a0576736376bbd7741f0080d34d5a045",
+  "identicalMixedCodecReportSha256": "a688cd0eb23760a473df80effdac67936614ec3abbeeaa2692b1a7c5fc5519d1",
+  "mixedExchanges": 6,
+  "identicalMatrixCaseFileSha256": {
+    "regenerated/native.json": "ec7d6a786787db3340548ee382c7726d7bf36166ec08f78afb6e8b3ead0f9fee",
+    "regenerated/wasm.json": "ec7d6a786787db3340548ee382c7726d7bf36166ec08f78afb6e8b3ead0f9fee",
+    "mutant/native.json": "719067dcc03e5cf2d49454d9a017ffb1ce500b3aff45d8c5be351820ccd9e7e2",
+    "mutant/wasm.json": "719067dcc03e5cf2d49454d9a017ffb1ce500b3aff45d8c5be351820ccd9e7e2"
+  },
+  "changedMatrixReportFields": [
+    "harnessSha256"
+  ]
+}

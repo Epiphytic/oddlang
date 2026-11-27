@@ -1,0 +1,10 @@
+fn main() {
+    let args: Vec<_> = std::env::args().skip(1).collect();
+    if args.first().map(String::as_str) == Some("install-status") {
+        assert_eq!(args[1], "--prefix");
+        assert_eq!(args[3], "--bin-dir");
+        println!("{{\"schema\":1,\"operation\":\"status\",\"version\":null,\"target\":null,\"active\":false,\"generation\":0,\"prefix\":\"{}\",\"bin_dir\":\"{}\"}}",args[2],args[4]);
+    } else {
+        println!("fixture {}", args.join(" "));
+    }
+}

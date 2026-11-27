@@ -1,0 +1,109 @@
+{
+  "graph": {
+    "format": "oddlang-line-grammar-v1",
+    "id": "urn:instrument:configuration",
+    "maxBytes": 64,
+    "forbiddenBytes": [
+      9,
+      13
+    ],
+    "textGrammars": [
+      {
+        "format": "oddlang-text-grammar-v1",
+        "id": "urn:instrument:branch",
+        "prefixes": [
+          "b"
+        ],
+        "body": {
+          "notation": "canonical-ascii-decimal",
+          "bits": 16,
+          "minimum": 1
+        },
+        "consumption": "entire-input"
+      }
+    ],
+    "rows": [
+      [
+        {
+          "kind": "literal",
+          "text": "branch"
+        },
+        {
+          "kind": "text",
+          "grammar": "urn:instrument:branch"
+        }
+      ],
+      [
+        {
+          "kind": "literal",
+          "text": "tier"
+        },
+        {
+          "kind": "text",
+          "capture": "tier",
+          "choices": [
+            "bronze",
+            "copper"
+          ]
+        }
+      ]
+    ],
+    "recordResult": {
+      "failure": {
+        "id": "urn:instrument:failure",
+        "code": "invalid_configuration"
+      },
+      "records": {
+        "configuration": [
+          {
+            "id": "tier",
+            "type": {
+              "kind": "owned-text"
+            }
+          }
+        ]
+      },
+      "entry": {
+        "record": "configuration",
+        "fields": {
+          "tier": {
+            "kind": "capture",
+            "id": "tier"
+          }
+        }
+      },
+      "formatters": []
+    }
+  },
+  "overlay": {
+    "format": "oddlang-line-record-rust-v1",
+    "parser": "parse",
+    "visibility": "crate",
+    "error": {
+      "id": "urn:instrument:failure",
+      "type": [
+        "crate",
+        "Fault"
+      ],
+      "variant": "Invalid"
+    },
+    "records": {
+      "configuration": {
+        "name": "Config",
+        "fields": {
+          "tier": "tier"
+        },
+        "derives": []
+      }
+    },
+    "formatters": {},
+    "support": {
+      "nestedGrammars": {
+        "urn:instrument:branch": "is_branch"
+      },
+      "textChoices": {
+        "tier": "TIERS"
+      }
+    }
+  }
+}

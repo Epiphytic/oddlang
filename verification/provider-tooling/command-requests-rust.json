@@ -1,0 +1,24 @@
+{
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "cases": 66,
+  "accepted": 6,
+  "observationsSha256": "efd236c5fac6b4ce445dd1b5fd690d3c4834a9387d960d195105ee2965d210d1",
+  "wireSha256": "23dc59c1e1cf4f3a52e537839a4a71ad9e45f462f77f5afb089995f3e2b8235f",
+  "compilerSha256": "b1419a1ce370b39fa3eef80054addc53fb9fde8b0efcae63e1affbbdd304195d",
+  "frameworkRevision": "361c74eab9fab814da1abad7889102800056177c",
+  "companionRevision": "e097f352e8a72c161e928375590bca3541db3833",
+  "host": "aarch64-apple-darwin",
+  "workspaceLockSha256": "7e078d8dad898b707ac7341f9caffa038fd5afd9e13ea2464bbb060be988a6f1",
+  "nativePackageLockSha256": "911e99f83ab03f0d0b6225d3fb73e7617b743725a816e472ded90c834d586685",
+  "sameCompilerReceiptSha256": "df8d73639ebac0e78c6a1aaf37d8bfbed0cd981e3a4f3265738aeabca32e0e67",
+  "previousPythonReceiptByteIdentical": true,
+  "historicalReceiptDifferences": [
+    "compilerSha256"
+  ],
+  "refusedChanges": {
+    "workspace.lock": "Error: \"workspace differs from pinned selection\"",
+    "marmish-native/package.lock": "Error: \"native member differs from pinned workspace\"",
+    "marmish-native/src/group_13/__projection_13.rs": "Error: \"native source differs\""
+  },
+  "shapeRegressionReceiptSha256": "3ae303046f182c3dc31ea940c21b2c6cb2f9fc1451350da90f4b29000426c9da"
+}

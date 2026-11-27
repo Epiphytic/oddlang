@@ -1,0 +1,69 @@
+{
+  "format": "oddlang-binary-frame-rust-v1",
+  "name": "Message",
+  "decoder": "Messages",
+  "errorType": "crate::Fault",
+  "cases": {
+    "urn:meter:panel": "Panel",
+    "urn:meter:samples": "Samples",
+    "urn:meter:seal": "Seal",
+    "urn:meter:existing-case": "Existing"
+  },
+  "fields": {
+    "urn:meter:device": "device",
+    "urn:meter:index": "index",
+    "urn:meter:data": "data",
+    "urn:meter:seal-id": "seal_id",
+    "urn:meter:existing": "existing"
+  },
+  "types": {
+    "urn:meter:header": {
+      "path": "crate::Header"
+    },
+    "urn:meter:existing-type": {
+      "path": "crate::Existing"
+    }
+  },
+  "errors": {
+    "urn:meter:error:header": {
+      "variant": "Bad",
+      "argument": "header"
+    },
+    "urn:meter:error:length": {
+      "variant": "Bad",
+      "argument": "length"
+    },
+    "urn:meter:error:limit": {
+      "variant": "Bad",
+      "argument": "limit"
+    },
+    "urn:meter:error:tag": {
+      "variant": "Bad",
+      "argument": "tag"
+    },
+    "urn:meter:error:truncated": {
+      "variant": "Bad",
+      "argument": "truncated"
+    },
+    "urn:meter:error:trailing": {
+      "variant": "Bad",
+      "argument": "trailing"
+    },
+    "urn:meter:error:decoderFailed": {
+      "variant": "Bad",
+      "argument": "decoderFailed"
+    },
+    "urn:meter:error:data": {
+      "variant": "Bad",
+      "argument": "data"
+    },
+    "urn:meter:error:range": {
+      "variant": "Bad",
+      "argument": "range"
+    },
+    "urn:meter:error:stamp": {
+      "variant": "Bad",
+      "argument": "stamp"
+    }
+  }
+}

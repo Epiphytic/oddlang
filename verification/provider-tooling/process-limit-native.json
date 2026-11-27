@@ -1,0 +1,44 @@
+{
+  "platform": "aarch64-apple-darwin",
+  "companionRevision": "72cc1f45a25fc1a6cb7e4c20bea9713a8c33b5f2",
+  "pythonAndRustReceiptSha256": {
+    "standalone": "ef916cadcf1d543c4f706f12098543edcedb523ea94d8aee50aa7c1b3d09ae7e",
+    "cargo": "83b2c2588a0434d9a333d70b684a2c42ed7b2db17acd60c3e35309922cbfafc5"
+  },
+  "differencesFromArchivedDarwinReceipt": [
+    "/executables/marmish",
+    "/executables/marmishd",
+    "/cargo_harness_with_missing_runtime_overrides/harness_sha256"
+  ],
+  "emptySuccessfulHarnessRejected": true,
+  "cargoHarness": "Fresh Cargo build of the unchanged pinned test with explicit compile-time client and daemon paths",
+  "observed": {
+    "upstream_commit": "af54339d250290490d62d4475a77539b7e739071",
+    "source": "crates/marmish-native/tests/process_limits.rs",
+    "test": "actual_native_entrypoints_accept_inherited_limits",
+    "source_sha256": "47a5d6d6fc37526a3a0d6ec825d99c1c5a13aa8cdc93479db673d88f6e727057",
+    "compiler": "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+    "libc_sha256": "abdcb399fe700165f0b7749c88393da9aefe6a45b69c286fe21033e8e30adc65",
+    "executables": {
+      "marmish": "febd6292de4189333c28aba0dd9df7ad0909c46fd6bcb0733c38afc28a021b09",
+      "marmishd": "7f6e1f2669707f45df44b6e17f90d464314772aedcde2bdbe751351798111dd9"
+    },
+    "staged_pair_exit": 0,
+    "mutants": {
+      "marmish": {
+        "sha256": "306c6ca7407560340797866e077e053627ad409277d1b9da58106fce4cf717cb",
+        "exit": 101,
+        "failed_assertion": "!result.stdout.is_empty()"
+      },
+      "marmishd": {
+        "sha256": "306c6ca7407560340797866e077e053627ad409277d1b9da58106fce4cf717cb",
+        "exit": 101,
+        "failed_assertion": "!result.stdout.is_empty()"
+      }
+    },
+    "cargo_harness_with_missing_runtime_overrides": {
+      "harness_sha256": "f04f76ac14b353a78b7619da0b71357676e6fa4f481b35bfff6d26409445317f",
+      "exit": 0
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "format": "oddlang-bounded-json-rust-v1",
+  "single": "item",
+  "sequence": "rows",
+  "limit": "LIMIT",
+  "errorType": "Fault",
+  "variants": {
+    "urn:test:capacity": "Capacity",
+    "urn:test:bad-input": "Input"
+  }
+}
