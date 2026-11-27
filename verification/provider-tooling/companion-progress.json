@@ -1,10 +1,10 @@
 {
-  "auditedCompanionRevision": "a784c66336932b84ab736ded119bb451a17ed61e",
+  "auditedCompanionRevision": "df964346e51f69af65e6d8cb7f55ff278ed379e4",
   "previousRevision": "b95fd5161e75c47913a17a2ee3e68e13da5e8748",
-  "reproducedTableSha256": "379500f7ee3c14449f4c539b4967046ab243b18968bf9872b17f46ceae7a8ebb",
-  "remainingProjectToolFiles": 162,
+  "reproducedTableSha256": "d1ab47f8155c6c20eb21126ba847f5818fd3de50a828ce836b9a10f8005312a6",
+  "remainingProjectToolFiles": 158,
   "remainingProjectExtensions": {
-    ".py": 153,
+    ".py": 149,
     ".sh": 9
   },
   "removedSincePrevious": [
@@ -17,8 +17,12 @@
     "verification/whole/copy-checkpoint/verify.py",
     "verification/whole/copy-field-relations/verify.py",
     "verification/whole/copy-manifest/verify.py",
+    "verification/whole/copy-source-correspondence/verify.py",
+    "verification/whole/private-buffer-inference/observe.py",
+    "verification/whole/private-buffer-inference/qualify.py",
     "verification/whole/private-buffer/baseline.py",
     "verification/whole/private-buffer/upstream_case.py",
+    "verification/whole/private-buffer/verify.py",
     "verification/whole/release-info-structure/verify.py",
     "verification/whole/retention-structure/verify.py",
     "verification/whole/stream-block/cases.py",

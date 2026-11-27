@@ -3463,7 +3463,7 @@ w:fiveSelectedSuiteCases a p:Artifact ;
     rdfs:label "Rust test staging matched predecessor files and reader module bytes; five exact upstream cases executed on the seven-member generated workspace" ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a567eb453ad9b64648c78bb7e620581c848b6887/verification/whole/suite/rust-selected-inputs-macos-arm64.json" .
 w:companionToolProgress a p:Artifact ;
-    rdfs:label "Pinned companion inventory found 162 project-authored Python and shell entries at a784c66" ;
+    rdfs:label "Pinned companion inventory found 158 project-authored Python and shell entries at df96434" ;
     p:location "verification/provider-tooling/companion-progress.json" .
 
 w:portHistoricTooling p:evidence w:fiveMemberObserverReplay .
@@ -3502,3 +3502,11 @@ w:canonicalRangeRustReplay a p:Artifact ;
 w:copySourceRustReplay a p:Artifact ;
     rdfs:label "The Rust copy-source qualification reconstructed its archived macOS receipt across four builds, 15 cases per build, and five changed outcomes" ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b599c7c17ad5d621442b53375af249848418cfc5/verification/whole/copy-source-correspondence/rust-replay-macos-arm64.json" .
+
+w:portHistoricTooling p:evidence w:fullNativeBufferInference, w:standaloneNativeBuffer .
+w:fullNativeBufferInference a p:Artifact ;
+    rdfs:label "Native Rust inference replay from published companion source matched both archived macOS receipts for five reader variants. All four Oddlang provider integration tests and nine provider-filtered unit tests passed." ;
+    p:location "verification/provider-tooling/buffer-inference-native.json" .
+w:standaloneNativeBuffer a p:Artifact ;
+    rdfs:label "Full native standalone private-buffer driver reproduced the Darwin archive, including the source extent compiler control and three policy mutants. Linux replay did not complete." ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/df964346e51f69af65e6d8cb7f55ff278ed379e4/verification/whole/private-buffer/README.md" .
