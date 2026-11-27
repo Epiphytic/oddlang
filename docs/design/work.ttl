@@ -3525,3 +3525,8 @@ w:portHistoricTooling p:evidence w:suiteProcessLimitsNative .
 w:suiteProcessLimitsNative a p:Artifact ;
     rdfs:label "On macOS ARM64 the Rust and Python process-limit verifiers produced identical receipts both with and without the Cargo harness control. Both empty-output role replacements failed the expected assertion. The archived original was reproduced apart from the two executable hashes and optional harness hash. The companion inventory now contains 147 project Python tools and 9 shell tools." ;
     p:location "verification/provider-tooling/process-limit-native.json" .
+
+w:portHistoricTooling p:evidence w:canonicalMdkRuntimeComposition .
+w:canonicalMdkRuntimeComposition a p:Artifact ;
+    rdfs:label "Rust rebuilt both canonical MDK and runtime-status compositions byte-for-byte across five outputs and rejected eleven drift or input mutations. A fresh Oddlang build regenerated the seven-member workspace, including 106 files and 49 directories, from 111 pinned inputs. All 105 local policy and eleven room configuration observations matched the archive. Four provider integration and nine unit tests passed on macOS ARM64." ;
+    p:location "verification/provider-tooling/canonical-mdk-runtime-composition.json" .
