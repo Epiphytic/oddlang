@@ -3530,3 +3530,8 @@ w:portHistoricTooling p:evidence w:canonicalMdkRuntimeComposition .
 w:canonicalMdkRuntimeComposition a p:Artifact ;
     rdfs:label "Rust rebuilt both canonical MDK and runtime-status compositions byte-for-byte across five outputs and rejected eleven drift or input mutations. A fresh Oddlang build regenerated the seven-member workspace, including 106 files and 49 directories, from 111 pinned inputs. All 105 local policy and eleven room configuration observations matched the archive. Four provider integration and nine unit tests passed on macOS ARM64." ;
     p:location "verification/provider-tooling/canonical-mdk-runtime-composition.json" .
+
+w:portHistoricTooling p:evidence w:recordRangeRoleComposition .
+w:recordRangeRoleComposition a p:Artifact ;
+    rdfs:label "Rust composers reproduced five observational-record and range-role descriptors. Both rebuilt workspace trees matched retained references with 92 and 101 files respectively. The sealed ARM64 Darwin range qualification reproduced its complete archived receipt with the pinned compiler. Both live verifier composition calls, five drift checks, and six input rejection controls passed." ;
+    p:location "verification/provider-tooling/record-range-role-composition.json" .

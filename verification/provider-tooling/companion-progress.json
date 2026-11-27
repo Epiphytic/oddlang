@@ -1,15 +1,15 @@
 {
-  "auditedCompanionRevision": "2e8e60035d60b5065a2e71acbaf427fc15ca58f2",
-  "previousRevision": "72cc1f45a25fc1a6cb7e4c20bea9713a8c33b5f2",
-  "reproducedTableSha256": "5090d8c2963d545e836aad5564ee55f63974b7dec60b7184051c2d159f32f0e0",
-  "remainingProjectToolFiles": 154,
+  "auditedCompanionRevision": "c7e1aa7cf0be893ef1d0a5d17458a6299f866e79",
+  "previousRevision": "2e8e60035d60b5065a2e71acbaf427fc15ca58f2",
+  "reproducedTableSha256": "6ea1e05dac900a336c5f846da7777c3092626282e8899dc11e4a65a1943233e8",
+  "remainingProjectToolFiles": 152,
   "remainingProjectExtensions": {
-    ".py": 145,
+    ".py": 143,
     ".sh": 9
   },
   "removedSincePrevious": [
-    "verification/whole/mdk-json-input/compose_canonical.py",
-    "verification/whole/runtime-status-data/compose.py"
+    "verification/whole/engine-native-records/compose.py",
+    "verification/whole/gap-range-role-workspace/compose.py"
   ],
   "addedSincePrevious": []
 }

@@ -1,0 +1,31 @@
+{
+  "companionRevision": "c7e1aa7cf0be893ef1d0a5d17458a6299f866e79",
+  "host": "aarch64-apple-darwin",
+  "pythonRustAndArchivedDescriptors": {
+    "engine-observational-records-package.json": "37034a24ca00fb803c30dfeb1d84f07a0142de5213966d398a1f19f943bcb14f",
+    "native-observational-records-package.json": "3cb933a9f0d24e7437131b6fcd791b0042c6a0a3e5a7bd65e114de317c6c5508",
+    "workspace-v7-observational-records.json": "a0d623fc84fafd6ab6a400469e2bcd4f3a7d77f6205897961685723b2b546874",
+    "marmish-engine-canonical-range-native-idioms-package.json": "8215c0bedcfce7e62c1e45edd8a3865802c138a45c16fa03e8d48b21ec98b8a7",
+    "workspace-v7-canonical-range-native-idioms.json": "b282f479fef502ae59e938b4ba365bc3eb2fb985bbf0163ee4edc1f602cc0c25"
+  },
+  "unalteredInputsGeneratedTrees": {
+    "workspace-v7-observational-records": {
+      "identicalFiles": 92,
+      "identicalDirectories": 42,
+      "rustSources": 75,
+      "workspaceLockSha256": "f03d75591e97660d43677d6d3c6172d6af48145e90b2a8d60079461bba4176c1"
+    },
+    "workspace-v7-canonical-range-native-idioms": {
+      "identicalFiles": 101,
+      "identicalDirectories": 45,
+      "rustSources": 84,
+      "workspaceLockSha256": "bb670bb4031c2c193d974f51a3343764caf46abc0097e57e85beb46db0217ae9"
+    }
+  },
+  "outputDriftRejections": 5,
+  "invalidInputRejections": 6,
+  "normalVerifierCallbacksPassed": 2,
+  "projectionCompilerSha256": "339facf9885c2be5b7f0dba0506e315bdf08e117e9cebd9e2049a52c86061f6e",
+  "sealedRangeRoleReceiptSha256": "4743f1867369acf4c8c60438ef1caa694851a6c840b340e99f8a0509673e4241",
+  "sealedRangeCompilerSha256": "80bf57800165968c12f1fcf72232ee8ae992b8fc009456bebd59c476cf71a10d"
+}
