@@ -3540,3 +3540,8 @@ w:portHistoricTooling p:evidence w:rangeRoleNativeQualification .
 w:rangeRoleNativeQualification a p:Artifact ;
     rdfs:label "Native range workspace and import verification reproduced the complete sealed Darwin receipt and all 140 consumer outcomes across seven libraries. Only the verifier source hash changed in the import receipt. Wrong predecessor and artifact-log controls produced no receipt." ;
     p:location "verification/provider-tooling/range-role-native.json" .
+
+w:portHistoricTooling p:evidence w:rangeEndpointNativeReplay .
+w:rangeEndpointNativeReplay a p:Artifact ;
+    rdfs:label "The Rust endpoint observer compiled independent callers against the pinned original and retained generated engines on macOS ARM64. Seven encoded outcomes and four rejection diagnostics matched the prior Python run and archive; only the observer source digest changed. The last user of the recovered range Python adapter was migrated." ;
+    p:location "verification/provider-tooling/range-endpoint-native.json" .

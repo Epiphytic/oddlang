@@ -1,0 +1,35 @@
+{
+  "platform": "aarch64-apple-darwin",
+  "companionRevision": "2bd155e9d34ce1a696aba8e0a59ecf23a357606c",
+  "cases": [
+    "omitted",
+    "null",
+    "zero",
+    "safe-integer-max",
+    "two-to-53",
+    "two-to-53-plus-one",
+    "u64-max",
+    "u64-overflow",
+    "negative",
+    "quoted-integer",
+    "fraction"
+  ],
+  "encodedResults": 7,
+  "rejections": 4,
+  "upstream": "af54339d250290490d62d4475a77539b7e739071",
+  "originalLibraryDigests": {
+    "marmish_engine": "34ecf3f3c0eff0db6720c821022de74477eb84147a86f4a18f9e76967732d5b1",
+    "serde_json": "c2952096c619d2c903df05eb47c699d85ed59c9347936b6998adc3cbbb097e37"
+  },
+  "generatedLibraryDigests": {
+    "marmish_engine": "5f223c4980cca5a11a206481da401865008b53d8d470e545758d6daa9c292d3c",
+    "serde_json": "fd80de7211503141ae8c59121a041ca7754a357fb7a6292396fbc3b52fa8c7fd"
+  },
+  "archivedReceiptSha256": "c5728e571e934298a34cb58a164107d19f831db3f113a0cd630e7c957261d00f",
+  "previousPythonReceiptSha256": "a97460c76a86ceaf635f3b9eb1b19174b00caa58064456224c6cd18d70875a50",
+  "nativeReceiptSha256": "c2a2595a8bead8bd2aab5149b4f1163db096a8408facc922b8d0c5549f858dee",
+  "differingReceiptFields": [
+    "observerSha256"
+  ],
+  "sharedTargetRejected": true
+}

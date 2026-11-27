@@ -1,15 +1,15 @@
 {
-  "auditedCompanionRevision": "c6ce2dc7ba2328c8646d41d94668a007770d1c4d",
-  "previousRevision": "c7e1aa7cf0be893ef1d0a5d17458a6299f866e79",
-  "reproducedTableSha256": "16a37b2f177647ff74459fb6a7cdc20bb9d62e6e0ef062ca56183543ea11f8ca",
-  "remainingProjectToolFiles": 150,
+  "auditedCompanionRevision": "2bd155e9d34ce1a696aba8e0a59ecf23a357606c",
+  "previousRevision": "c6ce2dc7ba2328c8646d41d94668a007770d1c4d",
+  "reproducedTableSha256": "3c9434826096597a3a2f02f8d94189871263fc68b9c0c4eaa4ffa1976814cad7",
+  "remainingProjectToolFiles": 148,
   "remainingProjectExtensions": {
-    ".py": 141,
+    ".py": 139,
     ".sh": 9
   },
   "removedSincePrevious": [
-    "verification/whole/gap-range-role-workspace/imports.py",
-    "verification/whole/gap-range-role-workspace/verify.py"
+    "verification/whole/canonical-recovered-range/workspace_compat.py",
+    "verification/whole/gap-range-endpoint/native.py"
   ],
   "addedSincePrevious": []
 }
