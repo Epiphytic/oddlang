@@ -9,7 +9,9 @@ use std::{
     path::Path,
 };
 
+mod restrictions;
 mod rust;
+use restrictions::RestrictionLists;
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -38,6 +40,7 @@ struct RoomPrepare {
     states: [String; 3],
     categories: [String; 5],
     config_fields: [String; 4],
+    restriction_lists: Option<RestrictionLists>,
     roles: [String; 2],
     name_prefix: String,
     description: String,
@@ -259,6 +262,9 @@ struct Binding {
 impl Graph {
     fn validate(&self, binding: &Binding) -> Result<(), String> {
         if let Some(prepare) = &self.room_prepare {
+            if let Some(lists) = &prepare.restriction_lists {
+                lists.validate(&prepare.config_fields)?;
+            }
             if !matches!(self.activation.kind, ActivationKind::OnionWebsocket)
                 || self.lifecycle.is_none()
                 || self.activation.relay_runtime.is_none()
