@@ -3948,3 +3948,8 @@ w:gapReasonContractRustEvidence a p:Artifact ;
     rdfs:label "Standalone Rust recovery and native package projection of the Marmish gap reason matched the original and mutated case observations on macOS ARM64" ;
     p:location "verification/provider-tooling/gap-reason-contract-rust.json" .
 w:portHistoricTooling p:evidence w:gapReasonContractRustEvidence .
+
+w:gapReasonNativeReplay a p:Artifact ;
+    rdfs:label "Fully native Rust replay of both gap-reason recovery and caller qualification lanes" ;
+    p:location "verification/provider-tooling/gap-reason-native-replay.json" .
+w:portHistoricTooling p:evidence w:gapReasonNativeReplay .
