@@ -1,0 +1,26 @@
+{
+  "companionRevision": "487e876756dc54b01cd5aac919814e37caa3e3fc",
+  "reference": "af54339d250290490d62d4475a77539b7e739071",
+  "framework": "a635eec8e0f71d2dabc9aee28655e26494a7506f",
+  "host": "aarch64-apple-darwin",
+  "independentWitnesses": 24,
+  "familyCounts": {
+    "decode": 1074,
+    "encode": 516,
+    "frame-error": 4,
+    "limits": 1,
+    "relay": 132,
+    "retention": 8
+  },
+  "transcriptSha256": "a0eba1d3a32c7238ba8f6f8b665d92f5205fc6bfc56a150f637f07516a856c0e",
+  "receiptSha256": "51f8b24becb49c9e84daf8d651e3a659506a242a9aafe74828655b4fbc2379c8",
+  "archivedReceiptByteIdentical": true,
+  "rejectedControls": [
+    "duplicate reference case",
+    "missing case in both transcripts",
+    "reordered candidate rows",
+    "changed candidate result",
+    "same wrong decoded bytes in both transcripts"
+  ],
+  "linux": "Shell syntax checked. Native execution pending."
+}

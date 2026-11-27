@@ -3622,3 +3622,8 @@ w:portHistoricTooling p:evidence w:corePackagePinQualification .
 w:corePackagePinQualification a p:Artifact ;
     rdfs:label "Shared Rust core-package checks staged the same pinned inputs and rejected four independent package mutations. The macOS ARM64 differential replay matched the archived receipt byte for byte across 1735 observations and four semantic mutants. The Linux runner passed shell syntax validation and awaits native replay." ;
     p:location "verification/provider-tooling/core-package-inputs.json" .
+
+w:portHistoricTooling p:evidence w:coreObservationChecks .
+w:coreObservationChecks a p:Artifact ;
+    rdfs:label "The shared Rust differential checker validated 24 portable expectations across 1735 core observations and rejected five transcript mutations. The full macOS qualification receipt matched the archive byte for byte." ;
+    p:location "verification/provider-tooling/core-observation-checks.json" .
