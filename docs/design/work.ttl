@@ -1440,7 +1440,7 @@ w:recoveredWorkspaceNamedSuiteReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/75> .
 
 w:privateBufferedInputFixture a p:Artifact ;
-    p:location "verification/buffered-input/verify.py" .
+    p:location "verification/provider-validation/src/bin/qualify-buffered-input/policies.rs" .
 
 w:sevenMemberBufferedWorkspacePlan a p:Artifact ;
     p:location "docs/superpowers/plans/2026-11-26-seven-member-buffered-workspace.md" .
@@ -2346,7 +2346,7 @@ w:observedBufferedInput a p:Task ;
     p:acceptance "Infer only the declared empty-read, retirement and refill-error policy choices. Reject inconsistent observations, preserve observed structure and replay both a real source baseline and a shape-invariant behavior mutation." .
 
 w:observedBufferedInputFixture a p:Artifact ;
-    p:location "verification/observed-buffered-input/verify.py" .
+    p:location "verification/provider-validation/src/bin/qualify-buffered-input/observed.rs" .
 
 w:observedBufferedInputCompanion a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/80> .
@@ -3165,3 +3165,8 @@ w:portHistoricTooling p:evidence w:sealedRecordReplay .
 w:sealedRecordReplay a p:Artifact ; p:location "verification/provider-validation/src/bin/sealed-record-package.rs", "verification/provider-validation/src/bin/sealed-record-api.rs" .
 
 w:rustCaptureParity rdfs:comment "The original executable-adapter path forwards to rust-capture for historical callers. Current native tools launch the Rust observer directly." .
+
+w:portHistoricTooling p:evidence w:nativeBufferedInputReplay .
+w:nativeBufferedInputReplay a p:Artifact ;
+    rdfs:label "Buffered-input native policy matrix, compiler shape recovery and observed trace parity on macOS ARM64" ;
+    p:location "verification/provider-tooling/buffered-input-replay.json" .

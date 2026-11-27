@@ -202,6 +202,17 @@ structure, trace-inferred policies and provider assumptions. The output
 graph and overlay use the existing buffered-input formats.
 See the [trace contract](../superpowers/specs/2026-11-26-observed-buffered-input.md).
 
+Run both native qualifications with Rust 1.97.1 and its `rustc-dev` component.
+The `policies` runner compiles all eight combinations of the three transitions.
+The `observed` runner records traces from the reference and its three-policy
+mutation, then executes the same probe against each assembled projection.
+
+```sh
+for suite in policies observed; do
+  cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin qualify-buffered-input -- "$suite" target/debug/oddlang
+done
+```
+
 ### Bounded local JSON test input
 
 A bounded JSON input component declares one maximum byte count, a record
