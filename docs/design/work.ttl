@@ -1669,7 +1669,7 @@ w:observationalRecordDefaults a p:Task ;
     p:acceptance "Recover pinned engine and native records within one reusable profile. Compare independent native callers for field widths, exact traits, default values and exported paths. Show a source-only mutation and preserve preceding sealed workspace behavior." .
 
 w:observationalRecordDefaultsFixture a p:Artifact ;
-    p:location "verification/observational-record-defaults/verify.py" .
+    p:location "verification/provider-validation/src/bin/record-defaults.rs" .
 w:observationalRecordDefaults p:evidence w:observationalRecordDefaultsFixture .
 
 w:observationalPathWireScope a p:Finding ;
@@ -2107,7 +2107,7 @@ w:wholeValueApiWitness a p:Task ; rdfs:label "Compare native public value APIs a
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
     p:acceptance "Match equivalent concrete value facades after a private rename and distinguish changed argument borrowing, return surface, enum order, constant type and traits." ;
     p:evidence w:wholeApiMutations .
-w:wholeApiMutations a p:Artifact ; p:location "verification/rust-recovery/test_public_api.py" .
+w:wholeApiMutations a p:Artifact ; p:location "verification/provider-validation/src/bin/rust-exports/semantics.rs" .
 w:wholeAmd64Effects a p:Artifact ; p:location "https://github.com/Epiphytic/oddlang/actions/runs/45775359148" .
 w:wholeMarmishFreeze p:evidence w:wholeAmd64Effects .
 
@@ -2115,7 +2115,7 @@ w:wholeRecoverShared a p:Task ; rdfs:label "Recover bounded shared declarations 
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
     p:acceptance "Derive constants, typed error templates, variant order and result aliases as structured facts at a pinned Git blob. Detect changed native declarations and reject unsupported selections." ;
     p:evidence w:wholeSharedRecoveryFixture .
-w:wholeSharedRecoveryFixture a p:Artifact ; p:location "verification/rust-recovery/test_shared_source.py" .
+w:wholeSharedRecoveryFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/rust-exports/semantics.rs" .
 
 w:wholeCoreBuild a p:Task ; rdfs:label "Build the core package without first-party source inputs" ;
     p:source w:wholeMarmishPlan ; p:milestone w:marmishMilestone ; p:status p:done ;
@@ -2132,7 +2132,7 @@ w:structuralArrayExtents a p:Task ; rdfs:label "Retain fixed and parameter-sized
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
     p:acceptance "Preserve element type, zero and nested dimensions and constant parameter identity across a source mutation in an unrelated fixture." ;
     p:evidence w:arrayExtentFixture .
-w:arrayExtentFixture a p:Artifact ; p:location "verification/rust-recovery/test_shapes.py" .
+w:arrayExtentFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/rust-exports/shapes.rs" .
 
 w:structuralArrayExtents p:evidence w:streamArrayExtentEvidence .
 w:streamArrayExtentEvidence a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/pull/45> .
@@ -2220,7 +2220,7 @@ w:publicTypeBindingPlan a p:Artifact ;
 w:publicTypeBindingReceipt a p:Artifact ;
     p:location "companion:verification/whole/public-types/provenance.json" .
 w:publicTypeBindingFixture a p:Artifact ;
-    p:location "verification/rust-recovery/test_exports.py" .
+    p:location "verification/provider-validation/src/bin/rust-exports/tests.rs" .
 w:publicTypeLegacyRecoveryReceipt a p:Artifact ;
     p:location "companion:verification/whole/public-types/legacy-recovery.json" .
 w:publicTypeBindingCutFinding a p:Finding ;

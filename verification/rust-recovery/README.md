@@ -4,7 +4,7 @@ Install the compiler's development metadata with rustup before running the adapt
 
 ```sh
 rustup component add rustc-dev --toolchain 1.97.1
-python3 verification/rust-recovery/test_adapter.py
+cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin rust-exports -- qualify adapter
 ```
 
 `run.sh` takes an absolute Cargo manifest path, package, `lib` or `bin`,
@@ -78,7 +78,7 @@ cargo run --locked --offline --manifest-path verification/provider-validation/Ca
   lib crate_name aarch64-apple-darwin --out /tmp/declarations.json
 ```
 
-The semantic comparison uses enclosing declared names and normalized categories. It preserves collisions and counts observations with missing identity by original kind. Declaration witnesses carry each observer's file and starting line. The separate `spanEvidence` section retains the historical diagnostic method. Supply `--previous-spans PATH` with a prior `reconcile_rustdoc.py` report to track each original one-sided key.
+The semantic comparison uses enclosing declared names and normalized categories. It preserves collisions and counts observations with missing identity by original kind. Declaration witnesses carry each observer's file and starting line. The separate `spanEvidence` section retains the historical diagnostic method. Supply `--previous-spans PATH` with a prior `rust-exports reconcile` report to track each original one-sided key.
 
 A path match verifies the presence of a named declaration at this ownership boundary. It does not qualify its type, layout, body or effects. The current mapping needs additional identity rules for impl-owned items, generic parameters and anonymous or synthetic items. For each direct alias, the report traces the exact supplied artifact to a compiler invocation in that observer's fresh build and its package in locked Cargo metadata. The recorded binding includes the producer's crate name, crate type, explicit target and cfg values, package name and version, and registry/Git source or relative path. A host proc-macro has an empty explicit target list. An unresolved or ambiguous selected artifact rejects the comparison. Hosts can compile build dependencies absent from the selected target’s metadata. The fixture exercises this distinction when the Rust 1.97.1 `wasm32-wasip1` target is installed. This check covers direct dependency selection. Transitive compilation-unit identity and content hashing for path dependencies remain open. Cargo build scripts can observe their environment, and macro expansion differs between documentation and code-generation interfaces.
 
@@ -94,7 +94,7 @@ The same pinned Cargo profile can recover a candidate data shape graph.
 cargo build --locked --offline --bin oddlang
 target/debug/oddlang recover rust-shapes /path/to/Cargo.toml \
   --profile /path/to/profile.toml --out /tmp/data-shapes
-python3 verification/rust-recovery/test_shapes.py target/debug/oddlang
+cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin rust-exports -- qualify shapes target/debug/oddlang
 ```
 
 Use the `recover rust` profile format. For this adapter include
@@ -130,17 +130,17 @@ satisfaction and compatibility across profiles still require evidence.
 
 Build a public rustdoc JSON document for each library with the same pinned 1.97.1 toolchain, target and flags. Run `oddlang inspect native-value-api FILE.json` on each and compare the output. This independent native witness resolves private-module reexports to their public root names. It records the order of unit enum variants, private tuple arity, inherent method parameter/return types, receiver and borrow mode, associated constant types and non-blanket trait identities including auto traits. Parameter names and private module names can change without changing the comparison. The extractor rejects public shapes outside this small vocabulary. Public rustdoc omits callable items marked `#[doc(hidden)]`. The witness also omits trait associated types, trait method bodies and overrides, constant values, layout, blanket impls and attributes including `#[non_exhaustive]`. Equality covers the recorded observations only. Runtime obligations cover values and behavior.
 
-Run `python3 verification/rust-recovery/test_public_api.py /path/to/oddlang` for the unrelated native fixture. The numeric rustdoc references, source spans and code bodies never enter the witness.
+Run `cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin rust-exports -- qualify public-api /path/to/oddlang` for the unrelated native fixture. The numeric rustdoc references, source spans and code bodies never enter the witness.
 
 ### Recover shared value declarations
 
 `oddlang recover shared-declarations CHECKOUT SELECTION.json NEW_DIRECTORY` reads one Git blob at a full commit ID. The selector assigns contract IRIs to chosen public names and error variants. Source changes to numeric literals, multiplication, references, supported integer maxima, error payloads, display literals, declaration order and Result targets change the semantic graph or the native overlay. The output includes source and selection digests. No compiler invocation is needed for this source-level candidate. The native binding accepts public u8/u16/u32/u64/usize constants, and errors deriving Debug, Clone, Copy, PartialEq, Eq and thiserror::Error. A native build is required to verify constant expression type checking and overflow at the selected target width. Its subset excludes conditional items, nonliteral display formatting, generic errors and payload types beyond the documented primitives. A pinned native build and independent consumer qualify inferred facts and platform-dependent types. Module resolution, macro expansion and the binding of the derive attribute to its actual dependency require a separate build witness.
 
-Run `python3 verification/rust-recovery/test_shared_source.py /path/to/oddlang` for positive revision controls and rejecting cases.
+Run `cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin rust-exports -- qualify shared-source /path/to/oddlang` for positive revision controls and rejecting cases.
 
 ### Cross-library imports
 
-Run `probe_consumer_paths.py EXPECTED_EXPORTS SUBJECT_GRAPH_DIRECTORY SUBJECT_CARGO_TOML TARGET_DIRECTORY RECEIPT` to compile independent downstream imports from one public type graph against a second library. Use an existing qualification's native Cargo target directory to reuse dependencies. The subject directory contains its `exports.json` and `exports.lock`. Each receipt records membership in the subject type namespace separately from whether a Rust import compiles. An import can succeed after replacement by a value. Other compiler failures outside missing paths, privacy and the ambiguity lint stop qualification. Callers responsible for a release qualification must also verify the checked-out or generated source tree against their source pin.
+Run `cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin rust-exports -- consumer-paths EXPECTED_EXPORTS SUBJECT_GRAPH_DIRECTORY SUBJECT_CARGO_TOML TARGET_DIRECTORY RECEIPT` to compile independent downstream imports from one public type graph against a second library. Use an existing qualification's native Cargo target directory to reuse dependencies. The subject directory contains its `exports.json` and `exports.lock`. Each receipt records membership in the subject type namespace separately from whether a Rust import compiles. An import can succeed after replacement by a value. Other compiler failures outside missing paths, privacy and the ambiguity lint stop qualification. Callers responsible for a release qualification must also verify the checked-out or generated source tree against their source pin.
 
 The observer verifies the adjacent export locks, compiler and native target. For the subject it checks package selection, workspace entry, recorded Cargo configuration and optional source revision. It builds in the same Cargo configuration directory used by extraction. Ambiguous candidates are reported separately; an ordinary import may resolve in another namespace even when the subject graph has no corresponding type. Constructor and pattern access require separate consumers.
 
@@ -162,3 +162,16 @@ independent fixture compiles a caller and checks rustc's rejection of a
 private method and a method used with the wrong type argument.
 
 The Rust release observer reproduced the Python producer's complete outputs on macOS ARM64 for Marmish revision `af54339d250290490d62d4475a77539b7e739071`. The core capture with public inherent observations had SHA-256 `941d5d5920b15dbe44501e234ad3fa578859d539ec60191c7ec2dcadb265594c`. The stream capture with historical span tracking had SHA-256 `a5aa32478bee2c8657d6c52a7533a59a51cc5f26199b4d27156d29e2727e79db`. All fields in the earlier archived stream report matched, including 445 revisited expansion-inclusive span keys. The current report also contains declared-access comparisons and external dependency bindings. [Archived stream evidence](https://github.com/Epiphytic/marmish-oddlang/tree/058e5d3f473380ced323db756a96d37a6a37476a/verification/whole/stream/structure)
+
+The Rust export qualification binary also compares two recovered export graphs and checks independent callers. Build it from the repository root, then run the selected operation.
+
+```sh
+cargo build --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin rust-exports --bin release-rustdoc
+tools=verification/provider-validation/target/debug
+"$tools/rust-exports" probe "$ODDLANG" "$LIB_MANIFEST" "$PACKAGE" "$OUT"
+"$tools/rust-exports" compare "$ORIGINAL_EXPORTS" "$GENERATED_EXPORTS" "$DIFF"
+"$tools/rust-exports" qualify exports "$ODDLANG"
+"$tools/rust-exports" qualify consumer-paths "$ODDLANG"
+"$tools/rust-exports" qualify value-domain "$ODDLANG"
+"$tools/rust-exports" qualify inherent "$tools/release-rustdoc"
+```

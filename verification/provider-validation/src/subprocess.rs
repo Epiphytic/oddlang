@@ -1,4 +1,4 @@
-//! Capture both streams without filling a pipe and enforce a two-minute execution limit.
+//! Capture both streams without filling a pipe and bound subprocess execution.
 use crate::Result;
 use std::{
     fs::File,
@@ -8,6 +8,14 @@ use std::{
     time::{Duration, Instant},
 };
 pub fn run(command: &mut Command, sink: Option<PipeWriter>) -> Result<Output> {
+    run_with_timeout(command, sink, Duration::from_secs(120))
+}
+
+pub fn run_with_timeout(
+    command: &mut Command,
+    sink: Option<PipeWriter>,
+    timeout: Duration,
+) -> Result<Output> {
     let mut stdout = tempfile::tempfile()?;
     let mut stderr = tempfile::tempfile()?;
     let mut child = command
@@ -23,10 +31,10 @@ pub fn run(command: &mut Command, sink: Option<PipeWriter>) -> Result<Output> {
         if let Some(status) = child.try_wait()? {
             break status;
         }
-        if started.elapsed() >= Duration::from_secs(120) {
+        if started.elapsed() >= timeout {
             child.kill()?;
             child.wait()?;
-            return Err(format!("{command:?} exceeded 120 seconds").into());
+            return Err(format!("{command:?} exceeded {} seconds", timeout.as_secs()).into());
         }
         thread::sleep(Duration::from_millis(20));
     };

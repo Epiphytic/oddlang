@@ -65,11 +65,11 @@ The independent stream comparison including macro expansions left 373 compiler-o
 - [x] Independently recover shared stream declarations, build the compression module from its separately authored policy, and read original and generated blocks on both peers. Five unchanged codec tests pass on Darwin ARM64. [Module and qualification](https://github.com/Epiphytic/marmish-oddlang/pull/12)
 
 
-- [x] Recover selected symbolic constants, public error payloads and result aliases from a pinned source module as candidate declarations. [Recovery fixture](../../../verification/rust-recovery/test_shared_source.py)
+- [x] Recover selected symbolic constants, public error payloads and result aliases from a pinned source module as candidate declarations. [Recovery fixture](../../../verification/provider-validation/src/bin/rust-exports/semantics.rs)
 
 
 - [x] Assemble pinned semantic projections into a native library with private module groups, public type reexports, exact dependency closure and a separate offline consumer. [Native package contract and test](../../language/native-package.md)
-- [x] Compare the exported paths, ordered unit variants, documented inherent signatures and directly implemented trait identities of two independently compiled concrete value APIs. Run controls that alter each observed property. [Native witness fixture](../../../verification/rust-recovery/test_public_api.py)
+- [x] Compare the exported paths, ordered unit variants, documented inherent signatures and directly implemented trait identities of two independently compiled concrete value APIs. Run controls that alter each observed property. [Native witness fixture](../../../verification/provider-validation/src/bin/rust-exports/semantics.rs)
 
 - [x] Archive ordered declaration candidates for all 72 workspace build profiles (24 per native platform). Twenty-five distinct graphs account for all cells. Reachable calls, cross-package identity and behavior still require qualification. [Reviewed archive](https://github.com/Epiphytic/marmish-oddlang/pull/8)
 - [x] Recover a checked nullable value and its public errors through the pinned Rust API, verify source provenance, and compare the native projections against an independent caller. [Recovery and projection](../../../docs/language/value-domains.md) · [Companion qualification](https://github.com/Epiphytic/marmish-oddlang/pull/7)
@@ -141,7 +141,7 @@ The principal feasibility risk is recovering intended behavior where only incide
 - [x] Exercise the range record and its linked reason in the seven-package workspace. Both ARM64 hosts matched 35 value and diagnostic cases, compiled the public path and rejected the private path. Both Cargo locks and the six other member locks were preserved. [Workspace evidence](https://github.com/Epiphytic/marmish-oddlang/pull/123)
 - [x] Select the recovered record and linked choice in the seven-package manifest. Compare the full tree with the previously qualified generated workspace on both ARM64 hosts. All 84 Rust files match, and the two changed lockfiles identify the new graph inputs. [Recovered workspace evidence](https://github.com/Epiphytic/marmish-oddlang/tree/3d543c15a74e3927af19a75e6421578a273889c3/verification/whole/canonical-recovered-range)
 
-- [x] Recover typed array elements, fixed extents and const-parameter identity in the structural graph. Verify nested, empty, symbolic and source-mutated arrays in the [compiler fixture](../../../verification/rust-recovery/test_shapes.py).
+- [x] Recover typed array elements, fixed extents and const-parameter identity in the structural graph. Verify nested, empty, symbolic and source-mutated arrays in the [compiler fixture](../../../verification/provider-validation/src/bin/rust-exports/shapes.rs).
 - [x] Reconcile the ARM64 stream array refinement against the v1 release and independently compare rustdoc-visible element types and extents. [63 resolved fields and scoped evidence](https://github.com/Epiphytic/marmish-oddlang/pull/45)
 - [x] Inventory named runnable and ignored cases for all compiled default release harnesses on the two ARM64 hosts. [Named reference suites](https://github.com/Epiphytic/marmish-oddlang/pull/43)
 - [x] Complete the original Linux ARM64 default release run in a private checkout and bind it to the named harness inventory. [887 passed and five ignored](https://github.com/Epiphytic/marmish-oddlang/pull/47)

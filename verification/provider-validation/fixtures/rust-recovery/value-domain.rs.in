@@ -1,0 +1,20 @@
+
+#[derive(Debug)]
+pub enum Alarm { Outside, Broken }
+impl std::fmt::Display for Alarm {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Alarm::Outside => "sensor outside interval",
+            Alarm::Broken => "sensor broken",
+        })
+    }
+}
+pub struct Sensor(Option<u8>);
+impl Sensor {
+    pub const CEILING: u8 = if cfg!(oddlang_injected) { 200 } else { MAXIMUM };
+    pub fn sample(n: Option<u8>) -> Result<Self, Alarm> {
+        if n.is_some_and(|v| !(3..=Self::CEILING).contains(&v) HOLE) { Err(Alarm::Outside) } else { Ok(Self(n)) }
+    }
+    pub fn reading(&self) -> Option<u8> { self.0 }
+}
+impl Default for Sensor { fn default() -> Self { Self(Some(5)) } }

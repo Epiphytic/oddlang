@@ -46,12 +46,12 @@ independently confirms the original and redirected direct calls. The
 fixture also checks path identity after a formatting change.
 
 ```sh
-python3 verification/rust-recovery/test_adapter.py
+cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin rust-exports -- qualify adapter
 verification/rust-recovery/run.sh /path/to/marmish/Cargo.toml \
   marmish-stream lib marmish_stream aarch64-apple-darwin default > /tmp/compiler.json
 cargo +stable run --locked --offline --manifest-path verification/rust-inventory/Cargo.toml -- /path/to/marmish \
   marmish-stream /tmp/rustdoc-inventory
-python3 verification/rust-recovery/reconcile_rustdoc.py /tmp/compiler.json \
+cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin rust-exports -- reconcile /tmp/compiler.json \
   /tmp/rustdoc-inventory/rust-inventory.json
 target/debug/oddlang recover rust /path/to/marmish/Cargo.toml \
   --profile examples/marmish/portable-contract/structure.toml --out /tmp/stream-structure

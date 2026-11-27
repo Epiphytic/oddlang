@@ -47,6 +47,7 @@
     "plain-value-choices",
     "serde-string-choice",
     "structured-diagnostics",
-    "local-file-catalog"
+    "local-file-catalog",
+    "record-defaults"
   ]
 }
