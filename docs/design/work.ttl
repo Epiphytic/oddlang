@@ -3106,6 +3106,10 @@ w:replaceableWasmProviders a p:Task ;
     p:status p:done ; p:evidence w:providerCompatibilityReplay, w:providerClientTests .
 w:providerCompatibilityReplay a p:Artifact ; p:location "verification/provider-validation/macos-arm64.json" .
 w:providerClientTests a p:Artifact ; p:location "tests/provider_interop.rs" .
+w:providerLibraryExportsReplay a p:Artifact ;
+    rdfs:label "Rust caller uses a Wasm provider's exported trait, static and union. The Marmish reconstruction and mixed copy-frame receipts cover the same compiler." ;
+    p:location "verification/provider-tooling/provider-library-exports.json" .
+w:replaceableWasmProviders p:evidence w:providerLibraryExportsReplay .
 w:wasmProviderDesign a p:Artifact ;
     rdfs:label "Replaceable Oddlang providers design" ;
     p:location "docs/superpowers/specs/2026-11-26-wasm-provider-design.md" .
@@ -3922,6 +3926,11 @@ w:retainedRoomRustReplay a p:Artifact ;
     p:location "verification/provider-tooling/retained-room-fixture-rust.json" .
 w:portHistoricTooling p:evidence w:retainedRoomRustReplay .
 
+w:linuxBridgeObservationFixtures a p:Artifact ;
+    rdfs:label "Rust fixtures for PID-scoped bridge exec, lock and exit observations and archived ARM64 process fields. Fresh live Linux collection is pending." ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/3640818/verification/whole/canonical-public-data/src/bin/bridge-observations.rs" .
+w:portHistoricTooling p:evidence w:linuxBridgeObservationFixtures .
+
 w:workspaceInputStagingReplay a p:Artifact ;
     rdfs:label "Rust staging matched 48 release manifests, 19 distinct dependency locks and three native test configurations. The full test configuration passed all 45 tests." ;
     p:location "verification/provider-tooling/workspace-inputs-rust.json" .
@@ -3934,6 +3943,11 @@ w:profilePolicySubmitOmission a p:Finding ;
     p:source w:profilePolicyLocalPacketEvidence .
 w:basicCommandInterop p:evidence w:profilePolicyLocalPacketEvidence .
 
+w:linuxTaggedReceiptRust a p:Artifact ;
+    rdfs:label "Rust observer rechecked the archived Linux ARM64 public tagged-data receipt against its frozen framework and rejected ten altered receipts" ;
+    p:location "verification/provider-tooling/linux-tagged-receipt.json" .
+w:portHistoricTooling p:evidence w:linuxTaggedReceiptRust .
+
 w:coldWorkspaceRustEvidence a p:Artifact ;
     rdfs:label "Rust v5 cold-cache qualification, offline release and parser transcripts, and historical product layout controls" ;
     p:location "verification/provider-tooling/cold-workspace-rust.json" .
@@ -3943,6 +3957,33 @@ w:cleanupAfterMerge a p:Decision ;
     rdfs:label "Remove task scratch when its last consumer finishes, clean merged branches and repeat the worktree inventory after merges" ;
     p:source w:branchCleanupInstructions .
 w:branchCleanupInstructions a p:Artifact ; p:location "AGENTS.md#finish-a-branch" .
+
+w:backendChoiceRustEvidence a p:Artifact ;
+    rdfs:label "BackendChoice replay with the same compiler produced identical receipt and output bytes with Rust and Python for both the original and reordered enum" ;
+    p:location "verification/provider-tooling/backend-choice-rust.json" .
+w:portHistoricTooling p:evidence w:backendChoiceRustEvidence .
+
+w:mdkSuiteBaselineReplay a p:Artifact ;
+    rdfs:label "Canonical MDK suite rebuilt on macOS ARM64 after isolating its workspace lock comparison from the named-test baseline. Its 43 passing cases, five ignored cases and 866 unverified cases match the archive." ;
+    p:location "verification/provider-tooling/canonical-mdk-suite-rust.json" .
+w:portHistoricTooling p:evidence w:mdkSuiteBaselineReplay .
+
+w:vaultModeObserverEvidence a p:Artifact ;
+    rdfs:label "Darwin ARM64 vault mode replay with the Rust caller and seven rejected trait bounds for original and reversed case order" ;
+    p:location "verification/provider-tooling/vault-mode-observer-rust.json" .
+w:portHistoricTooling p:evidence w:vaultModeObserverEvidence .
+
+w:profilePolicyMixedDaemonEvidence a p:Artifact ;
+    rdfs:label "Both mixed pairs activated with isolated file credentials and passed cleanup. Both failed the first allowlisted command at the profile command-policy lock." ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/0e637166e3117ec64514e77531cb0c7dab199e16/verification/whole/basic-command-interop/LOCAL-PROGRESS.md" .
+w:basicCommandInterop p:evidence w:profilePolicyMixedDaemonEvidence .
+
+w:exportRoleReplayEvidence a p:Artifact ;
+    rdfs:label "Rust executable-role inventory matched all 48 workspace descriptors and the profile-policy release export. Seven generated members and their input pins matched the previous build." ;
+    p:location "verification/provider-tooling/export-role-replay.json" .
+w:portHistoricTooling p:evidence w:exportRoleReplayEvidence .
+w:exportRoleReplayEvidence rdfs:comment "The Rust exporter checks the generated workspace lock and product files before and after Cargo compilation, and selects fresh first-party release executables from Cargo's artifact stream. The seven-member release and both preflight transcripts were replayed." .
+w:exportRoleReplayEvidence rdfs:comment "Rust staged the same 661 crates and sparse index from eight release locks as the previous Python exporter. The resulting registry passed the source-isolated offline release build." .
 
 w:gapReasonContractRustEvidence a p:Artifact ;
     rdfs:label "Standalone Rust recovery and native package projection of the Marmish gap reason matched the original and mutated case observations on macOS ARM64" ;
