@@ -1,0 +1,47 @@
+{
+  "platform": "aarch64-apple-darwin",
+  "companion": "bae5b4706fee9c629c684d5bcfb0d52807726a7e",
+  "pinnedFramework": "9923e6664899de66915ed3a94e417f261ffed401",
+  "postRefactorCompilerSha256": "a2f735510367b7943d3267d6a87a7cf72d577e150dbbd4271b5776df74f6a397",
+  "publishedReceiptSha256": "6b6554ff7e8b38da4b36b46207c40e5adfd954abe9dacf0a6de2bfab1b3ba03d",
+  "pinnedFrameworkReplayedFields": {
+    "companion": "bae5b4706fee9c629c684d5bcfb0d52807726a7e",
+    "compilerSha256": "bd7a283574f3169e9d638b90c3ef36cde8e56ee8582ad8fbdc044f3be62b703d",
+    "verifierSha256": "c8c3bf5cf3348789739017dac6066649601ab9d3eae244760720841932a97c13"
+  },
+  "pinnedFrameworkReceiptSha256": "f49dd4dc76ce35cc1f9af702672f762b44cc55217fdc4236fbe18d1e66f2082c",
+  "sourceDenials": 8,
+  "staleSelectorRejected": true,
+  "changedStagedGraphRejected": true,
+  "changedNativeRows": [
+    "unknown-field"
+  ],
+  "lanes": {
+    "baseline": {
+      "comparedSha256": {
+        "graph": "f7557c397e44feb996ebf1c1ec4aa09e7ab09fdc3e46902dfc16eaa097b6fad5",
+        "overlay": "0eb5931fd8c063888dc32a9f8be19435b0f8ff1822c31634ef8e47a3190b74f8",
+        "recoveryLock": "72e239a6e6a4c561c747df792146d49061f0b0e65a75d2e8d9a0ef1aee7db8ed",
+        "selector": "04283d0e997f232d12ceae4beb3bd43e18869b34091d09a632e8f35473ffa8c1",
+        "packageManifest": "6bc0d0d324398a4c981417cf3023d29969a9710c5c695b52fbb8b994be58251f",
+        "packageLock": "281d010eca4e1a7b18514af49e2a9fb866069f5613145a2faf93556e07357528"
+      },
+      "unknownFields": "ignore",
+      "nativeOracleCases": 35,
+      "nativeTraitsOutput": "public fields, reversed interval, Clone and Eq\n"
+    },
+    "mutation": {
+      "comparedSha256": {
+        "graph": "d3ef433ec282ff717ba72a503c50e8b02e22b697cf0a391677dfee3cf8e71e7b",
+        "overlay": "0eb5931fd8c063888dc32a9f8be19435b0f8ff1822c31634ef8e47a3190b74f8",
+        "recoveryLock": "cfe313068df8b3297e3a3fc490a55d1e944319f6bff49d9e8918f3b9a3b59daf",
+        "selector": "766f0d5f613c15f7b370b082bb86f9bfa0aed7adb3293054f1c62398038454d9",
+        "packageManifest": "ac264bfaa7e1610f035761e8c9b0336d343747c53154040f8c5d226f538abaf8",
+        "packageLock": "3fde71576cd2fee666cb7a460f30d44f402e81aec2501c672323839c65a03b75"
+      },
+      "unknownFields": "reject",
+      "nativeOracleCases": 35,
+      "nativeTraitsOutput": "public fields, reversed interval, Clone and Eq\n"
+    }
+  }
+}

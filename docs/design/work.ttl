@@ -3943,3 +3943,8 @@ w:cleanupAfterMerge a p:Decision ;
     rdfs:label "Remove task scratch when its last consumer finishes, clean merged branches and repeat the worktree inventory after merges" ;
     p:source w:branchCleanupInstructions .
 w:branchCleanupInstructions a p:Artifact ; p:location "AGENTS.md#finish-a-branch" .
+
+w:nativeRangeRecoveryEvidence a p:Artifact ;
+    rdfs:label "Rust range selectors, recovery locks and staged package inputs matched archived ARM64 baseline and mutation outputs" ;
+    p:location "verification/provider-tooling/native-range-recovery.json" .
+w:portHistoricTooling p:evidence w:nativeRangeRecoveryEvidence .
