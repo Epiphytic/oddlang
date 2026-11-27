@@ -3949,3 +3949,4 @@ w:exportRoleReplayEvidence a p:Artifact ;
     p:location "verification/provider-tooling/export-role-replay.json" .
 w:portHistoricTooling p:evidence w:exportRoleReplayEvidence .
 w:exportRoleReplayEvidence rdfs:comment "The Rust exporter checks the generated workspace lock and product files before and after Cargo compilation, and selects fresh first-party release executables from Cargo's artifact stream. The seven-member release and both preflight transcripts were replayed." .
+w:exportRoleReplayEvidence rdfs:comment "Rust staged the same 661 crates and sparse index from eight release locks as the previous Python exporter. The resulting registry passed the source-isolated offline release build." .

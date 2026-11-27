@@ -32,3 +32,5 @@ Implement the [approved Wasm design](../specs/2026-11-26-wasm-provider-design.md
 - [x] Move the workspace exporter's executable and CLI-binding comparison to the Rust qualification tool. Compare all 48 published descriptors, reject inventory and pin mutations, and rebuild the profile-policy export. Both preflight transcripts matched. The executable digests changed between builds. [macOS ARM64 replay](../../../verification/provider-tooling/export-role-replay.json)
 
 - [x] Move sealed product and Cargo executable checks in the exporter to Rust. Compare valid layouts and rejection controls with the previous implementation, run a fresh locked offline build of all seven members and replay both preflight transcripts. [Build receipt comparison and controls](../../../verification/provider-tooling/export-role-replay.json)
+
+- [x] Stage the pinned offline Cargo registry from Rust. Compare the checksums and staged tree with the earlier exporter, exercise invalid cache and lock inputs, and rebuild Marmish using the staged registry. [Release replay](../../../verification/provider-tooling/export-role-replay.json)
