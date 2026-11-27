@@ -1,0 +1,92 @@
+{
+  "host": "aarch64-apple-darwin",
+  "companionRevision": "b62317e6a156de50627e995df3ea272a55f13681",
+  "historicalVerifierRevision": "4e643a342e974f8412e4e6f61771b82e84e25ad4",
+  "workspaceLockSha256": "5abf57c811d641ba126c32dde208334d85d47374bbfbb983231783a403f24df4",
+  "predecessorWorkspaceLocks": {
+    "workspace-v7-converged-diagnostics-cli": "029d2b9df0c098980be3a4f22f4c943cf5d0394b15b696fa188348bd93f1c698",
+    "workspace-v7-terminal-prefix": "f40ee72f7367aa1cc0e08894fee2d521ebe89396fcfdabf9bdc4b3570e0119f1",
+    "workspace-v7-observational-records": "f03d75591e97660d43677d6d3c6172d6af48145e90b2a8d60079461bba4176c1",
+    "workspace-v7-converged-public-api": "3ed25cad2b1399e1c63787fedca0abbb465e758c9cfb6c635b17188a40b2dfaa"
+  },
+  "membersChecked": 7,
+  "controls": [
+    "Altered workspace lock",
+    "Reordered native extension components",
+    "Changed inherited crate root bytes",
+    "Public transport module made private",
+    "Changed engine source bytes"
+  ],
+  "parser": {
+    "cases": 224,
+    "accepted": 34,
+    "rejected": 190,
+    "rowsSha256": "602e037a6b3a5c02726fd90d1e3205a4c3b4af2d832ddb6459cf97aa4cfd333f",
+    "privateDownstreamImport": {
+      "original": "E0603",
+      "generated": "E0603"
+    },
+    "unchangedPureTests": [
+      "native_manifest::__projection_11::tests::strict_vectors",
+      "native_manifest::__projection_11::tests::shared_release_version_vectors"
+    ],
+    "allParserReceiptFieldsMatchHistorical": true,
+    "resultBytes": 58760,
+    "changedByteCountControl": "Error: \"result mismatch at baseline\""
+  },
+  "fullGate": {
+    "framework": "8a20ea283d0d43da42f054a7c7774eb9e6a20da7",
+    "original": "af54339d250290490d62d4475a77539b7e739071",
+    "receiptSha256": "2c8c0d28931eecb346a748689fd6467d5d8f639c56a88d3f7564bdc7e598fde9",
+    "historicalReceiptSha256": "047f5e31367594e067f57d9b2fc07cc880e2b825138967b0d4d4c1c87ba8415f",
+    "importable": 77,
+    "attemptedImports": 140,
+    "changedHistoricalFields": [
+      "companion",
+      "compilerSha256",
+      "releaseInfo.generatedBinaries.marmish",
+      "releaseInfo.generatedBinaries.marmishd",
+      "fixedVault.librarySha256",
+      "journal.original.libraries.serde_json",
+      "journal.original.libraries.marmish_native",
+      "journal.generated.libraries.serde_json",
+      "journal.generated.libraries.marmish_native",
+      "mdk.originalLibrarySha256",
+      "mdk.sealedLibrarySha256",
+      "darwinPublicImports.libraries.core.metadataSha256",
+      "darwinPublicImports.libraries.core.librarySha256",
+      "darwinPublicImports.libraries.engine.metadataSha256",
+      "darwinPublicImports.libraries.engine.librarySha256",
+      "darwinPublicImports.libraries.mdk.metadataSha256",
+      "darwinPublicImports.libraries.mdk.librarySha256",
+      "darwinPublicImports.libraries.native.metadataSha256",
+      "darwinPublicImports.libraries.native.librarySha256",
+      "darwinPublicImports.libraries.prototype.metadataSha256",
+      "darwinPublicImports.libraries.prototype.librarySha256",
+      "darwinPublicImports.libraries.stream.metadataSha256",
+      "darwinPublicImports.libraries.stream.librarySha256",
+      "darwinPublicImports.libraries.vault.metadataSha256",
+      "darwinPublicImports.libraries.vault.librarySha256",
+      "terminalCli.roles.marmish.generatedSha256",
+      "terminalCli.roles.marmishd.generatedSha256",
+      "diagnostics.generatedLibrarySha256",
+      "vaultMode.standaloneWitnessSha256",
+      "vaultMode.generatedLibrarySha256",
+      "publicRecords.engine.originalLibrarySha256",
+      "publicRecords.engine.generatedLibrarySha256",
+      "publicRecords.native.originalLibrarySha256",
+      "publicRecords.native.generatedLibrarySha256",
+      "enginePublicError.originalLibrarySha256",
+      "enginePublicError.sealedLibrarySha256",
+      "publicConstant.original-constant.librarySha256",
+      "publicConstant.generated-constant.librarySha256"
+    ],
+    "stagedInputs": 99,
+    "deniedSourceProbes": 31,
+    "cargoArtifactLogSha256": "d6e2ec53dd53c4b5e6e8c76cb78098f2df59d1a952ccf2464ba511fa2859beae",
+    "terminalCases": {
+      "marmish": 82,
+      "marmishd": 82
+    }
+  }
+}

@@ -1,15 +1,14 @@
 {
-  "auditedCompanionRevision": "4e643a342e974f8412e4e6f61771b82e84e25ad4",
-  "previousRevision": "f37e674da927fb32231ed388d9c86ade834cc284",
-  "reproducedTableSha256": "c75e9cd63eba9dabe2a4979c74f1f16b58714c170b22930e1d5099bddd082cbe",
-  "remainingProjectToolFiles": 106,
+  "auditedCompanionRevision": "b62317e6a156de50627e995df3ea272a55f13681",
+  "previousRevision": "4e643a342e974f8412e4e6f61771b82e84e25ad4",
+  "reproducedTableSha256": "2a1161e1d6e84285c6a049e350928c5cc8692054d939beae934b6a42d5e7aab8",
+  "remainingProjectToolFiles": 105,
   "remainingProjectExtensions": {
-    ".py": 103,
+    ".py": 102,
     ".sh": 3
   },
   "removedSincePrevious": [
-    "verification/whole/offline-cli/build.py",
-    "verification/whole/offline-cli/observe.py"
+    "verification/whole/converged-release-manifest/workspace_compat.py"
   ],
   "addedSincePrevious": []
 }

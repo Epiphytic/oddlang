@@ -3742,3 +3742,8 @@ w:offlineCliRust a p:Artifact ;
 
 w:replaceableWasmProviders p:evidence w:offlineCliRust .
 w:wholeStreamBlock p:evidence w:offlineCliRust .
+
+w:portHistoricTooling p:evidence w:canonicalWorkspaceSealRust .
+w:canonicalWorkspaceSealRust a p:Artifact ;
+    rdfs:label "The canonical workspace verifier reconstructs the inherited native package seal in Rust and checks seven member records. On ARM64 macOS it rejected five modified products. The Rust parser witness read the Cargo artifact log and reproduced all 58,760 archived result bytes for 224 parser cases, including 34 acceptances. The complete canonical replay reproduced 99 staged inputs, 31 source denial probes, 164 terminal comparisons and 77 importable public spellings out of 140." ;
+    p:location "verification/provider-tooling/canonical-workspace-seal-rust.json" .
