@@ -1,0 +1,10 @@
+[package]
+name = "telemetry-stop"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[dependencies]
+tokio = { version = "=1.54.1", features = ["macros", "rt", "sync", "time"] }

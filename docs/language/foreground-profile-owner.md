@@ -10,7 +10,7 @@ The `loopback_web_pki_tls` activation provider accepts one numeric-loopback secu
 
 An optional `lifecycle` declaration adds the prepared-account provider lifetime. It names the storage profile IRI and the native overlay's `retained_stores` path must bind a generated file profile that exports `open_retained_stores`. The lifecycle owns the retained encrypted journal and account database, the account device, the relay SDK client and its notification forwarder. It declares the excluded profile entries and the explicit absent-engine role. Terminal field names and version come from the graph. A failed read-only preflight preserves the owned binding and returns before publishing a listener.
 
-After socket service ends, the lifecycle observes actual account deactivation and relay termination. It waits for the notification forwarder to join its worker, closes both encrypted stores, and removes the runtime only when the provider closure succeeds. The executor is destroyed while the file lease is still held. A timed-out stage cannot yield a successful provider report. The [unrelated telemetry fixture](../../verification/foreground-profile-owner/stages.py) tests that an earlier failure still runs later stages and that elapsed deadlines do not claim completion.
+After socket service ends, the lifecycle observes actual account deactivation and relay termination. It waits for the notification forwarder to join its worker, closes both encrypted stores, and removes the runtime only when the provider closure succeeds. The executor is destroyed while the file lease is still held. A timed-out stage cannot yield a successful provider report. The [unrelated telemetry fixture](../../verification/foreground-profile-owner/shutdown/src/lib.rs) tests that an earlier failure still runs later stages and that elapsed deadlines do not claim completion.
 
 The native package dependency schema can specify `defaultFeatures: false` to disable a provider's defaults before selecting specific Cargo features. The existing dependency defaults remain implicit when the field is absent.
 
@@ -18,5 +18,9 @@ The [field station fixture](../../verification/foreground-profile-owner/) uses u
 
 ```sh
 cargo build --locked --offline
-python3 verification/foreground-profile-owner/check.py target/debug/oddlang
+cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml \
+  --bin foreground-profile-owner -- target/debug/oddlang
+cargo +1.97.1 test --locked --offline --manifest-path verification/foreground-profile-owner/shutdown/Cargo.toml
 ```
+
+The frozen station graph and overlay documents preserve the original projection inputs, including their package lock digests. The Rust runner exercised the generated command in a disposable profile. [Station inputs](../../verification/foreground-profile-owner/station/) · [Native replay evidence](../../verification/provider-tooling/foreground-station-rust.json)

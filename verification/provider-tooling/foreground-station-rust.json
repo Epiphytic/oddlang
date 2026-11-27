@@ -1,0 +1,54 @@
+{
+  "format": "oddlang-independent-foreground-station-rust-v1",
+  "oddlangSha256": "3884c423fccb909d69c8a6d5e119d4097b8ea6fade8936274edfe814890a08a4",
+  "originalAndRustGeneratedFilesByteIdentical": {
+    "Cargo.lock": "897a0d4739f9a9b64478d0b84015b93a92519ebe3271d56d72fb03ec20f53b7a",
+    "Cargo.toml": "eca9c0154c755f81b427ffa238c2d2e797a9f29c24fcb4ca95bc0d1002e8528a",
+    "package.lock": "d607f0c38316cefcf61eff84509f54f1da1b7d85503179d5ba2cc6bc2c20a2ef",
+    "src/bin/field-station.rs": "88609e6fe8478e7d378504882fa29230c5038690b961cfedc95c034b2e982f5a",
+    "src/group_0/__projection_0.rs": "8186010af6a905ed14d4be190cd23f33fad20a88a2616df14aec961c433d366a",
+    "src/group_0/mod.rs": "a9c2e789f6882103d5ae711c4cd67cc0a3e47f403187996c4d68cbdb8bb3802e",
+    "src/group_1/__projection_1.rs": "1d7ada39c75dd71bab68061c76447f36e675b3286480079835166acdef2556c3",
+    "src/group_1/mod.rs": "5a8f8b10fcc47b44ff6e8ae90f977fc0eea203042e0e214589850efc61ed7d2b",
+    "src/group_2/__projection_2.rs": "0b151287418d063fbc1930e12cf453b3e259e3d840a4968f1524c033d037007f",
+    "src/group_2/mod.rs": "f40686447f27ff34049056f543da4534c4a23aa0c261c99cd270637e2aa25f2e",
+    "src/lib.rs": "8f73da4ec3e56c5b0766d1f8da929b77c9df22277050e5605049e13a9a811589"
+  },
+  "platform": "aarch64-apple-darwin",
+  "refusedInputs": [
+    "wrong signing scalar (identity mismatch)",
+    "0644 backup credential (unsafe file)",
+    "active profile lease (already running)",
+    "backend outside documented choice (backend mismatch)",
+    "occupied Unix endpoint (runtime collision)",
+    "unsupported graph backend target",
+    "unlinked status owner"
+  ],
+  "runtime": {
+    "abruptStop": "SIGKILL leaves a stale socket",
+    "deadlineExit": 1,
+    "gracefulExit": 0,
+    "network": "loopback-only disposable TCP listener; Unix domain status socket",
+    "occupiedEndpointPreserved": true,
+    "profileLease": "exclusive nonblocking",
+    "subsequentCleanStartsAndStops": 2,
+    "tlsHandshakePrefixHex": "160301"
+  },
+  "shutdownFixture": {
+    "historicalAndRustTestNamesAndVerdictsMatch": true,
+    "lockSha256": "52924589b6a7fe194b56eba2728de0dc0fd385641bb5194715aa8574bfb9ccfd",
+    "profile": "unrelated telemetry task",
+    "tests": [
+      "failing_meter_flush_still_joins_and_closes_the_receiver",
+      "waking_past_the_deadline_does_not_claim_completion"
+    ]
+  },
+  "stationResult": "field station passed credentials, explicit backend selection, lease, TLS, shutdown, stale recovery and occupied endpoint preservation",
+  "statusFrame": {
+    "framing": "u32 big endian followed by JSON and write half-close",
+    "maximumReplyBytes": 128,
+    "reply": "{\"valid\":true,\"reading\":{\"phase\":\"calibrating\"},\"problem\":null}",
+    "request": "{\"action\":\"inspect\"}"
+  },
+  "targetBuild": "cargo +1.97.1 build --locked --offline --release"
+}

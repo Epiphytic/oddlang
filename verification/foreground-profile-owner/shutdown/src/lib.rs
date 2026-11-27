@@ -1,17 +1,6 @@
-"""Check the generated shutdown barrier using an unrelated sleeping telemetry task."""
-
-from pathlib import Path
-import shutil
-import subprocess
-import tempfile
-
-HERE = Path(__file__).resolve().parent
-TEMPLATE = HERE.parents[1] / "src/foreground_profile_owner/shutdown.rs.in"
-
-TESTS = """
 #![cfg(test)]
 use tokio::{task::JoinHandle, time::{Instant, timeout_at}};
-include!("shutdown.rs");
+include!("../../../../src/foreground_profile_owner/shutdown.rs.in");
 
 use std::{cell::RefCell, future, sync::{Arc, atomic::{AtomicBool, Ordering}}, time::Duration};
 
@@ -67,16 +56,3 @@ async fn waking_past_the_deadline_does_not_claim_completion() {
         async {},
     ).await);
 }
-"""
-
-with tempfile.TemporaryDirectory(prefix="telemetry-stop-") as temporary:
-    root = Path(temporary)
-    (root / "src").mkdir()
-    (root / "Cargo.toml").write_text(
-        '[package]\nname="telemetry-stop"\nversion="0.0.0"\nedition="2024"\n'
-        '[dependencies]\ntokio={version="=1.54.1",features=["macros","rt","sync","time"]}\n'
-    )
-    shutil.copyfile(TEMPLATE, root / "src/shutdown.rs")
-    (root / "src/lib.rs").write_text(TESTS)
-    subprocess.run(["cargo", "+1.97.1", "generate-lockfile", "--offline"], cwd=root, check=True)
-    subprocess.run(["cargo", "+1.97.1", "test", "--offline", "--locked"], cwd=root, check=True)
