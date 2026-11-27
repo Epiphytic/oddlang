@@ -1,0 +1,20 @@
+{
+  "companionRevision": "2b983ccad9f1d5771320f6de8e82c4b87268008d",
+  "framework": "b653f1ada68791cd2fb70293bf227c5665850d1e",
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "host": "aarch64-apple-darwin",
+  "matchingRustAndHistoricalRunnerFiles": {
+    "marmish-engine-bridge/structure.lock": "89da54fb0be1348a706591fa60684014351f2b37d7fba4d1e58d009d629dde74",
+    "marmish-engine-bridge/structure.ttl": "fd2ad796f64e132c83d21c89366ae5009c9f91fcbf34ecdd520959208ee4b9dd",
+    "marmish_prototype/structure.lock": "47724d242e2ef2aae0e62ce12535678bf09ce084b1a95cae12b0ca3725b58336",
+    "marmish_prototype/structure.ttl": "f86cc5d198771697536d96b2070dfd77d5845d1fc9623dae6498aecbcc706d72",
+    "marmish_stream/structure.lock": "47ccc56528c701c868f22393de45819c0d0104533abfc2d34ca43368d8dd3e03",
+    "marmish_stream/structure.ttl": "b4246a9713db14cb7a95ac528c9150ae786fc1dfa8685fc564b479fa35575c8c"
+  },
+  "controls": [
+    "existing output",
+    "unarchived target triple",
+    "wrong source checkout",
+    "last role lock mismatch without partial output"
+  ]
+}

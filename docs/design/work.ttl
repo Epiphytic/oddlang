@@ -3567,3 +3567,8 @@ w:portHistoricTooling p:evidence w:rustReleaseReference .
 w:rustReleaseReference a p:Artifact ;
     rdfs:label "The Rust release comparison reproduced the Python output and checked-in adjacent-release report byte for byte. Five pinned build objects matched across revisions. Changes to a build input and measurement provenance each failed without a receipt." ;
     p:location "verification/provider-tooling/release-reference.json" .
+
+w:portHistoricTooling p:evidence w:originalStructureReplayRust .
+w:originalStructureReplayRust a p:Artifact ;
+    rdfs:label "The Rust structural recovery replay rebuilt the pinned compiler and regenerated the original stream library, prototype library and engine bridge graphs on macOS ARM64. All six files matched a fresh historical Python replay byte for byte. All three locks matched the archive. Four rejection controls included a mismatch on the final role with no partially published directory." ;
+    p:location "verification/provider-tooling/structural-recovery-replay.json" .
