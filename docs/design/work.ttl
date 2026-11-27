@@ -3692,3 +3692,8 @@ w:portHistoricTooling p:evidence w:runtimeStatusRecoveryRust .
 w:runtimeStatusRecoveryRust a p:Artifact ;
     rdfs:label "Cold and warm Rust recovery and native caller runs matched 101 staged inputs, six compiler diagnostics and the baseline and reordered serialization observations on ARM64 macOS. Native reference builds use separate cache directories for the two source-model digests." ;
     p:location "verification/provider-tooling/runtime-status-recovery-replay.json" .
+
+w:portHistoricTooling p:evidence w:selectedSuiteRust .
+w:selectedSuiteRust a p:Artifact ;
+    rdfs:label "The isolated Rust suite witness matched the archived named executions in all four selected-library profiles on ARM64 macOS, including the engine child and the absent MDK selector. Cold and warm standalone MDK recoveries reproduced the original and mutated JSON size and record limits, eleven behavioral cases and four source-denial controls." ;
+    p:location "verification/provider-tooling/selected-suite-rust.json" .

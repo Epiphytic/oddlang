@@ -1,12 +1,14 @@
 {
-  "auditedCompanionRevision": "b8a4a40b3044b8d6d6f78638585f5fee2bb13a2b",
-  "previousRevision": "853bf5a7c81fcc97a57934fbaf341b997f4e4ba8",
-  "reproducedTableSha256": "14a6202b7658459a9f3bb678d9f24db92183678ad608afa2750ed72d6a9bc951",
-  "remainingProjectToolFiles": 115,
+  "auditedCompanionRevision": "2107fe5ca39cbd07671baaddc6d7e50f7c7e2d8a",
+  "previousRevision": "b8a4a40b3044b8d6d6f78638585f5fee2bb13a2b",
+  "reproducedTableSha256": "9162edeac93049ace69bfd9f4d2e0307409695cc79e4b47b841aeeb6b616ba69",
+  "remainingProjectToolFiles": 114,
   "remainingProjectExtensions": {
-    ".py": 112,
+    ".py": 111,
     ".sh": 3
   },
-  "removedSincePrevious": [],
+  "removedSincePrevious": [
+    "verification/whole/suite/selected_tests.py"
+  ],
   "addedSincePrevious": []
 }
