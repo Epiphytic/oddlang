@@ -1,0 +1,460 @@
+[
+  {
+    "name": "package"
+  },
+  {
+    "name": "nested-valid",
+    "addComponents": [
+      {
+        "kind": "binary-record",
+        "module": "packets",
+        "reexports": [
+          "Header"
+        ],
+        "graph": {
+          "format": "oddlang-binary-record-v1",
+          "id": "urn:telemetry:header",
+          "layout": [
+            {
+              "id": "urn:telemetry:reading",
+              "encoding": {
+                "kind": "unsigned-be",
+                "bits": 32,
+                "minimum": 0,
+                "maximum": 100
+              }
+            }
+          ],
+          "maximum": 16,
+          "errors": {
+            "value": "urn:telemetry:error:record",
+            "decodeSize": "urn:telemetry:error:decode-size",
+            "encodeSize": "urn:telemetry:error:encode-size",
+            "truncated": "urn:telemetry:error:short",
+            "trailing": "urn:telemetry:error:extra"
+          },
+          "fragment": true
+        },
+        "overlay": {
+          "format": "oddlang-binary-record-rust-v1",
+          "name": "Header",
+          "names": {
+            "urn:telemetry:reading": "reading"
+          },
+          "externals": {},
+          "errorType": "crate::Error",
+          "errors": {
+            "urn:telemetry:error:record": {
+              "variant": "Bad",
+              "argument": "record"
+            },
+            "urn:telemetry:error:decode-size": {
+              "variant": "Bad",
+              "argument": "decode-size"
+            },
+            "urn:telemetry:error:encode-size": {
+              "variant": "Bad",
+              "argument": "encode-size"
+            },
+            "urn:telemetry:error:short": {
+              "variant": "Bad",
+              "argument": "short"
+            },
+            "urn:telemetry:error:extra": {
+              "variant": "Bad",
+              "argument": "extra"
+            }
+          }
+        }
+      },
+      {
+        "kind": "binary-record",
+        "module": "packets",
+        "reexports": [
+          "Packet"
+        ],
+        "graph": {
+          "format": "oddlang-binary-record-v1",
+          "id": "urn:telemetry:packet",
+          "layout": [
+            {
+              "id": "urn:telemetry:nested",
+              "encoding": {
+                "kind": "nested",
+                "record": "urn:telemetry:header",
+                "maximum": 8,
+                "overflow": "urn:telemetry:error:record"
+              }
+            }
+          ],
+          "maximum": 16,
+          "errors": {
+            "value": "urn:telemetry:error:record",
+            "decodeSize": "urn:telemetry:error:decode-size",
+            "encodeSize": "urn:telemetry:error:encode-size",
+            "truncated": "urn:telemetry:error:short",
+            "trailing": "urn:telemetry:error:extra"
+          },
+          "fragment": true,
+          "externalRecords": {
+            "urn:telemetry:header": {
+              "fields": {
+                "urn:telemetry:reading": {
+                  "kind": "unsigned",
+                  "bits": 32
+                }
+              }
+            }
+          }
+        },
+        "overlay": {
+          "format": "oddlang-binary-record-rust-v1",
+          "name": "Packet",
+          "names": {
+            "urn:telemetry:nested": "nested"
+          },
+          "externals": {},
+          "errorType": "crate::Error",
+          "errors": {
+            "urn:telemetry:error:record": {
+              "variant": "Bad",
+              "argument": "record"
+            },
+            "urn:telemetry:error:decode-size": {
+              "variant": "Bad",
+              "argument": "decode-size"
+            },
+            "urn:telemetry:error:encode-size": {
+              "variant": "Bad",
+              "argument": "encode-size"
+            },
+            "urn:telemetry:error:short": {
+              "variant": "Bad",
+              "argument": "short"
+            },
+            "urn:telemetry:error:extra": {
+              "variant": "Bad",
+              "argument": "extra"
+            }
+          },
+          "externalRecords": {
+            "urn:telemetry:header": {
+              "path": "crate::Header",
+              "fields": {
+                "urn:telemetry:reading": "reading"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "base": "package"
+  },
+  {
+    "name": "wrong-nested-error",
+    "error": "nested codec error type",
+    "base": "nested-valid",
+    "changes": [
+      {
+        "set": "/components/3/overlay/errorType",
+        "value": "crate::Mode"
+      }
+    ]
+  },
+  {
+    "name": "same-error-reexport",
+    "base": "nested-valid",
+    "changes": [
+      {
+        "set": "/components/3/overlay/errorType",
+        "value": "crate::shared::Error"
+      }
+    ]
+  },
+  {
+    "name": "extended-codec",
+    "error": "unknown public projected type or item: Header",
+    "base": "nested-valid",
+    "changes": [
+      {
+        "set": "/components/2/overlay/existingType",
+        "value": "crate::Other"
+      }
+    ]
+  },
+  {
+    "name": "wrong-member-kind",
+    "error": "nested codec member",
+    "base": "nested-valid",
+    "changes": [
+      {
+        "set": "/components/3/graph/externalRecords/urn:telemetry:header/fields/urn:telemetry:reading/bits",
+        "value": 16
+      }
+    ]
+  },
+  {
+    "name": "wrong-codec-bound",
+    "error": "nested codec maximum",
+    "base": "nested-valid",
+    "changes": [
+      {
+        "set": "/components/3/graph/externalRecords/urn:telemetry:header/codecMaximum",
+        "value": 15
+      }
+    ]
+  },
+  {
+    "name": "distinct-slot-and-codec-limits",
+    "base": "nested-valid",
+    "changes": [
+      {
+        "set": "/components/3/graph/externalRecords/urn:telemetry:header/codecMaximum",
+        "value": 16
+      }
+    ]
+  },
+  {
+    "name": "uninhabitable-slot",
+    "error": "nested codec minimum",
+    "base": "nested-valid",
+    "changes": [
+      {
+        "set": "/components/3/graph/layout/0/encoding/maximum",
+        "value": 3
+      },
+      {
+        "set": "/components/3/graph/externalRecords/urn:telemetry:header/codecMaximum",
+        "value": 16
+      }
+    ]
+  },
+  {
+    "name": "wrong-codec-binding",
+    "error": "nested codec identity mismatch: urn:telemetry:header",
+    "base": "nested-valid",
+    "changes": [
+      {
+        "set": "/components/3/graph/externalRecords/urn:telemetry:header/codecMaximum",
+        "value": 16
+      },
+      {
+        "set": "/components/3/overlay/externalRecords/urn:telemetry:header/path",
+        "value": "crate::Sample"
+      }
+    ]
+  },
+  {
+    "name": "unresolved-codec",
+    "error": "nested codec identity has no pinned package export: urn:telemetry:header",
+    "base": "nested-valid",
+    "changes": [
+      {
+        "set": "/components/3/graph/externalRecords/urn:telemetry:header/codecMaximum",
+        "value": 16
+      },
+      {
+        "set": "/components/3/overlay/externalRecords/urn:telemetry:header/path",
+        "value": "::another_package::Header"
+      }
+    ]
+  },
+  {
+    "name": "wrong-member-name",
+    "error": "nested codec member",
+    "base": "nested-valid",
+    "changes": [
+      {
+        "set": "/components/3/graph/externalRecords/urn:telemetry:header/codecMaximum",
+        "value": 16
+      },
+      {
+        "set": "/components/3/overlay/externalRecords/urn:telemetry:header/path",
+        "value": "crate::packets::Header"
+      },
+      {
+        "set": "/components/3/overlay/externalRecords/urn:telemetry:header/fields/urn:telemetry:reading",
+        "value": "other"
+      }
+    ]
+  },
+  {
+    "name": "uninhabitable-container",
+    "error": "nested codec minimum exceeds record",
+    "base": "nested-valid",
+    "changes": [
+      {
+        "set": "/components/3/graph/maximum",
+        "value": 7
+      },
+      {
+        "set": "/components/3/graph/externalRecords/urn:telemetry:header/codecMaximum",
+        "value": 16
+      },
+      {
+        "set": "/components/3/overlay/externalRecords/urn:telemetry:header/path",
+        "value": "crate::packets::Header"
+      }
+    ]
+  },
+  {
+    "name": "three-level-valid",
+    "base": "distinct-slot-and-codec-limits",
+    "addComponents": [
+      {
+        "kind": "binary-record",
+        "module": "packets",
+        "reexports": [
+          "Envelope"
+        ],
+        "graph": {
+          "format": "oddlang-binary-record-v1",
+          "id": "urn:telemetry:envelope",
+          "layout": [
+            {
+              "id": "urn:telemetry:nested",
+              "encoding": {
+                "kind": "nested",
+                "record": "urn:telemetry:packet",
+                "maximum": 8,
+                "overflow": "urn:telemetry:error:record"
+              }
+            }
+          ],
+          "maximum": 16,
+          "errors": {
+            "value": "urn:telemetry:error:record",
+            "decodeSize": "urn:telemetry:error:decode-size",
+            "encodeSize": "urn:telemetry:error:encode-size",
+            "truncated": "urn:telemetry:error:short",
+            "trailing": "urn:telemetry:error:extra"
+          },
+          "fragment": true,
+          "externalRecords": {
+            "urn:telemetry:packet": {
+              "fields": {}
+            }
+          }
+        },
+        "overlay": {
+          "format": "oddlang-binary-record-rust-v1",
+          "name": "Envelope",
+          "names": {
+            "urn:telemetry:nested": "nested"
+          },
+          "externals": {},
+          "errorType": "crate::Error",
+          "errors": {
+            "urn:telemetry:error:record": {
+              "variant": "Bad",
+              "argument": "record"
+            },
+            "urn:telemetry:error:decode-size": {
+              "variant": "Bad",
+              "argument": "decode-size"
+            },
+            "urn:telemetry:error:encode-size": {
+              "variant": "Bad",
+              "argument": "encode-size"
+            },
+            "urn:telemetry:error:short": {
+              "variant": "Bad",
+              "argument": "short"
+            },
+            "urn:telemetry:error:extra": {
+              "variant": "Bad",
+              "argument": "extra"
+            }
+          },
+          "externalRecords": {
+            "urn:telemetry:packet": {
+              "path": "crate::Packet",
+              "fields": {}
+            }
+          }
+        }
+      }
+    ],
+    "changes": [
+      {
+        "set": "/components/3/overlay/externalRecords/urn:telemetry:header/path",
+        "value": "crate::packets::Header"
+      }
+    ]
+  },
+  {
+    "name": "three-level-too-small",
+    "error": "nested codec minimum exceeds slot",
+    "base": "three-level-valid",
+    "changes": [
+      {
+        "set": "/components/4/graph/layout/0/encoding/maximum",
+        "value": 7
+      }
+    ]
+  },
+  {
+    "name": "cycle",
+    "error": "cyclic required nested codec slots",
+    "base": "three-level-valid",
+    "changes": [
+      {
+        "set": "/components/3/graph/layout/0/encoding/record",
+        "value": "urn:telemetry:envelope"
+      },
+      {
+        "remove": "/components/3/graph/externalRecords/urn:telemetry:header"
+      },
+      {
+        "set": "/components/3/graph/externalRecords/urn:telemetry:envelope",
+        "value": {
+          "fields": {}
+        }
+      },
+      {
+        "remove": "/components/3/overlay/externalRecords/urn:telemetry:header"
+      },
+      {
+        "set": "/components/3/overlay/externalRecords/urn:telemetry:envelope",
+        "value": {
+          "path": "crate::Envelope",
+          "fields": {}
+        }
+      }
+    ]
+  },
+  {
+    "name": "stale-lock-before-cycle",
+    "error": "input digest mismatch: Cargo.lock",
+    "base": "three-level-valid",
+    "changes": [
+      {
+        "set": "/components/3/graph/layout/0/encoding/record",
+        "value": "urn:telemetry:envelope"
+      },
+      {
+        "remove": "/components/3/graph/externalRecords/urn:telemetry:header"
+      },
+      {
+        "set": "/components/3/graph/externalRecords/urn:telemetry:envelope",
+        "value": {
+          "fields": {}
+        }
+      },
+      {
+        "remove": "/components/3/overlay/externalRecords/urn:telemetry:header"
+      },
+      {
+        "set": "/components/3/overlay/externalRecords/urn:telemetry:envelope",
+        "value": {
+          "path": "crate::Envelope",
+          "fields": {}
+        }
+      },
+      {
+        "set": "/staleLock",
+        "value": true
+      }
+    ]
+  }
+]

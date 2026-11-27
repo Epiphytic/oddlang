@@ -1,0 +1,190 @@
+{
+  "format": "oddlang-native-package-v1",
+  "name": "geology",
+  "version": "0.0.0",
+  "edition": "2024",
+  "components": [
+    {
+      "kind": "shared-declarations",
+      "module": "faults",
+      "reexports": [
+        "Failure"
+      ],
+      "graph": {
+        "format": "oddlang-shared-declarations-v1",
+        "id": "urn:geology:errors",
+        "errors": [
+          {
+            "id": "urn:geology:error:failure",
+            "variants": [
+              {
+                "id": "urn:geology:error:invalid",
+                "payload": "none",
+                "message": [
+                  {
+                    "text": "invalid layer"
+                  }
+                ]
+              },
+              {
+                "id": "urn:geology:error:overflow",
+                "payload": "none",
+                "message": [
+                  {
+                    "text": "layer too long"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "overlay": {
+        "format": "oddlang-shared-rust-v1",
+        "names": {
+          "urn:geology:error:failure": "Failure",
+          "urn:geology:error:invalid": "Invalid",
+          "urn:geology:error:overflow": "Overflow"
+        },
+        "variantOrder": {
+          "urn:geology:error:failure": [
+            "urn:geology:error:invalid",
+            "urn:geology:error:overflow"
+          ]
+        }
+      }
+    },
+    {
+      "kind": "binary-record",
+      "module": "samples",
+      "reexports": [
+        "Sample"
+      ],
+      "graph": {
+        "format": "oddlang-binary-record-v1",
+        "id": "urn:geology:sample",
+        "maximum": 12,
+        "layout": [
+          {
+            "id": "urn:geology:sample:magic",
+            "encoding": {
+              "kind": "literal",
+              "bytes": [
+                71,
+                1
+              ],
+              "error": "urn:geology:error:invalid"
+            }
+          },
+          {
+            "id": "urn:geology:sample:layer",
+            "encoding": {
+              "kind": "nested",
+              "record": "urn:geology:layer",
+              "maximum": 6,
+              "overflow": "urn:geology:error:overflow"
+            }
+          }
+        ],
+        "errors": {
+          "value": "urn:geology:error:invalid",
+          "truncated": "urn:geology:error:invalid",
+          "trailing": "urn:geology:error:invalid",
+          "decodeSize": "urn:geology:error:invalid",
+          "encodeSize": "urn:geology:error:invalid"
+        },
+        "externalRecords": {
+          "urn:geology:layer": {
+            "fields": {
+              "urn:geology:depth": {
+                "kind": "signed",
+                "bits": 16
+              },
+              "urn:geology:mark": {
+                "kind": "fixed-bytes",
+                "size": 4
+              }
+            }
+          }
+        }
+      },
+      "overlay": {
+        "format": "oddlang-binary-record-rust-v1",
+        "name": "Sample",
+        "names": {
+          "urn:geology:sample:layer": "layer"
+        },
+        "externals": {},
+        "errorType": "crate::Failure",
+        "errors": {
+          "urn:geology:error:invalid": {
+            "variant": "Invalid"
+          },
+          "urn:geology:error:overflow": {
+            "variant": "Overflow"
+          }
+        },
+        "externalRecords": {
+          "urn:geology:layer": {
+            "path": "crate::layers::Layer",
+            "fields": {
+              "urn:geology:depth": "depth",
+              "urn:geology:mark": "mark"
+            }
+          }
+        }
+      }
+    },
+    {
+      "kind": "binary-record",
+      "module": "layers",
+      "reexports": [
+        "Layer"
+      ],
+      "graph": {
+        "format": "oddlang-binary-record-v1",
+        "id": "urn:geology:layer",
+        "maximum": 6,
+        "layout": [
+          {
+            "id": "urn:geology:depth",
+            "encoding": {
+              "kind": "signed-be",
+              "bits": 16
+            }
+          },
+          {
+            "id": "urn:geology:mark",
+            "encoding": {
+              "kind": "fixed-bytes",
+              "size": 4
+            }
+          }
+        ],
+        "errors": {
+          "value": "urn:geology:error:invalid",
+          "truncated": "urn:geology:error:invalid",
+          "trailing": "urn:geology:error:invalid",
+          "decodeSize": "urn:geology:error:invalid",
+          "encodeSize": "urn:geology:error:invalid"
+        }
+      },
+      "overlay": {
+        "format": "oddlang-binary-record-rust-v1",
+        "name": "Layer",
+        "names": {
+          "urn:geology:depth": "depth",
+          "urn:geology:mark": "mark"
+        },
+        "externals": {},
+        "errorType": "crate::Failure",
+        "errors": {
+          "urn:geology:error:invalid": {
+            "variant": "Invalid"
+          }
+        }
+      },
+      "rootReexports": []
+    }
+  ]
+}

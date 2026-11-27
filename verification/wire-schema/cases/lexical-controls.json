@@ -1,0 +1,45 @@
+[
+  {
+    "name": "skipped",
+    "replace": "pub meter:",
+    "text": "#[serde(skip_serializing_if = \"Option::is_none\")] pub meter:",
+    "reason": "skip_serializing_if"
+  },
+  {
+    "name": "macro",
+    "reason": "unvetted Rust attribute serde_with::skip_serializing_none",
+    "replace": "pub struct Sensor",
+    "text": "#[serde_with::skip_serializing_none]\npub struct Sensor"
+  },
+  {
+    "name": "item-macro",
+    "reason": "unexpanded source item macro shadow",
+    "append": "\nmacro_rules! shadow { () => { type u16 = u8; }; } shadow!();\n"
+  },
+  {
+    "name": "verbatim",
+    "reason": "unparsed source item needs compiler evidence",
+    "append": "\n#[other::emit] fn incomplete();\n"
+  },
+  {
+    "name": "unselected-macro",
+    "reason": "source item has unvetted Rust attribute other::emit",
+    "append": "\n#[other::emit] struct Different;\n"
+  },
+  {
+    "name": "derive",
+    "reason": "unverified native derive",
+    "replace": "use serde::{Deserialize, Serialize};",
+    "text": "use another::{Deserialize, Serialize};"
+  },
+  {
+    "name": "derive-alias",
+    "reason": "unverified native derive",
+    "prepend": "use other_derive as serde;\n"
+  },
+  {
+    "name": "builtin",
+    "reason": "unverified generic field type Option",
+    "append": "\ntype Option<T> = std::vec::Vec<T>;\n"
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "name": "rejected",
+    "error": "binary error aliases",
+    "changes": [
+      {
+        "set": "/graph/errors/value",
+        "value": "urn:telemetry:counter"
+      },
+      {
+        "remove": "/binding/errors/urn:telemetry:error:record"
+      },
+      {
+        "set": "/binding/errors/urn:telemetry:counter",
+        "value": {
+          "variant": "Bad",
+          "argument": "record"
+        }
+      }
+    ]
+  },
+  {
+    "name": "rejected",
+    "error": "invalid binary record",
+    "changes": [
+      {
+        "set": "/binding/errorType",
+        "value": "Error"
+      }
+    ]
+  },
+  {
+    "name": "rejected",
+    "error": "invalid enum binding",
+    "changes": [
+      {
+        "set": "/binding/externals/urn:telemetry:Mode/path",
+        "value": "Mode"
+      }
+    ]
+  },
+  {
+    "name": "rejected",
+    "error": "invalid unsigned",
+    "changes": [
+      {
+        "set": "/graph/layout/1/encoding/bits",
+        "value": 12
+      }
+    ]
+  },
+  {
+    "name": "rejected",
+    "error": "invalid enum",
+    "changes": [
+      {
+        "set": "/graph/layout/4/encoding/tags/urn:telemetry:New",
+        "value": 4
+      }
+    ]
+  },
+  {
+    "name": "rejected",
+    "error": "invalid ASCII",
+    "changes": [
+      {
+        "set": "/graph/layout/5/encoding/punctuation/0",
+        "value": 255
+      }
+    ]
+  },
+  {
+    "name": "rejected",
+    "error": "field name",
+    "changes": [
+      {
+        "set": "/binding/names/urn:telemetry:label",
+        "value": "counter"
+      }
+    ]
+  }
+]

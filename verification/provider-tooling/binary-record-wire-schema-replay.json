@@ -1,0 +1,16 @@
+{
+  "format": "oddlang-qualification-replay-v1",
+  "host": "aarch64-apple-darwin",
+  "rustc": "1.97.1",
+  "cliSha256": "3884c423fccb909d69c8a6d5e119d4097b8ea6fade8936274edfe814890a08a4",
+  "passed": {
+    "binary-record": ["telemetry", "metadata", "composite", "package"],
+    "wire-schema": ["garden", "byte-value", "hash-views"]
+  },
+  "observations": [
+    "The binary-record suites preserved the telemetry bytes, every truncated prefix, optional metadata and hash bytes, signed composite values, footer and named error precedence.",
+    "Both geology package consumers passed their native tests, including the independent codec and slot width observations. Repeated assembly produced identical Rust sources and package locks.",
+    "The garden caller compared original and projected wire behavior and detected the guard-order mutation. Repeated recovery and reordered projection preserved artifact bytes.",
+    "The scalar-byte caller passed as a standalone consumer and an external example of the source-free package. The hash caller matched all three independently calculated SHA-256 results."
+  ]
+}

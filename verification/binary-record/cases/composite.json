@@ -1,0 +1,218 @@
+{
+  "graph": {
+    "format": "oddlang-binary-record-v1",
+    "id": "urn:survey:sample",
+    "maximum": 128,
+    "layout": [
+      {
+        "id": "urn:survey:magic",
+        "encoding": {
+          "kind": "literal",
+          "bytes": [
+            77,
+            3
+          ],
+          "requireFull": true,
+          "error": "urn:survey:error:magic"
+        }
+      },
+      {
+        "id": "urn:survey:header",
+        "encoding": {
+          "kind": "nested",
+          "record": "urn:survey:header-type",
+          "maximum": 8,
+          "overflow": "urn:survey:error:limit"
+        }
+      },
+      {
+        "id": "urn:survey:first",
+        "encoding": {
+          "kind": "signed-be",
+          "bits": 64
+        }
+      },
+      {
+        "id": "urn:survey:last",
+        "encoding": {
+          "kind": "signed-be",
+          "bits": 64
+        }
+      },
+      {
+        "id": "urn:survey:position",
+        "encoding": {
+          "kind": "inline",
+          "id": "urn:survey:point"
+        }
+      },
+      {
+        "id": "urn:survey:cached",
+        "encoding": {
+          "kind": "optional",
+          "payload": {
+            "kind": "record",
+            "id": "urn:survey:point"
+          },
+          "error": "urn:survey:error:tag"
+        }
+      },
+      {
+        "id": "urn:survey:count",
+        "encoding": {
+          "kind": "unsigned-be",
+          "bits": 32,
+          "minimum": 0,
+          "maximum": 9
+        }
+      }
+    ],
+    "errors": {
+      "value": "urn:survey:error:value",
+      "truncated": "urn:survey:error:short",
+      "trailing": "urn:survey:error:trailing",
+      "decodeSize": "urn:survey:error:limit",
+      "encodeSize": "urn:survey:error:limit"
+    },
+    "externalRecords": {
+      "urn:survey:header-type": {
+        "fields": {
+          "urn:survey:quantity": {
+            "kind": "unsigned",
+            "bits": 32
+          }
+        }
+      }
+    },
+    "records": {
+      "urn:survey:point": {
+        "fields": [
+          {
+            "id": "urn:survey:north",
+            "bits": 16,
+            "signed": true
+          }
+        ]
+      }
+    },
+    "constraints": [
+      {
+        "id": "urn:survey:duration",
+        "error": "urn:survey:error:period",
+        "predicate": {
+          "kind": "elapsed",
+          "end": {
+            "kind": "field",
+            "id": "urn:survey:last"
+          },
+          "start": {
+            "kind": "field",
+            "id": "urn:survey:first"
+          },
+          "minimum": 1
+        }
+      },
+      {
+        "id": "urn:survey:stable",
+        "error": "urn:survey:error:point",
+        "predicate": {
+          "kind": "optional-equals",
+          "field": "urn:survey:cached",
+          "other": "urn:survey:position"
+        }
+      },
+      {
+        "id": "urn:survey:bounds",
+        "error": "urn:survey:error:recount",
+        "predicate": {
+          "kind": "at-most",
+          "left": {
+            "kind": "field",
+            "id": "urn:survey:count"
+          },
+          "right": {
+            "kind": "member",
+            "field": "urn:survey:header",
+            "id": "urn:survey:quantity"
+          }
+        }
+      }
+    ],
+    "integrity": {
+      "algorithm": "sha256",
+      "domain": [
+        74,
+        0
+      ],
+      "short": "urn:survey:error:limit",
+      "mismatch": "urn:survey:error:checksum"
+    }
+  },
+  "binding": {
+    "format": "oddlang-binary-record-rust-v1",
+    "name": "Sample",
+    "names": {
+      "urn:survey:header": "header",
+      "urn:survey:first": "first",
+      "urn:survey:last": "last",
+      "urn:survey:north": "north",
+      "urn:survey:position": "position",
+      "urn:survey:cached": "cached",
+      "urn:survey:count": "count",
+      "urn:survey:point": "Point"
+    },
+    "externals": {},
+    "errorType": "crate::Failure",
+    "errors": {
+      "urn:survey:error:value": {
+        "variant": "Bad",
+        "argument": "value"
+      },
+      "urn:survey:error:short": {
+        "variant": "Bad",
+        "argument": "short"
+      },
+      "urn:survey:error:trailing": {
+        "variant": "Bad",
+        "argument": "trailing"
+      },
+      "urn:survey:error:limit": {
+        "variant": "Bad",
+        "argument": "limit"
+      },
+      "urn:survey:error:magic": {
+        "variant": "Bad",
+        "argument": "magic"
+      },
+      "urn:survey:error:period": {
+        "variant": "Bad",
+        "argument": "period"
+      },
+      "urn:survey:error:point": {
+        "variant": "Bad",
+        "argument": "point"
+      },
+      "urn:survey:error:recount": {
+        "variant": "Bad",
+        "argument": "recount"
+      },
+      "urn:survey:error:checksum": {
+        "variant": "Bad",
+        "argument": "checksum"
+      },
+      "urn:survey:error:tag": {
+        "variant": "Bad",
+        "argument": "tag"
+      }
+    },
+    "externalRecords": {
+      "urn:survey:header-type": {
+        "path": "crate::Header",
+        "fields": {
+          "urn:survey:quantity": "quantity"
+        }
+      }
+    },
+    "integrity": "sha2"
+  }
+}

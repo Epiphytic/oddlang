@@ -1,0 +1,28 @@
+{
+  "id": "urn:garden:wire",
+  "types": {
+    "Sensor": "urn:garden:sensor",
+    "Irrigation": "urn:garden:event",
+    "Packet": "urn:garden:packet"
+  },
+  "adapters": {
+    "signature_text": {
+      "kind": "lower-hex",
+      "bytes": 2,
+      "diagnostic": "signature text"
+    },
+    "chunks_text": {
+      "kind": "bounded-base64-list",
+      "policy": {
+        "maxItems": 2,
+        "maxItemBytes": 4,
+        "maxTotalBytes": 6,
+        "perItemOverhead": 1,
+        "listLimitMessage": "piece list limit",
+        "encodedLimitMessage": "piece text limit",
+        "decodedLimitMessage": "piece byte limit",
+        "syntaxMessage": "piece encoding"
+      }
+    }
+  }
+}

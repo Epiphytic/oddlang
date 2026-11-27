@@ -1,0 +1,12 @@
+[
+  {
+    "name": "rejected",
+    "error": "invalid composite record constraint",
+    "changes": [
+      {
+        "set": "/graph/constraints/2/predicate/right/id",
+        "value": "urn:survey:ghost"
+      }
+    ]
+  }
+]

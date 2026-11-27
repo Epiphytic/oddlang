@@ -1,0 +1,72 @@
+[
+  {
+    "name": "bad",
+    "error": "invalid hash variant binding or identity",
+    "changes": [
+      {
+        "remove": "/graph/hashTags/urn:sensor:state/urn:sensor:on"
+      },
+      {
+        "set": "/graph/hashTags/urn:sensor:state/urn:sensor:digest",
+        "value": 42
+      },
+      {
+        "remove": "/binding/hashVariants/urn:sensor:on"
+      },
+      {
+        "set": "/binding/hashVariants/urn:sensor:digest",
+        "value": "On"
+      }
+    ]
+  },
+  {
+    "name": "bad",
+    "error": "hash slot type",
+    "changes": [
+      {
+        "set": "/graph/hashViews/0/fields/0/encoding",
+        "value": "bool-u8"
+      }
+    ]
+  },
+  {
+    "name": "bad",
+    "error": "unconditional count guard",
+    "changes": [
+      {
+        "set": "/graph/hashViews/0/validate",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "bad",
+    "error": "hash tag table",
+    "changes": [
+      {
+        "set": "/graph/hashTags/urn:sensor:state/urn:sensor:off",
+        "value": 42
+      }
+    ]
+  },
+  {
+    "name": "bad",
+    "error": "hash method binding",
+    "changes": [
+      {
+        "set": "/binding/hashViews/urn:sensor:digest/method",
+        "value": "validate_wire"
+      }
+    ]
+  },
+  {
+    "name": "bad",
+    "error": "hash parameter binding",
+    "changes": [
+      {
+        "set": "/binding/hashViews/urn:sensor:digest/parameters/urn:sensor:parameter",
+        "value": "__oddlang_hash"
+      }
+    ]
+  }
+]
