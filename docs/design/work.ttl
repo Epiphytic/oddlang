@@ -3248,3 +3248,9 @@ w:portHistoricTooling p:evidence w:rustWasmSpike .
 w:rustWasmSpike a p:Artifact ;
     rdfs:label "Rust offline spike reproduced the echo observation transcript and four archived component interfaces; a successful process returning no observations was rejected" ;
     p:location "verification/provider-tooling/wasm-spike.json" .
+
+w:portHistoricTooling p:evidence w:portableOracleRustReplay .
+w:portableOracleRustReplay a p:Artifact ;
+    rdfs:label "Rust stream and tagged Data replay against the frozen independent Marmish corpus" ;
+    p:location "verification/provider-tooling/portable-oracle-rust.json" ;
+    rdfs:comment "Native Apple Silicon replay matched the 403 public observations and 128 sealed cases. Both generated Data targets passed 253 public and 112 sealed cases with 628 public result lines each, six 36-record writer-reader exchanges and the retagged graph controls. A separate Linux namespace probe observed a readable stage, an inaccessible withheld sibling and zero effective capabilities." .

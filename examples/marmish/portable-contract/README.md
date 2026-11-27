@@ -28,8 +28,8 @@ reports `Invalid/copy_truncated` after a failure or while a record is incomplete
 Independent upstream evidence includes the authored `spec-frame-data-encode`
 and `spec-frame-data-decode` cases and the seeded Data reads, writes and offset
 overflow cases. Both generated modules passed the scoped downstream replay. [Qualification receipt](../portable-oracle/tagged-qualification.json)
-[Authored cases](../portable-oracle/spec_cases.py) ·
-[Seeded cases](../portable-oracle/seeded_cases.py) ·
+[Authored cases](../portable-oracle/authored-cases.json) ·
+[Seeded cases](../../../verification/marmish-inventory/src/bin/portable-oracle/corpus.rs) ·
 [Original receipt](../portable-oracle/original-receipt.json)
 
 The separately pinned advisory hints describe the Rust byte buffer and the

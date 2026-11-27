@@ -1,0 +1,193 @@
+{
+  "corpus": {
+    "authored": 96,
+    "freeze": {
+      "authoredCorpusSha256": "70f2e1e5b46278244c106d55b97c72462bed4f2e96467a94fe478f30c8d33cf3",
+      "holdout": {
+        "cases": 128,
+        "corpusSha256": "36af5ca913e14c7979b9488180a5728c48ec282d98aaf418fad4a6ae859ed8a9",
+        "fileSha256": "afd52185d31bd660ac6a83df554cfeb53e450dfa7ced9a74398994eebbfdb939"
+      },
+      "priorCorpusSha256": "8bf576e1223d9cd916be67595b94ae4064aa7f3c87365a977bc5dd303273ec52",
+      "revision": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+      "schema": 1,
+      "seed": "afafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafaf",
+      "seedAlgorithm": "SHA-256(seed || big-endian u64 counter), starting at counter 0",
+      "seededCorpusSha256": "2a467a7b3f663df4fff58a2f64b60150ee18c376b379a0376bd8f2b922892b29",
+      "seededRounds": 32
+    },
+    "prior": 50,
+    "publicOnlyReplayHoldout": null,
+    "seeded": 257
+  },
+  "format": "oddlang-portable-stream-rust-replay-v1",
+  "frozenArtifactSha256": {
+    "freeze.json": "9744b5727f86e472b76d69e6a7043d5e2e0f3715c79140d6086ce4ca2e20d339",
+    "original-observations.json.gz": "68aa67d0e97b880f2b123253884165f19c75138787ef9d1c792b5bbbab0e9637",
+    "original-receipt.json": "519ad9804ddc9915b714ceb52d692544dfeb4d4eb0f7b8dfacb96b1cf0766e61",
+    "tagged-qualification.json": "d87673af4c3fe7f9b2c946af8c0eb79aee01c8a11cb0c2eecd20b0fddbbdb4ac"
+  },
+  "host": "aarch64-apple-darwin",
+  "independentZlib": {
+    "directions": [
+      "Marmish encoder to system zlib decoder",
+      "system zlib encoder to Marmish decoder"
+    ],
+    "independentZlibHex": "78014b4c4a4ea43d0200db75270d",
+    "rawBytes": 102,
+    "rawSha256": "ba42ac903664e676d4cf71d6c4c1260bb8fa74a5d714dc2d9a757d3cea5aecf6",
+    "rustZlibHex": "789cb5c2010d00000082b0ac68ff0ea4603b3b3d01db75270d",
+    "systemZlibVersion": "1.2.12"
+  },
+  "linux": {
+    "childEffectiveCapabilities": 0,
+    "childEffectiveUid": 501,
+    "kernel": "6.8.0-147-generic",
+    "profileSourceSha256": "01becc4f824cabbb7e6d1144fd56f3968e0f8dcd90cfb3237f3a7a5c15438101",
+    "sandbox": "bubblewrap via privileged namespace setup and setpriv",
+    "scope": "Standalone native probe of the Rust Linux namespace builder on the local Ubuntu guest. The available guest lacks Node and Clang for a complete generated-target replay.",
+    "stageReadable": true,
+    "target": "aarch64-unknown-linux-gnu",
+    "withheldSiblingAbsent": true
+  },
+  "mixedWriterReaderPairs": {
+    "readerToWriter": 31,
+    "writerToReader": 31
+  },
+  "mutations": {
+    "copy-data-tag": [
+      "binary-data-encode"
+    ],
+    "error-precedence": [
+      "codec-block-length-before-offset"
+    ],
+    "rejected-transition": [
+      "seed-0-receive-retry"
+    ]
+  },
+  "negativeInputsRejectedBeforeReceipt": [
+    "wrong upstream revision",
+    "wrong capsule file commitment"
+  ],
+  "publicObservationRowsEqualFrozenArchive": true,
+  "publicObservationSha256": "00693291df0b7ded5774ff7ba9a508a71b59162e0cdf210cbab4cb29b7e87ff5",
+  "rustVersion": "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+  "sealed": {
+    "cases": 128,
+    "directReadDenied": true,
+    "fileSha256": "afd52185d31bd660ac6a83df554cfeb53e450dfa7ced9a74398994eebbfdb939",
+    "passed": true,
+    "peerCompared": true
+  },
+  "tagged": {
+    "comparedOperationResults": {
+      "rust": 628,
+      "typescript": 628
+    },
+    "count": 253,
+    "externalJudge": {
+      "rust": [
+        "E:05000000090000000000000000ff",
+        "D:5:0:ff"
+      ],
+      "typescript": [
+        "E:05000000090000000000000000ff",
+        "D:5:0:ff"
+      ]
+    },
+    "fieldsComparedToFrozenReceipt": [
+      "publicCount",
+      "sealedCases",
+      "publicCaseIds",
+      "publicCases",
+      "comparedOperationResults",
+      "mixedPeers",
+      "mutation",
+      "mutatedOutputs"
+    ],
+    "generatorSha256": "3884c423fccb909d69c8a6d5e119d4097b8ea6fade8936274edfe814890a08a4",
+    "graphSha256": "82ddfed871221091be6b42adf6d0b009cb5ce10f864c414bdbaed5e19e4dad56",
+    "mixedPeers": {
+      "rustToTypescript": {
+        "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+        "records": 36,
+        "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+      },
+      "rustToUpstream": {
+        "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+        "records": 36,
+        "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+      },
+      "typescriptToRust": {
+        "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+        "records": 36,
+        "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+      },
+      "typescriptToUpstream": {
+        "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+        "records": 36,
+        "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+      },
+      "upstreamToRust": {
+        "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+        "records": 36,
+        "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+      },
+      "upstreamToTypescript": {
+        "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+        "records": 36,
+        "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+      }
+    },
+    "mutation": {
+      "from": 5,
+      "mutantsDecodedOwnWire": [
+        "rust",
+        "typescript"
+      ],
+      "mutantsFedOwnWire": [
+        "rust",
+        "typescript"
+      ],
+      "mutantsRejectedOriginalDecodeAndFeed": [
+        "rust",
+        "typescript"
+      ],
+      "restoredPinReplayed": true,
+      "to": 51,
+      "upstreamRejected": [
+        "rust",
+        "typescript"
+      ],
+      "wrongEncodeTagsRejected": [
+        "rust",
+        "typescript"
+      ]
+    },
+    "public": {
+      "frame_decode": 112,
+      "frame_encode": 41,
+      "frame_fragments": 100
+    },
+    "sealed": 112,
+    "withheldOnProjection": [
+      "advisoryHintSource",
+      "advisoryHintSourceThroughDataVolume",
+      "oracleVectors",
+      "oracleVectorsThroughDataVolume",
+      "sealedCapsule",
+      "sealedCapsuleThroughDataVolume",
+      "upstreamSource",
+      "upstreamSourceThroughDataVolume",
+      "withheldHintCopy",
+      "withheldHintCopyThroughDataVolume",
+      "withheldStructureProbe",
+      "withheldStructureProbeThroughDataVolume"
+    ]
+  },
+  "upstream": {
+    "cargoLockSha256": "9c5f7dde5c0f7d340e22dbefaa8a1c6ddb94c119011ba3e49ac8044c9b4cb0b3",
+    "profile": "dev",
+    "revision": "49fc705408a230bd0ad896248d08dbdd2faad05a"
+  }
+}
