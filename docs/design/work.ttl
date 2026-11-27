@@ -3943,3 +3943,8 @@ w:cleanupAfterMerge a p:Decision ;
     rdfs:label "Remove task scratch when its last consumer finishes, clean merged branches and repeat the worktree inventory after merges" ;
     p:source w:branchCleanupInstructions .
 w:branchCleanupInstructions a p:Artifact ; p:location "AGENTS.md#finish-a-branch" .
+
+w:exportRoleReplayEvidence a p:Artifact ;
+    rdfs:label "Rust executable-role inventory matched all 48 workspace descriptors and the profile-policy release export. Seven generated members and their input pins matched the previous build." ;
+    p:location "verification/provider-tooling/export-role-replay.json" .
+w:portHistoricTooling p:evidence w:exportRoleReplayEvidence .

@@ -1,0 +1,149 @@
+{
+  "platform": "aarch64-apple-darwin",
+  "compilerCommit": "a207950ac0576fa76a50e1117ab669baae128c91",
+  "companionCommit": "a5078f427d4ffd59191715b6f44dae91d79f3078",
+  "previousBuildReceiptSha256": "599dcc864aa25486f136800f979f7ee5f3313004bf7bcb1d589d96d521215efa",
+  "buildReceiptSha256": "aa700d985020fa63309d8ec939fc3123c6e596bed193660e2a9a31c85dda0ee4",
+  "workspaceLockSha256": "889017343f0fdb092dee203264aa4f6d6d194bad8ef396e336f2dd2cf6ec9b76",
+  "workspaceMembers": 7,
+  "stagedInputs": 111,
+  "descriptorComparisons": 48,
+  "unexpectedExecutableRejections": 48,
+  "additionalRejectedInputs": [
+    "duplicate executable",
+    "duplicate CLI binding",
+    "undeclared CLI executable",
+    "missing executable",
+    "corrupt member manifest digest",
+    "corrupt overlay digest",
+    "overlay symlink outside staged root"
+  ],
+  "cliSurfaces": {
+    "marmish": {
+      "boundOperations": [
+        "*",
+        "init",
+        "release-info",
+        "setup",
+        "status",
+        "wait"
+      ],
+      "unboundOperations": [
+        "cancel",
+        "command-check",
+        "command-cleanup-status",
+        "command-evidence",
+        "command-local-cancel",
+        "command-prepare-cleanup",
+        "command-status",
+        "commands",
+        "copy-receipts",
+        "daemon",
+        "foundation-check",
+        "get",
+        "install",
+        "install-status",
+        "keychain-authorize",
+        "open-conversation",
+        "output",
+        "put",
+        "received",
+        "send",
+        "stream",
+        "stream-reconcile",
+        "streams",
+        "uninstall"
+      ],
+      "uncoveredExit": 125
+    },
+    "marmishd": {
+      "boundOperations": [
+        "daemon",
+        "release-info"
+      ],
+      "unboundOperations": [
+        "*",
+        "cancel",
+        "command-check",
+        "command-cleanup-status",
+        "command-evidence",
+        "command-local-cancel",
+        "command-prepare-cleanup",
+        "command-status",
+        "commands",
+        "copy-receipts",
+        "foundation-check",
+        "get",
+        "init",
+        "install",
+        "install-status",
+        "keychain-authorize",
+        "open-conversation",
+        "output",
+        "put",
+        "received",
+        "send",
+        "setup",
+        "status",
+        "stream",
+        "stream-reconcile",
+        "streams",
+        "uninstall",
+        "wait"
+      ],
+      "uncoveredExit": 125
+    }
+  },
+  "differentBuildFields": [
+    "artifacts",
+    "buildDriverCheckout",
+    "builderSha256",
+    "compilerSha256",
+    "seatbeltPolicySha256"
+  ],
+  "artifacts": {
+    "marmish": {
+      "sha256": "9981753cb80fc76a94a0f9d73782b85b5bc1a89b070d6685d458be7f40fd8c47",
+      "sizeBytes": 22251296
+    },
+    "marmishd": {
+      "sha256": "637457ded4bb85c23fcc32ca79456c3de2bcb969e7b8528809694d022c018f30",
+      "sizeBytes": 48621792
+    }
+  },
+  "preflight": {
+    "format": "marmish-profile-policy-preflight-v1",
+    "buildReceiptSha256": "aa700d985020fa63309d8ec939fc3123c6e596bed193660e2a9a31c85dda0ee4",
+    "preflightSha256": "a16b395aca24ce3047f8786eb6b4362830f54ef9a2f17ed704a23bad1390b1a3",
+    "cases": {
+      "setupWithoutFileProvider": {
+        "role": "marmish",
+        "argv": [
+          "setup",
+          "--role",
+          "client",
+          "--no-grants"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "marmish: profile preparation requires the file key provider\n"
+      },
+      "foregroundWithoutState": {
+        "role": "marmishd",
+        "argv": [
+          "--foreground"
+        ],
+        "exit": 125,
+        "stdout": "",
+        "stderr": "marmish: foreground status owner requires explicit state and a prepared file profile\n"
+      }
+    },
+    "workspaceRemoved": true,
+    "compositionPins": {
+      "workspace-profile-command-policy.json": "35fcd02816277171b6eac6c9349b2d14439ac9cab038f1f347ddaa5f67d300a1",
+      "marmish-native-profile-command-policy-package.json": "47acca0c2a5d49f22c602fa0aa5d5d454a6de13f2f1c9f9a0b79ee88e4153182",
+      "recovered-command-policy-v1/foreground.json": "d314e96ba0fbc63ff52ce907a3e842a584e26c7b87f98f561dc88d1a10db1cab",
+      "basic-command-delivery-v1/cli.rust.json": "dc0531e6d49ec46f73b383566b8e73bede4be426315224888710119eef939d41"
+    }
+  }
+}
