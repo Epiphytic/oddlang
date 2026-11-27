@@ -3127,6 +3127,11 @@ w:marmishPhase7RustReplay a p:Artifact ;
     rdfs:label "Historical Phase 7 verifier and Rust replay compared against the published qualification and coverage" ;
     p:location "verification/provider-tooling/marmish-phase7-replay.json" .
 
+w:portHistoricTooling p:evidence w:marmishNativeCandidateRustReplay .
+w:marmishNativeCandidateRustReplay a p:Artifact ;
+    rdfs:label "Native candidate report and original outcomes reproduced from authenticated archives by the Rust comparator" ;
+    p:location "verification/provider-tooling/marmish-native-candidate-replay.json" .
+
 w:portHistoricTooling p:evidence w:rustWorkflowReplay .
 w:rustWorkflowReplay a p:Artifact ;
     rdfs:label "Rust import cleanup, assembly preparation, profile checks and Wasm host receipt replay on macOS ARM64" ;

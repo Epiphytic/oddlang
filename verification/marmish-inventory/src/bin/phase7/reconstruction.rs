@@ -1,5 +1,5 @@
 use super::*;
-use sha1::Sha1;
+use sha1::{Digest, Sha1};
 
 const ONTOLOGY: [&str; 3] = [
     "docs/ontology/code_references.jsonl",

@@ -15,3 +15,4 @@ Implement the [approved Wasm design](../specs/2026-11-26-wasm-provider-design.md
 - [x] Replay native package projection, sibling workspace linking, cold and disconnected Git acquisition, and both native process wrappers with independent Rust callers and fresh-output rejection controls.
 - [x] Rebuild the pinned Marmish source inventory in Rust, compare its archive and summary byte-for-byte, and verify lexical scope, platform eligibility, packaging recipes and open completeness obligations.
 - [x] Replay the archived Phase 7 source trees, deterministic commit, framing evidence, mixed wire and native observations with the Rust orchestrator. Verify its aggregate bytes and nine negative controls.
+- [x] Recover the original native evidence and recompute the native candidate comparison in Rust. Compare all archived report bytes, exercise transcript and receipt mutations, and verify the candidate Git trees before issuing a new comparator receipt.
