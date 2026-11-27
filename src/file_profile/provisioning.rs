@@ -20,11 +20,21 @@ pub(super) struct Provisioning {
     report: Vec<Column>,
     max_peers: usize,
     peer_format: PeerFormat,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    restriction_lists: Option<StoredRestrictions>,
     invalid_member: Diagnostic,
     choice_required: Diagnostic,
     explicit_removal: Diagnostic,
     existing_config: Diagnostic,
     unsupported: Diagnostic,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct StoredRestrictions {
+    model: crate::stored_policy::RestrictionLists,
+    invalid_principal: Diagnostic,
+    invalid_bounds: Diagnostic,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -156,13 +166,33 @@ impl Provisioning {
             || self.report.iter().any(|c| matches!(&c.source,Source::AnyMember{field, ..} if !self.sets.iter().any(|s|&s.field==field))) {
             return Err("invalid provisioning report column".into());
         }
+        if let Some(policy) = &self.restriction_lists {
+            let reserved = self
+                .sets
+                .iter()
+                .map(|set| set.field.clone())
+                .chain([self.role_field.clone()])
+                .collect::<Vec<_>>();
+            policy.model.validate(&reserved)?;
+            if fixed.get(policy.model.policy_field()) != Some(&policy.model.default_document()) {
+                return Err(
+                    "provisioning requires the declared default restriction document".into(),
+                );
+            }
+        }
         for diagnostic in [
             &self.invalid_member,
             &self.choice_required,
             &self.explicit_removal,
             &self.existing_config,
             &self.unsupported,
-        ] {
+        ]
+        .into_iter()
+        .chain(
+            self.restriction_lists
+                .iter()
+                .flat_map(|p| [&p.invalid_principal, &p.invalid_bounds]),
+        ) {
             if diagnostic.exit == 0
                 || diagnostic.stderr.is_empty()
                 || diagnostic.stderr.chars().any(char::is_control)
@@ -230,8 +260,36 @@ impl Provisioning {
             .unwrap();
         }
         out.push_str("];\n");
+        let mut validate = String::new();
+        if let Some(policy) = &self.restriction_lists {
+            out.push_str("mod stored_restrictions {\nuse nostr::key::PublicKey;\n");
+            policy.model.render_reader(out);
+            out.push_str("}\n");
+            writeln!(
+                validate,
+                "        }} else if key == {:?} {{",
+                policy.model.policy_field()
+            )
+            .unwrap();
+            writeln!(validate, "            let bytes = serde_json::to_vec(&fields[key]).map_err(|_| CONFIG_FORMAT)?;").unwrap();
+            writeln!(validate, "            stored_restrictions::CommandRestrictions::from_json(&bytes).map_err(|error| match error {{").unwrap();
+            for (code, diagnostic) in [
+                ("config_account", &policy.invalid_principal),
+                ("config_policy_bounds", &policy.invalid_bounds),
+            ] {
+                writeln!(
+                    validate,
+                    "                {code:?} => Failure({}, {:?}),",
+                    diagnostic.exit, diagnostic.stderr
+                )
+                .unwrap();
+            }
+            validate.push_str("                _ => CONFIG_FORMAT,\n            })?;\n");
+        }
         out.push_str(
-            &include_str!("provisioning.rs.in").replace("@GLOBAL_GUARDS@", &init.argument_guards()),
+            &include_str!("provisioning.rs.in")
+                .replace("@STORED_RESTRICTIONS@", &validate)
+                .replace("@GLOBAL_GUARDS@", &init.argument_guards()),
         );
         writeln!(out,"pub fn {entry}(matches: clap::ArgMatches) -> std::process::ExitCode {{\n    let run = || -> Result<(), Failure> {{\n        let result = provision_profile(&matches)?;\n        let mut bytes = Vec::new();\n        let mut serializer = serde_json::Serializer::new(&mut bytes);\n        use serde::ser::{{SerializeMap,Serializer}};\n        let mut map = serializer.serialize_map(Some({})).map_err(|_| IO)?;",self.report.len()).unwrap();
         for c in &self.report {

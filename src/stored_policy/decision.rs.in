@@ -1,0 +1,76 @@
+    /// Validate the full configuration before evaluating any principal's named paths.
+    pub fn validate_for_principals(&self, admitted: &[[u8; 32]]) -> Result<(), &'static str> {
+        self.validate_bounds()?;
+        for (pattern, _) in self.defaults.patterns(true) {
+            compile_restriction(pattern)?;
+        }
+        for entry in &self.entries {
+            if !admitted.contains(&restriction_principal(&entry.principal)?) {
+                return Err("invalid_policy");
+            }
+            for (pattern, _) in entry.restrictions.patterns(false) {
+                compile_restriction(pattern)?;
+            }
+        }
+        Ok(())
+    }
+
+    /// Pure restriction decision. Ok(true) requires a separate canonical-path check.
+    /// The caller independently establishes principal admission and resolves any alias.
+    pub fn check_named_exec(
+        &self,
+        principal: [u8; 32],
+        executable: &[u8],
+        alias: Option<&[u8]>,
+    ) -> Result<bool, &'static str> {
+        if executable.len() > POLICY_EXECUTABLE_BYTES
+            || executable.first() != Some(&b'/')
+            || executable[1..]
+                .split(|b| *b == b'/')
+                .any(|part| part.is_empty() || part == b"." || part == b"..")
+        {
+            return Err("invalid_request");
+        }
+        let mut layers = vec![(&self.defaults, true)];
+        for entry in &self.entries {
+            if restriction_principal(&entry.principal)? == principal {
+                layers.push((&entry.restrictions, false));
+            }
+        }
+        // Charge every applicable rule before returning a decision. Rule order cannot mask exhaustion.
+        let mut remaining = POLICY_FUEL;
+        let mut permit = true;
+        for (layer, is_default) in layers {
+            let mut allowed = !is_default && layer.allow.is_none();
+            let mut denied = false;
+            for (pattern, deny) in layer.patterns(is_default) {
+                let tokens = compile_restriction(pattern)?;
+                let mut width = executable.len() + 1;
+                if let Some(alias) = alias.filter(|_| deny) {
+                    width = width
+                        .checked_add(alias.len())
+                        .and_then(|n| n.checked_add(1))
+                        .ok_or("invalid_policy")?;
+                }
+                let cost = width
+                    .checked_mul(tokens.len() + 1)
+                    .ok_or("invalid_policy")?;
+                remaining = remaining.checked_sub(cost).ok_or("invalid_policy")?;
+                let matches = restriction_matches(&tokens, executable);
+                if deny {
+                    denied |=
+                        matches || alias.is_some_and(|name| restriction_matches(&tokens, name));
+                } else {
+                    allowed |= matches;
+                }
+            }
+            permit &= allowed && !denied;
+        }
+        if permit {
+            Ok(true)
+        } else {
+            Err("command_denied")
+        }
+    }
+}
+// End of generated command restrictions.

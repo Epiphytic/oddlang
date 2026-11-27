@@ -9,9 +9,8 @@ use std::{
     path::Path,
 };
 
-mod restrictions;
 mod rust;
-use restrictions::RestrictionLists;
+use crate::stored_policy::RestrictionLists;
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -590,7 +589,7 @@ fn binding_path(value: &[String]) -> bool {
 fn plain(value: &str) -> bool {
     !value.is_empty() && !value.chars().any(char::is_control)
 }
-fn token(value: &str) -> bool {
+pub(crate) fn token(value: &str) -> bool {
     !value.is_empty()
         && value
             .bytes()

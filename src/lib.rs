@@ -14,6 +14,7 @@ pub mod field_relation;
 pub mod finite_error_domain;
 pub mod file_profile;
 pub mod foreground_profile_owner;
+mod stored_policy;
 mod source_observation;
 pub mod framing_import;
 pub mod framing_projection;

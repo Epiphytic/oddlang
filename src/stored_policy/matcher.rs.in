@@ -1,0 +1,51 @@
+enum PathToken {
+    Literal(u8),
+    Star,
+    DeepStar,
+}
+
+fn compile_restriction(pattern: &str) -> Result<Vec<PathToken>, &'static str> {
+    if pattern.len() > POLICY_PATTERN_BYTES
+        || !pattern.starts_with('/')
+        || pattern.chars().any(char::is_control)
+    {
+        return Err("invalid_policy");
+    }
+    let mut input = pattern.bytes().peekable();
+    let mut tokens = Vec::with_capacity(pattern.len());
+    while let Some(byte) = input.next() {
+        tokens.push(match byte {
+            b'\\' => match input.next() {
+                Some(b @ (b'\\' | b'*')) => PathToken::Literal(b),
+                _ => return Err("invalid_policy"),
+            },
+            b'*' if input.next_if_eq(&b'*').is_some() => {
+                while input.next_if_eq(&b'*').is_some() {}
+                PathToken::DeepStar
+            }
+            b'*' => PathToken::Star,
+            b => PathToken::Literal(b),
+        });
+    }
+    Ok(tokens)
+}
+
+// Each row records which path prefixes match the pattern prefix seen so far.
+fn restriction_matches(pattern: &[PathToken], path: &[u8]) -> bool {
+    let mut row = vec![false; path.len() + 1];
+    row[0] = true;
+    for token in pattern {
+        let mut diagonal = row[0];
+        row[0] &= !matches!(token, PathToken::Literal(_));
+        for (i, &byte) in path.iter().enumerate() {
+            let above = row[i + 1];
+            row[i + 1] = match token {
+                PathToken::Literal(b) => diagonal && byte == *b,
+                PathToken::Star => above || (row[i] && byte != b'/'),
+                PathToken::DeepStar => above || row[i],
+            };
+            diagonal = above;
+        }
+    }
+    row[path.len()]
+}

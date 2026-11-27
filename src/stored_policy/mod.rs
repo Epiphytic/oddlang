@@ -1,15 +1,16 @@
-use super::{Deserialize, token};
+use crate::foreground_profile_owner::token;
+use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::Write;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct RestrictionLists {
+pub(crate) struct RestrictionLists {
     schema: Schema,
     decision: Decision,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 struct Schema {
     format: String,
@@ -20,7 +21,7 @@ struct Schema {
     declarations: BTreeMap<String, String>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 struct Decision {
     semantics: String,
@@ -45,11 +46,15 @@ const ROLES: [&str; 8] = [
 ];
 
 impl RestrictionLists {
-    pub(super) fn policy_field(&self) -> &str {
+    pub(crate) fn policy_field(&self) -> &str {
         &self.schema.fields["policy"]
     }
 
-    pub(super) fn validate(&self, config_fields: &[String]) -> Result<(), String> {
+    pub(crate) fn default_document(&self) -> serde_json::Value {
+        serde_json::json!({ (&self.schema.fields["version"]): self.decision.version })
+    }
+
+    pub(crate) fn validate(&self, config_fields: &[String]) -> Result<(), String> {
         let s = &self.schema;
         let d = &self.decision;
         let shape = serde_json::json!({
@@ -106,7 +111,7 @@ impl RestrictionLists {
         Ok(())
     }
 
-    pub(super) fn render(&self, out: &mut String) {
+    pub(crate) fn render(&self, out: &mut String) {
         let d = &self.decision;
         writeln!(out, "const POLICY_VERSION: u32 = {};", d.version).unwrap();
         for (name, value) in [
@@ -119,7 +124,38 @@ impl RestrictionLists {
             writeln!(out, "const POLICY_{name}: usize = {value};").unwrap();
         }
         writeln!(out, "const POLICY_DEFAULT: &str = {:?};", d.default_allow).unwrap();
-        let mut parts = include_str!("restriction_lists.rs.in").split("__");
+        self.render_fields(
+            out,
+            concat!(
+                include_str!("types.rs.in"),
+                "\n",
+                include_str!("matcher.rs.in"),
+                "\n",
+                include_str!("read.rs.in"),
+                "\n",
+                include_str!("decision.rs.in")
+            ),
+        );
+    }
+
+    pub(crate) fn render_reader(&self, out: &mut String) {
+        let d = &self.decision;
+        writeln!(out,"const POLICY_VERSION:u32={}; const POLICY_KEYS:usize={}; const POLICY_PATTERNS:usize={}; const POLICY_PATTERN_BYTES:usize={}; const POLICY_DEFAULT:&str={:?};",
+          d.version,d.maximum_keys,d.maximum_patterns,d.maximum_pattern_bytes,d.default_allow).unwrap();
+        self.render_fields(
+            out,
+            concat!(
+                include_str!("types.rs.in"),
+                "\n",
+                include_str!("read.rs.in"),
+                "\n",
+                "}\n"
+            ),
+        );
+    }
+
+    fn render_fields(&self, out: &mut String, template: &str) {
+        let mut parts = template.split("__");
         out.push_str(parts.next().unwrap());
         while let Some(role) = parts.next() {
             write!(out, "{:?}", self.schema.fields[role]).unwrap();
@@ -171,6 +207,12 @@ mod tests {
         let model: RestrictionLists = serde_json::from_value(graph.clone()).unwrap();
         model.validate(&[]).unwrap();
         let mut rust = String::new();
+        let mut reader = String::new();
+        model.render_reader(&mut reader);
+        assert_eq!(model.default_document(), json!({"__deny__":1}));
+        assert!(reader.contains("rename = \"input_allow\""));
+        assert!(reader.contains("fn validate_bounds("));
+        syn::parse_file(&reader).expect("standalone policy reader must parse");
         model.render(&mut rust);
         assert!(rust.contains("rename = \"__deny__\""));
         assert!(rust.contains("rename = \"input_deny\""));
