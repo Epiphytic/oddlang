@@ -11,9 +11,9 @@ exercises output from the current reply and the existing plain workflow
 checks compatibility without the delivery binding.
 
 ```sh
-python3 -B verification/local-owner-workflow/delivery.py "$ODDLANG" --deferred
-python3 -B verification/local-owner-workflow/delivery.py "$ODDLANG"
-python3 -B verification/local-owner-workflow/check.py "$ODDLANG"
+cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin local-owner-workflow -- deferred "$ODDLANG"
+cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin local-owner-workflow -- delivery "$ODDLANG"
+cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin local-owner-workflow -- workflow "$ODDLANG"
 ```
 
 All three fixture runs passed. The deferred case rejected a matching request

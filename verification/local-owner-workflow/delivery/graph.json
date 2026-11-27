@@ -1,0 +1,261 @@
+{
+  "format": "oddlang-local-command-workflow-v1",
+  "id": "urn:meter:workflow",
+  "socket_argument": "port",
+  "delivery": true,
+  "transport": {
+    "deadline_ms": 1500,
+    "maximum_frame_bytes": 1024,
+    "maximum_exchanges": 3
+  },
+  "errors": {
+    "binding": {
+      "exit": 6,
+      "stderr": "binding"
+    },
+    "io": {
+      "exit": 7,
+      "stderr": "io"
+    },
+    "peer": {
+      "exit": 8,
+      "stderr": "peer"
+    },
+    "frame_size": {
+      "exit": 9,
+      "stderr": "frame_size"
+    },
+    "frame_json": {
+      "exit": 10,
+      "stderr": "frame_json"
+    },
+    "deadline": {
+      "exit": 11,
+      "stderr": "deadline"
+    },
+    "protocol": {
+      "exit": 12,
+      "stderr": "protocol"
+    },
+    "budget": {
+      "exit": 13,
+      "stderr": "budget"
+    }
+  },
+  "entry": "urn:meter:workflow:step:cursor",
+  "steps": [
+    {
+      "id": "urn:meter:workflow:step:cursor",
+      "request": [
+        {
+          "id": "urn:meter:workflow:field:cursor",
+          "key": "cursor",
+          "source": {
+            "kind": "literal",
+            "value": "lookup"
+          }
+        }
+      ],
+      "transitions": [
+        {
+          "id": "urn:meter:workflow:transition:read",
+          "when": [
+            {
+              "path": [
+                "ready"
+              ],
+              "equals": true
+            }
+          ],
+          "capture": [
+            {
+              "name": "previous",
+              "path": [
+                "previous"
+              ],
+              "value_kind": {
+                "kind": "unsigned64"
+              }
+            }
+          ],
+          "effect": {
+            "kind": "continue",
+            "step": "urn:meter:workflow:step:read",
+            "delay_ms": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "urn:meter:workflow:step:read",
+      "request": [
+        {
+          "id": "urn:meter:workflow:field:action",
+          "key": "action",
+          "source": {
+            "kind": "literal",
+            "value": "read"
+          }
+        }
+      ],
+      "embedded": {
+        "id": "urn:meter:workflow:embedded",
+        "bytes": [
+          "encoded"
+        ],
+        "sha256": [
+          "digest"
+        ],
+        "maximum_bytes": 512,
+        "tagged": {
+          "path": [
+            "state"
+          ],
+          "value": "answer"
+        }
+      },
+      "transitions": [
+        {
+          "id": "urn:meter:workflow:transition:ack",
+          "when": [
+            {
+              "path": [
+                "$opened",
+                "type"
+              ],
+              "equals": "measurement"
+            },
+            {
+              "path": [
+                "$opened",
+                "indexes",
+                "1"
+              ],
+              "equals": 9
+            },
+            {
+              "path": [
+                "$opened",
+                "outCursor"
+              ],
+              "equals_path": [
+                "$opened",
+                "produced"
+              ]
+            },
+            {
+              "path": [
+                "$opened",
+                "binding"
+              ],
+              "equals_source": {
+                "kind": "sha256",
+                "fields": [
+                  {
+                    "id": "urn:meter:workflow:field:scale",
+                    "key": "scale",
+                    "source": {
+                      "kind": "literal",
+                      "value": "C"
+                    }
+                  },
+                  {
+                    "id": "urn:meter:workflow:field:precision",
+                    "key": "precision",
+                    "source": {
+                      "kind": "literal",
+                      "value": 2
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "capture": [
+            {
+              "name": "exit-status",
+              "path": [
+                "$opened",
+                "exit"
+              ],
+              "value_kind": {
+                "kind": "exit_status"
+              }
+            }
+          ],
+          "effect": {
+            "kind": "continue",
+            "step": "urn:meter:workflow:step:ack",
+            "delay_ms": 0
+          },
+          "outputs": [
+            {
+              "id": "urn:meter:workflow:output:stdout",
+              "channel": "stdout",
+              "bytes": [
+                "$opened",
+                "stdout"
+              ],
+              "cursor": [
+                "$opened",
+                "outCursor"
+              ],
+              "maximum_bytes": 32,
+              "start": "previous",
+              "upper": [
+                "$opened",
+                "retained"
+              ]
+            },
+            {
+              "id": "urn:meter:workflow:output:stderr",
+              "channel": "stderr",
+              "bytes": [
+                "$opened",
+                "stderr"
+              ],
+              "cursor": [
+                "$opened",
+                "errCursor"
+              ],
+              "maximum_bytes": 32
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "urn:meter:workflow:step:ack",
+      "request": [
+        {
+          "id": "urn:meter:workflow:field:confirm",
+          "key": "confirm",
+          "source": {
+            "kind": "literal",
+            "value": "measurement"
+          }
+        }
+      ],
+      "transitions": [
+        {
+          "id": "urn:meter:workflow:transition:exit",
+          "when": [
+            {
+              "path": [
+                "confirmed"
+              ],
+              "equals": true
+            }
+          ],
+          "carry": [
+            "exit-status"
+          ],
+          "effect": {
+            "kind": "exit_captured",
+            "name": "exit-status"
+          }
+        }
+      ]
+    }
+  ]
+}

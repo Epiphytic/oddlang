@@ -2683,6 +2683,12 @@ w:localOwnerWorkflow a p:Task ;
     p:acceptance "Generate a linked native CLI request sequence. Verify ordered response decisions, capture validation, fixed request bytes, and one finite deadline and budget with an independent Unix peer." .
 w:basicCommandInterop p:dependsOn w:localOwnerWorkflow .
 
+w:portHistoricTooling p:evidence w:fieldMeterWorkflowRustReplay .
+w:localOwnerWorkflow p:evidence w:fieldMeterWorkflowRustReplay .
+w:fieldMeterWorkflowRustReplay a p:Artifact ;
+    rdfs:label "Rust replay of 31 independent field-meter cases and process outcomes across workflow, embedded delivery and deferred output scenarios" ;
+    p:location "verification/provider-tooling/local-owner-workflow-rust-replay.json" .
+
 w:localOwnerWorkflowVerification a p:Artifact ;
     p:location "verification/local-owner-workflow/runtime-verification.md" .
 w:localSubmitHandoffReference a p:Artifact ;

@@ -1,0 +1,254 @@
+{
+  "format": "oddlang-local-command-workflow-v1",
+  "id": "urn:meter:workflow",
+  "socket_argument": "port",
+  "transport": {
+    "deadline_ms": 1000,
+    "maximum_frame_bytes": 256,
+    "maximum_exchanges": 4
+  },
+  "errors": {
+    "binding": {
+      "exit": 6,
+      "stderr": "missing argument"
+    },
+    "io": {
+      "exit": 7,
+      "stderr": "socket I/O"
+    },
+    "peer": {
+      "exit": 8,
+      "stderr": "wrong user"
+    },
+    "frame_size": {
+      "exit": 9,
+      "stderr": "bad frame size"
+    },
+    "frame_json": {
+      "exit": 10,
+      "stderr": "bad frame JSON"
+    },
+    "deadline": {
+      "exit": 11,
+      "stderr": "deadline"
+    },
+    "protocol": {
+      "exit": 12,
+      "stderr": "unexpected reply"
+    },
+    "budget": {
+      "exit": 13,
+      "stderr": "exchange budget"
+    }
+  },
+  "entry": "urn:meter:workflow:step:probe",
+  "steps": [
+    {
+      "id": "urn:meter:workflow:step:probe",
+      "request": [
+        {
+          "id": "urn:meter:workflow:field:probe",
+          "key": "probe",
+          "source": {
+            "kind": "literal",
+            "value": "probe"
+          }
+        }
+      ],
+      "transitions": [
+        {
+          "id": "urn:meter:workflow:transition:poll",
+          "when": [
+            {
+              "path": [
+                "state"
+              ],
+              "equals": "warming"
+            }
+          ],
+          "capture": [],
+          "effect": {
+            "kind": "continue",
+            "step": "urn:meter:workflow:step:probe",
+            "delay_ms": 1
+          }
+        },
+        {
+          "id": "urn:meter:workflow:transition:reserve",
+          "when": [
+            {
+              "path": [
+                "state"
+              ],
+              "equals": "ready"
+            }
+          ],
+          "capture": [],
+          "effect": {
+            "kind": "continue",
+            "step": "urn:meter:workflow:step:reserve",
+            "delay_ms": 0
+          }
+        },
+        {
+          "id": "urn:meter:workflow:transition:later-overlap",
+          "when": [
+            {
+              "path": [
+                "state"
+              ],
+              "equals": "ready"
+            },
+            {
+              "path": [
+                "mode"
+              ],
+              "equals": "priority"
+            }
+          ],
+          "effect": {
+            "kind": "exit",
+            "status": 16,
+            "stderr": "later transition won"
+          }
+        },
+        {
+          "id": "urn:meter:workflow:transition:unexpected",
+          "when": [],
+          "effect": {
+            "kind": "exit",
+            "status": 15,
+            "stderr": "unknown state"
+          }
+        }
+      ]
+    },
+    {
+      "id": "urn:meter:workflow:step:reserve",
+      "request": [
+        {
+          "id": "urn:meter:workflow:field:reserve",
+          "key": "reserve",
+          "source": {
+            "kind": "literal",
+            "value": "reserve"
+          }
+        },
+        {
+          "id": "urn:meter:workflow:field:unit",
+          "key": "unit",
+          "source": {
+            "kind": "argument",
+            "id": "unit",
+            "value_kind": "string"
+          }
+        }
+      ],
+      "transitions": [
+        {
+          "id": "urn:meter:workflow:transition:sample",
+          "when": [
+            {
+              "path": [
+                "result"
+              ],
+              "equals": "registered"
+            }
+          ],
+          "capture": [
+            {
+              "name": "slot",
+              "path": [
+                "slot"
+              ],
+              "value_kind": {
+                "kind": "lower_hex",
+                "bytes": 2
+              }
+            }
+          ],
+          "effect": {
+            "kind": "continue",
+            "step": "urn:meter:workflow:step:sample",
+            "delay_ms": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "urn:meter:workflow:step:sample",
+      "request": [
+        {
+          "id": "urn:meter:workflow:field:sample",
+          "key": "sample",
+          "source": {
+            "kind": "literal",
+            "value": "measure"
+          }
+        },
+        {
+          "id": "urn:meter:workflow:field:slot",
+          "key": "slot",
+          "source": {
+            "kind": "captured",
+            "name": "slot"
+          }
+        }
+      ],
+      "transitions": [
+        {
+          "id": "urn:meter:workflow:transition:resample",
+          "when": [
+            {
+              "path": [
+                "result"
+              ],
+              "equals": "refresh"
+            }
+          ],
+          "capture": [],
+          "effect": {
+            "kind": "continue",
+            "step": "urn:meter:workflow:step:sample",
+            "delay_ms": 0
+          },
+          "carry": [
+            "slot"
+          ]
+        },
+        {
+          "id": "urn:meter:workflow:transition:busy",
+          "when": [
+            {
+              "path": [
+                "result"
+              ],
+              "equals": "unavailable"
+            }
+          ],
+          "effect": {
+            "kind": "exit",
+            "status": 14,
+            "stderr": "device busy"
+          }
+        },
+        {
+          "id": "urn:meter:workflow:transition:complete",
+          "when": [
+            {
+              "path": [
+                "result"
+              ],
+              "equals": "done"
+            }
+          ],
+          "effect": {
+            "kind": "exit",
+            "status": 0,
+            "stderr": ""
+          }
+        }
+      ]
+    }
+  ]
+}
