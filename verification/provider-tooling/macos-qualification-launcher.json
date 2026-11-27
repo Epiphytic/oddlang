@@ -1,0 +1,47 @@
+{
+  "companionRevision": "2df53f096f6e4009fe008fab3baedd4402cde01f",
+  "host": "aarch64-apple-darwin",
+  "suites": {
+    "parser": {
+      "identicalGeneratedFiles": 12,
+      "comparedWith": "cli-projection-replay.json",
+      "observationsPerRole": 34,
+      "transcriptSha256": "e3de629983416f1c2823d526916b0426ab98e7e2f5b69f6e24bf396f51fc2746"
+    },
+    "status": {
+      "identicalGeneratedFiles": 14,
+      "comparedWith": "status-projection-replay.json",
+      "archiveSha256": "4798ee46c43c936bf37409099ae9f4fcfdd2ff6981fa3827673478a0d5a40a00",
+      "runSha256": "98d4a541e55211e873cb7d54236c3eaf603a416f79b2efb3d40e301029a4ca9c",
+      "changedFields": [
+        "/candidateSha256",
+        "/companionRevision"
+      ]
+    },
+    "typed-status": {
+      "identicalGeneratedFiles": 12,
+      "comparedWith": "typed-status-projection-replay.json",
+      "archiveSha256": "c2f5bcc4fbabc2b3406ded270828b94d03a653d33a641c357b9c0860241ea7c5",
+      "runSha256": "f0997a6394e30951a4771a539ac1c35aa0489c553abeac1c3eb24915ccd3e1df",
+      "changedFields": [
+        "/candidateSha256",
+        "/extendedReplies/binarySha256",
+        "/nestedReplies/binarySha256"
+      ]
+    },
+    "discovery": {
+      "identicalGeneratedFiles": 12,
+      "comparedWith": "status-discovery-projection.json",
+      "archiveSha256": "2806e89dd727a70305fdafc24772049c48073341f27aede6a4551f931f13e458",
+      "runSha256": "655d49e63da43ce1df46f7f279ff6d69f881b7c44a052b60e387950acf6de8a7",
+      "changedFields": [
+        "/candidateSha256"
+      ]
+    }
+  },
+  "controls": [
+    "preexisting receipt unchanged",
+    "wrong framework rejected without output or receipt"
+  ],
+  "noMarmishDaemonsBeforeOrAfterEachRun": true
+}

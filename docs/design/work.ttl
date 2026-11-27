@@ -3597,3 +3597,8 @@ w:portHistoricTooling p:evidence w:discoveryStatusProjectRust .
 w:discoveryStatusProjectRust a p:Artifact ;
     rdfs:label "The shared Rust driver reproduced twelve generated discovery package files. All 43 controlled discovery cases and live status from an original daemon via default and explicit state directories matched the macOS ARM64 archive apart from executable provenance. Five rejection controls and the separate typed-client qualification passed." ;
     p:location "verification/provider-tooling/status-discovery-projection.json" .
+
+w:portHistoricTooling p:evidence w:macosQualificationLauncher .
+w:macosQualificationLauncher a p:Artifact ;
+    rdfs:label "Four macOS shell launchers were replaced with a shared Rust command. All four documented entry points regenerated their previously qualified files and matched the parser, status, typed status and discovery archives apart from revision and binary provenance. No marmishd was running before or after any qualification. Existing-receipt and wrong-framework controls passed." ;
+    p:location "verification/provider-tooling/macos-qualification-launcher.json" .
