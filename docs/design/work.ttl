@@ -3407,3 +3407,11 @@ w:companionGitToolAudit a p:Artifact ;
 w:companionNativeWireReplays a p:Artifact ;
     rdfs:label "Rust reproduced the archived structural wire receipt and all 81 native operation records byte for byte" ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b95fd5161e75c47913a17a2ee3e68e13da5e8748/verification/whole/stream-wire/native-replay-macos-arm64.json" .
+
+w:portHistoricTooling p:evidence w:releaseVersionGrammarNative .
+w:releaseVersionGrammarNative a p:Artifact ;
+    rdfs:label "Rust release-version verifier reproduced the baseline and changed source spans, recovered graphs, projection locks, 48 baseline outcomes, 15 changed-grammar outcomes and both enclosing-module witness hashes from the pinned ARM64 archive" ;
+    p:source w:releaseVersionGrammarNativeSource ;
+    p:location "verification/provider-tooling/release-version-grammar.json" .
+w:releaseVersionGrammarNativeSource a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/tree/dfdfc3771f1c08e5cfb32ec05adec5ab911d13ca/verification/whole/canonical-public-data/src/bin/release-version-grammar" .
