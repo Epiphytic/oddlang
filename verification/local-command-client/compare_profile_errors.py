@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import platform
 import subprocess
+import sys
 import tempfile
 
 
@@ -13,12 +14,33 @@ CASES = (
     "regular-file-state", "symlink-state", "world-readable-profile",
     "malformed-config", "world-readable-config",
 )
+LINK_CASES = ("symlink-profile", "regular-file-profile", "symlink-config", "hardlinked-config")
 ARGS = ["--key-storage", "file", "--no-autostart", "--state-dir", "<state>",
         "--identity", "audit", "wait", "--handle", "{}"]
 
 
 def fixture(root, case):
     state = root / "state"
+    if case in LINK_CASES:
+        state.mkdir(mode=0o700)
+        profile = state / "audit"
+        if case == "regular-file-profile":
+            profile.touch(mode=0o600)
+        elif case == "symlink-profile":
+            target = root / "target"
+            target.mkdir(mode=0o700)
+            profile.symlink_to(target, target_is_directory=True)
+        else:
+            profile.mkdir(mode=0o700)
+            target = root / "target"
+            target.write_bytes(b"{")
+            target.chmod(0o600)
+            config = profile / "config.json"
+            if case == "symlink-config":
+                config.symlink_to(target)
+            else:
+                config.hardlink_to(target)
+        return state
     if case == "missing-state":
         return state
     if case == "regular-file-state":
@@ -66,6 +88,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mainline", type=Path)
     parser.add_argument("sealed_export", type=Path)
+    parser.add_argument("--include-link-cases", action="store_true")
+    parser.add_argument("--require-match", action="store_true",
+                        help="exit unsuccessfully if either stream or the status differs")
     args = parser.parse_args()
     if (platform.system(), platform.machine()) != ("Darwin", "arm64"):
         parser.error("this fixture requires ARM64 macOS")
@@ -75,10 +100,18 @@ def main():
               "workspaceLockSha256": sha256(args.sealed_export / "workspace.lock"),
               "binarySha256": {name: sha256(path) for name, path in binaries.items()},
               "argv": ARGS, "cases": {}}
-    for case in CASES:
+    cases = CASES + LINK_CASES if args.include_link_cases else CASES
+    for case in cases:
         report["cases"][case] = {name: observe(path, case) for name, path in binaries.items()}
     print(json.dumps(report, indent=2))
+    if args.require_match:
+        differences = [case for case, pair in report["cases"].items()
+                       if pair["mainline"] != pair["generated"]]
+        if differences:
+            print("Different results for " + ", ".join(differences), file=sys.stderr)
+            return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

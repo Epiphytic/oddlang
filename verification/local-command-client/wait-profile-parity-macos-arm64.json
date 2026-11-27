@@ -1,0 +1,178 @@
+{
+  "platform": "aarch64-apple-darwin",
+  "workspaceLockSha256": "1d54bfc91701cb458c920bd54b3bb5297d53d615a8fae3dc77230e6084d14e73",
+  "binarySha256": {
+    "mainline": "8097469a154ba7cf3a5a4d4848537f7ce72ba9f767f90ab7362aba8074842ac7",
+    "generated": "21216b4cbdd425ba0712c1d5b3a878a27f7b83bd31f0bf7f8a650b97154e8ed8"
+  },
+  "argv": [
+    "--key-storage",
+    "file",
+    "--no-autostart",
+    "--state-dir",
+    "<state>",
+    "--identity",
+    "audit",
+    "wait",
+    "--handle",
+    "{}"
+  ],
+  "cases": {
+    "missing-state": {
+      "mainline": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: local I/O failed\n"
+      },
+      "generated": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: local I/O failed\n"
+      }
+    },
+    "missing-profile": {
+      "mainline": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: local I/O failed\n"
+      },
+      "generated": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: local I/O failed\n"
+      }
+    },
+    "missing-config": {
+      "mainline": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: local I/O failed\n"
+      },
+      "generated": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: local I/O failed\n"
+      }
+    },
+    "world-readable-state": {
+      "mainline": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: local I/O failed\n"
+      },
+      "generated": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: local I/O failed\n"
+      }
+    },
+    "regular-file-state": {
+      "mainline": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: local I/O failed\n"
+      },
+      "generated": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: local I/O failed\n"
+      }
+    },
+    "symlink-state": {
+      "mainline": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: local I/O failed\n"
+      },
+      "generated": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: local I/O failed\n"
+      }
+    },
+    "world-readable-profile": {
+      "mainline": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: identity: unsafe_profile_path\n"
+      },
+      "generated": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: identity: unsafe_profile_path\n"
+      }
+    },
+    "malformed-config": {
+      "mainline": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: invalid input: config_schema\n"
+      },
+      "generated": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: invalid input: config_schema\n"
+      }
+    },
+    "world-readable-config": {
+      "mainline": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: identity: unsafe_profile_file\n"
+      },
+      "generated": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: identity: unsafe_profile_file\n"
+      }
+    },
+    "symlink-profile": {
+      "mainline": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: identity: unsafe_profile_path\n"
+      },
+      "generated": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: identity: unsafe_profile_path\n"
+      }
+    },
+    "regular-file-profile": {
+      "mainline": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: identity: unsafe_profile_path\n"
+      },
+      "generated": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: identity: unsafe_profile_path\n"
+      }
+    },
+    "symlink-config": {
+      "mainline": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: local I/O failed\n"
+      },
+      "generated": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: local I/O failed\n"
+      }
+    },
+    "hardlinked-config": {
+      "mainline": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: identity: unsafe_profile_file\n"
+      },
+      "generated": {
+        "exit": 255,
+        "stdout": "",
+        "stderr": "marmish: identity: unsafe_profile_file\n"
+      }
+    }
+  }
+}

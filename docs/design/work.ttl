@@ -3028,12 +3028,12 @@ w:basicServerQualification p:evidence w:quiescentMixedServerReceipt .
 w:waitProfileErrorComparison a p:Artifact ;
     p:location "verification/local-command-client/missing-profile-macos-arm64.json" .
 w:waitProfileErrorFinding a p:Finding ;
-    rdfs:label "All nine local wait profile error cases disagree on exit status and six disagree on stderr" ;
+    rdfs:label "The initial retained-poll build differed in all nine local wait exit statuses and six stderr results" ;
     p:source w:waitProfileErrorComparison .
 w:qualifyWaitProfileErrors a p:Task ;
     rdfs:label "Match mainline wait profile error precedence, stderr and exit status" ;
     p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
-    p:status p:planned ; p:addresses w:waitProfileErrorFinding ;
+    p:status p:done ; p:evidence w:waitProfileParityReceipt ; p:addresses w:waitProfileErrorFinding ;
     p:acceptance "Reproduce all nine local wait observations with distinct private state per invocation, preserving refusal of unsafe profiles and files." .
 
 w:foregroundRelayCountObserver a p:Artifact ;
@@ -3055,3 +3055,26 @@ w:foregroundRelayGeneratedClient a p:Artifact ;
     rdfs:label "Generated client observed one additional relay event and returned a local response error" ;
     p:location "verification/foreground-relay-client-macos-arm64.json" .
 w:basicClientQualification p:evidence w:foregroundRelayGeneratedClient, w:foregroundRelaySuccessfulControl .
+
+w:privateProfileReadDiagnostics a p:Task ;
+    rdfs:label "Select distinct diagnostics for private configuration access failures" ;
+    p:source w:basicCommandInteropPlan ; p:milestone w:marmishMilestone ;
+    p:acceptance "Compile a contract that assigns its own errors to directory access, missing profiles, document open and document metadata. Preserve legacy mappings for omitted selectors." ;
+    p:status p:done ; p:evidence w:waitProfileParityReceipt .
+w:qualifyWaitProfileErrors p:dependsOn w:privateProfileReadDiagnostics .
+
+w:waitProfileParityReceipt a p:Artifact ;
+    rdfs:label "All 13 local wait profile refusal cases match the independent mainline executable" ;
+    p:location "verification/local-command-client/wait-profile-parity-macos-arm64.json" .
+w:profileReadCompilerWitness a p:Artifact ;
+    rdfs:label "Calibration contract diagnostic selection and byte-identical regeneration of the previous workspace lock" ;
+    p:location "verification/local-command-client/profile-read-compiler-macos-arm64.json" .
+w:privateProfileReadDiagnostics p:evidence w:profileReadCompilerWitness .
+w:waitProfilePriorComparison a p:Artifact ;
+    p:location "verification/local-command-client/wait-profile-prior-macos-arm64.json" .
+w:qualifyWaitProfileErrors p:evidence w:waitProfilePriorComparison .
+w:waitProfileFirstCommandRuns a p:Artifact ;
+    rdfs:label "First foreground control and both mixed directions at the wait-profile diagnostics lock" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/6162601e3584631a4d6deab030cd5dea7e090a6a/verification/whole/basic-command-interop/RETAINED-POLL.md" .
+w:basicServerQualification p:evidence w:waitProfileFirstCommandRuns .
+w:basicClientQualification p:evidence w:waitProfileFirstCommandRuns .

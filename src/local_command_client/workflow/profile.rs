@@ -24,10 +24,28 @@ fn diagnostics() -> [(&'static str, &'static str); 11] {
     ]
 }
 
+// Older contracts use the path and file diagnostics for all open failures.
+const OPTIONAL_READ_ERRORS: [(&str, &str); 4] = [
+    ("state_directory", "PROFILE_STATE_DIRECTORY"),
+    ("missing_profile_directory", "PROFILE_MISSING_DIRECTORY"),
+    ("document_open", "PROFILE_DOCUMENT_OPEN"),
+    ("document_metadata", "PROFILE_DOCUMENT_METADATA"),
+];
+
 const PAYLOAD_ERRORS: [(&str, &str); 2] = [
     ("stdin_timeout", "PROFILE_STDIN_TIMEOUT"),
     ("random", "PROFILE_RANDOM"),
 ];
+
+fn configured_diagnostics(
+    policy: &ProfileInputs,
+) -> impl Iterator<Item = (&'static str, &'static str)> + Clone + '_ {
+    diagnostics().into_iter().chain(PAYLOAD_ERRORS).chain(
+        OPTIONAL_READ_ERRORS
+            .into_iter()
+            .filter(move |(name, _)| policy.errors.contains_key(*name)),
+    )
+}
 
 pub(super) fn load(value: &Value) -> Result<ProfileInputs, String> {
     serde_json::from_value(value.clone()).map_err(|error| error.to_string())
@@ -93,7 +111,7 @@ pub(super) fn validate<'a>(
             return Err("invalid workflow profile document check".into());
         }
     }
-    let diagnostics = diagnostics().into_iter().chain(PAYLOAD_ERRORS);
+    let diagnostics = configured_diagnostics(policy);
     if policy.errors.len() != diagnostics.clone().count()
         || diagnostics.into_iter().any(|(field, _)| {
             policy.errors.get(field).is_none_or(|diagnostic| {
@@ -241,7 +259,7 @@ pub(super) fn render(policy: &ProfileInputs, out: &mut String) {
         include_str!("profile_schema.rs")
     )
     .unwrap();
-    for (key, constant) in diagnostics().into_iter().chain(PAYLOAD_ERRORS) {
+    for (key, constant) in configured_diagnostics(policy) {
         let error = &policy.errors[key];
         writeln!(
             out,
@@ -250,5 +268,94 @@ pub(super) fn render(policy: &ProfileInputs, out: &mut String) {
         )
         .unwrap();
     }
-    out.push_str(include_str!("profile_runtime.rs.in"));
+    let profile_open = if policy.errors.contains_key("missing_profile_directory") {
+        "|error| if error.kind() == io::ErrorKind::NotFound { PROFILE_MISSING_DIRECTORY } else { PROFILE_PATH }"
+    } else {
+        "|_| PROFILE_PATH"
+    };
+    let mut runtime =
+        include_str!("profile_runtime.rs.in").replace("/*profile_open_failure*/", profile_open);
+    for (marker, key, selected, fallback) in [
+        (
+            "/*state_directory_error*/",
+            "state_directory",
+            "PROFILE_STATE_DIRECTORY",
+            "PROFILE_PATH",
+        ),
+        (
+            "/*document_open_error*/",
+            "document_open",
+            "PROFILE_DOCUMENT_OPEN",
+            "PROFILE_FILE",
+        ),
+        (
+            "/*document_metadata_error*/",
+            "document_metadata",
+            "PROFILE_DOCUMENT_METADATA",
+            "PROFILE_FILE",
+        ),
+    ] {
+        runtime = runtime.replace(
+            marker,
+            if policy.errors.contains_key(key) {
+                selected
+            } else {
+                fallback
+            },
+        );
+    }
+    out.push_str(&runtime);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // A meter station uses its own error vocabulary for calibration profiles.
+    fn meter() -> Value {
+        let mut errors = serde_json::Map::new();
+        for (key, _) in diagnostics().into_iter().chain(PAYLOAD_ERRORS) {
+            errors.insert(key.to_owned(), json!({"exit": 6, "stderr": key}));
+        }
+        json!({
+            "id": "urn:meter:calibration",
+            "arguments": {"state":"store","profile":"station","default_profile":"bench",
+                "relay":"endpoint","route":"network","stdin":"input","stdin_none":"empty",
+                "required_flags":[],"excluded_flags":[],"excluded_values":[]},
+            "document": {"leaf":"calibration.json","directory_mode":448,"file_mode":384,
+                "maximum_bytes":1024,"profile_name_maximum_bytes":24,"profile_name_punctuation":"-",
+                "checks":[],"trusted":"operators","maximum_accounts":2,"relay":"endpoints","route":"network",
+                "maximum_relays":2,"maximum_relay_bytes":512,
+                "relay_rules":[{"id":"urn:meter:relay","scheme":"wss","routes":["lan"]}]},
+            "payload": {"maximum_arguments":2,"maximum_argument_bytes":32,"maximum_stdin_bytes":64,
+                "stdin_timeout_ms":100,"timestamp_bytes":4,"random_bytes":8},
+            "outputs": {"remote":"operator","relays":"endpoints","argv":"reading","stdin":"sample",
+                "request":"calibration","invocation":"sequence"},
+            "errors": errors
+        })
+    }
+
+    #[test]
+    fn calibration_read_errors_are_independently_selectable() {
+        for (key, constant) in OPTIONAL_READ_ERRORS {
+            let mut graph = meter();
+            graph["errors"][key] = json!({"exit": 27, "stderr": "station unavailable"});
+            let policy = load(&graph).unwrap();
+            validate(&policy, &mut BTreeSet::new()).unwrap();
+            let mut source = String::new();
+            render(&policy, &mut source);
+            assert!(source.contains(&format!(
+                "const {constant}: Failure = Failure(27, \"station unavailable\");"
+            )));
+            assert!(source.matches(constant).count() >= 2);
+            for (_, other) in OPTIONAL_READ_ERRORS {
+                if other != constant {
+                    assert!(!source.contains(other));
+                }
+            }
+
+            graph["errors"][key]["exit"] = json!(0);
+            assert!(validate(&load(&graph).unwrap(), &mut BTreeSet::new()).is_err());
+        }
+    }
 }
