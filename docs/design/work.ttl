@@ -3943,3 +3943,8 @@ w:cleanupAfterMerge a p:Decision ;
     rdfs:label "Remove task scratch when its last consumer finishes, clean merged branches and repeat the worktree inventory after merges" ;
     p:source w:branchCleanupInstructions .
 w:branchCleanupInstructions a p:Artifact ; p:location "AGENTS.md#finish-a-branch" .
+
+w:backendChoiceRustEvidence a p:Artifact ;
+    rdfs:label "BackendChoice replay with the same compiler produced identical receipt and output bytes with Rust and Python for both the original and reordered enum" ;
+    p:location "verification/provider-tooling/backend-choice-rust.json" .
+w:portHistoricTooling p:evidence w:backendChoiceRustEvidence .
