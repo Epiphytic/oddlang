@@ -3394,3 +3394,8 @@ w:rustRangeReference a p:Artifact ;
 w:rustCanonicalRangeComposers a p:Artifact ;
     rdfs:label "Native canonical engine choice, authored range and recovered range composers reproduced five descriptors and fourteen rejection controls" ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/9099eac2bbcab1dde1946ff45e3030435a3a8f08/verification/whole/canonical-range-data/rust-composition-macos-arm64.json" .
+
+w:portHistoricTooling p:evidence w:companionRustManifestProjection .
+w:companionRustManifestProjection a p:Artifact ;
+    rdfs:label "A source-denied Rust replay matched 224 native baseline and 224 mutant release-manifest cases, both native record shapes, both package locks and both compiler-observed Rustdoc hashes on ARM64 macOS" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/7c893079db9dffda68fe1e02e5e2a1223274f190/verification/whole/release-manifest-projection/rust-replay-macos-arm64.json" .
