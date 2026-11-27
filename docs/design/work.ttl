@@ -3677,3 +3677,8 @@ w:portHistoricTooling p:evidence w:engineChoiceRustInputs .
 w:engineChoiceRustInputs a p:Artifact ;
     rdfs:label "Rust recovered Stream and SubmitDisposition and reproduced every staged package input in the baseline and mutation. On macOS ARM64, the generated package matched the original caller in all four value observations and seventeen trait and visibility checks per case. The canonical replay reproduced all 140 public import verdicts and diagnostics across seven libraries." ;
     p:location "verification/provider-tooling/engine-choice-recovery.json" .
+
+w:portHistoricTooling p:evidence w:offlineWorkspaceComposition .
+w:offlineWorkspaceComposition a p:Artifact ;
+    rdfs:label "Rust reproduced the two package descriptors and two workspace descriptors from the Python compositors. The pinned Oddlang compilers regenerated all 91 diagnostics workspace files and all 98 canonical workspace files byte for byte against their retained releases. Both compositors rejected ten invalid inputs before publishing descriptors." ;
+    p:location "verification/provider-tooling/offline-workspace-composition.json" .

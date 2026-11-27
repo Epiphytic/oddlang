@@ -1,0 +1,41 @@
+{
+  "companion": "853bf5a7c81fcc97a57934fbaf341b997f4e4ba8",
+  "host": "aarch64-apple-darwin",
+  "qualificationCrateUnitTests": 9,
+  "releases": {
+    "canonical-offline": {
+      "compilerRevision": "8a20ea283d0d43da42f054a7c7774eb9e6a20da7",
+      "compilerSha256": "b3960946ed188a74d3a031cd2fa8346f5c0a98b933243b13948ac8ad30062e31",
+      "generatedFilesCompared": 98,
+      "members": 7,
+      "workspaceLockSha256": "5abf57c811d641ba126c32dde208334d85d47374bbfbb983231783a403f24df4",
+      "descriptorSha256": {
+        "workspace-v7-canonical-offline.json": "a5a6c95980b9035e7719ac8ace61f97c17a459d632c3c68b33ee030262e89a61",
+        "marmish-native-canonical-offline-package.json": "386579d124173fa64c200d97640bb96cfeb2203e283bd9a929800db022f94416"
+      }
+    },
+    "converged-diagnostics-cli": {
+      "compilerRevision": "0568396f8d0641b266aed1702d482d71c79b3ba4",
+      "compilerSha256": "966619d5f1fc51ad9dec7cca4393b6bf15fc17fbdc32689a22a29439b5498545",
+      "generatedFilesCompared": 91,
+      "members": 7,
+      "workspaceLockSha256": "029d2b9df0c098980be3a4f22f4c943cf5d0394b15b696fa188348bd93f1c698",
+      "descriptorSha256": {
+        "workspace-v7-converged-diagnostics-cli.json": "126edb522db8b1527c0aeecef9e70ff18b01a677e641be83817d3645fdc63630",
+        "marmish-native-converged-diagnostics-cli-package.json": "91ac558b25bd7315a1c8f04015ef8d6eeac5164c0c59f0906addfca0898d9934"
+      }
+    }
+  },
+  "invalidInputs": {
+    "member": "both rejected",
+    "edge": "both rejected",
+    "pin": "both rejected",
+    "duplicate": "both rejected",
+    "outside": "both rejected",
+    "removed": "both rejected",
+    "prefix-order": "both rejected",
+    "prefix-overlay": "both rejected",
+    "extra-record": "both rejected",
+    "vault": "both rejected"
+  }
+}
