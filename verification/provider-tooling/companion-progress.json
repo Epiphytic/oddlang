@@ -1,14 +1,14 @@
 {
-  "auditedCompanionRevision": "30d3373862106b7938414b27ce5e2438be00b671",
-  "previousRevision": "7674f47420ee5a203a825a4d1d95e9216f2e5b57",
-  "reproducedTableSha256": "633a257bbf98574090f43ca0c64f56b9c6691af1b9dfb47d0841cda9b0b9ec05",
-  "remainingProjectToolFiles": 130,
+  "auditedCompanionRevision": "3d25c2615c46d5cc0857604dab641d29b134dd95",
+  "previousRevision": "30d3373862106b7938414b27ce5e2438be00b671",
+  "reproducedTableSha256": "09998f21b50b0d47fa135f78784b7fcf8a7e540fb77aa17464c200dd358ab707",
+  "remainingProjectToolFiles": 129,
   "remainingProjectExtensions": {
-    ".py": 127,
+    ".py": 126,
     ".sh": 3
   },
   "removedSincePrevious": [
-    "verification/whole/native-build/macos.sh"
+    "verification/whole/gap-range-recovery/rustdoc.py"
   ],
   "addedSincePrevious": []
 }
