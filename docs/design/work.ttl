@@ -3431,3 +3431,16 @@ w:portHistoricTooling p:evidence w:reconstructionScratchReplay .
 w:reconstructionScratchReplay a p:Artifact ;
     rdfs:label "Two macOS ARM64 runs with RAM-backed reconstruction produced identical receipts across global and dedicated scratch settings. The archived seven-member workspace and 116 local cases matched. Only the three observer executable digests differed from the archive, with cause undetermined." ;
     p:location "verification/provider-tooling/reconstruction-scratch.json" .
+
+w:portHistoricTooling p:evidence w:nativeCargoLogSummary, w:nativeBlockWindow, w:nativeJournalInputs .
+w:nativeCargoLogSummary a p:Artifact ;
+    rdfs:label "Rust Cargo log summary matched its predecessor byte for byte on a real unit, ignored and documentation test fixture and on a nested summary. Both refused ten incomplete, inconsistent or ambiguous inputs without writing output." ;
+    p:source w:nativeCargoLogSource ; p:location "verification/provider-tooling/cargo-log-summary.json" .
+w:nativeCargoLogSource a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/2ab10d89440f03089e34177a0257ab4d31c86ce6/verification/whole/suite/src/bin/summarize-cargo.rs" .
+w:nativeBlockWindow a p:Artifact ;
+    rdfs:label "Rust local codec gates reproduced both archived macOS receipts with 192 encodes, 82 decodes, 160 cross-reads per peer, and 13031 window results" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/aa64fbb7734d33a410f2b81ab602f252f51da084/verification/whole/stream-wire/block-window-rust-replay.json" .
+w:nativeJournalInputs a p:Artifact ;
+    rdfs:label "Rust journal recovery and native package witness matched both archived layout locks, six ordered JSON records and five source denial controls on macOS ARM64" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/91e89e447c1361cd20fef7b54b8da2e20891a125/verification/whole/journal-records/README.md" .
