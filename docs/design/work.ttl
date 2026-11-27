@@ -3754,3 +3754,8 @@ w:sevenPublicImportsRust a p:Artifact ;
     p:location "verification/provider-tooling/seven-public-imports-rust.json" .
 
 w:sevenPublicImportsRust rdfs:comment "Historical callers now verify the returned release manifest and select Cargo metadata, libraries and linker paths through the same Rust routines as the native audit. Both implementations rejected a truncated build, artifacts outside the target and one altered member. On ARM64 macOS the Rust command with a rebuilt upstream prototype matched all 140 archived canonical-engine-choice observations." .
+
+w:portHistoricTooling p:evidence w:referenceRelayRust .
+w:referenceRelayRust a p:Artifact ;
+    rdfs:label "The Rust reference relay verifier ran all three pinned upstream loopback tests on ARM64 macOS and reproduced the archived 637-byte receipt. It rejected dirty and wrong-revision checkouts before building. The companion removed its Python relay fixture runner." ;
+    p:location "verification/provider-tooling/reference-relay-rust.json" .
