@@ -3602,3 +3602,8 @@ w:portHistoricTooling p:evidence w:macosQualificationLauncher .
 w:macosQualificationLauncher a p:Artifact ;
     rdfs:label "Four macOS shell launchers were replaced with a shared Rust command. All four documented entry points regenerated their previously qualified files and matched the parser, status, typed status and discovery archives apart from revision and binary provenance. No marmishd was running before or after any qualification. Existing-receipt and wrong-framework controls passed." ;
     p:location "verification/provider-tooling/macos-qualification-launcher.json" .
+
+w:portHistoricTooling p:evidence w:statusReplyCorporaRust .
+w:statusReplyCorporaRust a p:Artifact ;
+    rdfs:label "One Rust observer reproduced all four original and generated extended and nested reply receipts byte for byte on macOS ARM64. It checked the complete framed status request and EOF before sending each response. Eight negative controls and the complete typed-client run with a pinned original daemon passed." ;
+    p:location "verification/provider-tooling/status-reply-corpora.json" .

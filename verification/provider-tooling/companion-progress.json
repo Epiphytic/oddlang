@@ -1,17 +1,15 @@
 {
-  "auditedCompanionRevision": "2df53f096f6e4009fe008fab3baedd4402cde01f",
-  "previousRevision": "9ce10729a2e3dd8b2cebe71f30af272cc099a32c",
-  "reproducedTableSha256": "19230a598782ae2ba16e0867fb6a28048a1a033f49168653a4efe332675734e4",
-  "remainingProjectToolFiles": 135,
+  "auditedCompanionRevision": "eb0147696799292d6e4730f72b462a8da034d4ac",
+  "previousRevision": "2df53f096f6e4009fe008fab3baedd4402cde01f",
+  "reproducedTableSha256": "7cfeb31e601b1ef2bd6eacc2bd2fc80305ea96b1f42c4d16c6f3e98cc5dce302",
+  "remainingProjectToolFiles": 133,
   "remainingProjectExtensions": {
-    ".py": 131,
+    ".py": 129,
     ".sh": 4
   },
   "removedSincePrevious": [
-    "verification/whole/cli/macos.sh",
-    "verification/whole/status/macos-client.sh",
-    "verification/whole/status/macos-discovery-client.sh",
-    "verification/whole/status/macos-typed-client.sh"
+    "verification/whole/status/reply_shapes.py",
+    "verification/whole/status/typed_reply_variants.py"
   ],
   "addedSincePrevious": []
 }
