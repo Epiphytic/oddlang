@@ -3147,6 +3147,11 @@ w:stableStreamInputsRustReplay a p:Artifact ;
     rdfs:label "Rust collector reproduced the original and candidate stream compiler inventories and 29 native test outcomes across all three Cargo modes" ;
     p:location "verification/provider-tooling/stream-baseline-rust-replay.json" .
 
+w:portHistoricTooling p:evidence w:rustStreamGraphMutation .
+w:rustStreamGraphMutation a p:Artifact ;
+    rdfs:label "Isolated Rust graph mutation reproduced both denied file reads, the released bundle digest and all 50 wire observations" ;
+    p:location "verification/provider-tooling/stream-graph-mutation-replay.json" .
+
 w:portHistoricTooling p:evidence w:rustWorkflowReplay .
 w:rustWorkflowReplay a p:Artifact ;
     rdfs:label "Rust import cleanup, assembly preparation, profile checks and Wasm host receipt replay on macOS ARM64" ;

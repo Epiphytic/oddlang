@@ -1,0 +1,27 @@
+{
+  "baseBundleSha256": "f936373f48aae38e67302a425737e2ceaa888a2a404442399ace21d58925d709",
+  "bundleSha256": "71aaee3e88580ebbb63daaa9e906892d40eb5dde28647e4d6a1ad6e70e2e266e",
+  "changedLeaf": "<urn:oddlang:rust-tree:file:src/copy_protocol.rs#7816> <urn:oddlang:rust-tree:spelling>",
+  "observedDifferences": [
+    "binary-data-encode",
+    "maximum-data-encode"
+  ],
+  "deniedReads": {
+    "unmodifiedCandidate": {
+      "path": "/private/tmp/stream-workspace-qualification/v6/candidate/crates/marmish-stream/src/copy_protocol.rs",
+      "returnCode": 1,
+      "stderr": "cat: /private/tmp/stream-workspace-qualification/v6/candidate/crates/marmish-stream/src/copy_protocol.rs: Operation not permitted"
+    },
+    "unmodifiedCandidateDuringBuild": {
+      "path": "/private/tmp/stream-workspace-qualification/v6/candidate/crates/marmish-stream/src/copy_protocol.rs",
+      "returnCode": 1,
+      "stderr": "cat: /private/tmp/stream-workspace-qualification/v6/candidate/crates/marmish-stream/src/copy_protocol.rs: Operation not permitted"
+    }
+  },
+  "oracleCases": 50,
+  "archivedReceipts": {
+    "examples/marmish/evidence/stream-qualification/graph-mutation.json.gz": "dc51861549bedd62f7052e7256ab1911119a1d971bf87ca685b041a557a2aa78",
+    "examples/marmish/evidence/stream-qualification/oracle-mutation.json.gz": "9aa60376bda0b7a3f150e423f229e20b5c542e1117417c8974784a5e7a3c7444"
+  },
+  "comparisonScope": "The published and fresh isolated runs produced the same mutated bundle and all 50 individual observations. The host records fresh executable paths and build identities in the oracle receipt."
+}

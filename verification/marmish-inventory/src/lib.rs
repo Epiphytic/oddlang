@@ -3,6 +3,7 @@ pub mod baseline;
 pub mod candidate;
 pub mod stream_baseline;
 pub mod stream_observer;
+pub mod stream_workspace;
 use anyhow::{Context, Result, ensure};
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};

@@ -98,7 +98,7 @@ per direction. Each executable records its binding to the package
 sources, role, workspace provenance and freshly built library hashes.
 A reauthorized graph changed one Data tag from 5 to 12. That graph built
 under isolation and failed exactly the two encoding cases in the
-[independent mutation check](../../scripts/marmish/stream_mutation.py).
+[independent mutation check](../../verification/marmish-inventory/src/bin/stream-mutation.rs).
 
 The separately pinned [nightly adapter](../../verification/rust-inventory/README.md)
 matched 1,247 Rustdoc definitions and 41 compiler invocations across the
