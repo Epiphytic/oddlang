@@ -1,0 +1,44 @@
+{
+  "companion": "2053ff1f50bff6e206c61d03d97752de00b201be",
+  "framework": "5ec32f8177cf9d7b4ffcce0c192c5553af7f2042",
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "freshHost": "aarch64-apple-darwin",
+  "freshComparisons": [
+    "aarch64-apple-darwin.marmish-core.lib.marmish_core 073814165ae38edb3711da8ce2e79b6b7d492a7b647a7b6d881ff0e8b8349c13",
+    "aarch64-apple-darwin.marmish-stream.lib.marmish_stream adece1520849329e0dadc84d07bf3e7dbbc70a27a676f7873b0164fa5baf41b7"
+  ],
+  "resumedCells": [
+    "aarch64-apple-darwin.marmish-core.lib.marmish_core (existing)",
+    "aarch64-apple-darwin.marmish-stream.lib.marmish_stream"
+  ],
+  "targets": 17,
+  "archiveProfiles": {
+    "aarch64-apple-darwin": 24,
+    "aarch64-unknown-linux-gnu": 24,
+    "x86_64-unknown-linux-gnu": 24
+  },
+  "matchedArchiveFiles": 98,
+  "matchedArchivedReleaseSha256": "df113ca0bbe8fd97c54f893dee1f65ef033a6b6c1a71d0bb5f118af2b7174201",
+  "freshCoreArchiveMatchedPython": true,
+  "twoCellArchiveMatchedPython": true,
+  "controlsRejected": [
+    "target",
+    "cell",
+    "graph-missing",
+    "graph-hash",
+    "lock-hash",
+    "features",
+    "field-order",
+    "mac-source-null",
+    "mac-source-absent",
+    "linux-source-null",
+    "linux-source-absent",
+    "missing-gap",
+    "unmatched-gap",
+    "unknown-gap",
+    "local-reference",
+    "integer-width",
+    "root-file"
+  ],
+  "duplicateSealInputRejected": true
+}

@@ -3647,3 +3647,8 @@ w:portHistoricTooling p:evidence w:arrayShapesReplay .
 w:arrayShapesReplay a p:Artifact ;
     rdfs:label "The Rust array comparator and full recovery replay reproduced the Python reports, graph and lock byte for byte on macOS ARM64. The graph refined 63 array fields across 186 declarations. Rustdoc corroborated 33 fields. Both comparators rejected seven independent controls and accepted an aliased octet element." ;
     p:location "verification/provider-tooling/array-shapes-replay.json" .
+
+w:portHistoricTooling p:evidence w:workspaceShapeArchiveRust .
+w:workspaceShapeArchiveRust a p:Artifact ;
+    rdfs:label "Rust recovered the core and stream shape profiles on macOS ARM64 and verified a resumed core cell. Sealing 72 existing profile observations reproduced all 98 archive payloads byte for byte. The runner rejected 17 archive corruptions, including repinned changes, and duplicate seal inputs." ;
+    p:location "verification/provider-tooling/workspace-shape-archive.json" .

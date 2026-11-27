@@ -1,15 +1,15 @@
 {
-  "auditedCompanionRevision": "601b81cee7d141028f4d1ff1e7fd286b9ed62da8",
-  "previousRevision": "a110f3568b982047f0d759baad8c5e4de9bf7549",
-  "reproducedTableSha256": "230fd48f34979bfa329ac3dd8845c85856fce6f211d63045bb70c6520d6598ef",
-  "remainingProjectToolFiles": 126,
+  "auditedCompanionRevision": "2053ff1f50bff6e206c61d03d97752de00b201be",
+  "previousRevision": "601b81cee7d141028f4d1ff1e7fd286b9ed62da8",
+  "reproducedTableSha256": "cfcd442c179b67fdf66f98665909ab6e3fd34e74510f3a1ad7aae58124760179",
+  "remainingProjectToolFiles": 124,
   "remainingProjectExtensions": {
-    ".py": 123,
+    ".py": 121,
     ".sh": 3
   },
   "removedSincePrevious": [
-    "verification/whole/shapes/arrays/compare.py",
-    "verification/whole/shapes/arrays/replay.py"
+    "verification/whole/shapes/test_archive.py",
+    "verification/whole/shapes/workspace_shapes.py"
   ],
   "addedSincePrevious": []
 }
