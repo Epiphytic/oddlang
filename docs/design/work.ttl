@@ -3943,3 +3943,8 @@ w:cleanupAfterMerge a p:Decision ;
     rdfs:label "Remove task scratch when its last consumer finishes, clean merged branches and repeat the worktree inventory after merges" ;
     p:source w:branchCleanupInstructions .
 w:branchCleanupInstructions a p:Artifact ; p:location "AGENTS.md#finish-a-branch" .
+
+w:profilePolicyMixedDaemonEvidence a p:Artifact ;
+    rdfs:label "Both mixed pairs activated with isolated file credentials and passed cleanup. Both failed the first allowlisted command at the profile command-policy lock." ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/0e637166e3117ec64514e77531cb0c7dab199e16/verification/whole/basic-command-interop/LOCAL-PROGRESS.md" .
+w:basicCommandInterop p:evidence w:profilePolicyMixedDaemonEvidence .
