@@ -3226,3 +3226,8 @@ w:portHistoricTooling p:evidence w:nativeEndpointSetReplay .
 w:nativeEndpointSetReplay a p:Artifact ;
     rdfs:label "Locked Rust 2021 and 2024 consumer replay of reordered, bound, free and modified endpoint policies with nine refusal controls" ;
     p:location "verification/provider-tooling/endpoint-set.txt" .
+
+w:portHistoricTooling p:evidence w:rustAdoptionReplay .
+w:rustAdoptionReplay a p:Artifact ;
+    rdfs:label "Rust adoption test replayed six native Go client runs with offline toolchain and module lookup, and rejected both edits to reviewed source" ;
+    p:location "verification/provider-tooling/go-adoption.json" .
