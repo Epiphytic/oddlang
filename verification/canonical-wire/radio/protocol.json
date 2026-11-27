@@ -1,0 +1,397 @@
+{
+  "format": "oddlang-json-wire-protocol-v1",
+  "id": "urn:radio:frame",
+  "envelope": "urn:radio:envelope",
+  "selector": "urn:radio:envelope:message",
+  "maximumWireBytes": 240,
+  "sizeError": "urn:radio:size",
+  "admissionError": "urn:radio:bad",
+  "constants": [
+    {
+      "id": "urn:radio:protocol",
+      "value": "radio",
+      "type": {
+        "kind": "text"
+      }
+    },
+    {
+      "id": "urn:radio:version",
+      "value": 7,
+      "type": {
+        "kind": "unsigned",
+        "bits": 32
+      }
+    }
+  ],
+  "literals": {
+    "urn:radio:envelope:protocol": "urn:radio:protocol",
+    "urn:radio:envelope:version": "urn:radio:version"
+  },
+  "endpoints": [
+    {
+      "id": "urn:radio:tx",
+      "variant": "urn:radio:send",
+      "fields": [
+        {
+          "id": "urn:radio:tx:seq",
+          "from": {
+            "kind": "envelope-field",
+            "field": "urn:radio:envelope:sequence"
+          }
+        },
+        {
+          "id": "urn:radio:tx:level",
+          "from": {
+            "kind": "case-field",
+            "field": "urn:radio:send:gain"
+          }
+        }
+      ],
+      "guards": [
+        {
+          "id": "urn:radio:gain-check",
+          "require": {
+            "kind": "unsigned-range",
+            "field": "urn:radio:tx:level",
+            "minimum": 1,
+            "maximum": 20
+          },
+          "error": "urn:radio:range"
+        }
+      ],
+      "timed": [
+        {
+          "kind": "require",
+          "id": "urn:radio:clock",
+          "predicate": {
+            "kind": "compare",
+            "left": {
+              "kind": "field",
+              "value": {
+                "scope": "value",
+                "fields": [
+                  "urn:radio:tx:seq"
+                ]
+              }
+            },
+            "operator": "at-most",
+            "right": {
+              "kind": "field",
+              "value": {
+                "scope": "clock",
+                "fields": []
+              }
+            }
+          },
+          "error": "urn:radio:early"
+        }
+      ]
+    },
+    {
+      "id": "urn:radio:rx",
+      "variant": "urn:radio:read",
+      "fields": [
+        {
+          "id": "urn:radio:rx:seq",
+          "from": {
+            "kind": "envelope-field",
+            "field": "urn:radio:envelope:sequence"
+          }
+        },
+        {
+          "id": "urn:radio:rx:bit",
+          "from": {
+            "kind": "case-value"
+          }
+        }
+      ],
+      "guards": [],
+      "timed": [
+        {
+          "kind": "require",
+          "id": "urn:radio:reply-clock",
+          "predicate": {
+            "kind": "compare",
+            "left": {
+              "kind": "field",
+              "value": {
+                "scope": "clock",
+                "fields": []
+              }
+            },
+            "operator": "at-most",
+            "right": {
+              "kind": "constant",
+              "value": 10
+            }
+          },
+          "error": "urn:radio:early"
+        }
+      ]
+    },
+    {
+      "id": "urn:radio:scan-operation",
+      "variant": "urn:radio:scan",
+      "guards": [],
+      "fields": [
+        {
+          "id": "urn:radio:scan-seq",
+          "from": {
+            "kind": "envelope-field",
+            "field": "urn:radio:envelope:sequence"
+          }
+        },
+        {
+          "id": "urn:radio:scan-plan",
+          "from": {
+            "kind": "case-value"
+          }
+        }
+      ],
+      "steps": [
+        {
+          "kind": "cases",
+          "id": "urn:radio:sweep-guards",
+          "value": {
+            "scope": "value",
+            "fields": [
+              "urn:radio:scan-plan"
+            ]
+          },
+          "arms": [
+            {
+              "variant": "urn:radio:burst",
+              "bind": "case",
+              "steps": [
+                {
+                  "kind": "require",
+                  "id": "urn:radio:unique-samples",
+                  "predicate": {
+                    "kind": "unique",
+                    "value": {
+                      "scope": "case",
+                      "fields": [
+                        "urn:radio:burst:samples"
+                      ]
+                    }
+                  },
+                  "error": "urn:radio:range"
+                },
+                {
+                  "kind": "require",
+                  "id": "urn:radio:sample-budget",
+                  "predicate": {
+                    "kind": "total-bytes",
+                    "value": {
+                      "scope": "case",
+                      "fields": [
+                        "urn:radio:burst:samples"
+                      ]
+                    },
+                    "overhead": 1,
+                    "maximum": 4
+                  },
+                  "error": "urn:radio:size"
+                },
+                {
+                  "kind": "require",
+                  "id": "urn:radio:sample-token",
+                  "predicate": {
+                    "kind": "compare",
+                    "left": {
+                      "kind": "big-endian-prefix",
+                      "value": {
+                        "scope": "case",
+                        "fields": [
+                          "urn:radio:burst:token"
+                        ]
+                      },
+                      "bytes": 1
+                    },
+                    "operator": "at-most",
+                    "right": {
+                      "kind": "constant",
+                      "value": 8
+                    }
+                  },
+                  "error": "urn:radio:range"
+                },
+                {
+                  "kind": "some",
+                  "id": "urn:radio:probe-present",
+                  "value": {
+                    "scope": "case",
+                    "fields": [
+                      "urn:radio:burst:sensor"
+                    ]
+                  },
+                  "bind": "present",
+                  "steps": [
+                    {
+                      "kind": "call",
+                      "id": "urn:radio:probe-call",
+                      "value": {
+                        "scope": "present",
+                        "fields": []
+                      },
+                      "method": "urn:radio:probe-check"
+                    },
+                    {
+                      "kind": "on-success",
+                      "id": "urn:radio:probe-estimate-call",
+                      "value": {
+                        "scope": "present",
+                        "fields": []
+                      },
+                      "method": "urn:radio:probe-estimate",
+                      "bind": "sample",
+                      "steps": [
+                        {
+                          "kind": "require",
+                          "id": "urn:radio:probe-bound",
+                          "predicate": {
+                            "kind": "compare",
+                            "left": {
+                              "kind": "field",
+                              "value": {
+                                "scope": "sample",
+                                "fields": []
+                              }
+                            },
+                            "operator": "at-most",
+                            "right": {
+                              "kind": "constant",
+                              "value": 3
+                            }
+                          },
+                          "error": "urn:radio:range"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": {
+    "urn:radio:size": {
+      "variant": "urn:radio:size:variant",
+      "argument": null
+    },
+    "urn:radio:bad": {
+      "variant": "urn:radio:bad:variant",
+      "argument": "json-wire"
+    },
+    "urn:radio:range": {
+      "variant": "urn:radio:range:variant",
+      "argument": null
+    },
+    "urn:radio:early": {
+      "variant": "urn:radio:early:variant",
+      "argument": null
+    }
+  },
+  "digests": [
+    {
+      "id": "urn:radio:raw-digest",
+      "kind": "bytes"
+    },
+    {
+      "id": "urn:radio:tx-digest",
+      "kind": "case",
+      "union": "urn:radio:message",
+      "variant": "urn:radio:send",
+      "parameters": [
+        {
+          "id": "urn:radio:level-arg",
+          "field": "urn:radio:send:gain",
+          "passing": "owned"
+        }
+      ],
+      "steps": []
+    },
+    {
+      "id": "urn:radio:cal-hash",
+      "kind": "case",
+      "union": "urn:radio:sweep",
+      "variant": "urn:radio:cal",
+      "parameters": [],
+      "steps": []
+    },
+    {
+      "id": "urn:radio:burst-hash",
+      "kind": "case",
+      "union": "urn:radio:sweep",
+      "variant": "urn:radio:burst",
+      "parameters": [
+        {
+          "id": "urn:radio:samples-arg",
+          "field": "urn:radio:burst:samples",
+          "passing": "borrowed-list"
+        },
+        {
+          "id": "urn:radio:sensor-arg",
+          "field": "urn:radio:burst:sensor",
+          "passing": "owned"
+        },
+        {
+          "id": "urn:radio:token-arg",
+          "field": "urn:radio:burst:token",
+          "passing": "owned"
+        }
+      ],
+      "steps": [
+        {
+          "kind": "require",
+          "id": "urn:radio:digest-sample-budget",
+          "predicate": {
+            "kind": "total-bytes",
+            "value": {
+              "scope": "value",
+              "fields": [
+                "urn:radio:samples-arg"
+              ]
+            },
+            "overhead": 1,
+            "maximum": 4
+          },
+          "error": "urn:radio:size"
+        }
+      ]
+    }
+  ],
+  "foreign": [
+    {
+      "id": "urn:radio:probe",
+      "fields": [],
+      "variants": [],
+      "methods": [
+        {
+          "id": "urn:radio:probe-check",
+          "returns": "unit"
+        },
+        {
+          "id": "urn:radio:probe-estimate",
+          "returns": "unsigned"
+        }
+      ]
+    }
+  ],
+  "aliases": [
+    {
+      "id": "urn:radio:token-alias",
+      "bytes": 16
+    }
+  ],
+  "hexExports": [
+    {
+      "id": "urn:radio:token-encoding",
+      "bytes": 16,
+      "diagnostic": "radio hex"
+    }
+  ]
+}

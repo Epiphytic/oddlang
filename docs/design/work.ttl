@@ -3136,3 +3136,9 @@ w:portHistoricTooling p:evidence w:rustBinaryRecordWireSchemaReplay .
 w:rustBinaryRecordWireSchemaReplay a p:Artifact ;
     rdfs:label "Seven Rust binary-record and JSON wire-schema qualification suites on macOS ARM64" ;
     p:location "verification/provider-tooling/binary-record-wire-schema-replay.json" .
+
+w:portHistoricTooling p:evidence w:canonicalRadioReplay .
+w:canonicalRadioReplay a p:Artifact ; rdfs:label "Native nested and flat canonical JSON radio caller and rejection checks" ; p:location "verification/provider-validation/src/bin/canonical-wire.rs" .
+
+w:portHistoricTooling p:evidence w:integrityBlockNativeReplay .
+w:integrityBlockNativeReplay a p:Artifact ; p:location "verification/provider-validation/src/bin/integrity-block.rs" .

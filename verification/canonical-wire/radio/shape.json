@@ -1,0 +1,156 @@
+{
+  "format": "oddlang-json-wire-schema-v1",
+  "id": "urn:radio:wire",
+  "guards": [],
+  "types": [
+    {
+      "kind": "record",
+      "id": "urn:radio:envelope",
+      "fields": [
+        {
+          "id": "urn:radio:envelope:protocol",
+          "name": "protocol",
+          "type": {
+            "kind": "text"
+          }
+        },
+        {
+          "id": "urn:radio:envelope:version",
+          "name": "version",
+          "type": {
+            "kind": "unsigned",
+            "bits": 32
+          }
+        },
+        {
+          "id": "urn:radio:envelope:sequence",
+          "name": "sequence",
+          "type": {
+            "kind": "unsigned",
+            "bits": 64
+          }
+        },
+        {
+          "id": "urn:radio:envelope:message",
+          "name": "message",
+          "type": {
+            "kind": "ref",
+            "id": "urn:radio:message"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "adjacent",
+      "id": "urn:radio:message",
+      "tag": "dir",
+      "content": "payload",
+      "variants": [
+        {
+          "id": "urn:radio:send",
+          "name": "send",
+          "payload": {
+            "kind": "record",
+            "fields": [
+              {
+                "id": "urn:radio:send:gain",
+                "name": "gain",
+                "type": {
+                  "kind": "unsigned",
+                  "bits": 32
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "urn:radio:read",
+          "name": "read",
+          "payload": {
+            "kind": "newtype",
+            "type": {
+              "kind": "bool"
+            }
+          }
+        },
+        {
+          "id": "urn:radio:scan",
+          "name": "scan",
+          "payload": {
+            "kind": "newtype",
+            "type": {
+              "kind": "ref",
+              "id": "urn:radio:sweep"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "kind": "external",
+      "id": "urn:radio:probe"
+    },
+    {
+      "kind": "adjacent",
+      "id": "urn:radio:sweep",
+      "tag": "kind",
+      "content": "data",
+      "variants": [
+        {
+          "id": "urn:radio:burst",
+          "name": "burst",
+          "payload": {
+            "kind": "record",
+            "fields": [
+              {
+                "id": "urn:radio:burst:samples",
+                "name": "samples",
+                "type": {
+                  "kind": "bounded-base64-list",
+                  "policy": {
+                    "maxItems": 4,
+                    "maxItemBytes": 3,
+                    "maxTotalBytes": 8,
+                    "perItemOverhead": 1,
+                    "listLimitMessage": "too many samples",
+                    "encodedLimitMessage": "too many encoded bytes",
+                    "decodedLimitMessage": "too many bytes",
+                    "syntaxMessage": "bad samples"
+                  }
+                }
+              },
+              {
+                "id": "urn:radio:burst:sensor",
+                "name": "sensor",
+                "type": {
+                  "kind": "optional",
+                  "item": {
+                    "kind": "ref",
+                    "id": "urn:radio:probe"
+                  }
+                }
+              },
+              {
+                "id": "urn:radio:burst:token",
+                "name": "token",
+                "type": {
+                  "kind": "lower-hex",
+                  "bytes": 16,
+                  "diagnostic": "radio hex"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "urn:radio:cal",
+          "name": "cal",
+          "payload": {
+            "kind": "record",
+            "fields": []
+          }
+        }
+      ]
+    }
+  ]
+}

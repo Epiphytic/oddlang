@@ -57,6 +57,8 @@
     "shared-declarations",
     "typed-finite-errors",
     "record-writer",
-    "binary-frame"
+    "binary-frame",
+    "canonical-wire",
+    "integrity-block"
   ]
 }
