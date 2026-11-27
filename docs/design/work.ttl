@@ -3948,3 +3948,4 @@ w:nativeRangeRecoveryEvidence a p:Artifact ;
     rdfs:label "Rust range selectors, recovery locks and staged package inputs matched archived ARM64 baseline and mutation outputs" ;
     p:location "verification/provider-tooling/native-range-recovery.json" .
 w:portHistoricTooling p:evidence w:nativeRangeRecoveryEvidence .
+w:nativeRangeRecoveryEvidence rdfs:comment "The Rust checker accepted historical and fresh collector receipts, checked their Rustdoc source, toolchain and recipe pins before and after projection, and rejected nineteen altered evidence sets. Both collectors qualified 35 native cases per source variant." .
