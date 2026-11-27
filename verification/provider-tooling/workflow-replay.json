@@ -34,6 +34,11 @@
     "reproducibilityReportSha256": "458748c073362b5c2340fee97c78f9ba3794e516f4feadf38d4b6172c637aec3",
     "runtimeObservationsSha256": "84e2c7b5363260eca448cde529972fcfee6e03b2ca3f722c9c30a3ce242e1de1"
   },
+  "assemblyPreparation": {
+    "v1ComparedFiles": 1641,
+    "v2ComparedFiles": 1645,
+    "storeAndManifestsByteIdentical": true
+  },
   "replayedProfiles": [
     "bounded-json-input",
     "read-only-file",

@@ -3119,5 +3119,5 @@ w:providerToolInventory a p:Artifact ;
 
 w:portHistoricTooling p:evidence w:rustWorkflowReplay .
 w:rustWorkflowReplay a p:Artifact ;
-    rdfs:label "Rust import cleanup and Wasm host receipt replay on macOS ARM64" ;
+    rdfs:label "Rust import cleanup, assembly preparation, profile checks and Wasm host receipt replay on macOS ARM64" ;
     p:location "verification/provider-tooling/workflow-replay.json" .
