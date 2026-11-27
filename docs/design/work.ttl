@@ -3850,3 +3850,8 @@ w:portHistoricTooling p:evidence w:coreMacosQualificationRust .
 w:coreMacosQualificationRust a p:Artifact ;
     rdfs:label "The Rust macOS core-package qualifier and the compatibility entry point each reproduced the archived receipt byte for byte, including all four distinct mutation outcomes. The legacy and native sandbox interfaces produced the same environment and read roots." ;
     p:location "verification/provider-tooling/core-package-inputs.json" .
+
+w:portHistoricTooling p:evidence w:publicStreamProfilesRust .
+w:publicStreamProfilesRust a p:Artifact ;
+    rdfs:label "Pinned Rust public stream oracle replayed 403 cases, 31 wire pairs and three behavioral controls in each of the macOS ARM64 dev and release profiles. Both archived Linux architectures matched the frozen baseline and profile provenance. Twelve receipt alterations were rejected." ;
+    p:location "verification/provider-tooling/public-stream-profiles.json" .
