@@ -3070,3 +3070,11 @@ w:profileReadCompilerWitness a p:Artifact ;
     rdfs:label "Calibration contract diagnostic selection and byte-identical regeneration of the previous workspace lock" ;
     p:location "verification/local-command-client/profile-read-compiler-macos-arm64.json" .
 w:privateProfileReadDiagnostics p:evidence w:profileReadCompilerWitness .
+w:waitProfilePriorComparison a p:Artifact ;
+    p:location "verification/local-command-client/wait-profile-prior-macos-arm64.json" .
+w:qualifyWaitProfileErrors p:evidence w:waitProfilePriorComparison .
+w:waitProfileFirstCommandRuns a p:Artifact ;
+    rdfs:label "First foreground control and both mixed directions at the wait-profile diagnostics lock" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/6162601e3584631a4d6deab030cd5dea7e090a6a/verification/whole/basic-command-interop/RETAINED-POLL.md" .
+w:basicServerQualification p:evidence w:waitProfileFirstCommandRuns .
+w:basicClientQualification p:evidence w:waitProfileFirstCommandRuns .
