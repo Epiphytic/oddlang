@@ -1,14 +1,13 @@
 {
-  "auditedCompanionRevision": "f592e813e5d524bdac7b61a05204ff1b8d509aac",
-  "previousRevision": "e61caebc45f9cda73a2eef20cc8611fc82eb4521",
-  "reproducedTableSha256": "c6c74b870c17cdcac63190b179b65ba4e6bbbf8c943ac7a99c70d818e42e50ae",
-  "remainingProjectToolFiles": 82,
+  "auditedCompanionRevision": "469960d55737ea59d8b54ce5ea05444967534275",
+  "previousRevision": "f592e813e5d524bdac7b61a05204ff1b8d509aac",
+  "reproducedTableSha256": "1f08d6387f1100f1f8af8aba6cad2999b7d0e2ff8ba9c0a96f7ade3bac84f207",
+  "remainingProjectToolFiles": 81,
   "remainingProjectExtensions": {
-    ".py": 81,
-    ".sh": 1
+    ".py": 81
   },
   "removedSincePrevious": [
-    "verification/whole/basic-command-interop/test_corpus.py"
+    "verification/whole/core-package/linux.sh"
   ],
   "addedSincePrevious": []
 }

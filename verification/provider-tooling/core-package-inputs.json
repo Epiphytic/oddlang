@@ -19,5 +19,20 @@
     "component graph digest mismatch",
     "Cargo.lock modification"
   ],
-  "linux": "Runner syntax checked. Native replay pending VM shell access."
+  "linux": "Runner syntax checked. Native replay pending VM shell access.",
+  "rustLinuxRunner": {
+    "companionRevision": "469960d55737ea59d8b54ce5ea05444967534275",
+    "entryPoint": "core-package-inputs linux",
+    "nativeLinuxExecution": "Pending. One configured ARM64 guest reset its SSH connection and the other reported a shell I/O error.",
+    "testedHost": "aarch64-apple-darwin",
+    "pinnedCompilerRebuilt": true,
+    "freshGeneratedPackageLockSha256": "b30e3ad85232743da965f0ca1d823baea25095d66e883005ceb1f790ee44794c",
+    "referenceAndGeneratedTranscriptSha256": "a0eba1d3a32c7238ba8f6f8b665d92f5205fc6bfc56a150f637f07516a856c0e",
+    "matchingObservations": 1735,
+    "upstreamTestsPerImplementation": 7,
+    "differentialCallersPerImplementation": 1,
+    "acceptedLoopbackConnectionRejectedByProbe": true,
+    "closedPortAcceptedByProbe": true,
+    "nonLinuxInvocationRejectedBeforeReceipt": true
+  }
 }

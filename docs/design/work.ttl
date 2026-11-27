@@ -3840,3 +3840,8 @@ w:portHistoricTooling p:evidence w:offlineProfileSetupRust .
 w:offlineProfileSetupRust a p:Artifact ;
     rdfs:label "Rust offline profile setup replay reproduced the archived macOS receipt across 15 cases for each of two relay spellings and two builds, including private file credentials and rejected grants." ;
     p:location "verification/provider-tooling/offline-profile-setup.json" .
+
+w:portHistoricTooling p:evidence w:coreLinuxRunnerRust .
+w:coreLinuxRunnerRust a p:Artifact ;
+    rdfs:label "Rust Linux core-package launcher and macOS controls. A fresh projection matched 1,735 original observations and the archived transcript digest. Native Linux execution of this launcher is pending guest access." ;
+    p:location "verification/provider-tooling/core-package-inputs.json" .
