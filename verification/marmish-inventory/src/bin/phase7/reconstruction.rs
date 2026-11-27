@@ -123,8 +123,7 @@ pub fn check_source_rows(rows: &[Value], files: &Map, expected: &Set) -> Result<
     ensure!(&generated == expected, "unexpected generated module set");
     Ok(())
 }
-pub fn build_pair(dir: &Path, inventory: &Value, release_dir: &Path) -> Result<Value> {
-    let summary = read_json(&dir.join("rebuild.json"))?;
+pub fn verified_summary(dir: &Path, inventory: &Value, release_dir: &Path) -> Result<Value> {
     let generated_paths = PRODUCERS
         .iter()
         .map(|(_, m)| format!("crates/marmish-core/src/{m}"))
@@ -237,6 +236,11 @@ pub fn build_pair(dir: &Path, inventory: &Value, release_dir: &Path) -> Result<V
     let mut expected = previous.unwrap().0;
     expected["originalCommit"] = json!(PIN);
     expected["independentBuilds"] = json!(2);
+    Ok(expected)
+}
+pub fn build_pair(dir: &Path, inventory: &Value, release_dir: &Path) -> Result<Value> {
+    let expected = verified_summary(dir, inventory, release_dir)?;
+    let summary = read_json(&dir.join("rebuild.json"))?;
     ensure!(
         summary == expected,
         "rebuild summary disagrees with independent runs"

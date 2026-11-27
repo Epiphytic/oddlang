@@ -139,9 +139,20 @@ fn verify(root: &Path, upstream: &Path, dir: &Path) -> Result<()> {
     );
     let dir = dir.canonicalize()?;
     let candidate = dir.join("rebuild/candidate");
-    let mut rebuild = Command::new("python3");
+    let mut rebuild = Command::new("cargo");
     rebuild
-        .args(["-B", "scripts/marmish/rebuild.py"])
+        .args([
+            "+1.97.1",
+            "run",
+            "--quiet",
+            "--locked",
+            "--offline",
+            "--manifest-path",
+            "verification/marmish-inventory/Cargo.toml",
+            "--bin",
+            "marmish-rebuild",
+            "--",
+        ])
         .arg(upstream)
         .arg(dir.join("rebuild"));
     ensure!(run(root, rebuild)?.success(), "failed reconstruction");

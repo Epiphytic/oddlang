@@ -25,7 +25,7 @@ git -C "$upstream" diff --quiet HEAD -- || { echo 'Marmish tracked inputs differ
 [[ -z "$(git -C "$upstream" ls-files --others --exclude-standard)" ]] || { echo 'Untracked Marmish inputs present' >&2; exit 1; }
 export CARGO_NET_OFFLINE=true RUSTUP_AUTO_INSTALL=0 UV_OFFLINE=1 PYTHONDONTWRITEBYTECODE=1
 if [[ $mode == rebuild ]]; then
-    python3 -B scripts/marmish/rebuild.py "$upstream" "$report"
+    cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-rebuild -- "$upstream" "$report"
     echo "Marmish twice-rebuilt candidate in $report"
     exit 0
 elif [[ $mode == verify ]]; then
