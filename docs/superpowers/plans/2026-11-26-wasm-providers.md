@@ -24,3 +24,5 @@ Implement the [approved Wasm design](../specs/2026-11-26-wasm-provider-design.md
 - [x] Replace the recovery profile shell launcher with the native capture executable, reproduce the original stream structure and rustdoc differential, and qualify compiler, shape, and export witnesses.
 
 - [x] Replace the retained-room qualification launcher with Rust and replay its independent local authorization and commit/reopen assertions. Compare the complete generated workspace before and after the provider refactor. [macOS ARM64 evidence](../../../verification/provider-tooling/retained-room-fixture-rust.json)
+
+- [x] Route workspace closure, external package comparison, offline Git cache and original library test preparation through Rust. Compare the staged bytes for every published workspace manifest, rebuild the profile command-policy product, and run the original core and stream suites. [macOS ARM64 evidence](../../../verification/provider-tooling/workspace-inputs-rust.json)

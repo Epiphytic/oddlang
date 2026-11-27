@@ -3921,3 +3921,8 @@ w:retainedRoomRustReplay a p:Artifact ;
     rdfs:label "Rust retained-room fixture replay and 104-file pre/post-provider workspace comparison" ;
     p:location "verification/provider-tooling/retained-room-fixture-rust.json" .
 w:portHistoricTooling p:evidence w:retainedRoomRustReplay .
+
+w:workspaceInputStagingReplay a p:Artifact ;
+    rdfs:label "Rust staging matched 48 release manifests, 19 distinct dependency locks and three native test configurations. The full test configuration passed all 45 tests." ;
+    p:location "verification/provider-tooling/workspace-inputs-rust.json" .
+w:portHistoricTooling p:evidence w:workspaceInputStagingReplay .
