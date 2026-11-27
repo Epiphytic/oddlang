@@ -3916,3 +3916,8 @@ w:storedProfileRestrictionReader a p:Task ;
     p:status p:done ; p:evidence w:storedProfileRestrictionEvidence .
 w:storedProfileRestrictionEvidence a p:Artifact ;
     p:location "verification/provider-tooling/mixed-profile-setup-rust.json" .
+
+w:retainedRoomRustReplay a p:Artifact ;
+    rdfs:label "Rust retained-room fixture replay and 104-file pre/post-provider workspace comparison" ;
+    p:location "verification/provider-tooling/retained-room-fixture-rust.json" .
+w:portHistoricTooling p:evidence w:retainedRoomRustReplay .

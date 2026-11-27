@@ -1,0 +1,24 @@
+{
+  "host": "aarch64-apple-darwin",
+  "companionRevision": "8410a133576336a0109cf4f16f22d4c8c9a12227",
+  "input": "oddlang/portable/workspace-authorized-owner-submit.json",
+  "fixture": "verification/whole/basic-command-interop/authorized_submit_offline.rs",
+  "fixtureSha256": "43b309849447fd7768c3452d3c57ce379d7df1cad6d4e7ea11b1a0c03734769c",
+  "test": "foreground::__projection_4::authorized_submit_offline::local_room_selection_and_commit_receipt",
+  "network": "denied to the fixture process by macOS Seatbelt",
+  "historicalCompilerSha256": "46147d9ba643769e125e3102a3677980925931e86fa29b6e6e243d92adfcfbf8",
+  "historicalWorkspaceLockSha256": "9a57b3806c6cb04b6d6c740addca15f286af0be66dfb3293cd1bef6fd89ab747",
+  "beforeRefactor": "6f9e8475cc4d24ffe67d73c887f3a21e00f21d07",
+  "afterRefactor": "b27cf34783d06abd760104152b1689a5f6d10dcd",
+  "currentWorkspaceLockSha256": "335d1e319c86712444885b77614b15c9ebaf1a0c75f09e06d19cfe7dff63461c",
+  "beforeAndAfterTreesComparedByteForByte": true,
+  "generatedFiles": 104,
+  "observations": [
+    "The release compiler reproduced its published workspace lock and passed the named fixture with the Rust runner.",
+    "The pre-refactor and current compilers generated identical workspaces. Their lock differs from the earlier release only in marmish-native.standalonePackageLockSha256.",
+    "The Python and Rust runners each ran exactly one passing test with the current compiler and the unchanged Rust fixture."
+  ],
+  "liveDeliveryTested": false,
+  "remainingCompanionProjectTools": 63,
+  "companionAuditTsvSha256": "f0d9536a1b987a577bf8a83576f75f6852e2974d1d407c4b53ed83e62279ad3e"
+}

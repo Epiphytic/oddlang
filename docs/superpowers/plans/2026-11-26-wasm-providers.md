@@ -22,3 +22,5 @@ Implement the [approved Wasm design](../specs/2026-11-26-wasm-provider-design.md
 - [x] Port the source-free stream workspace and graph-mutation runners, regenerate all five Rust files, rerun both compiler controls, the named downstream consumer observations, and the 50-case mutation oracle.
 - [x] Migrate HTTP setup, version and schema pins, and offline qualification to Rust. Verify fresh provider, client and codec receipts and both hybrid rendering targets.
 - [x] Replace the recovery profile shell launcher with the native capture executable, reproduce the original stream structure and rustdoc differential, and qualify compiler, shape, and export witnesses.
+
+- [x] Replace the retained-room qualification launcher with Rust and replay its independent local authorization and commit/reopen assertions. Compare the complete generated workspace before and after the provider refactor. [macOS ARM64 evidence](../../../verification/provider-tooling/retained-room-fixture-rust.json)
