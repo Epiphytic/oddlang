@@ -3880,3 +3880,8 @@ w:portHistoricTooling p:evidence w:launchRecoveryHelperContextRust .
 w:launchRecoveryHelperContextRust a p:Artifact ;
     rdfs:label "Rust Launch recovery rebuilt both graphs and Rust bindings from the source, compiler inventory and native enum witness. Both the Launch and helper-context qualification receipts matched the macOS archives. The current compiler reproduced the seven-crate workspace from 111 pinned inputs. Independent observers matched all 105 policy decisions and 11 configuration cases, and the mixed local codec pairs matched every wire and payload byte." ;
     p:location "verification/provider-tooling/launch-recovery-helper-context-rust.json" .
+
+w:portHistoricTooling p:evidence w:vaultValueChecksRust .
+w:vaultValueChecksRust a p:Artifact ;
+    rdfs:label "Both Rust vault qualifiers reproduced their archived macOS receipts. The original strict test rejected a 31-byte array at compile time. Four of 600 public-value results changed when the label limit moved from 128 to 127 bytes in both the reference and projected implementations. The plugin-enabled and pre-refactor compilers produced identical package trees and fixed-byte recovery output. The current packages passed the strict and ownership tests and the public-value stdout comparison." ;
+    p:location "verification/provider-tooling/vault-value-replay-rust.json" .

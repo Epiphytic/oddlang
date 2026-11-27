@@ -1,0 +1,186 @@
+{
+  "frameworkRevision": "0cec91944abba01c880373afb387a1b4a719035c",
+  "companionRevision": "3baf30f16d1bb2654c95c0c03117475159a3796a",
+  "host": "aarch64-apple-darwin",
+  "pinnedOriginal": "af54339d250290490d62d4475a77539b7e739071",
+  "standalone": {
+    "fixed": {
+      "archive": "verification/whole/vault-fixed-bytes/aarch64-apple-darwin.json",
+      "reproducedReceiptSha256": "5b3667cef31a601c0a9c366400c4a24525582dec5a4b2790c113da0ec8277b4b",
+      "outcome": {
+        "framework": "595fb7a55dc2016cfab70c5b131bf2f6acfe9983",
+        "original": "af54339d250290490d62d4475a77539b7e739071",
+        "host": "aarch64-apple-darwin",
+        "profile": "release",
+        "test": "tests::strict_public_values",
+        "unchangedModuleSha256": "5389218be38e60288371fe63a79ae71d2e9dbb8408a34bc53e8010f03117359c",
+        "sourceSha256": "4547659ecea9b480bfb16e8f9aabc9d08037754f81b7b2b54383c06b8519ed9d",
+        "graphSha256": "f87cf4fad9f37189dd02c5a4179e90017380bfbc8affb867eab5fc23a2d6047b",
+        "selectedStorage": {
+          "kind": "named",
+          "id": "external::zeroize::Zeroizing::{type}",
+          "arguments": [
+            {
+              "parameter": "external::zeroize::Zeroizing::{type}::Z::{type}",
+              "name": "Z",
+              "position": 0,
+              "value": {
+                "kind": "array",
+                "element": {
+                  "kind": "unsigned-integer",
+                  "bits": 8
+                },
+                "extent": {
+                  "kind": "fixed",
+                  "count": 32
+                }
+              }
+            }
+          ]
+        },
+        "packageManifestSha256": "22ac94e18a4f89f4650876c1a2abf173133a0325cad748a0631b88b1ee4fce90",
+        "packageLockSha256": "96ff692bf79e6231972807545092f0acfcbb6e4ec035838240fe0e9f3446aa44",
+        "cargoLockSha256": "1e7f93b188b5894a7bc4af9f2ade14f0bcc48f5a45b3f61fdc474fb1460edddd",
+        "sourceReadDenied": true,
+        "originalPassed": 1,
+        "generatedPassed": 1,
+        "recovery": {
+          "authored": [
+            "domain",
+            "value",
+            "failure",
+            "public method bindings"
+          ],
+          "compiler": "8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+          "crate": "marmish_vault",
+          "declaration": "local::marmish_vault::Secret::{type}",
+          "format": "oddlang-fixed-bytes-recovery-v1",
+          "graphSha256": "f87cf4fad9f37189dd02c5a4179e90017380bfbc8affb867eab5fc23a2d6047b",
+          "observationSha256": "d75c0b7ed148c03290819dcf5a5636b81d86d9befd4b5b3ab2eadafe490d6e7b",
+          "observed": {
+            "element": "octet",
+            "length": 32,
+            "storageType": "external::zeroize::Zeroizing::{type}"
+          },
+          "providerAssumption": "onDrop follows from the reviewed Zeroizing provider identity",
+          "requiresIndependentQualification": [
+            "provider package identity and drop semantics",
+            "public conversions",
+            "borrowed view",
+            "failure mapping"
+          ],
+          "selectionSha256": "cda67211ae7f3bd2773ed2385e2a90d13a81c9c480a3b5be8cfbc8a7edadf9c2"
+        },
+        "widthControl": {
+          "length": 31,
+          "phase": "compile unchanged test module",
+          "diagnostic": "E0277",
+          "compilerExit": 1
+        }
+      }
+    },
+    "values": {
+      "archive": "verification/whole/vault-values/reference-aarch64-apple-darwin.json",
+      "reproducedReceiptSha256": "8735942516b82eed8ee6a738c8ead404f1f26ebfa13047bd7a25b0e7af37697e",
+      "outcome": {
+        "original": "af54339d250290490d62d4475a77539b7e739071",
+        "framework": "c579dcdfa8f0e94d3dc894242908475552cdbd83",
+        "rust": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6",
+        "declaredShapes": [
+          "Error",
+          "KeyRef",
+          "Label",
+          "Metadata",
+          "Namespace",
+          "Purpose"
+        ],
+        "observations": 2400,
+        "changedOutcomes": 4,
+        "originalSourceSha256": "4547659ecea9b480bfb16e8f9aabc9d08037754f81b7b2b54383c06b8519ed9d",
+        "mutatedSourceSha256": "53691a8e9a73a69a318ef75a298a0bec20a0a6f93fa749b9207e2fccdc608713",
+        "originalGraphSha256": "e553ac9935a5b21bb73c8353c61ab99b143a9c0aa8c8b70577c45fa6ddf3d9be",
+        "mutatedGraphSha256": "32a9b7d5d38bbc6b8618c52ea174964642ba8926e9acda29c40d9b9e3fd4096d",
+        "originalPackageLockSha256": "544c6f2d5b6ba9314b5963a239068a9bc519784d4c71762cedd1e588d48df2c8",
+        "mutatedPackageLockSha256": "dc028515652af30b8c090d3724adf3c8aa9a7223e09125b91b5d0df05c9bc401",
+        "callerSha256": "2b356012872458e7b6161a4c9e8c03e40c3ef79b8a2817e7f63cd29bc4b569ad",
+        "shapesSha256": "ef62915331df0597e13bb0f9e223ce8b286d890fc5437398e56de00356f38bd2",
+        "sourceReadDenied": true,
+        "privateStorageRejectsExternalConstruction": true
+      }
+    }
+  },
+  "workspaceCaller": {
+    "fixed": {
+      "name": "tests::strict_public_values",
+      "unchangedModuleSha256": "5389218be38e60288371fe63a79ae71d2e9dbb8408a34bc53e8010f03117359c",
+      "originalAndGeneratedPassed": true,
+      "fromBytesHoldout": {
+        "name": "from_bytes_owns_the_input_and_requires_drop",
+        "sourceSha256": "d4d0f17448e0a2aab6199f4ca232f4869739c4e6fe25b660d8851d13fb074e72",
+        "originalAndGeneratedPassed": true
+      },
+      "standaloneReceiptSha256": "5b3667cef31a601c0a9c366400c4a24525582dec5a4b2790c113da0ec8277b4b"
+    },
+    "values": {
+      "vaultRows": 600,
+      "vaultStdoutSha256": "8d881e5e326cb7875a00072d5e65a3b02fb3695216071b6c3cf0dc47e77c558a"
+    }
+  },
+  "rustCaptureSha256": "2a8aa0710ec6fcdbb6b3263d1efdb12b28558768688952f81e774026848b3928",
+  "preRefactorRevision": "6f9e8475cc4d24ffe67d73c887f3a21e00f21d07",
+  "preRefactorCompilerSha256": "71cbd5c51542f65f56ac6d705c0357707eeb643b2335cf86850bcd391f6527b4",
+  "currentCompilerSha256": "2b30b782204e1eb51705a51a7ff7f00d2f63ccd14f6384f188afbd0f5d1aebfb",
+  "identicalBeforeAndAfterRefactor": {
+    "vault-fixed-value": {
+      "matchingFiles": 10,
+      "files": {
+        "Cargo.lock": "1e7f93b188b5894a7bc4af9f2ade14f0bcc48f5a45b3f61fdc474fb1460edddd",
+        "Cargo.toml": "7a877e7b7a27bfc976fece56fbb889c0280a87eddba6b1771250b601c0a3d9d8",
+        "package.lock": "96ff692bf79e6231972807545092f0acfcbb6e4ec035838240fe0e9f3446aa44",
+        "src/group_0/__projection_0.rs": "91fb61d22613728261531ecb2c363f353dc5b5a56b35817afa06255a61ce99e0",
+        "src/group_0/mod.rs": "d09006c940a53adb5f920633e0a75ce48bcb0b78f883f1f9075167deecac0a0b",
+        "src/group_1/__projection_1.rs": "ca3ac70647ad5b1e5b5a9edb1ea565813b208ece3b5dc02062610a73ff6c0f86",
+        "src/group_1/mod.rs": "7928902911229bc1ba422bdc679ae48f8b392ffccaf285fdc1e12c9dcac4731b",
+        "src/group_2/__projection_2.rs": "608806b138d0ff9d84b755b45e88425b18ea6f83f22f890b0eb21f8510279655",
+        "src/group_2/mod.rs": "d73d7bde5c2f8fe3e084f1c83725f801e98706a9709ea69ae09807a413e53f6e",
+        "src/lib.rs": "fa48814fa493e8ebf7f9335ca02ef180d5033622fdfecb8f99b7af45e90fa8f5"
+      }
+    },
+    "vault-value-domain": {
+      "matchingFiles": 8,
+      "files": {
+        "Cargo.lock": "e176da6c02f877c1347a860da16c1aa1cfb447bd682570c2c4ca807215187005",
+        "Cargo.toml": "9588649f6102ea1f61e1f14b5bd65d83882633886343319a2cb2d5efcc418db3",
+        "package.lock": "82e5a0a72fd8cc8b3154095b717719ce5c6733c6b820023875d16d85460bf6fc",
+        "src/group_0/__projection_0.rs": "91fb61d22613728261531ecb2c363f353dc5b5a56b35817afa06255a61ce99e0",
+        "src/group_0/mod.rs": "d09006c940a53adb5f920633e0a75ce48bcb0b78f883f1f9075167deecac0a0b",
+        "src/group_1/__projection_1.rs": "ca3ac70647ad5b1e5b5a9edb1ea565813b208ece3b5dc02062610a73ff6c0f86",
+        "src/group_1/mod.rs": "7928902911229bc1ba422bdc679ae48f8b392ffccaf285fdc1e12c9dcac4731b",
+        "src/lib.rs": "7869d8aec912845f94ec50b9b52228838ebede5df63ac481e1bc7fc056c92254"
+      }
+    },
+    "recovery": {
+      "matchingFiles": 2,
+      "files": {
+        "graph.json": "f87cf4fad9f37189dd02c5a4179e90017380bfbc8affb867eab5fc23a2d6047b",
+        "recovery.lock": "8a93bb44b2ab2586f93bf69ffe4848ad10f001df0e55ddbecb1397df0f917af3"
+      }
+    }
+  },
+  "currentPublicValueStdoutSha256": "8d881e5e326cb7875a00072d5e65a3b02fb3695216071b6c3cf0dc47e77c558a",
+  "currentFixedValueTests": {
+    "name": "tests::strict_public_values",
+    "unchangedModuleSha256": "5389218be38e60288371fe63a79ae71d2e9dbb8408a34bc53e8010f03117359c",
+    "originalAndGeneratedPassed": true,
+    "fromBytesHoldout": {
+      "name": "from_bytes_owns_the_input_and_requires_drop",
+      "sourceSha256": "d4d0f17448e0a2aab6199f4ca232f4869739c4e6fe25b660d8851d13fb074e72",
+      "originalAndGeneratedPassed": true
+    }
+  },
+  "historicalLockDifference": "The older six-value archive predates the checked-values lock format change in 7ed1c29. Its generated source and obligation digests match. The pre-refactor and plugin-enabled compilers produce byte-identical trees and locks.",
+  "controls": [
+    "Wrong framework revisions rejected before receipt publication.",
+    "Relative and absolute paths in both workspace entry points produced identical observations."
+  ]
+}
