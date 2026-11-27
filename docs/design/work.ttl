@@ -3627,3 +3627,8 @@ w:portHistoricTooling p:evidence w:coreObservationChecks .
 w:coreObservationChecks a p:Artifact ;
     rdfs:label "The shared Rust differential checker validated 24 portable expectations across 1735 core observations and rejected five transcript mutations. The full macOS qualification receipt matched the archive byte for byte." ;
     p:location "verification/provider-tooling/core-observation-checks.json" .
+
+w:portHistoricTooling p:evidence w:coreMutationInputs .
+w:coreMutationInputs a p:Artifact ;
+    rdfs:label "The Rust core-package stager matched the baseline, four semantic mutants and a stale-digest fixture byte for byte with Python. The macOS qualification reproduced the archived receipt. Invalid inputs left no destination and concurrent writers published once." ;
+    p:location "verification/provider-tooling/core-mutation-inputs.json" .

@@ -1,0 +1,42 @@
+{
+  "companion": "490e100ee460d5a2db40f2605aed3eb14afddd1c",
+  "legacy": "487e876756dc54b01cd5aac919814e37caa3e3fc",
+  "host": "aarch64-apple-darwin",
+  "framework": "a635eec8e0f71d2dabc9aee28655e26494a7506f",
+  "reference": "af54339d250290490d62d4475a77539b7e739071",
+  "comparedTrees": {
+    "baseline": {
+      "files": 8,
+      "manifestSha256": "89292d721acd668379be55e762b963bfac16f0c57fad916c450ca14f0658e1d4"
+    },
+    "frame-error-order": {
+      "files": 8,
+      "manifestSha256": "ce516c6e69dbfe522e17ae4bb772e84b2fc069023521e45835561ece2a9100aa"
+    },
+    "frame-version": {
+      "files": 8,
+      "manifestSha256": "aec3fb3e03763ce5f92fc4e780eda363349e9251d2ac84698cd30ed34ab2c294"
+    },
+    "relay-rule-order": {
+      "files": 8,
+      "manifestSha256": "4fb420c6e47c0a42b46e403890264a5aa2bfbdf5fe27cd745b0d26569ee6f8a7"
+    },
+    "retention-bound": {
+      "files": 8,
+      "manifestSha256": "126bf4ac2a4b1028901506de4623068091eeb47d848088bdb9182ff0e50bf6f3"
+    },
+    "stale-frame-digest": {
+      "files": 8,
+      "manifestSha256": "89292d721acd668379be55e762b963bfac16f0c57fad916c450ca14f0658e1d4"
+    }
+  },
+  "publicationControls": [
+    "ambiguous rule leaves destination absent",
+    "invalid pin leaves destination absent",
+    "two writers produce exactly one successful publication"
+  ],
+  "receiptSha256": "51f8b24becb49c9e84daf8d651e3a659506a242a9aafe74828655b4fbc2379c8",
+  "archivedReceiptByteIdentical": true,
+  "observations": 1735,
+  "linux": "Shell unavailable on both macOS-hosted Lima VMs."
+}
