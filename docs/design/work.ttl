@@ -3375,3 +3375,8 @@ w:companionBufferedRust a p:Artifact ;
 w:companionPublicComposersRust a p:Artifact ;
     rdfs:label "Six prototype constant, engine error and converged public API descriptors reproduced byte for byte, with 14 rejected drift cases" ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/3460c689e219e4ab6bc22e41ee8e4a867d99461c/verification/whole/converged-public-api/rust-composition-macos-arm64.json" .
+
+w:portHistoricTooling p:evidence w:companionArchivedSuiteReceipts .
+w:companionArchivedSuiteReceipts a p:Artifact ;
+    rdfs:label "Rust reproduced 14 archived suite totals and ten build-target reports for ARM64 macOS and Linux, retained four missing-library refusals, and rejected 66 altered receipts" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/d1c9b193fa501cedec287409e1265677bc24797d/verification/whole/suite/README.md#archived-receipt-verifier" .
