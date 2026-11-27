@@ -3078,3 +3078,12 @@ w:waitProfileFirstCommandRuns a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/6162601e3584631a4d6deab030cd5dea7e090a6a/verification/whole/basic-command-interop/RETAINED-POLL.md" .
 w:basicServerQualification p:evidence w:waitProfileFirstCommandRuns .
 w:basicClientQualification p:evidence w:waitProfileFirstCommandRuns .
+
+w:recoverCommandPolicy a p:Task ;
+    rdfs:label "Recover nested restriction lists from pinned Serde records and project the Marmish command policy" ;
+    p:source w:basicCommandInteropPlan ; p:milestone w:marmishMilestone ;
+    p:acceptance "Regenerate the selected foreground configuration with required policy, distinguish absent, empty and null lists, and compare decisions with the pinned native implementation." ;
+    p:status p:done ; p:evidence w:recoveredCommandPolicyReceipt .
+w:recoveredCommandPolicyReceipt a p:Artifact ;
+    rdfs:label "Pinned native and regenerated policy decisions and foreground configuration-file results" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/51064fa44124b811fdfbe1329cb62de4097eb8de/verification/whole/command-policy/aarch64-apple-darwin.json" .

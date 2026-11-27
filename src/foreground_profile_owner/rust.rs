@@ -368,8 +368,23 @@ fn render_room_prepare(
             ("route", "String", &prepare.config_fields[3]),
         ],
     );
+    if let Some(lists) = &prepare.restriction_lists {
+        writeln!(
+            out,
+            "    #[serde(rename = {:?})]\n    command_policy: CommandRestrictions,",
+            lists.policy_field()
+        )
+        .unwrap();
+    }
     out.push_str("}\n");
-    let template = include_str!("room_prepare.rs.in");
+    let validate_restrictions = if let Some(lists) = &prepare.restriction_lists {
+        lists.render(out);
+        "    config.command_policy.validate_bounds().map_err(|_| INVALID_PROFILE)?;\n"
+    } else {
+        ""
+    };
+    let template = include_str!("room_prepare.rs.in")
+        .replace("/*VALIDATE_COMMAND_RESTRICTIONS*/", validate_restrictions);
     if let Some((model, binding)) = submit {
         let signature = "    queue: &RoomPrepareQueue,\n) -> Failure {";
         let request = "            request = pending.recv()";
@@ -386,7 +401,7 @@ fn render_room_prepare(
                 "            submission = submissions.recv() => {\n                let Some((request, reply)) = submission else { return IO; };\n                if !reply.is_closed() {\n                    let result = commit_room_submit(providers, queue, &request, profile);\n                    let _ = reply.send(result);\n                }\n                continue;\n            }\n            request = pending.recv()", 1));
         render_room_submit(out, prepare, model, binding);
     } else {
-        out.push_str(template);
+        out.push_str(&template);
     }
 }
 

@@ -1,0 +1,221 @@
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CommandRestrictions {
+    #[serde(rename = __version__)]
+    version: u32,
+    #[serde(default, rename = __defaults__)]
+    defaults: RestrictionLayer,
+    #[serde(default, rename = __entries__)]
+    entries: Vec<PrincipalRestriction>,
+}
+
+#[derive(Default, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct RestrictionLayer {
+    #[serde(default, rename = __allow__, deserialize_with = "explicit_allow_list")]
+    allow: Option<Vec<String>>,
+    #[serde(default, rename = __deny__)]
+    deny: Vec<String>,
+}
+
+fn explicit_allow_list<'de, D: serde::Deserializer<'de>>(
+    d: D,
+) -> Result<Option<Vec<String>>, D::Error> {
+    <Vec<String> as serde::Deserialize>::deserialize(d).map(Some)
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct PrincipalRestriction {
+    #[serde(rename = __principal__)]
+    principal: String,
+    #[serde(rename = __restrictions__)]
+    restrictions: RestrictionLayer,
+}
+
+fn restriction_principal(value: &str) -> Result<[u8; 32], &'static str> {
+    use nostr::nips::nip19::FromBech32;
+    if value.starts_with("npub1") {
+        return PublicKey::from_bech32(value)
+            .map(|key| key.to_bytes())
+            .map_err(|_| "config_account");
+    }
+    if value.len() != 64
+        || !value
+            .bytes()
+            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+    {
+        return Err("config_account");
+    }
+    PublicKey::from_hex(value)
+        .map(|key| key.to_bytes())
+        .map_err(|_| "config_account")
+}
+
+impl RestrictionLayer {
+    fn patterns(&self, is_default: bool) -> impl Iterator<Item = (&str, bool)> {
+        let fallback = (is_default && self.allow.is_none()).then_some(POLICY_DEFAULT);
+        fallback
+            .into_iter()
+            .chain(self.allow.iter().flatten().map(String::as_str))
+            .map(|p| (p, false))
+            .chain(self.deny.iter().map(|p| (p.as_str(), true)))
+    }
+}
+
+enum PathToken {
+    Literal(u8),
+    Star,
+    DeepStar,
+}
+
+fn compile_restriction(pattern: &str) -> Result<Vec<PathToken>, &'static str> {
+    if pattern.len() > POLICY_PATTERN_BYTES
+        || !pattern.starts_with('/')
+        || pattern.chars().any(char::is_control)
+    {
+        return Err("invalid_policy");
+    }
+    let mut input = pattern.bytes().peekable();
+    let mut tokens = Vec::with_capacity(pattern.len());
+    while let Some(byte) = input.next() {
+        tokens.push(match byte {
+            b'\\' => match input.next() {
+                Some(b @ (b'\\' | b'*')) => PathToken::Literal(b),
+                _ => return Err("invalid_policy"),
+            },
+            b'*' if input.next_if_eq(&b'*').is_some() => {
+                while input.next_if_eq(&b'*').is_some() {}
+                PathToken::DeepStar
+            }
+            b'*' => PathToken::Star,
+            b => PathToken::Literal(b),
+        });
+    }
+    Ok(tokens)
+}
+
+// Each row records which path prefixes match the pattern prefix seen so far.
+fn restriction_matches(pattern: &[PathToken], path: &[u8]) -> bool {
+    let mut row = vec![false; path.len() + 1];
+    row[0] = true;
+    for token in pattern {
+        let mut diagonal = row[0];
+        row[0] &= !matches!(token, PathToken::Literal(_));
+        for (i, &byte) in path.iter().enumerate() {
+            let above = row[i + 1];
+            row[i + 1] = match token {
+                PathToken::Literal(b) => diagonal && byte == *b,
+                PathToken::Star => above || (row[i] && byte != b'/'),
+                PathToken::DeepStar => above || row[i],
+            };
+            diagonal = above;
+        }
+    }
+    row[path.len()]
+}
+
+impl CommandRestrictions {
+    pub fn from_json(bytes: &[u8]) -> Result<Self, &'static str> {
+        let policy: Self = serde_json::from_slice(bytes).map_err(|_| "config_schema")?;
+        policy.validate_bounds()?;
+        Ok(policy)
+    }
+
+    fn validate_bounds(&self) -> Result<(), &'static str> {
+        if self.version != POLICY_VERSION || self.entries.len() > POLICY_KEYS {
+            return Err("config_policy_bounds");
+        }
+        for entry in &self.entries {
+            restriction_principal(&entry.principal)?;
+        }
+        let mut count = 0;
+        for (pattern, _) in self.defaults.patterns(true).chain(
+            self.entries
+                .iter()
+                .flat_map(|entry| entry.restrictions.patterns(false)),
+        ) {
+            count += 1;
+            if count > POLICY_PATTERNS || pattern.len() > POLICY_PATTERN_BYTES {
+                return Err("config_policy_bounds");
+            }
+        }
+        Ok(())
+    }
+
+    /// Validate the full configuration before evaluating any principal's named paths.
+    pub fn validate_for_principals(&self, admitted: &[[u8; 32]]) -> Result<(), &'static str> {
+        self.validate_bounds()?;
+        for (pattern, _) in self.defaults.patterns(true) {
+            compile_restriction(pattern)?;
+        }
+        for entry in &self.entries {
+            if !admitted.contains(&restriction_principal(&entry.principal)?) {
+                return Err("invalid_policy");
+            }
+            for (pattern, _) in entry.restrictions.patterns(false) {
+                compile_restriction(pattern)?;
+            }
+        }
+        Ok(())
+    }
+
+    /// Pure restriction decision. Ok(true) requires a separate canonical-path check.
+    /// The caller independently establishes principal admission and resolves any alias.
+    pub fn check_named_exec(
+        &self,
+        principal: [u8; 32],
+        executable: &[u8],
+        alias: Option<&[u8]>,
+    ) -> Result<bool, &'static str> {
+        if executable.len() > POLICY_EXECUTABLE_BYTES
+            || executable.first() != Some(&b'/')
+            || executable[1..]
+                .split(|b| *b == b'/')
+                .any(|part| part.is_empty() || part == b"." || part == b"..")
+        {
+            return Err("invalid_request");
+        }
+        let mut layers = vec![(&self.defaults, true)];
+        for entry in &self.entries {
+            if restriction_principal(&entry.principal)? == principal {
+                layers.push((&entry.restrictions, false));
+            }
+        }
+        // Charge every applicable rule before returning a decision. Rule order cannot mask exhaustion.
+        let mut remaining = POLICY_FUEL;
+        let mut permit = true;
+        for (layer, is_default) in layers {
+            let mut allowed = !is_default && layer.allow.is_none();
+            let mut denied = false;
+            for (pattern, deny) in layer.patterns(is_default) {
+                let tokens = compile_restriction(pattern)?;
+                let mut width = executable.len() + 1;
+                if let Some(alias) = alias.filter(|_| deny) {
+                    width = width
+                        .checked_add(alias.len())
+                        .and_then(|n| n.checked_add(1))
+                        .ok_or("invalid_policy")?;
+                }
+                let cost = width
+                    .checked_mul(tokens.len() + 1)
+                    .ok_or("invalid_policy")?;
+                remaining = remaining.checked_sub(cost).ok_or("invalid_policy")?;
+                let matches = restriction_matches(&tokens, executable);
+                if deny {
+                    denied |=
+                        matches || alias.is_some_and(|name| restriction_matches(&tokens, name));
+                } else {
+                    allowed |= matches;
+                }
+            }
+            permit &= allowed && !denied;
+        }
+        if permit {
+            Ok(true)
+        } else {
+            Err("command_denied")
+        }
+    }
+}
+// End of generated command restrictions.

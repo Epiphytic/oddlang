@@ -22,7 +22,7 @@ fn room_config(root: &Path, endpoint: &str) -> Result<RoomConfig, Failure> {
     {
         return Err(INVALID_PROFILE);
     }
-    Ok(config)
+/*VALIDATE_COMMAND_RESTRICTIONS*/    Ok(config)
 }
 
 fn room_routing(root: &Path, profile: &ProfileRecord, endpoint: &TransportEndpoint)

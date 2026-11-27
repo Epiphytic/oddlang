@@ -36,6 +36,7 @@ mod root_data_scope;
 pub mod rust_recovery;
 pub mod local_file_catalog;
 pub mod read_only_file;
+pub mod restriction_lists;
 pub mod rust_roundtrip;
 pub mod sequence_journal;
 pub mod shared_declarations;
