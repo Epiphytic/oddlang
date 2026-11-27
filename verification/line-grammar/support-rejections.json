@@ -1,0 +1,43 @@
+[
+  {
+    "case": "distinct native support names",
+    "diagnostic": "distinct native support names",
+    "changes": [
+      {
+        "op": "replace",
+        "path": "/overlay/support/textChoices/tier",
+        "value": "is_branch"
+      }
+    ]
+  },
+  {
+    "case": "unknown finite text choice capture",
+    "diagnostic": "unknown finite text choice capture",
+    "changes": [
+      {
+        "op": "remove",
+        "path": "/overlay/support/textChoices/tier"
+      },
+      {
+        "op": "add",
+        "path": "/overlay/support/textChoices/missing",
+        "value": "TIERS"
+      }
+    ]
+  },
+  {
+    "case": "unknown nested text grammar",
+    "diagnostic": "unknown nested text grammar",
+    "changes": [
+      {
+        "op": "remove",
+        "path": "/overlay/support/nestedGrammars/urn:instrument:branch"
+      },
+      {
+        "op": "add",
+        "path": "/overlay/support/nestedGrammars/urn:missing",
+        "value": "is_branch"
+      }
+    ]
+  }
+]

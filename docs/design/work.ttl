@@ -727,7 +727,7 @@ w:sharedTypedDeclarations a p:Task ; rdfs:label "Project typed constants, named 
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:dependsOn w:nativePackageAssembly ; p:status p:done ;
     p:acceptance "Qualify an unrelated native consumer against constant references and bounds, interpolated errors, native ordering, Serde wire values, and public and crate-private paths. Bind every declaration to a portable obligation." ;
     p:evidence w:sharedTypedFixture .
-w:sharedTypedFixture a p:Artifact ; p:location "verification/shared-declarations/verify.py" .
+w:sharedTypedFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/shared-declarations.rs" .
 
 w:sharedFormatterReview a p:Finding ; rdfs:label "Forwarding outer formatter options into an embedded payload changes its observable text" ; p:source w:sharedTypedFixture .
 w:sharedTypedDeclarations p:addresses w:sharedFormatterReview .
@@ -1581,7 +1581,7 @@ w:orderedLineGrammar a p:Task ;
     p:acceptance "Emit native parsers for exact byte framing, rows, tokens and typed captures. Verify unrelated native typed capture and malformed boundary cases." ;
     p:status p:done ; p:evidence w:orderedLineGrammarFixture .
 w:orderedLineGrammarFixture a p:Artifact ;
-    p:location "verification/line-grammar/verify.py" .
+    p:location "verification/provider-validation/src/bin/line-grammar/inventory.rs" .
 w:checkedRecordGrammar a p:Task ;
     rdfs:label "Project finite relations, aggregate limits and typed record results from line grammars" ;
     p:milestone w:marmishMilestone ; p:source w:orderedLineGrammarPlan ;
@@ -1589,7 +1589,7 @@ w:checkedRecordGrammar a p:Task ;
     p:acceptance "Apply checked finite and aggregate constraints and construct native typed records, stable parse errors and controlled name formatters." ;
     p:status p:done ; p:evidence w:checkedRecordGrammarFixture .
 w:checkedRecordGrammarFixture a p:Artifact ;
-    p:location "verification/line-grammar/verify_records.py" .
+    p:location "verification/provider-validation/src/bin/line-grammar/records.rs" .
 w:pureReleaseManifestGrammar a p:Task ;
     rdfs:label "Qualify native release manifest parsing and identifiers" ;
     p:milestone w:marmishMilestone ; p:source w:orderedLineGrammarPlan ;
@@ -1625,7 +1625,7 @@ w:lineGrammarNativeSupport a p:Task ;
     p:acceptance "Compile ordered native text arrays and nested predicates from a selected graph with an unrelated crate-visible fixture. Reject unknown or colliding overlay bindings." ;
     p:status p:done ; p:evidence w:lineGrammarNativeSupportFixture .
 w:lineGrammarNativeSupportFixture a p:Artifact ;
-    p:location "verification/line-grammar/verify_support.py" .
+    p:location "verification/provider-validation/src/bin/line-grammar/support.rs" .
 w:convergedReleaseManifest a p:Task ;
     rdfs:label "Qualify the pure parser inside the converged native package" ;
     p:milestone w:marmishMilestone ; p:source w:convergedReleaseManifestPlan ;
@@ -1815,7 +1815,7 @@ w:pointerWidthPublicRecords a p:Task ;
     p:dependsOn w:observationalRecordDefaults ; p:status p:done ; p:evidence w:pointerWidthRecordFixture ;
     p:acceptance "A native fixture observes the pointer-width primitive at zero and maximum and distinguishes a fixed-width source mutation and a shadowed type." .
 w:pointerWidthRecordFixture a p:Artifact ;
-    p:location "verification/observational-record-defaults/pointer_width.py" .
+    p:location "verification/provider-validation/src/bin/record-pointer-width.rs" .
 w:pointerWidthLocalGlobReview a p:Finding ;
     rdfs:label "Keep locally bound glob prefixes out of the unresolved dependency path" ;
     p:source w:pointerWidthRecordFixture .
@@ -1828,7 +1828,7 @@ w:sharedWireChoiceCopy a p:Task ;
     p:evidence w:sharedWireChoiceCopyFixture .
 w:sharedWireChoiceCopyFixture a p:Artifact ;
     rdfs:label "Native string-choice numbering, wire and Copy controls" ;
-    p:location "verification/shared-declarations/verify.py" .
+    p:location "verification/provider-validation/src/bin/shared-declarations.rs" .
 w:wholeMarmishStructure p:dependsOn w:sharedWireChoiceCopy .
 
 w:linuxKnownPublicImports a p:Task ;

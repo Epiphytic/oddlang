@@ -17,7 +17,7 @@ native record. Borrowed text carries the input lifetime. Literal captures
 are static strings. Decoded hexadecimal captures are fixed byte arrays.
 Each scalar integer has the declared native unsigned width.
 
-Run `python3 -B verification/line-grammar/verify.py /path/to/oddlang` with
+Run `cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin line-grammar -- inventory /path/to/oddlang` with
 Rust 1.97.1. The unrelated fixture compiles the generated Rust and reads
 its actual typed output. It also rejects malformed framed inputs, radix
 spelling, a noncanonical version or decimal, duplicate captures, and
@@ -38,7 +38,9 @@ fixed arrays, and vectors of declared records from named captures. It
 also binds simple formatters made from literal text, selected record text
 fields and an optional textual argument.
 
-Run `python3 -B verification/line-grammar/verify_records.py /path/to/oddlang`
+Run `cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin line-grammar -- records /path/to/oddlang`
 to compile and exercise an unrelated result with exact error and record
 types, distinct finite-table and overflow failures, and checked package
 error linkage.
+
+Run the same command with the `support` subcommand to compile the crate-visible grammar predicate and ordered choice array and exercise their three binding refusals.

@@ -22,11 +22,11 @@ The [combined workspace qualification](https://github.com/Epiphytic/marmish-oddl
 - [x] Combine the native package inputs in the companion, checking each changed member against its parent. Include the two private parser tests, the observational records, the copy-only vault mode, terminal CLI metadata and structured diagnostics.
 - [x] Cold-build on native Darwin and Linux ARM64 with the original source hidden and publish the resulting workspace lock. Run the public import audit, named upstream tests and CLI comparisons against those artifacts. Keep separately tested cases out of the counts for the combined workspace.
 
-From a clean compiler checkout, build with `cargo +1.96.1 build --locked --offline`, then run `cargo +1.96.1 test --locked --offline --lib`. Set `cli=$PWD/target/debug/oddlang` and run each of the following with `python3 -B verification/PATH "$cli"`:
+From a clean compiler checkout, build with `cargo +1.96.1 build --locked --offline`, then run `cargo +1.96.1 test --locked --offline --lib`. Set `cli=$PWD/target/debug/oddlang`. Run the Rust qualification binaries with `cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin BIN -- [SUBCOMMAND] "$cli"`.
 
-- `line-grammar/verify_records.py`, `line-grammar/verify_support.py` and `line-grammar/verify.py`
-- `record-defaults` and `qualify-choices -- equality`
-- `structured-diagnostics/check.py` and `command-surface/prefix.py`
+- `line-grammar` with each of the `records`, `support` and `inventory` subcommands
+- `record-defaults` and the `equality` subcommand of `qualify-choices`
+- `structured-diagnostics` and `python3 -B verification/command-surface/prefix.py "$cli"`
 
 All seven fixture commands and the 13 library tests passed on Darwin ARM64. They qualify compiler composition. The application results below come from separate sealed builds.
 
