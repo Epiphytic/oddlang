@@ -3035,3 +3035,23 @@ w:qualifyWaitProfileErrors a p:Task ;
     p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
     p:status p:planned ; p:addresses w:waitProfileErrorFinding ;
     p:acceptance "Reproduce all nine local wait observations with distinct private state per invocation, preserving refusal of unsafe profiles and files." .
+
+w:foregroundRelayCountObserver a p:Artifact ;
+    rdfs:label "Read-only counts by event kind around a foreground command attempt" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4f693395e6a5a4a5b549d005d0823ce4a4a50cb9/verification/whole/basic-command-interop/observe.py" .
+w:foregroundRelayFirstControl a p:Artifact ;
+    rdfs:label "Mainline control stopped before the relay count snapshots at engine startup" ;
+    p:location "verification/foreground-relay-control-macos-arm64.json" .
+w:basicServerQualification p:evidence w:foregroundRelayCountObserver, w:foregroundRelayFirstControl .
+w:foregroundRelayGeneratedServer a p:Artifact ;
+    rdfs:label "Generated-server attempt gained rows of two relay event kinds and produced no receiver receipt" ;
+    p:location "verification/foreground-relay-server-macos-arm64.json" .
+w:basicServerQualification p:evidence w:foregroundRelayGeneratedServer .
+w:foregroundRelaySuccessfulControl a p:Artifact ;
+    rdfs:label "Mainline control reproduced the foreground result and receiver receipt with relay counts at both boundaries" ;
+    p:location "verification/foreground-relay-control-retry-macos-arm64.json" .
+w:basicServerQualification p:evidence w:foregroundRelaySuccessfulControl .
+w:foregroundRelayGeneratedClient a p:Artifact ;
+    rdfs:label "Generated client observed one additional relay event and returned a local response error" ;
+    p:location "verification/foreground-relay-client-macos-arm64.json" .
+w:basicClientQualification p:evidence w:foregroundRelayGeneratedClient, w:foregroundRelaySuccessfulControl .
