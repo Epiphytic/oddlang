@@ -1,14 +1,14 @@
 {
-  "auditedCompanionRevision": "ff7b923bdbb3596cbef7b117683f0be847fe77c0",
-  "previousRevision": "84e94d27c68a9f70f9b5aaf1a8aab85a95598e4d",
-  "reproducedTableSha256": "cbe947772decf29701800e93cef44d83754d27d2850ca3cb085cec63ad75e761",
-  "remainingProjectToolFiles": 112,
+  "auditedCompanionRevision": "eb2110a1b319658b7baf6b781e5ee36722486180",
+  "previousRevision": "ff7b923bdbb3596cbef7b117683f0be847fe77c0",
+  "reproducedTableSha256": "fd1c868e554db0b79fe123f7d78ecf59674f49e1d869eb5a829ab0925ba2273a",
+  "remainingProjectToolFiles": 111,
   "remainingProjectExtensions": {
-    ".py": 109,
+    ".py": 108,
     ".sh": 3
   },
   "removedSincePrevious": [
-    "verification/whole/public-types/check_workspace.py"
+    "verification/whole/source-copy-frame-guards/verify.py"
   ],
   "addedSincePrevious": []
 }

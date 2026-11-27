@@ -1,0 +1,37 @@
+{
+  "host": "aarch64-apple-darwin",
+  "companionRevision": "eb2110a1b319658b7baf6b781e5ee36722486180",
+  "captureToolsRevision": "af40726b9499456e58e3f77680208ab46b331b13",
+  "receiptPath": "verification/whole/source-copy-frame-guards/reference-aarch64-apple-darwin.json",
+  "receiptSha256": "6b0245ad42bde69a00e2ae66bc39f7dd382f5d794e0e23f2cd29b7ffb2533f44",
+  "observations": {
+    "original": "af54339d250290490d62d4475a77539b7e739071",
+    "framework": "00d4e6411baf9a74a9af2be60d1d4fbc0520b5ba",
+    "rust": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6",
+    "cases": 7,
+    "rules": 9,
+    "checks": 72,
+    "changedOutcomes": 3,
+    "originalGraphSha256": "30d985c70e3e2834877396c3aa0a8906b4ac6ce119deab9b445bb017b71b1f05",
+    "mutantGraphSha256": "86eca87904f78c301cfcfa9dcaaaa996bad3578d677fc84ab5aa1d89f7186aaa",
+    "originalEvidenceSha256": "c6512545c9383b299aa4c9a815d74b09c3f38da648fb7d34c75a2967133f3c03",
+    "mutantEvidenceSha256": "60bc7d1c5a54de5e3876da329e10eb9cf11d63a6572bfaaf587d3067593611ca",
+    "packageLockSha256": "8dc65150ddb26ea35ef655ac0b0a345baa24befdb4b55e04d324a2990ac312fe",
+    "callerSha256": "a0142fbe611e7bfadc4ce51425a0d28975f1b10279d2dbc62a72149068b024e5",
+    "sourceReadDenied": true,
+    "remainingUnresolvedVariants": 2
+  },
+  "comparison": "The Rust verifier and historical Python verifier reproduced the archived receipt byte for byte. The historical verifier required the missing rustix entry in the copy-manifest lockfile.",
+  "staleCaptureControl": "Supplying baseline compiler evidence for the changed encoder failed the selected method or source pin and produced no receipt.",
+  "lockedOfflineCargoMetadata": [
+    "canonical-public-data",
+    "copy-checkpoint",
+    "copy-manifest",
+    "release-manifest-projection",
+    "stream-wire"
+  ],
+  "sharedHelperChecks": [
+    "The standalone mixed-library copy pipe replay matched its archived receipt byte for byte.",
+    "The archive helper reproduced the pinned copy protocol source and rejected an existing destination."
+  ]
+}

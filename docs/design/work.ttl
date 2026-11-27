@@ -3719,3 +3719,8 @@ w:wholeStreamBlock p:evidence w:copyDataPipeInterop .
 w:copyDataPipeInterop a p:Artifact ;
     rdfs:label "The original and reconstructed copy Data libraries exchanged 1,260 contiguous frames in each direction through local pipes on ARM64 macOS. Each run matched 4,210,721 wire bytes against the independent frame encoder and 4,194,341 decoded bytes against the input. Both decoders rejected truncation and a noncontiguous offset." ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/ff7b923bdbb3596cbef7b117683f0be847fe77c0/verification/whole/copy-frame/pipe-aarch64-apple-darwin.json" .
+
+w:portHistoricTooling p:evidence w:sourceCopyGuardReplayRust .
+w:sourceCopyGuardReplayRust a p:Artifact ;
+    rdfs:label "On ARM64 macOS the Rust replay reproduced the archived guard receipt across seven variants, nine rules and 72 caller observations. Three named errors changed when the two Data encoder checks were reversed. Substituted baseline compiler evidence failed the mutation source pin." ;
+    p:location "verification/provider-tooling/source-copy-guard-replay.json" .
