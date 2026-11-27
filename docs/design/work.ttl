@@ -3117,6 +3117,11 @@ w:portHistoricTooling a p:Task ;
 w:providerToolInventory a p:Artifact ;
     p:location "verification/provider-tooling/baseline.tsv" .
 
+w:portHistoricTooling p:evidence w:marmishSourceInventoryReplay .
+w:marmishSourceInventoryReplay a p:Artifact ;
+    rdfs:label "Rust replay of the pinned Marmish source inventory, Cargo configurations, static tests and packaging inputs" ;
+    p:location "verification/provider-tooling/marmish-source-inventory-replay.json" .
+
 w:portHistoricTooling p:evidence w:rustWorkflowReplay .
 w:rustWorkflowReplay a p:Artifact ;
     rdfs:label "Rust import cleanup, assembly preparation, profile checks and Wasm host receipt replay on macOS ARM64" ;

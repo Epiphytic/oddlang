@@ -1,6 +1,6 @@
 # Marmish inventory units and platform scopes
 
-The Phase 5 inventory freezes Marmish revision `49fc705408a230bd0ad896248d08dbdd2faad05a`. From Oddlang, run `python3 -B scripts/marmish/inventory.py UPSTREAM OUTPUT_DIRECTORY` against a clean checkout with the pinned tools cached. The command emits a compressed JSON inventory and a summary. Compare `sourceInventorySha256` across hosts, and use `inventorySha256` for the complete archive including the host compiler observation. The checked summary records the Apple Silicon run. [Frozen summary](../../examples/marmish/inventory-summary.json)
+The Phase 5 inventory freezes Marmish revision `49fc705408a230bd0ad896248d08dbdd2faad05a`. From Oddlang, run `cargo +1.97.1 run --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml -- UPSTREAM OUTPUT_DIRECTORY --compare-summary examples/marmish/inventory-summary.json` against a clean checkout with the pinned tools cached. The command emits a compressed JSON inventory and a summary. Compare `sourceInventorySha256` across hosts, and use `inventorySha256` for the complete archive including the host compiler observation. The checked summary records the Apple Silicon run. [Frozen summary](../../examples/marmish/inventory-summary.json)
 
 ## Counting declarations
 

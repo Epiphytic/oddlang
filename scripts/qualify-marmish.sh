@@ -36,20 +36,8 @@ if [[ $mode == frame ]]; then
     echo "Marmish framing observations recorded in $report"
     exit 0
 fi
-scripts/marmish/offline.sh python3 scripts/marmish/inventory.py "$upstream" "$report/inventory"
-python3 - "$report/inventory/inventory-summary.json" <<'CHECK_INVENTORY'
-import json, sys
-from pathlib import Path
-expected = json.loads(Path("examples/marmish/inventory-summary.json").read_bytes())
-actual = json.loads(Path(sys.argv[1]).read_bytes())
-host_specific = {"host", "inventorySha256"}
-def portable(summary):
-    return {key: value for key, value in summary.items() if key not in host_specific}
-if portable(expected) != portable(actual):
-    raise SystemExit("portable Marmish inventory or summary changed")
-if expected["host"] == actual["host"] and expected != actual:
-    raise SystemExit("host Marmish inventory changed")
-CHECK_INVENTORY
+scripts/marmish/offline.sh cargo +1.97.1 run --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml -- \
+    "$upstream" "$report/inventory" --compare-summary examples/marmish/inventory-summary.json
 scripts/marmish/offline.sh python3 scripts/marmish/observations.py "$upstream" "$report/observations"
 python3 scripts/marmish/baseline.py "$upstream" "$report/native"
 python3 scripts/marmish/receipt.py "$report" --write

@@ -13,3 +13,4 @@ Implement the [approved Wasm design](../specs/2026-11-26-wasm-provider-design.md
 - [x] Compare the Rust assembly preparers against the historical v1 and v2 content stores and manifests. Reproduce Rust declaration and native consumer observations through the Rust verification tools.
 - [x] Replay the published framing build-closure archive with the Rust verifier, repeat its sandbox denial control, compare all compiler prerequisites and package pins, and check the ordered build-report and recovery fixtures.
 - [x] Replay native package projection, sibling workspace linking, cold and disconnected Git acquisition, and both native process wrappers with independent Rust callers and fresh-output rejection controls.
+- [x] Rebuild the pinned Marmish source inventory in Rust, compare its archive and summary byte-for-byte, and verify lexical scope, platform eligibility, packaging recipes and open completeness obligations.
