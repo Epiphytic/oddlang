@@ -30,6 +30,11 @@ def checked(*args, cwd=None):
     return subprocess.run(args, cwd=cwd, check=True, capture_output=True, timeout=120)
 
 
+def field_meter(workspace):
+    checked("cargo", "build", "--release", "--locked", "--offline", cwd=workspace)
+    return workspace / os.environ.get("CARGO_TARGET_DIR", "target") / "release/field-meter"
+
+
 def capture(process):
     stdout, stderr = process.communicate(timeout=5)
     return process.returncode, stdout, stderr
@@ -73,6 +78,10 @@ def exchange(binary, path, wire, expected, *, args=None, env=None, request=REQUE
     path.unlink()
 
 
+checked("cargo", "+1.97.1", "run", "--offline", "--locked", "--quiet",
+        "--manifest-path", ROOT.parent / "provider-validation/Cargo.toml",
+        "--bin", "field-meter-projection", "--", ODDLANG)
+
 with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
     root = Path(directory)
     for file in ("cli.json", "graph.json", "Cargo.lock"):
@@ -101,8 +110,7 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
     }
     write("manifest.json", manifest)
     checked(ODDLANG, "build", "native-package", "rust", root / "manifest.json", root / "generated")
-    checked("cargo", "build", "--release", "--locked", "--offline", cwd=root / "generated")
-    binary = root / "generated/target/release/field-meter"
+    binary = field_meter(root / "generated")
     path = root / "s"
     exchange(binary, path, reply(b'{"ready":true,"reading":{"z":1,"a":2},"notice":null}'),
              (0, b'{"reading":{"a":2,"z":1},"ready":true}\n', b""))
@@ -126,16 +134,7 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
 
     dynamic = json.loads((root / "graph.json").read_bytes())
     dynamic["request_id"] = "urn:field:request"
-    dynamic["request"] = [
-        {"key": "verb", "value": "read"},
-        {"key": "sensor", "argument": {"id": "sensor", "kind": "unsigned64"}},
-        {"key": "label", "argument": {"id": "label", "kind": "string"}},
-        {"key": "waiting", "argument": {"id": "waiting", "kind": "flag"}},
-        {"key": "probes", "argument": {"id": "probe", "kind": "repeated_string"}},
-        {"key": "comment", "value": None},
-    ]
-    for field in dynamic["request"]:
-        field["id"] = "urn:field:request:" + field["key"]
+    dynamic["request"] = json.loads((ROOT / "typed-request.json").read_bytes())
     dynamic_cli = json.loads((root / "cli.json").read_bytes())
     dynamic_cli["root"]["arguments"].extend([
         {"id": "sensor", "long": "sensor", "kind": "u64", "global": True},
@@ -157,8 +156,7 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
     built = subprocess.run([ODDLANG, "build", "native-package", "rust", root / "dynamic-package.json",
                             root / "dynamic-client"], capture_output=True, timeout=120)
     assert built.returncode == 0, built.stderr
-    checked("cargo", "build", "--release", "--locked", "--offline", cwd=root / "dynamic-client")
-    dynamic_bin = root / "dynamic-client/target/release/field-meter"
+    dynamic_bin = field_meter(root / "dynamic-client")
     args = ["read", "--port", path, "--sensor", "18446744073709551615", "--label", 'site"3',
             "--waiting", "--probe", "b", "--probe", "a"]
     valid = br'{"verb":"read","sensor":18446744073709551615,"label":"site\"3","waiting":true,"probes":["b","a"],"comment":null}'
@@ -192,95 +190,15 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
                               root / "bad-dynamic-client"], capture_output=True, timeout=120)
         assert bad.returncode != 0 and f'incompatible argument "{argument}"'.encode() in bad.stderr
         assert not (root / "bad-dynamic-client").exists()
-    checked(ODDLANG, "build", "local-command-client", "rust", root / "dynamic.json",
-            root / "binding.json", root / "dynamic-effects")
-    config = root / "dynamic-effects"
-    policy = (config / "request-obligations.json").read_bytes()
-    projection = json.loads((config / "projection.lock").read_bytes())
-    assert hashlib.sha256(policy).hexdigest() == projection["requestObligationsSha256"]
-    obligations = json.loads(policy)
-    assert obligations["qualification"] == "independent-witness-required"
-    header, *fields = obligations["obligations"]
-    assert header["declaration"] == "urn:field:request" and header["role"] == "request-envelope"
-    assert header["maximumFrameBytes"] == 128 and header["objectOrder"] == "declarationOrder"
-    assert header["argumentSource"] == "explicitCommandLine"
-    assert header["stringEscaping"]["otherControls"] == "lowercase-u00xx"
-    assert header["stringEscaping"]["controlRange"] == "U+0000-U+001F"
-    keys = ["verb", "sensor", "label", "waiting", "probes", "comment"]
-    assert [(field["declaration"], field["role"], field["position"], field["key"]) for field in fields] == [
-        (f"urn:field:request:{key}", "request-field", index, key) for index, key in enumerate(keys)
-    ]
-    assert fields[1]["argument"] == {"id": "sensor", "kind": "unsigned64"}
-    assert fields[1]["representation"] == {
-        "type": "integer", "minimumDecimal": "0",
-        "maximumDecimal": "18446744073709551615", "absent": "reject",
-    }
-    assert "value" in fields[-1] and fields[-1]["value"] is None
-    for change, diagnostic in (
-        (lambda graph: graph["transport"].update(maximum_frame_bytes=1),
-         b"minimum request exceeds frame limit"),
-        (lambda graph: graph.pop("request_id"),
-         b"missing request declaration identity"),
-        (lambda graph: graph["request"][1].update(id="urn:field:request"),
-         b"duplicate request declaration identity"),
-        (lambda graph: graph["request"][-1].update(value={"samples": [0.25]}),
-         b"identified request literals require signed or unsigned integer JSON numbers"),
-        (lambda graph: graph["request"][1].update(value=None),
-         b"request field needs exactly one literal value or argument"),
-        (lambda graph: graph["request"][1].pop("argument"),
-         b"request field needs exactly one literal value or argument"),
-    ):
-        variant = json.loads((root / "dynamic.json").read_bytes())
-        change(variant)
-        write("bad-dynamic.json", variant)
-        bad = subprocess.run([ODDLANG, "build", "local-command-client", "rust", root / "bad-dynamic.json",
-                              root / "binding.json", root / "bad-effects"], capture_output=True, timeout=120)
-        assert bad.returncode != 0 and diagnostic in bad.stderr
-        assert not (root / "bad-effects").exists()
-    minimum = b'{"verb":"read","sensor":0,"label":"","waiting":true,"probes":[],"comment":null}'
-    dynamic["transport"]["maximum_frame_bytes"] = len(minimum)
-    write("minimum-dynamic.json", dynamic)
-    checked(ODDLANG, "build", "local-command-client", "rust", root / "minimum-dynamic.json",
-            root / "binding.json", root / "minimum-dynamic-client")
 
     typed = json.loads((root / "graph.json").read_bytes())
     typed["transport"]["maximum_frame_bytes"] = 512
-    typed["response"].update(id="urn:field:reply", ordered_sequence_minimum=2)
-    for field in typed["response"]["fields"]:
-        field["id"] = "urn:field:reply:" + field["key"]
-
-    def nested(owner, key, kind):
-        return {"id": f"urn:field:{owner}:{key}", "key": key,
-                "kind": kind, "presence": "required"}
-
-    typed["response"]["fields"][0]["kind"] = {"kind":"ref", "id":"urn:field:reading"}
-    typed["response"]["declarations"] = [
-        {"kind":"tagged", "id":"urn:field:reading", "tag":"mode", "variants":[
-            {"id":"urn:field:reading:idle", "tag":"idle"},
-            {"id":"urn:field:reading:scan", "tag":"scan", "fields":[
-                nested("scan","digest",{"kind":"lower_hex", "bytes":2}),
-                nested("scan","rows",{"kind":"list","item":{"kind":"ref","id":"urn:field:sample"}}),
-            ]},
-        ]},
-        {"kind":"record", "id":"urn:field:sample", "fields":[
-            nested("sample","value","u8"),
-            nested("sample","reference",{"kind":"fixed_bytes","length":2}),
-        ]},
-    ]
+    typed["response"] = json.loads((ROOT / "typed-response.json").read_bytes())
     write("typed.json", typed)
-    checked(ODDLANG, "build", "local-command-client", "rust", root / "typed.json",
-            root / "binding.json", root / "reply-projection")
-    projected = root / "reply-projection"
-    lock = json.loads((projected / "projection.lock").read_bytes())
-    assert lock["replyObligationsSha256"] == hashlib.sha256(
-        (projected / "reply-obligations.json").read_bytes()).hexdigest()
-    obligations = json.loads((projected / "reply-obligations.json").read_bytes())["obligations"]
-    assert len({row["declaration"] for row in obligations}) == len(obligations) == 12
     manifest["components"][1]["graph"] = pin("typed.json")
     write("manifest.json", manifest)
     checked(ODDLANG, "build", "native-package", "rust", root / "manifest.json", root / "typed-client")
-    checked("cargo", "build", "--release", "--locked", "--offline", cwd=root / "typed-client")
-    typed_bin = root / "typed-client/target/release/field-meter"
+    typed_bin = field_meter(root / "typed-client")
     exchange(typed_bin, path, reply(b'[null,true]'), (0, b'{"reading":null,"ready":true}\n', b""))
     exchange(typed_bin, path, reply(b'[null,false,"stale"]'), (3, b'{"reading":null,"ready":false,"notice":"stale"}\n', b""))
     exchange(typed_bin, path, reply(b'{"ready":true,"reading":{"mode":"idle","discard":0}}'),
@@ -293,31 +211,6 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
                  b'{"ready":true,"reading":{"mode":"scan","digest":"face","rows":[{"value":256,"reference":[1,2]}]}}',
                  b'{"ready":true,"reading":{"mode":"scan","digest":"face","rows":[{"value":255,"reference":[1]}]}}'):
         exchange(typed_bin, path, reply(body), (10, b"", b"invalid sensor response\n"))
-    def unspecified_default(graph):
-        del graph["response"]["ordered_sequence_minimum"]
-        graph["response"]["fields"][-1]["default"] = True
-
-    for name, mutate, error in (
-        ("unspecified-default", unspecified_default, b"reply field default requires ordered_sequence_minimum"),
-        ("sequence", lambda graph: graph["response"].update(ordered_sequence_minimum=1), b"invalid nullable suffix"),
-        ("dangling", lambda graph: graph["response"]["fields"][0]["kind"].update(id="urn:field:missing"), b"unknown reply type"),
-        ("identity", lambda graph: graph["response"]["fields"][0].update(id="urn:field:reading"), b"duplicate reply declaration"),
-    ):
-        invalid_graph = json.loads((root / "typed.json").read_bytes())
-        mutate(invalid_graph)
-        write(name + ".json", invalid_graph)
-        invalid = subprocess.run([ODDLANG, "build", "local-command-client", "rust", root / (name + ".json"),
-                                  root / "binding.json", root / name], capture_output=True)
-        assert invalid.returncode and error in invalid.stderr and not (root / name).exists(), invalid.stderr
-    anonymous = json.loads((root / "graph.json").read_bytes())
-    anonymous["response"]["fields"][0]["kind"] = "u8"
-    write("anonymous-unsigned.json", anonymous)
-    invalid = subprocess.run(
-        [ODDLANG, "build", "local-command-client", "rust", root / "anonymous-unsigned.json",
-         root / "binding.json", root / "anonymous"], capture_output=True,
-    )
-    assert invalid.returncode and b"typed reply needs a root declaration identity" in invalid.stderr
-    assert not (root / "anonymous").exists()
     manifest["components"][1]["graph"] = pin("graph.json")
 
     discovery_graph = json.loads((root / "graph.json").read_bytes())
@@ -368,8 +261,7 @@ with tempfile.TemporaryDirectory(prefix="fmc-", dir="/tmp") as directory:
     manifest["components"][1]["graph"] = pin("discovery.json")
     write("manifest.json", manifest)
     checked(ODDLANG, "build", "native-package", "rust", root / "manifest.json", root / "discovery-client")
-    checked("cargo", "build", "--release", "--locked", "--offline", cwd=root / "discovery-client")
-    discovery_bin = root / "discovery-client/target/release/field-meter"
+    discovery_bin = field_meter(root / "discovery-client")
     home, scratch = root / "h", root / "t"
     state = home / "meter"
     station = state / "bench"

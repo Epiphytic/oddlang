@@ -8,9 +8,12 @@ The generated source and locks for the original literal field-meter graph and th
 
 ```sh
 cargo +1.97.1 build --release --locked --offline --bin oddlang
+cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin field-meter-projection -- target/release/oddlang
 python3 -B verification/local-command-client/check.py target/release/oddlang
 cargo +1.97.1 test --release --locked --offline --lib
 ```
+
+The standalone Rust command checks the request and reply catalogs and eleven invalid graphs. The full field-meter fixture also invokes it and exercises the generated client through a local Unix socket.
 
 Claude Opus 5.5 approved the final code in Claude Code auto mode. Earlier review findings identified missing argument and field obligations, escape and number encoding details, edge-size coverage, and implicit CLI defaults overriding the request catalog. The final code binds the catalog to stable declaration IRIs, records exact encoding rules, and uses only values explicitly supplied on the command line. The reviewer inspected code and the fixture. The runtime observations above came from separate verification runs.
 

@@ -1,0 +1,91 @@
+{
+  "fields": [
+    {
+      "key": "reading",
+      "kind": {
+        "kind": "ref",
+        "id": "urn:field:reading"
+      },
+      "presence": "nullable",
+      "id": "urn:field:reply:reading"
+    },
+    {
+      "key": "ready",
+      "kind": "bool",
+      "presence": "required",
+      "id": "urn:field:reply:ready"
+    },
+    {
+      "key": "notice",
+      "kind": "string",
+      "presence": "omit_null",
+      "id": "urn:field:reply:notice"
+    }
+  ],
+  "success_field": "ready",
+  "success_exit": 0,
+  "failure_exit": 3,
+  "id": "urn:field:reply",
+  "ordered_sequence_minimum": 2,
+  "declarations": [
+    {
+      "kind": "tagged",
+      "id": "urn:field:reading",
+      "tag": "mode",
+      "variants": [
+        {
+          "id": "urn:field:reading:idle",
+          "tag": "idle"
+        },
+        {
+          "id": "urn:field:reading:scan",
+          "tag": "scan",
+          "fields": [
+            {
+              "id": "urn:field:scan:digest",
+              "key": "digest",
+              "kind": {
+                "kind": "lower_hex",
+                "bytes": 2
+              },
+              "presence": "required"
+            },
+            {
+              "id": "urn:field:scan:rows",
+              "key": "rows",
+              "kind": {
+                "kind": "list",
+                "item": {
+                  "kind": "ref",
+                  "id": "urn:field:sample"
+                }
+              },
+              "presence": "required"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "record",
+      "id": "urn:field:sample",
+      "fields": [
+        {
+          "id": "urn:field:sample:value",
+          "key": "value",
+          "kind": "u8",
+          "presence": "required"
+        },
+        {
+          "id": "urn:field:sample:reference",
+          "key": "reference",
+          "kind": {
+            "kind": "fixed_bytes",
+            "length": 2
+          },
+          "presence": "required"
+        }
+      ]
+    }
+  ]
+}

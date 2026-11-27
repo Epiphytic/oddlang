@@ -1041,7 +1041,7 @@ w:foregroundProfileOwner a p:Task ;
     p:acceptance "Acquire and validate a native file-backed profile, bind a private discoverable runtime, and preserve source-free operation and explicit provider readiness scope." .
 
 w:foregroundProfileOwnerFixture a p:Artifact ;
-    p:location "verification/foreground-profile-owner/check.py" .
+    p:location "verification/provider-validation/src/bin/foreground-profile-owner/main.rs" .
 
 w:foregroundProfileReview a p:Finding ;
     rdfs:label "Recover a matching dead runtime under the lease and bind explicit backend choices" ;
@@ -1166,7 +1166,7 @@ w:localProviderReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/53> .
 
 w:localProviderBarrierFixture a p:Artifact ;
-    p:location "verification/foreground-profile-owner/stages.py" .
+    p:location "verification/foreground-profile-owner/shutdown/src/lib.rs" .
 
 w:localProviderBarrierReview a p:Finding ;
     rdfs:label "Prove terminal account database release and join the native forwarder's delivery worker" ;
@@ -3338,3 +3338,13 @@ w:portHistoricTooling p:evidence w:nativeLocalRequestQueue .
 w:nativeLocalRequestQueue a p:Artifact ;
     rdfs:label "Rust queue qualifier ran separate write and recovery processes, two concurrent submitters, and eight invalid graph controls against the independent gauge consumer" ;
     p:location "verification/provider-tooling/local-request-queue.json" .
+
+w:portHistoricTooling p:evidence w:rustForegroundStationReplay .
+w:rustForegroundStationReplay a p:Artifact ;
+    rdfs:label "Rust replay of the independently named foreground station and two telemetry shutdown barrier cases" ;
+    p:location "verification/provider-tooling/foreground-station-rust.json" .
+
+w:portHistoricTooling p:evidence w:fieldMeterProjectionRust .
+w:fieldMeterProjectionRust a p:Artifact ;
+    rdfs:label "Rust verified the field-meter request and reply declaration catalogs, accepted the exact minimum frame, rejected eleven invalid graphs and six altered catalogs, and passed within the independent local client fixture" ;
+    p:location "verification/provider-tooling/field-meter-projection.json" .

@@ -1,0 +1,12 @@
+{
+  "platform": "aarch64-apple-darwin",
+  "rust": "1.97.1",
+  "compilerSha256": "ccd3aa5caeac7c57dddb5d8c04e6cc619c7580e446edb8139bc00f0c6555e09f",
+  "requestFixtureSha256": "f1fee5cd2c636bbc51ec4f5cbe6ea067684ab22842858363761fcc5e2a0e0190",
+  "responseFixtureSha256": "a80fc180bde76d8ce85454f8efde86571053c758702935adc4fa2738f6288037",
+  "requestFields": 6,
+  "distinctReplyDeclarations": 12,
+  "rejectedGraphMutations": 11,
+  "rejectedCatalogMutations": ["stale digest", "reordered fields", "missing explicit null", "incorrect control escaping", "incorrect integer upper bound", "duplicate reply declaration"],
+  "fullFixtureStdout": "field-meter IPC: literal and typed request frames, frame limits, argument checks, typed replies, and private endpoint discovery passed\n"
+}
