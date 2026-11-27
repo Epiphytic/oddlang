@@ -319,13 +319,21 @@ fn proof(root: &Path, report: &Path, hashes: &Value) -> Result<Value> {
         "Cargo.toml",
         "Cargo.lock",
         "src/lib.rs",
-        "scripts/prove.sh",
+        if package.join("scripts/tools.rs").is_file() {
+            "scripts/tools.rs"
+        } else {
+            "scripts/prove.sh"
+        },
         if package.join("scripts/runner.rs").is_file() {
             "scripts/runner.rs"
         } else {
             "scripts/runner.py"
         },
-        "scripts/setup.sh",
+        if package.join("scripts/setup.rs").is_file() {
+            "scripts/setup.rs"
+        } else {
+            "scripts/setup.sh"
+        },
     ];
     require(
         proof["packageSha256"] == inventory(&package, package_files)?,
@@ -415,7 +423,14 @@ fn summarize(root: &Path, report: &Path) -> Result<Value> {
         HARNESS,
         ORACLE,
         "docs/language/ledger-core.md",
-        "scripts/verify-rust-translation.sh",
+        if root
+            .join("verification/provider-validation/src/bin/translation-verify.rs")
+            .is_file()
+        {
+            "verification/provider-validation/src/bin/translation-verify.rs"
+        } else {
+            "scripts/verify-rust-translation.sh"
+        },
         "verification/rust-translation/README.md",
         "examples/rust-import/ledger/original.sha256",
         "examples/rust-import/ledger.baseline",

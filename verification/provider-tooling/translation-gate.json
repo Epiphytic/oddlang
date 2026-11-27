@@ -1,0 +1,22 @@
+{
+  "platform": "aarch64-apple-darwin",
+  "ledgerRust": "1.96.1",
+  "verificationToolsRust": "1.97.1",
+  "oddlangSha256": "ccd3aa5caeac7c57dddb5d8c04e6cc619c7580e446edb8139bc00f0c6555e09f",
+  "kani": "0.68.0",
+  "cbmc": "6.11.0",
+  "kaniInstallation": "Fresh cargo install prefix, existing Kani backend and cached packages",
+  "nativeCases": 1922,
+  "seededCases": 1024,
+  "outcomesMatchArchive": true,
+  "nativeMutantObservationsMatchArchive": true,
+  "classifications": {
+    "transfer_equivalence": "proved over the recorded domain",
+    "populated_equivalence": "inconclusive",
+    "guard_mutant": "disproved",
+    "guard_replay": "tested"
+  },
+  "archivedSourceAndReceiptReplayed": true,
+  "evidenceVerifierTestsPassed": 10,
+  "nonemptyOutputRejected": true
+}

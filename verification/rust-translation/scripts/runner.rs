@@ -1,11 +1,12 @@
 //! Stage the two pinned inputs, collect Kani logs, and replay the concrete guard witness.
+use provider_validation::proof_tools::ProofTools;
 use provider_validation::{Result, sha};
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use std::{
     env, fs,
     io::Write,
-    path::{Path, PathBuf},
+    path::Path,
     process::{Command, ExitStatus},
     thread,
     time::{Duration, Instant},
@@ -66,6 +67,8 @@ fn run(work: &Path, out: &Path, name: &str, command: &mut Command) -> Result<(Ex
     let path = out.join(format!("{name}.log"));
     let stream = fs::File::create(&path)?;
     let mut child = command
+        .env("CARGO_NET_OFFLINE", "true")
+        .env("RUSTFLAGS", "-C overflow-checks=yes")
         .current_dir(work)
         .stdout(stream.try_clone()?)
         .stderr(stream)
@@ -84,8 +87,8 @@ fn run(work: &Path, out: &Path, name: &str, command: &mut Command) -> Result<(Ex
     };
     Ok((status, fs::read_to_string(path)?))
 }
-fn kani(harness: &str) -> Command {
-    let mut command = Command::new("cargo");
+fn kani(tools: &ProofTools, harness: &str) -> Command {
+    let mut command = tools.cargo();
     command.args([
         "kani",
         "--harness",
@@ -148,17 +151,15 @@ fn main() -> Result {
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => (),
         Err(e) => return Err(e.into()),
     }
-    let backend = version(Command::new("cargo").args(["kani", "--version"]))?;
+    let tools = ProofTools::load()?;
+    let backend = version(tools.cargo().args(["kani", "--version"]))?;
     require(
         backend
             .lines()
             .eq(["Kani Rust Verifier 0.68.0 (cargo plugin)", "CBMC 6.11.0"]),
         format!("unexpected verifier versions: {backend}"),
     )?;
-    let compiler = env::var_os("KANI_HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| PathBuf::from(env::var_os("HOME").unwrap()).join(".kani/kani-0.68.0"));
-    let compiler = version(Command::new(compiler.join("toolchain/bin/rustc")).arg("-vV"))?;
+    let compiler = version(Command::new(tools.kani_home.join("toolchain/bin/rustc")).arg("-vV"))?;
     require(
         compiler.contains("commit-hash: 8925ea358a0f265ca61026aadc7ecc506c545cbe"),
         "unexpected proof compiler",
@@ -173,9 +174,9 @@ fn main() -> Result {
             "Cargo.toml",
             "Cargo.lock",
             "src/lib.rs",
-            "scripts/prove.sh",
+            "scripts/tools.rs",
             "scripts/runner.rs",
-            "scripts/setup.sh",
+            "scripts/setup.rs",
         ],
     )?;
     let temp = tempfile::Builder::new()
@@ -193,14 +194,14 @@ fn main() -> Result {
         work,
         &out,
         "transfer_equivalence",
-        &mut kani("transfer_equivalence"),
+        &mut kani(&tools, "transfer_equivalence"),
     )?;
     success(status, &log, 1)?;
     let (status, log) = run(
         work,
         &out,
         "populated_equivalence",
-        &mut kani("populated_equivalence"),
+        &mut kani(&tools, "populated_equivalence"),
     )?;
     let populated = if status.success() {
         success(status, &log, 7)?;
@@ -218,7 +219,7 @@ fn main() -> Result {
         work,
         &out,
         "guard_mutant",
-        kani(MUTANT).args(["-Z", "concrete-playback", "--concrete-playback", "inplace"]),
+        kani(&tools, MUTANT).args(["-Z", "concrete-playback", "--concrete-playback", "inplace"]),
     )?;
     require(
         !status.success()
@@ -249,7 +250,7 @@ fn main() -> Result {
         work,
         &out,
         "guard_replay",
-        Command::new("cargo").args([
+        tools.cargo().args([
             "kani",
             "playback",
             "-Z",

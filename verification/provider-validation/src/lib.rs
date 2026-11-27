@@ -114,3 +114,6 @@ pub mod wasm_toolchain;
 
 #[path = "../../offline.rs"]
 pub mod offline;
+
+#[path = "../../rust-translation/scripts/tools.rs"]
+pub mod proof_tools;

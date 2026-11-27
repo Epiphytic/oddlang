@@ -22,3 +22,7 @@ path = "../rust-translation/scripts/runner.rs"
 [[bin]]
 name = "rust-capture"
 path = "../rust-recovery/capture.rs"
+
+[[bin]]
+name = "translation-setup"
+path = "../rust-translation/scripts/setup.rs"

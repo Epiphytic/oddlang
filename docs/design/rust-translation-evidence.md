@@ -3,8 +3,8 @@
 The production build uses the independently pinned source fixture and the graph emitted by the public Rust importer. The translation gate recompiles the generated code, compares its outputs and full state with the original implementation and the independent oracle, and runs a bounded verification experiment on both production function bodies. Each proof result identifies its input domain and assumptions.
 
 ```sh
-verification/rust-translation/scripts/setup.sh
-scripts/verify-rust-translation.sh
+cargo run --locked --manifest-path verification/provider-validation/Cargo.toml --bin translation-setup
+cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin translation-verify
 ```
 
 The verification directory contains the original pin, import lock, generated native code, differential results, verifier output and a reproducible summary. Evidence from the Wasm guests applies to the specific component releases in the [component execution record](component-execution-evidence.md).
