@@ -1,5 +1,5 @@
 //! Closed, bounded vocabulary for workspace-provided document schemas.
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -8,13 +8,24 @@ use std::collections::{BTreeMap, BTreeSet};
 pub(super) struct Schema {
     #[serde(rename = "type")]
     kind: Kind,
+    #[serde(default, deserialize_with = "supplied")]
     properties: Option<BTreeMap<String, Schema>>,
+    #[serde(default, deserialize_with = "supplied")]
     required: Option<Vec<String>>,
+    #[serde(default, deserialize_with = "supplied")]
     additional_properties: Option<bool>,
+    #[serde(default, deserialize_with = "supplied")]
     items: Option<Box<Schema>>,
+    #[serde(default, deserialize_with = "supplied")]
     format: Option<StringFormat>,
+    #[serde(default, deserialize_with = "supplied")]
     iri_namespaces: Option<Vec<String>>,
 }
+// Missing keywords use Option::default. Present keywords must deserialize as their declared type.
+fn supplied<'de, D: Deserializer<'de>, T: Deserialize<'de>>(d: D) -> Result<Option<T>, D::Error> {
+    T::deserialize(d).map(Some)
+}
+
 #[derive(Deserialize)]
 #[serde(rename_all = "lowercase")]
 enum StringFormat {
@@ -157,6 +168,35 @@ mod tests {
         ] {
             assert!(schema.validate(&value(bad)).is_err(), "{bad}");
         }
+    }
+
+    #[test]
+    fn supplied_schema_keywords_must_have_their_declared_types() {
+        for (kind, keyword) in [
+            ("object", "properties"),
+            ("object", "required"),
+            ("object", "additionalProperties"),
+            ("array", "items"),
+            ("string", "format"),
+            ("string", "iriNamespaces"),
+        ] {
+            let mut declaration = json!({"type": kind});
+            if keyword == "iriNamespaces" {
+                declaration["format"] = json!("iri");
+            }
+            serde_json::from_value::<Schema>(declaration.clone())
+                .unwrap()
+                .check(0)
+                .unwrap();
+            declaration[keyword] = Value::Null;
+            assert!(
+                serde_json::from_value::<Schema>(declaration).is_err(),
+                "{keyword}"
+            );
+        }
+        // Null remains a valid input value when the provider explicitly declares that type.
+        let nullable: Schema = serde_json::from_value(json!({"type": "null"})).unwrap();
+        nullable.validate(&Value::Null).unwrap();
     }
 
     #[test]

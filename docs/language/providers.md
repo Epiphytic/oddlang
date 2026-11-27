@@ -21,7 +21,7 @@ A registry pins the component and the schema of the request's `input` value. Pat
 
 The [published WIT](../../contracts/providers/provider.wit) defines the import-free worlds and their typed byte-list functions. Both exchange UTF-8 JSON. The host serializes a request with `format` equal to `oddlang-provider-input-v1`, the selected `role`, `capability`, `version`, `configuration` and the `input` document. The public-records generator receives a graph, effective overlay and Serde availability. Its recovery counterpart receives a selection and a list of named, base64-encoded source files.
 
-Each schema node requires a `type` of object, array, string, integer, number, boolean or null. Object nodes can specify `properties`, `required` and a boolean `additionalProperties`. Array nodes can specify an `items` schema. The host rejects unknown schema keywords, duplicate keys and schema nesting beyond 32 levels.
+Each schema node requires a `type` of object, array, string, integer, number, boolean or null. Omit unused keywords. Each supplied keyword must have its declared type, including in nested schemas. Object nodes can specify `properties`, `required` and a boolean `additionalProperties`. Array nodes can specify an `items` schema. The host rejects unknown schema keywords, duplicate keys and schema nesting beyond 32 levels.
 
 A successful response has this form. Artifact contents use standard padded base64.
 

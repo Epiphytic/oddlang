@@ -3702,3 +3702,5 @@ w:portHistoricTooling p:evidence w:boundedMdkRecoveryRust .
 w:boundedMdkRecoveryRust a p:Artifact ;
     rdfs:label "The complete Rust MDK JSON qualifier reproduced fresh Python observations, recovered graph and package locks, the four source-denial probes and the original field-bound mutations. Cold and warm receipts on macOS ARM64 were byte-identical. Prepare mode restored the three portable outputs and rejected a stale dependency pin." ;
     p:location "verification/provider-tooling/bounded-mdk-json-recovery.json" .
+
+w:ontoGPTQualification rdfs:label "Four pinned skills and provider schema semantics. The Rust schema reader distinguishes omission from a mistyped explicit null in six optional keywords, including nested identifier namespace constraints. The macOS CLI rejected the invalid binding schema before creating output." .

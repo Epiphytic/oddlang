@@ -12,6 +12,15 @@
     "providers::schema::tests::entity_ranges_apply_to_every_list_item_and_keep_prose_free",
     "providers::schema::tests::reject_ambiguous_namespace_boundaries_and_mistyped_schema",
     "wasm::model::entry_tests::entry_boolean_uses_the_xsd_value_space",
-    "library_binding_rejects_ids_outside_its_declared_namespace"
-  ]
+    "library_binding_rejects_ids_outside_its_declared_namespace",
+    "providers::schema::tests::supplied_schema_keywords_must_have_their_declared_types"
+  ],
+  "explicitNullSchemaReplay": {
+    "host": "aarch64-apple-darwin",
+    "capability": "example.library-binding",
+    "fixtureChange": "Repinned the binding schema with iriNamespaces set to JSON null.",
+    "previousOutcome": "Wrote binding.json and a provider receipt.",
+    "correctedOutcome": "Rejected the schema before creating the output directory.",
+    "diagnostic": "invalid type: null, expected a sequence"
+  }
 }
