@@ -2417,7 +2417,7 @@ w:directObserverBindings a p:Task ;
     p:acceptance "Trace each alias to one compiler build producer and its locked package identity. Distinguish swapped package versions and identify host proc-macros in the unrelated release fixture." ;
     p:status p:done ; p:evidence w:directObserverBindingFixture .
 w:directObserverBindingFixture a p:Artifact ;
-    p:location "verification/rust-recovery/test_release_rustdoc.py" .
+    p:location "verification/provider-validation/src/bin/release-rustdoc/tests.rs" .
 w:wholeMarmishStructure p:dependsOn w:directObserverBindings .
 
 w:crossTargetObserverReview a p:Finding ;

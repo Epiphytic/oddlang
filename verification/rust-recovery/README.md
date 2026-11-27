@@ -71,10 +71,10 @@ at the declaration level.
 
 ## Same-profile declaration comparison
 
-`release_rustdoc.py` runs the compiler adapter and a separate private-item rustdoc JSON pass with Rust 1.97.1. Both must use the pinned compiler commit and requested target. The verifier compares the actual Cargo invocations' edition, crate kind, feature and build-script cfg flags, code generation settings affecting cfg, direct external dependency bindings and remapped workspace root. It forwards the compiler's optimization and assertion settings because Cargo's release rustdoc command can omit them. The unstable JSON switch is enabled only in the rustdoc subprocess. Rustdoc implicitly selects `cfg(doc)`; the report and fixture preserve that difference. Run the fixture with `python3 -B verification/rust-recovery/test_release_rustdoc.py`.
+The `release-rustdoc` verifier runs the compiler adapter and a separate private-item rustdoc JSON pass with Rust 1.97.1. Both must use the pinned compiler commit and requested target. The verifier compares the actual Cargo invocations' edition, crate kind, feature and build-script cfg flags, code generation settings affecting cfg, direct external dependency bindings and remapped workspace root. It forwards the compiler's optimization and assertion settings because Cargo's release rustdoc command can omit them. The unstable JSON switch is enabled only in the rustdoc subprocess. Rustdoc implicitly selects `cfg(doc)`; the report and fixture preserve that difference. Run the fixture with `cargo test --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin release-rustdoc`.
 
 ```sh
-python3 -B verification/rust-recovery/release_rustdoc.py /path/to/workspace package \
+cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin release-rustdoc -- /path/to/workspace package \
   lib crate_name aarch64-apple-darwin --out /tmp/declarations.json
 ```
 
@@ -160,3 +160,5 @@ report counts excluded local inherent implementations present in the Rustdoc ind
 names alone do not establish signature or behavioral equivalence. The
 independent fixture compiles a caller and checks rustc's rejection of a
 private method and a method used with the wrong type argument.
+
+The Rust release observer reproduced the Python producer's complete outputs on macOS ARM64 for Marmish revision `af54339d250290490d62d4475a77539b7e739071`. The core capture with public inherent observations had SHA-256 `941d5d5920b15dbe44501e234ad3fa578859d539ec60191c7ec2dcadb265594c`. The stream capture with historical span tracking had SHA-256 `a5aa32478bee2c8657d6c52a7533a59a51cc5f26199b4d27156d29e2727e79db`. All fields in the earlier archived stream report matched, including 445 revisited expansion-inclusive span keys. The current report also contains declared-access comparisons and external dependency bindings. [Archived stream evidence](https://github.com/Epiphytic/marmish-oddlang/tree/058e5d3f473380ced323db756a96d37a6a37476a/verification/whole/stream/structure)
