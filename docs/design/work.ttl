@@ -3795,3 +3795,8 @@ w:portHistoricTooling p:evidence w:convergedPublicApiRust .
 w:convergedPublicApiRust a p:Artifact ;
     rdfs:label "Three ARM64 macOS release qualifications replayed the shared Rust public API verifier. All archived observations matched, including both prototype constant reads, 26 engine error variants and 50 negative compiler diagnostics. The canonical release reproduced 77 importable symbols across 140 attempts." ;
     p:location "verification/provider-tooling/converged-public-api-rust.json" .
+
+w:portHistoricTooling p:evidence w:commandRoomBindingRust .
+w:commandRoomBindingRust a p:Artifact ;
+    rdfs:label "The Rust room-binding verifier reproduced all four archived projection locks and the complete observation stream for ten valid packets and forty incorrect peer or session bindings. The historical Python and Rust runners agreed on every receipt field with a common compiler." ;
+    p:location "verification/provider-tooling/command-room-binding-rust.json" .
