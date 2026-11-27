@@ -3535,3 +3535,8 @@ w:portHistoricTooling p:evidence w:recordRangeRoleComposition .
 w:recordRangeRoleComposition a p:Artifact ;
     rdfs:label "Rust composers reproduced five observational-record and range-role descriptors. Both rebuilt workspace trees matched retained references with 92 and 101 files respectively. The sealed ARM64 Darwin range qualification reproduced its complete archived receipt with the pinned compiler. Both live verifier composition calls, five drift checks, and six input rejection controls passed." ;
     p:location "verification/provider-tooling/record-range-role-composition.json" .
+
+w:portHistoricTooling p:evidence w:rangeRoleNativeQualification .
+w:rangeRoleNativeQualification a p:Artifact ;
+    rdfs:label "Native range workspace and import verification reproduced the complete sealed Darwin receipt and all 140 consumer outcomes across seven libraries. Only the verifier source hash changed in the import receipt. Wrong predecessor and artifact-log controls produced no receipt." ;
+    p:location "verification/provider-tooling/range-role-native.json" .

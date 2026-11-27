@@ -1,0 +1,53 @@
+{
+  "platform": "aarch64-apple-darwin",
+  "companionRevision": "c6ce2dc7ba2328c8646d41d94668a007770d1c4d",
+  "sealedWorkspace": {
+    "pythonAndRustAndArchiveSha256": "4743f1867369acf4c8c60438ef1caa694851a6c840b340e99f8a0509673e4241",
+    "files": 101,
+    "directories": 45,
+    "identicalRustSources": 84,
+    "stagedInputs": 105,
+    "deniedInputs": 3
+  },
+  "nativeImports": {
+    "pythonAndArchiveSha256": "31b2b86705229957015cf43cb79267f7415755e8d452f213014bc351a29d6505",
+    "rustReceiptSha256": "baa533aab2c5edec11b87147022057abc3331498f7bcd8c7d36a833c12cd5b7f",
+    "differingFields": [
+      "runnerSha256"
+    ],
+    "libraries": {
+      "core": {
+        "accepted": 6,
+        "attempted": 6
+      },
+      "engine": {
+        "accepted": 11,
+        "attempted": 48
+      },
+      "mdk": {
+        "accepted": 2,
+        "attempted": 5
+      },
+      "native": {
+        "accepted": 19,
+        "attempted": 36
+      },
+      "prototype": {
+        "accepted": 0,
+        "attempted": 0
+      },
+      "stream": {
+        "accepted": 35,
+        "attempted": 35
+      },
+      "vault": {
+        "accepted": 9,
+        "attempted": 10
+      }
+    }
+  },
+  "rejectedBeforeReceipt": [
+    "wrong predecessor tree",
+    "changed Cargo artifact log"
+  ]
+}

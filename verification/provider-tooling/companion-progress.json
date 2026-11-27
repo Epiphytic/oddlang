@@ -1,15 +1,15 @@
 {
-  "auditedCompanionRevision": "c7e1aa7cf0be893ef1d0a5d17458a6299f866e79",
-  "previousRevision": "2e8e60035d60b5065a2e71acbaf427fc15ca58f2",
-  "reproducedTableSha256": "6ea1e05dac900a336c5f846da7777c3092626282e8899dc11e4a65a1943233e8",
-  "remainingProjectToolFiles": 152,
+  "auditedCompanionRevision": "c6ce2dc7ba2328c8646d41d94668a007770d1c4d",
+  "previousRevision": "c7e1aa7cf0be893ef1d0a5d17458a6299f866e79",
+  "reproducedTableSha256": "16a37b2f177647ff74459fb6a7cdc20bb9d62e6e0ef062ca56183543ea11f8ca",
+  "remainingProjectToolFiles": 150,
   "remainingProjectExtensions": {
-    ".py": 143,
+    ".py": 141,
     ".sh": 9
   },
   "removedSincePrevious": [
-    "verification/whole/engine-native-records/compose.py",
-    "verification/whole/gap-range-role-workspace/compose.py"
+    "verification/whole/gap-range-role-workspace/imports.py",
+    "verification/whole/gap-range-role-workspace/verify.py"
   ],
   "addedSincePrevious": []
 }
