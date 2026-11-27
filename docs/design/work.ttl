@@ -3926,6 +3926,11 @@ w:retainedRoomRustReplay a p:Artifact ;
     p:location "verification/provider-tooling/retained-room-fixture-rust.json" .
 w:portHistoricTooling p:evidence w:retainedRoomRustReplay .
 
+w:linuxBridgeObservationFixtures a p:Artifact ;
+    rdfs:label "Rust fixtures for PID-scoped bridge exec, lock and exit observations and archived ARM64 process fields. Fresh live Linux collection is pending." ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/3640818/verification/whole/canonical-public-data/src/bin/bridge-observations.rs" .
+w:portHistoricTooling p:evidence w:linuxBridgeObservationFixtures .
+
 w:workspaceInputStagingReplay a p:Artifact ;
     rdfs:label "Rust staging matched 48 release manifests, 19 distinct dependency locks and three native test configurations. The full test configuration passed all 45 tests." ;
     p:location "verification/provider-tooling/workspace-inputs-rust.json" .
