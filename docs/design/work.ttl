@@ -3510,3 +3510,8 @@ w:fullNativeBufferInference a p:Artifact ;
 w:standaloneNativeBuffer a p:Artifact ;
     rdfs:label "Full native standalone private-buffer driver reproduced the Darwin archive, including the source extent compiler control and three policy mutants. Linux replay did not complete." ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/df964346e51f69af65e6d8cb7f55ff278ed379e4/verification/whole/private-buffer/README.md" .
+
+w:portHistoricTooling p:evidence w:nativeSuiteReconciliation .
+w:nativeSuiteReconciliation a p:Artifact ;
+    rdfs:label "Live suite producer uses Rust for named-case accounting. On macOS, all 14 archived Darwin and Linux role receipts matched the historical producer and independently qualified archive verifier. Six invalid inventories or observation sets were rejected and the empty catalog preserved all four counts." ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/2a509f0449c65e7cde7406dec473c5fbc33f5933/verification/whole/suite/tests/reconcile.rs" .
