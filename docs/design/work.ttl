@@ -3066,3 +3066,7 @@ w:qualifyWaitProfileErrors p:dependsOn w:privateProfileReadDiagnostics .
 w:waitProfileParityReceipt a p:Artifact ;
     rdfs:label "All 13 local wait profile refusal cases match the independent mainline executable" ;
     p:location "verification/local-command-client/wait-profile-parity-macos-arm64.json" .
+w:profileReadCompilerWitness a p:Artifact ;
+    rdfs:label "Calibration contract diagnostic selection and byte-identical regeneration of the previous workspace lock" ;
+    p:location "verification/local-command-client/profile-read-compiler-macos-arm64.json" .
+w:privateProfileReadDiagnostics p:evidence w:profileReadCompilerWitness .

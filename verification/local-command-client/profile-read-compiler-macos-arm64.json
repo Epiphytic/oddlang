@@ -1,0 +1,16 @@
+{
+  "frameworkRevision": "d6605bb766ad4fe7c99b5bc5ceeb8134b66ea21e",
+  "libraryTestsPassed": 20,
+  "calibrationFixture": "local_command_client::workflow::profile::tests::calibration_read_errors_are_independently_selectable",
+  "calibrationDiagnosticSelectorsTested": [
+    "state_directory",
+    "missing_profile_directory",
+    "document_open",
+    "document_metadata"
+  ],
+  "legacyWorkspaceLockSha256": "6aa912c17d1775490e4fa92dd0b8f6c9bd17aaf6004d5d92e3897a0c93e3de63",
+  "legacyWorkspaceLockMatchedPublishedReceipt": true,
+  "legacyWaitModuleSha256": "7512af8943c49deed14905e781602b8ac0e795311c641e4f003e8ab063cf1940",
+  "newWaitModuleSha256": "6fcd81be4b5a074f11a6175652dc8ee188c59970730bfbbb4413b4481a7fa63a",
+  "updatedWorkspaceLockSha256": "1d54bfc91701cb458c920bd54b3bb5297d53d615a8fae3dc77230e6084d14e73"
+}
