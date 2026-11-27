@@ -3885,3 +3885,8 @@ w:portHistoricTooling p:evidence w:vaultValueChecksRust .
 w:vaultValueChecksRust a p:Artifact ;
     rdfs:label "Both Rust vault qualifiers reproduced their archived macOS receipts. The original strict test rejected a 31-byte array at compile time. Four of 600 public-value results changed when the label limit moved from 128 to 127 bytes in both the reference and projected implementations. The plugin-enabled and pre-refactor compilers produced identical package trees and fixed-byte recovery output. The current packages passed the strict and ownership tests and the public-value stdout comparison." ;
     p:location "verification/provider-tooling/vault-value-replay-rust.json" .
+
+w:portHistoricTooling p:evidence w:nativeErrorRecoveryRust .
+w:nativeErrorRecoveryRust a p:Artifact ;
+    rdfs:label "Rust reproduced the independent baseline and mutated native error transcripts and their archived receipt byte for byte. The fresh Rust and historical Python runners produced identical combined receipts, including both executable hashes, all 59 input pins and 32 release-info exit, stdout and stderr comparisons. Only the executable hashes differ from the older combined archive. The current compiler reproduced the finite error graph, binding and source observation, and the seven-member workspace caller matched all 32 reference rows." ;
+    p:location "verification/provider-tooling/native-error-recovery-rust.json" .

@@ -1,15 +1,14 @@
 {
-  "auditedCompanionRevision": "3baf30f16d1bb2654c95c0c03117475159a3796a",
-  "previousRevision": "3e3fc0d4bdb87472317bb16a7c25dad31d74fb3e",
-  "reproducedTableSha256": "9b9539e716eda69a7dccaccfd75e532dcf86fcb99495ce4004618ab0d6b5ad0f",
-  "remainingProjectToolFiles": 70,
+  "auditedCompanionRevision": "ad8700882e2deb81ecba45a7e87ca187722211af",
+  "previousRevision": "3baf30f16d1bb2654c95c0c03117475159a3796a",
+  "reproducedTableSha256": "98495c2e36ede1cc809ed116b45aee4de1d5f9c4f5e71f9c40b3154f8fddc3aa",
+  "remainingProjectToolFiles": 68,
   "remainingProjectExtensions": {
-    ".py": 70
+    ".py": 68
   },
   "removedSincePrevious": [
-    "verification/whole/copy-launch/inputs.py",
-    "verification/whole/vault-fixed-bytes/verify.py",
-    "verification/whole/vault-values/verify.py"
+    "verification/whole/native-error/combined.py",
+    "verification/whole/native-error/verify.py"
   ],
   "addedSincePrevious": []
 }
