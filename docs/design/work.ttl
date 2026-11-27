@@ -3465,3 +3465,8 @@ w:fiveSelectedSuiteCases a p:Artifact ;
 w:companionToolProgress a p:Artifact ;
     rdfs:label "Pinned companion inventory found 169 project-authored Python and shell entries at a567eb4" ;
     p:location "verification/provider-tooling/companion-progress.json" .
+
+w:portHistoricTooling p:evidence w:fiveMemberObserverReplay .
+w:fiveMemberObserverReplay a p:Artifact ;
+    rdfs:label "Full fresh macOS ARM64 five-member run at a567eb4 with 73 inputs, eight denied source probes, 600 native vault observations, release-info and journal witnesses. Historical fields differed only in companion revision and build artifact hashes." ;
+    p:location "verification/provider-tooling/five-member-replay.json" .
