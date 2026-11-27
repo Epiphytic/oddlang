@@ -3967,3 +3967,8 @@ w:mdkSuiteBaselineReplay a p:Artifact ;
     rdfs:label "Canonical MDK suite rebuilt on macOS ARM64 after isolating its workspace lock comparison from the named-test baseline. Its 43 passing cases, five ignored cases and 866 unverified cases match the archive." ;
     p:location "verification/provider-tooling/canonical-mdk-suite-rust.json" .
 w:portHistoricTooling p:evidence w:mdkSuiteBaselineReplay .
+
+w:vaultModeObserverEvidence a p:Artifact ;
+    rdfs:label "Darwin ARM64 vault mode replay with the Rust caller and seven rejected trait bounds for original and reversed case order" ;
+    p:location "verification/provider-tooling/vault-mode-observer-rust.json" .
+w:portHistoricTooling p:evidence w:vaultModeObserverEvidence .

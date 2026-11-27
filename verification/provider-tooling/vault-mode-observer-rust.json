@@ -1,0 +1,60 @@
+{
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "host": "aarch64-apple-darwin",
+  "compiler": [
+    "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+    "binary: rustc",
+    "commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+    "commit-date: 2026-07-14",
+    "host: aarch64-apple-darwin",
+    "release: 1.97.1",
+    "LLVM version: 22.1.6"
+  ],
+  "framework": "18ea58006de4482c0ebc61de9e800edc78eba987",
+  "compilerSha256": "2d157d4ff7945659e477d6a701619846d9adcd3754a1640e0a78d4269c7f6c44",
+  "probeSha256": "d0d1901fb8b1bb1663c3a405fec23d7e5b810dc20cdb9f52844df11ef77099fd",
+  "results": {
+    "baseline": {
+      "sourceSha256": "a6c8f7625b1693e90d69648aa485f1f77ad53106dc0e4f3535d929ac1d91b114",
+      "graphSha256": "96e2f288f7279b7639d72d460efda9c93b3a0b0ea8cea2b6494baf4785e1de73",
+      "overlaySha256": "36cc7f91481be8a4d7f069aafde5c90d2dd44042a15d871252695493341db835",
+      "packageLockSha256": "111090ff5fdac0dfa72ef050ed916ce9737408b5724080e30214e239c51e3da2",
+      "originalLibrarySha256": "f25651e1c2360106a7738752b345956d3db142a92ae1b654401f64b5cdfc5ba9",
+      "generatedLibrarySha256": "93fab9efab0ab64f5f62fbd2b637b459692a89ed6df728c47faaf9af9cc7ac67",
+      "values": [
+        "interactive=0",
+        "verify=1"
+      ],
+      "absentTraits": {
+        "PartialEq": "E0277",
+        "Eq": "E0277",
+        "std::fmt::Debug": "E0277",
+        "std::fmt::Display": "E0277",
+        "Default": "E0277",
+        "std::hash::Hash": "E0277",
+        "Ord": "E0277"
+      }
+    },
+    "mutation": {
+      "sourceSha256": "48d0180d06461884e4d5821f665e97133a6ae54166bd38daff89d0f22cfc5e37",
+      "graphSha256": "28de11f8d1c4be505793117736f8baaeeff111e83026965ce40aff64e62f0184",
+      "overlaySha256": "ce713360697887c8df4313da50cdea9d57b6b07fc9aa4a48fbc8a6bcbf284b78",
+      "packageLockSha256": "9737e16b4dd5f30ffdb935fb4b81f71c2ce0e895467f0f37a08af3a9b54cdf04",
+      "originalLibrarySha256": "d860deebe51f2938159ce4513dea80fab894994711a355c4ab8f77e04eae2a0f",
+      "generatedLibrarySha256": "deb0f6d1320b570730d156be651c54fc7d6b9488e3a2190493cae9f6915ac066",
+      "values": [
+        "interactive=1",
+        "verify=0"
+      ],
+      "absentTraits": {
+        "PartialEq": "E0277",
+        "Eq": "E0277",
+        "std::fmt::Debug": "E0277",
+        "std::fmt::Display": "E0277",
+        "Default": "E0277",
+        "std::hash::Hash": "E0277",
+        "Ord": "E0277"
+      }
+    }
+  }
+}
