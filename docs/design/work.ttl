@@ -3399,3 +3399,11 @@ w:portHistoricTooling p:evidence w:companionRustManifestProjection .
 w:companionRustManifestProjection a p:Artifact ;
     rdfs:label "A source-denied Rust replay matched 224 native baseline and 224 mutant release-manifest cases, both native record shapes, both package locks and both compiler-observed Rustdoc hashes on ARM64 macOS" ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/7c893079db9dffda68fe1e02e5e2a1223274f190/verification/whole/release-manifest-projection/rust-replay-macos-arm64.json" .
+
+w:portHistoricTooling p:evidence w:companionGitToolAudit, w:companionNativeWireReplays .
+w:companionGitToolAudit a p:Artifact ;
+    rdfs:label "Companion Git tree audit reconciles 382 baseline entries and classifies 355 current paths, including 182 remaining project Python and shell tooling files" ;
+    p:location "verification/provider-tooling/companion-audit.md" .
+w:companionNativeWireReplays a p:Artifact ;
+    rdfs:label "Rust reproduced the archived structural wire receipt and all 81 native operation records byte for byte" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b95fd5161e75c47913a17a2ee3e68e13da5e8748/verification/whole/stream-wire/native-replay-macos-arm64.json" .
