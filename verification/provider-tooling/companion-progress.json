@@ -1,15 +1,15 @@
 {
-  "auditedCompanionRevision": "eb0147696799292d6e4730f72b462a8da034d4ac",
-  "previousRevision": "2df53f096f6e4009fe008fab3baedd4402cde01f",
-  "reproducedTableSha256": "7cfeb31e601b1ef2bd6eacc2bd2fc80305ea96b1f42c4d16c6f3e98cc5dce302",
-  "remainingProjectToolFiles": 133,
+  "auditedCompanionRevision": "7674f47420ee5a203a825a4d1d95e9216f2e5b57",
+  "previousRevision": "eb0147696799292d6e4730f72b462a8da034d4ac",
+  "reproducedTableSha256": "97a6e9a93d9865135f564bb397d903d4d71be18f47f6a99b4d28d5cf13bcf25c",
+  "remainingProjectToolFiles": 131,
   "remainingProjectExtensions": {
-    ".py": 129,
+    ".py": 127,
     ".sh": 4
   },
   "removedSincePrevious": [
-    "verification/whole/status/reply_shapes.py",
-    "verification/whole/status/typed_reply_variants.py"
+    "verification/whole/status/qualify.py",
+    "verification/whole/status/typed_qualify.py"
   ],
   "addedSincePrevious": []
 }

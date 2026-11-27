@@ -1,0 +1,54 @@
+{
+  "companionRevision": "7674f47420ee5a203a825a4d1d95e9216f2e5b57",
+  "host": "aarch64-apple-darwin",
+  "suites": {
+    "status": {
+      "sameBinaryPreviousSha256": "bd401d04a56d915c3456514ea3a3a60420998bb9b787372b5bdefaebadd6ebd0",
+      "sameBinaryRustSha256": "3062445cc166dd415f0eafdec0d04363910c626b9463ee465e77d2e8b6af32e9",
+      "sameBinaryChangedFields": [
+        "/companionRevision"
+      ],
+      "freshReceiptSha256": "85551bea9e257da337c58bc6bf3ed778e91efd9856e7866916112e77477d0b55",
+      "archiveSha256": "4798ee46c43c936bf37409099ae9f4fcfdd2ff6981fa3827673478a0d5a40a00",
+      "freshChangedFields": [
+        "/candidateSha256",
+        "/companionRevision"
+      ],
+      "liveStatus": {
+        "exit": 0,
+        "stderr": "",
+        "stdout": "{\"ok\":true,\"result\":{\"state\":\"activating\"},\"error\":null}\n"
+      },
+      "parserCases": {
+        "marmish": 34,
+        "marmishd": 34
+      },
+      "checkedGuardCount": 5,
+      "controlledReplyCount": 17
+    },
+    "typed-status": {
+      "sameBinaryPreviousSha256": "c2f5bcc4fbabc2b3406ded270828b94d03a653d33a641c357b9c0860241ea7c5",
+      "sameBinaryRustSha256": "c2f5bcc4fbabc2b3406ded270828b94d03a653d33a641c357b9c0860241ea7c5",
+      "sameBinaryChangedFields": [],
+      "freshReceiptSha256": "f078be08e11025e8aed634850103cecd7d8fb9448664b9f3421d797eec0d5de4",
+      "archiveSha256": "c2f5bcc4fbabc2b3406ded270828b94d03a653d33a641c357b9c0860241ea7c5",
+      "freshChangedFields": [
+        "/candidateSha256",
+        "/extendedReplies/binarySha256",
+        "/nestedReplies/binarySha256"
+      ],
+      "liveStatus": {
+        "exit": 0,
+        "stderr": "",
+        "stdout": "{\"ok\":true,\"result\":{\"state\":\"activating\"},\"error\":null}\n"
+      },
+      "parserCases": {
+        "marmish": 34,
+        "marmishd": 34
+      },
+      "checkedGuardCount": 5,
+      "controlledReplyCount": 17
+    }
+  },
+  "wrongReferenceBinaryRejectedWithoutReceipt": true
+}
