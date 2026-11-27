@@ -3415,3 +3415,19 @@ w:releaseVersionGrammarNative a p:Artifact ;
     p:location "verification/provider-tooling/release-version-grammar.json" .
 w:releaseVersionGrammarNativeSource a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/tree/dfdfc3771f1c08e5cfb32ec05adec5ab911d13ca/verification/whole/canonical-public-data/src/bin/release-version-grammar" .
+
+w:portHistoricTooling p:evidence w:nativeReleaseObserverCaller, w:nativeRetentionRecheck, w:nativeReleaseInfoStructure .
+w:nativeReleaseObserverCaller a p:Artifact ;
+    rdfs:label "The shared Rust release-info observer matched all 32 process observations on the same pinned upstream and generated binaries and rejected absent, null and changed format versions" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/6d87add48e3e2857ad4213d7ae81ca037522a03d/verification/whole/build-report/rust-macos-arm64.json" .
+w:nativeRetentionRecheck a p:Artifact ;
+    rdfs:label "Native retention recovery reproduced the seven archived files and passed 28 contract test executions" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/7a632f665e8ad27c928c96730681ad57741165b6/verification/whole/retention-structure/README.md" .
+w:nativeReleaseInfoStructure a p:Artifact ;
+    rdfs:label "Native report recovery and type probe compared four digest-bound retained upstream metadata executables and both freshly generated role pairs" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/7a632f665e8ad27c928c96730681ad57741165b6/verification/whole/release-info-structure/README.md" .
+
+w:portHistoricTooling p:evidence w:reconstructionScratchReplay .
+w:reconstructionScratchReplay a p:Artifact ;
+    rdfs:label "Two macOS ARM64 runs with RAM-backed reconstruction produced identical receipts across global and dedicated scratch settings. The archived seven-member workspace and 116 local cases matched. Only the three observer executable digests differed from the archive, with cause undetermined." ;
+    p:location "verification/provider-tooling/reconstruction-scratch.json" .

@@ -10,7 +10,7 @@ use std::{
     path::{Path, PathBuf},
     process::Command,
 };
-use tempfile::tempdir;
+use tempfile::{tempdir, tempdir_in};
 type Result<T> = std::result::Result<T, Box<dyn Error>>;
 const LOCK: &str = "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c";
 const INPUTS: &str = include_str!("../marmish-inputs.sha256");
@@ -127,7 +127,12 @@ fn main() -> Result<()> {
         return Err("choose a fresh receipt path".into());
     }
     check_inputs(inputs)?;
-    let temp = tempdir()?;
+    // The compiler may need gigabytes for disposable Cargo checks. Move only the
+    // reconstruction tree so native observers still use their normal build environment.
+    let temp = match env::var_os("ODDLANG_VALIDATION_SCRATCH") {
+        Some(parent) => tempdir_in(parent)?,
+        None => tempdir()?,
+    };
     // Bind the receipt to private copies, including when a build concurrently replaces its CLI.
     let frozen_compiler = temp.path().join("oddlang");
     let frozen_policy = temp.path().join("command-policy-validation");
