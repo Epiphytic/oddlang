@@ -3359,3 +3359,8 @@ w:portHistoricTooling p:evidence w:nativeFieldMeterSocketCases .
 w:nativeFieldMeterSocketCases a p:Artifact ;
     rdfs:label "Python and Rust field-meter runners agreed on 24 private Unix peer exchanges, eight additional process outcomes and the graph and linkage rejection controls" ;
     p:location "verification/provider-tooling/field-meter-socket.json" .
+
+w:portHistoricTooling p:evidence w:oddlangToolingAndConsumers .
+w:oddlangToolingAndConsumers a p:Artifact ;
+    rdfs:label "Oddlang tracked tooling and native consumers, with 36 Wasm observations, three refusal controls and the live two-version hybrid test" ;
+    p:location "verification/provider-tooling/oddlang-root-audit.md" .

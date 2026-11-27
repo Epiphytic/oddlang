@@ -65,13 +65,15 @@ impl Provider {
     pub fn launch(binary: &Path, fixture: &Value) -> Self {
         let mut file = tempfile::NamedTempFile::new().unwrap();
         serde_json::to_writer(&mut file, fixture).unwrap();
-        let mut child = Command::new(binary)
+        let mut command = Command::new(binary);
+        command
             .arg("--fixture")
             .arg(file.path())
-            .args(["--listen", "127.0.0.1:0"])
-            .stdout(Stdio::piped())
-            .spawn()
-            .unwrap();
+            .args(["--listen", "127.0.0.1:0"]);
+        Self::start(command, Duration::from_secs(10))
+    }
+    pub fn start(mut command: Command, timeout: Duration) -> Self {
+        let mut child = command.stdout(Stdio::piped()).spawn().unwrap();
         let stdout = child.stdout.take().unwrap();
         let mut service = Self {
             child,
@@ -84,7 +86,7 @@ impl Provider {
             let _ = tx.send(line);
         });
         let line = rx
-            .recv_timeout(Duration::from_secs(10))
+            .recv_timeout(timeout)
             .expect("provider readiness timeout");
         service.addr = line
             .trim()
