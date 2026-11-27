@@ -3943,3 +3943,8 @@ w:cleanupAfterMerge a p:Decision ;
     rdfs:label "Remove task scratch when its last consumer finishes, clean merged branches and repeat the worktree inventory after merges" ;
     p:source w:branchCleanupInstructions .
 w:branchCleanupInstructions a p:Artifact ; p:location "AGENTS.md#finish-a-branch" .
+
+w:mdkSuiteBaselineReplay a p:Artifact ;
+    rdfs:label "Canonical MDK suite rebuilt on macOS ARM64 after isolating its workspace lock comparison from the named-test baseline. Its 43 passing cases, five ignored cases and 866 unverified cases match the archive." ;
+    p:location "verification/provider-tooling/canonical-mdk-suite-rust.json" .
+w:portHistoricTooling p:evidence w:mdkSuiteBaselineReplay .
