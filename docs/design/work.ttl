@@ -3938,3 +3938,8 @@ w:coldWorkspaceRustEvidence a p:Artifact ;
     rdfs:label "Rust v5 cold-cache qualification, offline release and parser transcripts, and historical product layout controls" ;
     p:location "verification/provider-tooling/cold-workspace-rust.json" .
 w:portHistoricTooling p:evidence w:coldWorkspaceRustEvidence .
+
+w:cleanupAfterMerge a p:Decision ;
+    rdfs:label "Remove task scratch when its last consumer finishes, clean merged branches and repeat the worktree inventory after merges" ;
+    p:source w:branchCleanupInstructions .
+w:branchCleanupInstructions a p:Artifact ; p:location "AGENTS.md#finish-a-branch" .

@@ -71,6 +71,10 @@ semble find-related src/model.rs 42 .
 
 After successful verification, push the feature branch and create a pull request against its base branch. Leave merging to the user. Present integration options only when push or PR creation is impossible or the user requests a different outcome.
 
+Remove task-created worktrees and temporary files as soon as their last consumer finishes. After a PR merges, remove its remaining worktrees and temporary artifacts, then delete its local and remote feature branches after verifying their tips belong to the merged work. Preserve active work, local edits and commits added after the merge.
+
+After cleanup, run `git worktree list --porcelain` in each participating clone. Check the listed paths and task scratch directories for stale checkouts from earlier runs, remove unused ones and verify the final inventory. Use `git worktree remove` for linked checkouts. Preserve any needed local changes before removal and confirm that shared build directories and caches have no other consumers.
+
 ## OntoGPT ontology authoring skills
 
 The [four OntoGPT skills](skills/OntoGPT-README.md) are vendored from [OntoGPT revision b8f3dee](https://github.com/monarch-initiative/ontogpt/tree/b8f3dee7ea7c315a9be892b30a6a263ac4f1e873/skills) under its [BSD license](skills/OntoGPT-LICENSE). Use the template-selection and authoring guides when defining extraction inputs. Record the root, field cardinalities, literal types and identifier namespaces, and test a known example before applying a template broadly. Keep extraction candidates and their source evidence available for review before promoting them into a pinned contract. The upstream helpers run in OntoGPT's own environment.
