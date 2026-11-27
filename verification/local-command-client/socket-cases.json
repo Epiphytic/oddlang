@@ -1,0 +1,361 @@
+{
+  "generated": [
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 52,
+      "replyBytes": "{\"ready\":true,\"reading\":{\"z\":1,\"a\":2},\"notice\":null}",
+      "exit": 0,
+      "stdout": "{\"reading\":{\"a\":2,\"z\":1},\"ready\":true}\n",
+      "stderr": ""
+    },
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 14,
+      "replyBytes": "{\"ready\":true}\u0000\u0000\u0000\u0002{}",
+      "exit": 0,
+      "stdout": "{\"reading\":null,\"ready\":true}\n",
+      "stderr": ""
+    },
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 44,
+      "replyBytes": "{\"notice\":\"invalid cartridge\",\"ready\":false}",
+      "exit": 3,
+      "stdout": "{\"reading\":null,\"ready\":false,\"notice\":\"invalid cartridge\"}\n",
+      "stderr": ""
+    },
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 0,
+      "replyBytes": "",
+      "exit": 9,
+      "stdout": "",
+      "stderr": "invalid sensor frame size\n"
+    },
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 129,
+      "replyBytes": "",
+      "exit": 9,
+      "stdout": "",
+      "stderr": "invalid sensor frame size\n"
+    },
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 24,
+      "replyBytes": "{\"ready\":true,\"extra\":1}",
+      "exit": 10,
+      "stdout": "",
+      "stderr": "invalid sensor response\n"
+    },
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 16,
+      "replyBytes": "{\"ready\":\"true\"}",
+      "exit": 10,
+      "stdout": "",
+      "stderr": "invalid sensor response\n"
+    },
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 9,
+      "replyBytes": "{}",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "sensor I/O\n"
+    },
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": null,
+      "replyBytes": "",
+      "exit": 11,
+      "stdout": "",
+      "stderr": "sensor timed out\n"
+    }
+  ],
+  "dynamic-client": [
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s",
+        "--sensor",
+        "18446744073709551615",
+        "--label",
+        "site\"3xxxxxxxxxxxxxxxx",
+        "--waiting",
+        "--probe",
+        "b",
+        "--probe",
+        "a"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":18446744073709551615,\"label\":\"site\\\"3xxxxxxxxxxxxxxxx\",\"waiting\":true,\"probes\":[\"b\",\"a\"],\"comment\":null}",
+      "replyLength": 14,
+      "replyBytes": "{\"ready\":true}",
+      "exit": 0,
+      "stdout": "{\"reading\":null,\"ready\":true}\n",
+      "stderr": ""
+    },
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s",
+        "--sensor",
+        "0",
+        "--label",
+        "測/<\t\u0001"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":0,\"label\":\"測/<\\t\\u0001\",\"waiting\":false,\"probes\":[],\"comment\":null}",
+      "replyLength": 14,
+      "replyBytes": "{\"ready\":true}",
+      "exit": 0,
+      "stdout": "{\"reading\":null,\"ready\":true}\n",
+      "stderr": ""
+    }
+  ],
+  "typed-client": [
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 11,
+      "replyBytes": "[null,true]",
+      "exit": 0,
+      "stdout": "{\"reading\":null,\"ready\":true}\n",
+      "stderr": ""
+    },
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 20,
+      "replyBytes": "[null,false,\"stale\"]",
+      "exit": 3,
+      "stdout": "{\"reading\":null,\"ready\":false,\"notice\":\"stale\"}\n",
+      "stderr": ""
+    },
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 52,
+      "replyBytes": "{\"ready\":true,\"reading\":{\"mode\":\"idle\",\"discard\":0}}",
+      "exit": 0,
+      "stdout": "{\"reading\":{\"mode\":\"idle\"},\"ready\":true}\n",
+      "stderr": ""
+    },
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 97,
+      "replyBytes": "{\"ready\":true,\"reading\":{\"rows\":[{\"reference\":[1,2],\"value\":255}],\"mode\":\"scan\",\"digest\":\"face\"}}",
+      "exit": 0,
+      "stdout": "{\"reading\":{\"mode\":\"scan\",\"digest\":\"face\",\"rows\":[{\"value\":255,\"reference\":[1,2]}]},\"ready\":true}\n",
+      "stderr": ""
+    },
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 6,
+      "replyBytes": "[null]",
+      "exit": 10,
+      "stdout": "",
+      "stderr": "invalid sensor response\n"
+    },
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 18,
+      "replyBytes": "[null,true,null,0]",
+      "exit": 10,
+      "stdout": "",
+      "stderr": "invalid sensor response\n"
+    },
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 41,
+      "replyBytes": "{\"ready\":true,\"reading\":{\"mode\":\"other\"}}",
+      "exit": 10,
+      "stdout": "",
+      "stderr": "invalid sensor response\n"
+    },
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 66,
+      "replyBytes": "{\"ready\":true,\"reading\":{\"mode\":\"scan\",\"digest\":\"FACE\",\"rows\":[]}}",
+      "exit": 10,
+      "stdout": "",
+      "stderr": "invalid sensor response\n"
+    },
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 76,
+      "replyBytes": "{\"ready\":true,\"reading\":{\"mode\":\"scan\",\"digest\":\"face\",\"rows\":[],\"extra\":1}}",
+      "exit": 10,
+      "stdout": "",
+      "stderr": "invalid sensor response\n"
+    },
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 97,
+      "replyBytes": "{\"ready\":true,\"reading\":{\"mode\":\"scan\",\"digest\":\"face\",\"rows\":[{\"value\":256,\"reference\":[1,2]}]}}",
+      "exit": 10,
+      "stdout": "",
+      "stderr": "invalid sensor response\n"
+    },
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 95,
+      "replyBytes": "{\"ready\":true,\"reading\":{\"mode\":\"scan\",\"digest\":\"face\",\"rows\":[{\"value\":255,\"reference\":[1]}]}}",
+      "exit": 10,
+      "stdout": "",
+      "stderr": "invalid sensor response\n"
+    }
+  ],
+  "discovery-client": [
+    {
+      "socket": "t/{runtime}/sock",
+      "args": [
+        "read"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 14,
+      "replyBytes": "{\"ready\":true}",
+      "exit": 0,
+      "stdout": "{\"reading\":null,\"ready\":true}\n",
+      "stderr": ""
+    },
+    {
+      "socket": "s",
+      "args": [
+        "read",
+        "--folder",
+        "{root}/h/meter",
+        "--station",
+        "bad/name",
+        "--port",
+        "{root}/s"
+      ],
+      "request": "{\"verb\":\"read\",\"sensor\":10}",
+      "replyLength": 14,
+      "replyBytes": "{\"ready\":true}",
+      "exit": 0,
+      "stdout": "{\"reading\":null,\"ready\":true}\n",
+      "stderr": ""
+    }
+  ]
+}

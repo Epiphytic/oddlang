@@ -9,7 +9,7 @@ The generated source and locks for the original literal field-meter graph and th
 ```sh
 cargo +1.97.1 build --release --locked --offline --bin oddlang
 cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin field-meter-projection -- target/release/oddlang
-python3 -B verification/local-command-client/check.py target/release/oddlang
+cargo +1.97.1 run --offline --locked --manifest-path verification/provider-validation/Cargo.toml --bin field-meter-projection -- --with-sockets target/release/oddlang
 cargo +1.97.1 test --release --locked --offline --lib
 ```
 

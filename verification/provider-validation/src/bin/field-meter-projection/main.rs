@@ -1,5 +1,8 @@
 //! Compare the generated field-meter projection with independent request and reply obligations.
-use provider_validation::{Result, cli, invoke, read, sha, write};
+mod package;
+mod socket_cases;
+use clap::Parser;
+use provider_validation::{Result, invoke, read, sha, write};
 use serde_json::{Value, json};
 use std::{collections::BTreeSet, path::Path};
 
@@ -77,15 +80,20 @@ fn reject(cli: &Path, root: &Path, graph: &Value, cases: &[Mutation]) -> Result 
     Ok(())
 }
 
+#[derive(Parser)]
+struct Args {
+    compiler: std::path::PathBuf,
+    #[arg(long)]
+    with_sockets: bool,
+}
+
 fn main() -> Result {
-    let cli = cli()?;
+    let args = Args::parse();
+    let cli = args.compiler.canonicalize()?;
     let fixture = Path::new(env!("CARGO_MANIFEST_DIR")).join("../local-command-client");
     let tmp = tempfile::tempdir()?;
     let root = tmp.path();
-    write(
-        &root.join("binding.json"),
-        &json!({"format":"oddlang-local-command-client-rust-v1","entry":"measure"}),
-    )?;
+    std::fs::copy(fixture.join("binding.json"), root.join("binding.json"))?;
     let base = read(&fixture.join("graph.json"))?;
     let mut request = base.clone();
     request["request_id"] = json!("urn:field:request");
@@ -185,5 +193,8 @@ fn main() -> Result {
         )],
     )?;
     println!("verified request and reply catalogs, exact minimum frame, and 11 rejected graphs");
+    if args.with_sockets {
+        package::verify(&cli, &fixture)?;
+    }
     Ok(())
 }

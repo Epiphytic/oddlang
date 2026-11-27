@@ -7,7 +7,7 @@ Both tests ran through their ordinary generated CLI binaries. The earlier statel
 ```sh
 cargo +1.97.1 build --locked --offline --release --bin oddlang
 cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin local-owner-workflow -- workflow target/release/oddlang
-python3 -B verification/local-command-client/check.py target/release/oddlang
+cargo +1.97.1 run --offline --locked --manifest-path verification/provider-validation/Cargo.toml --bin field-meter-projection -- --with-sockets target/release/oddlang
 cargo +1.97.1 test --locked --offline --release --lib
 ```
 

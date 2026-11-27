@@ -799,7 +799,7 @@ w:localCommandClient a p:Task ;
     p:acceptance "Generate a Rust operation with a bounded framed request, ordered preconditions, structured response, and finite diagnostics. Compare a generated command against an unrelated real Unix peer." .
 
 w:localCommandClientFixture a p:Artifact ;
-    p:location "verification/local-command-client/check.py" .
+    p:location "verification/provider-validation/src/bin/field-meter-projection/main.rs" .
 
 w:localClientReleaseGuardFinding a p:Finding ;
     rdfs:label "Reject release CLI bindings that would silently omit local client arguments" ;
@@ -3354,3 +3354,8 @@ w:portHistoricTooling p:evidence w:fieldMeterProjectionRust .
 w:fieldMeterProjectionRust a p:Artifact ;
     rdfs:label "Rust verified the field-meter request and reply declaration catalogs, accepted the exact minimum frame, rejected eleven invalid graphs and six altered catalogs, and passed within the independent local client fixture" ;
     p:location "verification/provider-tooling/field-meter-projection.json" .
+
+w:portHistoricTooling p:evidence w:nativeFieldMeterSocketCases .
+w:nativeFieldMeterSocketCases a p:Artifact ;
+    rdfs:label "Python and Rust field-meter runners agreed on 24 private Unix peer exchanges, eight additional process outcomes and the graph and linkage rejection controls" ;
+    p:location "verification/provider-tooling/field-meter-socket.json" .
