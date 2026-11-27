@@ -3667,3 +3667,8 @@ w:portHistoricTooling p:evidence w:streamReleaseReplayRust .
 w:streamReleaseReplayRust a p:Artifact ;
     rdfs:label "The Rust release replay verified 403 public original stream cases in each of two profiles, the complete archived gzip and six cross-implementation Data exchanges on macOS ARM64. The runner refused an occupied destination and a mismatched tooling revision." ;
     p:location "verification/provider-tooling/stream-release-replay.json" .
+
+w:portHistoricTooling p:evidence w:engineSourceMutationReplay .
+w:engineSourceMutationReplay a p:Artifact ;
+    rdfs:label "Rust reran the engine record and error source mutations against the original and projected libraries on macOS ARM64. Both receipts matched the historical Python runners byte for byte with the same fresh compiler. Restoring the unmodified graphs caused both runs to fail. All three workspace caller adapters reproduced the positive observations and the 21, 38 and 11 expected compiler diagnostics." ;
+    p:location "verification/provider-tooling/engine-mutation-replay.json" .
