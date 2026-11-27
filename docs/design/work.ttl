@@ -3855,3 +3855,8 @@ w:portHistoricTooling p:evidence w:publicStreamProfilesRust .
 w:publicStreamProfilesRust a p:Artifact ;
     rdfs:label "Pinned Rust public stream oracle replayed 403 cases, 31 wire pairs and three behavioral controls in each of the macOS ARM64 dev and release profiles. Both archived Linux architectures matched the frozen baseline and profile provenance. Twelve receipt alterations were rejected." ;
     p:location "verification/provider-tooling/public-stream-profiles.json" .
+
+w:portHistoricTooling p:evidence w:sourceCopyFrameRecoveryRust .
+w:sourceCopyFrameRecoveryRust a p:Artifact ;
+    rdfs:label "The Rust encoder, fragment and guard verifiers reproduced all three archived receipts. The rebuilt framework regenerated the exact seven-crate tree from 111 pinned inputs. Local original/generated copy Data encoders and decoders exchanged 1,260 frames in each direction with all bytes matching and all four malformed-stream controls detected." ;
+    p:location "verification/provider-tooling/source-copy-frames-rust.json" .

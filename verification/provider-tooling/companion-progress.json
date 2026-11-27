@@ -1,13 +1,14 @@
 {
-  "auditedCompanionRevision": "7308e14cf63caf482f0b7dc32b9e6d318428e044",
-  "previousRevision": "09cf82cd0859df5efe5813152abb7d3b967151a1",
-  "reproducedTableSha256": "c6df1c3156d6017b1e389eef8f1ba21799d75f8f4e2a8d604441604636dbfcf1",
-  "remainingProjectToolFiles": 80,
+  "auditedCompanionRevision": "65fae1d2345e45c458d2d66ae1bdf8fa36afbf54",
+  "previousRevision": "7308e14cf63caf482f0b7dc32b9e6d318428e044",
+  "reproducedTableSha256": "a205e5aaa5fe26c895ab6fdbcb8149184d1d1c08aef5029127e6ec745cce1ac9",
+  "remainingProjectToolFiles": 78,
   "remainingProjectExtensions": {
-    ".py": 80
+    ".py": 78
   },
   "removedSincePrevious": [
-    "verification/whole/linux/replay.py"
+    "verification/whole/source-copy-frame/verify.py",
+    "verification/whole/source-copy-frame-fragments/verify.py"
   ],
   "addedSincePrevious": []
 }

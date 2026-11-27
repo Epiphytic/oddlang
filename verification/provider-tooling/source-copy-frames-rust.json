@@ -1,0 +1,60 @@
+{
+  "frameworkRevision": "6f5af677552a882a6c7cff0b4358c5fda0b88cb4",
+  "companionRevision": "65fae1d2345e45c458d2d66ae1bdf8fa36afbf54",
+  "host": "aarch64-apple-darwin",
+  "rustCaptureSha256": "1b5e1b3eed797d62633202d36e0160d9cfd2b6ff0d7f7262a7e60efb871d098b",
+  "archivedReceipts": {
+    "source-copy-frame": {
+      "sha256": "e739fdbc4391058052e1cd8f6d59af01368fc18035190e03cf3c8f69a1741ac5",
+      "recoveryCompilerRevision": "4c986ccdcf46564e5ecc6ca1eca8edeec1ce62e7",
+      "nativeChecks": 44,
+      "changedOutcomes": 1
+    },
+    "source-copy-frame-fragments": {
+      "sha256": "262e9442346819d04fd8728d1e35ed47855ed67165e04eae54f1e8eae400f7a6",
+      "recoveryCompilerRevision": "84075fd457e311697860170cf2d2cd5c7cef68f0",
+      "nativeChecks": 36,
+      "changedOutcomes": 4
+    },
+    "source-copy-frame-guards": {
+      "sha256": "6b0245ad42bde69a00e2ae66bc39f7dd382f5d794e0e23f2cd29b7ffb2533f44",
+      "recoveryCompilerRevision": "00d4e6411baf9a74a9af2be60d1d4fbc0520b5ba",
+      "nativeChecks": 72,
+      "changedOutcomes": 3
+    }
+  },
+  "wrongRecoveryCompilerRejectedBeforeReceipt": [
+    "source-copy-frame",
+    "source-copy-frame-fragments"
+  ],
+  "regeneratedWorkspace": {
+    "compilerSha256": "7e1baad5121a1cfa1a34489b0cccb955b59b9157b403b5c42aab21e7f5355ef6",
+    "pinnedInputs": 111,
+    "directories": 49,
+    "files": 106,
+    "members": 7,
+    "treeSha256": "ed3ba7e04668b2ad346edf880c0c1a261ffefaa47b6838ad9b24e0ab4b8c3524",
+    "workspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c"
+  },
+  "copyDataPipe": {
+    "original": "af54339d250290490d62d4475a77539b7e739071",
+    "generatedWorkspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c",
+    "driverSha256": "d5ec33dd26c651ca82483188862bc43ee459b900fdb39c4ccc9d7199a537dd66",
+    "framesPerDirection": 1260,
+    "payloadSha256": "e8007b4a0a207564767a34fd944d829e984318e4ac4d65522b136ca16794106e",
+    "wireSha256": "a2ad71740d1390383296943473fdfac7ed6515b005e1cae5cb0f5f1cb62f78e5",
+    "originalToGenerated": {
+      "encodeExit": 0,
+      "decodeExit": 0,
+      "wireBytesCompared": 4210721,
+      "payloadBytesCompared": 4194341
+    },
+    "generatedToOriginal": {
+      "encodeExit": 0,
+      "decodeExit": 0,
+      "wireBytesCompared": 4210721,
+      "payloadBytesCompared": 4194341
+    },
+    "truncationAndOffsetControlsPassed": 4
+  }
+}
