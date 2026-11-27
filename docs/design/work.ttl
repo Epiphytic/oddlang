@@ -3657,3 +3657,8 @@ w:portHistoricTooling p:evidence w:suiteParserExecution .
 w:suiteParserExecution a p:Artifact ;
     rdfs:label "The Rust parser test runner executed both pinned upstream cases exactly once on a freshly generated macOS ARM64 workspace. Its staged source, vectors, case counts and source hashes matched the historical producer. The sandbox denied all five source probes and the runner rejected a real zero-test invocation before staging. Rust producer controls checked baseline substitution, registration and execution counts." ;
     p:location "verification/provider-tooling/suite-parser-execution.json" .
+
+w:portHistoricTooling p:evidence w:baselineBuildStreamArchive .
+w:baselineBuildStreamArchive a p:Artifact ;
+    rdfs:label "The shared Rust checkout checker and fresh compiler reproduced the published Data graph digest and six structural artifacts. The native oracle now writes the 13011-byte historical observation archive exactly in both development and release builds. The local Data replay matched six directed 36-record exchanges across Rust, TypeScript and the original caller." ;
+    p:location "verification/provider-tooling/baseline-build-stream-archive.json" .

@@ -11,7 +11,7 @@ use std::{
 pub fn directory() -> PathBuf {
     root().join("examples/marmish/portable-oracle")
 }
-pub fn hash(value: &impl serde::Serialize) -> Result<String> {
+pub fn canonical(value: &impl serde::Serialize) -> Result<String> {
     use std::fmt::Write;
     let mut document = serde_json::to_value(value)?;
     document.sort_all_objects();
@@ -25,7 +25,10 @@ pub fn hash(value: &impl serde::Serialize) -> Result<String> {
             }
         }
     }
-    Ok(digest(canonical.as_bytes()))
+    Ok(canonical)
+}
+pub fn hash(value: &impl serde::Serialize) -> Result<String> {
+    Ok(digest(canonical(value)?.as_bytes()))
 }
 pub fn case(name: impl AsRef<str>, operation: &str, input: V, expected: V) -> V {
     json!({"name":name.as_ref(),"operation":operation,"input":input,"expected":expected})

@@ -38,6 +38,14 @@ struct Args {
     #[command(flatten)]
     original: native::Original,
 }
+fn write_observations(writer: impl Write, rows: &[V]) -> Result<()> {
+    let mut gzip = GzEncoder::new(writer, Compression::best());
+    gzip.write_all(corpus::canonical(&rows)?.as_bytes())?;
+    gzip.write_all(b"\n")?;
+    gzip.finish()?;
+    Ok(())
+}
+
 fn fails(cases: &[V], obs: &[V]) -> Result<Vec<String>> {
     ensure!(obs.len() == cases.len(), "observation length mismatch");
     let mut failures = vec![];
@@ -237,10 +245,7 @@ fn main() -> Result<()> {
         "holdout":holdout,
     });
     if let Some(path) = a.observations {
-        let mut gz = GzEncoder::new(fs::File::create(&path)?, Compression::default());
-        serde_json::to_writer(&mut gz, &obs)?;
-        gz.write_all(b"\n")?;
-        gz.finish()?;
+        write_observations(fs::File::create(&path)?, &obs)?;
         report["publicObservationArchiveSha256"] = json!(sum(&path)?);
     }
     fs::write(a.receipt, serde_json::to_string_pretty(&report)? + "\n")?;
@@ -271,6 +276,12 @@ mod tests {
         )?)
         .read_to_end(&mut bytes)?;
         let observations: Vec<V> = serde_json::from_slice(&bytes)?;
+        let mut encoded = Vec::new();
+        write_observations(&mut encoded, &observations)?;
+        assert_eq!(
+            sum(&directory().join("original-observations.json.gz"))?,
+            digest(&encoded)
+        );
         assert_eq!(hash(&observations)?, old["publicObservationSha256"]);
         assert!(fails(&public.cases, &observations)?.is_empty());
         assert_eq!(
