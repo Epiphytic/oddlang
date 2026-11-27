@@ -1,0 +1,28 @@
+{
+  "framework": "b653f1ada68791cd2fb70293bf227c5665850d1e",
+  "archivedGuest": "aarch64-unknown-linux-gnu",
+  "verificationHost": "aarch64-apple-darwin",
+  "publicCaseIds": 253,
+  "comparedOperationResults": {
+    "rust": 628,
+    "typescript": 628
+  },
+  "guestReceiptSha256": "49970b41bd5e01c6b6a9b0b69edda0781332c62a42e5692cff35717c20f9cf03",
+  "generatedSourceSha256": {
+    "rust": "be03eda8830b276bfca68a3079630cfac776e224233d974002d42ec33a48bf2f",
+    "typescript": "b438efbe30b5e26f0ecf06d3798807f44626cc8f68a83bd24685411700abbece"
+  },
+  "rejectedChanges": [
+    "driverSourceSha256.tagged_adapter.rs",
+    "approvedGraphSha256",
+    "publicCaseIds",
+    "comparedOperationResults.rust",
+    "mixedPeers",
+    "mutation",
+    "upstreamRevision",
+    "originalCaller.revision",
+    "originalCaller.cargoLockSha256",
+    "build.generatedSourceSha256.rust"
+  ],
+  "rawWhitespaceChangesReceiptDigest": true
+}
