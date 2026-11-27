@@ -43,7 +43,8 @@ upstream revision.
 ```sh
 cargo build --locked --offline
 cargo test --locked --offline --test tagged_recovery
-python3 examples/marmish/portable-contract/check-candidate.py \
+cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml \
+  --bin tagged-candidate -- \
   target/debug/oddlang /path/to/pinned/marmish
 target/debug/oddlang tagged-wire digest examples/marmish/portable-contract/data.ttl
 ```

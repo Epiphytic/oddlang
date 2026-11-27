@@ -1,0 +1,5 @@
+Contract pin verified at 82ddfed871221091be6b42adf6d0b009cb5ce10f864c414bdbaed5e19e4dad56.
+Pinned tag 5 and two payload writes reproduced.
+Tag 51 changed only the graph tag, yielding 3a4aa56ae2590624a7078362d9102c7519982a3d38f4350567d8e9fb4a3ab943.
+A one-sided tag change was rejected without writing a graph.
+Equivalent integer-writer rename preserved the observations and graph pin.

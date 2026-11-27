@@ -3211,3 +3211,8 @@ w:publicDataNativeComposition a p:Artifact ;
 w:publicDataNativeInherited a p:Artifact ;
     rdfs:label "Nine inherited Rust fixture replays against the same archived Darwin compiler and parent receipt" ;
     p:location "verification/provider-tooling/public-data-native-inherited.json" .
+
+w:portHistoricTooling p:evidence w:rustTaggedCandidate .
+w:rustTaggedCandidate a p:Artifact ;
+    rdfs:label "Rust tagged-contract observer reproduced the original report for pinned Marmish revision 49fc705, tag and writer mutations" ;
+    p:location "verification/provider-tooling/tagged-candidate.txt" .
