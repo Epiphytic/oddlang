@@ -3962,3 +3962,8 @@ w:backendChoiceRustEvidence a p:Artifact ;
     rdfs:label "BackendChoice replay with the same compiler produced identical receipt and output bytes with Rust and Python for both the original and reordered enum" ;
     p:location "verification/provider-tooling/backend-choice-rust.json" .
 w:portHistoricTooling p:evidence w:backendChoiceRustEvidence .
+
+w:mdkSuiteBaselineReplay a p:Artifact ;
+    rdfs:label "Canonical MDK suite rebuilt on macOS ARM64 after isolating its workspace lock comparison from the named-test baseline. Its 43 passing cases, five ignored cases and 866 unverified cases match the archive." ;
+    p:location "verification/provider-tooling/canonical-mdk-suite-rust.json" .
+w:portHistoricTooling p:evidence w:mdkSuiteBaselineReplay .
