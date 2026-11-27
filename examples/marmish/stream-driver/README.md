@@ -45,8 +45,8 @@ cargo +1.97.1 run --locked --offline --manifest-path verification/marmish-invent
   --receipt /tmp/original-stream-oracle.json --baseline /path/to/baseline/receipt.json
 ```
 
-For the candidate and reverse replay use
-`scripts/marmish/qualify_stream_workspace.py`. The qualification runner
+For the candidate and reverse replay use the `stream-workspace` binary in
+`verification/marmish-inventory`. Run it with `--help` for the required inputs. The qualification runner
 supplies the reviewed commit, graph lock pin, archive and source isolation
 profile. Both directions compare all peer observations against the frozen
 vectors before replaying peer-emitted bytes.

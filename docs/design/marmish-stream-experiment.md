@@ -69,7 +69,7 @@ Its bootstrap materializes the crate at its existing path with the same
 name, version, dependencies and Rust bytes. No package code was added to
 the generic importer or emitter for this experiment.
 
-The [qualification runner](../../scripts/marmish/qualify_stream_workspace.py)
+The [qualification runner](../../verification/marmish-inventory/src/bin/stream-workspace.rs)
 unpacks a Git archive in a fresh directory. Separate Seatbelt profiles
 isolate the graph emitter, repository bootstrap, and native Cargo build.
 Permission probes cover the upstream checkout, Git object data from both

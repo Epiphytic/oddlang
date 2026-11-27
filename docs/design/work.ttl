@@ -3152,6 +3152,11 @@ w:rustStreamGraphMutation a p:Artifact ;
     rdfs:label "Isolated Rust graph mutation reproduced both denied file reads, the released bundle digest and all 50 wire observations" ;
     p:location "verification/provider-tooling/stream-graph-mutation-replay.json" .
 
+w:portHistoricTooling p:evidence w:rustStreamWorkspaceReplay .
+w:rustStreamWorkspaceReplay a p:Artifact ;
+    rdfs:label "Rust workspace qualification regenerated the sealed stream crate, exercised both compiler controls, and reran the six selected cases on both retained consumer builds" ;
+    p:location "verification/provider-tooling/stream-workspace-rust-replay.json" .
+
 w:portHistoricTooling p:evidence w:rustWorkflowReplay .
 w:rustWorkflowReplay a p:Artifact ;
     rdfs:label "Rust import cleanup, assembly preparation, profile checks and Wasm host receipt replay on macOS ARM64" ;
@@ -3277,3 +3282,8 @@ w:rustFramingPilot a p:Artifact ;
 w:sealedWorkspaceRustQualifiers a p:Artifact ;
     rdfs:label "Six-member MDK, canonical seven-member, and buffered seven-member Darwin workspace qualification receipts at companion commit 7e015a3" ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/tree/7e015a316eb366cebb53d2904cb700231347a1e9/verification/whole" .
+
+w:portHistoricTooling p:evidence w:marmishRebuildRustReplay .
+w:marmishRebuildRustReplay a p:Artifact ;
+    rdfs:label "Native two-producer recovery and assembly reproduced the 39 archived Phase 7 witnesses" ;
+    p:location "verification/provider-tooling/marmish-rebuild-rust.json" .

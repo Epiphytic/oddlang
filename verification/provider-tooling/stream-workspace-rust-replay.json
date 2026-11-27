@@ -1,0 +1,76 @@
+{
+  "archive": {
+    "path": "examples/marmish/evidence/stream-qualification/qualification.tar.gz",
+    "sha256": "7e1295d50933b2bf470c18055792e8ceba1748a12586cde8c21e636d7e205ec8",
+    "qualificationSha256": "68e7b424e942eca29a37d856fff86be4a0050e0c40f0dd75efbf491c5fdd084f",
+    "verifiedEvidenceMembers": 13
+  },
+  "sourceFreeCommit": "7eca9d87ae696ba7cc790f735c7e596618f4d317",
+  "upstreamCommit": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+  "bundleSha256": "f936373f48aae38e67302a425737e2ceaa888a2a404442399ace21d58925d709",
+  "replayed": {
+    "emitterAndBootstrap": {
+      "independentEmission": true,
+      "bootstrapRuns": 2,
+      "sourceSha256": {
+        "crates/marmish-stream/src/codec.rs": "a0e5f99775d8122516341cf64166c2b620b664276722728fbad8b769ea7012df",
+        "crates/marmish-stream/src/copy_protocol.rs": "cd25b010838a5f2d29d49550abe7ea99092064c5303d727a05efb1868612cbf2",
+        "crates/marmish-stream/src/lib.rs": "34a195e548fb5c8b97c746bdb54147677758684873140c624a9480472f2409eb",
+        "crates/marmish-stream/src/windows.rs": "385c27084cbe251987d320d8eddf8904c6f44df963e1f136bd5d15fd27422949",
+        "crates/marmish-stream/src/wire.rs": "54254ed91540dd6eef2237b174a6834d200b933b9061ff255f61305248fbecf8"
+      }
+    },
+    "isolatedPackage": {
+      "cargoModes": [
+        "test",
+        "check --all-targets",
+        "build --release"
+      ],
+      "packageTests": 29,
+      "negativeControls": {
+        "missingModule": 101,
+        "undeclaredInput": "undeclared compiler input crates/marmish-stream/src/undeclared-input"
+      }
+    },
+    "nativeDownstreamConsumers": {
+      "original": {
+        "linkedSuites": 16,
+        "listedTests": 859,
+        "selectedOutcomes": {
+          "marmish-engine/lib/marmish_engine": {
+            "copy_launch::tests::owned_context_is_read_only_cloexec_above_three_and_has_no_writer": "ok"
+          },
+          "marmish-native/lib/marmish_native": {
+            "copy_io::tests::coalesced_prefix_and_data_are_bounded_and_delivered_in_order": "ok",
+            "copy_worker::tests::sender_data_record_fits_one_transport_block": "ok",
+            "stream_runner::tests::failed_exchange_does_not_apply_other_channel_ack": "ok",
+            "stream_session::tests::output_ack_regression_is_rejected_without_an_ipc_request": "ok"
+          },
+          "marmish-prototype/test/bridge": {
+            "framing_is_bounded_and_diagnostics_are_sanitized": "ok"
+          }
+        }
+      },
+      "candidate": {
+        "linkedSuites": 16,
+        "listedTests": 859,
+        "selectedOutcomes": {
+          "marmish-engine/lib/marmish_engine": {
+            "copy_launch::tests::owned_context_is_read_only_cloexec_above_three_and_has_no_writer": "ok"
+          },
+          "marmish-native/lib/marmish_native": {
+            "copy_io::tests::coalesced_prefix_and_data_are_bounded_and_delivered_in_order": "ok",
+            "copy_worker::tests::sender_data_record_fits_one_transport_block": "ok",
+            "stream_runner::tests::failed_exchange_does_not_apply_other_channel_ack": "ok",
+            "stream_session::tests::output_ack_regression_is_rejected_without_an_ipc_request": "ok"
+          },
+          "marmish-prototype/test/bridge": {
+            "framing_is_bounded_and_diagnostics_are_sanitized": "ok"
+          }
+        }
+      }
+    },
+    "consumerComparisonMutationsRejected": 6
+  },
+  "qualificationScope": "Fresh graph emission and bootstrap, local stream compilation and denial controls used disposable checkouts. Retained locked downstream executables were relisted, rehashed and run under their original profiles. The full downstream consumer compilations and vendoring are evidenced by the sealed qualification archive."
+}
