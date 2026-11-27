@@ -29,7 +29,7 @@ if [[ $mode == rebuild ]]; then
     echo "Marmish twice-rebuilt candidate in $report"
     exit 0
 elif [[ $mode == verify ]]; then
-    exec python3 -B scripts/marmish/phase7.py "$upstream" "$report"
+    exec cargo +1.97.1 run --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-phase7 -- "$upstream" "$report"
 fi
 if [[ $mode == frame ]]; then
     scripts/marmish/project-frame.sh "$upstream" "$report"
@@ -40,6 +40,6 @@ scripts/marmish/offline.sh cargo +1.97.1 run --locked --offline --manifest-path 
     "$upstream" "$report/inventory" --compare-summary examples/marmish/inventory-summary.json
 scripts/marmish/offline.sh python3 scripts/marmish/observations.py "$upstream" "$report/observations"
 python3 scripts/marmish/baseline.py "$upstream" "$report/native"
-python3 scripts/marmish/receipt.py "$report" --write
-python3 scripts/marmish/receipt.py "$report"
+cargo +1.97.1 run --quiet --offline --locked --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-receipt -- check "$report" --write
+cargo +1.97.1 run --quiet --offline --locked --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-receipt -- check "$report"
 echo "Marmish baseline recorded in $report"

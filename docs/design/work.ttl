@@ -3122,6 +3122,11 @@ w:marmishSourceInventoryReplay a p:Artifact ;
     rdfs:label "Rust replay of the pinned Marmish source inventory, Cargo configurations, static tests and packaging inputs" ;
     p:location "verification/provider-tooling/marmish-source-inventory-replay.json" .
 
+w:portHistoricTooling p:evidence w:marmishPhase7RustReplay .
+w:marmishPhase7RustReplay a p:Artifact ;
+    rdfs:label "Historical Phase 7 verifier and Rust replay compared against the published qualification and coverage" ;
+    p:location "verification/provider-tooling/marmish-phase7-replay.json" .
+
 w:portHistoricTooling p:evidence w:rustWorkflowReplay .
 w:rustWorkflowReplay a p:Artifact ;
     rdfs:label "Rust import cleanup, assembly preparation, profile checks and Wasm host receipt replay on macOS ARM64" ;
@@ -3180,3 +3185,6 @@ w:portHistoricTooling p:evidence w:nativeStorageContractReplay .
 w:nativeStorageContractReplay a p:Artifact ;
     rdfs:label "POSIX file-profile credential preparation and native sequence-journal qualification on macOS ARM64" ;
     p:location "verification/provider-tooling/storage-contract-replay.json" .
+
+w:portHistoricTooling p:evidence w:historicalReceiptRust .
+w:historicalReceiptRust a p:Artifact ; p:location "verification/provider-tooling/original-receipt.json" .

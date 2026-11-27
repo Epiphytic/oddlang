@@ -24,14 +24,14 @@ The frozen inventory counts 19 regenerated lexical declaration sites and 5,830 r
 
 ## Replay the archived run
 
-The [qualification archive](../../examples/marmish/evidence/qualification.tar.gz) has SHA-256 `60a0cb9b231d200cb2c03b043f1bd335d5c43fc362b17352fd5ce7017e4d425a`. The native observations originated in a clean Oddlang checkout at `957433a`. Two fresh rebuilds at `481bec7` supplied the Git object witnesses for that same immutable candidate. The comparator and aggregate verifier at `bccd6c3` replayed the observations. Replay trusts the Oddlang checkout that supplies the verifier, the assembly and emitter release pins, and the frozen inventory and original observation archive. The lexical ontology checks ran during each build. Replay binds those ontology blobs to their Git tree, commit and check logs. Keep the extracted directory for the named comparisons, individual logs and compiler input receipts.
+The [qualification archive](../../examples/marmish/evidence/qualification.tar.gz) has SHA-256 `60a0cb9b231d200cb2c03b043f1bd335d5c43fc362b17352fd5ce7017e4d425a`. The native observations originated in a clean Oddlang checkout at `957433a`. Two fresh rebuilds at `481bec7` supplied the Git object witnesses for that same immutable candidate. The comparator and aggregate verifier at `bccd6c3` replayed the observations. The Rust replay accepts the complete framing harness identities from that historical revision or a freshly collected harness from the checkout. Replay trusts the Oddlang checkout that supplies the verifier, the assembly and emitter release pins, and the frozen inventory and original observation archive. The lexical ontology checks ran during each build. Replay binds those ontology blobs to their Git tree, commit and check logs. Keep the extracted directory for the named comparisons, individual logs and compiler input receipts.
 
 ```sh
 archive=examples/marmish/evidence/qualification.tar.gz
 printf '%s  %s\n' 60a0cb9b231d200cb2c03b043f1bd335d5c43fc362b17352fd5ce7017e4d425a "$archive" | shasum -a 256 -c -
 report=$(mktemp -d)
 tar -xzf "$archive" -C "$report"
-python3 -B scripts/marmish/phase7.py replay "$report"
+cargo +1.97.1 run --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-phase7 -- replay "$report"
 ```
 
 ## Observed reconstruction and interoperability
@@ -65,7 +65,7 @@ The original failures include three DNS fixture cases in the denied-network envi
 Run the focused negative controls from the repository root.
 
 ```sh
-python3 -B -m unittest discover -s scripts/marmish -p 'test_phase7.py' -v
+cargo +1.97.1 test --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-phase7
 cargo test --locked --offline --test workspace_assembly
 ```
 

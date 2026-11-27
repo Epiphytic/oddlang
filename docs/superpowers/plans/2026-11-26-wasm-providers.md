@@ -14,3 +14,4 @@ Implement the [approved Wasm design](../specs/2026-11-26-wasm-provider-design.md
 - [x] Replay the published framing build-closure archive with the Rust verifier, repeat its sandbox denial control, compare all compiler prerequisites and package pins, and check the ordered build-report and recovery fixtures.
 - [x] Replay native package projection, sibling workspace linking, cold and disconnected Git acquisition, and both native process wrappers with independent Rust callers and fresh-output rejection controls.
 - [x] Rebuild the pinned Marmish source inventory in Rust, compare its archive and summary byte-for-byte, and verify lexical scope, platform eligibility, packaging recipes and open completeness obligations.
+- [x] Replay the archived Phase 7 source trees, deterministic commit, framing evidence, mixed wire and native observations with the Rust orchestrator. Verify its aggregate bytes and nine negative controls.
