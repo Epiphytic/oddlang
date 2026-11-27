@@ -1,14 +1,14 @@
 {
-  "auditedCompanionRevision": "d982b368f55c3311a17f1ac4c409b380af544613",
-  "previousRevision": "6ff62d1c97a931b6643f53ef2c9f38ca9fe001ce",
-  "reproducedTableSha256": "cfe3335064822ef93082a278b2be590cad95b4460d89e31417025b7f97844727",
-  "remainingProjectToolFiles": 140,
+  "auditedCompanionRevision": "9ce10729a2e3dd8b2cebe71f30af272cc099a32c",
+  "previousRevision": "d982b368f55c3311a17f1ac4c409b380af544613",
+  "reproducedTableSha256": "ce5f0fad723af5beba762b739f7eb8ee68db5f1aad907ad2c8c7bf847e6210ba",
+  "remainingProjectToolFiles": 139,
   "remainingProjectExtensions": {
-    ".py": 132,
+    ".py": 131,
     ".sh": 8
   },
   "removedSincePrevious": [
-    "verification/whole/status/typed_project.py"
+    "verification/whole/status/discovery_project.py"
   ],
   "addedSincePrevious": []
 }

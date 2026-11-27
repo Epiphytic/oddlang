@@ -3592,3 +3592,8 @@ w:portHistoricTooling p:evidence w:typedStatusProjectRust .
 w:typedStatusProjectRust a p:Artifact ;
     rdfs:label "The Rust projector regenerated the typed status package under source isolation on macOS ARM64. The candidate matched the original on all three exact replies that diverged in the earlier untyped baseline, all 16 extended and 33 nested reply cases, and the activating response from a live original daemon. Package outputs matched the previous projector and the complete qualification matched the archive apart from binary digest fields." ;
     p:location "verification/provider-tooling/typed-status-projection-replay.json" .
+
+w:portHistoricTooling p:evidence w:discoveryStatusProjectRust .
+w:discoveryStatusProjectRust a p:Artifact ;
+    rdfs:label "The shared Rust driver reproduced twelve generated discovery package files. All 43 controlled discovery cases and live status from an original daemon via default and explicit state directories matched the macOS ARM64 archive apart from executable provenance. Five rejection controls and the separate typed-client qualification passed." ;
+    p:location "verification/provider-tooling/status-discovery-projection.json" .
