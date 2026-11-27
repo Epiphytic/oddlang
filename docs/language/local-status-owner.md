@@ -16,5 +16,5 @@ The [river gauge fixture](../../verification/local-status-owner/) compiles an un
 
 ```sh
 cargo build --locked --offline
-python3 verification/local-status-owner/check.py target/debug/oddlang
+cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin local-status-owner -- target/debug/oddlang
 ```

@@ -1,0 +1,37 @@
+{
+  "platform": "aarch64-apple-darwin",
+  "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+  "cliSha256": "3884c423fccb909d69c8a6d5e119d4097b8ea6fade8936274edfe814890a08a4",
+  "historicalRunnerSha256": "41e9664eccd12de38569421a6bf97e8327e24a24a154df412b109e32c0d3bb16",
+  "rustRunner": "verification/provider-validation/src/bin/local-status-owner.rs",
+  "fixturePins": {
+    "graph.json": "f10a2cadff46279f627c096f397fb9ba0e156098ee1225647897c248648e9798",
+    "Cargo.lock": "8b3133e92d2550eb45f2bf64ccf6e1e129385a0e0f1d1aa2db69112de8b21d4f",
+    "consumer.rs": "9be6e52e1944bbd121b906085d4ad705f82b9bbe7f41d673baaf32df6c4b24a0",
+    "routed_consumer.rs": "bc85fca70c4ac9ede13b41a5ac197e2e74bf7ba57749df8e638cbdd0e263415e",
+    "async_routed_consumer.rs": "6c403893ec09e12b92ee3559e4bacd9b05543990fd723f65747f7ebbbdf56ddc"
+  },
+  "transport": "local Unix-domain socket",
+  "validResponse": "{\"valid\":true,\"reading\":{\"phase\":\"calibrating\"},\"problem\":null}",
+  "invalidResponse": "{\"valid\":false,\"reading\":null,\"problem\":\"unrecognized sample\"}",
+  "replayedControls": [
+    "four invalid JSON request shapes",
+    "three invalid length-prefixed frames",
+    "two partial peers timed out and third peer received EOF",
+    "socket mode 0600",
+    "occupied endpoint refused and original owner continued serving",
+    "non-private directory refused",
+    "existing regular file preserved",
+    "SIGTERM removed the owned socket and exited silently",
+    "SIGINT retained the replacement regular file",
+    "SIGTERM retained the replacement socket inode",
+    "unreachable transition rejected without output",
+    "out-of-bound lifecycle status rejected without output"
+  ],
+  "nativeConsumerTests": [
+    "visible_owner_transitions_are_committed_and_stopped",
+    "routed_owner_preserves_status_and_bounds_every_extension",
+    "waits_for_async_reply_and_bounds_a_pending_route"
+  ],
+  "qualification": "Both the historical and new runners generated and built three native packages in separate temporary directories and passed the same independent native consumers."
+}

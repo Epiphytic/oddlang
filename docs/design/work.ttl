@@ -981,7 +981,12 @@ w:localStatusOwner a p:Task ;
     p:acceptance "Exercise private socket ownership, guarded state publication, bounded status requests, and process signal cleanup on an unrelated fixture." .
 
 w:localStatusOwnerFixture a p:Artifact ;
-    p:location "verification/local-status-owner/check.py" .
+    p:location "verification/provider-validation/src/bin/local-status-owner.rs" .
+w:portHistoricTooling p:evidence w:gaugeOwnerRustReplay .
+w:localStatusOwner p:evidence w:gaugeOwnerRustReplay .
+w:gaugeOwnerRustReplay a p:Artifact ;
+    rdfs:label "Native Unix-domain gauge verifier checked response bytes, admission limits, routing, shutdown signals, and replacement pathname ownership" ;
+    p:location "verification/provider-tooling/local-status-owner-rust-replay.json" .
 
 w:localStatusOwnerShutdownReview a p:Finding ;
     rdfs:label "Keep every lifecycle frame bounded and unlink the owned socket before releasing its descriptor" ;
