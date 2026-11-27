@@ -1,0 +1,26 @@
+{
+  "format": "oddlang-storage-contract-replay-v1",
+  "host": "aarch64-apple-darwin",
+  "rustcCommit": "8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+  "cliSha256": "3884c423fccb909d69c8a6d5e119d4097b8ea6fade8936274edfe814890a08a4",
+  "passedRunners": ["file-profile", "sequence-journal"],
+  "fileProfile": {
+    "keyLength": 32,
+    "keyMode": "0600",
+    "profileMode": "0700",
+    "repeat": "identical stdout, inode numbers and credential digests",
+    "resumedScalarOneIdentity": "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+    "rejectionExit": 3,
+    "rejectionStdout": "",
+    "rejectionMessagesInTestOrder": ["unsafe file", "in use", "unsafe file", "io", "missing secret", "identity mismatch", "unsafe directory"]
+  },
+  "sequenceJournal": {
+    "nativeBoundaryCases": 256,
+    "nativeOrderMutation": "left: Err(Gap)",
+    "nativeCapacityMutation": "left: 1",
+    "effectRollbackChecks": ["evict-receipt", "append"],
+    "privateFieldTests": 2,
+    "assembledPackagePublicCallerTests": 1,
+    "equivalentGraphByteIdentical": ["sequence_journal.rs", "projection.lock", "obligations.json"]
+  }
+}

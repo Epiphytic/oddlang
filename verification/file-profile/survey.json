@@ -1,0 +1,211 @@
+{
+  "graph": {
+    "format": "oddlang-file-profile-v1",
+    "id": "urn:survey:bootstrap",
+    "arguments": {
+      "state": "station",
+      "profile": "name",
+      "backend": "medium",
+      "default_profile": "daily",
+      "file_backend": "local"
+    },
+    "layout": {
+      "owner": "lease",
+      "manifest": "record.json",
+      "keys": "credentials",
+      "private_subdirectories": [
+        "cache"
+      ],
+      "signing_prefix": "signature-",
+      "storage_prefix": "vault-",
+      "transaction_prefix": ".stage-",
+      "name_maximum_bytes": 12,
+      "name_punctuation": "-",
+      "manifest_maximum_bytes": 4096,
+      "directory_mode": 448,
+      "file_mode": 384
+    },
+    "manifest": {
+      "version": 9,
+      "pending": "proposed",
+      "ready": "active",
+      "file_backend": "disk",
+      "other_backends": [
+        "external"
+      ],
+      "fields": {
+        "version": "v",
+        "profile": "pid",
+        "name": "label",
+        "transaction": "tx",
+        "phase": "stage",
+        "backend": "provider",
+        "signer": "sign",
+        "storage": "locker",
+        "slot": "device",
+        "public": "attestation"
+      }
+    },
+    "errors": {
+      "binding": {
+        "exit": 3,
+        "stderr": "binding"
+      },
+      "state_required": {
+        "exit": 3,
+        "stderr": "state required"
+      },
+      "backend_required": {
+        "exit": 3,
+        "stderr": "backend required"
+      },
+      "unsafe_directory": {
+        "exit": 3,
+        "stderr": "unsafe directory"
+      },
+      "unsafe_file": {
+        "exit": 3,
+        "stderr": "unsafe file"
+      },
+      "invalid_profile": {
+        "exit": 3,
+        "stderr": "invalid profile"
+      },
+      "in_use": {
+        "exit": 3,
+        "stderr": "in use"
+      },
+      "invalid_manifest": {
+        "exit": 3,
+        "stderr": "invalid manifest"
+      },
+      "wrong_version": {
+        "exit": 3,
+        "stderr": "wrong version"
+      },
+      "wrong_backend": {
+        "exit": 3,
+        "stderr": "wrong backend"
+      },
+      "random": {
+        "exit": 3,
+        "stderr": "random"
+      },
+      "missing_secret": {
+        "exit": 3,
+        "stderr": "missing secret"
+      },
+      "invalid_secret": {
+        "exit": 3,
+        "stderr": "invalid secret"
+      },
+      "invalid_signing_key": {
+        "exit": 3,
+        "stderr": "invalid signing key"
+      },
+      "identity_mismatch": {
+        "exit": 3,
+        "stderr": "identity mismatch"
+      },
+      "key_readback": {
+        "exit": 3,
+        "stderr": "key readback"
+      },
+      "io": {
+        "exit": 3,
+        "stderr": "io"
+      }
+    }
+  },
+  "overlay": {
+    "format": "oddlang-file-profile-rust-v1",
+    "entry": "prepare_credentials",
+    "random": "getrandom",
+    "signing": "secp256k1_x_only"
+  },
+  "program": {
+    "profile": "command-surface-v1",
+    "package_name": "field-survey",
+    "version": "1.0.0",
+    "root": {
+      "name": "field-survey",
+      "subcommands": [
+        {
+          "name": "prepare"
+        }
+      ],
+      "arguments": [
+        {
+          "id": "station",
+          "long": "station",
+          "kind": "path",
+          "global": true
+        },
+        {
+          "id": "name",
+          "long": "name",
+          "kind": "string",
+          "global": true
+        },
+        {
+          "id": "medium",
+          "long": "medium",
+          "kind": "string",
+          "global": true
+        }
+      ]
+    }
+  },
+  "command": {
+    "executable": "field-survey",
+    "invalid_exit": 2,
+    "uncovered_exit": 125,
+    "operations": {
+      "prepare": "urn:survey:bootstrap"
+    },
+    "handlers": {
+      "urn:survey:bootstrap": [
+        "keys",
+        "prepare_credentials"
+      ]
+    }
+  },
+  "dependencies": {
+    "clap": {
+      "version": "4.6.7",
+      "features": []
+    },
+    "getrandom": {
+      "version": "0.4.3",
+      "features": []
+    },
+    "libc": {
+      "version": "0.2.189",
+      "features": []
+    },
+    "rustix": {
+      "version": "1.1.5",
+      "features": [
+        "fs"
+      ]
+    },
+    "secp256k1": {
+      "version": "0.30.0",
+      "features": []
+    },
+    "serde": {
+      "version": "1.0.229",
+      "features": [
+        "derive"
+      ]
+    },
+    "serde_json": {
+      "version": "1.0.151",
+      "features": []
+    },
+    "zeroize": {
+      "version": "1.9.1",
+      "features": []
+    }
+  }
+}

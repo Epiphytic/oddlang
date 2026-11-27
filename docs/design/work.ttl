@@ -1066,7 +1066,7 @@ w:nativeFileProfilePreparation p:addresses w:nativeFileProfileWitnessReview .
 w:nativeFileProfilePlan a p:Artifact ;
     p:location "docs/superpowers/plans/2026-11-26-native-file-profile.md" .
 w:nativeFileProfileFixture a p:Artifact ;
-    p:location "verification/file-profile/check.py" .
+    p:location "verification/provider-validation/src/bin/file-profile/unix.rs" .
 w:nativeFileProfileStores a p:Task ;
     rdfs:label "Complete native initialization after encrypted storage opens and verified counts" ;
     p:milestone w:marmishMilestone ; p:source w:nativeFileProfilePlan ; p:status p:done ;
@@ -3175,3 +3175,8 @@ w:portHistoricTooling p:evidence w:marmishGapRegisterRust, w:marmishCompanionCor
 w:marmishGapRegisterRust a p:Artifact ; p:location "verification/provider-tooling/marmish-gap-register.json" .
 w:marmishCompanionCoreRoles a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/0a1d816a84f4f3c148ea37427ab83e508a86b660/verification/whole/core-ownership/rust-qualification-macos-arm64.json" .
+
+w:portHistoricTooling p:evidence w:nativeStorageContractReplay .
+w:nativeStorageContractReplay a p:Artifact ;
+    rdfs:label "POSIX file-profile credential preparation and native sequence-journal qualification on macOS ARM64" ;
+    p:location "verification/provider-tooling/storage-contract-replay.json" .

@@ -2,7 +2,7 @@
 
 ```sh
 cargo +1.97.1 build --locked --offline --bin oddlang
-python3 -B verification/sequence-journal/verify.py target/debug/oddlang
+cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin sequence-journal -- target/debug/oddlang
 ```
 
 The unrelated telemetry queue exercises a five-byte journal, two retained

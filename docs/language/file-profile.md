@@ -11,7 +11,7 @@ The native callback selects explicit state and file backing, validates the profi
 The callback reports credential preparation. The generated profile remains pending until its required stores are initialized and checked by a completion provider. The preparation projection has a distinct entrypoint and effect catalog. The native package links that entry with checked path and string arguments.
 
 ```sh
-python3 -B verification/file-profile/check.py target/debug/oddlang
+cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin file-profile -- target/debug/oddlang
 ```
 
 An initialization extension declares a private runtime binding, named startup
