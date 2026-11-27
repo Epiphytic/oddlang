@@ -3259,3 +3259,8 @@ w:portableOracleRustReplay a p:Artifact ;
     rdfs:label "Rust stream and tagged Data replay against the frozen independent Marmish corpus" ;
     p:location "verification/provider-tooling/portable-oracle-rust.json" ;
     rdfs:comment "Native Apple Silicon replay matched the 403 public observations and 128 sealed cases. Both generated Data targets passed 253 public and 112 sealed cases with 628 public result lines each, six 36-record writer-reader exchanges and the retagged graph controls. A separate Linux namespace probe observed a readable stage, an inaccessible withheld sibling and zero effective capabilities." .
+
+w:portHistoricTooling p:evidence w:rustWasmVerification .
+w:rustWasmVerification a p:Artifact ;
+    rdfs:label "Rust orchestrator for two clean component builds, eight releases and Wasmtime, Node and Chromium qualification, with byte-exact historical reports" ;
+    p:location "verification/provider-tooling/wasm-verify.json" .

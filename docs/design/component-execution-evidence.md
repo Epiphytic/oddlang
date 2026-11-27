@@ -4,8 +4,10 @@ The ledger guest uses freestanding Rust and Component Model bindings. While the 
 
 ```sh
 scripts/setup-wasm.sh
-scripts/verify-wasm.sh
+cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin wasm-verify
 ```
+
+Use `--prepare EMPTY_DIRECTORY` after Cargo’s `--` to produce one set of artifacts for the Wasmtime integration test. The full command builds two sets and runs all three hosts. To replay with previously built binaries, pass `--built-tools DIR` containing `oddlang`, `publish-wasm-matrix`, `wasm-guests`, `runtime-host`, the `wasm_runtime` test executable, `wasm-js-hosts`, and `wasm-reports`. Both modes check the wasm-tools archive against the repository pin.
 
 The verification directory contains both clean builds, their digest comparison, the WIT and canonical ABI for every guest, and separate receipts for each host and participant. The ledger operations run in four binaries across the handwritten and generated implementations and the production and instrumented worlds. Node and Chromium instantiate each transpiled guest through jco with the ledger snapshot import explicitly provided. They preserve signed 64-bit integers as BigInt at the ABI and as decimal strings in reports. Each observed case compares the full ordered import transcript, return values and named transfer errors with the published case.
 

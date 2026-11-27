@@ -1,0 +1,42 @@
+{
+  "platform": "aarch64-apple-darwin",
+  "rust": "1.97.1",
+  "isolatedGuestBuilds": 2,
+  "releasedBundlesComparedToArchivePerBuild": [
+    "ledger",
+    "ledger-test",
+    "ledger-probe",
+    "echo",
+    "echo-label",
+    "echo-rename",
+    "echo-tags",
+    "echo-import"
+  ],
+  "wasmGuestsPerBuild": 12,
+  "wasmtimeFilesMatchingArchive": 38,
+  "nodeAndChromiumFilesMatchingArchive": {
+    "generated-ledger-node.json": "5a70a095795fe490178c1110a662ccfb888a5679d54d115267baa82e45344610",
+    "manual-ledger-test-node.json": "53fd595c9da232066229381e16212d679e92b3b7ace07b43cacfb082d3da53ff",
+    "manual-ledger-node.json": "67bd96405dbe7713b6145d7f65fe873ee379c225edac66c5822e4a6611766077",
+    "generated-ledger-chromium.json": "3937c2ecf43825a673d64c6542df9620943f884bd8c179fe0f8fd69cd2236271",
+    "manual-ledger-chromium.json": "8cf1a5dab0accc0f8ba1db612c10a767935689be46437a48ff989c682960994c",
+    "generated-ledger-test-node.json": "f4016162b9b2300d3c61a371b3e2ecb29a970ace7d8474911c0d478dccf61290",
+    "manual-ledger-test-chromium.json": "6bc5d65aac3ab94e4309de3ee6312162807837fe96209fd05a7d422d3d3d2822",
+    "generated-ledger-test-chromium.json": "c0ba8eb430544cdbddeb8342a35d2f314a317de94f950b87287b49acf9f72b8c"
+  },
+  "aggregateFilesMatchingArchive": {
+    "runtime-observations.json": "84e2c7b5363260eca448cde529972fcfee6e03b2ca3f722c9c30a3ce242e1de1",
+    "reproducibility.json": "458748c073362b5c2340fee97c78f9ba3794e516f4feadf38d4b6172c637aec3"
+  },
+  "prebuiltToolsSha256": {
+    "oddlang": "ccd3aa5caeac7c57dddb5d8c04e6cc619c7580e446edb8139bc00f0c6555e09f",
+    "publish-wasm-matrix": "d45b6f43a66801e760515f5c67ae142a6ba18e9aaba2c658a63d4d811d5875bc",
+    "runtime-host": "6f467e057815cfae5b5f7dd18e0a728e4fc6e8509956d17c657f019c8ad99651",
+    "wasm-guests": "ad88eba0b14756b50f7c043b967ca8105e79da1a26d2709241cdd3b7b80dd43d",
+    "wasm-js-hosts": "5ffef1ecba53fb0e6792de93ef97e23e1d2dbec493a45c8b7aa2a77989b555f1",
+    "wasm-reports": "1710ca2d6ad2a1b9bf24de864c302e52d4d6b4518511852cd676da25576340d9",
+    "wasm_runtime": "80484f39068f1c60a18c0ee3c2ae096d2c5b8a9d98acdbf796395109f7d68f37"
+  },
+  "standalonePreparationMatchedArchive": true,
+  "nonemptyPreparationDirectoryRejected": true
+}

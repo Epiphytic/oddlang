@@ -2,9 +2,8 @@
 use clap::Parser;
 use provider_validation::{
     Result, sha,
-    wasm_toolchain::{compiler, copy_tree, prepare, run},
+    wasm_toolchain::{compiler, prepare, publish_fixture, run},
 };
-use sha2::{Digest, Sha256};
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -120,30 +119,17 @@ fn main() -> Result {
     observations.push_str(&host_output);
     fs::write(out.join("observations.txt"), &observations)?;
     print!("{observations}");
-    let store = out.join("cache");
     for (name, world) in [
         ("ledger", "ledger"),
         ("ledger-test", "ledger-test"),
         ("echo", "echo-world"),
     ] {
-        let lock = if name == "ledger-test" {
-            let ledger_key = format!("{:x}", Sha256::digest(b"urn:oddlang:ledger:wasm:package"));
-            copy_tree(
-                &out.join("ledger"),
-                &store.join("wasm").join(ledger_key).join("1.0.0"),
-            )?;
-            "contracts/wasm/ledger-test/dependencies.lock.json"
-        } else {
-            "contracts/wasm/empty.lock.json"
-        };
-        let bundle = out.join(name);
-        run(compiler(args.oddlang.as_deref(), &pins.rust_version)?
-            .current_dir(&root)
-            .args(["wasm", "publish"])
-            .arg(format!("contracts/wasm/{name}"))
-            .arg(lock)
-            .arg(&store)
-            .arg(&bundle))?;
+        let bundle = publish_fixture(
+            compiler(args.oddlang.as_deref(), &pins.rust_version)?,
+            &root,
+            out,
+            name,
+        )?;
         let core = out.join(format!("{name}-core.wasm"));
         let component = out.join(format!("{name}.wasm"));
         run(Command::new(&tools)

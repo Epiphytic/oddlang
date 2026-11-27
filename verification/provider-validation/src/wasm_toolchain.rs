@@ -1,6 +1,7 @@
 //! Shared pinned build inputs for the offline WebAssembly qualification tools.
 use crate::{Result, sha};
 use serde::Deserialize;
+use sha2::{Digest, Sha256};
 use std::{
     collections::BTreeMap,
     env, fs,
@@ -100,4 +101,28 @@ pub fn compiler(executable: Option<&Path>, version: &str) -> Result<Command> {
         ]);
         cmd
     })
+}
+
+/// Publish the pinned three-world fixture; the test world imports the ledger release.
+pub fn publish_fixture(mut cli: Command, root: &Path, out: &Path, name: &str) -> Result<PathBuf> {
+    let store = out.join("cache");
+    let lock = if name == "ledger-test" {
+        let key = format!("{:x}", Sha256::digest(b"urn:oddlang:ledger:wasm:package"));
+        copy_tree(
+            &out.join("ledger"),
+            &store.join("wasm").join(key).join("1.0.0"),
+        )?;
+        "contracts/wasm/ledger-test/dependencies.lock.json"
+    } else {
+        "contracts/wasm/empty.lock.json"
+    };
+    let bundle = out.join(name);
+    run(cli
+        .current_dir(root)
+        .args(["wasm", "publish"])
+        .arg(format!("contracts/wasm/{name}"))
+        .arg(lock)
+        .arg(store)
+        .arg(&bundle))?;
+    Ok(bundle)
 }
