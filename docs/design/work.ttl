@@ -3157,6 +3157,12 @@ w:rustStreamWorkspaceReplay a p:Artifact ;
     rdfs:label "Rust workspace qualification regenerated the sealed stream crate, exercised both compiler controls, and reran the six selected cases on both retained consumer builds" ;
     p:location "verification/provider-tooling/stream-workspace-rust-replay.json" .
 
+w:portHistoricTooling p:evidence w:rustHttpConformanceReplay .
+w:httpHybrid p:evidence w:rustHttpConformanceReplay .
+w:rustHttpConformanceReplay a p:Artifact ;
+    rdfs:label "Rust HTTP tooling provisioned locked consumers, launched Chromium and verified eight byte-identical fresh Rust, TypeScript and Go receipts" ;
+    p:location "verification/provider-tooling/http-conformance-rust-replay.json" .
+
 w:portHistoricTooling p:evidence w:rustWorkflowReplay .
 w:rustWorkflowReplay a p:Artifact ;
     rdfs:label "Rust import cleanup, assembly preparation, profile checks and Wasm host receipt replay on macOS ARM64" ;

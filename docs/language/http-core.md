@@ -57,7 +57,7 @@ The pinned ledger operation evaluates guards in priority order. SourceMissing an
 
 ## Toolchain
 
-Run `scripts/setup-http-conformance.sh` for pinned tooling. The baseline uses Rust 1.96.1, Go 1.26.3, Node 22.22.2, npm 10.9.7, TypeScript 5.9.3, Ajv 8.20.0 (JSON Schema 2020-12), the 2022-10-07 OpenAPI 3.1 schema, and Playwright 1.58.2 with its Chromium build. The hand-authored v1 cache fixture supports offline phase-one checks.
+Run `cargo +1.96.1 run --locked --manifest-path verification/http-conformance/Cargo.toml -- setup` for pinned tooling. The baseline uses Rust 1.96.1, Go 1.26.3, Node 22.22.2, npm 10.9.7, TypeScript 5.9.3, Ajv 8.20.0 (JSON Schema 2020-12), the 2022-10-07 OpenAPI 3.1 schema, and Playwright 1.58.2 with its Chromium build. The hand-authored v1 cache fixture supports offline phase-one checks.
 
 ## Standalone JSON codecs (rule set 2)
 

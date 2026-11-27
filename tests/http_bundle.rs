@@ -274,7 +274,7 @@ fn pinned_standards_validators_accept_projections() {
         .arg("tests/support/http-schema.cjs")
         .arg(out.path())
         .output()
-        .expect("node is required: run scripts/setup-http-conformance.sh");
+        .expect("node is required; provision the HTTP tools with cargo +1.96.1 run --locked --manifest-path verification/http-conformance/Cargo.toml -- setup");
     assert!(
         run.status.success(),
         "{}",
