@@ -763,7 +763,7 @@ w:commandSurface a p:Task ;
     p:status p:done ; p:dependsOn w:nativePackageAssembly ; p:evidence w:commandSurfaceFixture ;
     p:acceptance "Compare independent derived and generated Rust executables on exact help, version, error, alias, requirement, default and parsed dispatch observations. Detect unsupported syntax and graph changes." .
 w:commandSurfaceFixture a p:Artifact ;
-    p:location "verification/command-surface/check.py" .
+    p:location "verification/provider-validation/src/bin/command-surface/check.rs" .
 
 w:wholeWorkspaceAssembly a p:Task ; rdfs:label "Compose native packages and link declared binary targets" ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
@@ -1525,7 +1525,7 @@ w:terminalCliDispatchReview a p:Finding ;
 w:terminalAuxiliaryCli p:addresses w:terminalCliDispatchReview .
 
 w:terminalCliFixture a p:Artifact ;
-    p:location "verification/command-surface/terminal.py" .
+    p:location "verification/provider-validation/src/bin/command-surface/terminal.rs" .
 w:terminalCliDarwin a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/blob/b11a2040323ec134f51bb6827b64d4429bf79459/verification/whole/offline-cli/aarch64-apple-darwin.json> .
 w:terminalCliPrefixGap a p:Finding ;
@@ -2386,7 +2386,7 @@ w:privateManifestSuiteLinux a p:Artifact ;
 
 w:terminalPrefixCli p:addresses w:terminalCliPrefixGap .
 w:terminalPrefixFixture a p:Artifact ;
-    p:location "verification/command-surface/prefix.py" .
+    p:location "verification/provider-validation/src/bin/command-surface/prefix.rs" .
 w:terminalPrefixDarwin a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/blob/faacb6133e3db379ad037979b28261d773b37e95/verification/whole/terminal-prefix/aarch64-apple-darwin.json> .
 w:terminalPrefixLinux a p:Artifact ;
@@ -3190,3 +3190,8 @@ w:portHistoricTooling p:evidence w:historicalReceiptRust .
 w:historicalReceiptRust a p:Artifact ; p:location "verification/provider-tooling/original-receipt.json" .
 
 w:historicalReceiptRust rdfs:comment "The independently pinned candidate comparator also revalidates the archived original through its historical check entry point." .
+
+w:portHistoricTooling p:evidence w:nativeCommandSurfaceReplay .
+w:nativeCommandSurfaceReplay a p:Artifact ;
+    rdfs:label "Offline native CLI parser and terminal prefix qualification on macOS ARM64" ;
+    p:location "verification/provider-tooling/command-surface-replay.json" .

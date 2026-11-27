@@ -26,7 +26,7 @@ From a clean compiler checkout, build with `cargo +1.96.1 build --locked --offli
 
 - `line-grammar` with each of the `records`, `support` and `inventory` subcommands
 - `record-defaults` and the `equality` subcommand of `qualify-choices`
-- `structured-diagnostics` and `python3 -B verification/command-surface/prefix.py "$cli"`
+- `structured-diagnostics` and the `prefix` subcommand of `command-surface`
 
 All seven fixture commands and the 13 library tests passed on Darwin ARM64. They qualify compiler composition. The application results below come from separate sealed builds.
 
