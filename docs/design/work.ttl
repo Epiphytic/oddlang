@@ -3875,3 +3875,8 @@ w:portHistoricTooling p:evidence w:launchHashRust .
 w:launchHashRust a p:Artifact ;
     rdfs:label "The Rust Launch hash verifier matched 227 digest and namespace cases and the predicted field-order mutation. The shared Rust construction and decoding corpus exactly matched its historical inputs and construction expectations. The Launch hash, base Launch, Manifest and field-relations runs each reproduced the archived macOS receipt byte for byte." ;
     p:location "verification/provider-tooling/launch-hash-rust.json" .
+
+w:portHistoricTooling p:evidence w:launchRecoveryHelperContextRust .
+w:launchRecoveryHelperContextRust a p:Artifact ;
+    rdfs:label "Rust Launch recovery rebuilt both graphs and Rust bindings from the source, compiler inventory and native enum witness. Both the Launch and helper-context qualification receipts matched the macOS archives. The current compiler reproduced the seven-crate workspace from 111 pinned inputs. Independent observers matched all 105 policy decisions and 11 configuration cases, and the mixed local codec pairs matched every wire and payload byte." ;
+    p:location "verification/provider-tooling/launch-recovery-helper-context-rust.json" .

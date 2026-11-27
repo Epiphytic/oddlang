@@ -1,0 +1,108 @@
+{
+  "frameworkRevision": "7c43198831a1afadc2884919c88ff635197316c5",
+  "companionRevision": "3e3fc0d4bdb87472317bb16a7c25dad31d74fb3e",
+  "host": "aarch64-apple-darwin",
+  "historicalVerifiers": {
+    "copy-launch": {
+      "archive": "verification/whole/copy-launch/reference-aarch64-apple-darwin.json",
+      "sha256": "7396611edbe056128db1f3b60d12fc445026f743fb98f9609fbc4346bb10ed11",
+      "observations": {
+        "original": "af54339d250290490d62d4475a77539b7e739071",
+        "framework": "5f4cf958b7b4f8da8f8309f87734c14a8309c7d7",
+        "rust": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6",
+        "originalAndCompanionReadDenied": true,
+        "packageLockSha256": "2b5a90bd3ed02e3d6ddd4216b65210798ead15eec52491e0d13ae2efb638764c",
+        "callerSha256": "96915e38007f9bcbd26bd4b47af204266d91de2b1abd0da4d6c6b810e8671e00",
+        "nativeEnumByteOutcomes": 1280,
+        "constructCases": 45,
+        "exactDecodeCases": 56,
+        "negativeControl": "version guard moved last selects copy_path instead of copy_version",
+        "observationsSha256": "3fbc931dce2c7ad6da31a056a0dff74883a993bd495867efb1027d3f3fc0dac2"
+      }
+    },
+    "copy-helper-context": {
+      "archive": "verification/whole/copy-helper-context/reference-aarch64-apple-darwin.json",
+      "sha256": "b540b27c606bef2af356089659765ae4f1579a9d0993ac8d86b84cc8ca486868",
+      "observations": {
+        "original": "af54339d250290490d62d4475a77539b7e739071",
+        "framework": "d427d5399a9ce91195eb1eb467dab99d294e45bb",
+        "rust": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6",
+        "originalAndCompanionReadDenied": true,
+        "packageLockSha256": "40936233b0361cc494f89d513de162c238296a4045fde1eb6a638c5524917a75",
+        "callerSha256": "cbf04617b85215d9dbefcece927579e5b75c976b86be0526cacda51f37232d64",
+        "constructionCases": 108,
+        "decodeCases": 2159,
+        "rejectedDecodeCases": 1991,
+        "observationsSha256": "3c616ccfe696dda81c6a0317ce0c7b7373910290a6650fc44f4cda4138e5065f",
+        "negativeControl": "repinned fixed-field permutation emits independently predicted swapped bytes"
+      }
+    },
+    "copy-frame": {
+      "archive": "verification/whole/copy-frame/pipe-aarch64-apple-darwin.json",
+      "sha256": "9fec5667ef96209b5db80ec20334ce2ae5266981fd2e7c2105b234181980a79f",
+      "observations": {
+        "original": "af54339d250290490d62d4475a77539b7e739071",
+        "generatedWorkspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c",
+        "driverSha256": "d5ec33dd26c651ca82483188862bc43ee459b900fdb39c4ccc9d7199a537dd66",
+        "framesPerDirection": 1260,
+        "payloadSha256": "e8007b4a0a207564767a34fd944d829e984318e4ac4d65522b136ca16794106e",
+        "wireSha256": "a2ad71740d1390383296943473fdfac7ed6515b005e1cae5cb0f5f1cb62f78e5",
+        "originalToGenerated": {
+          "encodeExit": 0,
+          "decodeExit": 0,
+          "wireBytesCompared": 4210721,
+          "payloadBytesCompared": 4194341
+        },
+        "generatedToOriginal": {
+          "encodeExit": 0,
+          "decodeExit": 0,
+          "wireBytesCompared": 4210721,
+          "payloadBytesCompared": 4194341
+        },
+        "truncationAndOffsetControlsPassed": 4
+      }
+    }
+  },
+  "currentCompilerRecoveryObservationSha256": "d9033e45c61c8ad3ab5fdfd6caf14b186596f7079a86176d919623a65a02880f",
+  "recoveredFiles": {
+    "launch.json": "3d102d85bb4c76b1d4450cbee5f2e82032aed4b8c73293ffe36cf4c0c5d25561",
+    "launch-rust.json": "6b89437f7b252f9cfc97012502b510b4391eb2fa8bdb8adfeaa9054d018ac1d5",
+    "enums.json": "9ea5cc2f6ba85350ec16ba7c24465b5ec066502450fcabd8fcd2551ceee5d11b",
+    "enums-rust.json": "5ddd8100e68af2391d48ffdfca1ac3470c978f3741042a9acda46151500df512"
+  },
+  "postRefactorWorkspace": {
+    "compilerSha256": "0417fa009a15cc19a16c5d40e61488d98d6b550f748c639f8b6d787ad5f1b131",
+    "inputManifestSha256": "859923216f7a48d14f6975c9625fc809b2f6f1a0da3c4484ff367f96eaa929b4",
+    "pinnedInputs": 111,
+    "policy": {
+      "foregroundSourceSha256": "9ddc9fd6ab6f2fa08e3e80805c18d96a0d0be4c02ca177205bbe5cd692d106e2",
+      "host": "aarch64-apple-darwin",
+      "policyDecisions": {
+        "cases": 105,
+        "inputsSha256": "b392ced173616d91990bb648af275a25776ccc15e22f33faf7388baea451a980",
+        "observationsSha256": "c30e84dc1ec0633fc995d79eda55ece8dfabd27db8cc91bcf72e2270cbbd6f6b"
+      },
+      "rebuiltObserverSha256": {
+        "generated-observer": "8d07a546d610d7dc70355c663885458794aaee75cf057d45f77b2866f9ed20a8",
+        "policy-observer": "9be43a93b00afd85feb083bc6dcbe3932fe0b5f7cc4fac26cbba98b04293edf7",
+        "room-observer": "3036d1be6bcd6b2d5af86e4bc4a84380d1d8baf6a04f2dfa3013c0b549e1f313"
+      },
+      "roomConfigFileCases": 11,
+      "rustToolchain": "1.97.1",
+      "upstreamCommit": "af54339d250290490d62d4475a77539b7e739071",
+      "workspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c"
+    },
+    "policyToolSha256": "0031e951491fdb9aafdcd7219939473912c5a53932afa6a85167d385f85c0ed8",
+    "workspace": {
+      "directories": 49,
+      "files": 106,
+      "members": 7,
+      "treeSha256": "ed3ba7e04668b2ad346edf880c0c1a261ffefaa47b6838ad9b24e0ab4b8c3524",
+      "workspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c"
+    }
+  },
+  "controls": [
+    "Both validators rejected the other framework pin before creating a receipt.",
+    "The two remaining vault callers staged identical sets of eight and six inputs before and after moving their shared helpers."
+  ]
+}

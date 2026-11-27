@@ -1,13 +1,14 @@
 {
-  "auditedCompanionRevision": "bbc01a9aaf872f56999f735e346adb04643c7208",
-  "previousRevision": "381b3f09c18e5d411db87ba0bb54d33d763e2555",
-  "reproducedTableSha256": "3001f5d7cdd1b81c9ef11f5605ff46514ae4b29e8595659b994fed8e7279a43d",
-  "remainingProjectToolFiles": 75,
+  "auditedCompanionRevision": "3e3fc0d4bdb87472317bb16a7c25dad31d74fb3e",
+  "previousRevision": "bbc01a9aaf872f56999f735e346adb04643c7208",
+  "reproducedTableSha256": "3b690066fce6619a06238bee928607ec380adb3d0db9bd0c0a1c2fcb275a0b0e",
+  "remainingProjectToolFiles": 73,
   "remainingProjectExtensions": {
-    ".py": 75
+    ".py": 73
   },
   "removedSincePrevious": [
-    "verification/whole/copy-launch-hash/verify.py"
+    "verification/whole/copy-helper-context/verify.py",
+    "verification/whole/copy-launch/verify.py"
   ],
   "addedSincePrevious": []
 }
