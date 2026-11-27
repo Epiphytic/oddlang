@@ -3818,7 +3818,7 @@ w:ownerProjectorsRust a p:Artifact ;
 
 w:portHistoricTooling p:evidence w:directCommandCorpusRust .
 w:directCommandCorpusRust a p:Artifact ;
-    rdfs:label "The native direct replay matched all nine local fixture observations including distinct binary streams, raw arguments, exit 7 and private receipts. Running the historical short fixture reproduced the full archived receipt. With the native short executable only its five executable digests changed. All four finite fixture receipts were identical." ;
+    rdfs:label "The native direct replay matched all nine local fixture observations including distinct binary streams, raw arguments, exit 7 and private receipts. Running the historical short fixture reproduced the full archived receipt. With the native short executable only its five executable digests changed. All four finite fixture receipts were identical. The Rust corpus tests now independently check stream boundaries, status mismatches, fixed vector bytes and nonce bounds." ;
     p:location "verification/provider-tooling/direct-command-corpus-rust.json" .
 
 w:portHistoricTooling p:evidence w:commandOutputRust .

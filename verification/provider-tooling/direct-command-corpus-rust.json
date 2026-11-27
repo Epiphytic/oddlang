@@ -132,5 +132,16 @@
     ],
     "schema": 1,
     "workspace_removed": true
+  },
+  "regressionReplay": {
+    "companionRevision": "f592e813e5d524bdac7b61a05204ff1b8d509aac",
+    "originalPythonCorpusTestsPassed": 4,
+    "rustCorpusTestsPassed": 4,
+    "rustCommandOutputTestsPassed": 3,
+    "historicalReportByteIdentical": true,
+    "historicalReportSha256": "704b175b96d5372f031ed2b8f210d6329a7cc1955c399431180e1e98e7aec2af",
+    "nativeReportSha256": "4ac4ba21ab4ea94a2c4a39ed2460b651d5978ec78fa210be3ed48c1a17292ff8",
+    "casesCompared": 9,
+    "differingFields": "Only executable_sha256 in the five short cases."
   }
 }
