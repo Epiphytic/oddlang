@@ -3380,3 +3380,17 @@ w:portHistoricTooling p:evidence w:companionArchivedSuiteReceipts .
 w:companionArchivedSuiteReceipts a p:Artifact ;
     rdfs:label "Rust reproduced 14 archived suite totals and ten build-target reports for ARM64 macOS and Linux, retained four missing-library refusals, and rejected 66 altered receipts" ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/d1c9b193fa501cedec287409e1265677bc24797d/verification/whole/suite/README.md#archived-receipt-verifier" .
+
+w:portHistoricTooling p:evidence w:rustReleaseManifestConformance, w:rustReleaseManifestConsumer, w:rustRangeReference, w:rustCanonicalRangeComposers .
+w:rustReleaseManifestConformance a p:Artifact ;
+    rdfs:label "Rust corpus generator and strict checker reproduced the blind inputs, 224 published vectors, both host observations and the changed size-limit expectation" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/89a6f9a648c119d8d304bb29a82ca175a07786af/verification/whole/release-manifest/rust-conformance-macos-arm64.json" .
+w:rustReleaseManifestConsumer a p:Artifact ;
+    rdfs:label "Generated Rust parser executed the independent manifest probe and returned the archived output digest for 224 freshly generated blind inputs" ;
+    p:location "verification/provider-tooling/release-manifest-consumer.json" .
+w:rustRangeReference a p:Artifact ;
+    rdfs:label "Rust observers reproduced 35 original range and reason outcomes, 17 projected outcomes and the original compiler rejection" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/3179b2fa77300383f3c0a04a4f1e26f02a977741/verification/whole/gap-range-reference/rust-replay-aarch64-apple-darwin.json" .
+w:rustCanonicalRangeComposers a p:Artifact ;
+    rdfs:label "Native canonical engine choice, authored range and recovered range composers reproduced five descriptors and fourteen rejection controls" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/9099eac2bbcab1dde1946ff45e3030435a3a8f08/verification/whole/canonical-range-data/rust-composition-macos-arm64.json" .
