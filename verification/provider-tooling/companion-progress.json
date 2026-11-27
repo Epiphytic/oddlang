@@ -1,14 +1,14 @@
 {
-  "auditedCompanionRevision": "84e94d27c68a9f70f9b5aaf1a8aab85a95598e4d",
-  "previousRevision": "2107fe5ca39cbd07671baaddc6d7e50f7c7e2d8a",
-  "reproducedTableSha256": "e4141119486fbdf5f6ca47d36c3781c8171f69923a839e05a6668472acea4343",
-  "remainingProjectToolFiles": 113,
+  "auditedCompanionRevision": "ff7b923bdbb3596cbef7b117683f0be847fe77c0",
+  "previousRevision": "84e94d27c68a9f70f9b5aaf1a8aab85a95598e4d",
+  "reproducedTableSha256": "cbe947772decf29701800e93cef44d83754d27d2850ca3cb085cec63ad75e761",
+  "remainingProjectToolFiles": 112,
   "remainingProjectExtensions": {
-    ".py": 110,
+    ".py": 109,
     ".sh": 3
   },
   "removedSincePrevious": [
-    "verification/whole/mdk-json-input/verify.py"
+    "verification/whole/public-types/check_workspace.py"
   ],
   "addedSincePrevious": []
 }
