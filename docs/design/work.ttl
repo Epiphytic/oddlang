@@ -3943,3 +3943,8 @@ w:cleanupAfterMerge a p:Decision ;
     rdfs:label "Remove task scratch when its last consumer finishes, clean merged branches and repeat the worktree inventory after merges" ;
     p:source w:branchCleanupInstructions .
 w:branchCleanupInstructions a p:Artifact ; p:location "AGENTS.md#finish-a-branch" .
+
+w:gapReasonContractRustEvidence a p:Artifact ;
+    rdfs:label "Standalone Rust recovery and native package projection of the Marmish gap reason matched the original and mutated case observations on macOS ARM64" ;
+    p:location "verification/provider-tooling/gap-reason-contract-rust.json" .
+w:portHistoricTooling p:evidence w:gapReasonContractRustEvidence .
