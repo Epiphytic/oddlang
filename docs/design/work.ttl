@@ -3810,3 +3810,8 @@ w:portHistoricTooling p:evidence w:commandRequestsRust .
 w:commandRequestsRust a p:Artifact ;
     rdfs:label "The Rust verifier compared 66 request packets across isolated mainline and projected codecs on ARM64 macOS. All six accepted packets returned their exact bytes. The original Python and Rust receipts matched byte for byte on the same compiler. Three modified package inputs were refused and the shared observer reproduced the archived 108-case response structure receipt." ;
     p:location "verification/provider-tooling/command-requests-rust.json" .
+
+w:portHistoricTooling p:evidence w:ownerProjectorsRust .
+w:ownerProjectorsRust a p:Artifact ;
+    rdfs:label "Both native macOS owner launchers recovered and staged the historical inputs, generated and built release executables under Seatbelt and replayed the independent status and foreground qualification. All archived observations matched, including admission, cleanup and foreground recovery. Three altered inputs were rejected." ;
+    p:location "verification/provider-tooling/owner-projectors-rust.json" .

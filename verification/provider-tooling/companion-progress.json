@@ -1,14 +1,17 @@
 {
-  "auditedCompanionRevision": "e097f352e8a72c161e928375590bca3541db3833",
-  "previousRevision": "ce28ad604d899b06adaec4e8eabd71e0719abc83",
-  "reproducedTableSha256": "fb0fc1908dc66d2f352ea2d5fc630c48b1a1de1f5de4f3ef1358e175d27ac0d4",
-  "remainingProjectToolFiles": 93,
+  "auditedCompanionRevision": "ed3d99567ab1cfd9fe224034fce5e00172b095ab",
+  "previousRevision": "e097f352e8a72c161e928375590bca3541db3833",
+  "reproducedTableSha256": "1bf940f182d57e4438f9e7b314a97b1702408d82ce94d8876a3a4975c4edb394",
+  "remainingProjectToolFiles": 89,
   "remainingProjectExtensions": {
-    ".py": 90,
-    ".sh": 3
+    ".py": 88,
+    ".sh": 1
   },
   "removedSincePrevious": [
-    "verification/whole/command-requests/verify.py"
+    "verification/whole/foreground-owner/macos.sh",
+    "verification/whole/foreground-owner/project.py",
+    "verification/whole/status-owner/macos.sh",
+    "verification/whole/status-owner/project.py"
   ],
   "addedSincePrevious": []
 }

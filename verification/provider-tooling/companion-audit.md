@@ -1,6 +1,6 @@
 # Companion script and tool inventory
 
-The latest scan at `df964346e51f69af65e6d8cb7f55ff278ed379e4` found **158 remaining project-authored tools**, comprising 149 Python and nine shell files. The [progress receipt](companion-progress.json) lists the paths added and removed since the detailed baseline below. To reproduce this snapshot, run the same scanner command with the latest scan revision and compare the resulting TSV digest with the progress receipt.
+The [progress receipt](companion-progress.json) records the latest audited revision, counts by extension, and paths added or removed since the preceding scan. To reproduce that snapshot, run the scanner command below with the audited revision and compare the resulting TSV digest with the receipt.
 
 At companion revision `b95fd5161e75c47913a17a2ee3e68e13da5e8748`, **182 project-authored Python or shell files remain** in the tooling migration inventory. They comprise 170 Python verifiers, producers, helpers and tests, nine shell entry points, and three Python adapters for callers of Rust gates. This counts files. Several work together to qualify one contract. It includes separately owned lanes and does not certify their behavior.
 
