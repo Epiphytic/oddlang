@@ -3323,3 +3323,8 @@ w:portHistoricTooling p:evidence w:rustPortableBridgeReplay .
 w:rustPortableBridgeReplay a p:Artifact ;
     rdfs:label "Rust verifier reproduced all five local bridge argument, init, and EOF transcripts, plus an independent Linux OFD lock probe" ;
     p:location "verification/provider-tooling/portable-bridge-rust.json" .
+
+w:portHistoricTooling p:evidence w:nativeWaitProfileDiagnostics .
+w:nativeWaitProfileDiagnostics a p:Artifact ;
+    rdfs:label "Rust local profile observer reproduced all three archived diagnostic reports, including the prior build's thirteen mismatches and failing comparison status" ;
+    p:location "verification/provider-tooling/profile-diagnostics.json" .

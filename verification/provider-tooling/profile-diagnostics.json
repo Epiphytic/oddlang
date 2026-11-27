@@ -1,0 +1,10 @@
+{
+  "platform": "aarch64-apple-darwin",
+  "observer": "verification/provider-validation/src/bin/profile-diagnostics.rs",
+  "observations": [
+    {"archive": "verification/local-command-client/missing-profile-macos-arm64.json", "sha256": "b48a2b1e864eb686340e922b6e73fc2dfc9ebd3acd72b3455180d0f63220fe38", "cases": 9, "requireMatch": false, "exit": 0},
+    {"archive": "verification/local-command-client/wait-profile-prior-macos-arm64.json", "sha256": "34ed73d2fdcd53e2307e34619ee853605677655acaf290f69eaa654137517649", "cases": 13, "requireMatch": true, "exit": 1, "differences": 13},
+    {"archive": "verification/local-command-client/wait-profile-parity-macos-arm64.json", "sha256": "4283bec8431aba783a41dfceec71a8101dae70c6dfaad5749a0ad09a1a7f6140", "cases": 13, "requireMatch": true, "exit": 0, "differences": 0}
+  ],
+  "allArchiveBytesMatched": true
+}
