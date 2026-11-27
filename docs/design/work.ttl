@@ -3790,3 +3790,8 @@ w:portHistoricTooling p:evidence w:generatedDiagnosticsRust .
 w:generatedDiagnosticsRust a p:Artifact ;
     rdfs:label "The complete Rust diagnostics verifier staged 85 pinned inputs, denied twelve source and caller reads and built all seven crates on ARM64 macOS. Its four downstream diagnostic scenarios matched the original including cross-thread state and closed stderr. All archived observations matched; only build artifact digests and the companion revision changed. Four altered products failed the native seal check." ;
     p:location "verification/provider-tooling/generated-diagnostics-rust.json" .
+
+w:portHistoricTooling p:evidence w:convergedPublicApiRust .
+w:convergedPublicApiRust a p:Artifact ;
+    rdfs:label "Three ARM64 macOS release qualifications replayed the shared Rust public API verifier. All archived observations matched, including both prototype constant reads, 26 engine error variants and 50 negative compiler diagnostics. The canonical release reproduced 77 importable symbols across 140 attempts." ;
+    p:location "verification/provider-tooling/converged-public-api-rust.json" .

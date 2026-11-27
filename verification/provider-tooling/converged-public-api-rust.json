@@ -1,0 +1,159 @@
+{
+  "host": "aarch64-apple-darwin",
+  "parentSealRejectedChanges": [
+    "workspace.lock",
+    "marmish-prototype/package.lock",
+    "marmish-engine/src/lib.rs",
+    "marmish-native/src/lib.rs"
+  ],
+  "public": {
+    "archive": "converged-public-api/aarch64-apple-darwin.json",
+    "archiveSha256": "f15b3d225a557944c7dafcfdb2df5a247d81f7ded07e62764de1b8c0f4d19103",
+    "nativeReceiptSha256": "0e00a9465fdce3738730baf95294e697294deae47a82fa3fefcddc1f47793945",
+    "companionRevision": "4682107a10a60393606f9c96d3dbb4935c5b2ef8",
+    "frameworkRevision": "225c32d49be4ac7f96a9ff7874220b5307753a90",
+    "workspaceLockSha256": "3ed25cad2b1399e1c63787fedca0abbb465e758c9cfb6c635b17188a40b2dfaa",
+    "stagedInputs": 89,
+    "deniedSourceProbes": 17,
+    "distinctEngineVariants": 26,
+    "negativeEngineDiagnostics": 38,
+    "negativeIdentityDiagnostics": 12,
+    "privateReaderCases": [
+      "secret_request_tests::private_reader_wipes_consumed_spans",
+      "buffer_contract_observations::retained_span_and_consumed_bytes",
+      "buffer_contract_observations::failed_refill_retains_prior_end",
+      "buffer_contract_observations::zero_output_still_reads_and_eof_can_be_polled_again"
+    ],
+    "prototypeConstants": {
+      "original-constant": "131072\n",
+      "generated-constant": "131072\n"
+    },
+    "changedReceiptFields": [
+      "companion",
+      "compilerSha256",
+      "enginePublicError.originalLibrarySha256",
+      "enginePublicError.sealedLibrarySha256",
+      "fixedVault.librarySha256",
+      "journal.generated.libraries.marmish_native",
+      "journal.generated.libraries.serde_json",
+      "journal.original.libraries.marmish_native",
+      "mdk.originalLibrarySha256",
+      "mdk.sealedLibrarySha256",
+      "publicConstant.generated-constant.librarySha256",
+      "publicConstant.original-constant.librarySha256",
+      "releaseInfo.generatedBinaries.marmish",
+      "releaseInfo.generatedBinaries.marmishd"
+    ],
+    "parentWorkspaceLocks": {
+      "workspace-v7-engine-public-error-identity": "d89469b03c3cb808181a154424b07ad43fcaee8191dee191e5cb5d3da950cc3c",
+      "workspace-v7-recovered-vault-engine-journal-mdk-buffered-limit": "fbddb3a4d7bd543fba52f3fb0015b29dcf07e79154aca9ba2984893cb8633142"
+    }
+  },
+  "records": {
+    "archive": "engine-native-records/aarch64-apple-darwin.json",
+    "archiveSha256": "70c5e475df4585c1c86e434bbbd9b39de73738d7c4cb87ab4e6d66cac2f1a9c6",
+    "nativeReceiptSha256": "9ad4a0deb006790701881e6f31fb85b476af96a3654b9d54a63a3a3eb2a92599",
+    "companionRevision": "4682107a10a60393606f9c96d3dbb4935c5b2ef8",
+    "frameworkRevision": "6457c87f65f542d47045d0338a64e99346e1ca39",
+    "workspaceLockSha256": "f03d75591e97660d43677d6d3c6172d6af48145e90b2a8d60079461bba4176c1",
+    "stagedInputs": 93,
+    "deniedSourceProbes": 20,
+    "distinctEngineVariants": 26,
+    "negativeEngineDiagnostics": 38,
+    "negativeIdentityDiagnostics": 12,
+    "privateReaderCases": [
+      "secret_request_tests::private_reader_wipes_consumed_spans",
+      "buffer_contract_observations::retained_span_and_consumed_bytes",
+      "buffer_contract_observations::failed_refill_retains_prior_end",
+      "buffer_contract_observations::zero_output_still_reads_and_eof_can_be_polled_again"
+    ],
+    "prototypeConstants": {
+      "original-constant": "131072\n",
+      "generated-constant": "131072\n"
+    },
+    "changedReceiptFields": [
+      "companion",
+      "compilerSha256",
+      "enginePublicError.originalLibrarySha256",
+      "enginePublicError.sealedLibrarySha256",
+      "fixedVault.librarySha256",
+      "journal.generated.libraries.marmish_native",
+      "journal.generated.libraries.serde_json",
+      "journal.original.libraries.marmish_native",
+      "mdk.originalLibrarySha256",
+      "mdk.sealedLibrarySha256",
+      "publicConstant.generated-constant.librarySha256",
+      "publicConstant.original-constant.librarySha256",
+      "publicRecords.engine.generatedLibrarySha256",
+      "publicRecords.engine.originalLibrarySha256",
+      "publicRecords.native.generatedLibrarySha256",
+      "publicRecords.native.originalLibrarySha256",
+      "releaseInfo.generatedBinaries.marmish",
+      "releaseInfo.generatedBinaries.marmishd"
+    ]
+  },
+  "canonical": {
+    "archive": "canonical-workspace/aarch64-apple-darwin.json",
+    "archiveSha256": "047f5e31367594e067f57d9b2fc07cc880e2b825138967b0d4d4c1c87ba8415f",
+    "nativeReceiptSha256": "a84bc1b3b4aeb731cd4bc0f0548cce14554ad6d0833760156f0f2f6a6de19082",
+    "companionRevision": "4682107a10a60393606f9c96d3dbb4935c5b2ef8",
+    "frameworkRevision": "8a20ea283d0d43da42f054a7c7774eb9e6a20da7",
+    "workspaceLockSha256": "5abf57c811d641ba126c32dde208334d85d47374bbfbb983231783a403f24df4",
+    "stagedInputs": 99,
+    "deniedSourceProbes": 31,
+    "distinctEngineVariants": 26,
+    "negativeEngineDiagnostics": 38,
+    "negativeIdentityDiagnostics": 12,
+    "privateReaderCases": [
+      "secret_request_tests::private_reader_wipes_consumed_spans",
+      "buffer_contract_observations::retained_span_and_consumed_bytes",
+      "buffer_contract_observations::failed_refill_retains_prior_end",
+      "buffer_contract_observations::zero_output_still_reads_and_eof_can_be_polled_again"
+    ],
+    "prototypeConstants": {
+      "original-constant": "131072\n",
+      "generated-constant": "131072\n"
+    },
+    "changedReceiptFields": [
+      "companion",
+      "compilerSha256",
+      "darwinPublicImports.libraries.core.librarySha256",
+      "darwinPublicImports.libraries.core.metadataSha256",
+      "darwinPublicImports.libraries.engine.librarySha256",
+      "darwinPublicImports.libraries.engine.metadataSha256",
+      "darwinPublicImports.libraries.mdk.librarySha256",
+      "darwinPublicImports.libraries.mdk.metadataSha256",
+      "darwinPublicImports.libraries.native.librarySha256",
+      "darwinPublicImports.libraries.native.metadataSha256",
+      "darwinPublicImports.libraries.prototype.librarySha256",
+      "darwinPublicImports.libraries.prototype.metadataSha256",
+      "darwinPublicImports.libraries.stream.librarySha256",
+      "darwinPublicImports.libraries.stream.metadataSha256",
+      "darwinPublicImports.libraries.vault.librarySha256",
+      "darwinPublicImports.libraries.vault.metadataSha256",
+      "diagnostics.generatedLibrarySha256",
+      "enginePublicError.originalLibrarySha256",
+      "enginePublicError.sealedLibrarySha256",
+      "fixedVault.librarySha256",
+      "journal.generated.libraries.marmish_native",
+      "journal.generated.libraries.serde_json",
+      "journal.original.libraries.marmish_native",
+      "mdk.originalLibrarySha256",
+      "mdk.sealedLibrarySha256",
+      "publicConstant.generated-constant.librarySha256",
+      "publicConstant.original-constant.librarySha256",
+      "publicRecords.engine.generatedLibrarySha256",
+      "publicRecords.engine.originalLibrarySha256",
+      "publicRecords.native.generatedLibrarySha256",
+      "publicRecords.native.originalLibrarySha256",
+      "releaseInfo.generatedBinaries.marmish",
+      "releaseInfo.generatedBinaries.marmishd",
+      "terminalCli.roles.marmish.generatedSha256",
+      "terminalCli.roles.marmishd.generatedSha256",
+      "vaultMode.generatedLibrarySha256",
+      "vaultMode.standaloneWitnessSha256"
+    ],
+    "canonicalImportable": 77,
+    "canonicalAttempted": 140
+  }
+}

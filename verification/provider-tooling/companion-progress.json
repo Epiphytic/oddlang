@@ -1,14 +1,14 @@
 {
-  "auditedCompanionRevision": "c9b6f8bc5cad35f3dad542277664ab89c99b31e7",
-  "previousRevision": "ce71a5b662d5a8a703ac2b7b0c71e78052e50106",
-  "reproducedTableSha256": "943859010ce05d972daf6966609eddf466130f74f633dd965fefc79046a8367b",
-  "remainingProjectToolFiles": 99,
+  "auditedCompanionRevision": "4682107a10a60393606f9c96d3dbb4935c5b2ef8",
+  "previousRevision": "c9b6f8bc5cad35f3dad542277664ab89c99b31e7",
+  "reproducedTableSha256": "4e789d6d66824211db1d8c8579c1bdeb0eae0b837f9dbd3ab9fd957e9156f848",
+  "remainingProjectToolFiles": 98,
   "remainingProjectExtensions": {
-    ".py": 96,
+    ".py": 95,
     ".sh": 3
   },
   "removedSincePrevious": [
-    "verification/whole/generated-diagnostics/verify.py"
+    "verification/whole/converged-public-api/verify.py"
   ],
   "addedSincePrevious": []
 }
