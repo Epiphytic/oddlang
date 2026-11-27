@@ -3024,3 +3024,14 @@ w:quiescentMixedServerReceipt a p:Artifact ;
     p:location "verification/quiescent-mixed-server-macos-arm64.json" .
 w:basicClientQualification p:evidence w:quiescentMixedClientReceipt .
 w:basicServerQualification p:evidence w:quiescentMixedServerReceipt .
+
+w:waitProfileErrorComparison a p:Artifact ;
+    p:location "verification/local-command-client/missing-profile-macos-arm64.json" .
+w:waitProfileErrorFinding a p:Finding ;
+    rdfs:label "All nine local wait profile error cases disagree on exit status and six disagree on stderr" ;
+    p:source w:waitProfileErrorComparison .
+w:qualifyWaitProfileErrors a p:Task ;
+    rdfs:label "Match mainline wait profile error precedence, stderr and exit status" ;
+    p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
+    p:status p:planned ; p:addresses w:waitProfileErrorFinding ;
+    p:acceptance "Reproduce all nine local wait observations with distinct private state per invocation, preserving refusal of unsafe profiles and files." .
