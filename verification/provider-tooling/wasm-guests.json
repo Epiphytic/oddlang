@@ -26,24 +26,8 @@
   ],
   "reportDirectory": {
     "files": 38,
-    "byteIdentical": 24,
-    "jsonEquivalent": 38,
-    "serializationOnlyDifferences": [
-      "echo-echo.claim.json",
-      "echo-import-echo-import.claim.json",
-      "echo-label-echo.claim.json",
-      "echo-rename-echo-rename.claim.json",
-      "echo-tags-echo-tags.claim.json",
-      "ledger-double-import.claim.json",
-      "ledger-generated-ledger.claim.json",
-      "ledger-manual-ledger-test.claim.json",
-      "ledger-manual-ledger.claim.json",
-      "ledger-max-exclusive.claim.json",
-      "ledger-probe-probe.claim.json",
-      "ledger-test-generated-ledger-test.claim.json",
-      "ledger-test-manual-ledger-test.claim.json",
-      "ledger-trap.claim.json"
-    ]
+    "byteIdentical": 38,
+    "serdeJsonPreserveOrderEnabledInTest": true
   },
   "archiveDigestMismatchRejectedBeforeGuestOutput": true
 }

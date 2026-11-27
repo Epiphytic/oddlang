@@ -3241,3 +3241,5 @@ w:portHistoricTooling p:evidence w:rustGuestComponentMatrix .
 w:rustGuestComponentMatrix a p:Artifact ;
     rdfs:label "Twelve Wasm components and their WIT rebuilt byte-for-byte with the Rust runner; Wasmtime counterexamples and independent ledger oracle replayed" ;
     p:location "verification/provider-tooling/wasm-guests.json" .
+
+w:rustGuestComponentMatrix rdfs:comment "The native witness sorts JSON object members before writing evidence. Its 38 files reproduce the archive byte-for-byte even with serde_json preserve_order enabled." .
