@@ -114,3 +114,6 @@ pub fn run_json(command: &mut Command) -> Result<Value> {
     );
     Ok(serde_json::from_slice(&output.stdout)?)
 }
+
+#[path = "../../offline.rs"]
+pub mod offline;

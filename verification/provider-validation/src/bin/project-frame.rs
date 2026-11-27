@@ -59,18 +59,18 @@ fn compiler(repo: &Path) -> Result<PathBuf> {
 fn project(repo: &Path, cli: &Path, source: &Path, import: &Path, projection: &Path) -> Result {
     let manifest = source.join("crates/marmish-core/Cargo.toml");
     let mapping = repo.join("examples/marmish/framing.toml");
-    let offline = || {
-        let mut cmd = Command::new(repo.join("scripts/marmish/offline.sh"));
+    let offline = || -> Result<Command> {
+        let mut cmd = provider_validation::offline::command()?;
         cmd.arg(cli);
-        cmd
+        Ok(cmd)
     };
-    run(offline()
+    run(offline()?
         .args(["import", "rust"])
         .arg(&manifest)
         .arg(&mapping)
         .arg(import))?;
     run(Command::new(cli).args(["import", "verify"]).arg(import))?;
-    run(offline()
+    run(offline()?
         .args(["import", "replay"])
         .arg(manifest)
         .arg(mapping)

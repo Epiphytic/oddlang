@@ -5,7 +5,7 @@
 ```sh
 scripts/setup-marmish.sh
 scripts/setup-wasm.sh
-scripts/qualify-marmish.sh frame
+cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-qualify -- frame
 cargo test --locked --offline --test framing_import --test framing_projection --test workspace_assembly
 ```
 

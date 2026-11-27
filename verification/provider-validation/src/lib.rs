@@ -111,3 +111,6 @@ pub fn capture_command() -> Command {
 }
 
 pub mod wasm_toolchain;
+
+#[path = "../../offline.rs"]
+pub mod offline;

@@ -45,9 +45,6 @@ fn main() -> Result {
     let upstream = args.upstream.canonicalize()?;
     let out = args.evidence.canonicalize()?;
     let cli = args.oddlang.canonicalize()?;
-    let repo = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../..")
-        .canonicalize()?;
     let scratch = tempfile::tempdir()?;
     let package = scratch.path().join("package");
     checked(
@@ -70,7 +67,7 @@ fn main() -> Result {
     fs::copy(&manifest, out.join("assembly.toml"))?;
     let log = fs::File::create(out.join("upstream-contracts.log"))?;
     checked(
-        Command::new(repo.join("scripts/marmish/offline.sh"))
+        provider_validation::offline::command()?
             .args([
                 "cargo",
                 "+1.97.1",

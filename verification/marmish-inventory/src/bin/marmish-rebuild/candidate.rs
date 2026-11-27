@@ -90,7 +90,7 @@ pub fn index(
         .tempdir()?;
     let index = |args: &[&str]| {
         output(
-            Command::new(root().join("scripts/marmish/offline.sh"))
+            offline::command()?
                 .current_dir(dest)
                 .envs(env)
                 .env("GIT_CONFIG_GLOBAL", "/dev/null")

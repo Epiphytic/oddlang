@@ -173,7 +173,7 @@ fn verify(root: &Path, upstream: &Path, dir: &Path) -> Result<()> {
         .arg(upstream)
         .arg(&candidate)
         .arg(dir.join("native"));
-    let mut wire = Command::new(root.join("scripts/marmish/offline.sh"));
+    let mut wire = marmish_inventory::offline::command()?;
     wire.args([
         "cargo",
         "+1.97.1",
@@ -191,7 +191,19 @@ fn verify(root: &Path, upstream: &Path, dir: &Path) -> Result<()> {
     .arg(upstream)
     .arg(&candidate)
     .arg(dir.join("wire.json"));
-    let mut frame = Command::new(root.join("scripts/qualify-marmish.sh"));
+    let mut frame = Command::new("cargo");
+    frame.args([
+        "+1.97.1",
+        "run",
+        "--quiet",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "verification/marmish-inventory/Cargo.toml",
+        "--bin",
+        "marmish-qualify",
+        "--",
+    ]);
     frame.arg("frame").arg(upstream).arg(dir.join("frame"));
     let statuses = thread::scope(|s| {
         let children = [native, wire, frame].map(|cmd| s.spawn(move || run(root, cmd)));

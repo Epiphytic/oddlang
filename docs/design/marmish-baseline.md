@@ -4,7 +4,7 @@ The original is Marmish revision `49fc705408a230bd0ad896248d08dbdd2faad05a`. Its
 
 ```sh
 scripts/setup-marmish.sh
-scripts/qualify-marmish.sh baseline
+cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-qualify -- baseline
 ```
 
 To reuse a pinned checkout, set `ODDLANG_MARMISH_SOURCE` for both commands. Supply an explicit checkout and an empty output directory to retain a named run. Check the stored files with `cargo +1.97.1 run --quiet --offline --locked --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-receipt -- check OUTPUT_DIRECTORY`.

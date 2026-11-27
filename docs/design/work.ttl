@@ -3287,3 +3287,8 @@ w:portHistoricTooling p:evidence w:marmishRebuildRustReplay .
 w:marmishRebuildRustReplay a p:Artifact ;
     rdfs:label "Independent builds with the pinned compiler and a freshly compiled Oddlang CLI reproduced the 39 archived Phase 7 witnesses" ;
     p:location "verification/provider-tooling/marmish-rebuild-rust.json" .
+
+w:portHistoricTooling p:evidence w:nativeMarmishEntry .
+w:nativeMarmishEntry a p:Artifact ;
+    rdfs:label "Rust Marmish qualification entry and OS network isolation: two pinned rebuilds, 39 byte-identical witnesses, source refusals, process status and socket controls" ;
+    p:location "verification/provider-tooling/qualification-entry.json" .

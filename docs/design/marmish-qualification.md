@@ -8,11 +8,11 @@ The published candidate is on `main` in the private Epiphytic repository. GitHub
 scripts/setup-http-conformance.sh
 scripts/setup-wasm.sh
 scripts/setup-marmish.sh
-scripts/qualify-marmish.sh rebuild
-scripts/qualify-marmish.sh verify
+cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-qualify -- rebuild
+cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-qualify -- verify
 ```
 
-Run the public commands from the Oddlang repository root on Apple Silicon macOS with the setup dependencies installed. Each run prints its output directory. To retain a named report, pass the frozen Marmish checkout and a new directory, for example `scripts/qualify-marmish.sh verify "$ODDLANG_MARMISH_SOURCE" target/marmish/qualification-local`. The original archive and the native comparison protocol are documented separately. [Frozen baseline](marmish-baseline.md) · [Candidate comparison](marmish-candidate-boundaries.md)
+Run the public commands from the Oddlang repository root on Apple Silicon macOS with the setup dependencies installed. Each run prints its output directory. To retain a named report, pass the frozen Marmish checkout and a new directory, for example `cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-qualify -- verify "$ODDLANG_MARMISH_SOURCE" target/marmish/qualification-local`. The original archive and the native comparison protocol are documented separately. [Frozen baseline](marmish-baseline.md) · [Candidate comparison](marmish-candidate-boundaries.md)
 
 `rebuild` leaves a local Git repository in `candidate/`. It recovers and projects twice in separately named directories, creates each project manifest from immutable Git objects, verifies every file mode and SHA-256, and compares the Git trees and commits. Both builds update Marmish's staged source index, create an immutable local commit, and pass the upstream indexer's `check --ref HEAD`. The upstream indexer uses historical release tags. The tag lock identifies each locally supplied Git object. [Pinned release tags](../../examples/marmish/ontology-tags.lock)
 

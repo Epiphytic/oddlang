@@ -5,18 +5,18 @@ pub struct Recovery<'a> {
     pub binary: &'a Path,
 }
 impl Recovery<'_> {
-    fn isolated(&self, hidden: bool) -> Command {
+    fn isolated(&self, hidden: bool) -> Result<Command> {
         if hidden {
             let mut c = Command::new("sandbox-exec");
             c.arg("-D").arg(format!("ORIGINAL={}",self.upstream.display())).args(["-p","(version 1)(allow default)(deny network-outbound (remote ip \"*:*\"))(deny network-inbound (local ip \"*:*\"))(deny file-read* (subpath (param \"ORIGINAL\")))"]);
-            c
+            Ok(c)
         } else {
-            Command::new(self.root.join("scripts/marmish/offline.sh"))
+            Ok(offline::command()?)
         }
     }
     fn cli(&self, stage: &Path, hidden: bool, args: &[&OsStr]) -> Result<()> {
         output(
-            self.isolated(hidden)
+            self.isolated(hidden)?
                 .current_dir(stage)
                 .arg(self.binary)
                 .args(args),
@@ -30,7 +30,7 @@ impl Recovery<'_> {
         let stage = tmp.path();
         let original = self.upstream.join("crates/marmish-core/Cargo.toml");
         let check = self
-            .isolated(true)
+            .isolated(true)?
             .arg("/bin/cat")
             .arg(&original)
             .output()?;
