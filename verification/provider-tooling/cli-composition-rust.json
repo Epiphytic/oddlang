@@ -1,0 +1,63 @@
+{
+  "host": "aarch64-apple-darwin",
+  "companionRevision": "f37e674da927fb32231ed388d9c86ade834cc284",
+  "upstream": "af54339d250290490d62d4475a77539b7e739071",
+  "compositions": {
+    "offline-cli": {
+      "files": {
+        "native-cli-terminal-v1/graph.json": "2e53ea1d88ef46ca510cdc2507d41d7ba0e84cfdf9e3afd7eb8797b80d022b73",
+        "native-offline-cli-package.json": "f7368358296ca806b9c12083386cdff88bb6a138efac8fb703f30536961e9e9f",
+        "workspace-v7-offline-cli.json": "dc2bcff454a20722140292ad2c7c1e8ad086a6102c79b9efc01c6e69fe06f0ac",
+        "native-cli-terminal-v1/marmish-cli.json": "c009ef2646b7bbd839b81cf025e8424d16a0a73ed178821ac0383daa2de712d0",
+        "native-cli-terminal-v1/marmishd-cli.json": "fc89b4c73b663813a1c571ce57ad384e6ce7af52ff73cecfe3a50da56ea16b58"
+      },
+      "compilerSha256": "1e1942c8339f7586f41506f08fa309af0a90849ce5a39239c7bb02a933084865"
+    },
+    "terminal-prefix": {
+      "files": {
+        "native-cli-prefix-v1/graph.json": "e42435541ec64e62319e00926bd4880017a0cf26c061c36c8c04868f4f9d0c6a",
+        "native-terminal-prefix-package.json": "0b8032fd80f0239e7694bf4d6d11d732b68f1b78aa278f3321797b12c2856009",
+        "workspace-v7-terminal-prefix.json": "53685d1886b4fe45d71dd2da3e19403e11b267656a336e11995cea173a512e5d"
+      },
+      "compilerSha256": "bcb163648b2330147b28a45d1d1f8023cfc649206b3636ddca02ee2acf4a6522"
+    }
+  },
+  "controls": [
+    "Both historical Python composers reproduced their archived files using the same recovery compilers as Rust.",
+    "Rust regenerated all eight absent output files in an independent directory and matched the published bytes.",
+    "For both releases, check mode rejected a modified output and preserved it. Write mode repaired it. A stale parent manifest pin failed before writing any output."
+  ],
+  "offlineCli": {
+    "archivedAndReplayedReceiptSha256": "ff7324eec77bbb84647a4faa249b875b917ccf3db372c70f1a413b860c79b2c1",
+    "matchedHistoricalRowsPerRole": {
+      "marmish": 34,
+      "marmishd": 34
+    },
+    "supplementalCasesPerRole": 32,
+    "matchingBaselinePerRole": 26,
+    "matchingSuccessorPerRole": 30
+  },
+  "terminalPrefix": {
+    "frameworkRevision": "4b0e07a97de579adbd779bbd598a532bda9fdb3c",
+    "workspace": {
+      "files": 91,
+      "members": 7,
+      "workspaceLockSha256": "f40ee72f7367aa1cc0e08894fee2d521ebe89396fcfdabf9bdc4b3570e0119f1"
+    },
+    "roles": {
+      "marmish": {
+        "matchingCases": 82,
+        "generatedBinarySha256": "a6210c12f03daa0cecc84abc967c85d667313a106e1bc032e77053fa792d9f85",
+        "originalBinarySha256": "8097469a154ba7cf3a5a4d4848537f7ce72ba9f767f90ab7362aba8074842ac7"
+      },
+      "marmishd": {
+        "matchingCases": 82,
+        "generatedBinarySha256": "32d310c7f9506909179cfef89e1fad72bd2741ac6eab3b9a604172f264013b4d",
+        "originalBinarySha256": "f35024f7a3a342392d36b83e4348f7bf0ea65d9e39b9358425c8249592038f41"
+      }
+    },
+    "preservedOutsideProfileComparisons": 2,
+    "freshReceiptSha256": "21560cd87e4c4ef808ebc17eb9a90884644eee0cd5591e691444fef1e7a8b5e6",
+    "archiveSha256": "6feac74e10ebd13ff2305ce3786c0cd4492ddf233f8f6619a5f56e570bf59598"
+  }
+}

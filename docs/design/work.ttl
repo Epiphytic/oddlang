@@ -3729,3 +3729,8 @@ w:portHistoricTooling p:evidence w:publicDiagnosticObserverRust .
 w:publicDiagnosticObserverRust a p:Artifact ;
     rdfs:label "The Rust diagnostic observer reproduced the Python receipt from the same rebuilt library byte for byte on macOS ARM64. Four native caller scenarios matched the archived behavior and the generated library, including Unicode event bytes, cross-thread state and a closed stderr pipe. Only the upstream library digest differed from the historical receipt." ;
     p:location "verification/provider-tooling/public-diagnostics-rust.json" .
+
+w:portHistoricTooling p:evidence w:cliCompositionRust .
+w:cliCompositionRust a p:Artifact ;
+    rdfs:label "Rust recovered the offline auxiliary CLI grammar and terminal prefix policy, regenerating all eight composition outputs byte for byte. On ARM64 macOS the offline transcript matched the archive. The rebuilt terminal workspace matched 91 pinned files across seven members, 164 original CLI observations and both recorded out-of-profile comparisons." ;
+    p:location "verification/provider-tooling/cli-composition-rust.json" .

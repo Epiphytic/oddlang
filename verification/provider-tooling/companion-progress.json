@@ -1,14 +1,15 @@
 {
-  "auditedCompanionRevision": "2f2bd87be3215529789f2b979ab6c71af48d5362",
-  "previousRevision": "eb2110a1b319658b7baf6b781e5ee36722486180",
-  "reproducedTableSha256": "6b2546f5bddba0b408e99eef7d79891cc48328198c434d62115ca9ea4c3d89c7",
-  "remainingProjectToolFiles": 110,
+  "auditedCompanionRevision": "f37e674da927fb32231ed388d9c86ade834cc284",
+  "previousRevision": "2f2bd87be3215529789f2b979ab6c71af48d5362",
+  "reproducedTableSha256": "4231fff49c9f5dbbf48cf10da30f49bc2042c75f7d5308c08c7864ee55a87ee1",
+  "remainingProjectToolFiles": 108,
   "remainingProjectExtensions": {
-    ".py": 107,
+    ".py": 105,
     ".sh": 3
   },
   "removedSincePrevious": [
-    "verification/whole/public-diagnostics/verify.py"
+    "verification/whole/offline-cli/compose.py",
+    "verification/whole/terminal-prefix/compose.py"
   ],
   "addedSincePrevious": []
 }
