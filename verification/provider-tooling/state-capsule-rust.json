@@ -1,0 +1,32 @@
+{
+  "host": "aarch64-apple-darwin",
+  "companionRevision": "9d7bb12b129d6bc6873fec50e67e6dcfbd85a4fd",
+  "historicalObserverRevision": "b9c546e34895e92037908c428c33e1005d849221",
+  "bridgeSha256": "225814a08efca7c3c408816856340f4c8ccc5bf832060956cb8abf8f955f71d4",
+  "workerSha256": "e2c92b02e0530af38502f67fd0f5221051aebb4010c39ef4d8a7b1be3601c842",
+  "fixtureSha256": "4930d88dadfcb2ba3256d0cb82455828a2288b773c86ad8589b074aa4e868d2d",
+  "corruptFixtureSha256": "998757a9541be7344934b5684d8c1ed7efc16e4dabac70615ad916b468af1ceb",
+  "captureAndCrossRead": [
+    {
+      "writer": "historical",
+      "reader": "rust",
+      "matchingReceiptBytes": 541,
+      "receiptSha256": "b55dd98a9037d4cacda2cd93f8098acbd09e2fffd3a8e83d535a00e8d8d2aa38"
+    },
+    {
+      "writer": "rust",
+      "reader": "historical",
+      "matchingReceiptBytes": 541,
+      "receiptSha256": "5b16dc0920e5720a00fc9a7dab44f69a7830ac89ae630a305cbb7797b5924164"
+    }
+  ],
+  "scope": "Fresh disposable v1 capsules written by the pinned original bridge and worker. Only the private manifest digest differed from the archived public receipt.",
+  "corruptCopy": "storage_failure then three invalid_request replies; empty stderr and status zero",
+  "controls": [
+    "existing capture destination",
+    "wrong writer digests",
+    "mismatched private manifest receipt",
+    "changed input database",
+    "descendant holding stdio open after bridge exit timed out at 15 seconds"
+  ]
+}

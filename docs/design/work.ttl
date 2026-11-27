@@ -3764,3 +3764,8 @@ w:portHistoricTooling p:evidence w:legacyVersionProbeRust .
 w:legacyVersionProbeRust a p:Artifact ;
     rdfs:label "The Rust observer verified the pinned optional CLI with the original local version probe on macOS ARM64. Its full 1,929-byte receipt matched the historical observer and archive. Five controls rejected changed provenance, a failing exit or unexpected stderr. The companion removed the Python observer." ;
     p:location "verification/provider-tooling/legacy-version-probe-rust.json" .
+
+w:portHistoricTooling p:evidence w:stateCapsuleRust .
+w:stateCapsuleRust a p:Artifact ;
+    rdfs:label "The native v1 state runner and its historical predecessor read each other's fresh capsules on ARM64 macOS with the pinned original bridge and worker. Both reproduced every healthy and corrupt reply, retained the key, and emitted identical receipts per capsule. The Rust runner bounds piped sessions and publishes captures after the checks pass." ;
+    p:location "verification/provider-tooling/state-capsule-rust.json" .
