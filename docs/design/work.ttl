@@ -3457,3 +3457,11 @@ w:portHistoricTooling p:evidence w:nativeSuiteInventories .
 w:nativeSuiteInventories a p:Artifact ;
     rdfs:label "Native Git test inventory reproduced archived bytes. Native and predecessor harness enumerators matched on the same clean build of 24 harnesses, 909 runnable and five ignored cases. All archived fields apart from build-dependent harness digests matched." ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/6962494babb1fb4114c4069d7f9419b23807746a/verification/whole/suite/rust-inventory-macos-arm64.json" .
+
+w:portHistoricTooling p:evidence w:fiveSelectedSuiteCases, w:companionToolProgress .
+w:fiveSelectedSuiteCases a p:Artifact ;
+    rdfs:label "Rust test staging matched predecessor files and reader module bytes; five exact upstream cases executed on the seven-member generated workspace" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a567eb453ad9b64648c78bb7e620581c848b6887/verification/whole/suite/rust-selected-inputs-macos-arm64.json" .
+w:companionToolProgress a p:Artifact ;
+    rdfs:label "Pinned companion inventory found 169 project-authored Python and shell entries at a567eb4" ;
+    p:location "verification/provider-tooling/companion-progress.json" .
