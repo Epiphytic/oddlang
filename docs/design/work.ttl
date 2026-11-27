@@ -3870,3 +3870,8 @@ w:portHistoricTooling p:evidence w:launchLayoutRust .
 w:launchLayoutRust a p:Artifact ;
     rdfs:label "Rust replay recovered all eleven Launch writer slots and reproduced the archived macOS receipt byte for byte. All 227 native observations matched for the release and reordered builds. The source mutation changed 201 digests. The independent Rust corpus matched the historical requests and both sets of expected outputs." ;
     p:location "verification/provider-tooling/launch-layout-rust.json" .
+
+w:portHistoricTooling p:evidence w:launchHashRust .
+w:launchHashRust a p:Artifact ;
+    rdfs:label "The Rust Launch hash verifier matched 227 digest and namespace cases and the predicted field-order mutation. The shared Rust construction and decoding corpus exactly matched its historical inputs and construction expectations. The Launch hash, base Launch, Manifest and field-relations runs each reproduced the archived macOS receipt byte for byte." ;
+    p:location "verification/provider-tooling/launch-hash-rust.json" .

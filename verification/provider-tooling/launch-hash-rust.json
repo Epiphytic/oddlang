@@ -1,0 +1,34 @@
+{
+  "companionRevision": "bbc01a9aaf872f56999f735e346adb04643c7208",
+  "host": "aarch64-apple-darwin",
+  "receipts": {
+    "copy-launch-hash": {
+      "archive": "verification/whole/copy-launch-hash/reference-aarch64-apple-darwin.json",
+      "reproducedSha256": "a41623e09195d165c122284bb21fe95e6b7293d241ef4f3c075058ac5f75a7f9"
+    },
+    "copy-launch": {
+      "archive": "verification/whole/copy-launch/reference-aarch64-apple-darwin.json",
+      "reproducedSha256": "7396611edbe056128db1f3b60d12fc445026f743fb98f9609fbc4346bb10ed11"
+    },
+    "copy-manifest": {
+      "archive": "verification/whole/copy-manifest/reference-aarch64-apple-darwin.json",
+      "reproducedSha256": "f51229c75538323c4beb5fdfc49a60ee3c9f39cdf0fdc15f4d15e25f96469bb4"
+    },
+    "copy-field-relations": {
+      "archive": "verification/whole/copy-field-relations/reference-aarch64-apple-darwin.json",
+      "reproducedSha256": "923c667e30218c844cce0ee401eeaf8bcefe36ec47d37132353f476443bd5df9"
+    }
+  },
+  "hashCases": 227,
+  "invalidDigestCases": 26,
+  "constructCases": 45,
+  "exactDecodeCases": 56,
+  "nativeEnumByteOutcomes": 1280,
+  "expectationsSha256": "7daa3777f133f5eda26ca282205b2984e385bb859b7a841ce511b3d72c0cb216",
+  "checks": [
+    "The Rust construction requests, JSON wire expectations and exact decode inputs matched the prior Python corpus.",
+    "Both the pinned original and the sandbox-built projection matched the independently predicted digest and namespace values.",
+    "Reordering the graph slots produced the predicted changes to both views.",
+    "Wrong framework checkout rejected before receipt creation."
+  ]
+}
