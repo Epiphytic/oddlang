@@ -1,18 +1,23 @@
 {
-  "auditedCompanionRevision": "a567eb453ad9b64648c78bb7e620581c848b6887",
+  "auditedCompanionRevision": "a784c66336932b84ab736ded119bb451a17ed61e",
   "previousRevision": "b95fd5161e75c47913a17a2ee3e68e13da5e8748",
-  "reproducedTableSha256": "711a0c7d05a9909707a8566d5344f7e2fdeaf4278cb84bfe8f642f21096f1f0f",
-  "remainingProjectToolFiles": 169,
+  "reproducedTableSha256": "379500f7ee3c14449f4c539b4967046ab243b18968bf9872b17f46ceae7a8ebb",
+  "remainingProjectToolFiles": 162,
   "remainingProjectExtensions": {
-    ".py": 160,
+    ".py": 153,
     ".sh": 9
   },
   "removedSincePrevious": [
     "verification/whole/build-report/observe.py",
+    "verification/whole/canonical-range-data/verify.py",
+    "verification/whole/canonical-recovered-range/verify.py",
     "verification/whole/converged-release-manifest/compose.py",
     "verification/whole/converged-release-manifest/verify.py",
     "verification/whole/copy-checkpoint/check_linkage.py",
     "verification/whole/copy-checkpoint/verify.py",
+    "verification/whole/copy-field-relations/verify.py",
+    "verification/whole/copy-manifest/verify.py",
+    "verification/whole/private-buffer/baseline.py",
     "verification/whole/private-buffer/upstream_case.py",
     "verification/whole/release-info-structure/verify.py",
     "verification/whole/retention-structure/verify.py",
@@ -20,11 +25,15 @@
     "verification/whole/stream-block/verify.py",
     "verification/whole/stream-windows/release.py",
     "verification/whole/stream-windows/verify.py",
+    "verification/whole/suite/child_control.py",
     "verification/whole/suite/inventory.py",
     "verification/whole/suite/list_cargo.py",
-    "verification/whole/suite/summarize_cargo.py"
+    "verification/whole/suite/mdk_host.py",
+    "verification/whole/suite/summarize_cargo.py",
+    "verification/whole/unified-vault-journal/verify.py"
   ],
   "addedSincePrevious": [
+    "verification/whole/canonical-recovered-range/workspace_compat.py",
     "verification/whole/converged-release-manifest/workspace_compat.py",
     "verification/whole/suite/upstream.py"
   ]

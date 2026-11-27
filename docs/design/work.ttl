@@ -3463,7 +3463,7 @@ w:fiveSelectedSuiteCases a p:Artifact ;
     rdfs:label "Rust test staging matched predecessor files and reader module bytes; five exact upstream cases executed on the seven-member generated workspace" ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a567eb453ad9b64648c78bb7e620581c848b6887/verification/whole/suite/rust-selected-inputs-macos-arm64.json" .
 w:companionToolProgress a p:Artifact ;
-    rdfs:label "Pinned companion inventory found 169 project-authored Python and shell entries at a567eb4" ;
+    rdfs:label "Pinned companion inventory found 162 project-authored Python and shell entries at a784c66" ;
     p:location "verification/provider-tooling/companion-progress.json" .
 
 w:portHistoricTooling p:evidence w:fiveMemberObserverReplay .
@@ -3475,3 +3475,19 @@ w:portHistoricTooling p:evidence w:nativeSuiteControls .
 w:nativeSuiteControls a p:Artifact ;
     rdfs:label "Native suite controls reproduced both macOS archives and Python outputs byte for byte, including eight passed MDK cases and one host failure, negative signal exit for the copied env executable, and rejection of a zero-test child with successful Cargo status" ;
     p:location "verification/provider-tooling/suite-controls.json" .
+
+w:portHistoricTooling p:evidence w:copyManifestRustCases, w:copyRelationsRustCases .
+w:copyManifestRustCases a p:Artifact ;
+    rdfs:label "Native macOS ARM64 manifest verifier reproduced the archived 631 constructions, 2363 decodes and 197 digests" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a15c46af9633d3e5223fc148b2c2e77a4ee79cd2/verification/whole/copy-manifest/rust-replay-macos-arm64.json" .
+w:copyRelationsRustCases a p:Artifact ;
+    rdfs:label "Native field-relation and source-correspondence checks reproduced 94 relation cases and 15 cases per original and projected build, including the five changed outcomes" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a15c46af9633d3e5223fc148b2c2e77a4ee79cd2/verification/whole/copy-field-relations/rust-replay-macos-arm64.json" .
+
+w:portHistoricTooling p:evidence w:privateReaderRustBaseline .
+w:privateReaderRustBaseline a p:Artifact ;
+    rdfs:label "Independent Rust and Python private-buffer baselines matched archived receipt 543bbfe72bcb8bb5c1a8b81480c142facfc09c0e764239ca38936319588f77fc byte for byte on macOS ARM64 with four passed reader cases and two rejected mutations" ;
+    p:source w:privateReaderRustSource ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a784c66336932b84ab736ded119bb451a17ed61e/verification/whole/private-buffer/original-aarch64-apple-darwin.json" .
+w:privateReaderRustSource a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a784c66336932b84ab736ded119bb451a17ed61e/verification/whole/canonical-public-data/src/bin/buffer-baseline.rs" .
