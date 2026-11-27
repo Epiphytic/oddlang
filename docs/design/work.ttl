@@ -3815,3 +3815,8 @@ w:portHistoricTooling p:evidence w:ownerProjectorsRust .
 w:ownerProjectorsRust a p:Artifact ;
     rdfs:label "Both native macOS owner launchers recovered and staged the historical inputs, generated and built release executables under Seatbelt and replayed the independent status and foreground qualification. All archived observations matched, including admission, cleanup and foreground recovery. Three altered inputs were rejected." ;
     p:location "verification/provider-tooling/owner-projectors-rust.json" .
+
+w:portHistoricTooling p:evidence w:directCommandCorpusRust .
+w:directCommandCorpusRust a p:Artifact ;
+    rdfs:label "The native direct replay matched all nine local fixture observations including distinct binary streams, raw arguments, exit 7 and private receipts. Running the historical short fixture reproduced the full archived receipt. With the native short executable only its five executable digests changed. All four finite fixture receipts were identical." ;
+    p:location "verification/provider-tooling/direct-command-corpus-rust.json" .

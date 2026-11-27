@@ -1,17 +1,14 @@
 {
-  "auditedCompanionRevision": "ed3d99567ab1cfd9fe224034fce5e00172b095ab",
-  "previousRevision": "e097f352e8a72c161e928375590bca3541db3833",
-  "reproducedTableSha256": "1bf940f182d57e4438f9e7b314a97b1702408d82ce94d8876a3a4975c4edb394",
-  "remainingProjectToolFiles": 89,
+  "auditedCompanionRevision": "ca36c9b8fc8b22b3583ee05f9d8771736ea6e3c7",
+  "previousRevision": "ed3d99567ab1cfd9fe224034fce5e00172b095ab",
+  "reproducedTableSha256": "4d9d485eca57ff685bcfd4f387d09662fe234139a6845fdba8c4b6fd9e9856bd",
+  "remainingProjectToolFiles": 88,
   "remainingProjectExtensions": {
-    ".py": 88,
+    ".py": 87,
     ".sh": 1
   },
   "removedSincePrevious": [
-    "verification/whole/foreground-owner/macos.sh",
-    "verification/whole/foreground-owner/project.py",
-    "verification/whole/status-owner/macos.sh",
-    "verification/whole/status-owner/project.py"
+    "verification/whole/basic-command-interop/replay_corpus.py"
   ],
   "addedSincePrevious": []
 }
