@@ -1,0 +1,40 @@
+{
+  "format": "oddlang-binary-frame-rust-v1",
+  "name": "Parcel",
+  "decoder": "ParcelDecoder",
+  "errorType": "crate::Fault",
+  "errors": {
+    "urn:parcel:Header": {
+      "variant": "Header"
+    },
+    "urn:parcel:Length": {
+      "variant": "Length"
+    },
+    "urn:parcel:Capacity": {
+      "variant": "Capacity"
+    },
+    "urn:parcel:Tag": {
+      "variant": "Tag"
+    },
+    "urn:parcel:Truncated": {
+      "variant": "Truncated"
+    },
+    "urn:parcel:Trailing": {
+      "variant": "Trailing"
+    },
+    "urn:parcel:DecoderFailed": {
+      "variant": "DecoderFailed"
+    },
+    "urn:parcel:End": {
+      "variant": "End"
+    }
+  },
+  "types": {},
+  "cases": {
+    "urn:parcel:chunk": "Chunk"
+  },
+  "fields": {
+    "urn:parcel:chunk:seq": "seq",
+    "urn:parcel:chunk:contents": "contents"
+  }
+}

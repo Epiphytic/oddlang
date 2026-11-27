@@ -1,0 +1,61 @@
+{
+  "calls": {},
+  "format": "oddlang-field-relation-v1",
+  "id": "urn:sample:graph",
+  "relations": {
+    "urn:sample:agrees": {
+      "arguments": [
+        {
+          "id": "urn:sample:other",
+          "value": {
+            "id": "urn:sample:receipt",
+            "kind": "named"
+          }
+        }
+      ],
+      "failure": null,
+      "receiver": "urn:sample:invoice",
+      "steps": []
+    }
+  },
+  "types": {
+    "urn:sample:invoice": {
+      "fields": {
+        "urn:sample:invoice:flags": {
+          "kind": "bytes"
+        },
+        "urn:sample:invoice:serial": {
+          "bits": 32,
+          "kind": "unsigned"
+        },
+        "urn:sample:invoice:stage": {
+          "id": "urn:sample:stage",
+          "kind": "named"
+        }
+      }
+    },
+    "urn:sample:receipt": {
+      "fields": {
+        "urn:sample:receipt:backup": {
+          "bits": 32,
+          "kind": "unsigned"
+        },
+        "urn:sample:receipt:flags": {
+          "kind": "bytes"
+        },
+        "urn:sample:receipt:serial": {
+          "bits": 32,
+          "kind": "unsigned"
+        },
+        "urn:sample:receipt:stage": {
+          "id": "urn:sample:stage",
+          "kind": "named"
+        }
+      }
+    },
+    "urn:sample:stage": {
+      "equality": true,
+      "fields": {}
+    }
+  }
+}

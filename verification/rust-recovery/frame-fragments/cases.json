@@ -1,0 +1,97 @@
+[
+  {
+    "name": "baseline",
+    "edits": [],
+    "expected": [
+      "0d000000090162319b0000000102",
+      "Invalid",
+      "0e0000000571f2332b00",
+      "0e0000000971f2332b0100000003",
+      "Invalid"
+    ]
+  },
+  {
+    "name": "mutant",
+    "edits": [
+      {
+        "before": "    out.extend(copy.second);\n",
+        "after": ""
+      },
+      {
+        "before": "fn append_copy(out: &mut Vec<u8>, copy: &Copy) {\n",
+        "after": "fn append_copy(out: &mut Vec<u8>, copy: &Copy) {\n    out.extend(copy.second);\n"
+      },
+      {
+        "before": "    out.extend(head.second);\n",
+        "after": ""
+      },
+      {
+        "before": "fn append_head(out: &mut Vec<u8>, head: &Head) {\n",
+        "after": "fn append_head(out: &mut Vec<u8>, head: &Head) {\n    out.extend(head.second);\n"
+      }
+    ],
+    "expected": [
+      "0d00000009319b01620000000102",
+      "Invalid",
+      "0e00000005332b71f200",
+      "0e00000009332b71f20100000003",
+      "Invalid"
+    ]
+  },
+  {
+    "name": "partial-metadata",
+    "edits": [
+      {
+        "append": "\n#[derive(Clone, Copy)] pub struct Metadata { pub first:u64, pub second:u32 }\n"
+      },
+      {
+        "before": "    marked(out, copy.count, append32);\n",
+        "after": "    marked(out, copy.count, |out, value| out.extend(value.first.to_be_bytes()));\n"
+      },
+      {
+        "before": "        if self.count.is_some_and(|count| count & 1 == 0) { Err(Fault::Invalid) } else { Ok(()) }\n",
+        "after": "        if self.count.is_some_and(|count| count.first & 1 == 0) { Err(Fault::Invalid) } else { Ok(()) }\n"
+      },
+      {
+        "before": "pub struct Copy { pub first: [u8; 2], pub second: [u8; 2], pub count: Option<u32> }\n",
+        "after": "pub struct Copy { pub first: [u8; 2], pub second: [u8; 2], pub count: Option<Metadata> }\n"
+      }
+    ]
+  },
+  {
+    "name": "missing-self-check",
+    "edits": [
+      {
+        "before": "        self.validate()?;\n",
+        "after": ""
+      }
+    ]
+  },
+  {
+    "name": "missing-head-check",
+    "edits": [
+      {
+        "before": "                head.validate()?;\n",
+        "after": ""
+      }
+    ]
+  },
+  {
+    "name": "option-marker",
+    "edits": [
+      {
+        "before": "        None => out.push(0),\n",
+        "after": "        None => out.push(2),\n"
+      }
+    ]
+  },
+  {
+    "name": "unproven-mutation",
+    "edits": [
+      {
+        "before": "                append_head(&mut payload, head);\n",
+        "after": "                payload.clear(); append_head(&mut payload, head);\n"
+      }
+    ]
+  }
+]

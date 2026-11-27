@@ -1,0 +1,65 @@
+{
+  "format": "oddlang-binary-frame-v1",
+  "id": "urn:parts:frames",
+  "maximum": 64,
+  "cases": {
+    "urn:parts:Head": {
+      "tag": 13,
+      "form": "tuple",
+      "slots": [
+        {
+          "id": "urn:parts:head-value",
+          "encoding": {
+            "kind": "fragment",
+            "id": "urn:parts:head-fragment"
+          }
+        },
+        {
+          "id": "urn:parts:level-value",
+          "encoding": {
+            "kind": "enum",
+            "id": "urn:parts:Level",
+            "error": "urn:parts:invalid"
+          }
+        }
+      ]
+    },
+    "urn:parts:Copy": {
+      "tag": 14,
+      "form": "tuple",
+      "slots": [
+        {
+          "id": "urn:parts:copy-value",
+          "encoding": {
+            "kind": "fragment",
+            "id": "urn:parts:copy-fragment"
+          }
+        }
+      ]
+    }
+  },
+  "errors": {
+    "header": "urn:parts:invalid",
+    "length": "urn:parts:invalid",
+    "limit": "urn:parts:limit",
+    "tag": "urn:parts:invalid",
+    "truncated": "urn:parts:invalid",
+    "trailing": "urn:parts:invalid",
+    "decoderFailed": "urn:parts:invalid"
+  },
+  "types": {
+    "urn:parts:Level": {
+      "kind": "enum",
+      "tags": {
+        "urn:parts:low": 1,
+        "urn:parts:high": 2
+      }
+    },
+    "urn:parts:head-fragment": {
+      "kind": "fragment"
+    },
+    "urn:parts:copy-fragment": {
+      "kind": "fragment"
+    }
+  }
+}

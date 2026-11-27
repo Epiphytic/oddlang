@@ -1,0 +1,46 @@
+{
+  "format": "oddlang-compiler-recovery-fixture-replay-v1",
+  "host": "aarch64-apple-darwin",
+  "rustcCommit": "8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+  "cliSha256": "3884c423fccb909d69c8a6d5e119d4097b8ea6fade8936274edfe814890a08a4",
+  "launcherComparison": "Both launchers observed the same clean temporary crate using the unmodified checked-in Rust source. Each pair emitted identical receipt bytes. The separate field-conjunction suite also exercised CRLF source and stale cross-file evidence.",
+  "priorShellLauncherBlob": "ef782941fd34cf3d09effaf7300cf743f59acf87",
+  "suites": {
+    "field-conjunction": {
+      "compilerObservations": 8,
+      "nativeCallerBuilds": 4,
+      "nativeOutputLinesCompared": 16,
+      "unresolvedControls": 6,
+      "sourceSha256": "8dea344b9ae53d6d2cd453352bcdef06a2ffbab7ee1ca7cc32c0de77e7a207fe",
+      "casesSha256": "ae693d063a53df94f7d0da1c37771689a346e0305affe019f202f59c1c80d311",
+      "identicalCaptureSha256ForCheckedInSource": "1521bb666ddcf6ee391f250fbf5838f2149b13a5671a12b4d0766d61598faf98"
+    },
+    "frame-guards": {
+      "compilerObservations": 5,
+      "nativeCallerBuilds": 4,
+      "nativeOutputLinesCompared": 32,
+      "unresolvedControls": 3,
+      "sourceSha256": "b0fda690daad212fca2a0161b1b625e51765397bf3ac8bf811744125441a60c8",
+      "casesSha256": "6c1460076adabf8cfa204cca3d7f56ccb2d92f3f75f4e2a39936c8c3fba0ffe4",
+      "identicalCaptureSha256ForCheckedInSource": "95df934286706e138d4f167ca8553e605c9124e2f6ca5f04cea764fcf2ffad1a"
+    },
+    "frame-fragments": {
+      "compilerObservations": 7,
+      "nativeCallerBuilds": 4,
+      "nativeOutputLinesCompared": 20,
+      "unresolvedControls": 5,
+      "sourceSha256": "5a9c761fc121ef436e65f6924ca9434d9a697ff9c5f79df3eae35ebaec97a6e5",
+      "casesSha256": "cd82ee0604ca8eca874e260facb61e709cd9794d65c24656eae600f503cc0322",
+      "identicalCaptureSha256ForCheckedInSource": "39ebb6e14cb7b9c316ec3aa97719d443f468418234a5f89e7edced98ff4e4a36"
+    },
+    "tagged-frame": {
+      "compilerObservations": 9,
+      "nativeCallerBuilds": 4,
+      "nativeOutputLinesCompared": 8,
+      "unresolvedControls": 7,
+      "sourceSha256": "52fccfbaf6cc94c497ec22255463f0f59d7ea19b45b23fa436cc41cf9b07ff6a",
+      "casesSha256": "2a3f5b2b9959846757c22a9ed56595f32fe962f3195d74356fd1e4aee0277695",
+      "identicalCaptureSha256ForCheckedInSource": "2ed2db7940c47757a28b08c826fef2489d5c20c22e86150ad6627cb4481460a3"
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "format": "oddlang-binary-record-v1",
+  "id": "urn:parts:Head",
+  "maximum": 64,
+  "fragment": true,
+  "errors": {
+    "value": "urn:parts:invalid",
+    "decodeSize": "urn:parts:limit",
+    "encodeSize": "urn:parts:limit",
+    "trailing": "urn:parts:invalid",
+    "truncated": "urn:parts:invalid"
+  },
+  "layout": [
+    {
+      "id": "urn:parts:first",
+      "encoding": {
+        "kind": "fixed-bytes",
+        "size": 2
+      }
+    },
+    {
+      "id": "urn:parts:second",
+      "encoding": {
+        "kind": "fixed-bytes",
+        "size": 2
+      }
+    },
+    {
+      "id": "urn:parts:version",
+      "encoding": {
+        "kind": "unsigned-be",
+        "bits": 32,
+        "minimum": 1,
+        "maximum": 1
+      }
+    }
+  ]
+}

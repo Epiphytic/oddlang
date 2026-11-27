@@ -1,0 +1,120 @@
+[
+  {
+    "name": "baseline",
+    "edits": [],
+    "expected": [
+      "1f0000000441913366",
+      "200000000b01020304050607080f7e54"
+    ]
+  },
+  {
+    "name": "mutant",
+    "edits": [
+      {
+        "before": "                payload.extend(second);\n                31\n",
+        "after": "                34\n"
+      },
+      {
+        "before": "            Self::Key { first: a, second } => {\n",
+        "after": "            Self::Key { first: a, second } => {\n                payload.extend(second);\n"
+      }
+    ],
+    "expected": [
+      "220000000433664191",
+      "200000000b01020304050607080f7e54"
+    ]
+  },
+  {
+    "name": "tag-expression",
+    "edits": [
+      {
+        "before": "        bytes.push(tag);\n",
+        "after": "        bytes.push(tag ^ 1);\n"
+      }
+    ],
+    "unresolved": "selected discriminator"
+  },
+  {
+    "name": "collision",
+    "edits": [
+      {
+        "before": "                32\n",
+        "after": "                31\n"
+      }
+    ],
+    "unresolved": "collision"
+  },
+  {
+    "name": "clear",
+    "edits": [
+      {
+        "before": "                payload.extend(a);\n",
+        "after": "                payload.extend(a); payload.clear();\n"
+      }
+    ],
+    "unresolved": "unknown write",
+    "variant": "Key"
+  },
+  {
+    "name": "endianness",
+    "edits": [
+      {
+        "before": "    out.extend(data.to_be_bytes());\n",
+        "after": "    out.extend(data.to_le_bytes());\n"
+      }
+    ],
+    "unresolved": "matched field",
+    "variant": "Reading"
+  },
+  {
+    "name": "helper-clears",
+    "edits": [
+      {
+        "append": "\npub struct Record;\nfn clear_record(out: &mut Vec<u8>, _record: &Record) { out.clear(); }\n"
+      },
+      {
+        "before": "            Self::Reading { value, footer } => {\n                append_reading(&mut payload, *value, footer);\n",
+        "after": "            Self::Reading { item } => {\n                clear_record(&mut payload, item);\n"
+      },
+      {
+        "before": "    Reading { value: u64, footer: [u8; 2] },\n",
+        "after": "    Reading { item: Record },\n"
+      }
+    ],
+    "unresolved": "mutate or escape",
+    "variant": "Reading"
+  },
+  {
+    "name": "trait-dispatch",
+    "edits": [
+      {
+        "append": "\n#[derive(Clone, Copy)]\npub enum Signal { Ready }\ntrait Number {\n    fn number(self) -> u8;\n}\nimpl Number for Signal {\n    fn number(self) -> u8 { match self { Signal::Ready => 53 } }\n}\n"
+      },
+      {
+        "before": "                payload.push(84);\n",
+        "after": "                payload.push(Signal::number(*signal));\n"
+      },
+      {
+        "before": "            Self::Reading { value, footer } => {\n",
+        "after": "            Self::Reading { value, footer, signal } => {\n"
+      },
+      {
+        "before": "    Reading { value: u64, footer: [u8; 2] },\n",
+        "after": "    Reading { value: u64, footer: [u8; 2], signal: Signal },\n"
+      }
+    ],
+    "unresolved": "proven enum mapping",
+    "variant": "Reading"
+  },
+  {
+    "name": "alias",
+    "edits": [
+      {
+        "before": "                payload.extend(a);\n",
+        "after": "                let aliased = &mut payload; aliased.extend(a);\n"
+      }
+    ],
+    "unresolved": "local alias",
+    "variant": "Key"
+  }
+]

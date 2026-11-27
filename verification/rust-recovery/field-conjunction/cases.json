@@ -1,0 +1,85 @@
+[
+  {
+    "name": "base",
+    "edits": [],
+    "expected": [
+      "true",
+      "false",
+      "false",
+      "false"
+    ]
+  },
+  {
+    "name": "mutated",
+    "edits": [
+      {
+        "before": "        other.serial == self.serial && self.flags == other.flags && self.stage == other.stage\n",
+        "after": "        other.backup == self.serial && self.flags == other.flags && self.stage == other.stage\n"
+      }
+    ],
+    "expected": [
+      "false",
+      "true",
+      "false",
+      "false"
+    ]
+  },
+  {
+    "name": "custom",
+    "edits": [],
+    "unresolved": "not proven effect-free"
+  },
+  {
+    "name": "effect",
+    "edits": [
+      {
+        "before": "        other.serial == self.serial && self.flags == other.flags && self.stage == other.stage\n",
+        "after": "        eprintln!(\"effect\"); other.serial == self.serial && self.flags == other.flags && self.stage == other.stage\n"
+      }
+    ],
+    "unresolved": "statements, aliases or effects"
+  },
+  {
+    "name": "alias",
+    "edits": [
+      {
+        "before": "        other.serial == self.serial && self.flags == other.flags && self.stage == other.stage\n",
+        "after": "        { let alias = other; alias }.serial == self.serial && self.flags == other.flags && self.stage == other.stage\n"
+      }
+    ],
+    "unresolved": "field operand uses indirection or an alias"
+  },
+  {
+    "name": "shadow",
+    "edits": [
+      {
+        "before": "        other.serial == self.serial && self.flags == other.flags && self.stage == other.stage\n",
+        "after": "        { let other = self; other }.serial == self.serial && self.flags == other.flags && self.stage == other.stage\n"
+      }
+    ],
+    "unresolved": "field operand uses indirection or an alias"
+  },
+  {
+    "name": "trait-only",
+    "edits": [
+      {
+        "before": "impl Invoice {\n    pub fn agrees(&self, other: &Receipt) -> bool {\n        other.serial == self.serial && self.flags == other.flags && self.stage == other.stage\n    }\n",
+        "after": "\ntrait Agreement { fn agrees(&self, other: &Receipt) -> bool; }\nimpl Agreement for Invoice {\n    fn agrees(&self, other: &Receipt) -> bool { self.serial == other.serial }\n"
+      }
+    ],
+    "unresolved": "selected inherent method is absent"
+  },
+  {
+    "name": "overloaded-deref",
+    "edits": [
+      {
+        "append": "\npub struct Shadow { extra: u32 }\nimpl std::ops::Deref for Receipt {\n    type Target = Shadow;\n    fn deref(&self) -> &Shadow {\n        eprintln!(\"effect\");\n        static FALLBACK: Shadow = Shadow { extra: 0 };\n        &FALLBACK\n    }\n}\n"
+      },
+      {
+        "before": "        other.serial == self.serial && self.flags == other.flags && self.stage == other.stage\n",
+        "after": "        other.extra == self.serial && self.flags == other.flags && self.stage == other.stage\n"
+      }
+    ],
+    "unresolved": "non-builtin receiver adjustment"
+  }
+]
