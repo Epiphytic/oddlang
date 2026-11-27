@@ -1,44 +1,15 @@
 {
-  "auditedCompanionRevision": "df964346e51f69af65e6d8cb7f55ff278ed379e4",
-  "previousRevision": "b95fd5161e75c47913a17a2ee3e68e13da5e8748",
-  "reproducedTableSha256": "d1ab47f8155c6c20eb21126ba847f5818fd3de50a828ce836b9a10f8005312a6",
-  "remainingProjectToolFiles": 158,
+  "auditedCompanionRevision": "72cc1f45a25fc1a6cb7e4c20bea9713a8c33b5f2",
+  "previousRevision": "df964346e51f69af65e6d8cb7f55ff278ed379e4",
+  "reproducedTableSha256": "13dcdfe1309ad9297f807ccf38e634b2b0bff166e56be6cbe041a1ddd530c7f3",
+  "remainingProjectToolFiles": 156,
   "remainingProjectExtensions": {
-    ".py": 149,
+    ".py": 147,
     ".sh": 9
   },
   "removedSincePrevious": [
-    "verification/whole/build-report/observe.py",
-    "verification/whole/canonical-range-data/verify.py",
-    "verification/whole/canonical-recovered-range/verify.py",
-    "verification/whole/converged-release-manifest/compose.py",
-    "verification/whole/converged-release-manifest/verify.py",
-    "verification/whole/copy-checkpoint/check_linkage.py",
-    "verification/whole/copy-checkpoint/verify.py",
-    "verification/whole/copy-field-relations/verify.py",
-    "verification/whole/copy-manifest/verify.py",
-    "verification/whole/copy-source-correspondence/verify.py",
-    "verification/whole/private-buffer-inference/observe.py",
-    "verification/whole/private-buffer-inference/qualify.py",
-    "verification/whole/private-buffer/baseline.py",
-    "verification/whole/private-buffer/upstream_case.py",
-    "verification/whole/private-buffer/verify.py",
-    "verification/whole/release-info-structure/verify.py",
-    "verification/whole/retention-structure/verify.py",
-    "verification/whole/stream-block/cases.py",
-    "verification/whole/stream-block/verify.py",
-    "verification/whole/stream-windows/release.py",
-    "verification/whole/stream-windows/verify.py",
-    "verification/whole/suite/child_control.py",
-    "verification/whole/suite/inventory.py",
-    "verification/whole/suite/list_cargo.py",
-    "verification/whole/suite/mdk_host.py",
-    "verification/whole/suite/summarize_cargo.py",
-    "verification/whole/unified-vault-journal/verify.py"
-  ],
-  "addedSincePrevious": [
-    "verification/whole/canonical-recovered-range/workspace_compat.py",
-    "verification/whole/converged-release-manifest/workspace_compat.py",
+    "verification/whole/suite/process_limits.py",
     "verification/whole/suite/upstream.py"
-  ]
+  ],
+  "addedSincePrevious": []
 }

@@ -3520,3 +3520,8 @@ w:portHistoricTooling p:evidence w:nativeSuiteSelection .
 w:nativeSuiteSelection a p:Artifact ;
     rdfs:label "Rust producer checks both canonical archive digests and compares exact named registrations. A differential replay against the prior Python producer matched seven core and 29 stream registrations on each of the two platform archives. Four malformed stream names were rejected. The three producer controls passed." ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/3dc92e28d4c53985e605332afc602f49d5d86bf9/verification/whole/suite/src/bin/suite-selection.rs" .
+
+w:portHistoricTooling p:evidence w:suiteProcessLimitsNative .
+w:suiteProcessLimitsNative a p:Artifact ;
+    rdfs:label "On macOS ARM64 the Rust and Python process-limit verifiers produced identical receipts both with and without the Cargo harness control. Both empty-output role replacements failed the expected assertion. The archived original was reproduced apart from the two executable hashes and optional harness hash. The companion inventory now contains 147 project Python tools and 9 shell tools." ;
+    p:location "verification/provider-tooling/process-limit-native.json" .
