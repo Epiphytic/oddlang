@@ -1,14 +1,12 @@
 {
-  "auditedCompanionRevision": "b62317e6a156de50627e995df3ea272a55f13681",
-  "previousRevision": "4e643a342e974f8412e4e6f61771b82e84e25ad4",
-  "reproducedTableSha256": "2a1161e1d6e84285c6a049e350928c5cc8692054d939beae934b6a42d5e7aab8",
+  "auditedCompanionRevision": "a3764d5f56172f5ae84d86d41f75418ce2bbe5c9",
+  "previousRevision": "b62317e6a156de50627e995df3ea272a55f13681",
+  "reproducedTableSha256": "914950bff11c99efb19b28b90895681f5b72d97c04d35fba73017490b597ec90",
   "remainingProjectToolFiles": 105,
   "remainingProjectExtensions": {
     ".py": 102,
     ".sh": 3
   },
-  "removedSincePrevious": [
-    "verification/whole/converged-release-manifest/workspace_compat.py"
-  ],
+  "removedSincePrevious": [],
   "addedSincePrevious": []
 }

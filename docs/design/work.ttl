@@ -3747,3 +3747,8 @@ w:portHistoricTooling p:evidence w:canonicalWorkspaceSealRust .
 w:canonicalWorkspaceSealRust a p:Artifact ;
     rdfs:label "The canonical workspace verifier reconstructs the inherited native package seal in Rust and checks seven member records. On ARM64 macOS it rejected five modified products. The Rust parser witness read the Cargo artifact log and reproduced all 58,760 archived result bytes for 224 parser cases, including 34 acceptances. The complete canonical replay reproduced 99 staged inputs, 31 source denial probes, 164 terminal comparisons and 77 importable public spellings out of 140." ;
     p:location "verification/provider-tooling/canonical-workspace-seal-rust.json" .
+
+w:portHistoricTooling p:evidence w:sevenPublicImportsRust .
+w:sevenPublicImportsRust a p:Artifact ;
+    rdfs:label "The Rust seven-library public import verifier reproduced the archived verifier's 140 import outcomes and diagnostics and both prototype caller checks on ARM64 macOS. Its locked offline build replay preserved every caller result. The canonical engine-choice replay matched the archived two gains, Stream and SubmitDisposition." ;
+    p:location "verification/provider-tooling/seven-public-imports-rust.json" .
