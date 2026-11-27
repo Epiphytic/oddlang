@@ -3572,3 +3572,8 @@ w:portHistoricTooling p:evidence w:originalStructureReplayRust .
 w:originalStructureReplayRust a p:Artifact ;
     rdfs:label "The Rust structural recovery replay rebuilt the pinned compiler and regenerated the original stream library, prototype library and engine bridge graphs on macOS ARM64. All six files matched a fresh historical Python replay byte for byte. All three locks matched the archive. Four rejection controls included a mismatch on the final role with no partially published directory." ;
     p:location "verification/provider-tooling/structural-recovery-replay.json" .
+
+w:portHistoricTooling p:evidence w:cliTranscriptReplayRust .
+w:cliTranscriptReplayRust a p:Artifact ;
+    rdfs:label "The Rust CLI transcript runner captured all 68 observations from pinned macOS ARM64 original executables and reproduced the checked-in fixture and legacy capture byte for byte. The generated parser-only client and daemon passed both readers. Seven negative controls covered changed arguments, output, exit, ordering, capture origin and existing fixture preservation." ;
+    p:location "verification/provider-tooling/cli-transcript-replay.json" .

@@ -1,0 +1,30 @@
+{
+  "companionRevision": "a5b32e8fa246aa93df730a66943fdf3c4707254c",
+  "host": "aarch64-apple-darwin",
+  "scope": "parse-only CLI",
+  "archive": "verification/whole/cli/transcript.json",
+  "identicalCaptureSha256": "e3de629983416f1c2823d526916b0426ab98e7e2f5b69f6e24bf396f51fc2746",
+  "observationsPerRole": {
+    "marmish": 34,
+    "marmishd": 34
+  },
+  "binarySha256": {
+    "original": {
+      "marmish": "8097469a154ba7cf3a5a4d4848537f7ce72ba9f767f90ab7362aba8074842ac7",
+      "marmishd": "f35024f7a3a342392d36b83e4348f7bf0ea65d9e39b9358425c8249592038f41"
+    },
+    "generated": {
+      "marmish": "f338a2a08079034e0d1e02e0729e81e02d865b8ab568dea2b77285629636df7a",
+      "marmishd": "05c033d8409086b635f122b16f9568e0be091bb100b6a8fc0046e2fb03866d28"
+    }
+  },
+  "controls": [
+    "stdout drift",
+    "stderr drift",
+    "status drift",
+    "argument drift",
+    "reordered rows",
+    "capture from unpinned binaries",
+    "capture onto existing fixture"
+  ]
+}
