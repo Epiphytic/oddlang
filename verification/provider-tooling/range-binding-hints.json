@@ -1,0 +1,33 @@
+{
+  "companionRevision": "7601a6c540bf590d3ae7d0f61bc0e50a36020ec7",
+  "compilerSha256": "80bf57800165968c12f1fcf72232ee8ae992b8fc009456bebd59c476cf71a10d",
+  "host": "aarch64-apple-darwin",
+  "node": "v22.22.2",
+  "typescript": "5.9.3",
+  "profileNames": [
+    "absent",
+    "baseline",
+    "replacement",
+    "without-rust",
+    "without-typescript"
+  ],
+  "casesPerProfile": 11,
+  "deniedSourceReads": 4,
+  "differingReceiptFields": [
+    "companion",
+    "contractVerifierSha256",
+    "verifierSha256"
+  ],
+  "replays": {
+    "final": {
+      "receiptSha256": "9af4d40def6fc70ec7d15b3f2ea1e5d8fc9eb3d1ba489288f6ec44404e4950eb",
+      "archiveSha256": "082a75b9bae0191cb94b9ae3935666c013d92833b2b8c8e0f3b3203ceaa6dbb1",
+      "contractVerifierSha256": "d72b97552df7a3787ecd9090ac3dfc8f0ecff1a5b28ae89432905de97146551c"
+    },
+    "final-missing": {
+      "receiptSha256": "6002f9438cf0d618c50e73aff60d3bd992d47bfa6262a038cd77ee321e3a2c0d",
+      "archiveSha256": "1812ba895a2789c69ac7af4b2c18f521060514bfa76400483bc5d84af8daf828",
+      "contractVerifierSha256": "c2708319dae97a295742210299b86cbdfe3ed050c3711d0e1d8bd340053f28b2"
+    }
+  }
+}
