@@ -3704,3 +3704,8 @@ w:boundedMdkRecoveryRust a p:Artifact ;
     p:location "verification/provider-tooling/bounded-mdk-json-recovery.json" .
 
 w:ontoGPTQualification rdfs:label "Four pinned skills and provider schema semantics. The Rust schema reader distinguishes omission from a mistyped explicit null in six optional keywords, including nested identifier namespace constraints. The macOS CLI rejected the invalid binding schema before creating output." .
+
+w:replaceableWasmProviders p:evidence w:providerSchemaWorkspaceReplay .
+w:providerSchemaWorkspaceReplay a p:Artifact ;
+    rdfs:label "After strict optional schema keyword validation, the current compiler regenerated 106 files in 49 directories from 111 pinned inputs on macOS ARM64. The seven workspace members, file bytes and permissions, 105 policy decisions and 11 configuration cases matched the archive. All 42 library, provider interoperability and Rust round-trip tests passed including the six-build control." ;
+    p:location "verification/provider-tooling/provider-schema-reconstruction.json" .
