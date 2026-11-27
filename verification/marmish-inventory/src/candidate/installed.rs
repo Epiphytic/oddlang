@@ -81,7 +81,13 @@ fn snapshot(root: &Path, path: &Path, files: &mut Map) -> Result<()> {
     }
     Ok(())
 }
-pub fn observe(tmp: &Path, report: &Path, revision: &str, policy: &[String]) -> Result<Value> {
+pub fn observe(
+    tmp: &Path,
+    report: &Path,
+    revision: &str,
+    policy: &[String],
+    environment: &BTreeMap<String, String>,
+) -> Result<Value> {
     let base = tmp.join("installed-layout");
     let prefix = base.join("prefix");
     let bin_dir = base.join("bin");
@@ -106,6 +112,8 @@ pub fn observe(tmp: &Path, report: &Path, revision: &str, policy: &[String]) -> 
     snapshot(&base, &base, &mut before)?;
     let (program, args) = policy.split_first().context("missing native policy")?;
     let mut child = Command::new(program)
+        .env_clear()
+        .envs(environment)
         .args(args)
         .arg(tmp.join("target/release/marmish"))
         .args(["install-status", "--prefix"])

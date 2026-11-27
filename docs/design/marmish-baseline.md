@@ -13,7 +13,7 @@ The source tree has 1,641 tracked paths. The upstream ontology covers 418 files 
 
 For this pin the inventory classifies 5,849 lexical declaration sites across the selected targets and feature profiles (including fields and enum variants) as retained native. The compiler type-checked a separate framing consumer. Static module edges resolve to workspace roots. The inventory lists unresolved lexical callees and parser omissions explicitly, so the full runtime denominator stays open. All 33 frozen framing vectors passed against the original. They cover exact JSON bytes, named errors and which check wins when multiple conditions fail.
 
-The baseline runner uses Python 3.11 or later, uv, Git, the pinned Rust toolchain, and native Apple Silicon macOS. The Linux x86-64 and ARM64 entries remain unobserved until their respective hosts run the original and candidate.
+The Rust baseline runner uses Git, uv, Xcode and Rust 1.97.1 on native Apple Silicon macOS. The inherited Marmish ontology check runs in its locked Python 3.12 environment. The Linux x86-64 and ARM64 entries remain unobserved until their respective hosts run the original and candidate.
 
 | Native platform | Static tests eligible in at least one selected profile | Ignored sites | Runtime baseline |
 | --- | ---: | ---: | --- |
@@ -30,3 +30,9 @@ The installed-checks run recorded 907 passed, eight failed and three ignored. It
 The release build completed and hashed all three product binaries and the auxiliary packager. The six CLI help/version probes matched the frozen byte expectations, including the worker's silent rejection of both flags. The [original evidence archive](../../examples/marmish/evidence/original.tar.gz) contains all 22 command records, 44 stdout/stderr logs, the inventory, byte vectors, and environment controls. Its SHA-256 is `4c944d14b9260b2300a164cedda7f8721cb0e487efd1ef7e515c5a900f8fea32`. Extract it to an empty directory and run the receipt checker above.
 
 Claude independently unpacked and replayed the archive at `38809b4`, checked all six CLI probes and approved the macOS baseline. The reported totals exclude filtered subprocess tests nested in an upstream test. The original archive digest anchors subsequent comparisons. The recorded binary digests identify that particular release build. Build directories affect binary bytes.
+
+Reproduce the collector checks on a configured Apple Silicon host from the Oddlang root. Set `MARMISH_PINNED_SOURCE` to the clean frozen checkout. The fixture compares all 22 command identities and log paths with the release archive, exercises release binaries and the inactive install layout, and checks timeout and sandbox behavior. The pinned-source check runs the eleven tool, ontology and Cargo metadata commands plus the seven original core contract tests. [Collector verification](../../verification/provider-tooling/native-baseline-collector-replay.json)
+
+```sh
+cargo +1.97.1 test --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml --lib baseline::tests::macos -- --ignored
+```

@@ -7,6 +7,8 @@ pub mod original;
 mod transcripts;
 const TARGET: &str = "aarch64-apple-darwin";
 const BINS: [&str; 3] = ["marmish", "marmishd", "marmish-worker"];
+// The historical Python comparator and the published 6c8480a Rust replay each
+// retain the identity stamped on their original reports.
 pub const LEGACY_VERIFIER: &str =
     "1f7c5c311dc8f71c8b43927f048ec27d396ae94476650a5ef853da057ae92205";
 /// Identity of the Rust comparison implementation used to produce a fresh receipt.
@@ -39,7 +41,9 @@ pub fn compare(
         "wrong archived candidate identity"
     );
     ensure!(
-        verifier_hash == LEGACY_VERIFIER || verifier_hash == verifier(),
+        verifier_hash == LEGACY_VERIFIER
+            || verifier_hash == "83808058a812e58a8aca6f36a13922c820e546356635ab1ca249c4d33a2e409a"
+            || verifier_hash == verifier(),
         "unrecognized native verifier identity"
     );
     let original = dir.join("original/native");

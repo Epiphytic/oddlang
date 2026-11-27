@@ -100,7 +100,7 @@ pub fn identities(upstream: &Path, candidate: &Path) -> Result<(String, String)>
     );
     Ok((revision, rev(candidate, "HEAD^{tree}")?))
 }
-pub fn collect(upstream: &Path, candidate: &Path, out: &Path, revision: &str) -> Result<()> {
+pub fn collect(candidate: &Path, out: &Path, revision: &str) -> Result<()> {
     ensure!(
         cfg!(all(target_os = "macos", target_arch = "aarch64")),
         "native Apple Silicon required"
@@ -111,34 +111,5 @@ pub fn collect(upstream: &Path, candidate: &Path, out: &Path, revision: &str) ->
         "qualification requires an empty output directory"
     );
     original::recover(&out.join("original"))?;
-    let report = out.join("candidate");
-    fs::create_dir(&report)?;
-    let tmp = tempfile::Builder::new()
-        .prefix("m-")
-        .tempdir_in("/private/tmp")?;
-    // The native baseline owns its build sandbox. It invokes this executable
-    // while its temporary release binaries and seeded environment are available.
-    let driver = r#"import json, subprocess, sys
-from pathlib import Path
-from baseline import run
-exe, candidate, report, tmp, revision = sys.argv[1:]
-def after_release(tmp, policy, env, report, state):
-    output = subprocess.check_output([exe, 'installed-status', tmp, report, state['revision'], '--', *policy], env=env)
-    state.update(json.loads(output))
-run(Path(candidate), Path(report), Path(tmp), revision=revision, after_release=after_release)"#;
-    let status = Command::new("python3")
-        .args(["-B", "-c", driver])
-        .arg(std::env::current_exe()?)
-        .arg(candidate)
-        .arg(report)
-        .arg(tmp.path())
-        .arg(revision)
-        .current_dir(root().join("scripts/marmish"))
-        .status()?;
-    ensure!(
-        status.success(),
-        "candidate native baseline collection failed for {}",
-        upstream.display()
-    );
-    Ok(())
+    crate::baseline::run(candidate, &out.join("candidate"), revision, true)
 }

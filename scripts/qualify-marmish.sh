@@ -39,7 +39,7 @@ fi
 scripts/marmish/offline.sh cargo +1.97.1 run --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml -- \
     "$upstream" "$report/inventory" --compare-summary examples/marmish/inventory-summary.json
 scripts/marmish/offline.sh cargo +1.97.1 run --quiet --offline --locked --manifest-path verification/marmish-inventory/Cargo.toml --bin framing-observer -- collect "$upstream" "$report/observations"
-python3 scripts/marmish/baseline.py "$upstream" "$report/native"
+cargo +1.97.1 run --quiet --offline --locked --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-baseline -- "$upstream" "$report/native"
 cargo +1.97.1 run --quiet --offline --locked --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-receipt -- check "$report" --write
 cargo +1.97.1 run --quiet --offline --locked --manifest-path verification/marmish-inventory/Cargo.toml --bin marmish-receipt -- check "$report"
 echo "Marmish baseline recorded in $report"

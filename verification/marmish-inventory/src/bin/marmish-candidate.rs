@@ -44,6 +44,7 @@ fn main() -> Result<()> {
                 Path::new(report),
                 revision,
                 policy,
+                &std::env::vars().collect(),
             )?)
         }
         _ => {
@@ -53,7 +54,6 @@ fn main() -> Result<()> {
             let (revision, tree) = candidate::collect::identities(&upstream, &checkout)?;
             if !args.compare_existing {
                 candidate::collect::collect(
-                    &upstream,
                     &checkout,
                     &std::path::absolute(&args.output)?,
                     &revision,
