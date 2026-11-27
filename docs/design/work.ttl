@@ -3984,3 +3984,13 @@ w:exportRoleReplayEvidence a p:Artifact ;
 w:portHistoricTooling p:evidence w:exportRoleReplayEvidence .
 w:exportRoleReplayEvidence rdfs:comment "The Rust exporter checks the generated workspace lock and product files before and after Cargo compilation, and selects fresh first-party release executables from Cargo's artifact stream. The seven-member release and both preflight transcripts were replayed." .
 w:exportRoleReplayEvidence rdfs:comment "Rust staged the same 661 crates and sparse index from eight release locks as the previous Python exporter. The resulting registry passed the source-isolated offline release build." .
+
+w:gapReasonContractRustEvidence a p:Artifact ;
+    rdfs:label "Standalone Rust recovery and native package projection of the Marmish gap reason matched the original and mutated case observations on macOS ARM64" ;
+    p:location "verification/provider-tooling/gap-reason-contract-rust.json" .
+w:portHistoricTooling p:evidence w:gapReasonContractRustEvidence .
+
+w:gapReasonNativeReplay a p:Artifact ;
+    rdfs:label "Fully native Rust replay of both gap-reason recovery and caller qualification lanes" ;
+    p:location "verification/provider-tooling/gap-reason-native-replay.json" .
+w:portHistoricTooling p:evidence w:gapReasonNativeReplay .
