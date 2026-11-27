@@ -3779,3 +3779,9 @@ w:replaceableWasmProviders p:evidence w:postRefactorWorkspaceReplay .
 w:postRefactorWorkspaceReplay a p:Artifact ;
     rdfs:label "A fresh compiler at 497c96d regenerated the seven Marmish crates from 111 pinned inputs. The complete tree matched the baseline bytes and modes. Fresh original and generated observers matched 105 policy cases and 11 file cases. Mixed stream-library processes reproduced the complete wire and payload in both directions and rejected all four malformed inputs." ;
     p:location "verification/provider-tooling/post-refactor-workspace-replay.json" .
+
+w:portHistoricTooling p:evidence w:typescriptVaultWidthRust .
+w:typescriptVaultWidthRust a p:Artifact ;
+    rdfs:label "The native verifier reproduced the TypeScript fixed-byte projection and its lock and obligations while Seatbelt denied both Rust input probes. Node accepted the published 32-byte width and the mutated 31-byte width with the same ownership and rejection observations as the historical verifier." ;
+    p:location "verification/provider-tooling/typescript-vault-fixed-rust.json" .
+w:postRefactorWorkspaceReplay rdfs:comment "Fresh ARM64 macOS runs at 7e368cb passed 33 library tests, four provider interoperability tests and five Rust round-trip tests, including the separately invoked six-build native comparison." .

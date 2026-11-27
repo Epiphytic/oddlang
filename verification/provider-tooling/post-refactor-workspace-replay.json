@@ -51,5 +51,18 @@
     },
     "roomConfigFileCases": 11
   },
-  "host": "aarch64-apple-darwin"
+  "host": "aarch64-apple-darwin",
+  "providerAndRecoveryTests": {
+    "frameworkRevision": "7e368cb1bd20e738e4effcdc2a8bcfe609fab2c2",
+    "host": "aarch64-apple-darwin",
+    "rustToolchain": "1.97.1",
+    "libraryPassed": 33,
+    "providerInteropPassed": 4,
+    "rustRoundtripPassed": 5,
+    "sixBuildControlExecuted": true,
+    "commands": [
+      "cargo +1.97.1 test --locked --offline --lib --test provider_interop --test rust_roundtrip",
+      "cargo +1.97.1 test --locked --offline --test rust_roundtrip -- --ignored"
+    ]
+  }
 }
