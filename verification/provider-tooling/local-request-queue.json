@@ -1,0 +1,13 @@
+{
+  "host": "aarch64-apple-darwin",
+  "rustToolchain": "1.97.1",
+  "compilerSha256": "ccd3aa5caeac7c57dddb5d8c04e6cc619c7580e446edb8139bc00f0c6555e09f",
+  "consumerSha256": "3ba27ec6b24b971346ae7d3fee6c14bb2d84d93698d3692cb202847322888c44",
+  "cargoLockSha256": "02c9497878abe81cbc0444ea4afb6609b1353b95f5008c0aedf5ccf884a540b2",
+  "consumerPhases": ["write", "recover"],
+  "concurrentObserverStdoutSorted": ["already queued\n", "queued\n"],
+  "plaintextSqliteHeaderAbsent": true,
+  "rejectedGraphMutations": 8,
+  "qualificationStdout": "durable local queue fixture passed\n",
+  "sevenCrateReplayReceiptSha256": "12a403b4982d0cd555aeec33e697b2df1fdfa784fc3c19989a4339aced3f3fd7"
+}

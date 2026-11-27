@@ -3328,3 +3328,8 @@ w:portHistoricTooling p:evidence w:nativeWaitProfileDiagnostics .
 w:nativeWaitProfileDiagnostics a p:Artifact ;
     rdfs:label "Rust local profile observer reproduced all three archived diagnostic reports, including the prior build's thirteen mismatches and failing comparison status" ;
     p:location "verification/provider-tooling/profile-diagnostics.json" .
+
+w:portHistoricTooling p:evidence w:nativeLocalRequestQueue .
+w:nativeLocalRequestQueue a p:Artifact ;
+    rdfs:label "Rust queue qualifier ran separate write and recovery processes, two concurrent submitters, and eight invalid graph controls against the independent gauge consumer" ;
+    p:location "verification/provider-tooling/local-request-queue.json" .
