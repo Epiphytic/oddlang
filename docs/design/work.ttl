@@ -3845,3 +3845,8 @@ w:portHistoricTooling p:evidence w:coreLinuxRunnerRust .
 w:coreLinuxRunnerRust a p:Artifact ;
     rdfs:label "Rust Linux core-package launcher and macOS controls. A fresh projection matched 1,735 original observations and the archived transcript digest. Native Linux execution of this launcher is pending guest access." ;
     p:location "verification/provider-tooling/core-package-inputs.json" .
+
+w:portHistoricTooling p:evidence w:coreMacosQualificationRust .
+w:coreMacosQualificationRust a p:Artifact ;
+    rdfs:label "The Rust macOS core-package qualifier and the compatibility entry point each reproduced the archived receipt byte for byte, including all four distinct mutation outcomes. The legacy and native sandbox interfaces produced the same environment and read roots." ;
+    p:location "verification/provider-tooling/core-package-inputs.json" .

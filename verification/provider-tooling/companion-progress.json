@@ -1,13 +1,11 @@
 {
-  "auditedCompanionRevision": "469960d55737ea59d8b54ce5ea05444967534275",
-  "previousRevision": "f592e813e5d524bdac7b61a05204ff1b8d509aac",
-  "reproducedTableSha256": "1f08d6387f1100f1f8af8aba6cad2999b7d0e2ff8ba9c0a96f7ade3bac84f207",
+  "auditedCompanionRevision": "09cf82cd0859df5efe5813152abb7d3b967151a1",
+  "previousRevision": "469960d55737ea59d8b54ce5ea05444967534275",
+  "reproducedTableSha256": "0913f7c538bd56ad24487ae41157d21d34728b4e5c5d43be33090396981bda1e",
   "remainingProjectToolFiles": 81,
   "remainingProjectExtensions": {
     ".py": 81
   },
-  "removedSincePrevious": [
-    "verification/whole/core-package/linux.sh"
-  ],
+  "removedSincePrevious": [],
   "addedSincePrevious": []
 }
