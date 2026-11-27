@@ -1,0 +1,58 @@
+{
+  "compilerSha256": "43761d9f3c9c45d7115cac426baf63b1b55c22ac2a9b9423c2b3022a27b60d17",
+  "inputManifestSha256": "859923216f7a48d14f6975c9625fc809b2f6f1a0da3c4484ff367f96eaa929b4",
+  "pinnedInputs": 111,
+  "policy": {
+    "foregroundSourceSha256": "9ddc9fd6ab6f2fa08e3e80805c18d96a0d0be4c02ca177205bbe5cd692d106e2",
+    "host": "aarch64-apple-darwin",
+    "policyDecisions": {
+      "cases": 105,
+      "inputsSha256": "b392ced173616d91990bb648af275a25776ccc15e22f33faf7388baea451a980",
+      "observationsSha256": "c30e84dc1ec0633fc995d79eda55ece8dfabd27db8cc91bcf72e2270cbbd6f6b"
+    },
+    "rebuiltObserverSha256": {
+      "generated-observer": "6641812d870004153c52eec1d71fa4fc7b23aa4a3494d361149a4bb482297a81",
+      "policy-observer": "72c852f9d401f5000601bce16fc641d117d99c16967f6bdec7204538cab00ed2",
+      "room-observer": "faa7e5d6189140a2276a6bc64fe3134def573efffa73b9da326626797a56277a"
+    },
+    "roomConfigFileCases": 11,
+    "rustToolchain": "1.97.1",
+    "upstreamCommit": "af54339d250290490d62d4475a77539b7e739071",
+    "workspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c"
+  },
+  "policyToolSha256": "f42eae6dbc58fdb7876af66bb9e5d936edeb0fb28355dd3d8ac1b7f0aaf2d0c3",
+  "workspace": {
+    "directories": 49,
+    "files": 106,
+    "members": 7,
+    "treeSha256": "ed3ba7e04668b2ad346edf880c0c1a261ffefaa47b6838ad9b24e0ab4b8c3524",
+    "workspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c"
+  },
+  "copyDataPipe": {
+    "original": "af54339d250290490d62d4475a77539b7e739071",
+    "generatedWorkspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c",
+    "driverSha256": "d5ec33dd26c651ca82483188862bc43ee459b900fdb39c4ccc9d7199a537dd66",
+    "framesPerDirection": 1260,
+    "payloadSha256": "e8007b4a0a207564767a34fd944d829e984318e4ac4d65522b136ca16794106e",
+    "wireSha256": "a2ad71740d1390383296943473fdfac7ed6515b005e1cae5cb0f5f1cb62f78e5",
+    "originalToGenerated": {
+      "encodeExit": 0,
+      "decodeExit": 0,
+      "wireBytesCompared": 4210721,
+      "payloadBytesCompared": 4194341
+    },
+    "generatedToOriginal": {
+      "encodeExit": 0,
+      "decodeExit": 0,
+      "wireBytesCompared": 4210721,
+      "payloadBytesCompared": 4194341
+    },
+    "truncationAndOffsetControlsPassed": 4
+  },
+  "rustTests": {
+    "library": 33,
+    "providerInterop": 4,
+    "registeredPackageWithDownstreamConsumer": 1,
+    "rustRoundtripIncludingSixBuildControl": 5
+  }
+}
