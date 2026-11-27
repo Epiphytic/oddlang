@@ -1,0 +1,32 @@
+{
+  "format": "oddlang-shared-rust-v1",
+  "names": {
+    "urn:meter:step": "STEP",
+    "urn:meter:period": "PERIOD",
+    "urn:meter:outcome": "Reading",
+    "urn:meter:fault": "SensorError",
+    "urn:meter:paused": "Paused",
+    "urn:meter:label": "Label",
+    "urn:meter:count": "Count",
+    "urn:meter:flag": "Flag",
+    "urn:meter:mode": "Mode",
+    "urn:meter:hot": "Hot",
+    "urn:meter:cold": "Cold"
+  },
+  "constantTypes": {
+    "urn:meter:step": "usize",
+    "urn:meter:period": "u16"
+  },
+  "variantOrder": {
+    "urn:meter:fault": [
+      "urn:meter:label",
+      "urn:meter:count",
+      "urn:meter:flag",
+      "urn:meter:paused"
+    ],
+    "urn:meter:mode": [
+      "urn:meter:cold",
+      "urn:meter:hot"
+    ]
+  }
+}

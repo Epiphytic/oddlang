@@ -53,6 +53,7 @@
     "serde-string-choice",
     "structured-diagnostics",
     "local-file-catalog",
-    "record-defaults"
+    "record-defaults",
+    "shared-declarations"
   ]
 }
