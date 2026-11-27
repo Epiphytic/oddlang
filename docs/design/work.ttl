@@ -940,7 +940,7 @@ w:typedFieldRelations a p:Task ; rdfs:label "Project typed ordered cross-record 
     p:dependsOn w:boundedBinaryRecords, w:typedHashViews ;
     p:acceptance "Compare typed fields and arguments with explicit short-circuit order and propagate a checked operation error only when reached. Verify each outcome and reject invalid operands." ;
     p:evidence w:typedFieldRelationFixture .
-w:typedFieldRelationFixture a p:Artifact ; p:location "verification/field-relation/verify.py" .
+w:typedFieldRelationFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/qualify-domains/relation.rs" .
 w:wholeMarmishProtocols p:dependsOn w:typedFieldRelations .
 
 w:binaryMetadataRecords a p:Task ; rdfs:label "Project optional binary metadata and ordered constraints" ;
@@ -1226,7 +1226,7 @@ w:finiteErrorDomains a p:Task ;
     p:status p:done ; p:dependsOn w:unifiedProfileWorkspace ;
     p:acceptance "Recover pinned named diagnostics, exhaustive category tables, and explicit error-source and conversion rules. Compile an independent caller against original and sealed generated native packages, and observe a source mutation through both." .
 w:finiteErrorDomainFixture a p:Artifact ;
-    p:location "verification/finite-error-domains/verify.py" .
+    p:location "verification/provider-validation/src/bin/finite-error-domain.rs" .
 w:nativeErrorDomainReceipt a p:Artifact ;
     p:location "companion:verification/whole/native-error/darwin-arm64/receipt.json" .
 w:finiteErrorDomains p:evidence w:finiteErrorDomainFixture, w:nativeErrorDomainReceipt .
@@ -1255,7 +1255,7 @@ w:checkedValueProductProjection a p:Task ;
     p:acceptance "Compile an unrelated consumer with borrowed inputs and getters and public metadata, reject bypassed constructors, and reproject a detectable byte limit mutation." ;
     p:addresses w:checkedValuesFidelityReview ; p:evidence w:checkedValuesFixture .
 w:checkedValuesFixture a p:Artifact ;
-    p:location "verification/checked-values/verify.py" .
+    p:location "verification/provider-validation/src/bin/qualify-domains/checked.rs" .
 w:checkedValuesFidelityReview a p:Finding ;
     rdfs:label "Retain accessible product construction and getters, protect trait calls, and verify exact Cc and deterministic capabilities" ;
     p:source w:checkedValuesReview .
@@ -1320,7 +1320,7 @@ w:processLimitCompanionRelease a p:Artifact ;
 w:unifiedVaultEngineReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/blob/aee87208cdfe403a77e652902f65d5b77804f42c/verification/whole/unified-vault/darwin-arm64/receipt.json> .
 
-w:fixedByteFrameworkFixture a p:Artifact ; p:location "verification/checked-values/fixed_bytes.py" .
+w:fixedByteFrameworkFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/qualify-domains/fixed.rs" .
 w:fixedByteDarwin a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/blob/2f5934a6cf01aa0316d76c1725d0ec885ae07cc0/verification/whole/vault-fixed-bytes/aarch64-apple-darwin.json> .
 w:fixedByteLinux a p:Artifact ; p:location <https://github.com/Epiphytic/marmish-oddlang/blob/2f5934a6cf01aa0316d76c1725d0ec885ae07cc0/verification/whole/vault-fixed-bytes/aarch64-unknown-linux-gnu.json> .
 
@@ -1399,7 +1399,7 @@ w:rootPublicData a p:Task ;
     p:dependsOn w:finiteErrorDomains, w:publicObservationalRecords ;
     p:acceptance "Compare all seven MDK public error variants and the ordered public version record against original Rust. Change their pinned source and observe the exact Display and Debug changes through a native consumer." .
 w:rootPublicDataFixture a p:Artifact ;
-    p:location "verification/root-public-data/verify.py" .
+    p:location "verification/provider-validation/src/bin/root-public-data.rs" .
 w:mdkPublicDataReceipt a p:Artifact ;
     p:location "companion:verification/whole/mdk-public-data/darwin-arm64/receipt.json" .
 w:rootPublicData p:evidence w:rootPublicDataFixture, w:mdkPublicDataReceipt .
@@ -1464,7 +1464,7 @@ w:plainValueChoices a p:Task ;
     p:acceptance "Compare original and generated native exhaustiveness, exact capabilities and declaration-order casts. Reorder a pinned ordinary choice at its Rust source, and verify only the intended ordinal observations change." ;
     p:evidence w:plainChoiceFixture, w:nativeBackendChoiceReceipt .
 w:plainChoiceFixture a p:Artifact ;
-    p:location "verification/plain-value-choices/verify.py" .
+    p:location "verification/provider-validation/src/bin/qualify-choices/native.rs" .
 w:nativeBackendChoiceReceipt a p:Artifact ;
     p:location "companion:verification/whole/backend-choice/darwin-arm64/receipt.json" .
 
@@ -1639,7 +1639,7 @@ w:choiceEqualityRecovery a p:Task ;
     p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;
     p:dependsOn w:plainValueChoices ; p:status p:done ; p:evidence w:choiceEqualityFixture ;
     p:acceptance "Original and projected Rust types expose equal Copy, Clone, PartialEq and Eq bounds for unrelated choices with no, partial, or total equality, preserving the older graph and consumer behavior." .
-w:choiceEqualityFixture a p:Artifact ; p:location "verification/plain-value-choices/equality.py" .
+w:choiceEqualityFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/qualify-choices/native.rs" .
 w:vaultHelperChoice a p:Task ;
     rdfs:label "Qualify the public copy-only vault helper mode type" ;
     p:milestone w:marmishMilestone ; p:source w:publicApiConvergencePlan ;
@@ -1685,7 +1685,7 @@ w:publicApiLinux a p:Artifact ;
 w:publicImportAudit a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/4f39fe3da13635d66b5a09fbe55e52fe27d17962/verification/whole/converged-public-api/darwin-imports.json" .
 w:structuredDiagnosticsFixture a p:Artifact ;
-    p:location "verification/structured-diagnostics/check.py" .
+    p:location "verification/provider-validation/src/bin/structured-diagnostics.rs" .
 
 w:publicDiagnosticsCliConvergence a p:Task ;
     rdfs:label "Converge qualified public imports, terminal CLI and structured diagnostics" ;
@@ -1803,7 +1803,7 @@ w:typescriptChoiceHostEquality a p:Finding ;
 w:typescriptPlainChoices p:addresses w:typescriptChoiceHostEquality .
 
 w:typescriptPlainChoiceFixture a p:Artifact ;
-    p:location "verification/plain-value-choices/typescript.py" .
+    p:location "verification/provider-validation/src/bin/qualify-choices/typescript.rs" .
 w:typescriptVaultModeReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/blob/8621f49d40217132c8d3842a54531e066e93dfec/verification/whole/vault-mode-typescript/receipt.json> .
 
@@ -1864,7 +1864,7 @@ w:serdeStringChoiceRecovery a p:Task ;
     p:evidence w:serdeStringChoiceRecoveryFixture ;
     p:acceptance "Recover a checked shared-declarations graph and disjoint Rust bindings from pinned source and qualify target semantics and a true source mutation with native consumers." .
 w:serdeStringChoiceRecoveryFixture a p:Artifact ;
-    p:location "verification/serde-string-choice/verify.py" .
+    p:location "verification/provider-validation/src/bin/qualify-choices/terrain.rs" .
 w:serdeStringChoiceDeriveFixtureReview a p:Finding ;
     rdfs:label "Exercise qualified Serde derives and reject explicit stock-derive or macro-use shadows" ;
     p:source w:serdeStringChoiceRecoveryFixture .
@@ -2303,7 +2303,7 @@ w:vaultValueDomainNativeReceipt a p:Artifact ;
 w:wholeMarmishProtocols p:dependsOn w:vaultValueDomainQualification .
 
 w:processLimitFixture a p:Artifact ;
-    p:location "verification/process-limits/verify.py" .
+    p:location "verification/provider-validation/src/bin/process-limit.rs" .
 w:processLimitReceipt a p:Artifact ;
     p:location <https://github.com/Epiphytic/marmish-oddlang/pull/65> .
 
@@ -2404,7 +2404,7 @@ w:boundedJsonInput a p:Task ;
     p:acceptance "Recover a pure byte parser contract with explicit bounds and error precedence, detect a source mutation, and execute the unchanged private native parser case." .
 
 w:boundedJsonInputFixture a p:Artifact ;
-    p:location "verification/bounded-json-input/verify.py" .
+    p:location "verification/provider-validation/src/bin/bounded-json-input.rs" .
 w:boundedJsonInput p:evidence w:boundedJsonInputFixture .
 
 w:boundedJsonInputNativeReceipts a p:Artifact ;
@@ -2492,7 +2492,7 @@ w:readOnlyFileIntegrity a p:Task ;
     p:acceptance "Observe ordered file admission, bounded reads and digest checks on both native ARM64 hosts using inert files, and independently detect a source mutation." .
 
 w:readOnlyFileIntegrityFixture a p:Artifact ;
-    p:location "verification/read-only-file/check.py" .
+    p:location "verification/provider-validation/src/bin/read-only-file.rs" .
 w:readOnlyFileIntegrity p:evidence w:readOnlyFileIntegrityFixture, w:readOnlyFileDarwin, w:readOnlyFileLinux .
 
 w:readOnlyFileDarwin a p:Artifact ;
@@ -3116,3 +3116,8 @@ w:portHistoricTooling a p:Task ;
     p:status p:active ; p:evidence w:providerToolInventory .
 w:providerToolInventory a p:Artifact ;
     p:location "verification/provider-tooling/baseline.tsv" .
+
+w:portHistoricTooling p:evidence w:rustWorkflowReplay .
+w:rustWorkflowReplay a p:Artifact ;
+    rdfs:label "Rust import cleanup and Wasm host receipt replay on macOS ARM64" ;
+    p:location "verification/provider-tooling/workflow-replay.json" .

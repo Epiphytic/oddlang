@@ -1,0 +1,27 @@
+
+use instrument::{Calibration, Fault};
+use std::sync::atomic::{AtomicBool, Ordering};
+use zeroize::{Zeroize,Zeroizing};
+fn main() {
+    assert!(std::mem::needs_drop::<Calibration>());
+    let _borrow: fn(&Calibration) -> &[u8; WIDTH] = Calibration::sample;
+    let mut input = [11; WIDTH];
+    let owned = Calibration::read(&input).ok().unwrap();
+    input.fill(99);
+    assert_eq!(owned.sample(), &[11; WIDTH]);
+    assert_eq!(Calibration::take(input).sample(), &[99; WIDTH]);
+    for n in 0..=12 {
+        match Calibration::read(&vec![3;n]) {
+            Ok(value) => println!("{n} {:?}", value.sample()),
+            Err(Fault::Width) => println!("{n} rejected"),
+        }
+    }
+    // Observe the provider's drop hook without reading freed/uninitialized storage.
+    struct Sentinel<'a>(&'a AtomicBool);
+    impl Zeroize for Sentinel<'_> { fn zeroize(&mut self) { self.0.store(true, Ordering::Relaxed); } }
+    let erased = AtomicBool::new(false);
+    drop(Zeroizing::new(Sentinel(&erased)));
+    assert!(erased.load(Ordering::Relaxed));
+    input.zeroize();
+    assert_eq!(input, [0; WIDTH]);
+}

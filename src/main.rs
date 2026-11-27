@@ -19,6 +19,7 @@ fn import_has_profile(path: &str, profile: &str) -> bool {
 
 fn run(args: &[String]) -> Result<(), String> {
     match args {
+        [cmd, action @ ..] if cmd == "cleanup" => oddlang::import_rust::cleanup::command(action),
         [cmd, kind, target, graph, overlay, out, flag, registry]
             if cmd == "build" && kind == "public-records" && target == "rust" && flag == "--providers" => {
             let registry = oddlang::providers::Registry::load(registry.as_ref())?;

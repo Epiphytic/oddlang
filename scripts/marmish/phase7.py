@@ -12,14 +12,14 @@ import subprocess
 import sys
 
 from gaps import generate
-from observations import CONTRACT, expand
-from prepare import ROOT, digest
+from observations import CONTRACT, digest, expand
 from rebuild import ONTOLOGY, PIN, rebuild
 from qualify_candidate import compare_archived
 from frame_runner import verify_inputs
 from receipt import expected_cases
 
 HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
 
 
 def coverage(inventory, generated, frozen_register=None):

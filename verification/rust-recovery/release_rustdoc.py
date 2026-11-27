@@ -2,7 +2,7 @@
 """Reconcile declaration names observed by the release compiler and same-toolchain rustdoc."""
 import argparse
 from collections import Counter, defaultdict
-import importlib.util
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -15,9 +15,21 @@ import reconcile_rustdoc as historical
 HERE = Path(__file__).resolve().parent
 TOOLS = "1.97.1"
 COMMIT = "8bab26f4f68e0e26f0bb7960be334d5b520ea452"
-spec = importlib.util.spec_from_file_location("cargo_trace", HERE.parent / "rust-inventory/inventory.py")
-trace = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(trace)
+def cargo_commands(log):
+    manifest = HERE.parent / "rust-inventory/Cargo.toml"
+    args = ["cargo", "+stable", "run", "--quiet", "--locked", "--offline",
+            "--manifest-path", str(manifest), "--", "--cargo-commands"]
+    return json.loads(subprocess.check_output(args, input=log, text=True))
+
+
+def flag_values(words, name):
+    return [value for word, value in zip(words, words[1:]) if word == name]
+
+
+def file_sha(path):
+    with path.open("rb") as data:
+        return hashlib.file_digest(data, "sha256").hexdigest()
+
 
 COMPILER_KINDS = {
     "crate": "package", "module": "module", "struct": "record", "union": "union",
@@ -51,7 +63,7 @@ def tool_identity():
         if result:
             require(result["host"] == fields["host"], "toolchain hosts differ")
         result.update(host=fields["host"], commit=COMMIT, release=TOOLS)
-        result[name + "Sha256"] = trace.sha(tool(name))
+        result[name + "Sha256"] = file_sha(tool(name))
     return result
 
 
@@ -63,10 +75,10 @@ def command(args, cwd, env):
 
 def invocation(log, executable, crate):
     selected = []
-    for words in trace.commands(log):
+    for words in cargo_commands(log):
         if str(executable) in words:
             args = words[words.index(str(executable)) + 1:]
-            if trace.flag(args, "--crate-name") == [crate]:
+            if flag_values(args, "--crate-name") == [crate]:
                 selected.append(args)
     require(len(selected) == 1, f"expected one {executable.name} invocation for {crate}, found {len(selected)}")
     return selected[0]
@@ -75,15 +87,15 @@ def invocation(log, executable, crate):
 def profile(args, root):
     # Cargo gives rustdoc its own metadata hash and output paths. Preserve
     # target CPU/features, panic strategy, optimization and assertion flags.
-    codegen = [flag for flag in trace.flag(args, "-C")
+    codegen = [flag for flag in flag_values(args, "-C")
                if flag.split("=", 1)[0] not in {"metadata", "extra-filename", "embed-bitcode", "strip", "debuginfo",
                                                  "split-debuginfo", "linker", "incremental"}]
     return {
         "edition": [word for word in args if word.startswith("--edition=")],
-        "crateType": trace.flag(args, "--crate-type"), "target": trace.flag(args, "--target"),
-        "crateName": trace.flag(args, "--crate-name"), "explicitCfg": sorted(trace.flag(args, "--cfg")),
-        "checkCfg": sorted(trace.flag(args, "--check-cfg")), "codegen": codegen,
-        "externAliases": sorted(x.split("=",1)[0] for x in trace.flag(args, "--extern")),
+        "crateType": flag_values(args, "--crate-type"), "target": flag_values(args, "--target"),
+        "crateName": flag_values(args, "--crate-name"), "explicitCfg": sorted(flag_values(args, "--cfg")),
+        "checkCfg": sorted(flag_values(args, "--check-cfg")), "codegen": codegen,
+        "externAliases": sorted(x.split("=",1)[0] for x in flag_values(args, "--extern")),
         "pathMaps": [word.replace(str(root), "$WORKSPACE") for word in args if word.startswith("--remap-path-prefix=")],
     }
 
@@ -110,29 +122,29 @@ def cargo_packages(root, triple, package, no_default, features, env):
 def extern_bindings(log, rustc, selected, packages):
     """Resolve each selected --extern file back to its producer in the same fresh build."""
     producers = defaultdict(list)
-    for words in trace.commands(log):
+    for words in cargo_commands(log):
         if str(rustc) not in words:
             continue
         index = words.index(str(rustc))
         args = words[index + 1:]
         env = dict(word.split("=", 1) for word in words[:index] if "=" in word)
-        crate_types = trace.flag(args, "--crate-type")
+        crate_types = flag_values(args, "--crate-type")
         if not set(crate_types).intersection({"lib", "rlib", "dylib", "proc-macro"}):
             continue
-        crate, = trace.flag(args, "--crate-name")
-        output, = trace.flag(args, "--out-dir")
-        suffixes = [v.removeprefix("extra-filename=") for v in trace.flag(args, "-C")
+        crate, = flag_values(args, "--crate-name")
+        output, = flag_values(args, "--out-dir")
+        suffixes = [v.removeprefix("extra-filename=") for v in flag_values(args, "-C")
                     if v.startswith("extra-filename=")]
         require(len(suffixes) <= 1, f"ambiguous output suffix for {crate}")
         suffix = next(iter(suffixes), "")
         directory = Path(env["CARGO_MANIFEST_DIR"]).resolve()
-        target = trace.flag(args, "--target")
+        target = flag_values(args, "--target")
         evidence = {"crate": crate, "crateTypes": sorted(crate_types),
-                    "target": target, "explicitCfg": sorted(trace.flag(args, "--cfg"))}
+                    "target": target, "explicitCfg": sorted(flag_values(args, "--cfg"))}
         producers[(Path(output), crate + suffix)].append((directory, evidence))
 
     bindings = {}
-    for arg in trace.flag(selected, "--extern"):
+    for arg in flag_values(selected, "--extern"):
         alias, sep, filename = arg.partition("=")
         require(sep and alias not in bindings, f"missing or duplicate extern binding: {alias}")
         artifact = Path(filename)
@@ -424,8 +436,8 @@ def collect(root, package, kind, target, triple, no_default, features, previous=
     return {"schema": 1, "source": source, "package": package, "targetKind": kind, "defaultFeatures": not no_default,
             "requestedFeatures": sorted(features), "tools": tools, "cargoProfile": "release",
             "profile": compiled, "compilerCfg": sorted(selected_cfg), "rustdocImplicitCfg": ["doc"],
-            "cargoLockSha256": trace.sha(root / "Cargo.lock"), "workspaceManifestSha256": trace.sha(manifest),
-            "previousSpanReportSha256": trace.sha(previous) if previous else None, "spanEvidence": legacy,
+            "cargoLockSha256": file_sha(root / "Cargo.lock"), "workspaceManifestSha256": file_sha(manifest),
+            "previousSpanReportSha256": file_sha(previous) if previous else None, "spanEvidence": legacy,
             "formatVersion": 57, "comparison": result, **extra}
 
 

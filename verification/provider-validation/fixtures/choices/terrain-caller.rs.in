@@ -1,0 +1,16 @@
+
+fn require<T: Clone + std::fmt::Debug + Eq + serde::Serialize + for<'de> serde::Deserialize<'de>>() {}
+fn main() {
+    require::<Terrain>();
+    let choices = [@VARIANTS@];
+    let expected = [@WIRES@];
+    for (index, (choice, wire)) in choices.into_iter().zip(expected).enumerate() {
+        assert_eq!(choice, serde_json::from_str::<Terrain>(wire).unwrap());
+        assert_eq!(serde_json::to_string(&choice).unwrap(), wire);
+        assert_eq!(choice.clone() as usize, index);
+        println!("{choice:?} {wire}");
+    }
+    for bad in ["null", "0", "{}", "\"unknown\""] {
+        assert!(serde_json::from_str::<Terrain>(bad).is_err());
+    }
+}

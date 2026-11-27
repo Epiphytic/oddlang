@@ -1,0 +1,52 @@
+{
+  "format": "oddlang-field-relation-v1",
+  "id": "urn:invoice:payment",
+  "types": {
+    "urn:invoice:Invoice": {
+      "fields": {
+        "urn:invoice:invoice:amount": {
+          "kind": "unsigned",
+          "bits": 64
+        }
+      }
+    },
+    "urn:invoice:Remittance": {
+      "fields": {
+        "urn:invoice:remittance:amount": {
+          "kind": "unsigned",
+          "bits": 64
+        }
+      }
+    }
+  },
+  "calls": {},
+  "relations": {
+    "urn:invoice:agrees": {
+      "receiver": "urn:invoice:Invoice",
+      "arguments": [
+        {
+          "id": "urn:invoice:package-remittance",
+          "value": {
+            "kind": "named",
+            "id": "urn:invoice:Remittance"
+          }
+        }
+      ],
+      "steps": [
+        {
+          "kind": "equal",
+          "left": {
+            "kind": "field",
+            "object": "receiver",
+            "field": "urn:invoice:invoice:amount"
+          },
+          "right": {
+            "kind": "field",
+            "object": "urn:invoice:package-remittance",
+            "field": "urn:invoice:remittance:amount"
+          }
+        }
+      ]
+    }
+  }
+}

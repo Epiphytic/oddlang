@@ -5,7 +5,8 @@ out=$2
 bin=$3
 scratch=$(mktemp -d)
 trap 'rm -rf "$scratch"' EXIT
-python3 -B scripts/marmish/prepare.py "$upstream" "$out/import" "$out/projection" "$scratch/package"
+cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin marmish-prepare -- \
+    v1 "$upstream" "$out/import" "$out/projection" "$scratch/package"
 manifest=$scratch/package/project.toml
 store=$scratch/package/store
 candidate=$scratch/candidate

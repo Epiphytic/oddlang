@@ -38,3 +38,7 @@ verification/provider-validation/target/debug/provider-validation \
 ```
 
 The validator checks every input against its pinned digest, renders into a new temporary directory and compares directory entries, permissions and file contents with the baseline. It then builds the original and generated observers, replays the independent policy and file cases, checks the historical observation and input digests, and writes the receipt. The observer processes run on local files and in-memory inputs.
+
+Run the native descriptor-limit and startup checks with `process-limit` and `process-startup`, and the finite-error recovery and projection cases with `finite-error-domain`. Each binary takes the compiler executable as its sole argument.
+
+The `wasm-reports` binary reads the first and second guest builds, JavaScript host receipts and Wasmtime observations under a verification root. Its optional second argument names an existing output directory, so an archived run can be rechecked without writing into it.

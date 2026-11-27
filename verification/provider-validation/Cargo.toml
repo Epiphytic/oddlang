@@ -7,6 +7,14 @@ publish = false
 [workspace]
 
 [dependencies]
+toml = "=1.2.3"
+clap = { version = "4", features = ["derive"] }
+rust-inventory = { path = "../rust-inventory" }
+serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"
 tempfile = "3"
+
+[[bin]]
+name = "translation-proof"
+path = "../rust-translation/scripts/runner.rs"

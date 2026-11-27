@@ -1,0 +1,12 @@
+
+#[derive(Clone, Copy)] enum Sky { INPUT }
+#[derive(Clone, Copy, PartialEq)] enum Side { Left, Right }
+#[derive(Clone, Copy, PartialEq, Eq)] enum Tier { Local, Wide }
+fn main() {
+    println!(
+        "{{\"Sky\":[{},{},{}],\"Side\":[{},{},{},{}],\"Tier\":[{},{},{},{}]}}",
+        Sky::Clear as isize, Sky::Mist as isize, Sky::Cloud as isize,
+        Side::Left as isize, Side::Right as isize, Side::Left == Side::Left, Side::Left == Side::Right,
+        Tier::Local as isize, Tier::Wide as isize, Tier::Wide == Tier::Wide, Tier::Local == Tier::Wide,
+    );
+}

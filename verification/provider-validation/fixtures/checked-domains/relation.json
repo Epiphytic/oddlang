@@ -1,0 +1,131 @@
+{
+  "format": "oddlang-field-relation-v1",
+  "id": "urn:invoice:contract",
+  "types": {
+    "urn:invoice:Approval": {
+      "fields": {
+        "urn:invoice:owner": {
+          "kind": "text"
+        },
+        "urn:invoice:amount": {
+          "kind": "unsigned",
+          "bits": 64
+        }
+      }
+    },
+    "urn:invoice:Quote": {
+      "fields": {
+        "urn:invoice:payee": {
+          "kind": "text"
+        }
+      }
+    }
+  },
+  "calls": {
+    "urn:invoice:approval-valid": {
+      "receiver": "urn:invoice:Approval",
+      "arguments": []
+    },
+    "urn:invoice:quote-total": {
+      "receiver": "urn:invoice:Quote",
+      "arguments": [
+        {
+          "kind": "unsigned",
+          "bits": 64
+        }
+      ],
+      "output": {
+        "kind": "unsigned",
+        "bits": 64
+      }
+    }
+  },
+  "relations": {
+    "urn:invoice:accepts": {
+      "receiver": "urn:invoice:Approval",
+      "arguments": [
+        {
+          "id": "urn:invoice:quote",
+          "value": {
+            "kind": "named",
+            "id": "urn:invoice:Quote"
+          }
+        },
+        {
+          "id": "urn:invoice:units",
+          "value": {
+            "kind": "unsigned",
+            "bits": 64
+          }
+        }
+      ],
+      "failure": "urn:invoice:mismatch",
+      "steps": [
+        {
+          "kind": "check",
+          "call": {
+            "method": "urn:invoice:approval-valid",
+            "object": "receiver",
+            "arguments": []
+          }
+        },
+        {
+          "kind": "equal",
+          "left": {
+            "kind": "field",
+            "object": "receiver",
+            "field": "urn:invoice:owner"
+          },
+          "right": {
+            "kind": "field",
+            "object": "urn:invoice:quote",
+            "field": "urn:invoice:payee"
+          }
+        },
+        {
+          "kind": "equal",
+          "left": {
+            "kind": "field",
+            "object": "receiver",
+            "field": "urn:invoice:amount"
+          },
+          "right": {
+            "kind": "result",
+            "call": {
+              "method": "urn:invoice:quote-total",
+              "object": "urn:invoice:quote",
+              "arguments": [
+                "urn:invoice:units"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "urn:invoice:names-owner": {
+      "receiver": "urn:invoice:Approval",
+      "arguments": [
+        {
+          "id": "urn:invoice:candidate",
+          "value": {
+            "kind": "text"
+          }
+        }
+      ],
+      "steps": [
+        {
+          "kind": "equal",
+          "left": {
+            "kind": "field",
+            "object": "receiver",
+            "field": "urn:invoice:owner"
+          },
+          "right": {
+            "kind": "argument",
+            "id": "urn:invoice:candidate"
+          }
+        }
+      ]
+    }
+  }
+}

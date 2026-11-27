@@ -194,8 +194,8 @@ fn original_and_regenerated_transfers_match_the_oracle() {
 
     // Re-import a digest-accepted source edit and execute the archived pre-edit source.
     let cleanup = || {
-        let mut c = Command::new("python3");
-        c.arg(root.join("skills/oddlang-import-cleanup/scripts/cleanup.py"))
+        let mut c = Command::new(env!("CARGO_BIN_EXE_oddlang"));
+        c.arg("cleanup")
             .current_dir(dir);
         c
     };

@@ -9,4 +9,4 @@ root=$(cd "$pkg/../.." && pwd)
 export PATH="${ODDLANG_PROOF_TOOLS:-$root/target/proof-tools}/bin:$PATH"
 export CARGO_NET_OFFLINE=true
 export RUSTFLAGS='-C overflow-checks=yes'
-exec python3 "$pkg/scripts/runner.py" "$@"
+exec cargo run --locked --offline --manifest-path "$root/verification/provider-validation/Cargo.toml" --bin translation-proof -- "$@"

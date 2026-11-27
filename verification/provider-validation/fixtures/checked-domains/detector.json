@@ -1,0 +1,104 @@
+{
+  "format": "oddlang-checked-values-v1",
+  "id": "urn:example:detector:domain",
+  "types": {
+    "urn:example:detector:tone": {
+      "kind": "enum",
+      "values": {
+        "urn:example:detector:quiet": "quiet",
+        "urn:example:detector:loud": "loud"
+      },
+      "failure": "urn:example:detector:invalid"
+    },
+    "urn:example:detector:octave": {
+      "kind": "enum",
+      "values": {
+        "urn:example:detector:low": 1,
+        "urn:example:detector:high": 7
+      }
+    },
+    "urn:example:detector:caption": {
+      "kind": "record",
+      "fields": {
+        "urn:example:detector:caption:text": {
+          "kind": "text"
+        }
+      },
+      "constructor": "urn:example:detector:invalid",
+      "guards": [
+        {
+          "kind": "utf8-byte-length",
+          "field": "urn:example:detector:caption:text",
+          "minimum": 1,
+          "maximum": 6
+        },
+        {
+          "kind": "exclude-unicode",
+          "field": "urn:example:detector:caption:text",
+          "generalCategoryCc": true,
+          "ranges": [
+            {
+              "minimum": 8294,
+              "maximum": 8297
+            }
+          ]
+        }
+      ]
+    },
+    "urn:example:detector:station": {
+      "kind": "record",
+      "fields": {
+        "urn:example:detector:station:code": {
+          "kind": "text"
+        },
+        "urn:example:detector:station:number": {
+          "kind": "u8"
+        },
+        "urn:example:detector:station:tone": {
+          "kind": "named",
+          "id": "urn:example:detector:tone"
+        }
+      },
+      "constructor": "urn:example:detector:invalid",
+      "guards": [
+        {
+          "kind": "one-of",
+          "field": "urn:example:detector:station:number",
+          "values": [
+            2,
+            4
+          ]
+        },
+        {
+          "kind": "utf8-byte-length",
+          "field": "urn:example:detector:station:code",
+          "minimum": 2,
+          "maximum": 2
+        },
+        {
+          "kind": "ascii-bytes",
+          "field": "urn:example:detector:station:code",
+          "ranges": [
+            {
+              "minimum": 65,
+              "maximum": 90
+            }
+          ]
+        }
+      ]
+    },
+    "urn:example:detector:metadata": {
+      "kind": "record",
+      "fields": {
+        "urn:example:detector:metadata:station": {
+          "kind": "named",
+          "id": "urn:example:detector:station"
+        },
+        "urn:example:detector:metadata:caption": {
+          "kind": "named",
+          "id": "urn:example:detector:caption"
+        }
+      }
+    }
+  }
+}

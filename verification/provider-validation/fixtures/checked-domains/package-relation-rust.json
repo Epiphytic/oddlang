@@ -1,0 +1,21 @@
+{
+  "format": "oddlang-field-relation-rust-v1",
+  "types": {
+    "urn:invoice:Invoice": "crate::Invoice",
+    "urn:invoice:Remittance": "crate::Remittance"
+  },
+  "fields": {
+    "urn:invoice:invoice:amount": "amount",
+    "urn:invoice:remittance:amount": "amount"
+  },
+  "calls": {},
+  "errors": {},
+  "relations": {
+    "urn:invoice:agrees": {
+      "name": "agrees",
+      "arguments": {
+        "urn:invoice:package-remittance": "remittance"
+      }
+    }
+  }
+}

@@ -3,7 +3,10 @@ use super::{Res, digest, read};
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, fs, path::Path, process::Command};
 
-#[derive(Serialize, Deserialize)]
+mod author;
+pub use author::command;
+
+#[derive(Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct Receipt {
     version: u32,
@@ -46,14 +49,23 @@ fn entries(root: &Path, dir: &Path, result: &mut BTreeMap<String, String>) -> Re
     Ok(())
 }
 
-fn snapshot(root: &Path, expected: &str) -> Res<BTreeMap<String, String>> {
-    let mut entries_map = BTreeMap::new();
-    entries(root, root, &mut entries_map)?;
-    let bytes: String = entries_map
+fn inventory(root: &Path) -> Res<BTreeMap<String, String>> {
+    let mut files = BTreeMap::new();
+    entries(root, root, &mut files)?;
+    Ok(files)
+}
+
+fn tree_digest(files: &BTreeMap<String, String>) -> String {
+    let bytes: String = files
         .iter()
         .map(|(name, hash)| format!("{name}\0{hash}\n"))
         .collect();
-    if digest(bytes.as_bytes()) != expected {
+    digest(bytes.as_bytes())
+}
+
+fn snapshot(root: &Path, expected: &str) -> Res<BTreeMap<String, String>> {
+    let entries_map = inventory(root)?;
+    if tree_digest(&entries_map) != expected {
         return Err("cleanup snapshot digest mismatch".into());
     }
     Ok(entries_map)

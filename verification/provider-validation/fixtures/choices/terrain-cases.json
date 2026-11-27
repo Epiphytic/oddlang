@@ -1,0 +1,62 @@
+[
+  [
+    "baseline",
+    "use serde::{Deserialize, Serialize as WireSerialize};\n#[derive(Debug, Clone, PartialEq, Eq, WireSerialize, Deserialize)]\npub enum Terrain {\n    #[serde(rename = \"wet-ground\")]\n    Marsh,\n    Granite,\n}\n",
+    [
+      [
+        "Marsh",
+        "wet-ground"
+      ],
+      [
+        "Granite",
+        "Granite"
+      ]
+    ],
+    false
+  ],
+  [
+    "changed",
+    "use serde::{Deserialize, Serialize as WireSerialize};\n#[derive(Debug, Clone, PartialEq, Eq, WireSerialize, Deserialize)]\npub enum Terrain {\n    Granite,\n    #[serde(rename = \"shallow-marsh\")]\n    Marsh,\n}\n",
+    [
+      [
+        "Granite",
+        "Granite"
+      ],
+      [
+        "Marsh",
+        "shallow-marsh"
+      ]
+    ],
+    false
+  ],
+  [
+    "copy",
+    "use serde::{Deserialize, Serialize as WireSerialize};\n#[derive(Debug, Clone, Copy, PartialEq, Eq, WireSerialize, Deserialize)]\npub enum Terrain {\n    #[serde(rename = \"wet-ground\")]\n    Marsh,\n    Granite,\n}\n",
+    [
+      [
+        "Marsh",
+        "wet-ground"
+      ],
+      [
+        "Granite",
+        "Granite"
+      ]
+    ],
+    true
+  ],
+  [
+    "qualified",
+    "#[derive(Debug, Clone, PartialEq, Eq, ::serde::Serialize, serde::Deserialize)]\npub enum Terrain {\n    #[serde(rename = \"wet-ground\")]\n    Marsh,\n    Granite,\n}",
+    [
+      [
+        "Marsh",
+        "wet-ground"
+      ],
+      [
+        "Granite",
+        "Granite"
+      ]
+    ],
+    false
+  ]
+]

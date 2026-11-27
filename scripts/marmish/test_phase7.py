@@ -5,14 +5,13 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from observations import CONTRACT, expand
+from observations import CONTRACT, digest, expand
 from phase7 import (
     check_generated_module,
     check_platforms,
     check_source_rows,
     check_wire,
 )
-from prepare import digest
 from receipt import expected_cases
 
 

@@ -232,3 +232,12 @@ the fixed-name branch. Native bindings select
 the typed parser, asset fields and file policy. Assembly checks the grammar
 and policy identities, constructor order, field widths, error roles and
 private exports. The contract operates on inert local files.
+
+## Materialize the Marmish input store
+
+The Rust materializer reads retained blobs from the Git revision pinned in `examples/marmish/project.toml`, verifies each producer against its published release and checks the complete manifest digest. Supply a fresh or empty output directory. The resulting `project.toml` and `store` are the inputs to `oddlang assemble`.
+
+```sh
+cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin marmish-prepare -- v1 UPSTREAM FRAME_IMPORT FRAME_PROJECTION OUTPUT
+cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin marmish-prepare -- v2 UPSTREAM FRAME_IMPORT FRAME_PROJECTION FACADE_IMPORT FACADE_PROJECTION OUTPUT
+```

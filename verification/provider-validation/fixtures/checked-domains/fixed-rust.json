@@ -1,0 +1,19 @@
+{
+  "format": "oddlang-checked-values-rust-v1",
+  "variants": {},
+  "errors": {
+    "urn:sample:width-error": {
+      "errorType": "crate::Fault",
+      "variant": "Width"
+    }
+  },
+  "types": {
+    "urn:sample:calibration": {
+      "name": "Calibration",
+      "order": [],
+      "constructor": "take",
+      "parse": "read",
+      "view": "sample"
+    }
+  }
+}

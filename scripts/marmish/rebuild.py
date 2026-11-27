@@ -10,8 +10,9 @@ import sys
 import tempfile
 import tomllib
 
-from prepare import ROOT, digest
-from prepare_v2 import compose
+from observations import digest
+
+ROOT = Path(__file__).resolve().parents[2]
 
 PIN = "49fc705408a230bd0ad896248d08dbdd2faad05a"
 ONTOLOGY = {
@@ -87,13 +88,16 @@ def run_build(upstream, destination, evidence, binary, original, env):
             shutil.copytree(imported, evidence / name)
             shutil.copytree(projected, evidence / f"{name}-projection")
         prepared = stage / "prepared"
-        compose(
-            upstream,
-            stage / "framing",
-            stage / "framing-projection",
-            stage / "facade",
-            stage / "facade-projection",
-            prepared,
+        subprocess.run(
+            [
+                "cargo", "run", "--locked", "--offline", "--manifest-path",
+                ROOT / "verification/provider-validation/Cargo.toml", "--bin", "marmish-prepare",
+                "--", "v2", upstream, stage / "framing", stage / "framing-projection",
+                stage / "facade", stage / "facade-projection", prepared,
+            ],
+            check=True,
+            env=env,
+            cwd=ROOT,
         )
         assembly = prepared / "project.toml"
         assembly_hash = digest(assembly.read_bytes())

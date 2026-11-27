@@ -1,0 +1,51 @@
+{
+  "host": "aarch64-apple-darwin",
+  "compilerSha256": "ccd3aa5caeac7c57dddb5d8c04e6cc619c7580e446edb8139bc00f0c6555e09f",
+  "importCleanup": {
+    "baselinePinSha256": "4db772bcd663f8e340088aee56b5a71210f680b8425a6c55709889c24dfb1510",
+    "reviewDigest": "c8c360178783d3538fb11ee5cc3403feda2501ec9956cbeaa079806e3da4493f",
+    "identicalFiles": [
+      "cleanup.patch",
+      "effective/Cargo.lock",
+      "effective/Cargo.toml",
+      "effective/mapping.toml",
+      "effective/original.sha256",
+      "effective/overlays/avro.ttl",
+      "effective/overlays/fields.ttl",
+      "effective/overlays/rust.ttl",
+      "effective/overlays/sql.ttl",
+      "effective/src/lib.rs",
+      "original/Cargo.lock",
+      "original/Cargo.toml",
+      "original/mapping.toml",
+      "original/original.sha256",
+      "original/overlays/avro.ttl",
+      "original/overlays/fields.ttl",
+      "original/overlays/rust.ttl",
+      "original/overlays/sql.ttl",
+      "original/src/lib.rs",
+      "proposal.json"
+    ],
+    "acceptanceTests": 3,
+    "transferOraclePassed": true
+  },
+  "wasm": {
+    "identicalJavascriptHostReceipts": 8,
+    "reproducibilityReportSha256": "458748c073362b5c2340fee97c78f9ba3794e516f4feadf38d4b6172c637aec3",
+    "runtimeObservationsSha256": "84e2c7b5363260eca448cde529972fcfee6e03b2ca3f722c9c30a3ce242e1de1"
+  },
+  "replayedProfiles": [
+    "bounded-json-input",
+    "read-only-file",
+    "root-public-data",
+    "finite-error-domain",
+    "process-limit",
+    "process-startup",
+    "checked-values",
+    "fixed-bytes",
+    "field-relation",
+    "plain-value-choices",
+    "serde-string-choice",
+    "structured-diagnostics"
+  ]
+}

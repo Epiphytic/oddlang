@@ -1,0 +1,14 @@
+{
+  "format": "oddlang-finite-error-rust-v1",
+  "categoryTypes": {},
+  "variantOrder": [
+    "urn:fixture:error:invalid",
+    "urn:fixture:error:io"
+  ],
+  "names": {
+    "urn:fixture:Fault": "Fault",
+    "urn:fixture:Result": "Result",
+    "urn:fixture:error:invalid": "Rejected",
+    "urn:fixture:error:io": "Io"
+  }
+}

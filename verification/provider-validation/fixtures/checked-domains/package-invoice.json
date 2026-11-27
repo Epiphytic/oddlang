@@ -1,0 +1,23 @@
+{
+  "format": "oddlang-binary-record-v1",
+  "id": "urn:invoice:Invoice",
+  "layout": [
+    {
+      "id": "urn:invoice:invoice:amount",
+      "encoding": {
+        "kind": "unsigned-be",
+        "bits": 64,
+        "minimum": 0,
+        "maximum": 99
+      }
+    }
+  ],
+  "maximum": 8,
+  "errors": {
+    "value": "urn:invoice:invoice:value",
+    "truncated": "urn:invoice:invoice:truncated",
+    "trailing": "urn:invoice:invoice:trailing",
+    "decodeSize": "urn:invoice:invoice:decodeSize",
+    "encodeSize": "urn:invoice:invoice:encodeSize"
+  }
+}

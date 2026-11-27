@@ -49,7 +49,7 @@ fixture also checks path identity after a formatting change.
 python3 verification/rust-recovery/test_adapter.py
 verification/rust-recovery/run.sh /path/to/marmish/Cargo.toml \
   marmish-stream lib marmish_stream aarch64-apple-darwin default > /tmp/compiler.json
-python3 verification/rust-inventory/inventory.py /path/to/marmish \
+cargo +stable run --locked --offline --manifest-path verification/rust-inventory/Cargo.toml -- /path/to/marmish \
   marmish-stream /tmp/rustdoc-inventory
 python3 verification/rust-recovery/reconcile_rustdoc.py /tmp/compiler.json \
   /tmp/rustdoc-inventory/rust-inventory.json

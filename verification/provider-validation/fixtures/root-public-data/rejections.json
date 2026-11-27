@@ -1,0 +1,77 @@
+[
+  {
+    "command": "finite-error-domain",
+    "name": "bad-error-0",
+    "source": "\n#![cfg(unix)]\nuse thiserror::Error;\n#[derive(Debug, Error)]\npub enum Fault {\n    #[error(\"sample missing\")]\n    Empty(u8),\n    #[error(\"sensor unavailable\")]\n    Unavailable,\n}\n#[derive(Debug)]\npub struct Snapshot {\n    pub secondary: String,\n    pub primary: String,\n}\npub fn is_empty(_: &Snapshot) -> bool { false }\n"
+  },
+  {
+    "command": "finite-error-domain",
+    "name": "bad-error-1",
+    "source": "\n#![cfg(unix)]\nuse thiserror::Error;\n#[derive(Debug, Error)]\npub enum Fault {\n    #[error(\"sample missing\")]\n    Empty = 3,\n    #[error(\"sensor unavailable\")]\n    Unavailable,\n}\n#[derive(Debug)]\npub struct Snapshot {\n    pub secondary: String,\n    pub primary: String,\n}\npub fn is_empty(_: &Snapshot) -> bool { false }\n"
+  },
+  {
+    "command": "finite-error-domain",
+    "name": "bad-error-2",
+    "source": "\n#![cfg(unix)]\nuse fake::Error;\n#[derive(Debug, Error)]\npub enum Fault {\n    #[error(\"sample missing\")]\n    Empty,\n    #[error(\"sensor unavailable\")]\n    Unavailable,\n}\n#[derive(Debug)]\npub struct Snapshot {\n    pub secondary: String,\n    pub primary: String,\n}\npub fn is_empty(_: &Snapshot) -> bool { false }\n"
+  },
+  {
+    "command": "finite-error-domain",
+    "name": "bad-error-3",
+    "source": "\n#![cfg(unix)]\nuse thiserror::Error;\n#[derive(Debug, Error)]\npub enum Fault {\n    #[error(\"sample missing\")]\n    Empty,\n    #[error(\"sensor unavailable\")]\n    Unavailable,\n}\n#[derive(Debug)]\npub struct Snapshot {\n    pub secondary: String,\n    pub primary: String,\n}\npub fn is_empty(_: &Snapshot) -> bool { false }\n\npub type Result<T> = std::result::Result<T, Fault>;"
+  },
+  {
+    "command": "finite-error-domain",
+    "name": "bad-error-4",
+    "source": "\n#![cfg(unix)]\nuse thiserror::Error;\n#[derive(Debug, Error)]\npub enum Fault {\n    #[error(\"sample missing\")]\n    Empty,\n    #[error(\"sensor unavailable\")]\n    Unavailable,\n}\n#[derive(Debug)]\npub struct Snapshot {\n    pub secondary: String,\n    pub primary: String,\n}\npub fn is_empty(_: &Snapshot) -> bool { false }\n\nimpl From<Fault> for u8 { fn from(_: Fault) -> u8 { 0 } }"
+  },
+  {
+    "command": "finite-error-domain",
+    "name": "bad-error-5",
+    "source": "\n#![cfg(unix)]\nuse thiserror::Error;\n#[derive(Debug, Error)]\npub enum Fault {\n    #[error(\"sample missing\")]\n    Empty,\n    #[error(\"sensor unavailable\")]\n    Unavailable,\n}\n#[derive(Debug)]\npub struct Snapshot {\n    pub secondary: String,\n    pub primary: String,\n}\npub fn is_empty(_: &Snapshot) -> bool { false }\n\nmacro_rules! more { () => {} } more!();"
+  },
+  {
+    "command": "public-root-records",
+    "name": "bad-record-0",
+    "source": "\n#![cfg(unix)]\nuse thiserror::Error;\n#[derive(Debug, Error)]\npub enum Fault {\n    #[error(\"sample missing\")]\n    Empty,\n    #[error(\"sensor unavailable\")]\n    Unavailable,\n}\n#[derive(Debug)]\npub struct Snapshot {\n    secondary: String,\n    pub primary: String,\n}\npub fn is_empty(_: &Snapshot) -> bool { false }\n"
+  },
+  {
+    "command": "public-root-records",
+    "name": "bad-record-1",
+    "source": "\n#![cfg(unix)]\nuse thiserror::Error;\n#[derive(Debug, Error)]\npub enum Fault {\n    #[error(\"sample missing\")]\n    Empty,\n    #[error(\"sensor unavailable\")]\n    Unavailable,\n}\n#[derive(Debug)]\npub struct Snapshot {\n    pub secondary: String,\n    pub primary: u8,\n}\npub fn is_empty(_: &Snapshot) -> bool { false }\n"
+  },
+  {
+    "command": "public-root-records",
+    "name": "bad-record-2",
+    "source": "\n#![cfg(unix)]\nuse thiserror::Error;\n#[derive(Debug, Error)]\npub enum Fault {\n    #[error(\"sample missing\")]\n    Empty,\n    #[error(\"sensor unavailable\")]\n    Unavailable,\n}\n#[derive(Debug)]\npub struct Snapshot {\n    pub secondary: String,\n    pub primary: String,\n}\npub fn is_empty(_: &Snapshot) -> bool { false }\n\nuse custom::String;"
+  },
+  {
+    "command": "public-root-records",
+    "name": "bad-record-3",
+    "source": "\n#![cfg(unix)]\nuse thiserror::Error;\n#[derive(Debug, Error)]\npub enum Fault {\n    #[error(\"sample missing\")]\n    Empty,\n    #[error(\"sensor unavailable\")]\n    Unavailable,\n}\n#[derive(Debug)]\npub struct Snapshot {\n    pub secondary: String,\n    pub primary: String,\n}\npub fn is_empty(_: &Snapshot) -> bool { false }\n\nmacro_rules! more { () => {} } more!();"
+  },
+  {
+    "command": "public-root-records",
+    "name": "bad-record-4",
+    "source": "\n#![cfg(target_arch = \"aarch64\")]\nuse thiserror::Error;\n#[derive(Debug, Error)]\npub enum Fault {\n    #[error(\"sample missing\")]\n    Empty,\n    #[error(\"sensor unavailable\")]\n    Unavailable,\n}\n#[derive(Debug)]\npub struct Snapshot {\n    pub secondary: String,\n    pub primary: String,\n}\npub fn is_empty(_: &Snapshot) -> bool { false }\n"
+  },
+  {
+    "command": "public-root-records",
+    "name": "raw-shadow-0",
+    "source": "mod m { pub use ::core::clone::Clone as Debug; } use self::m::r#Debug; #[derive(Debug)] pub struct Snapshot { pub primary: String }"
+  },
+  {
+    "command": "public-root-records",
+    "name": "raw-shadow-1",
+    "source": "mod m { pub type String = u8; } use self::m::r#String; #[derive(Debug)] pub struct Snapshot { pub primary: String }"
+  },
+  {
+    "command": "public-root-records",
+    "name": "raw-shadow-2",
+    "source": "type r#String = u8; #[derive(Debug)] pub struct Snapshot { pub primary: String }"
+  },
+  {
+    "command": "public-root-records",
+    "name": "raw-shadow-3",
+    "source": "mod m { pub mod r#core {} } use self::m::r#core::{self}; #[derive(Debug)] pub struct Snapshot { pub primary: String }"
+  }
+]

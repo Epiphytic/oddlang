@@ -25,7 +25,7 @@ The [combined workspace qualification](https://github.com/Epiphytic/marmish-oddl
 From a clean compiler checkout, build with `cargo +1.96.1 build --locked --offline`, then run `cargo +1.96.1 test --locked --offline --lib`. Set `cli=$PWD/target/debug/oddlang` and run each of the following with `python3 -B verification/PATH "$cli"`:
 
 - `line-grammar/verify_records.py`, `line-grammar/verify_support.py` and `line-grammar/verify.py`
-- `observational-record-defaults/verify.py` and `plain-value-choices/equality.py`
+- `observational-record-defaults/verify.py` and `qualify-choices -- equality`
 - `structured-diagnostics/check.py` and `command-surface/prefix.py`
 
 All seven fixture commands and the 13 library tests passed on Darwin ARM64. They qualify compiler composition. The application results below come from separate sealed builds.

@@ -1,0 +1,31 @@
+{
+  "format": "oddlang-binary-record-rust-v1",
+  "name": "Remittance",
+  "names": {
+    "urn:invoice:remittance:amount": "amount"
+  },
+  "externals": {},
+  "errorType": "crate::WireFault",
+  "errors": {
+    "urn:invoice:remittance:value": {
+      "variant": "Bad",
+      "argument": "value"
+    },
+    "urn:invoice:remittance:truncated": {
+      "variant": "Bad",
+      "argument": "truncated"
+    },
+    "urn:invoice:remittance:trailing": {
+      "variant": "Bad",
+      "argument": "trailing"
+    },
+    "urn:invoice:remittance:decodeSize": {
+      "variant": "Bad",
+      "argument": "decodeSize"
+    },
+    "urn:invoice:remittance:encodeSize": {
+      "variant": "Bad",
+      "argument": "encodeSize"
+    }
+  }
+}

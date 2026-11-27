@@ -8,8 +8,8 @@ Run `oddlang recover serde-string-choice SOURCE SELECTION OUTPUT`. The `oddlang-
 
 The source profile admits exactly Clone, Debug, PartialEq, Eq, Serde Serialize and Deserialize, with optional Copy. Serde derives may be qualified or explicitly imported from Serde, including aliases. The default variant spelling and symmetric `#[serde(rename = "...")]` are supported. This profile rejects enum-level options, directional renames, extra variant attributes, manual selected impls and glob imports. The compiler-independent result is a syntax candidate. Sibling macro expansion, actual derive resolution and external public paths remain native qualification obligations.
 
-Run the [independent native fixture](../../../verification/serde-string-choice/verify.py) after building Oddlang.
+Run the [independent native fixture](../../../verification/provider-validation/src/bin/qualify-choices/terrain.rs) after building Oddlang.
 
 ```sh
-python3 verification/serde-string-choice/verify.py target/debug/oddlang
+cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin qualify-choices -- serde-string target/debug/oddlang
 ```

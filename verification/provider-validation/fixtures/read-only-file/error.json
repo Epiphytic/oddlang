@@ -1,0 +1,32 @@
+{
+  "format": "oddlang-finite-error-domain-v1",
+  "id": "urn:fixture:error-domain",
+  "error": "urn:fixture:Fault",
+  "result": "urn:fixture:Result",
+  "categories": {},
+  "variants": {
+    "urn:fixture:error:invalid": {
+      "payload": {
+        "kind": "static-text"
+      },
+      "message": {
+        "kind": "insertion",
+        "prefix": "invalid: ",
+        "suffix": ""
+      },
+      "source": false,
+      "from": false
+    },
+    "urn:fixture:error:io": {
+      "payload": {
+        "kind": "io-error"
+      },
+      "message": {
+        "kind": "literal",
+        "text": "I/O"
+      },
+      "source": true,
+      "from": true
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "format": "oddlang-read-only-file-v1",
+  "maximumLinks": 1,
+  "profile": {
+    "id": "urn:fixture:archive:file",
+    "modeMask": 511,
+    "digest": {
+      "algorithm": "sha256",
+      "chunkBytes": 17
+    },
+    "open": [
+      "read-only",
+      "no-follow-final-link",
+      "close-on-exec"
+    ],
+    "guards": [
+      "regular",
+      "links",
+      "maximum-size",
+      "exact-size",
+      "effective-owner",
+      "masked-mode",
+      "digest"
+    ],
+    "readCeiling": "requested-size-plus-one",
+    "safety": {
+      "preflightFileType": "regular-or-final-symlink",
+      "nonblockingOpen": true,
+      "hashCeiling": "exact-size-plus-one"
+    },
+    "errors": {
+      "io": {
+        "id": "urn:fixture:error:io"
+      },
+      "descriptor": {
+        "id": "urn:fixture:error:invalid",
+        "code": "unsafe-file"
+      },
+      "boundedRead": {
+        "id": "urn:fixture:error:invalid",
+        "code": "read-overflow"
+      },
+      "metadata": {
+        "id": "urn:fixture:error:invalid",
+        "code": "wrong-metadata"
+      },
+      "digest": {
+        "id": "urn:fixture:error:invalid",
+        "code": "wrong-digest"
+      }
+    }
+  }
+}

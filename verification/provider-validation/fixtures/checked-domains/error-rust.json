@@ -1,0 +1,17 @@
+{
+  "format": "oddlang-shared-rust-v1",
+  "names": {
+    "urn:example:detector:fault": "Fault",
+    "urn:example:detector:invalid": "Invalid",
+    "urn:example:detector:other-fault": "Other"
+  },
+  "variantOrder": {
+    "urn:example:detector:fault": [
+      "urn:example:detector:invalid",
+      "urn:example:detector:other-fault"
+    ]
+  },
+  "errorCategoryMethods": {
+    "urn:example:detector:fault": "kind"
+  }
+}

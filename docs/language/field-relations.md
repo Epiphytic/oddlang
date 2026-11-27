@@ -8,7 +8,7 @@ A relation with a `failure` returns a typed result and stops at the first unequa
 
 The Rust overlay supplies crate-local type paths, field names, native call names and method names. It binds each mismatch to a Rust error variant and optional static text argument. Record arguments are borrowed, opaque named arguments are passed by value and must declare Copy when passed to a fallible call, and byte and text arguments borrow slices. Byte and text fields and return values use owned vectors and strings. Equality borrows native operands. A comparison may directly use a checked return value without storing or subsequently exposing it.
 
-The package component `field-relation` adds inherent methods to generated types. Its package entry has no reexports of its own. [Independent precedence fixture](../../verification/field-relation/verify.py)
+The package component `field-relation` adds inherent methods to generated types. Its package entry has no reexports of its own. Run the independent precedence fixture with `cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin qualify-domains -- field-relation /path/to/oddlang`.
 
 ## Compiler-backed recovery of direct conjunctions
 

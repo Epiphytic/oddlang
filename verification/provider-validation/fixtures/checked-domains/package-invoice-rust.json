@@ -1,0 +1,31 @@
+{
+  "format": "oddlang-binary-record-rust-v1",
+  "name": "Invoice",
+  "names": {
+    "urn:invoice:invoice:amount": "amount"
+  },
+  "externals": {},
+  "errorType": "crate::WireFault",
+  "errors": {
+    "urn:invoice:invoice:value": {
+      "variant": "Bad",
+      "argument": "value"
+    },
+    "urn:invoice:invoice:truncated": {
+      "variant": "Bad",
+      "argument": "truncated"
+    },
+    "urn:invoice:invoice:trailing": {
+      "variant": "Bad",
+      "argument": "trailing"
+    },
+    "urn:invoice:invoice:decodeSize": {
+      "variant": "Bad",
+      "argument": "decodeSize"
+    },
+    "urn:invoice:invoice:encodeSize": {
+      "variant": "Bad",
+      "argument": "encodeSize"
+    }
+  }
+}

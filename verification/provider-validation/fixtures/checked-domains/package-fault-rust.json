@@ -1,0 +1,12 @@
+{
+  "format": "oddlang-shared-rust-v1",
+  "names": {
+    "urn:invoice:WireFault": "WireFault",
+    "urn:invoice:Bad": "Bad"
+  },
+  "variantOrder": {
+    "urn:invoice:WireFault": [
+      "urn:invoice:Bad"
+    ]
+  }
+}
