@@ -3769,3 +3769,13 @@ w:portHistoricTooling p:evidence w:stateCapsuleRust .
 w:stateCapsuleRust a p:Artifact ;
     rdfs:label "The native v1 state runner and its historical predecessor read each other's fresh capsules on ARM64 macOS with the pinned original bridge and worker. Both reproduced every healthy and corrupt reply, retained the key, and emitted identical receipts per capsule. The Rust runner bounds piped sessions and publishes captures after the checks pass." ;
     p:location "verification/provider-tooling/state-capsule-rust.json" .
+
+w:portHistoricTooling p:evidence w:typescriptVaultModeRust .
+w:typescriptVaultModeRust a p:Artifact ;
+    rdfs:label "The Rust verifier regenerated the published TypeScript vault choice and compared Node's observed ordinals with Darwin and Linux native witnesses. All three static rejection cases passed. The compiler, projection, declaration and runtime fields matched the historical verifier's archived receipt." ;
+    p:location "verification/provider-tooling/typescript-vault-mode-rust.json" .
+
+w:replaceableWasmProviders p:evidence w:postRefactorWorkspaceReplay .
+w:postRefactorWorkspaceReplay a p:Artifact ;
+    rdfs:label "A fresh compiler at 497c96d regenerated the seven Marmish crates from 111 pinned inputs. The complete tree matched the baseline bytes and modes. Fresh original and generated observers matched 105 policy cases and 11 file cases. Mixed stream-library processes reproduced the complete wire and payload in both directions and rejected all four malformed inputs." ;
+    p:location "verification/provider-tooling/post-refactor-workspace-replay.json" .

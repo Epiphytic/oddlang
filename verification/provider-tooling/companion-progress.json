@@ -1,14 +1,14 @@
 {
-  "auditedCompanionRevision": "9d7bb12b129d6bc6873fec50e67e6dcfbd85a4fd",
-  "previousRevision": "b9c546e34895e92037908c428c33e1005d849221",
-  "reproducedTableSha256": "021d9ecdf81b3ee552e5659821e09743a1285b89ed4764bc1deba74b51244171",
-  "remainingProjectToolFiles": 102,
+  "auditedCompanionRevision": "5f5b49304a93db00112954a7ceda35eecb492c07",
+  "previousRevision": "9d7bb12b129d6bc6873fec50e67e6dcfbd85a4fd",
+  "reproducedTableSha256": "f90e1e3b913f8c789aacf25057be3e455f3c7c16bf7aa4354663e2d403798ab3",
+  "remainingProjectToolFiles": 101,
   "remainingProjectExtensions": {
-    ".py": 99,
+    ".py": 98,
     ".sh": 3
   },
   "removedSincePrevious": [
-    "verification/whole/state/replay.py"
+    "verification/whole/vault-mode-typescript/verify.py"
   ],
   "addedSincePrevious": []
 }
