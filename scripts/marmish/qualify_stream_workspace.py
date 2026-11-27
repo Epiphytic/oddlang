@@ -1,6 +1,7 @@
 """Qualify a source-free Marmish stream checkout on native Apple Silicon."""
 import argparse
 import io
+import hashlib
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -10,12 +11,34 @@ import subprocess
 import sys
 import tarfile
 
-from stream_baseline import command_output as capture
-from stream_baseline import require, save, sha
-from stream_baseline import LOGICAL_ROOT, ORIGINAL, PACKAGE, PACKAGE_ROOT, RUST, RUST_COMMIT
-from stream_baseline import list_tests
-from stream_baseline import capture as stream_capture
-from stream_baseline import compare as stream_compare
+ORIGINAL = "49fc705408a230bd0ad896248d08dbdd2faad05a"
+RUST = "1.97.1"
+RUST_COMMIT = "8bab26f4f68e0e26f0bb7960be334d5b520ea452"
+PACKAGE = "marmish-stream"
+PACKAGE_ROOT = "crates/marmish-stream/"
+LOGICAL_ROOT = "/oddlang-workspace"
+
+
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
+def save(path, value):
+    path.write_text(json.dumps(value, sort_keys=True, indent=2) + "\n")
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def capture(args):
+    return subprocess.check_output(args, text=True).strip()
+
+
+def list_tests(stdout):
+    return sorted(set(re.findall(r"(?m)^(.+): test$", stdout)))
+
 
 HERE = Path(__file__).resolve().parent
 ORACLE = HERE.parent.parent / "examples/marmish/stream-driver"
@@ -300,23 +323,23 @@ def compare_consumers(original, candidate):
             require(left[field] == right[field], f"drop-in test comparison differs: {name}.{field}")
 
 
-def oracle_binary():
+def verifier_binary(name):
     manifest = HERE.parent.parent / "verification/marmish-inventory/Cargo.toml"
     build = subprocess.run(
         ["cargo", "+1.97.1", "build", "--locked", "--offline", "--manifest-path", manifest,
-         "--bin", "stream-driver", "--message-format=json-render-diagnostics"],
+         "--bin", name, "--message-format=json-render-diagnostics"],
         check=True, stdout=subprocess.PIPE, text=True,
     )
     executables = [row["executable"] for line in build.stdout.splitlines()
                    if (row := json.loads(line))["reason"] == "compiler-artifact"
-                   and row["target"]["name"] == "stream-driver" and row.get("executable")]
+                   and row["target"]["name"] == name and row.get("executable")]
     require(len(executables) == 1, "missing native stream runner")
     return executables[0]
 
 
 def run_oracle(root, writable, env, sandbox, toolchain, role, peer, output, baseline,
                commit, archive, bundle=None):
-    command = [oracle_binary(), "--workspace", root, "--target-dir",
+    command = [verifier_binary("stream-driver"), "--workspace", root, "--target-dir",
                writable / "oracle-target", "--receipt", output, "--role", role,
                "--toolchain", toolchain, "--sandbox", sandbox, "--peer-receipt", peer,
                "--baseline", baseline, "--commit", commit, "--archive-sha256", archive]
@@ -325,6 +348,15 @@ def run_oracle(root, writable, env, sandbox, toolchain, role, peer, output, base
     # The host reads the corpus and receipts. The selected profile confines Cargo,
     # rustc and every linked observer process.
     subprocess.run(command, env=env, cwd=root, check=True)
+
+
+def stream_capture(root, directory, baseline, cargo_home, sandbox, vendor):
+    result = subprocess.run([verifier_binary("stream-baseline"), root, directory, "--expected", baseline,
+                             "--cargo-home", cargo_home, "--sandbox", sandbox, "--vendor", vendor],
+                            capture_output=True, text=True)
+    if result.returncode:
+        raise ValueError(result.stderr.strip().removeprefix("Error: "))
+    return json.loads((directory / "receipt.json").read_bytes())
 
 
 def controls(root, writable, env, sandbox, vendor, cargo, baseline, output):
@@ -347,7 +379,6 @@ def controls(root, writable, env, sandbox, vendor, cargo, baseline, output):
     marker.write_bytes(b"oddlang-independent-undeclared-input")
     lib.write_bytes(original + b'\nconst _: &[u8] = include_bytes!("undeclared-input");\n')
     report = writable / "negative-baseline"
-    report.mkdir()
     try:
         try:
             stream_capture(root, report, baseline, Path(env["CARGO_HOME"]), sandbox, vendor)
@@ -443,10 +474,7 @@ def qualify(args):
     observed["candidateBuild"] = denied_reads(build, denied | {"graph": graph_inputs[-1]}, src, env)
     save(output / "denied-reads.json", observed)
     baseline_output = candidate_work / "stream"
-    baseline_output.mkdir()
-    candidate = stream_capture(src, baseline_output, baseline, Path(env["CARGO_HOME"]), build, vendor)
-    save(baseline_output / "receipt.json", candidate)
-    stream_compare(baseline, candidate)
+    stream_capture(src, baseline_output, args.baseline, Path(env["CARGO_HOME"]), build, vendor)
     print("generated stream package matches frozen source, inputs and tests", flush=True)
 
     consumers = consumer_tests(src, candidate_work, env, build, output / "candidate-consumers",
@@ -455,7 +483,7 @@ def qualify(args):
     run_oracle(src, candidate_work, env, build, toolchain, "candidate", args.oracle_original,
                output / "candidate-oracle.json", args.baseline, args.commit, archive_sha,
                args.bundle_sha256)
-    negative = controls(src, candidate_work, env, build, vendor, cargo, baseline, output)
+    negative = controls(src, candidate_work, env, build, vendor, cargo, args.baseline, output)
 
     original = output / "upstreams"
     original_sha = git_archive(args.original, ORIGINAL, original)

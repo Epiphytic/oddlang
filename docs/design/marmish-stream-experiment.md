@@ -21,7 +21,7 @@ feature selection.
 | Distinct inputs in each mode | 348, including all five package Rust sources |
 | Independent wire and state corpus | 50 passed |
 
-The [baseline collector](../../scripts/marmish/stream_baseline.py) records
+The [baseline collector](../../verification/marmish-inventory/src/bin/stream-baseline.rs) records
 compiler invocations, file hashes, environment dependencies, test module
 spans, and named test results. The frozen
 [stable receipt](../../examples/marmish/evidence/stream-baseline/stable-original.json.gz)

@@ -36,7 +36,7 @@ SHA-256 when it runs.
 
 Use the Rust 1.97.1 toolchain. The offline Cargo cache
 must already contain the workspace lock's inputs. Use a fresh build target and
-the stable upstream receipt from `scripts/marmish/stream_baseline.py`.
+the stable upstream receipt from the `stream-baseline` Rust command.
 
 ```sh
 cargo +1.97.1 run --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml \

@@ -4,9 +4,8 @@ import json
 from pathlib import Path
 import subprocess
 
-from stream_baseline import require, save, sha
 from qualify_stream_workspace import (
-    oracle_binary, boundaries, checked_run, clean_environment, denied_reads, digest, git_archive, profile, regular_inputs, tool_paths,
+    require, save, sha, verifier_binary, boundaries, checked_run, clean_environment, denied_reads, digest, git_archive, profile, regular_inputs, tool_paths,
 )
 
 MODULE = "src/copy_protocol.rs"
@@ -71,7 +70,7 @@ def main(args):
     build.write_text(profile([*trees, root, args.vendor], writable, files))
     probes.update(denied_reads(build, {"unmodifiedCandidateDuringBuild": source_probe}, root, env))
     receipt = output / "oracle-mutation.json"
-    command = [oracle_binary(), "--workspace", root, "--target-dir",
+    command = [verifier_binary("stream-driver"), "--workspace", root, "--target-dir",
                writable / "oracle-target", "--receipt", receipt, "--role", "mutation",
                "--baseline", args.baseline, "--commit", args.commit, "--archive-sha256", archive_sha,
                "--toolchain", toolchain, "--sandbox", build]

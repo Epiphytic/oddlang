@@ -1,6 +1,7 @@
 //! Shared evidence readers for historical Marmish qualification.
 pub mod baseline;
 pub mod candidate;
+pub mod stream_baseline;
 pub mod stream_observer;
 use anyhow::{Context, Result, ensure};
 use serde_json::{Value, json};

@@ -3142,6 +3142,11 @@ w:marmishStreamDriverRustReplay a p:Artifact ;
     rdfs:label "Rust stream driver matched the historical original receipt, both mixed wire directions and the discriminating tag mutation" ;
     p:location "verification/provider-tooling/stream-driver-rust-replay.json" .
 
+w:portHistoricTooling p:evidence w:stableStreamInputsRustReplay .
+w:stableStreamInputsRustReplay a p:Artifact ;
+    rdfs:label "Rust collector reproduced the original and candidate stream compiler inventories and 29 native test outcomes across all three Cargo modes" ;
+    p:location "verification/provider-tooling/stream-baseline-rust-replay.json" .
+
 w:portHistoricTooling p:evidence w:rustWorkflowReplay .
 w:rustWorkflowReplay a p:Artifact ;
     rdfs:label "Rust import cleanup, assembly preparation, profile checks and Wasm host receipt replay on macOS ARM64" ;

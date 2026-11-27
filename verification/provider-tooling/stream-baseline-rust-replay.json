@@ -1,0 +1,60 @@
+{
+  "sourceCommit": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+  "originalArchive": {
+    "path": "examples/marmish/evidence/stream-baseline/stable-original.json.gz",
+    "sha256": "378609a5a58b48b14885935c0bbe1d3fc71d1cba31ee081c03bc860e3dbf23f1"
+  },
+  "candidateArchive": {
+    "path": "examples/marmish/evidence/stream-qualification/qualification.tar.gz",
+    "sha256": "7e1295d50933b2bf470c18055792e8ceba1748a12586cde8c21e636d7e205ec8",
+    "member": "a/stream/receipt.json",
+    "memberSha256": "363dd2cb667b2fd8c2029973dc9a8179ee2777f20ff58afc95313112c2c3f9c9"
+  },
+  "verification": {
+    "original": {
+      "modes": {
+        "check": {
+          "compilerInvocations": 41,
+          "buildScripts": 10
+        },
+        "release": {
+          "compilerInvocations": 40,
+          "buildScripts": 10
+        },
+        "test": {
+          "compilerInvocations": 41,
+          "buildScripts": 10
+        }
+      },
+      "nativeTests": 29,
+      "workspaceIndependentReceiptSha256": "e13166bd7e744c7a2d2024a3c2a482ced8b2016eaacb2ece477348a73f38172c"
+    },
+    "candidate": {
+      "modes": {
+        "check": {
+          "compilerInvocations": 41,
+          "buildScripts": 10
+        },
+        "release": {
+          "compilerInvocations": 40,
+          "buildScripts": 10
+        },
+        "test": {
+          "compilerInvocations": 41,
+          "buildScripts": 10
+        }
+      },
+      "nativeTests": 29,
+      "workspaceIndependentReceiptSha256": "203f94827569f6c8f5aa35cd20707075c1949e2e4b6991bd53ea52e5f362a6e3"
+    }
+  },
+  "comparisonScope": "Each fresh receipt matched its published counterpart after excluding workspaceRoot, Cargo artifact records with physical paths, and suite executable paths and digests. Suite names, ignored tests, outcomes and normalized artifact profiles were included.",
+  "unitControls": [
+    "escaped depfile paths and environment",
+    "inline test scope",
+    "extra Rust source",
+    "orphan compiler dep-info",
+    "real include_bytes undeclared input",
+    "same workspace and changed frozen inputs"
+  ]
+}
