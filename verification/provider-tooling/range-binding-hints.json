@@ -29,5 +29,32 @@
       "archiveSha256": "1812ba895a2789c69ac7af4b2c18f521060514bfa76400483bc5d84af8daf828",
       "contractVerifierSha256": "c2708319dae97a295742210299b86cbdfe3ed050c3711d0e1d8bd340053f28b2"
     }
+  },
+  "rustProfileInventory": {
+    "companionRevision": "4bb8e3fbb679e2336a1f7631e305e95581859838",
+    "runs": {
+      "published": {
+        "receiptSha256": "6bf561626ea29ce99af440d9daddb96d1eb20cd1bb97a0816428c9affe8e311e",
+        "contractVerifierSha256": "8eedc90daaf1526226b6c416731fca4b49825979dbf49cd2e4ecaf5bde881203"
+      },
+      "missing": {
+        "receiptSha256": "c2acb30ff223fd8ff4d3a00b2f768621d78d291922307316fe5a5b57d3acefb0",
+        "contractVerifierSha256": "4d7e1d8a41f176b74e8c68042ede3750816b750f966e9a30cad8fc17922c9a94"
+      }
+    },
+    "filesPerProfile": 7,
+    "rejectedControls": [
+      "missing package.lock",
+      "altered package.lock",
+      "extra file",
+      "symlink",
+      "altered wire.json",
+      "altered cases.json"
+    ],
+    "differingReceiptFields": [
+      "companion",
+      "contractVerifierSha256",
+      "verifierSha256"
+    ]
   }
 }

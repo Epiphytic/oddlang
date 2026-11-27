@@ -3550,3 +3550,5 @@ w:portHistoricTooling p:evidence w:rangeBindingHintReplay .
 w:rangeBindingHintReplay a p:Artifact ;
     rdfs:label "The Rust endpoint checker and profile stager reproduced all six legacy staged input trees. Fresh macOS ARM64 receipt comparisons with published and physically absent hints matched both archives apart from verifier and revision provenance. All five profiles in each run passed eleven Rust and TypeScript cases with four source-denial probes. A private binding was rejected." ;
     p:location "verification/provider-tooling/range-binding-hints.json" .
+
+w:rangeBindingHintReplay rdfs:comment "The Rust profile inventory verified seven generated files in each of five profiles against the sealed file hashes and baseline package lock. The published-hint and omitted-hint replays matched their archived behavior. Six negative controls rejected a missing or changed lock, extra file, symlink, changed wire contract and changed case file." .
