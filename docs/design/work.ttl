@@ -3577,3 +3577,8 @@ w:portHistoricTooling p:evidence w:cliTranscriptReplayRust .
 w:cliTranscriptReplayRust a p:Artifact ;
     rdfs:label "The Rust CLI transcript runner captured all 68 observations from pinned macOS ARM64 original executables and reproduced the checked-in fixture and legacy capture byte for byte. The generated parser-only client and daemon passed both readers. Seven negative controls covered changed arguments, output, exit, ordering, capture origin and existing fixture preservation." ;
     p:location "verification/provider-tooling/cli-transcript-replay.json" .
+
+w:portHistoricTooling p:evidence w:cliProjectRust .
+w:cliProjectRust a p:Artifact ;
+    rdfs:label "Rust recovery reproduced the pinned CLI parser graph. Source-isolated Rust and historical Python generation on macOS ARM64 used the same eight inputs, reproduced all twelve generated files, and each passed 34 client and 34 daemon parser transcript cases. Five rejection controls and the downstream status recovery entry point passed." ;
+    p:location "verification/provider-tooling/cli-projection-replay.json" .
