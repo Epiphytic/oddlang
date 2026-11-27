@@ -1,0 +1,51 @@
+[
+  {
+    "id": "urn:oddlang:work:marmish-capability-modules",
+    "construct": "public module and re-export resolution",
+    "fixtureToExtract": "two modules re-export a checked type",
+    "positive": "public path and type identity agree",
+    "negative": "reject an ambiguous or cfg-dependent re-export"
+  },
+  {
+    "id": "urn:oddlang:work:marmish-capability-config",
+    "construct": "URL normalization and configuration validators",
+    "fixtureToExtract": "a two-entry relay list",
+    "positive": "valid inputs have the same normalized values",
+    "negative": "reject invalid URLs with the same first error"
+  },
+  {
+    "id": "urn:oddlang:work:marmish-capability-wire",
+    "construct": "numbered Rust enum tags and checked binary cursors",
+    "fixtureToExtract": "a one-tag record with bounded length",
+    "positive": "encode and decode exact original bytes",
+    "negative": "reject unknown tags and truncated input"
+  },
+  {
+    "id": "urn:oddlang:work:marmish-capability-offset",
+    "construct": "bounded offsets and ordered window transitions",
+    "fixtureToExtract": "a checkpoint with one byte pending",
+    "positive": "resume at the admissible offset",
+    "negative": "preserve the original error on a gap or overflow"
+  },
+  {
+    "id": "urn:oddlang:work:marmish-capability-compression",
+    "construct": "bounded external compression primitive",
+    "fixtureToExtract": "a length-limited block codec",
+    "positive": "match decompressed bytes and output bounds",
+    "negative": "reject an invalid or oversized block"
+  },
+  {
+    "id": "urn:oddlang:work:marmish-capability-native",
+    "construct": "general Rust bodies and native dependency resolution",
+    "fixtureToExtract": "a public function from the listed file isolated with its resolved imports",
+    "positive": "compare the reduced entry point and all observable state with the pinned original",
+    "negative": "reject an unresolved import, effect or expansion"
+  },
+  {
+    "id": "urn:oddlang:work:marmish-capability-os",
+    "construct": "platform-specific library calls and observable OS effects",
+    "fixtureToExtract": "a local fixture with a capability supplied by the caller",
+    "positive": "replay declared local outcomes on the named platform",
+    "negative": "reject an undeclared capability"
+  }
+]

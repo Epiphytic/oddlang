@@ -3170,3 +3170,8 @@ w:portHistoricTooling p:evidence w:nativeBufferedInputReplay .
 w:nativeBufferedInputReplay a p:Artifact ;
     rdfs:label "Buffered-input native policy matrix, compiler shape recovery and observed trace parity on macOS ARM64" ;
     p:location "verification/provider-tooling/buffered-input-replay.json" .
+
+w:portHistoricTooling p:evidence w:marmishGapRegisterRust, w:marmishCompanionCoreRoles .
+w:marmishGapRegisterRust a p:Artifact ; p:location "verification/provider-tooling/marmish-gap-register.json" .
+w:marmishCompanionCoreRoles a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/0a1d816a84f4f3c148ea37427ab83e508a86b660/verification/whole/core-ownership/rust-qualification-macos-arm64.json" .
