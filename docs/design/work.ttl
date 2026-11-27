@@ -3890,3 +3890,8 @@ w:portHistoricTooling p:evidence w:nativeErrorRecoveryRust .
 w:nativeErrorRecoveryRust a p:Artifact ;
     rdfs:label "Rust reproduced the independent baseline and mutated native error transcripts and their archived receipt byte for byte. The fresh Rust and historical Python runners produced identical combined receipts, including both executable hashes, all 59 input pins and 32 release-info exit, stdout and stderr comparisons. Only the executable hashes differ from the older combined archive. The current compiler reproduced the finite error graph, binding and source observation, and the seven-member workspace caller matched all 32 reference rows." ;
     p:location "verification/provider-tooling/native-error-recovery-rust.json" .
+
+w:portHistoricTooling p:evidence w:engineLimitRust .
+w:engineLimitRust a p:Artifact ;
+    rdfs:label "On macOS the seven-member release workspace and original binaries matched on all ten startup cases and three library descriptor-limit cases. The native Rust runner resolved the engine dependencies using Cargo build records in the presence of two libc artifacts. Its entire receipt matched the historical observer on the same artifacts." ;
+    p:location "verification/provider-tooling/engine-limits-rust.json" .
