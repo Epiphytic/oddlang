@@ -1,0 +1,132 @@
+{
+  "host": "aarch64-apple-darwin",
+  "upstream": "af54339d250290490d62d4475a77539b7e739071",
+  "companionRevision": "4e643a342e974f8412e4e6f61771b82e84e25ad4",
+  "historicalBuilderRevision": "f37e674da927fb32231ed388d9c86ade834cc284",
+  "archiveAndBothObserversSha256": "ff7324eec77bbb84647a4faa249b875b917ccf3db372c70f1a413b860c79b2c1",
+  "freshRustBuiltReceiptSha256": "db6aaf36a0d5945b2049fab3261bca3f904521d923dd59b8b73271f1f7526db3",
+  "freshPythonBuiltReceiptSha256": "70aab9ab69c7e87ce79afdb002b2d67879dbd25995fd96cabb61a8f872dd7f77",
+  "historicalRowsPerBinary": {
+    "marmish": 34,
+    "marmishd": 34
+  },
+  "supplementalMatchesPerRole": {
+    "cases": 32,
+    "baseline": 26,
+    "successor": 30
+  },
+  "builds": {
+    "base": {
+      "matchingWorkspaceFiles": 83,
+      "workspaceTreeSha256": "a4df9df56683c81fa3aab64830612f07adf54241177d6f20cf078780d787bb6e",
+      "rustBuild": {
+        "frameworkRevision": "59f947dafdb4cf3055e35216857472ada895a76a",
+        "compilerSha256": "6dca4fbc08c6ae510608116c1284606d3b0f7fdac0929c61052dbdb9d1591144",
+        "workspaceLockSha256": "fdfa5b16d9172fe97705ee5794251c6168d0e226ea159334a52286e2e7172b68",
+        "workspaceManifestSha256": "9b48e0471d15c634b556bdc7be2369df53eb7f731c4f67c32bb94007141afa6e",
+        "binarySha256": {
+          "marmish": "a99b0ac8ab947f4b09be512c44b956b22fc76ba0d88a95377e6821fd6f094328",
+          "marmishd": "9df954eadebf2f660603ecb8d19b19d6080c6cb0c8845153cbd2170ebe939db2"
+        }
+      },
+      "historicalBuilderBinaries": {
+        "marmish": "f96a8b2d1d8d7933fcbea532a2dc9336fcc8b28611f123c67a2716b9103280eb",
+        "marmishd": "cdb76d48ef063ff9c0b25694c3991269a94d9ee9ad396b0a253a2a33cb81a978"
+      }
+    },
+    "next": {
+      "matchingWorkspaceFiles": 83,
+      "workspaceTreeSha256": "2c5ad29549f0bc89254915cfc6ee45778cb91768f64315ab0ac608e6f36bb7aa",
+      "rustBuild": {
+        "frameworkRevision": "0fc48e920e30baf6396218cee0983732ba6c3a78",
+        "compilerSha256": "9eccccca981a400c10107dd2a4bd2807d1feba72de162dab0618c89ba2fe8093",
+        "workspaceLockSha256": "1618a0211f4230521b8334bffff7db5b1ec7ba1fa84d205d720e699c4b1366c1",
+        "workspaceManifestSha256": "dc2bcff454a20722140292ad2c7c1e8ad086a6102c79b9efc01c6e69fe06f0ac",
+        "binarySha256": {
+          "marmish": "3727029a5889b430e59a0b5cafe56f85604d38b1113a5ff64b9528416ec7def0",
+          "marmishd": "735b9f84258246b00b1147292f1f39316792ea2654d01bf44e0097b1fda00ab6"
+        }
+      },
+      "historicalBuilderBinaries": {
+        "marmish": "9c8ff226a0d847db09ac26bc943cdc2dca6a7a419adaf1e998296546b2c20702",
+        "marmishd": "ba95c6d7eb5ea0e36fc0a099a30b963172fbbad96a672d26427669de0f2d2309"
+      }
+    }
+  },
+  "downstreamTerminalPrefix": {
+    "matchedCases": {
+      "marmish": 82,
+      "marmishd": 82
+    },
+    "workspaceLockSha256": "f40ee72f7367aa1cc0e08894fee2d521ebe89396fcfdabf9bdc4b3570e0119f1",
+    "receiptSha256": "dd24d5a758450d3eeeab0ff8cc33141f66ca2c108bb0839276e27b0d912ef553",
+    "matchingOutsideTerminalProfileControls": 2
+  },
+  "controls": [
+    "An existing product retained its sentinel and no receipt was written.",
+    "A failed generator left neither a product nor a receipt.",
+    "The observer rejected a successor receipt substituted for the baseline before emitting a comparison.",
+    "Both build profiles demonstrated read denial for all three source roots."
+  ],
+  "providerGate": {
+    "frameworkRevision": "c256e4158db292ab3faf2d46f6430d02755a42f2",
+    "validationReceipt": {
+      "compilerSha256": "8980b68a63ebc40496947b36fb1c4ec2bdc7964f1a1bb11e5765f761dc475d78",
+      "inputManifestSha256": "859923216f7a48d14f6975c9625fc809b2f6f1a0da3c4484ff367f96eaa929b4",
+      "pinnedInputs": 111,
+      "policy": {
+        "foregroundSourceSha256": "9ddc9fd6ab6f2fa08e3e80805c18d96a0d0be4c02ca177205bbe5cd692d106e2",
+        "host": "aarch64-apple-darwin",
+        "policyDecisions": {
+          "cases": 105,
+          "inputsSha256": "b392ced173616d91990bb648af275a25776ccc15e22f33faf7388baea451a980",
+          "observationsSha256": "c30e84dc1ec0633fc995d79eda55ece8dfabd27db8cc91bcf72e2270cbbd6f6b"
+        },
+        "rebuiltObserverSha256": {
+          "generated-observer": "7ca6efd96253cd40bbfacfb89d08e2493758c8173023ab262e867fc3538ab966",
+          "policy-observer": "ed8025995d42e78dfc037c0e6e9293f625b808c8ec0e1f76913604f222b7e599",
+          "room-observer": "83aef04dc13a0c0bc40b2c53ca46fa4dd196d7df4c7425213222cce9cae367ed"
+        },
+        "roomConfigFileCases": 11,
+        "rustToolchain": "1.97.1",
+        "upstreamCommit": "af54339d250290490d62d4475a77539b7e739071",
+        "workspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c"
+      },
+      "policyToolSha256": "0031e951491fdb9aafdcd7219939473912c5a53932afa6a85167d385f85c0ed8",
+      "workspace": {
+        "directories": 49,
+        "files": 106,
+        "members": 7,
+        "treeSha256": "ed3ba7e04668b2ad346edf880c0c1a261ffefaa47b6838ad9b24e0ab4b8c3524",
+        "workspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c"
+      }
+    },
+    "tests": {
+      "library": 33,
+      "providerInterop": 4,
+      "rustRoundtrip": 5,
+      "sixBuildControlExecuted": true
+    },
+    "copyDataPipe": {
+      "original": "af54339d250290490d62d4475a77539b7e739071",
+      "generatedWorkspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c",
+      "driverSha256": "d5ec33dd26c651ca82483188862bc43ee459b900fdb39c4ccc9d7199a537dd66",
+      "framesPerDirection": 1260,
+      "payloadSha256": "e8007b4a0a207564767a34fd944d829e984318e4ac4d65522b136ca16794106e",
+      "wireSha256": "a2ad71740d1390383296943473fdfac7ed6515b005e1cae5cb0f5f1cb62f78e5",
+      "originalToGenerated": {
+        "encodeExit": 0,
+        "decodeExit": 0,
+        "wireBytesCompared": 4210721,
+        "payloadBytesCompared": 4194341
+      },
+      "generatedToOriginal": {
+        "encodeExit": 0,
+        "decodeExit": 0,
+        "wireBytesCompared": 4210721,
+        "payloadBytesCompared": 4194341
+      },
+      "truncationAndOffsetControlsPassed": 4
+    }
+  }
+}

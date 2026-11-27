@@ -3734,3 +3734,11 @@ w:portHistoricTooling p:evidence w:cliCompositionRust .
 w:cliCompositionRust a p:Artifact ;
     rdfs:label "Rust recovered the offline auxiliary CLI grammar and terminal prefix policy, regenerating all eight composition outputs byte for byte. On ARM64 macOS the offline transcript matched the archive. The rebuilt terminal workspace matched 91 pinned files across seven members, 164 original CLI observations and both recorded out-of-profile comparisons." ;
     p:location "verification/provider-tooling/cli-composition-rust.json" .
+
+w:portHistoricTooling p:evidence w:offlineCliRust .
+w:offlineCliRust a p:Artifact ;
+    rdfs:label "The Rust offline CLI builder reproduced all 83 workspace files for each of the baseline and successor builds on macOS ARM64. The Rust and historical observers produced identical receipts on the same binaries. Both builds preserved the historical help and usage results, and the downstream prefix verifier reproduced 164 scoped CLI comparisons and both outside-profile controls." ;
+    p:location "verification/provider-tooling/offline-cli-rust.json" .
+
+w:replaceableWasmProviders p:evidence w:offlineCliRust .
+w:wholeStreamBlock p:evidence w:offlineCliRust .

@@ -1,15 +1,15 @@
 {
-  "auditedCompanionRevision": "f37e674da927fb32231ed388d9c86ade834cc284",
-  "previousRevision": "2f2bd87be3215529789f2b979ab6c71af48d5362",
-  "reproducedTableSha256": "4231fff49c9f5dbbf48cf10da30f49bc2042c75f7d5308c08c7864ee55a87ee1",
-  "remainingProjectToolFiles": 108,
+  "auditedCompanionRevision": "4e643a342e974f8412e4e6f61771b82e84e25ad4",
+  "previousRevision": "f37e674da927fb32231ed388d9c86ade834cc284",
+  "reproducedTableSha256": "c75e9cd63eba9dabe2a4979c74f1f16b58714c170b22930e1d5099bddd082cbe",
+  "remainingProjectToolFiles": 106,
   "remainingProjectExtensions": {
-    ".py": 105,
+    ".py": 103,
     ".sh": 3
   },
   "removedSincePrevious": [
-    "verification/whole/offline-cli/compose.py",
-    "verification/whole/terminal-prefix/compose.py"
+    "verification/whole/offline-cli/build.py",
+    "verification/whole/offline-cli/observe.py"
   ],
   "addedSincePrevious": []
 }
