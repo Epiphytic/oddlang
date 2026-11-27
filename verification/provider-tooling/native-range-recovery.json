@@ -231,5 +231,67 @@
       "unexpected diagnostic",
       "extra changed result"
     ]
+  },
+  "nativeQualification": {
+    "companionRevision": "33d920c5c74449ebbd79b0c20e22c1472a65fff8",
+    "host": "aarch64-apple-darwin",
+    "frameworkRevision": "9923e6664899de66915ed3a94e417f261ffed401",
+    "verifierSha256": "40139d086ecd67c9eb05d98db13244f89be9c15e292b436caf87bd2b6574683e",
+    "receiptSha256": "72089c2fb786038ad833129cd2f44fc9a424d66fcbb9d7879b5752ff224c9982",
+    "pythonComparisonRevision": "a624b4978dfc9173aa60b380dd1d7665763471d8",
+    "pythonComparisonReceiptSha256": "e6f55f8aabdfd97d7ac5d7ad7352a828188a9319979614ea3f4ff31288de91c7",
+    "changedFieldsFromPython": [
+      "companion",
+      "verifierSha256"
+    ],
+    "comparedFilesSha256": {
+      "mutation/recovery.lock": "cfe313068df8b3297e3a3fc490a55d1e944319f6bff49d9e8918f3b9a3b59daf",
+      "mutation/package.lock": "3fde71576cd2fee666cb7a460f30d44f402e81aec2501c672323839c65a03b75",
+      "mutation/package.json": "ac264bfaa7e1610f035761e8c9b0336d343747c53154040f8c5d226f538abaf8",
+      "mutation/rust.json": "0eb5931fd8c063888dc32a9f8be19435b0f8ff1822c31634ef8e47a3190b74f8",
+      "mutation/selection.json": "766f0d5f613c15f7b370b082bb86f9bfa0aed7adb3293054f1c62398038454d9",
+      "mutation/graph.json": "d3ef433ec282ff717ba72a503c50e8b02e22b697cf0a391677dfee3cf8e71e7b",
+      "baseline/recovery.lock": "72e239a6e6a4c561c747df792146d49061f0b0e65a75d2e8d9a0ef1aee7db8ed",
+      "baseline/package.lock": "281d010eca4e1a7b18514af49e2a9fb866069f5613145a2faf93556e07357528",
+      "baseline/package.json": "6bc0d0d324398a4c981417cf3023d29969a9710c5c695b52fbb8b994be58251f",
+      "baseline/rust.json": "0eb5931fd8c063888dc32a9f8be19435b0f8ff1822c31634ef8e47a3190b74f8",
+      "baseline/selection.json": "04283d0e997f232d12ceae4beb3bd43e18869b34091d09a632e8f35473ffa8c1",
+      "baseline/graph.json": "f7557c397e44feb996ebf1c1ec4aa09e7ab09fdc3e46902dfc16eaa097b6fad5"
+    },
+    "comparedCases": {
+      "baseline": 35,
+      "mutation": 35
+    },
+    "changedNativeRows": [
+      "unknown-field"
+    ],
+    "sourceAccessDenials": 8,
+    "staleSelectorRejected": true,
+    "rejectionControls": [
+      "wrong framework revision",
+      "target inside source tree",
+      "output inside compiler target",
+      "changed baseline source pin",
+      "existing output preserved"
+    ],
+    "legacyEntryPointReplayed": true,
+    "postRefactorComparison": {
+      "frameworkRevision": "4ffea9980f00ececadefd3743ee0f58bfa60bc59",
+      "compilerSha256": "56cd561744ad89db452a5e4a6a79ce696bae2a18134ac9da51a734ecae24c98c",
+      "comparedGeneratedFiles": {
+        "baseline": {
+          "src/group_0/__projection_0.rs": "e8f5ebe06b1b6f504c11f7380fb5e6107bd92ed0e51e8b9662310cc459c8693a",
+          "src/group_0/__projection_1.rs": "4f3159463c6bc615d0c7156e84fdf1ebdfb59edeb7fb12725f773644b7f5d59c",
+          "src/group_0/mod.rs": "4280c49315f335ec1cfa8c31f605f135b4a0bc15a8ca2bfd6dc1133c9fc5cfc5",
+          "src/lib.rs": "8b0b5b00a320945c48220826234351488d9f745966f008f5f0cb9b522b27c8f8"
+        },
+        "mutation": {
+          "src/group_0/__projection_0.rs": "e8f5ebe06b1b6f504c11f7380fb5e6107bd92ed0e51e8b9662310cc459c8693a",
+          "src/group_0/__projection_1.rs": "05bf5982f4cf5329d6f32111ec3d55c5660cb32869d30f36f2138d2d3ca377cc",
+          "src/group_0/mod.rs": "4280c49315f335ec1cfa8c31f605f135b4a0bc15a8ca2bfd6dc1133c9fc5cfc5",
+          "src/lib.rs": "8b0b5b00a320945c48220826234351488d9f745966f008f5f0cb9b522b27c8f8"
+        }
+      }
+    }
   }
 }
