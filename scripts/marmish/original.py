@@ -29,6 +29,15 @@ def outcomes(path):
     return {"counts": dict(totals), "failedTests": names}
 
 
+def check(directory):
+    try:
+        subprocess.run(["cargo", "+1.97.1", "run", "--quiet", "--offline", "--locked",
+                        "--manifest-path", ROOT / "verification/marmish-inventory/Cargo.toml",
+                        "--bin", "marmish-receipt", "--", "check", directory], check=True, capture_output=True, text=True)
+    except subprocess.CalledProcessError as error:
+        raise ValueError(error.stderr.strip()) from error
+
+
 def recover(directory):
     if sha(ARCHIVE) != DIGEST:
         raise ValueError("published original archive digest mismatch")
@@ -44,9 +53,7 @@ def recover(directory):
             target.parent.mkdir(parents=True, exist_ok=True)
             with target.open("xb") as dest:
                 dest.write(archive.extractfile(entry).read())
-    subprocess.run(["cargo", "+1.97.1", "run", "--quiet", "--offline", "--locked",
-                    "--manifest-path", ROOT / "verification/marmish-inventory/Cargo.toml",
-                    "--bin", "marmish-receipt", "--", "check", directory], check=True)
+    check(directory)
     native = json.loads((directory / "native/baseline.json").read_bytes())
     if native["tree"] != TREE:
         raise ValueError("original Git tree changed")

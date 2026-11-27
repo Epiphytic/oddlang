@@ -3188,3 +3188,5 @@ w:nativeStorageContractReplay a p:Artifact ;
 
 w:portHistoricTooling p:evidence w:historicalReceiptRust .
 w:historicalReceiptRust a p:Artifact ; p:location "verification/provider-tooling/original-receipt.json" .
+
+w:historicalReceiptRust rdfs:comment "The independently pinned candidate comparator also revalidates the archived original through its historical check entry point." .
