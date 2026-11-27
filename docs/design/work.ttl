@@ -703,7 +703,7 @@ w:wholeMarmishProtocols p:dependsOn w:endpointSetNormalization .
 w:orderedEndpointPolicyReview a p:Finding ;
     rdfs:label "Require typed address classification and explicit loopback opt-in before projection" ;
     p:source w:orderedEndpointPolicyGuardFixture .
-w:orderedEndpointPolicyGuardFixture a p:Artifact ; p:location "verification/endpoint-set/verify.py" .
+w:orderedEndpointPolicyGuardFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/endpoint-set.rs" .
 w:endpointSetNormalization p:addresses w:orderedEndpointPolicyReview ; p:evidence w:orderedEndpointPolicyGuardFixture .
 w:nativePackageAssembly a p:Task ; rdfs:label "Assemble pinned semantic projections into a native Rust library" ;
     p:milestone w:marmishMilestone ; p:source w:wholeMarmishPlan ; p:status p:done ;
@@ -3221,3 +3221,8 @@ w:portHistoricTooling p:evidence w:rustTaggedCandidate .
 w:rustTaggedCandidate a p:Artifact ;
     rdfs:label "Rust tagged-contract observer reproduced the original report for pinned Marmish revision 49fc705, tag and writer mutations" ;
     p:location "verification/provider-tooling/tagged-candidate.txt" .
+
+w:portHistoricTooling p:evidence w:nativeEndpointSetReplay .
+w:nativeEndpointSetReplay a p:Artifact ;
+    rdfs:label "Locked Rust 2021 and 2024 consumer replay of reordered, bound, free and modified endpoint policies with nine refusal controls" ;
+    p:location "verification/provider-tooling/endpoint-set.txt" .

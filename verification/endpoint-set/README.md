@@ -4,7 +4,8 @@ Build Oddlang and run the unrelated download-mirror consumer.
 
 ```sh
 cargo +1.97.1 build --locked --offline --bin oddlang
-python3 -B verification/endpoint-set/verify.py target/debug/oddlang
+cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml \
+  --bin endpoint-set -- target/debug/oddlang
 ```
 
 The run projects two equivalent inputs and compares both generated files

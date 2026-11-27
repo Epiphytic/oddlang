@@ -1,0 +1,1 @@
+endpoint-set qualification passed in Rust editions 2021 and 2024
