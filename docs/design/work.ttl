@@ -3934,6 +3934,11 @@ w:profilePolicySubmitOmission a p:Finding ;
     p:source w:profilePolicyLocalPacketEvidence .
 w:basicCommandInterop p:evidence w:profilePolicyLocalPacketEvidence .
 
+w:linuxTaggedReceiptRust a p:Artifact ;
+    rdfs:label "Rust observer rechecked the archived Linux ARM64 public tagged-data receipt against its frozen framework and rejected ten altered receipts" ;
+    p:location "verification/provider-tooling/linux-tagged-receipt.json" .
+w:portHistoricTooling p:evidence w:linuxTaggedReceiptRust .
+
 w:coldWorkspaceRustEvidence a p:Artifact ;
     rdfs:label "Rust v5 cold-cache qualification, offline release and parser transcripts, and historical product layout controls" ;
     p:location "verification/provider-tooling/cold-workspace-rust.json" .
