@@ -3137,6 +3137,11 @@ w:marmishNativeBaselineCollector a p:Artifact ;
     rdfs:label "Rust Seatbelt collector checked against the archived command matrix, pinned ontology, Cargo metadata and native core tests" ;
     p:location "verification/provider-tooling/native-baseline-collector-replay.json" .
 
+w:portHistoricTooling p:evidence w:marmishStreamDriverRustReplay .
+w:marmishStreamDriverRustReplay a p:Artifact ;
+    rdfs:label "Rust stream driver matched the historical original receipt, both mixed wire directions and the discriminating tag mutation" ;
+    p:location "verification/provider-tooling/stream-driver-rust-replay.json" .
+
 w:portHistoricTooling p:evidence w:rustWorkflowReplay .
 w:rustWorkflowReplay a p:Artifact ;
     rdfs:label "Rust import cleanup, assembly preparation, profile checks and Wasm host receipt replay on macOS ARM64" ;

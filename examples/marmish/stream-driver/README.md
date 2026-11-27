@@ -2,7 +2,7 @@
 
 The [frozen vectors](../stream-vectors.json) exercise the public API of
 `marmish-stream` at upstream commit `49fc705408a230bd0ad896248d08dbdd2faad05a`.
-The Rust driver observes values and errors through a linked library. The Python
+The Rust driver observes values and errors through a linked library. The Rust
 runner compares those observations against expectations derived before running
 the original. Each fresh Cargo target supplies the artifact paths and digests
 embedded in the executable binding alongside the pinned workspace identity.
@@ -24,8 +24,8 @@ SHA-256 when it runs.
   hex. The request digest is the SHA-256 of the complete canonical request
   bytes. The hello request and gap response are pinned byte for byte,
   including their direction, operation, and field order.
-- Codec tests use Python's SHA-256, base64 and zlib to derive the input
-  block and verify the separately observed Rust encoder. The case requires a
+- The frozen codec expectations were derived with Python's SHA-256, base64 and zlib.
+  The Rust runner checks the separately observed encoder using system zlib. The case requires a
   complete zlib stream with no leftover bytes and an exact decoded payload.
   This keeps the check independent of equivalent DEFLATE encoder choices.
 - Fragmentation tests track consumed bytes, frame delivery and error
@@ -34,12 +34,13 @@ SHA-256 when it runs.
 
 ## Freeze the upstream observation
 
-Use Python 3.11 or later and the Rust 1.97.1 toolchain. The offline Cargo cache
+Use the Rust 1.97.1 toolchain. The offline Cargo cache
 must already contain the workspace lock's inputs. Use a fresh build target and
 the stable upstream receipt from `scripts/marmish/stream_baseline.py`.
 
 ```sh
-python3 examples/marmish/stream-driver/run.py --workspace /path/to/original \
+cargo +1.97.1 run --locked --offline --manifest-path verification/marmish-inventory/Cargo.toml \
+  --bin stream-driver -- --workspace /path/to/original \
   --target-dir /tmp/original-stream-oracle --role original \
   --receipt /tmp/original-stream-oracle.json --baseline /path/to/baseline/receipt.json
 ```
@@ -57,3 +58,5 @@ SHA-256 digests are
 The interoperability comparison replays nine wire records in each direction.
 A build-valid mutation that replaces the copy Data encoder tag 5 with 12
 changes both exact-byte Data observations.
+
+The Rust runner reproduced the complete historical runner receipt under equivalent nonincremental build inputs. Local original and candidate builds matched the archived observation rows in both directions. [Rust replay evidence](../../../verification/provider-tooling/stream-driver-rust-replay.json)

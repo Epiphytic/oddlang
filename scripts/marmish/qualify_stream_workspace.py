@@ -300,16 +300,30 @@ def compare_consumers(original, candidate):
             require(left[field] == right[field], f"drop-in test comparison differs: {name}.{field}")
 
 
+def oracle_binary():
+    manifest = HERE.parent.parent / "verification/marmish-inventory/Cargo.toml"
+    build = subprocess.run(
+        ["cargo", "+1.97.1", "build", "--locked", "--offline", "--manifest-path", manifest,
+         "--bin", "stream-driver", "--message-format=json-render-diagnostics"],
+        check=True, stdout=subprocess.PIPE, text=True,
+    )
+    executables = [row["executable"] for line in build.stdout.splitlines()
+                   if (row := json.loads(line))["reason"] == "compiler-artifact"
+                   and row["target"]["name"] == "stream-driver" and row.get("executable")]
+    require(len(executables) == 1, "missing native stream runner")
+    return executables[0]
+
+
 def run_oracle(root, writable, env, sandbox, toolchain, role, peer, output, baseline,
                commit, archive, bundle=None):
-    command = [sys.executable, "-B", ORACLE / "run.py", "--workspace", root, "--target-dir",
+    command = [oracle_binary(), "--workspace", root, "--target-dir",
                writable / "oracle-target", "--receipt", output, "--role", role,
                "--toolchain", toolchain, "--sandbox", sandbox, "--peer-receipt", peer,
                "--baseline", baseline, "--commit", commit, "--archive-sha256", archive]
     if bundle:
         command += ["--bundle-sha256", bundle]
-    # The Python harness reads the corpus and receipt; all package builds, rustc
-    # and driver processes are separately sandboxed by its selected profile.
+    # The host reads the corpus and receipts. The selected profile confines Cargo,
+    # rustc and every linked observer process.
     subprocess.run(command, env=env, cwd=root, check=True)
 
 
