@@ -3972,3 +3972,8 @@ w:vaultModeObserverEvidence a p:Artifact ;
     rdfs:label "Darwin ARM64 vault mode replay with the Rust caller and seven rejected trait bounds for original and reversed case order" ;
     p:location "verification/provider-tooling/vault-mode-observer-rust.json" .
 w:portHistoricTooling p:evidence w:vaultModeObserverEvidence .
+
+w:profilePolicyMixedDaemonEvidence a p:Artifact ;
+    rdfs:label "Both mixed pairs activated with isolated file credentials and passed cleanup. Both failed the first allowlisted command at the profile command-policy lock." ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/0e637166e3117ec64514e77531cb0c7dab199e16/verification/whole/basic-command-interop/LOCAL-PROGRESS.md" .
+w:basicCommandInterop p:evidence w:profilePolicyMixedDaemonEvidence .
