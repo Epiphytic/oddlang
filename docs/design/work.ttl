@@ -3860,3 +3860,8 @@ w:portHistoricTooling p:evidence w:sourceCopyFrameRecoveryRust .
 w:sourceCopyFrameRecoveryRust a p:Artifact ;
     rdfs:label "The Rust encoder, fragment and guard verifiers reproduced all three archived receipts. The rebuilt framework regenerated the exact seven-crate tree from 111 pinned inputs. Local original/generated copy Data encoders and decoders exchanged 1,260 frames in each direction with all bytes matching and all four malformed-stream controls detected." ;
     p:location "verification/provider-tooling/source-copy-frames-rust.json" .
+
+w:portHistoricTooling p:evidence w:copyFrameDecodeRust .
+w:copyFrameDecodeRust a p:Artifact ;
+    rdfs:label "Rust replay of the complete copy-frame release reproduced the archived receipt. Both libraries passed 11 upstream and nine exact checks. The composed package passed the Manifest and Checkpoint corpora, and the mutated encoder and decoder returned the predicted opposite errors." ;
+    p:location "verification/provider-tooling/copy-frame-decode-rust.json" .

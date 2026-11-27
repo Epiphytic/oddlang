@@ -1,0 +1,45 @@
+{
+  "companionRevision": "fbdbfe64c267fd28350cdbbdbfa3282bac3be950",
+  "platform": "aarch64-apple-darwin",
+  "qualifier": "check-copy-frame qualify",
+  "upstreamRevision": "af54339d250290490d62d4475a77539b7e739071",
+  "recoveryCompilerRevision": "20f26a01bda33a1c6a6b284839dbf417f88af850",
+  "archivedReceiptByteIdentical": true,
+  "receiptSha256": "edf5bc8957beae9e605867ea4f2f861721d765b8308b6a7f2024f0c5cad4ea02",
+  "packageLockSha256": "412d78d9014de11bb5a6aea24173671064257b0e4663a814f020e6661216fc1c",
+  "testsPerImplementation": {
+    "upstream": 11,
+    "exact": 9
+  },
+  "nestedRecordChecks": {
+    "manifest": {
+      "constructions": 631,
+      "decodes": 2363
+    },
+    "checkpoint": {
+      "constructions": 290,
+      "decodes": 1827
+    }
+  },
+  "mutantErrorChecks": {
+    "encode": {
+      "expected": "Limit",
+      "observed": "Offset"
+    },
+    "decode": {
+      "expected": "Offset",
+      "observed": "Limit"
+    }
+  },
+  "wrongFrameworkRejectedBeforeReceipt": true,
+  "unifiedVaultCopyTestCaller": {
+    "compared": "Original and regenerated seven-crate workspace member",
+    "matchedTestNames": 20
+  },
+  "providerRegression": {
+    "frameworkRevision": "bc24e1a430694d6d21634c9707e8113f1d0bfb56",
+    "libraryPassed": 33,
+    "providerInteropPassed": 4,
+    "command": "cargo +1.97.1 test --locked --offline --lib --test provider_interop"
+  }
+}
