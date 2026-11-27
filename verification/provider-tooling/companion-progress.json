@@ -1,14 +1,14 @@
 {
-  "auditedCompanionRevision": "388caf95ccf6eafebba9a51bcf8265dac4c3703c",
-  "previousRevision": "f2862d2cdcd28426d423141eee9cb003f3d2a3d5",
-  "reproducedTableSha256": "f11d86515edd70a1648ed463fe7b7d074e7d9240f2cc5b97adbc4e4614fe439d",
-  "remainingProjectToolFiles": 104,
+  "auditedCompanionRevision": "b9c546e34895e92037908c428c33e1005d849221",
+  "previousRevision": "388caf95ccf6eafebba9a51bcf8265dac4c3703c",
+  "reproducedTableSha256": "f5323ee07b7b6d9c63251eb11a4b61ddc3296994853ffefe06308dfecc2a1305",
+  "remainingProjectToolFiles": 103,
   "remainingProjectExtensions": {
-    ".py": 101,
+    ".py": 100,
     ".sh": 3
   },
   "removedSincePrevious": [
-    "verification/whole/relay/replay.py"
+    "verification/whole/legacy/observe.py"
   ],
   "addedSincePrevious": []
 }
