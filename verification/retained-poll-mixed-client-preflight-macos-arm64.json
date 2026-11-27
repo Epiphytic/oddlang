@@ -1,0 +1,50 @@
+{
+  "activation_only": false,
+  "attempts": [],
+  "build_record_sha256": "20626333b5d35f320306303df40f6a4a28953a5a0a8f9b9d6750f4b2442361f3",
+  "cleanup_verification": "passed",
+  "failure_type": "ValueError",
+  "first_foreground_only": false,
+  "fixture_sha256": "d9230b3ab14404a5f8abc95958e364070747fa610716217a309f2f29bc82854a",
+  "generated_binary_sha256": {
+    "marmish": "42b8b611ce070a616662ec17f0987ed2230ed8dfa9797661aac80f051591e79e",
+    "marmishd": "bc781b25d26c2e9e21afb66de4b1a14de45ecd1684e77b5b01462a1d86471177"
+  },
+  "generated_pin_build_sha256": "8a52aa38e3adb80622044e073ded940216097ab7a9f46a9dfe9bbf374d55e14d",
+  "generated_pin_preflight_sha256": "67c25db1a37b9ed75a0a693e26bc0892b8553f13f78a123626840e3016f8ffa0",
+  "generated_receipt_sha256": "8a52aa38e3adb80622044e073ded940216097ab7a9f46a9dfe9bbf374d55e14d",
+  "generated_role": "client",
+  "host_metadata_audit_errors": [],
+  "host_metadata_changed_categories": [],
+  "host_metadata_changes": [],
+  "host_preferences_metadata_unchanged": true,
+  "missing_generated_artifacts": [
+    "marmish-engine-bridge",
+    "marmish-engine-worker",
+    "marmish-keychain",
+    "marmish-release-tool",
+    "marmish-worker"
+  ],
+  "outcome": "blocked",
+  "platform": "macos-arm64",
+  "reference_binary_sha256": {
+    "marmish": "8097469a154ba7cf3a5a4d4848537f7ce72ba9f767f90ab7362aba8074842ac7",
+    "marmish-engine-bridge": "225814a08efca7c3c408816856340f4c8ccc5bf832060956cb8abf8f955f71d4",
+    "marmish-engine-worker": "e2c92b02e0530af38502f67fd0f5221051aebb4010c39ef4d8a7b1be3601c842",
+    "marmish-keychain": "24f948313871451e29acd666d042a1a417d0a74e7e7c930bc1852c401d175a33",
+    "marmish-release-tool": "197604da722f307864dc8118a1f3c5b59ead55cfc2e344b1aa810dbd157f37a0",
+    "marmish-worker": "b95f465c76232d8b93498cb4db5c33017273042ad2263353366bb018e9650501",
+    "marmishd": "f35024f7a3a342392d36b83e4348f7bf0ea65d9e39b9358425c8249592038f41"
+  },
+  "reference_complete": false,
+  "relay_sha256": "7c5cbfee478f225bdfe8d5b83bf17612772adf8ead13e36d7d47a02ba24e14e3",
+  "residual_workers_terminated": 0,
+  "sandbox_probes": true,
+  "schema": 1,
+  "setups": {},
+  "short_interpreter_sha256": "6dca157b9d524d141e5a09e7f587f9909da143e29bd06eb516bc18256ed98659",
+  "short_runtime_record_sha256": "cbe54cdd175de958c39caa73d24af3b49e490b22b1f63b4464a4e708bf3963a9",
+  "stage": "sandbox",
+  "upstream": "af54339d250290490d62d4475a77539b7e739071",
+  "workspace_removed": true
+}

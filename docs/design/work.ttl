@@ -2657,12 +2657,12 @@ w:basicPeerSetup a p:Task ;
 w:basicClientQualification a p:Task ;
     rdfs:label "Verify generated client presentation against the mainline server" ;
     p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
-    p:status p:planned ; p:dependsOn w:basicPeerObservation, w:basicPeerSetup ;
+    p:status p:active ; p:dependsOn w:basicPeerObservation, w:basicPeerSetup ;
     p:acceptance "A generated client submits the fixed cases to a mainline server and presents the attributed reference results." .
 w:basicServerQualification a p:Task ;
     rdfs:label "Verify generated server completion against the mainline client" ;
     p:milestone w:marmishMilestone ; p:source w:basicCommandInteropPlan ;
-    p:status p:planned ; p:dependsOn w:basicPeerObservation, w:basicPeerSetup ;
+    p:status p:active ; p:dependsOn w:basicPeerObservation, w:basicPeerSetup ;
     p:acceptance "A mainline client receives the expected results from the verified generated receiver for all fixed cases." .
 w:basicCommandInterop p:dependsOn w:basicClientQualification, w:basicServerQualification .
 
@@ -3004,3 +3004,23 @@ w:deferredOutputControlFinding a p:Finding ;
 w:retainedLocalPollRecoveryReceipt a p:Artifact ;
     rdfs:label "Source-free client recovers one retained terminal reply, with four independent refusal cases" ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/bfc6deac182917d8e47325eee89dea3d4ee1368c/verification/whole/basic-command-interop/retained-poll-recovery-aarch64-apple-darwin.json" .
+
+w:retainedPollMixedClientPreflight a p:Artifact ;
+    p:location "verification/retained-poll-mixed-client-preflight-macos-arm64.json" .
+w:retainedPollMixedClientReceipt a p:Artifact ;
+    p:location "verification/retained-poll-mixed-client-macos-arm64.json" .
+w:retainedPollMixedServerReceipt a p:Artifact ;
+    p:location "verification/retained-poll-mixed-server-macos-arm64.json" .
+w:basicClientQualification p:evidence w:retainedPollMixedClientPreflight, w:retainedPollMixedClientReceipt .
+w:basicServerQualification p:evidence w:retainedPollMixedServerReceipt .
+w:retainedPollMixedClientReceipt rdfs:label "Generated client returned 255 with command_local_response on the first cold command" .
+w:retainedPollMixedServerReceipt rdfs:label "Mainline client returned 255 with remote_pending and no receiver receipt after 301 seconds" .
+
+w:quiescentMixedClientReceipt a p:Artifact ;
+    rdfs:label "Repeat generated-client command after stopping the installed daemon and verifying separate file keystores" ;
+    p:location "verification/quiescent-mixed-client-macos-arm64.json" .
+w:quiescentMixedServerReceipt a p:Artifact ;
+    rdfs:label "Repeat generated-server command from a host with zero Marmish processes and zero test workspaces" ;
+    p:location "verification/quiescent-mixed-server-macos-arm64.json" .
+w:basicClientQualification p:evidence w:quiescentMixedClientReceipt .
+w:basicServerQualification p:evidence w:quiescentMixedServerReceipt .
