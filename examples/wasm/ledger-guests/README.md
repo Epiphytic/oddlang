@@ -15,7 +15,8 @@ Hosts should validate incoming snapshots before supplying them. In direct Wasmti
 After running `scripts/setup-wasm.sh`, run the following from the repository root with published `ledger/` and `ledger-test/` bundles and a fresh output directory.
 
 ```sh
-scripts/build-wasm-guests.sh BUNDLES OUT
+cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml \
+  --bin wasm-guests -- BUNDLES OUT
 ```
 
 The offline build uses the pinned Rust freestanding target, wraps each core module with `wasm-tools component new`, validates the final component, and checks its type against the published world. It also compares the final component's extracted WIT with the full import and export surface derived from the release. The production artifacts export `lookup` and `transfer`. Only the test artifacts export `fixture-load` and `complete-snapshot`. Both worlds import the ledger types and the host's `initial-state` function.

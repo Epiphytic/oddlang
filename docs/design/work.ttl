@@ -3231,3 +3231,8 @@ w:portHistoricTooling p:evidence w:rustAdoptionReplay .
 w:rustAdoptionReplay a p:Artifact ;
     rdfs:label "Rust adoption test replayed six native Go client runs with offline toolchain and module lookup, and rejected both edits to reviewed source" ;
     p:location "verification/provider-tooling/go-adoption.json" .
+
+w:portHistoricTooling p:evidence w:rustGuestComponentMatrix .
+w:rustGuestComponentMatrix a p:Artifact ;
+    rdfs:label "Twelve Wasm components and their WIT rebuilt byte-for-byte with the Rust runner; Wasmtime counterexamples and independent ledger oracle replayed" ;
+    p:location "verification/provider-tooling/wasm-guests.json" .

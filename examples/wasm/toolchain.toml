@@ -1,0 +1,12 @@
+# Kept as quoted scalar assignments for the remaining shell callers.
+rust_version="1.97.1"
+rust_commit="8bab26f4f68e0e26f0bb7960be334d5b520ea452"
+rust_manifest_sha256="03569b1886ceb5c05276b50c8431ab111de944cd6140fe1fa7d821dd8e0f29cf"
+guest_target="wasm32-wasip2"
+ledger_guest_target="wasm32-unknown-unknown"
+guest_profile="release"
+wasm_tools_version="1.250.0"
+aarch64_macos="1efe40e1923a80947db3a9a8b84c64442c539988a25cfd4ebe516d00bb5c4ba3"
+x86_64_macos="491edeb43ba81154b44da5f8da7dba64a4a3fed5ab4985c58e9a48d1b75ad41b"
+aarch64_linux="a6f7684f4bc618068cf9ae09cf3c1ccfe72a97061324c8f7a15f409f6a4c18c3"
+x86_64_linux="b746c34e7c4162b8812eb29397ebe076834e496a8c46fe68d793379a2741eb50"

@@ -27,7 +27,8 @@ prepare() {
     cargo run --quiet --locked --offline --bin oddlang -- wasm publish contracts/wasm/ledger-test contracts/wasm/ledger-test/dependencies.lock.json "$release_store" "$out/ledger-test"
     cargo run --quiet --locked --offline --bin oddlang -- wasm publish contracts/wasm/echo contracts/wasm/empty.lock.json "$release_store" "$out/echo"
     cargo run --quiet --locked --offline --bin publish-wasm-matrix -- "$out"
-    WASM_TOOLS="$out/wasm-tools" scripts/build-wasm-guests.sh "$out" "$out/guests"
+    cargo +"$rust_version" run --locked --offline --manifest-path verification/provider-validation/Cargo.toml \
+        --bin wasm-guests -- "$out" "$out/guests"
     cargo +"$rust_version" build --locked --offline --manifest-path examples/wasm/Cargo.toml \
         --target-dir target/wasm-host -p runtime-host
     cp target/wasm-host/debug/runtime-host "$out/runtime-host"

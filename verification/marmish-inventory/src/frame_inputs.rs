@@ -55,6 +55,7 @@ pub fn harness(root: &Path) -> Result<Value> {
         "examples/wasm/Cargo.lock",
         "examples/wasm/host/Cargo.toml",
         "examples/wasm/toolchain.lock",
+        "examples/wasm/toolchain.toml",
         "scripts/marmish/frame.sh",
         "scripts/marmish/observe_core.rs",
         "scripts/marmish/test_base64_tails.rs",
