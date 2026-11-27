@@ -3106,6 +3106,10 @@ w:replaceableWasmProviders a p:Task ;
     p:status p:done ; p:evidence w:providerCompatibilityReplay, w:providerClientTests .
 w:providerCompatibilityReplay a p:Artifact ; p:location "verification/provider-validation/macos-arm64.json" .
 w:providerClientTests a p:Artifact ; p:location "tests/provider_interop.rs" .
+w:providerLibraryExportsReplay a p:Artifact ;
+    rdfs:label "Rust caller uses a Wasm provider's exported trait, static and union. The Marmish reconstruction and mixed copy-frame receipts cover the same compiler." ;
+    p:location "verification/provider-tooling/provider-library-exports.json" .
+w:replaceableWasmProviders p:evidence w:providerLibraryExportsReplay .
 w:wasmProviderDesign a p:Artifact ;
     rdfs:label "Replaceable Oddlang providers design" ;
     p:location "docs/superpowers/specs/2026-11-26-wasm-provider-design.md" .
