@@ -71,5 +71,71 @@
     ],
     "archivedImportObservationsMatched": 140
   },
-  "rustLibraryTestsPassed": 9
+  "rustLibraryTestsPassed": 9,
+  "nativeManifestAndArtifactSelection": {
+    "companionRevision": "f2862d2cdcd28426d423141eee9cb003f3d2a3d5",
+    "historicalAdapterRevision": "a3764d5f56172f5ae84d86d41f75418ce2bbe5c9",
+    "baselineManifestMembersMatched": 7,
+    "artifactSelectionsMatched": [
+      {
+        "role": "generated",
+        "libraries": 7,
+        "linkedPaths": 4
+      },
+      {
+        "role": "upstream",
+        "libraries": 1,
+        "linkedPaths": 2
+      }
+    ],
+    "rejectedByBoth": [
+      "truncated Cargo log",
+      "library outside target",
+      "modified generated member"
+    ],
+    "canonicalEngineChoices": {
+      "workspaceLockSha256": "a72d0b0538b3afc272fcd7f5cf8cc900935fd4cc920261fa4bd6bcea46270292",
+      "candidateArtifactLogSha256": "abb7a2bc9fbb6f388fed647e9e96144049733b0ee28ca1f0f6c792ac25d0f4ea",
+      "originalArtifactLogSha256": "4f2f666e5565e5426f071ad6a817cfd5c01423413904c05dcbcdb7db1505e4b5",
+      "verifierSha256": "6f682257cdef86155411313ff4438f4cfc957c65d3591a43c335e5318e90a2da",
+      "totals": {
+        "importable": 79,
+        "missing": 61
+      },
+      "prototypeValueProbes": {
+        "original": {
+          "MAX_LINE": {
+            "compiles": true,
+            "diagnostics": [],
+            "value": 131072
+          },
+          "serve": {
+            "compiles": true,
+            "diagnostics": []
+          },
+          "librarySha256": "c16b6d01db6c438e5fdf0dea9b805ac26d9f6adce947ffcc3b8b9f2d7589da45"
+        },
+        "generated": {
+          "MAX_LINE": {
+            "compiles": true,
+            "diagnostics": [],
+            "value": 131072
+          },
+          "serve": {
+            "compiles": false,
+            "diagnostics": [
+              {
+                "code": "E0425",
+                "message": "cannot find value `serve` in crate `observed`",
+                "rendered": "error[E0425]: cannot find value `serve` in crate `observed`\n --> caller.rs:4:15\n  |\n4 |     observed::serve\n  |               ^^^^^ not found in `observed`\n\n"
+              }
+            ]
+          },
+          "librarySha256": "3f05dc752554581388803e10b7b69254761b421383ca8c2792865884ee193104"
+        }
+      }
+    },
+    "archivedImportObservationsMatched": 140,
+    "staleUpstreamCache": "The replay stopped on rustc E0460 when using the existing upstream Cargo log and artifacts. A fresh locked offline upstream build passed using the same generated workspace and candidate artifacts."
+  }
 }

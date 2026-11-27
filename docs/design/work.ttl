@@ -3752,3 +3752,5 @@ w:portHistoricTooling p:evidence w:sevenPublicImportsRust .
 w:sevenPublicImportsRust a p:Artifact ;
     rdfs:label "The Rust seven-library public import verifier reproduced the archived verifier's 140 import outcomes and diagnostics and both prototype caller checks on ARM64 macOS. Its locked offline build replay preserved every caller result. The canonical engine-choice replay matched the archived two gains, Stream and SubmitDisposition." ;
     p:location "verification/provider-tooling/seven-public-imports-rust.json" .
+
+w:sevenPublicImportsRust rdfs:comment "Historical callers now verify the returned release manifest and select Cargo metadata, libraries and linker paths through the same Rust routines as the native audit. Both implementations rejected a truncated build, artifacts outside the target and one altered member. On ARM64 macOS the Rust command with a rebuilt upstream prototype matched all 140 archived canonical-engine-choice observations." .
