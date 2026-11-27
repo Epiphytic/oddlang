@@ -3637,3 +3637,8 @@ w:portHistoricTooling p:evidence w:linkedRangeRustdocCollector .
 w:linkedRangeRustdocCollector a p:Artifact ;
     rdfs:label "Rust collected the pinned original and mutated MissingRange compiler documents. The full macOS ARM64 recovery matched both archived graphs, overlays, generated file inventories, package locks and native observations. Only the unknown-field case changed between the two source versions. Both rustdoc evidence formats passed validation." ;
     p:location "verification/provider-tooling/linked-range-rustdoc.json" .
+
+w:portHistoricTooling p:evidence w:localFileCatalogComposition .
+w:localFileCatalogComposition a p:Artifact ;
+    rdfs:label "The Rust composer regenerated five catalog inputs byte for byte. The full macOS qualification matched the archived named test, twelve independent observations, workspace lock and ambiguity mutation. The daemon-independent sandbox probe used the built native test executable. All four Oddlang provider interoperability tests passed." ;
+    p:location "verification/provider-tooling/local-file-catalog-composition.json" .

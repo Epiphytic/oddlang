@@ -1,0 +1,61 @@
+{
+  "companion": "a110f3568b982047f0d759baad8c5e4de9bf7549",
+  "framework": "3543b8cb296c24f2b77a6e98ef4f502b92e4e589",
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "rustc": [
+    "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+    "binary: rustc",
+    "commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+    "commit-date: 2026-07-14",
+    "host: aarch64-apple-darwin",
+    "release: 1.97.1",
+    "LLVM version: 22.1.6"
+  ],
+  "receiptSha256": "27aa15b12d783d756b5efd2c79d8f50b5ac44d427899748140aa1ac8886a170f",
+  "archivedReceiptDifferences": [
+    "companion",
+    "compilerSha256"
+  ],
+  "outputs": {
+    "local-file-catalog-v1/graph.json": "261f40a32f2e243e806ed87f9197daed4d7acab02a281b44b03337f8e9f7c136",
+    "local-file-catalog-v1/Cargo.lock": "6f0d4656294a3293f8bec9a31e98b230e8600520b3b6e84110dbee3762b5bef0",
+    "workspace-v7-local-file-catalog/Cargo.lock": "e280c09159eb9b93cf502cfbd50eb63ca07ab9f20aabf646e5557c1e83b5925e",
+    "native-local-file-catalog-package.json": "340d5e91ce2b3eaf64bd98ef4b48163b51fba5bd4e1e3693aa30635d83fed14b",
+    "workspace-v7-local-file-catalog.json": "855df899152453be8b01044aeffb0d194021c55033569656d9d4492c5fa44a10"
+  },
+  "workspaceLockSha256": "6cc00cdb304db004d4fc7ca7433155442dc7c34170123441904ab696a9d9551c",
+  "sourceDenials": 3,
+  "unchangedCase": "native_manifest::tests::versioned_directory_discovery_supports_both_families_and_rejects_ambiguity",
+  "observations": {
+    "ambiguity-before-caller-digest": "candidate",
+    "bad-syntax": "syntax",
+    "bounded-before-caller-digest": "descriptor",
+    "caller-digest-before-syntax": "digest",
+    "complete-fixed": "accepted",
+    "complete-selected": "accepted",
+    "fixed-mode-mismatch": "metadata",
+    "long-asset": "descriptor",
+    "none": "candidate",
+    "same-length-changed-asset": "digest",
+    "short-asset": "metadata",
+    "valid-content-wrong-name": "candidate"
+  },
+  "mutation": {
+    "failure": "missed-ambiguity",
+    "namedFailed": 1,
+    "removedPrefix": "marmish-0.3.",
+    "workspaceLockSha256": "9ca1af3576e75b65ac03c9f00d224487f13a9aad3fc3e1930d6ac59ad8d75985"
+  },
+  "rejectedControls": [
+    "stale published graph",
+    "changed predecessor lock digest",
+    "surplus descriptor fields",
+    "test dependency already in predecessor lock"
+  ],
+  "providerInteropTests": [
+    "workspace_rejects_registry_configuration_drift_before_projection",
+    "library_binding_rejects_ids_outside_its_declared_namespace",
+    "unknown_capability_and_selected_library_binding_use_the_same_host",
+    "same_native_consumer_and_portable_recovery_for_both_providers"
+  ]
+}

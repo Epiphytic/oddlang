@@ -1,14 +1,14 @@
 {
-  "auditedCompanionRevision": "3d25c2615c46d5cc0857604dab641d29b134dd95",
-  "previousRevision": "30d3373862106b7938414b27ce5e2438be00b671",
-  "reproducedTableSha256": "09998f21b50b0d47fa135f78784b7fcf8a7e540fb77aa17464c200dd358ab707",
-  "remainingProjectToolFiles": 129,
+  "auditedCompanionRevision": "a110f3568b982047f0d759baad8c5e4de9bf7549",
+  "previousRevision": "3d25c2615c46d5cc0857604dab641d29b134dd95",
+  "reproducedTableSha256": "4f6335bb01b6975936552c2e03376daa050f53d877117738ab7d47ed93dfc182",
+  "remainingProjectToolFiles": 128,
   "remainingProjectExtensions": {
-    ".py": 126,
+    ".py": 125,
     ".sh": 3
   },
   "removedSincePrevious": [
-    "verification/whole/gap-range-recovery/rustdoc.py"
+    "verification/whole/local-file-catalog/compose.py"
   ],
   "addedSincePrevious": []
 }
