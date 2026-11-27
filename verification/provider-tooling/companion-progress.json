@@ -1,14 +1,15 @@
 {
-  "auditedCompanionRevision": "45558860cbbd2600d812fdf8c3581f69b5ce3cb8",
-  "previousRevision": "ca36c9b8fc8b22b3583ee05f9d8771736ea6e3c7",
-  "reproducedTableSha256": "68c66b45bbe4f58e30202b332dcd181173b56928b2f3df7a806a37c0f2fa5c3b",
-  "remainingProjectToolFiles": 87,
+  "auditedCompanionRevision": "a3b34ffd1e6431b46f1d0f620216ed3adc4196fa",
+  "previousRevision": "45558860cbbd2600d812fdf8c3581f69b5ce3cb8",
+  "reproducedTableSha256": "268406076d00641debfb41eadd30fd1026208dba644a84785985179b2224f303",
+  "remainingProjectToolFiles": 85,
   "remainingProjectExtensions": {
-    ".py": 86,
+    ".py": 84,
     ".sh": 1
   },
   "removedSincePrevious": [
-    "verification/whole/basic-command-interop/test_qualify.py"
+    "verification/whole/basic-command-interop/candidate_preflight.py",
+    "verification/whole/basic-command-interop/prepare_preflight.py"
   ],
   "addedSincePrevious": []
 }

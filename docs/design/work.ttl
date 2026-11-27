@@ -3825,3 +3825,8 @@ w:portHistoricTooling p:evidence w:commandOutputRust .
 w:commandOutputRust a p:Artifact ;
     rdfs:label "The direct and mixed-peer harnesses use a shared Rust comparator. Offline replay reproduced nine archived status and stream receipts and twelve historical goodput values. Three native test groups and eighteen Python integration tests exercised exact bytes, receiver identity, duration bounds and failure paths." ;
     p:location "verification/provider-tooling/command-output-rust.json" .
+
+w:portHistoricTooling p:evidence w:candidatePreflightRust .
+w:candidatePreflightRust a p:Artifact ;
+    rdfs:label "Two preflight verifiers now use the shared native Seatbelt policy. Five ARM64 macOS candidate exports reproduced all 22 archived exit statuses, stdout and stderr, contract pins and cleanup observations. Ten negative controls passed. A separate test exercised permitted and denied file operations and verified that Seatbelt denied a reachable loopback listener." ;
+    p:location "verification/provider-tooling/candidate-preflight-rust.json" .
