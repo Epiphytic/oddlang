@@ -1,0 +1,374 @@
+{
+  "format": "marmish-gap-reason-recovery-v1",
+  "host": "aarch64-apple-darwin",
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "framework": "a207950ac0576fa76a50e1117ab669baae128c91",
+  "companion": "9f926365d44a9e69c71f3c75c04cd02a7308e53f",
+  "rustc": "8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+  "compilerSha256": "5aaa31d5b041f0f4cb6e37c1ac98fbe53f5e3f0c6d05777b608ad5274810d6af",
+  "sourceSha256": "f147e2d08551d7d758a89b46857805820567a78f70571a663f33ea91672c9d53",
+  "probeSha256": "d19a82fd8ae9107dae49a344de52248487ccf79a0fd907e374153b3013f99d28",
+  "referenceSha256": "431a9eef60aa3ab14968ab9169cdb19a5ad5d825a1872f92bac8d659a944d777",
+  "baselineRecovery": {
+    "format": "oddlang-rust-serde-string-choice-recovery-v1",
+    "graphSha256": "be737d3eeb44a1cbeeeac4b86d6bce5328bcacfb793189b2dbf655d7897810d1",
+    "overlaySha256": "6565b1d98ab10b6b4e8beae25b2ba3c5fbab165f21b91ded64508c3b36a013f9",
+    "qualification": "Syntax candidate. Rust derive resolution, sibling macro expansion and public exports require independent native confirmation.",
+    "selectionSha256": "50f8d5d0814ec0c05a4df54599a2677d41e0ef58165671a8ac60ffdd880f2953",
+    "sourceSha256": "f147e2d08551d7d758a89b46857805820567a78f70571a663f33ea91672c9d53"
+  },
+  "mutationRecovery": {
+    "format": "oddlang-rust-serde-string-choice-recovery-v1",
+    "graphSha256": "50e7b54b8922cd18496e279d520b0b414c94965d39952ef05f6f9c2fc4e5104f",
+    "overlaySha256": "7c0414d09356fe472d6e751ca540b1e9dbf91255e350ed135b1223465b59bc38",
+    "qualification": "Syntax candidate. Rust derive resolution, sibling macro expansion and public exports require independent native confirmation.",
+    "selectionSha256": "2ecab7696a51a24d643d277065066398c6986821522df493b96ec6cab0669ae4",
+    "sourceSha256": "617712b6dcefbda5b4f6d2c50a20b18f5acadc87d9a5cf51e348a6d0aeb8edd0"
+  },
+  "lanes": {
+    "baseline": {
+      "candidate": {
+        "manifestSha256": "22754191e38f2badec9b2beef1c5a59c509a59059635bfa192826b81a3bcdcf7",
+        "packageLockSha256": "c780610b67f988626d5af4a5e9124eaf75d52cf0324382bcafe236911147fd99",
+        "generatedFiles": {
+          "src/group_0/__projection_0.rs": "e8f5ebe06b1b6f504c11f7380fb5e6107bd92ed0e51e8b9662310cc459c8693a",
+          "src/group_0/mod.rs": "7ab9716b54b8033d1bd450469c01a6385fc09384bdeff5a8269eeb6bc31d09b8",
+          "src/lib.rs": "8b8ae582313dbfb0828027f41dfb7d14872488360f0254bf527e8d4b85bd370d"
+        },
+        "projection": {
+          "artifact": "shared.rs",
+          "artifactSha256": "e8f5ebe06b1b6f504c11f7380fb5e6107bd92ed0e51e8b9662310cc459c8693a",
+          "bindingSha256": "ffb071cdbe300766306e0a71d3bac845dab14c09c43bc834257f197da13af1af",
+          "domain": "urn:marmish:engine:output-gap:domain",
+          "domainSha256": "f0a95981a9caca31ee13a108cfb4ccf5a9fcaa60014405ab790aa5549f184804",
+          "format": "oddlang-shared-projection-v1",
+          "obligationsSha256": "a63aed318d05682c2d7fe11589c8a3485a2d22a302fa0475fffe9d66dc30e2fe"
+        }
+      },
+      "originalLibrarySha256": {
+        "marmish_engine": "d088692ae918da9e61566aca3e6e26f900ed83db9892a68c04018df36b620197",
+        "serde_json": "79418fb62da4f0bb1c5b197a4da1224ad67b258ef8ed348087bd88b25762dd3f"
+      },
+      "output": {
+        "observations": [
+          {
+            "id": "Limit-string",
+            "result": {
+              "encoded": "\"Limit\""
+            }
+          },
+          {
+            "id": "Limit-object",
+            "result": {
+              "encoded": "\"Limit\""
+            }
+          },
+          {
+            "id": "StorageFailure-string",
+            "result": {
+              "encoded": "\"StorageFailure\""
+            }
+          },
+          {
+            "id": "StorageFailure-object",
+            "result": {
+              "encoded": "\"StorageFailure\""
+            }
+          },
+          {
+            "id": "Expired-string",
+            "result": {
+              "encoded": "\"Expired\""
+            }
+          },
+          {
+            "id": "Expired-object",
+            "result": {
+              "encoded": "\"Expired\""
+            }
+          },
+          {
+            "id": "UncertainTail-string",
+            "result": {
+              "encoded": "\"UncertainTail\""
+            }
+          },
+          {
+            "id": "UncertainTail-object",
+            "result": {
+              "encoded": "\"UncertainTail\""
+            }
+          },
+          {
+            "id": "case-sensitive",
+            "result": {
+              "column": 7,
+              "diagnostic": "unknown variant `limit`, expected one of `Limit`, `StorageFailure`, `Expired`, `UncertainTail` at line 1 column 7",
+              "line": 1
+            }
+          },
+          {
+            "id": "unknown",
+            "result": {
+              "column": 7,
+              "diagnostic": "unknown variant `Other`, expected one of `Limit`, `StorageFailure`, `Expired`, `UncertainTail` at line 1 column 7",
+              "line": 1
+            }
+          },
+          {
+            "id": "wrong-value",
+            "result": {
+              "column": 10,
+              "diagnostic": "invalid type: integer `1`, expected unit at line 1 column 10",
+              "line": 1
+            }
+          },
+          {
+            "id": "multiple",
+            "result": {
+              "column": 13,
+              "diagnostic": "expected value at line 1 column 13",
+              "line": 1
+            }
+          },
+          {
+            "id": "empty-object",
+            "result": {
+              "column": 2,
+              "diagnostic": "expected value at line 1 column 2",
+              "line": 1
+            }
+          },
+          {
+            "id": "numeric",
+            "result": {
+              "column": 1,
+              "diagnostic": "expected value at line 1 column 1",
+              "line": 1
+            }
+          },
+          {
+            "id": "array",
+            "result": {
+              "column": 1,
+              "diagnostic": "expected value at line 1 column 1",
+              "line": 1
+            }
+          },
+          {
+            "id": "unicode-escape",
+            "result": {
+              "encoded": "\"Limit\""
+            }
+          },
+          {
+            "id": "extra-input",
+            "result": {
+              "column": 9,
+              "diagnostic": "trailing characters at line 1 column 9",
+              "line": 1
+            }
+          }
+        ],
+        "variants": [
+          {
+            "native": "Limit",
+            "wire": "\"Limit\""
+          },
+          {
+            "native": "StorageFailure",
+            "wire": "\"StorageFailure\""
+          },
+          {
+            "native": "Expired",
+            "wire": "\"Expired\""
+          },
+          {
+            "native": "UncertainTail",
+            "wire": "\"UncertainTail\""
+          }
+        ]
+      },
+      "copyControl": [
+        "E0277"
+      ]
+    },
+    "mutation": {
+      "candidate": {
+        "manifestSha256": "ad9b952510e1db88a3024fba48249009d0259fccd38d826a7306db50383f04c6",
+        "packageLockSha256": "6851e2cf5f010082fb6a075c579e7656bd070312b05e7e2f7c153510559bd1b7",
+        "generatedFiles": {
+          "src/group_0/__projection_0.rs": "20325bf5ec5fa7e222c134be276eb74c66fa0e4a4fd997c2252cfe4f32630504",
+          "src/group_0/mod.rs": "7ab9716b54b8033d1bd450469c01a6385fc09384bdeff5a8269eeb6bc31d09b8",
+          "src/lib.rs": "8b8ae582313dbfb0828027f41dfb7d14872488360f0254bf527e8d4b85bd370d"
+        },
+        "projection": {
+          "artifact": "shared.rs",
+          "artifactSha256": "20325bf5ec5fa7e222c134be276eb74c66fa0e4a4fd997c2252cfe4f32630504",
+          "bindingSha256": "153d93ac2264eef435e1a2e2525cbb411127ca79e8504db836600f82a27f531c",
+          "domain": "urn:marmish:engine:output-gap:domain",
+          "domainSha256": "cd40ec322c3f7ca91af9ea2a0ab96bba975882a3952d3e329c38a9ec1f25a4d9",
+          "format": "oddlang-shared-projection-v1",
+          "obligationsSha256": "e9679b6ab933b98e98830faca3825932c31e2a43386f147269e539381af5edfb"
+        }
+      },
+      "originalLibrarySha256": {
+        "marmish_engine": "08e6a34599962a5c05b1465f6d140fe9c42c102bd182ed1c155e1d5ea6a4f4a7",
+        "serde_json": "c2952096c619d2c903df05eb47c699d85ed59c9347936b6998adc3cbbb097e37"
+      },
+      "output": {
+        "observations": [
+          {
+            "id": "Limit-string",
+            "result": {
+              "encoded": "\"Limit\""
+            }
+          },
+          {
+            "id": "Limit-object",
+            "result": {
+              "encoded": "\"Limit\""
+            }
+          },
+          {
+            "id": "StorageFailure-string",
+            "result": {
+              "column": 16,
+              "diagnostic": "unknown variant `StorageFailure`, expected one of `Storage-Failure`, `Limit`, `Expired`, `UncertainTail` at line 1 column 16",
+              "line": 1
+            }
+          },
+          {
+            "id": "StorageFailure-object",
+            "result": {
+              "column": 17,
+              "diagnostic": "unknown variant `StorageFailure`, expected one of `Storage-Failure`, `Limit`, `Expired`, `UncertainTail` at line 1 column 17",
+              "line": 1
+            }
+          },
+          {
+            "id": "Expired-string",
+            "result": {
+              "encoded": "\"Expired\""
+            }
+          },
+          {
+            "id": "Expired-object",
+            "result": {
+              "encoded": "\"Expired\""
+            }
+          },
+          {
+            "id": "UncertainTail-string",
+            "result": {
+              "encoded": "\"UncertainTail\""
+            }
+          },
+          {
+            "id": "UncertainTail-object",
+            "result": {
+              "encoded": "\"UncertainTail\""
+            }
+          },
+          {
+            "id": "case-sensitive",
+            "result": {
+              "column": 7,
+              "diagnostic": "unknown variant `limit`, expected one of `Storage-Failure`, `Limit`, `Expired`, `UncertainTail` at line 1 column 7",
+              "line": 1
+            }
+          },
+          {
+            "id": "unknown",
+            "result": {
+              "column": 7,
+              "diagnostic": "unknown variant `Other`, expected one of `Storage-Failure`, `Limit`, `Expired`, `UncertainTail` at line 1 column 7",
+              "line": 1
+            }
+          },
+          {
+            "id": "wrong-value",
+            "result": {
+              "column": 10,
+              "diagnostic": "invalid type: integer `1`, expected unit at line 1 column 10",
+              "line": 1
+            }
+          },
+          {
+            "id": "multiple",
+            "result": {
+              "column": 13,
+              "diagnostic": "expected value at line 1 column 13",
+              "line": 1
+            }
+          },
+          {
+            "id": "empty-object",
+            "result": {
+              "column": 2,
+              "diagnostic": "expected value at line 1 column 2",
+              "line": 1
+            }
+          },
+          {
+            "id": "numeric",
+            "result": {
+              "column": 1,
+              "diagnostic": "expected value at line 1 column 1",
+              "line": 1
+            }
+          },
+          {
+            "id": "array",
+            "result": {
+              "column": 1,
+              "diagnostic": "expected value at line 1 column 1",
+              "line": 1
+            }
+          },
+          {
+            "id": "unicode-escape",
+            "result": {
+              "encoded": "\"Limit\""
+            }
+          },
+          {
+            "id": "extra-input",
+            "result": {
+              "column": 9,
+              "diagnostic": "trailing characters at line 1 column 9",
+              "line": 1
+            }
+          },
+          {
+            "id": "new-storage-wire-name",
+            "result": {
+              "encoded": "\"Storage-Failure\""
+            }
+          }
+        ],
+        "variants": [
+          {
+            "native": "StorageFailure",
+            "wire": "\"Storage-Failure\""
+          },
+          {
+            "native": "Limit",
+            "wire": "\"Limit\""
+          },
+          {
+            "native": "Expired",
+            "wire": "\"Expired\""
+          },
+          {
+            "native": "UncertainTail",
+            "wire": "\"UncertainTail\""
+          }
+        ]
+      },
+      "copyControl": [
+        "E0277"
+      ]
+    }
+  }
+}

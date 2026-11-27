@@ -1,0 +1,71 @@
+{
+  "format": "marmish-native-backend-choice-evidence-v1",
+  "originalRevision": "af54339d250290490d62d4475a77539b7e739071",
+  "frameworkRevision": "ceb0d7209eceb76621da9e3dd8be2c610a005da2",
+  "rustc": [
+    "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+    "binary: rustc",
+    "commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+    "commit-date: 2026-07-14",
+    "host: aarch64-apple-darwin",
+    "release: 1.97.1",
+    "LLVM version: 22.1.6"
+  ],
+  "probeSha256": "38a49e1083f6022d0fcf44c9773ce598e0af1b1cc23ea5448d02ef0ba8a86b4f",
+  "lanes": {
+    "baseline": {
+      "sourceRevision": "af54339d250290490d62d4475a77539b7e739071",
+      "recovery": {
+        "format": "oddlang-plain-choice-observation-v1",
+        "gap": "native name resolution, trait capabilities and public module paths require downstream compilation",
+        "graphSha256": "78dbab0729733f0c4e700dfbdabd0175e823864867bd69a0c7bc3e8c71c75926",
+        "overlaySha256": "87037762d967a9bb0bdd24a8b92b651dd7297856c8cfa7eb97ee37af9a6d2809",
+        "selectionSha256": "e3c3cbb13255a33abfd76ef8eb16b73d21fa758f77bd3571e55be722ec334207",
+        "sourceSha256": "0f8d1e4bcc9865ada76cc757b8bddcbc3a15397f0075c57d0eb6bd967b2a349d"
+      },
+      "assembledLockSha256": "d979f4103112c8c01ac9d0d9ee7da69ce46a763a1ff5d95e914e2a54a826737d",
+      "outputSha256": "86836d4015d4c063ecbccb80bb409d933226d5f03648f25706b23606da76258b",
+      "negativeRustDiagnostics": {
+        "Debug": "E0277",
+        "Display": "E0277",
+        "Default": "E0277",
+        "Hash": "E0277",
+        "Ord": "E0277",
+        "PartialOrd": "E0277",
+        "Serialize": "E0277",
+        "Deserialize": "E0277",
+        "integerConversion": "E0277",
+        "crossTypeEquality": "E0277",
+        "incompleteMatch": "E0004",
+        "rootExposure": "E0432"
+      }
+    },
+    "mutant": {
+      "sourceRevision": "c736c23a6efcf788c72aebde48dee01b09dba768",
+      "recovery": {
+        "format": "oddlang-plain-choice-observation-v1",
+        "gap": "native name resolution, trait capabilities and public module paths require downstream compilation",
+        "graphSha256": "96cf37b82b923bf8c70ca4fd4c54aa4ec45edfb48a34bd2dfdb16263184eef64",
+        "overlaySha256": "2c3c7556b766dc7007cbc78c1dd38e34ac69d766b34a5a69f677a75e582673f1",
+        "selectionSha256": "38dd659751df322e3512886d34983b232d14047c024fbdcec49247fc7db01e51",
+        "sourceSha256": "b935c6dfbb9dcc960615f53d18be4b104c6b01a28cc4974021411c2fbf95455a"
+      },
+      "assembledLockSha256": "15e2da47597391b25af2d50b6eecd1d024f823e64e33245cd725f74d079387d3",
+      "outputSha256": "b2994e9f706a97ec7eba5b1530b4601cf05264c1db724926255b5f32ca840c8f",
+      "negativeRustDiagnostics": {
+        "Debug": "E0277",
+        "Display": "E0277",
+        "Default": "E0277",
+        "Hash": "E0277",
+        "Ord": "E0277",
+        "PartialOrd": "E0277",
+        "Serialize": "E0277",
+        "Deserialize": "E0277",
+        "integerConversion": "E0277",
+        "crossTypeEquality": "E0277",
+        "incompleteMatch": "E0004",
+        "rootExposure": "E0432"
+      }
+    }
+  }
+}

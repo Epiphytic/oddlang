@@ -1,0 +1,317 @@
+{
+  "platform": "aarch64-apple-darwin",
+  "compilerCommit": "a207950ac0576fa76a50e1117ab669baae128c91",
+  "companionCommit": "a5078f427d4ffd59191715b6f44dae91d79f3078",
+  "previousBuildReceiptSha256": "599dcc864aa25486f136800f979f7ee5f3313004bf7bcb1d589d96d521215efa",
+  "buildReceiptSha256": "aa700d985020fa63309d8ec939fc3123c6e596bed193660e2a9a31c85dda0ee4",
+  "workspaceLockSha256": "889017343f0fdb092dee203264aa4f6d6d194bad8ef396e336f2dd2cf6ec9b76",
+  "workspaceMembers": 7,
+  "stagedInputs": 111,
+  "descriptorComparisons": 48,
+  "unexpectedExecutableRejections": 48,
+  "additionalRejectedInputs": [
+    "duplicate executable",
+    "duplicate CLI binding",
+    "undeclared CLI executable",
+    "missing executable",
+    "corrupt member manifest digest",
+    "corrupt overlay digest",
+    "overlay symlink outside staged root"
+  ],
+  "cliSurfaces": {
+    "marmish": {
+      "boundOperations": [
+        "*",
+        "init",
+        "release-info",
+        "setup",
+        "status",
+        "wait"
+      ],
+      "unboundOperations": [
+        "cancel",
+        "command-check",
+        "command-cleanup-status",
+        "command-evidence",
+        "command-local-cancel",
+        "command-prepare-cleanup",
+        "command-status",
+        "commands",
+        "copy-receipts",
+        "daemon",
+        "foundation-check",
+        "get",
+        "install",
+        "install-status",
+        "keychain-authorize",
+        "open-conversation",
+        "output",
+        "put",
+        "received",
+        "send",
+        "stream",
+        "stream-reconcile",
+        "streams",
+        "uninstall"
+      ],
+      "uncoveredExit": 125
+    },
+    "marmishd": {
+      "boundOperations": [
+        "daemon",
+        "release-info"
+      ],
+      "unboundOperations": [
+        "*",
+        "cancel",
+        "command-check",
+        "command-cleanup-status",
+        "command-evidence",
+        "command-local-cancel",
+        "command-prepare-cleanup",
+        "command-status",
+        "commands",
+        "copy-receipts",
+        "foundation-check",
+        "get",
+        "init",
+        "install",
+        "install-status",
+        "keychain-authorize",
+        "open-conversation",
+        "output",
+        "put",
+        "received",
+        "send",
+        "setup",
+        "status",
+        "stream",
+        "stream-reconcile",
+        "streams",
+        "uninstall",
+        "wait"
+      ],
+      "uncoveredExit": 125
+    }
+  },
+  "differentBuildFields": [
+    "artifacts",
+    "buildDriverCheckout",
+    "builderSha256",
+    "compilerSha256",
+    "seatbeltPolicySha256"
+  ],
+  "artifacts": {
+    "marmish": {
+      "sha256": "9981753cb80fc76a94a0f9d73782b85b5bc1a89b070d6685d458be7f40fd8c47",
+      "sizeBytes": 22251296
+    },
+    "marmishd": {
+      "sha256": "637457ded4bb85c23fcc32ca79456c3de2bcb969e7b8528809694d022c018f30",
+      "sizeBytes": 48621792
+    }
+  },
+  "preflight": {
+    "format": "marmish-profile-policy-preflight-v1",
+    "buildReceiptSha256": "aa700d985020fa63309d8ec939fc3123c6e596bed193660e2a9a31c85dda0ee4",
+    "preflightSha256": "a16b395aca24ce3047f8786eb6b4362830f54ef9a2f17ed704a23bad1390b1a3",
+    "cases": {
+      "setupWithoutFileProvider": {
+        "role": "marmish",
+        "argv": [
+          "setup",
+          "--role",
+          "client",
+          "--no-grants"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "marmish: profile preparation requires the file key provider\n"
+      },
+      "foregroundWithoutState": {
+        "role": "marmishd",
+        "argv": [
+          "--foreground"
+        ],
+        "exit": 125,
+        "stdout": "",
+        "stderr": "marmish: foreground status owner requires explicit state and a prepared file profile\n"
+      }
+    },
+    "workspaceRemoved": true,
+    "compositionPins": {
+      "workspace-profile-command-policy.json": "35fcd02816277171b6eac6c9349b2d14439ac9cab038f1f347ddaa5f67d300a1",
+      "marmish-native-profile-command-policy-package.json": "47acca0c2a5d49f22c602fa0aa5d5d454a6de13f2f1c9f9a0b79ee88e4153182",
+      "recovered-command-policy-v1/foreground.json": "d314e96ba0fbc63ff52ce907a3e842a584e26c7b87f98f561dc88d1a10db1cab",
+      "basic-command-delivery-v1/cli.rust.json": "dc0531e6d49ec46f73b383566b8e73bede4be426315224888710119eef939d41"
+    }
+  },
+  "productAndArtifactVerification": {
+    "baselineBuildReceipt": "https://github.com/Epiphytic/marmish-oddlang/blob/0e637166e3117ec64514e77531cb0c7dab199e16/verification/whole/basic-command-interop/profile-policy-build-macos-arm64.json",
+    "baselineBuildSha256": "599dcc864aa25486f136800f979f7ee5f3313004bf7bcb1d589d96d521215efa",
+    "buildReceiptSha256": "1ebd468e3993283158e854a35548b3102ae4dc11b6a2c6db81040192f9770a42",
+    "buildReceiptChangedFields": {
+      "artifacts": {
+        "marmish": {
+          "sha256": "5f00b52d63d808b6077ef2630ede01ffb379da50c34c9b3044f8351c597a6821",
+          "sizeBytes": 22251296
+        },
+        "marmishd": {
+          "sha256": "54b57e22493b82857ba42d1a40d3fb4843954d6d38020e5b8bc3d5ad523cfbca",
+          "sizeBytes": 48621792
+        }
+      },
+      "buildDriverCheckout": "88b2b96993be6b6335d0bc5a6e2e31a7605c0b19",
+      "builderSha256": "7694b7546d233d95887507b376ac6054062f7b54a031b6bb96e3353cafce733a",
+      "compilerSha256": "3dcf1baeb45a0bcaa9ba504435b11aeff185198824b0014973cb760268fa5da3",
+      "seatbeltPolicySha256": "aef13920b5b3debe5d170aad40abd56d13aeb27c8db67436155e09fd19ca1259"
+    },
+    "receiptEncoding": "Replace the listed top-level fields in the baseline, then serialize with sorted keys, two-space indentation and a final newline.",
+    "productLayoutsAccepted": [
+      "published workspace",
+      "workspace with Cargo target artifacts",
+      "empty nested directories"
+    ],
+    "productMutationsRejected": [
+      "file under an extra directory",
+      "extra root file",
+      "extra member file",
+      "extra source file",
+      "changed Cargo.toml",
+      "changed Cargo.lock",
+      "changed workspace.lock",
+      "changed member package.lock",
+      "changed member Cargo.toml",
+      "changed member build.rs",
+      "symlinked member package.lock"
+    ],
+    "cargoChecks": {
+      "freshExecutableNames": [
+        "one",
+        "two"
+      ],
+      "rejected": [
+        "cached rebuild",
+        "duplicate report",
+        "test profile",
+        "invalid target name",
+        "unexpected executable path",
+        "missing executable",
+        "invalid JSON"
+      ],
+      "ignored": [
+        "non-executable artifact",
+        "library artifact",
+        "external manifest"
+      ]
+    },
+    "preflight": {
+      "format": "marmish-profile-policy-preflight-v1",
+      "buildReceiptSha256": "1ebd468e3993283158e854a35548b3102ae4dc11b6a2c6db81040192f9770a42",
+      "preflightSha256": "a16b395aca24ce3047f8786eb6b4362830f54ef9a2f17ed704a23bad1390b1a3",
+      "cases": {
+        "setupWithoutFileProvider": {
+          "role": "marmish",
+          "argv": [
+            "setup",
+            "--role",
+            "client",
+            "--no-grants"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "marmish: profile preparation requires the file key provider\n"
+        },
+        "foregroundWithoutState": {
+          "role": "marmishd",
+          "argv": [
+            "--foreground"
+          ],
+          "exit": 125,
+          "stdout": "",
+          "stderr": "marmish: foreground status owner requires explicit state and a prepared file profile\n"
+        }
+      },
+      "workspaceRemoved": true,
+      "compositionPins": {
+        "workspace-profile-command-policy.json": "35fcd02816277171b6eac6c9349b2d14439ac9cab038f1f347ddaa5f67d300a1",
+        "marmish-native-profile-command-policy-package.json": "47acca0c2a5d49f22c602fa0aa5d5d454a6de13f2f1c9f9a0b79ee88e4153182",
+        "recovered-command-policy-v1/foreground.json": "d314e96ba0fbc63ff52ce907a3e842a584e26c7b87f98f561dc88d1a10db1cab",
+        "basic-command-delivery-v1/cli.rust.json": "dc0531e6d49ec46f73b383566b8e73bede4be426315224888710119eef939d41"
+      }
+    }
+  },
+  "registryStaging": {
+    "locksCompared": 8,
+    "archivesCompared": 661,
+    "identicalInventoryEntries": 2437,
+    "controlsRejectedWithoutPublishing": [
+      "incorrect archive digest",
+      "conflicting lock checksums",
+      "missing archive",
+      "unexpected registry",
+      "invalid archive filename",
+      "duplicate archive locations",
+      "index symlink",
+      "archive symlink"
+    ],
+    "additionalControls": [
+      "duplicate identical pins accepted",
+      "index excludes .git and .DS_Store",
+      "existing output preserved"
+    ],
+    "baselineBuildSha256": "599dcc864aa25486f136800f979f7ee5f3313004bf7bcb1d589d96d521215efa",
+    "buildReceiptChangedFields": {
+      "artifacts": {
+        "marmish": {
+          "sha256": "10e9df19535c685ca11774375040882a00662d7325407643310171a003615583",
+          "sizeBytes": 22251296
+        },
+        "marmishd": {
+          "sha256": "afb8efb80dd24d245368c3a0e04da5d1709ecd3bad1f87f9be20b20b6f434900",
+          "sizeBytes": 48621792
+        }
+      },
+      "buildDriverCheckout": "64957d92e9f6cfd031b4f9eed4132bc81f73f14e",
+      "builderSha256": "2d3f310e0e834c8fdcb5bae8bd510ce0ab67f100b1705aa752aa79dbbd55ebd1",
+      "compilerSha256": "c542f02a45d5a65a6af21e97911519e4ec051f777b62eaf263b18b4eca33a602",
+      "seatbeltPolicySha256": "aaed7cf86f0c6d727d972194244861d1f3612ff8322d025052025eb8717051f3"
+    },
+    "buildReceiptSha256": "b3c2b64027e7995598b1e9ac91d4beda7a6293f2b37c6e237cc6a911fccbbf74",
+    "preflight": {
+      "format": "marmish-profile-policy-preflight-v1",
+      "buildReceiptSha256": "b3c2b64027e7995598b1e9ac91d4beda7a6293f2b37c6e237cc6a911fccbbf74",
+      "preflightSha256": "a16b395aca24ce3047f8786eb6b4362830f54ef9a2f17ed704a23bad1390b1a3",
+      "cases": {
+        "setupWithoutFileProvider": {
+          "role": "marmish",
+          "argv": [
+            "setup",
+            "--role",
+            "client",
+            "--no-grants"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "marmish: profile preparation requires the file key provider\n"
+        },
+        "foregroundWithoutState": {
+          "role": "marmishd",
+          "argv": [
+            "--foreground"
+          ],
+          "exit": 125,
+          "stdout": "",
+          "stderr": "marmish: foreground status owner requires explicit state and a prepared file profile\n"
+        }
+      },
+      "workspaceRemoved": true,
+      "compositionPins": {
+        "workspace-profile-command-policy.json": "35fcd02816277171b6eac6c9349b2d14439ac9cab038f1f347ddaa5f67d300a1",
+        "marmish-native-profile-command-policy-package.json": "47acca0c2a5d49f22c602fa0aa5d5d454a6de13f2f1c9f9a0b79ee88e4153182",
+        "recovered-command-policy-v1/foreground.json": "d314e96ba0fbc63ff52ce907a3e842a584e26c7b87f98f561dc88d1a10db1cab",
+        "basic-command-delivery-v1/cli.rust.json": "dc0531e6d49ec46f73b383566b8e73bede4be426315224888710119eef939d41"
+      }
+    }
+  }
+}
