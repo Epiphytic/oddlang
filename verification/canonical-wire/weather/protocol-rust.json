@@ -1,0 +1,31 @@
+{
+  "format": "oddlang-json-wire-protocol-rust-v1",
+  "errorType": "crate::Failure",
+  "errors": {
+    "urn:weather:symbol:limit": "Limit",
+    "urn:weather:symbol:invalid": "Invalid"
+  },
+  "constants": {
+    "urn:weather:revision": "FORMAT"
+  },
+  "fields": {
+    "urn:weather:native-count": "count",
+    "urn:weather:send-seq": "sequence",
+    "urn:weather:native-bytes": "bytes",
+    "urn:weather:native-label": "label",
+    "urn:weather:native-samples": "samples"
+  },
+  "internalEnvelope": true,
+  "endpoints": {
+    "urn:weather:send": {
+      "type": "Upload",
+      "encode": "encode_upload",
+      "decode": "decode_upload",
+      "derives": [
+        "Clone",
+        "PartialEq",
+        "Eq"
+      ]
+    }
+  }
+}

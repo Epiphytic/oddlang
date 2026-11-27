@@ -1,0 +1,29 @@
+{
+  "format": "oddlang-shared-declarations-v1",
+  "id": "urn:weather:errors",
+  "errors": [
+    {
+      "id": "urn:weather:error",
+      "variants": [
+        {
+          "id": "urn:weather:symbol:limit",
+          "payload": "none",
+          "message": [
+            {
+              "text": "too long"
+            }
+          ]
+        },
+        {
+          "id": "urn:weather:symbol:invalid",
+          "payload": "none",
+          "message": [
+            {
+              "text": "invalid"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

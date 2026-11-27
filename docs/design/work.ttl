@@ -840,7 +840,7 @@ w:canonicalWireNativePackage a p:Task ;
     p:dependsOn w:jsonWireCanonicalOperations ;
     p:acceptance "Pin the structural shape and overlay separately from the operation inputs, project a package module, preserve the pins in its lock, and verify exact width and writer limits with an external native caller." ;
     p:evidence w:canonicalWirePackageFixture .
-w:canonicalWirePackageFixture a p:Artifact ; p:location "verification/canonical-wire/package.py" .
+w:canonicalWirePackageFixture a p:Artifact ; p:location "verification/provider-validation/src/bin/canonical-wire-package.rs" .
 w:wholeMarmishProtocols p:dependsOn w:canonicalWireNativePackage .
 
 w:jsonWireSchemaReview a p:Finding ;
@@ -3142,3 +3142,8 @@ w:canonicalRadioReplay a p:Artifact ; rdfs:label "Native nested and flat canonic
 
 w:portHistoricTooling p:evidence w:integrityBlockNativeReplay .
 w:integrityBlockNativeReplay a p:Artifact ; p:location "verification/provider-validation/src/bin/integrity-block.rs" .
+
+w:portHistoricTooling p:evidence w:canonicalWeatherReplay .
+w:canonicalWeatherReplay a p:Artifact ;
+    rdfs:label "Native weather package caller, rejection cases and byte comparison with the historical verifier" ;
+    p:location "verification/provider-tooling/canonical-weather-replay.json" .

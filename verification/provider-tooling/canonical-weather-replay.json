@@ -1,0 +1,22 @@
+{
+  "additionalRejectionCases": 6,
+  "comparedAgainstOriginalEmissions": true,
+  "compilerSha256": "3884c423fccb909d69c8a6d5e119d4097b8ea6fade8936274edfe814890a08a4",
+  "format": "oddlang-canonical-weather-replay-v1",
+  "generatedFiles": {
+    "src/group_0/__projection_0.rs": "c475dcbb6c773bdd60d2ef079d7b37c7b3aee06b3e04842afbb8e4be5643d0bb",
+    "src/group_0/mod.rs": "9327de0fdb2d5eb238c394523f37780f2a50c54d5a7b7e94c77dd3f9caf589dd",
+    "src/group_1/__projection_1.rs": "7ca9462020251e6fe812ba2017bac7db1f474bd629fa46045e0cdb87baca275d",
+    "src/group_1/mod.rs": "5c43b8236a0533d0a279aaf21671e92ebecb2d57462c04d599ed88e5e6c63366",
+    "src/lib.rs": "d47f526bfb8fdba7aa387f3c71ce0580c43fc7285d02e34b8a39d0914edea196"
+  },
+  "invalidGuardCases": 14,
+  "nativeObserver": "verification/canonical-wire/package_fixture.rs",
+  "nativeWarningsDenied": true,
+  "obligations": 30,
+  "obligationsSha256": "7837ba8be201ffb5c359a16e60f8bd7912feb8daaa5c96a04b47576e6f3aa659",
+  "observerSha256": "e21fd7973e3b2bcb8bb42dfa2bc307526fe564016e9b9a8d781c41e0ddca1ece",
+  "originalVerifierBlob": "a2da1f33e89d733d067d6484f3752f6c6cec1b12",
+  "platform": "aarch64-apple-darwin",
+  "wireRustSha256": "7ca9462020251e6fe812ba2017bac7db1f474bd629fa46045e0cdb87baca275d"
+}

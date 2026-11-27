@@ -1,0 +1,273 @@
+{
+  "format": "oddlang-json-wire-protocol-v1",
+  "id": "urn:weather:protocol",
+  "envelope": "urn:weather:envelope",
+  "selector": "urn:weather:packet",
+  "maximumWireBytes": 160,
+  "sizeError": "urn:weather:limit",
+  "admissionError": "urn:weather:invalid",
+  "errors": {
+    "urn:weather:limit": {
+      "variant": "urn:weather:symbol:limit"
+    },
+    "urn:weather:invalid": {
+      "variant": "urn:weather:symbol:invalid"
+    }
+  },
+  "constants": [
+    {
+      "id": "urn:weather:revision",
+      "value": 2,
+      "type": {
+        "kind": "unsigned",
+        "bits": 32
+      }
+    }
+  ],
+  "literals": {
+    "urn:weather:format": "urn:weather:revision"
+  },
+  "endpoints": [
+    {
+      "id": "urn:weather:send",
+      "variant": "urn:weather:upload",
+      "guards": [],
+      "fields": [
+        {
+          "id": "urn:weather:send-seq",
+          "from": {
+            "kind": "envelope-field",
+            "field": "urn:weather:seq"
+          }
+        },
+        {
+          "id": "urn:weather:native-count",
+          "from": {
+            "kind": "case-field",
+            "field": "urn:weather:count"
+          }
+        },
+        {
+          "id": "urn:weather:native-bytes",
+          "from": {
+            "kind": "case-field",
+            "field": "urn:weather:bytes"
+          }
+        },
+        {
+          "id": "urn:weather:native-label",
+          "from": {
+            "kind": "case-field",
+            "field": "urn:weather:label"
+          }
+        },
+        {
+          "id": "urn:weather:native-samples",
+          "from": {
+            "kind": "case-field",
+            "field": "urn:weather:samples"
+          }
+        }
+      ],
+      "steps": [
+        {
+          "kind": "require",
+          "id": "urn:weather:byte-length",
+          "predicate": {
+            "kind": "all",
+            "items": [
+              {
+                "kind": "compare",
+                "left": {
+                  "kind": "length",
+                  "value": {
+                    "scope": "value",
+                    "fields": [
+                      "urn:weather:native-bytes"
+                    ]
+                  }
+                },
+                "operator": "at-least",
+                "right": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              {
+                "kind": "compare",
+                "left": {
+                  "kind": "length",
+                  "value": {
+                    "scope": "value",
+                    "fields": [
+                      "urn:weather:native-bytes"
+                    ]
+                  }
+                },
+                "operator": "at-most",
+                "right": {
+                  "kind": "constant",
+                  "value": 4
+                }
+              }
+            ]
+          },
+          "error": "urn:weather:invalid"
+        },
+        {
+          "kind": "for-each",
+          "id": "urn:weather:each-batch",
+          "value": {
+            "scope": "value",
+            "fields": [
+              "urn:weather:native-samples"
+            ]
+          },
+          "bind": "batch",
+          "steps": [
+            {
+              "kind": "for-each",
+              "id": "urn:weather:each-sample",
+              "value": {
+                "scope": "batch",
+                "fields": []
+              },
+              "bind": "sample",
+              "steps": [
+                {
+                  "kind": "check-record",
+                  "id": "urn:weather:apply-sample-check",
+                  "value": {
+                    "scope": "sample",
+                    "fields": []
+                  },
+                  "check": "urn:weather:check:sample"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "recordChecks": {
+    "urn:weather:check:sample": {
+      "owner": "urn:weather:sample",
+      "steps": [
+        {
+          "kind": "check-record",
+          "id": "urn:weather:check-name",
+          "value": {
+            "scope": "value",
+            "fields": []
+          },
+          "check": "urn:weather:check:text"
+        },
+        {
+          "kind": "require",
+          "id": "urn:weather:sample-json-size",
+          "predicate": {
+            "kind": "compare",
+            "left": {
+              "kind": "json-string-length",
+              "value": {
+                "scope": "value",
+                "fields": [
+                  "urn:weather:sample-tag"
+                ]
+              }
+            },
+            "operator": "at-most",
+            "right": {
+              "kind": "constant",
+              "value": 16
+            }
+          },
+          "error": "urn:weather:limit"
+        },
+        {
+          "kind": "check-record",
+          "id": "urn:weather:allow-empty-rule",
+          "value": {
+            "scope": "value",
+            "fields": []
+          },
+          "check": "urn:weather:check:empty"
+        }
+      ]
+    },
+    "urn:weather:check:text": {
+      "owner": "urn:weather:sample",
+      "steps": [
+        {
+          "kind": "require",
+          "id": "urn:weather:sample-name",
+          "predicate": {
+            "kind": "any",
+            "items": [
+              {
+                "kind": "text-equal",
+                "value": {
+                  "scope": "value",
+                  "fields": [
+                    "urn:weather:sample-tag"
+                  ]
+                },
+                "text": "hail"
+              },
+              {
+                "kind": "text-prefix",
+                "value": {
+                  "scope": "value",
+                  "fields": [
+                    "urn:weather:sample-tag"
+                  ]
+                },
+                "text": "rain:"
+              }
+            ]
+          },
+          "error": "urn:weather:invalid"
+        },
+        {
+          "kind": "require",
+          "id": "urn:weather:sample-nul",
+          "predicate": {
+            "kind": "text-excludes-nul",
+            "value": {
+              "scope": "value",
+              "fields": [
+                "urn:weather:sample-tag"
+              ]
+            }
+          },
+          "error": "urn:weather:invalid"
+        }
+      ]
+    },
+    "urn:weather:check:empty": {
+      "owner": "urn:weather:sample",
+      "steps": []
+    },
+    "urn:weather:check:unused": {
+      "owner": "urn:weather:sample",
+      "steps": [
+        {
+          "kind": "require",
+          "id": "urn:weather:unused-tag-rule",
+          "predicate": {
+            "kind": "text-equal",
+            "value": {
+              "scope": "value",
+              "fields": [
+                "urn:weather:sample-tag"
+              ]
+            },
+            "text": "unused rule sentinel"
+          },
+          "error": "urn:weather:invalid"
+        }
+      ]
+    }
+  }
+}
