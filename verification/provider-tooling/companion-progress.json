@@ -1,14 +1,14 @@
 {
-  "auditedCompanionRevision": "4226e010dd42f2e05099d72d8e64690fc06166a8",
-  "previousRevision": "a3b34ffd1e6431b46f1d0f620216ed3adc4196fa",
-  "reproducedTableSha256": "747a857a1e93e3f091636a87dbd47692c8469b572fee66546dcdc5d7380dd25d",
-  "remainingProjectToolFiles": 84,
+  "auditedCompanionRevision": "e61caebc45f9cda73a2eef20cc8611fc82eb4521",
+  "previousRevision": "4226e010dd42f2e05099d72d8e64690fc06166a8",
+  "reproducedTableSha256": "865ce09ba433feacc04d1889f3c8fb9b63eeeaead634fd58ee60762d21a8aba9",
+  "remainingProjectToolFiles": 83,
   "remainingProjectExtensions": {
-    ".py": 83,
+    ".py": 82,
     ".sh": 1
   },
   "removedSincePrevious": [
-    "verification/whole/basic-command-interop/composed_preflight.py"
+    "verification/whole/basic-command-interop/profile_setup.py"
   ],
   "addedSincePrevious": []
 }

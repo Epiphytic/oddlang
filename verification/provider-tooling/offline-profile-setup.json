@@ -1,0 +1,24 @@
+{
+  "companionRevision": "e61caebc45f9cda73a2eef20cc8611fc82eb4521",
+  "platform": "aarch64-apple-darwin",
+  "runner": "verification/whole/canonical-public-data/src/bin/profile-setup.rs",
+  "referenceRecordSha256": "c246b8b6583753a166cf19a4682c98e9a9cd2b7576bd504b5402b97d70f35ba5",
+  "candidateBuildSha256": "a002231a2c51b18bcc08ed866e2eb517b38ef7e9a960abda744102ce6fc8e6ae",
+  "historicalReceipt": "verification/whole/basic-command-interop/local-profile-setup-aarch64-apple-darwin.json",
+  "byteIdenticalReceiptSha256": "a1769f62264cb4293a13e26c3cdb3bd6ab44e69ceff4f5be32f7848cc048e3d3",
+  "casesPerBuild": {
+    "wss": 15,
+    "onion": 15
+  },
+  "buildsCompared": 2,
+  "checks": [
+    "exit status",
+    "normalized stdout and configuration bytes",
+    "unmodified stderr bytes",
+    "0600 configuration mode",
+    "isolated file-backed identities",
+    "sandboxed loopback connection denied after positive control",
+    "workspace removal"
+  ],
+  "negativeControl": "A symlink in place of the reference CLI was rejected before executing it. The temporary directory was empty afterward."
+}
