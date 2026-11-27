@@ -3617,3 +3617,8 @@ w:portHistoricTooling p:evidence w:macosNativeBuildIsolation .
 w:macosNativeBuildIsolation a p:Artifact ;
     rdfs:label "The Rust build sandbox reproduced all four parser and status package trees and their macOS ARM64 behavior, including staging from a historical Python projector. Each generation checked denied source reads, external writes and loopback access against a reachable listener. Cross-volume publication preserved modes and symlinks, and an existing output was preserved." ;
     p:location "verification/provider-tooling/macos-native-build-isolation.json" .
+
+w:portHistoricTooling p:evidence w:corePackagePinQualification .
+w:corePackagePinQualification a p:Artifact ;
+    rdfs:label "Shared Rust core-package checks staged the same pinned inputs and rejected four independent package mutations. The macOS ARM64 differential replay matched the archived receipt byte for byte across 1735 observations and four semantic mutants. The Linux runner passed shell syntax validation and awaits native replay." ;
+    p:location "verification/provider-tooling/core-package-inputs.json" .
