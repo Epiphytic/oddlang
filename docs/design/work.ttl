@@ -3926,3 +3926,10 @@ w:workspaceInputStagingReplay a p:Artifact ;
     rdfs:label "Rust staging matched 48 release manifests, 19 distinct dependency locks and three native test configurations. The full test configuration passed all 45 tests." ;
     p:location "verification/provider-tooling/workspace-inputs-rust.json" .
 w:portHistoricTooling p:evidence w:workspaceInputStagingReplay .
+
+w:profilePolicyLocalPacketEvidence a p:Artifact ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/19e4506dc18927a287e482285bc809f9b2e4c5a3/verification/whole/basic-command-interop/LOCAL-PROGRESS.md" .
+w:profilePolicySubmitOmission a p:Finding ;
+    rdfs:label "The profile policy workspace omits the separate retained-room submit declaration and queue. Its foreground handler declines the submit operation." ;
+    p:source w:profilePolicyLocalPacketEvidence .
+w:basicCommandInterop p:evidence w:profilePolicyLocalPacketEvidence .
