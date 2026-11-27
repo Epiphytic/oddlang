@@ -3285,5 +3285,5 @@ w:sealedWorkspaceRustQualifiers a p:Artifact ;
 
 w:portHistoricTooling p:evidence w:marmishRebuildRustReplay .
 w:marmishRebuildRustReplay a p:Artifact ;
-    rdfs:label "Native two-producer recovery and assembly reproduced the 39 archived Phase 7 witnesses" ;
+    rdfs:label "Independent builds with the pinned compiler and a freshly compiled Oddlang CLI reproduced the 39 archived Phase 7 witnesses" ;
     p:location "verification/provider-tooling/marmish-rebuild-rust.json" .

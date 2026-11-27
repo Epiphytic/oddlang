@@ -5,6 +5,17 @@
   "candidateCommit": "e0d855874ec2348939175dfa6ec5c71488c8ba35",
   "candidateTree": "6c0c7b16e3cb7b013a360c1b19e26ed19a238e65",
   "format": "oddlang-two-producer-rust-rebuild-v1",
+  "freshCompilerGateway": {
+    "archiveWitnessFilesByteIdentical": 39,
+    "build": "cargo +1.97.1 build --locked --offline --bin oddlang",
+    "candidateCommit": "e0d855874ec2348939175dfa6ec5c71488c8ba35",
+    "candidateTree": "6c0c7b16e3cb7b013a360c1b19e26ed19a238e65",
+    "commandAtRevision": "scripts/qualify-marmish.sh rebuild UPSTREAM OUTPUT",
+    "independentBuilds": 2,
+    "oddlangSha256": "0472f33df812b112d9cf4a68a4984411a55781265228b70dcce5589f2c016bf2",
+    "profile": "dev, debug=0, incremental=false",
+    "revision": "8560516"
+  },
   "generated": {
     "crates/marmish-core/src/frame.rs": {
       "candidateBlob": "fb334bc3b020c0c906fc58aaddf5c0ac0a3cb325",
