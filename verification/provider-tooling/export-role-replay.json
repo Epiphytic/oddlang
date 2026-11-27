@@ -145,5 +145,100 @@
       "recovered-command-policy-v1/foreground.json": "d314e96ba0fbc63ff52ce907a3e842a584e26c7b87f98f561dc88d1a10db1cab",
       "basic-command-delivery-v1/cli.rust.json": "dc0531e6d49ec46f73b383566b8e73bede4be426315224888710119eef939d41"
     }
+  },
+  "productAndArtifactVerification": {
+    "baselineBuildReceipt": "https://github.com/Epiphytic/marmish-oddlang/blob/0e637166e3117ec64514e77531cb0c7dab199e16/verification/whole/basic-command-interop/profile-policy-build-macos-arm64.json",
+    "baselineBuildSha256": "599dcc864aa25486f136800f979f7ee5f3313004bf7bcb1d589d96d521215efa",
+    "buildReceiptSha256": "1ebd468e3993283158e854a35548b3102ae4dc11b6a2c6db81040192f9770a42",
+    "buildReceiptChangedFields": {
+      "artifacts": {
+        "marmish": {
+          "sha256": "5f00b52d63d808b6077ef2630ede01ffb379da50c34c9b3044f8351c597a6821",
+          "sizeBytes": 22251296
+        },
+        "marmishd": {
+          "sha256": "54b57e22493b82857ba42d1a40d3fb4843954d6d38020e5b8bc3d5ad523cfbca",
+          "sizeBytes": 48621792
+        }
+      },
+      "buildDriverCheckout": "88b2b96993be6b6335d0bc5a6e2e31a7605c0b19",
+      "builderSha256": "7694b7546d233d95887507b376ac6054062f7b54a031b6bb96e3353cafce733a",
+      "compilerSha256": "3dcf1baeb45a0bcaa9ba504435b11aeff185198824b0014973cb760268fa5da3",
+      "seatbeltPolicySha256": "aef13920b5b3debe5d170aad40abd56d13aeb27c8db67436155e09fd19ca1259"
+    },
+    "receiptEncoding": "Replace the listed top-level fields in the baseline, then serialize with sorted keys, two-space indentation and a final newline.",
+    "productLayoutsAccepted": [
+      "published workspace",
+      "workspace with Cargo target artifacts",
+      "empty nested directories"
+    ],
+    "productMutationsRejected": [
+      "file under an extra directory",
+      "extra root file",
+      "extra member file",
+      "extra source file",
+      "changed Cargo.toml",
+      "changed Cargo.lock",
+      "changed workspace.lock",
+      "changed member package.lock",
+      "changed member Cargo.toml",
+      "changed member build.rs",
+      "symlinked member package.lock"
+    ],
+    "cargoChecks": {
+      "freshExecutableNames": [
+        "one",
+        "two"
+      ],
+      "rejected": [
+        "cached rebuild",
+        "duplicate report",
+        "test profile",
+        "invalid target name",
+        "unexpected executable path",
+        "missing executable",
+        "invalid JSON"
+      ],
+      "ignored": [
+        "non-executable artifact",
+        "library artifact",
+        "external manifest"
+      ]
+    },
+    "preflight": {
+      "format": "marmish-profile-policy-preflight-v1",
+      "buildReceiptSha256": "1ebd468e3993283158e854a35548b3102ae4dc11b6a2c6db81040192f9770a42",
+      "preflightSha256": "a16b395aca24ce3047f8786eb6b4362830f54ef9a2f17ed704a23bad1390b1a3",
+      "cases": {
+        "setupWithoutFileProvider": {
+          "role": "marmish",
+          "argv": [
+            "setup",
+            "--role",
+            "client",
+            "--no-grants"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "marmish: profile preparation requires the file key provider\n"
+        },
+        "foregroundWithoutState": {
+          "role": "marmishd",
+          "argv": [
+            "--foreground"
+          ],
+          "exit": 125,
+          "stdout": "",
+          "stderr": "marmish: foreground status owner requires explicit state and a prepared file profile\n"
+        }
+      },
+      "workspaceRemoved": true,
+      "compositionPins": {
+        "workspace-profile-command-policy.json": "35fcd02816277171b6eac6c9349b2d14439ac9cab038f1f347ddaa5f67d300a1",
+        "marmish-native-profile-command-policy-package.json": "47acca0c2a5d49f22c602fa0aa5d5d454a6de13f2f1c9f9a0b79ee88e4153182",
+        "recovered-command-policy-v1/foreground.json": "d314e96ba0fbc63ff52ce907a3e842a584e26c7b87f98f561dc88d1a10db1cab",
+        "basic-command-delivery-v1/cli.rust.json": "dc0531e6d49ec46f73b383566b8e73bede4be426315224888710119eef939d41"
+      }
+    }
   }
 }

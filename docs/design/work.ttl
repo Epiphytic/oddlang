@@ -3948,3 +3948,4 @@ w:exportRoleReplayEvidence a p:Artifact ;
     rdfs:label "Rust executable-role inventory matched all 48 workspace descriptors and the profile-policy release export. Seven generated members and their input pins matched the previous build." ;
     p:location "verification/provider-tooling/export-role-replay.json" .
 w:portHistoricTooling p:evidence w:exportRoleReplayEvidence .
+w:exportRoleReplayEvidence rdfs:comment "The Rust exporter checks the generated workspace lock and product files before and after Cargo compilation, and selects fresh first-party release executables from Cargo's artifact stream. The seven-member release and both preflight transcripts were replayed." .
