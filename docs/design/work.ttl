@@ -3491,3 +3491,14 @@ w:privateReaderRustBaseline a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a784c66336932b84ab736ded119bb451a17ed61e/verification/whole/private-buffer/original-aarch64-apple-darwin.json" .
 w:privateReaderRustSource a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/a784c66336932b84ab736ded119bb451a17ed61e/verification/whole/canonical-public-data/src/bin/buffer-baseline.rs" .
+
+w:portHistoricTooling p:evidence w:fiveMemberNativeRustReplay, w:canonicalRangeRustReplay, w:copySourceRustReplay .
+w:fiveMemberNativeRustReplay a p:Artifact ;
+    rdfs:label "The five-member native Rust driver reproduced the original and fresh predecessor results across 73 inputs, eight denied source probes, 600 vault values, 32 release-info cases and all three journal records. Nine build identity fields differed." ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/8ec6b04787094d843f7212aa74ddcde8a9a47498/verification/whole/unified-vault-journal/rust-aarch64-apple-darwin.json" .
+w:canonicalRangeRustReplay a p:Artifact ;
+    rdfs:label "On Darwin ARM64 native range qualifiers matched 35 original observations and reproduced 84 generated Rust files. Eight provenance fields in two locks changed." ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b0534678866bc0b790a95587e99d62da7749287f/verification/whole/canonical-range-data/qualification-comparison-aarch64-apple-darwin.json" .
+w:copySourceRustReplay a p:Artifact ;
+    rdfs:label "The Rust copy-source qualification reconstructed its archived macOS receipt across four builds, 15 cases per build, and five changed outcomes" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/b599c7c17ad5d621442b53375af249848418cfc5/verification/whole/copy-source-correspondence/rust-replay-macos-arm64.json" .
