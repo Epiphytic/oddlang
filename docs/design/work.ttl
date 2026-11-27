@@ -3800,3 +3800,8 @@ w:portHistoricTooling p:evidence w:commandRoomBindingRust .
 w:commandRoomBindingRust a p:Artifact ;
     rdfs:label "The Rust room-binding verifier reproduced all four archived projection locks and the complete observation stream for ten valid packets and forty incorrect peer or session bindings. The historical Python and Rust runners agreed on every receipt field with a common compiler." ;
     p:location "verification/provider-tooling/command-room-binding-rust.json" .
+
+w:portHistoricTooling p:evidence w:commandResponsesRust .
+w:commandResponsesRust a p:Artifact ;
+    rdfs:label "The Rust runners reproduced the original 117 complete response observations and the independent 108-case structure receipt on ARM64 macOS. The generated codec matched all accepted bytes and refused all twenty wrong decoder pairings. Both the pre-refactor and provider compilers emitted the same complete delivery workspace, including two source files that differ from the historical delivery release." ;
+    p:location "verification/provider-tooling/command-responses-rust.json" .

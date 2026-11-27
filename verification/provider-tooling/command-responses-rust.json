@@ -1,0 +1,51 @@
+{
+  "host": "aarch64-apple-darwin",
+  "frameworkRevision": "bc30b28754e26907738d009fa3de39f9cfe9938c",
+  "companionRevision": "ce28ad604d899b06adaec4e8eabd71e0719abc83",
+  "referenceReceiptByteIdentical": true,
+  "referenceReceiptSha256": "2e7d244faef0bd660e5e7c36a7872bdea7d23b0743fdc6b22b7159a3747ea583",
+  "structuralReceiptByteIdentical": true,
+  "structural": {
+    "referenceRevision": "af54339d250290490d62d4475a77539b7e739071",
+    "cases": 108,
+    "accepted": 71,
+    "observationsSha256": "92bf91e16eef5d382386569c13dd457bccc30f19edfb0812efeabb23f4cb4491",
+    "generatedSourceSha256": "29daf7262cb911fcafaea2f8e06d333eb0b5ea6de2c671c8b09dc30d31f89d38"
+  },
+  "generated": {
+    "accepted": 36,
+    "cases": 117,
+    "compilerSha256": "6a7aff153d8a65ca9780554c96d8f8e90c0c3ad2ecbde414db1b490a2adf39f2",
+    "observationsSha256": "a1caa92f9c994f8219c957cfaf69eb84c4bfd58c656c7e06b438fe87f71229d4",
+    "projectionLockSha256": "1cdb37f6ad9e03658b86b7ba450f79e876906e2f7545efe8d69d14265b75cdf0",
+    "referenceReceiptSha256": "2e7d244faef0bd660e5e7c36a7872bdea7d23b0743fdc6b22b7159a3747ea583",
+    "referenceRevision": "af54339d250290490d62d4475a77539b7e739071",
+    "workspace": {
+      "nativePackageLockSha256": "630d1d54524dae4f62f35294f4aa69ce3875a115954ee882147c8f988425ab3a",
+      "sourcePath": "src/group_16/__projection_16.rs",
+      "workspaceLockSha256": "331c07905a81f1604781ea53b1a8903642a73b0c1d6168d411883f4dc98c402d"
+    },
+    "wrongDecoderRejections": 20
+  },
+  "generatedArchivedDifferences": [
+    "compilerSha256"
+  ],
+  "workspaceRefusalControls": {
+    "workspace.lock": "Error: \"workspace differs from pinned selection\"",
+    "marmish-native/package.lock": "Error: \"native member differs from pinned workspace\"",
+    "marmish-native/src/group_16/__projection_16.rs": "Error: \"native source differs\""
+  },
+  "historicalDeliveryWorkspaceReplay": {
+    "preRefactorFrameworkRevision": "6f9e8475cc4d24ffe67d73c887f3a21e00f21d07",
+    "preRefactorWorkspaceLockSha256": "3d3fcafc9362732b116710c96e93364399d80d9f6bbdc5260c670f5302ba15b3",
+    "postRefactorWorkspaceLockSha256": "3d3fcafc9362732b116710c96e93364399d80d9f6bbdc5260c670f5302ba15b3",
+    "matchingProductFiles": 106,
+    "archivedWorkspaceLockSha256": "331c07905a81f1604781ea53b1a8903642a73b0c1d6168d411883f4dc98c402d",
+    "filesDifferingFromHistoricalWorkspace": [
+      "marmish-native/package.lock",
+      "marmish-native/src/group_14/__projection_14.rs",
+      "marmish-native/src/group_15/__projection_15.rs",
+      "workspace.lock"
+    ]
+  }
+}
