@@ -201,17 +201,17 @@ fn load_profile_document<'a>(
     {
         return Err(PROFILE_PATH);
     }
-    let state = private_openat(libc::AT_FDCWD, base.as_os_str(), true).map_err(|_| PROFILE_PATH)?;
+    let state = private_openat(libc::AT_FDCWD, base.as_os_str(), true).map_err(|_| /*state_directory_error*/)?;
     if !private_metadata(&state, true, doc.directory_mode).map_err(|_| IO)? {
-        return Err(PROFILE_PATH);
+        return Err(/*state_directory_error*/);
     }
-    let profile_dir = private_openat(state.as_raw_fd(), OsStr::new(profile), true).map_err(|_| PROFILE_PATH)?;
+    let profile_dir = private_openat(state.as_raw_fd(), OsStr::new(profile), true).map_err(/*profile_open_failure*/)?;
     if !private_metadata(&profile_dir, true, doc.directory_mode).map_err(|_| IO)? {
         return Err(PROFILE_PATH);
     }
-    let file = private_openat(profile_dir.as_raw_fd(), OsStr::new(&doc.leaf), false).map_err(|_| PROFILE_FILE)?;
+    let file = private_openat(profile_dir.as_raw_fd(), OsStr::new(&doc.leaf), false).map_err(|_| /*document_open_error*/)?;
     if !private_metadata(&file, false, doc.file_mode).map_err(|_| IO)? {
-        return Err(PROFILE_FILE);
+        return Err(/*document_metadata_error*/);
     }
     let mut contents = Vec::new();
     file.take(u64::from(doc.maximum_bytes) + 1).read_to_end(&mut contents).map_err(|_| IO)?;
