@@ -26,3 +26,5 @@ Implement the [approved Wasm design](../specs/2026-11-26-wasm-provider-design.md
 - [x] Replace the retained-room qualification launcher with Rust and replay its independent local authorization and commit/reopen assertions. Compare the complete generated workspace before and after the provider refactor. [macOS ARM64 evidence](../../../verification/provider-tooling/retained-room-fixture-rust.json)
 
 - [x] Route workspace closure, external package comparison, offline Git cache and original library test preparation through Rust. Compare the staged bytes for every published workspace manifest, rebuild the profile command-policy product, and run the original core and stream suites. [macOS ARM64 evidence](../../../verification/provider-tooling/workspace-inputs-rust.json)
+
+- [x] Replace the v5 cold-cache Python verifier with Rust, including empty-cache refusal, locked acquisition, offline package and source verification, release compilation and transcript comparison for both executables. Check the historical and unified product layouts through the shared Rust verifier. [macOS ARM64 evidence](../../../verification/provider-tooling/cold-workspace-rust.json)

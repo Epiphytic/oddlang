@@ -3933,3 +3933,8 @@ w:profilePolicySubmitOmission a p:Finding ;
     rdfs:label "The profile policy workspace omits the separate retained-room submit declaration and queue. Its foreground handler declines the submit operation." ;
     p:source w:profilePolicyLocalPacketEvidence .
 w:basicCommandInterop p:evidence w:profilePolicyLocalPacketEvidence .
+
+w:coldWorkspaceRustEvidence a p:Artifact ;
+    rdfs:label "Rust v5 cold-cache qualification, offline release and parser transcripts, and historical product layout controls" ;
+    p:location "verification/provider-tooling/cold-workspace-rust.json" .
+w:portHistoricTooling p:evidence w:coldWorkspaceRustEvidence .
