@@ -3662,3 +3662,8 @@ w:portHistoricTooling p:evidence w:baselineBuildStreamArchive .
 w:baselineBuildStreamArchive a p:Artifact ;
     rdfs:label "The shared Rust checkout checker and fresh compiler reproduced the published Data graph digest and six structural artifacts. The native oracle now writes the 13011-byte historical observation archive exactly in both development and release builds. The local Data replay matched six directed 36-record exchanges across Rust, TypeScript and the original caller." ;
     p:location "verification/provider-tooling/baseline-build-stream-archive.json" .
+
+w:portHistoricTooling p:evidence w:streamReleaseReplayRust .
+w:streamReleaseReplayRust a p:Artifact ;
+    rdfs:label "The Rust release replay verified 403 public original stream cases in each of two profiles, the complete archived gzip and six cross-implementation Data exchanges on macOS ARM64. The runner refused an occupied destination and a mismatched tooling revision." ;
+    p:location "verification/provider-tooling/stream-release-replay.json" .

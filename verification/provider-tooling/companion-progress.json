@@ -1,15 +1,14 @@
 {
-  "auditedCompanionRevision": "61f69a9df4192a1d765298c56b431e1b4214ed79",
-  "previousRevision": "2053ff1f50bff6e206c61d03d97752de00b201be",
-  "reproducedTableSha256": "33ad78f3347bc831843e085f4e5d5bb8631fa82b95cfed02d0907e43bb4884ed",
-  "remainingProjectToolFiles": 122,
+  "auditedCompanionRevision": "493f5b18ab16cc55315f9ab9177532d2c5ed0bb8",
+  "previousRevision": "61f69a9df4192a1d765298c56b431e1b4214ed79",
+  "reproducedTableSha256": "f1cd3a826c69ea42eec5e95ff31550f2fadeab89a2312b88c2fb0871f24d09da",
+  "remainingProjectToolFiles": 121,
   "remainingProjectExtensions": {
-    ".py": 119,
+    ".py": 118,
     ".sh": 3
   },
   "removedSincePrevious": [
-    "verification/whole/suite/parser_cases.py",
-    "verification/whole/suite/test_candidate_producer.py"
+    "verification/whole/stream/replay.py"
   ],
   "addedSincePrevious": []
 }

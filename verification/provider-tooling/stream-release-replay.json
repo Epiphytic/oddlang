@@ -1,0 +1,56 @@
+{
+  "companionRevision": "493f5b18ab16cc55315f9ab9177532d2c5ed0bb8",
+  "sourceRevision": "b653f1ada68791cd2fb70293bf227c5665850d1e",
+  "freshBuildSha256": "305acdc7d034e1d1bbd1766363ff3e137a604aaaffc169509c2cc068382d2f13",
+  "cleanCheckout": true,
+  "oracleToolsRevision": "08373b871aeac0f76cb1675748fd604cea2a79a2",
+  "host": "aarch64-apple-darwin",
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "profiles": [
+    "dev",
+    "release"
+  ],
+  "publicStreamCasesPerProfile": 403,
+  "wireRecordsPerProfile": 31,
+  "negativeControlsPerProfile": 3,
+  "compressedObservationArchiveSha256": "68aa67d0e97b880f2b123253884165f19c75138787ef9d1c792b5bbbab0e9637",
+  "archiveBytes": 13011,
+  "publicDataCases": 253,
+  "mixedDataPairs": {
+    "rustToTypescript": {
+      "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+      "records": 36,
+      "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+    },
+    "rustToUpstream": {
+      "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+      "records": 36,
+      "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+    },
+    "typescriptToRust": {
+      "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+      "records": 36,
+      "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+    },
+    "typescriptToUpstream": {
+      "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+      "records": 36,
+      "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+    },
+    "upstreamToRust": {
+      "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+      "records": 36,
+      "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+    },
+    "upstreamToTypescript": {
+      "decodedRowsSha256": "864b0ff568f02575fb7d336e13abcf8c89e0b75f084b9de96448dbd4eb7c7e3a",
+      "records": 36,
+      "wireSha256": "a35f5b9dd4001d4f00b1c4dc56b0522fedb6c644e56c8dc18303b01967f86d52"
+    }
+  },
+  "sealedCases": 0,
+  "refused": [
+    "existing destination",
+    "incorrect oracle tools revision"
+  ]
+}
