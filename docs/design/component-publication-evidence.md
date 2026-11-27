@@ -4,7 +4,7 @@ The release, WIT recovery and public CLI tests exercise the ledger, its instrume
 
 ```sh
 cargo test --locked --offline --test wasm_release --test wasm_import_wit --test wasm_cli
-scripts/verify-wasm-spike.sh
+cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin wasm-spike
 ```
 
 The native Rust guest produced a component for `wasm32-wasip2`. An independent Wasmtime host confirmed that its linker required zero definitions and observed exact echoes for five signed integers including both extrema. The [recorded observations](../../examples/wasm/evidence/observations.txt) contain the component and extracted WIT digests. Repeated builds on the qualification host produced the same component digest.

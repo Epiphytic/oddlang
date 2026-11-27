@@ -109,3 +109,5 @@ pub fn capture_command() -> Command {
     }
     cmd
 }
+
+pub mod wasm_toolchain;

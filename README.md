@@ -27,7 +27,7 @@ cargo run --locked --offline -- wasm import-wit target/wasm-ledger/wit ledger ta
 
 Each publication includes WIT, a manifest, a workspace lock and conformance cases. Pin the workspace lock independently when consuming a release. A WIT import recovers the interface. The release ontology carries additional behavior and constraints.
 
-Run `scripts/setup-wasm.sh` once with network access. Then run `scripts/verify-wasm-spike.sh` to compile the pure echo guest, inspect its imports and call it from an empty Wasmtime linker offline.
+Run `scripts/setup-wasm.sh` once with network access. Then run `cargo +1.97.1 run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin wasm-spike` to compile the pure echo guest, inspect its imports and call it from an empty Wasmtime linker offline.
 
 Run `scripts/verify-wasm.sh` for ledger execution. It publishes fresh bundles, builds handwritten and generated Rust components in two directories, and runs portable cases against Wasmtime, Node and headless Chromium. Its output directory holds release pins, Rust source, component binaries, host observations and a build digest comparison. Ledger guests use `wasm32-unknown-unknown` with Component Model bindings. The integer echo uses `wasm32-wasip2`.
 

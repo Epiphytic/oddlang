@@ -1,0 +1,17 @@
+{
+  "platform": "aarch64-apple-darwin",
+  "rust": "1.97.1",
+  "rustcTarget": "wasm32-wasip2",
+  "emptyLinkerSha256": "8a1a63c730bead6a5fd99517b78318f72326d90adfb42086f24753875c035ddb",
+  "oddlangSha256": "ccd3aa5caeac7c57dddb5d8c04e6cc619c7580e446edb8139bc00f0c6555e09f",
+  "echoGuestSha256": "a66e9e957194b141dc03ce912c66e6fca61a9db33431d52d4738d5c013a9709f",
+  "filesMatchingCheckedInEvidence": {
+    "observations.txt": "bc55f72d040a2f0229d84cf7a18e428fafcb8093570fc8eda95486ba3bba77a7",
+    "pure-echo.wit": "c67759c90d8fe50ab7691796ea4ee3479637d06f79c60fd6347d8ec2e610e6a9",
+    "ledger.wit": "5579173197a79cf766e4f6b34c54a5c7726f38bb0108f7007cac2f0432857dcf",
+    "ledger-test.wit": "c98b7342f42979a1b9346d4b75b35bc5ef6b70b2158c9cf593cbf9063b08838f",
+    "echo.wit": "d41d152e5f3e6f542c97e6451d985020a63e7042710073fc9b5d07250d83e5a7"
+  },
+  "emptySuccessfulHostRejected": true,
+  "failedRunPublishedEvidence": false
+}

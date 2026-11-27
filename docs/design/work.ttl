@@ -3243,3 +3243,8 @@ w:rustGuestComponentMatrix a p:Artifact ;
     p:location "verification/provider-tooling/wasm-guests.json" .
 
 w:rustGuestComponentMatrix rdfs:comment "The native witness sorts JSON object members before writing evidence. Its 38 files reproduce the archive byte-for-byte even with serde_json preserve_order enabled." .
+
+w:portHistoricTooling p:evidence w:rustWasmSpike .
+w:rustWasmSpike a p:Artifact ;
+    rdfs:label "Rust offline spike reproduced the echo observation transcript and four archived component interfaces; a successful process returning no observations was rejected" ;
+    p:location "verification/provider-tooling/wasm-spike.json" .

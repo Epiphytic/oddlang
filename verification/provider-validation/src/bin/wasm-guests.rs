@@ -1,10 +1,11 @@
 //! Build the ledger component matrix and compare the complete canonical WIT surface.
 use clap::Parser;
-use provider_validation::{Result, sha};
-use serde::Deserialize;
+use provider_validation::{
+    Result,
+    wasm_toolchain::{Pins, compiler, copy_tree, prepare, run},
+};
 use std::{
-    collections::BTreeMap,
-    env, fs,
+    fs,
     path::{Path, PathBuf},
     process::Command,
 };
@@ -17,41 +18,6 @@ struct Args {
     tools_cache: Option<PathBuf>,
     #[arg(long)]
     oddlang: Option<PathBuf>,
-}
-
-#[derive(Deserialize)]
-struct Pins {
-    rust_version: String,
-    rust_commit: String,
-    ledger_guest_target: String,
-    guest_profile: String,
-    wasm_tools_version: String,
-    #[serde(flatten)]
-    other: BTreeMap<String, String>,
-}
-
-fn run(cmd: &mut Command) -> Result {
-    cmd.env("CARGO_NET_OFFLINE", "true")
-        .env("RUSTUP_AUTO_INSTALL", "0");
-    let status = cmd.status()?;
-    if !status.success() {
-        return Err(format!("{cmd:?}: {status}").into());
-    }
-    Ok(())
-}
-
-fn copy_tree(src: &Path, dest: &Path) -> Result {
-    fs::create_dir_all(dest)?;
-    for entry in fs::read_dir(src)? {
-        let entry = entry?;
-        let target = dest.join(entry.file_name());
-        if entry.file_type()?.is_dir() {
-            copy_tree(&entry.path(), &target)?;
-        } else {
-            fs::copy(entry.path(), target)?;
-        }
-    }
-    Ok(())
 }
 
 struct Build<'a> {
@@ -146,48 +112,14 @@ fn main() -> Result {
     let bundles = args.bundles.canonicalize()?;
     fs::create_dir_all(&args.out)?;
     let out = args.out.canonicalize()?;
-    let pins: Pins = toml::from_str(&fs::read_to_string(
-        root.join("examples/wasm/toolchain.toml"),
-    )?)?;
-    let platform = format!("{}-{}", env::consts::ARCH, env::consts::OS);
-    let expected = pins
-        .other
-        .get(&platform.replace('-', "_"))
-        .ok_or("unsupported wasm-tools host")?;
-    let archive_name = format!("wasm-tools-{}-{platform}", pins.wasm_tools_version);
-    let archive = args
-        .tools_cache
-        .unwrap_or_else(|| root.join("target/wasm-tools"))
-        .join(format!("{archive_name}.tar.gz"));
     let stage = tempfile::tempdir_in(&out)?;
-    let checked_archive = stage.path().join("wasm-tools.tar.gz");
-    fs::copy(&archive, &checked_archive)?;
-    if sha(&checked_archive)? != *expected {
-        return Err("wasm-tools archive digest mismatch".into());
-    }
-    let toolchain = format!("+{}", pins.rust_version);
-    let version = Command::new("rustc")
-        .arg(&toolchain)
-        .arg("-Vv")
-        .env("RUSTUP_AUTO_INSTALL", "0")
-        .output()?;
-    if !version.status.success()
-        || !String::from_utf8(version.stdout)?
-            .lines()
-            .any(|s| s == format!("commit-hash: {}", pins.rust_commit))
-    {
-        return Err("guest rustc commit mismatch".into());
-    }
-    let member = format!("{archive_name}/wasm-tools");
-    run(Command::new("tar")
-        .arg("-xzf")
-        .arg(checked_archive)
-        .arg("-C")
-        .arg(stage.path())
-        .arg(&member))?;
+    let cache = args
+        .tools_cache
+        .unwrap_or_else(|| root.join("target/wasm-tools"));
+    let (pins, tools) = prepare(&root, &cache, stage.path())?;
     let build = Build {
         pins: &pins,
-        tools: stage.path().join(member),
+        tools,
         stage: stage.path(),
         out: &out,
     };
@@ -201,21 +133,7 @@ fn main() -> Result {
             &ledger.join("wit").join(name),
         )?;
     }
-    let mut cli = if let Some(path) = args.oddlang {
-        Command::new(path.canonicalize()?)
-    } else {
-        let mut cmd = Command::new("cargo");
-        cmd.arg(toolchain).args([
-            "run",
-            "--quiet",
-            "--locked",
-            "--offline",
-            "--bin",
-            "oddlang",
-            "--",
-        ]);
-        cmd
-    };
+    let mut cli = compiler(args.oddlang.as_deref(), &pins.rust_version)?;
     let native = stage.path().join("native");
     run(cli
         .current_dir(&root)
