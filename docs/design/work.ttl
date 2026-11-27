@@ -3165,7 +3165,7 @@ w:rustHttpConformanceReplay a p:Artifact ;
 
 w:portHistoricTooling p:evidence w:nativeRecoveryEntrypoint .
 w:nativeRecoveryEntrypoint a p:Artifact ;
-    rdfs:label "Native executable recovery adapter reproduced the pinned structure, compiler inventory bytes and independent historical declaration comparison" ;
+    rdfs:label "Native executable recovery adapter reproduced 3,296 declarations and 9,534 edges, the compiler inventory bytes and the independent historical declaration comparison" ;
     p:location "verification/provider-tooling/native-recovery-entrypoint.json" .
 
 w:portHistoricTooling p:evidence w:rustWorkflowReplay .

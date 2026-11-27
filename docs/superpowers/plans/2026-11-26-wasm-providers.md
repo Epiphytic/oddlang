@@ -21,3 +21,4 @@ Implement the [approved Wasm design](../specs/2026-11-26-wasm-provider-design.md
 - [x] Collect original and regenerated stream package compiler inputs in Rust, compare all three build modes and 29 native test outcomes with their archived receipts, and exercise the six declaration and dependency controls.
 - [x] Port the source-free stream workspace and graph-mutation runners, regenerate all five Rust files, rerun both compiler controls, the named downstream consumer observations, and the 50-case mutation oracle.
 - [x] Migrate HTTP setup, version and schema pins, and offline qualification to Rust. Verify fresh provider, client and codec receipts and both hybrid rendering targets.
+- [x] Replace the recovery profile shell launcher with the native capture executable, reproduce the original stream structure and rustdoc differential, and qualify compiler, shape, and export witnesses.

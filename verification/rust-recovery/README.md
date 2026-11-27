@@ -4,12 +4,13 @@ Install the compiler's development metadata with rustup before running the adapt
 
 ```sh
 rustup component add rustc-dev --toolchain 1.97.1
+cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin rust-capture -- --install-adapter
 cargo run --locked --offline --manifest-path verification/provider-validation/Cargo.toml --bin rust-exports -- qualify adapter
 ```
 
 The Rust executable `rust-capture` takes an absolute Cargo manifest path, package, `lib` or `bin`,
 target name, Rust target triple, `default` or `no-default`, and zero or
-more Cargo feature names. Existing executable-adapter profiles can use the compatibility launcher at `run.sh`. For example, for a checkout of Marmish at
+more Cargo feature names. For executable-adapter profiles, `--install-adapter` puts the native `rust-capture` beside the driver sources named in `adapterInputs`. Set the profile’s `adapter` path to that executable and repeat installation after rebuilding the capture tool. The export and shape qualifications install it automatically. For example, for a checkout of Marmish at
 `49fc705408a230bd0ad896248d08dbdd2faad05a` on Apple Silicon:
 
 ```sh
@@ -24,7 +25,7 @@ cargo +1.97.1 run --quiet --locked --offline --manifest-path verification/provid
 The adapter uses Rust 1.97.1 at commit
 `8bab26f4f68e0e26f0bb7960be334d5b520ea452`. Cargo runs locked, offline and
 in release mode with fresh target directories for the adapter and the selected
-crate. The shell clears inherited Rust flags and Cargo profile and target flag
+crate. The native adapter clears inherited Rust flags and Cargo profile and target flag
 overrides. Cargo configuration files, build scripts and proc macros still
 participate in the build. Use a trusted checkout. An alternate target needs
 its Rust standard library and applicable native toolchain installed. The host

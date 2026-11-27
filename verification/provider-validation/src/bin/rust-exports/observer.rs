@@ -247,9 +247,7 @@ pub fn profile(
     features: &[String],
     default: bool,
 ) -> Result<String> {
-    let adapter = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../rust-recovery/run.sh")
-        .canonicalize()?;
+    let adapter = installed_adapter()?;
     let fields = json!({"adapter":adapter,"adapterInputs":["Cargo.toml","Cargo.lock","driver.rs","shapes.rs","shape_model.rs","capture.rs","exports.rs","export_model.rs"],
         "package":package,"targetKind":"lib","targetName":name,"targetTriple":triple,"features":features,"defaultFeatures":default,"compilerCommit":PIN,"cargoLockSha256":sha(lock)?});
     Ok(object(&fields)?

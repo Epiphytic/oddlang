@@ -157,18 +157,34 @@ fn capture(args: &[OsString]) -> Result {
     io::stdout().write_all(&fs::read(inventory)?)?;
     Ok(())
 }
+fn install_adapter() -> Result {
+    // The recovery profile resolves driver source pins beside the executable.
+    let directory = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../rust-recovery")
+        .canonicalize()?;
+    let destination = directory.join(format!("rust-capture{}", env::consts::EXE_SUFFIX));
+    let temporary = tempfile::NamedTempFile::new_in(directory)?;
+    fs::copy(env::current_exe()?, temporary.path())?;
+    temporary.persist(&destination)?;
+    println!("{}", destination.display());
+    Ok(())
+}
 fn main() -> ExitCode {
     let args: Vec<_> = env::args_os().skip(1).collect();
-    if args.len() < 6
+    let result = if args.as_slice() == [OsStr::new("--install-adapter")] {
+        install_adapter()
+    } else if args.len() < 6
         || !matches!(args[2].to_str(), Some("lib" | "bin"))
         || !matches!(args[5].to_str(), Some("default" | "no-default"))
     {
         eprintln!(
-            "usage: rust-capture MANIFEST PACKAGE lib|bin TARGET TRIPLE default|no-default [FEATURE ...]"
+            "usage: rust-capture --install-adapter | MANIFEST PACKAGE lib|bin TARGET TRIPLE default|no-default [FEATURE ...]"
         );
         return ExitCode::from(2);
-    }
-    match capture(&args) {
+    } else {
+        capture(&args)
+    };
+    match result {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
             eprintln!("{error}");

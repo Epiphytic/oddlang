@@ -17,9 +17,7 @@ pub fn verify(cli: &Path, root: &Path) -> Result {
     )?;
     let manifest = root.join("Cargo.toml");
     let path = root.join("profile.toml");
-    let adapter = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../rust-recovery/run.sh")
-        .canonicalize()?;
+    let adapter = installed_adapter()?;
     let base = format!(
         "package=\"observatory\"\ntargetKind=\"lib\"\ntargetName=\"observatory\"\ntargetTriple={}\ndefaultFeatures=false\ncompilerCommit=\"{PIN}\"\ncargoLockSha256={}\n",
         json!(host()?),

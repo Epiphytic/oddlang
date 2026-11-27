@@ -1,0 +1,41 @@
+{
+  "sourceCommit": "49fc705408a230bd0ad896248d08dbdd2faad05a",
+  "compilerCommit": "8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+  "target": "aarch64-apple-darwin",
+  "legacyAndNativeInventorySha256": "0526431307f9fcc33733679169c138122524aaffe345b0fad5c7ff926828b9aa",
+  "nativeExecutableSha256": "83dbc4c63f9aef0c08d1ef5695499ef920ef1f4534b367264886382fcf86453f",
+  "qualificationCliSha256": "3884c423fccb909d69c8a6d5e119d4097b8ea6fade8936274edfe814890a08a4",
+  "historicalStructureLock": "examples/marmish/portable-contract/structure.lock.json",
+  "structureSha256": "b4246a9713db14cb7a95ac528c9150ae786fc1dfa8685fc564b479fa35575c8c",
+  "declarations": 3296,
+  "edges": 9534,
+  "gaps": 2976,
+  "differential": {
+    "historicalSpanReport": "verification/whole/stream/structure/historical-spans.json.gz",
+    "historicalCompressedSha256": "906e1e1a068025658fe3a5e55d8cda64fd672164d5bcaf6fa1850f80b9534b7e",
+    "independentRustdocInventorySha256": "7a506e8e80c901b6f8d81dd8f3fd46637c4f88bac86c3d0e66896253e40cb6c0",
+    "scopes": {
+      "includingExpansions": {
+        "matched": 451,
+        "compilerOnly": 373,
+        "rustdocOnly": 72
+      },
+      "ordinary": {
+        "matched": 378,
+        "compilerOnly": 6,
+        "rustdocOnly": 145
+      }
+    },
+    "comparison": "All historical and recomputed JSON fields and arrays matched. Object key order differed."
+  },
+  "qualification": [
+    "rust-exports qualify adapter",
+    "rust-exports qualify shapes",
+    "rust-exports qualify exports"
+  ],
+  "environmentControls": [
+    "RUSTC",
+    "RUSTFLAGS",
+    "CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS"
+  ]
+}

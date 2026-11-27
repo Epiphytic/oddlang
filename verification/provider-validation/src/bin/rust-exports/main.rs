@@ -81,6 +81,14 @@ fn checked(command: &mut Command) -> Result<Vec<u8>> {
     }
     Ok(out.stdout)
 }
+fn installed_adapter() -> Result<PathBuf> {
+    let bytes = checked(provider_validation::capture_command().arg("--install-adapter"))?;
+    let path = PathBuf::from(std::str::from_utf8(&bytes)?.trim_end_matches(['\r', '\n']));
+    if !path.is_absolute() || !path.is_file() {
+        return Err("native compiler adapter installation did not produce an executable".into());
+    }
+    Ok(path)
+}
 fn version() -> Result<String> {
     Ok(String::from_utf8(checked(cmd("rustc").arg("-vV"))?)?)
 }

@@ -1,4 +1,4 @@
-adapter = "../../../verification/rust-recovery/run.sh"
+adapter = "../../../verification/rust-recovery/rust-capture"
 adapterInputs = ["Cargo.toml", "Cargo.lock", "driver.rs", "capture.rs"]
 package = "marmish-stream"
 targetKind = "lib"
