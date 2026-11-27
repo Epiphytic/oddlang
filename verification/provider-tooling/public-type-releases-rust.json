@@ -1,0 +1,115 @@
+{
+  "companionRevision": "27989951fe2f491f7092cf36994937121e9c75fa",
+  "frameworkRevision": "ae4538696c0e68dba5c67e8af502fb1f04c2b175",
+  "host": "aarch64-apple-darwin",
+  "releases": {
+    "errors": {
+      "referenceFramework": "bbdc69e026ee0ae0c50bd9884fa4b6eaad8040a1",
+      "archive": "engine-public-error/rust-buffered-callback-aarch64-apple-darwin.json",
+      "archiveSha256": "410f18455e3f0b0a77aea19313190931fc6d7f2bf7876b3792b197a8bef680d0",
+      "freshReceiptSha256": "1db9eb795147271e89fbced53a044bb4fef1de45eb55346726dc625ee07d0d74",
+      "workspaceLockSha256": "d89469b03c3cb808181a154424b07ad43fcaee8191dee191e5cb5d3da950cc3c",
+      "stagedInputs": 87,
+      "unchangedMemberLocks": [
+        "marmish-core",
+        "marmish-mdk",
+        "marmish-prototype",
+        "marmish-stream",
+        "marmish-vault"
+      ],
+      "sourceDenials": 16,
+      "engineErrorVariants": 26,
+      "negativeErrorDiagnostics": 38,
+      "negativeIdentityDiagnostics": 12,
+      "archiveDifferences": [
+        "/companion",
+        "/releaseInfo/originalBinaries/marmish",
+        "/releaseInfo/originalBinaries/marmishd",
+        "/releaseInfo/generatedBinaries/marmish",
+        "/releaseInfo/generatedBinaries/marmishd",
+        "/fixedVault/librarySha256",
+        "/journal/original/libraries/serde_json",
+        "/journal/original/libraries/marmish_native",
+        "/journal/generated/libraries/serde_json",
+        "/journal/generated/libraries/marmish_native",
+        "/mdk/originalLibrarySha256",
+        "/mdk/sealedLibrarySha256",
+        "/enginePublicError/originalLibrarySha256",
+        "/enginePublicError/sealedLibrarySha256"
+      ],
+      "currentCompilerTreeMatchesPinnedCompiler": true,
+      "comparedGeneratedFiles": 87,
+      "engineOutputSha256": "20e03f324ae3440560160d5c5144c1a7e22c133c2d4a4a3089ef19361274d2f9",
+      "identityOutputSha256": "86836d4015d4c063ecbccb80bb409d933226d5f03648f25706b23606da76258b",
+      "comparedTreeInventorySha256": "41dbaeba9d2d333aada3b0eaa62b1598edb80ae5130af02a8bd21710d3de8170"
+    },
+    "records": {
+      "referenceFramework": "6457c87f65f542d47045d0338a64e99346e1ca39",
+      "archive": "engine-native-records/aarch64-apple-darwin.json",
+      "archiveSha256": "70c5e475df4585c1c86e434bbbd9b39de73738d7c4cb87ab4e6d66cac2f1a9c6",
+      "freshReceiptSha256": "9dc21149ed01e94b8c116d59c19ac99ed01693e2c3e8656080240d6c1222107b",
+      "workspaceLockSha256": "f03d75591e97660d43677d6d3c6172d6af48145e90b2a8d60079461bba4176c1",
+      "stagedInputs": 93,
+      "unchangedMemberLocks": [
+        "marmish-core",
+        "marmish-mdk",
+        "marmish-prototype",
+        "marmish-stream",
+        "marmish-vault"
+      ],
+      "sourceDenials": 20,
+      "engineErrorVariants": 26,
+      "negativeErrorDiagnostics": 38,
+      "negativeIdentityDiagnostics": 12,
+      "archiveDifferences": [
+        "/companion",
+        "/compilerSha256",
+        "/releaseInfo/generatedBinaries/marmish",
+        "/releaseInfo/generatedBinaries/marmishd",
+        "/fixedVault/librarySha256",
+        "/journal/original/libraries/serde_json",
+        "/journal/original/libraries/marmish_native",
+        "/journal/generated/libraries/serde_json",
+        "/journal/generated/libraries/marmish_native",
+        "/mdk/originalLibrarySha256",
+        "/mdk/sealedLibrarySha256",
+        "/enginePublicError/originalLibrarySha256",
+        "/enginePublicError/sealedLibrarySha256",
+        "/publicConstant/original-constant/librarySha256",
+        "/publicConstant/generated-constant/librarySha256",
+        "/publicRecords/engine/originalLibrarySha256",
+        "/publicRecords/engine/generatedLibrarySha256",
+        "/publicRecords/native/originalLibrarySha256",
+        "/publicRecords/native/generatedLibrarySha256"
+      ],
+      "currentCompilerTreeMatchesPinnedCompiler": true,
+      "comparedGeneratedFiles": 92,
+      "currentCompilerInheritedCallerChecksMatch": true,
+      "records": {
+        "engine": {
+          "scope": [
+            "marmish_engine::InputReceipt",
+            "marmish_engine::MaintenanceReport"
+          ],
+          "negativeDiagnostics": 21,
+          "outputSha256": "92f87fee3ef7fa2d6d62269062da9d2ca259cbbd3f7d7d17af48f846d0c93e73",
+          "graphSha256": "2737dec183b717dd15b6738a1d3b60df6bd556d8301298c5c4e3fe4c119a7ed5",
+          "overlaySha256": "c845ac482362d3356e070518ee747b8474259d1d9eafcdc8b009bf2f679d00e5"
+        },
+        "native": {
+          "scope": [
+            "marmish_native::transport::ArtiDirs"
+          ],
+          "negativeDiagnostics": 11,
+          "outputSha256": "bc13879a28301c2bd5a48945d8d2df5611cba2b58745f72f52182309679f5fc4",
+          "graphSha256": "23819586cc9d517cc6197c85fc42834b16e62acdc65e6d5f00e78150202977ba",
+          "overlaySha256": "92e9dd4ba53d9a89ae489c6198bb9d48d9a580aa673579d44220754817a430d4"
+        }
+      },
+      "engineOutputSha256": "20e03f324ae3440560160d5c5144c1a7e22c133c2d4a4a3089ef19361274d2f9",
+      "identityOutputSha256": "86836d4015d4c063ecbccb80bb409d933226d5f03648f25706b23606da76258b",
+      "comparedTreeInventorySha256": "fb50bc94df33c116b490e8042e0d1310dddfeb3ad6c64ec9360db27f0d7ebc70"
+    }
+  },
+  "currentCompilerSha256": "9314d634febfb195ea6d362daba28d1bc9f52c08ca9bee8aca17773c26f1ed04"
+}
