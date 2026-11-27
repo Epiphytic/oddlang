@@ -1,14 +1,14 @@
 {
-  "auditedCompanionRevision": "2107fe5ca39cbd07671baaddc6d7e50f7c7e2d8a",
-  "previousRevision": "b8a4a40b3044b8d6d6f78638585f5fee2bb13a2b",
-  "reproducedTableSha256": "9162edeac93049ace69bfd9f4d2e0307409695cc79e4b47b841aeeb6b616ba69",
-  "remainingProjectToolFiles": 114,
+  "auditedCompanionRevision": "84e94d27c68a9f70f9b5aaf1a8aab85a95598e4d",
+  "previousRevision": "2107fe5ca39cbd07671baaddc6d7e50f7c7e2d8a",
+  "reproducedTableSha256": "e4141119486fbdf5f6ca47d36c3781c8171f69923a839e05a6668472acea4343",
+  "remainingProjectToolFiles": 113,
   "remainingProjectExtensions": {
-    ".py": 111,
+    ".py": 110,
     ".sh": 3
   },
   "removedSincePrevious": [
-    "verification/whole/suite/selected_tests.py"
+    "verification/whole/mdk-json-input/verify.py"
   ],
   "addedSincePrevious": []
 }

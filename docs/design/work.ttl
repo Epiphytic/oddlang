@@ -3697,3 +3697,8 @@ w:portHistoricTooling p:evidence w:selectedSuiteRust .
 w:selectedSuiteRust a p:Artifact ;
     rdfs:label "The isolated Rust suite witness matched the archived named executions in all four selected-library profiles on ARM64 macOS, including the engine child and the absent MDK selector. Cold and warm standalone MDK recoveries reproduced the original and mutated JSON size and record limits, eleven behavioral cases and four source-denial controls." ;
     p:location "verification/provider-tooling/selected-suite-rust.json" .
+
+w:portHistoricTooling p:evidence w:boundedMdkRecoveryRust .
+w:boundedMdkRecoveryRust a p:Artifact ;
+    rdfs:label "The complete Rust MDK JSON qualifier reproduced fresh Python observations, recovered graph and package locks, the four source-denial probes and the original field-bound mutations. Cold and warm receipts on macOS ARM64 were byte-identical. Prepare mode restored the three portable outputs and rejected a stale dependency pin." ;
+    p:location "verification/provider-tooling/bounded-mdk-json-recovery.json" .
