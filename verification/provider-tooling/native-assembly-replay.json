@@ -1,0 +1,75 @@
+{
+  "compilerSha256": "3884c423fccb909d69c8a6d5e119d4097b8ea6fade8936274edfe814890a08a4",
+  "format": "oddlang-native-assembly-tool-replay-v1",
+  "lockedBootstrap": {
+    "acquiredAndDisconnectedTreesIdentical": true,
+    "emptyCacheOffline": "rejected",
+    "fetchLocked": "passed",
+    "offlineAfterDisconnect": "passed",
+    "preservedLockBytes": true,
+    "provider": "disposable local Git repository",
+    "staleRootLock": "rejected"
+  },
+  "nativePackage": {
+    "deterministicTree": true,
+    "downstreamSharedWireConsumer": "passed",
+    "rejections": [
+      "existing destination",
+      "conflicting reexport",
+      "unknown public item",
+      "stale input digest",
+      "symlink outside package",
+      "stale Cargo lock",
+      "concurrent destination publication"
+    ],
+    "sourceFileHashesMatchReceipt": true,
+    "sourceFreeInputs": true
+  },
+  "nativeWorkspace": {
+    "deterministicTree": true,
+    "rejections": [
+      "existing destination",
+      "self dependency",
+      "unresolved dependency",
+      "cycle",
+      "stale package manifest digest"
+    ],
+    "siblingConsumer": "passed"
+  },
+  "platform": "aarch64-apple-darwin",
+  "processComparison": {
+    "cases": [
+      [
+        "--help"
+      ],
+      [
+        "--version"
+      ],
+      [
+        "--absent"
+      ],
+      [
+        "help",
+        "capture"
+      ]
+    ],
+    "equalObservations": [
+      "exit status",
+      "stdout bytes",
+      "stderr bytes"
+    ],
+    "missingEntryRejected": true,
+    "targets": [
+      "native-package",
+      "native-workspace"
+    ]
+  },
+  "rustToolchain": "1.97.1",
+  "verifiedSources": {
+    "verification/provider-validation/src/bin/native-package.rs": "b0a8012284444f16967ea7dc15d931e99a4e81db1358a75313a5a60d60b62842",
+    "verification/provider-validation/src/bin/native-workspace-cli.rs": "abdd6f8c641cba52716f477ac30e5aa68aceb78f9ca04cf01071faefeb3d4f25",
+    "verification/provider-validation/src/bin/native-workspace.rs": "3c8d8a0a212f861bfdca525084fb2e7e83d28d4a81593cff7a77f6b547480dfa",
+    "verification/provider-validation/src/bin/native_artifacts/mod.rs": "b5fbad02f165b753ba6529b12b409efb955fcc036c8611cabc35344a76c560cb",
+    "verification/provider-validation/src/bin/native_workspace/bootstrap.rs": "6b92b25941eac21124a65e7c1cb12533d663112be1132d57c04dac859678b748"
+  }
+}
