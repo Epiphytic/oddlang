@@ -3364,3 +3364,14 @@ w:portHistoricTooling p:evidence w:oddlangToolingAndConsumers .
 w:oddlangToolingAndConsumers a p:Artifact ;
     rdfs:label "Oddlang tracked tooling and native consumers, with 36 Wasm observations, three refusal controls and the live two-version hybrid test" ;
     p:location "verification/provider-tooling/oddlang-root-audit.md" .
+
+w:portHistoricTooling p:evidence w:companionInventoryRust, w:companionBufferedRust, w:companionPublicComposersRust .
+w:companionInventoryRust a p:Artifact ;
+    rdfs:label "Native release inventory reproduced both pinned workspaces, 30 Cargo targets, 15 independently checked release assets and all 1286 RDF triples. The verifier rejected the omitted workspace, unknown feature, missing witness and unclassified file controls." ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/266821f550ddab77ee9db6edef4eebd7a4a762a4/verification/whole-marmish/inventory/rust-replay-macos-arm64.json" .
+w:companionBufferedRust a p:Artifact ;
+    rdfs:label "Buffered seven-member native gate and its successor callback replays" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/48bd4ddbbadc2d3837b4f785042f56aa77e2f602/verification/whole/unified-buffered/native-aarch64-apple-darwin.json" .
+w:companionPublicComposersRust a p:Artifact ;
+    rdfs:label "Six prototype constant, engine error and converged public API descriptors reproduced byte for byte, with 14 rejected drift cases" ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/3460c689e219e4ab6bc22e41ee8e4a867d99461c/verification/whole/converged-public-api/rust-composition-macos-arm64.json" .
