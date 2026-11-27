@@ -105,6 +105,26 @@ fn same_native_consumer_and_portable_recovery_for_both_providers() {
             .arg(format!("workspace-{name}.json"))
             .arg(&workspace));
         consumer(&workspace.join("records/src/lib.rs"), &dir);
+        let package = dir.join("standalone-package");
+        run(oddlang()
+            .current_dir(&root)
+            .args(["build", "native-package", "rust", "fixture/package.json"])
+            .arg(&package)
+            .args(["--providers", registry]));
+        consumer(&package.join("src/lib.rs"), &dir);
+        for file in ["src/lib.rs", "package.lock"] {
+            assert_eq!(
+                fs::read(package.join(file)).unwrap(),
+                fs::read(workspace.join("records").join(file)).unwrap(),
+            );
+        }
+        if name == "wasm" {
+            assert_eq!(
+                json(&package.join("provider-receipt.json")),
+                json(&workspace.join("records/provider-receipt.json")),
+            );
+        }
+
         let receipt = workspace.join("records/provider-receipt.json");
         if name == "wasm" {
             let receipt = json(&receipt);
@@ -215,4 +235,39 @@ fn workspace_rejects_registry_configuration_drift_before_projection() {
         "{diagnostic}"
     );
     assert!(!work.path().join("output").exists());
+}
+
+#[test]
+fn standalone_package_rejects_an_incompatible_override_without_publishing() {
+    let root = example();
+    let work = tempfile::tempdir().unwrap();
+    let mut registration = json(&root.join("registry.json"))["providers"][0].clone();
+    registration["version"] = "2".into();
+    for pin in ["component", "schema"] {
+        let path = registration[pin]["path"].as_str().unwrap();
+        fs::copy(root.join(path), work.path().join(path)).unwrap();
+    }
+    let registry = work.path().join("registry.json");
+    fs::write(
+        &registry,
+        serde_json::json!({"format":"oddlang-provider-registry-v1","providers":[registration]})
+            .to_string(),
+    )
+    .unwrap();
+    let destination = work.path().join("package");
+    let result = oddlang()
+        .current_dir(root)
+        .args(["build", "native-package", "rust", "fixture/package.json"])
+        .arg(&destination)
+        .arg("--providers")
+        .arg(registry)
+        .output()
+        .unwrap();
+    assert!(!result.status.success());
+    assert!(
+        String::from_utf8(result.stderr)
+            .unwrap()
+            .contains("incompatible provider contract version")
+    );
+    assert!(!destination.exists());
 }

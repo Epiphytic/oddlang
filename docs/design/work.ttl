@@ -3943,3 +3943,12 @@ w:cleanupAfterMerge a p:Decision ;
     rdfs:label "Remove task scratch when its last consumer finishes, clean merged branches and repeat the worktree inventory after merges" ;
     p:source w:branchCleanupInstructions .
 w:branchCleanupInstructions a p:Artifact ; p:location "AGENTS.md#finish-a-branch" .
+
+w:standalonePackageProviders a p:Task ;
+    rdfs:label "Select registered providers when building a standalone Rust package" ;
+    p:milestone w:marmishMilestone ; p:source w:wasmProviderDesign ;
+    p:dependsOn w:replaceableWasmProviders ; p:status p:done ;
+    p:acceptance "Build the same package directly and in a workspace with native and Wasm providers, compare its lock, run the independent consumer and reject an incompatible selection before publication." ;
+    p:evidence w:standalonePackageProviderReplay, w:providerClientTests .
+w:standalonePackageProviderReplay a p:Artifact ;
+    p:location "verification/provider-tooling/standalone-package-providers.json" .
