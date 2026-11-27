@@ -55,6 +55,7 @@
     "local-file-catalog",
     "record-defaults",
     "shared-declarations",
-    "typed-finite-errors"
+    "typed-finite-errors",
+    "record-writer"
   ]
 }
