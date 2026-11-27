@@ -3865,3 +3865,8 @@ w:portHistoricTooling p:evidence w:copyFrameDecodeRust .
 w:copyFrameDecodeRust a p:Artifact ;
     rdfs:label "Rust replay of the complete copy-frame release reproduced the archived receipt. Both libraries passed 11 upstream and nine exact checks. The composed package passed the Manifest and Checkpoint corpora, and the mutated encoder and decoder returned the predicted opposite errors." ;
     p:location "verification/provider-tooling/copy-frame-decode-rust.json" .
+
+w:portHistoricTooling p:evidence w:launchLayoutRust .
+w:launchLayoutRust a p:Artifact ;
+    rdfs:label "Rust replay recovered all eleven Launch writer slots and reproduced the archived macOS receipt byte for byte. All 227 native observations matched for the release and reordered builds. The source mutation changed 201 digests. The independent Rust corpus matched the historical requests and both sets of expected outputs." ;
+    p:location "verification/provider-tooling/launch-layout-rust.json" .

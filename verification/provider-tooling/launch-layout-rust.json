@@ -1,0 +1,28 @@
+{
+  "companionRevision": "381b3f09c18e5d411db87ba0bb54d33d763e2555",
+  "verifier": "verification/whole/copy-launch-layout/verify.rs",
+  "receipt": {
+    "reference": "af54339d250290490d62d4475a77539b7e739071",
+    "framework": "f45f1308d995114740a8d55770f5c4ab3615bc40",
+    "sourceSha256": "cd25b010838a5f2d29d49550abe7ea99092064c5303d727a05efb1868612cbf2",
+    "layoutSha256": "c08812745ba8a9c1438ff69af3c2e7246aa2af045c3131e8a544ea5f1c514769",
+    "observationSha256": "142eb1a35b20ef6a4a1d43bdaeec33b1cfa623b07371065731807b5a58d702f7",
+    "contractSha256": "5e02a133153617370d168fb99cba20962d019f74715a4f2cde29bab8ecb64535",
+    "mutatedContractSha256": "d9a43a48d1c1e755a003cccc5d71a241ef16b62effa0b9253136836d1a639d62",
+    "mutatedCases": 227,
+    "changedResults": 201,
+    "packageLockSha256": "df92672e71c67ad8bf2d879c333d85f65f060afbecdff89580a585f9c4b63d8e",
+    "recoveredFieldSlots": 11,
+    "nativeCases": 227,
+    "platform": "aarch64-apple-darwin",
+    "originalAndCompanionReadDeniedDuringBuild": true
+  },
+  "archivedReceipt": "verification/whole/copy-launch-layout/reference-aarch64-apple-darwin.json",
+  "byteIdenticalReceiptSha256": "b71ad1759f980e657c001da749f99d067156522b93df2c2df361c71e43eebdba",
+  "expectedRowsSha256": "7daa3777f133f5eda26ca282205b2984e385bb859b7a841ce511b3d72c0cb216",
+  "controls": [
+    "All 227 Rust requests, baseline outputs and swapped outputs equal the historical Python corpus.",
+    "Unchanged native caller matched all baseline rows against both original and seven-crate workspace libraries.",
+    "Wrong framework revision rejected before writing a receipt."
+  ]
+}
