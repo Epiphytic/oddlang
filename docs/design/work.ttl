@@ -3724,3 +3724,8 @@ w:portHistoricTooling p:evidence w:sourceCopyGuardReplayRust .
 w:sourceCopyGuardReplayRust a p:Artifact ;
     rdfs:label "On ARM64 macOS the Rust replay reproduced the archived guard receipt across seven variants, nine rules and 72 caller observations. Three named errors changed when the two Data encoder checks were reversed. Substituted baseline compiler evidence failed the mutation source pin." ;
     p:location "verification/provider-tooling/source-copy-guard-replay.json" .
+
+w:portHistoricTooling p:evidence w:publicDiagnosticObserverRust .
+w:publicDiagnosticObserverRust a p:Artifact ;
+    rdfs:label "The Rust diagnostic observer reproduced the Python receipt from the same rebuilt library byte for byte on macOS ARM64. Four native caller scenarios matched the archived behavior and the generated library, including Unicode event bytes, cross-thread state and a closed stderr pipe. Only the upstream library digest differed from the historical receipt." ;
+    p:location "verification/provider-tooling/public-diagnostics-rust.json" .

@@ -1,0 +1,34 @@
+{
+  "host": "aarch64-apple-darwin",
+  "companionRevision": "2f2bd87be3215529789f2b979ab6c71af48d5362",
+  "upstream": "af54339d250290490d62d4475a77539b7e739071",
+  "receiptPath": "verification/whole/public-diagnostics/aarch64-apple-darwin.json",
+  "historicalPythonRevision": "eb2110a1b319658b7baf6b781e5ee36722486180",
+  "archivedReceiptSha256": "94d47966693c3fcb26ab66da15304bfa4642ab1e0b725fee9830fcf0e9c26169",
+  "freshPythonAndRustReceiptSha256": "62e74b64b554455bfa3e2c73626936e735104909f428a5fe25e4320831642818",
+  "onlyArchivedDifference": {
+    "field": "librarySha256",
+    "archive": "cbadad236629e47ee63bd3bb8633e303a531115f9c0d91d298ace5f4cb43040b",
+    "rebuilt": "ec48b2019d98a88414be48fdffa701652a6299964b159f18655a2eff850bd2dd"
+  },
+  "generatedWorkspaceLockSha256": "82a33136e1ac65194ffd5bee4928b41550a7b1a2981ab26b233ad5d57d6ef507",
+  "generatedLibrarySha256": "b0a8929192d0411255b2f98a56b49e7acdf35f6e607892e7efa565bfccba1ce7",
+  "cases": [
+    "disabled",
+    "sequence",
+    "cross-thread",
+    "closed-sink"
+  ],
+  "checked": [
+    "exit status",
+    "stdout bytes",
+    "stderr bytes",
+    "closed stderr pipe"
+  ],
+  "generatedCallbackReplays": [
+    "generated-diagnostics",
+    "converged-diagnostics-cli",
+    "canonical-workspace"
+  ],
+  "wrongVersionControl": "Expecting version 0.3.2 from the generated 0.3.1 library failed on the sequence case and emitted no result."
+}
