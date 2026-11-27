@@ -3562,3 +3562,8 @@ w:portHistoricTooling p:evidence w:bufferedReaderDirectCallbacks .
 w:bufferedReaderDirectCallbacks a p:Artifact ;
     rdfs:label "Both direct Rust reader callbacks reproduced the archived bufferedInput object, including four native reader cases each, on the pinned engine-error and prototype-constant workspaces. A changed predecessor was rejected without a receipt and three downstream verification entry points loaded after removal of the Python adapter." ;
     p:location "verification/provider-tooling/buffered-reader-callbacks.json" .
+
+w:portHistoricTooling p:evidence w:rustReleaseReference .
+w:rustReleaseReference a p:Artifact ;
+    rdfs:label "The Rust release comparison reproduced the Python output and checked-in adjacent-release report byte for byte. Five pinned build objects matched across revisions. Changes to a build input and measurement provenance each failed without a receipt." ;
+    p:location "verification/provider-tooling/release-reference.json" .

@@ -1,14 +1,14 @@
 {
-  "auditedCompanionRevision": "4d7d17011396084e431dbf8b6d66ddccca225055",
-  "previousRevision": "0481f4c59496481e17772dc7be4c1ba6215feff1",
-  "reproducedTableSha256": "c9b95ab5c269ae78c0de0fb9ad74cd7806ff68dd3bf6fe7dd0ad263ad893a790",
-  "remainingProjectToolFiles": 146,
+  "auditedCompanionRevision": "79e0e6811f5056983213bfdcf8df564b966c9aea",
+  "previousRevision": "4d7d17011396084e431dbf8b6d66ddccca225055",
+  "reproducedTableSha256": "a617ac135a1863ddf318b09889fd9260ab11ee82618291c1b7f85923225df3c5",
+  "remainingProjectToolFiles": 145,
   "remainingProjectExtensions": {
-    ".py": 138,
+    ".py": 137,
     ".sh": 8
   },
   "removedSincePrevious": [
-    "verification/whole/unified-buffered/workspace_compat.py"
+    "verification/whole/release/reference.py"
   ],
   "addedSincePrevious": []
 }

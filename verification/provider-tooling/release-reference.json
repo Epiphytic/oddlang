@@ -1,0 +1,27 @@
+{
+  "companionRevision": "79e0e6811f5056983213bfdcf8df564b966c9aea",
+  "archive": "verification/whole/release/reference.json",
+  "identicalRustPythonArchiveSha256": "c5022d166d48a8a6ab60c8e5c76ba763da821a72d72600c3cd94a993d9b762fa",
+  "comparedGitObjects": {
+    "Cargo.lock": "d5c301303312f0392269c39a26b5a1b4a1084b8b",
+    "Cargo.toml": "48d5216d0cac96fb9890327220499caf1032d961",
+    "crates": "2906b64abdfde58b9d533d232d0a33758a73f32d",
+    "patches": "02f7a037e88cac7fa76f9aa42ae59a3576860bbe",
+    "rust-toolchain.toml": "5ec58696981dc886c3770cb5b56b7e6f36fb76b5"
+  },
+  "measurementSha256": "aa502df438a3bc16d6b1e118822f25d647a392d70995dc738f2a203f51522972",
+  "historicalCohortCounts": {
+    "copy-interrupt-get": 3,
+    "copy-interrupt-put": 3,
+    "copy-matrix": 18,
+    "edge-copy": 66,
+    "edge-rsync": 18,
+    "edge-stream": 27,
+    "rsync-matrix": 18,
+    "stream-matrix": 9
+  },
+  "controlsRejectedWithoutReceipt": [
+    "changed Cargo.toml object",
+    "wrong measurement provenance"
+  ]
+}
