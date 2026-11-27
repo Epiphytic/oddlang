@@ -3155,3 +3155,6 @@ w:nativeCompilerRecoveryFixtureReplay a p:Artifact ;
 
 w:portHistoricTooling p:evidence w:rustCaptureParity .
 w:rustCaptureParity a p:Artifact ; p:location "verification/provider-tooling/rust-capture.json" .
+
+w:portHistoricTooling p:evidence w:sealedRecordReplay .
+w:sealedRecordReplay a p:Artifact ; p:location "verification/provider-validation/src/bin/sealed-record-package.rs", "verification/provider-validation/src/bin/sealed-record-api.rs" .

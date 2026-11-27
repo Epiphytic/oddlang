@@ -59,6 +59,8 @@
     "record-writer",
     "binary-frame",
     "canonical-wire",
-    "integrity-block"
+    "integrity-block",
+    "sealed-record-api",
+    "sealed-record-package"
   ]
 }
