@@ -3200,3 +3200,6 @@ w:portHistoricTooling p:evidence w:nativeCommandSurfaceReplay .
 w:nativeCommandSurfaceReplay a p:Artifact ;
     rdfs:label "Offline native CLI parser and terminal prefix qualification on macOS ARM64" ;
     p:location "verification/provider-tooling/command-surface-replay.json" .
+
+w:portHistoricTooling p:evidence w:rustFramingReplay .
+w:rustFramingReplay a p:Artifact ; p:location "verification/provider-tooling/native-wasm-framing.json" .

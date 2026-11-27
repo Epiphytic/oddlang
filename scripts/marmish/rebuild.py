@@ -1,6 +1,7 @@
 """Recover two locked modules and independently assemble and index the candidate twice."""
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -9,8 +10,6 @@ import subprocess
 import sys
 import tempfile
 import tomllib
-
-from observations import digest
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -100,7 +99,7 @@ def run_build(upstream, destination, evidence, binary, original, env):
             cwd=ROOT,
         )
         assembly = prepared / "project.toml"
-        assembly_hash = digest(assembly.read_bytes())
+        assembly_hash = hashlib.sha256(assembly.read_bytes()).hexdigest()
         if (
             assembly_hash
             != (ROOT / "examples/marmish/assembly-v2.sha256").read_text().split()[0]
@@ -159,7 +158,7 @@ def run_build(upstream, destination, evidence, binary, original, env):
     for row in rows:
         path = row["path"]
         if (
-            digest((destination / path).read_bytes()) != row["sha256"]
+            hashlib.sha256((destination / path).read_bytes()).hexdigest() != row["sha256"]
             or before[path][0] != row["mode"]
         ):
             raise ValueError(f"assembled bytes/mode disagree with manifest: {path}")

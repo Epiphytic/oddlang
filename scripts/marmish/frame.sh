@@ -28,8 +28,8 @@ tar -xzf "$cache/$archive_name.tar.gz" -C "$stage" "$archive_name/wasm-tools"
 tools="$stage/$archive_name/wasm-tools"
 "$tools" --version > "$out/wasm-tools.txt"
 
-python3 scripts/marmish/frame_runner.py verify-inputs "$import" "$projection" "$mutant"
-python3 scripts/marmish/observations.py "$upstream" "$out/original"
+cargo +1.97.1 run --quiet --offline --locked --manifest-path verification/marmish-inventory/Cargo.toml --bin frame-matrix -- verify-inputs "$import" "$projection" "$mutant"
+cargo +1.97.1 run --quiet --offline --locked --manifest-path verification/marmish-inventory/Cargo.toml --bin framing-observer -- collect "$upstream" "$out/original"
 cargo +"$rust_version" build --locked --offline --manifest-path examples/wasm/Cargo.toml \
     --target-dir target/wasm-host --bin framing-host
 cp target/wasm-host/debug/framing-host "$stage/host"
@@ -60,4 +60,4 @@ build_pair() {
 }
 build_pair regenerated "$projection"
 build_pair mutant "$mutant"
-python3 scripts/marmish/frame_runner.py compare "$out" "$stage/host" "$import" "$projection" "$mutant"
+cargo +1.97.1 run --quiet --offline --locked --manifest-path verification/marmish-inventory/Cargo.toml --bin frame-matrix -- compare "$out" "$stage/host" "$import" "$projection" "$mutant"

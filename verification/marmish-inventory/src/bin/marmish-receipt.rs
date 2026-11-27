@@ -1,5 +1,5 @@
 //! Seal or replay independently observed native, CLI, and framing evidence.
-use anyhow::{Context, Result, bail, ensure};
+use anyhow::{Context, Result, ensure};
 use clap::{Parser, Subcommand};
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
@@ -48,61 +48,9 @@ fn list(v: &Value) -> Result<&Vec<Value>> {
 fn observed(data: &[u8]) -> Value {
     json!({"byteLength":data.len(),"sha256":hash(data)})
 }
-fn hex(bytes: &[u8]) -> String {
-    use std::fmt::Write as _;
-    let mut out = String::with_capacity(bytes.len() * 2);
-    for b in bytes {
-        write!(out, "{b:02x}").unwrap();
-    }
-    out
-}
-fn expand(segments: &Value) -> Result<Vec<u8>> {
-    let mut out = Vec::new();
-    for segment in list(segments)? {
-        let obj = segment.as_object().context("invalid byte segment")?;
-        if obj.len() == 1 && obj.contains_key("utf8") {
-            out.extend(text(&segment["utf8"])?.as_bytes());
-            continue;
-        }
-        let (s, count) = if obj.len() == 1 && obj.contains_key("hex") {
-            (text(&segment["hex"])?, 1)
-        } else if obj.len() == 2 && obj.contains_key("repeatHex") {
-            (
-                text(&segment["repeatHex"])?,
-                segment["count"].as_u64().context("invalid repeat count")?,
-            )
-        } else {
-            bail!("invalid byte segment")
-        };
-        let digits: Vec<_> = s
-            .split_ascii_whitespace()
-            .flat_map(str::as_bytes)
-            .copied()
-            .collect();
-        ensure!(digits.len() % 2 == 0, "odd hex length");
-        let bytes = digits
-            .chunks_exact(2)
-            .map(|pair| Ok(u8::from_str_radix(std::str::from_utf8(pair)?, 16)?))
-            .collect::<Result<Vec<_>>>()?;
-        for _ in 0..count {
-            out.extend_from_slice(&bytes);
-        }
-    }
-    Ok(out)
-}
-fn cases(contract: &Value) -> Result<Value> {
-    let mut rows = Vec::new();
-    for case in list(&contract["cases"])? {
-        let v = &case["expected"];
-        let actual = if let Some(bytes) = v.get("bytes") {
-            json!({"bytesHex":hex(&expand(bytes)?)})
-        } else {
-            v.clone()
-        };
-        rows.push(json!({"id":case["id"],"operation":case["operation"],"observed":actual,"inputSha256":hash(&expand(&case["input"])?) }));
-    }
-    Ok(json!(rows))
-}
+#[path = "../framing_contract.rs"]
+mod framing_contract;
+use framing_contract::cases;
 fn commands(native: &Value) -> Result<BTreeMap<&str, &Value>> {
     let mut result = BTreeMap::new();
     for row in list(&native["commands"])? {

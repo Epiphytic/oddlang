@@ -58,51 +58,9 @@ pub fn check_wire(contract: &Value, wire: &Value) -> Result<()> {
     );
     Ok(())
 }
-fn verify_inputs(imported: &Path, positive: &Path, mutant: &Path) -> Result<()> {
-    let graph = digest(&read(&imported.join("domain.ttl"))?);
-    let lock = read_json(&imported.join("import.lock"))?;
-    ensure!(
-        lock["graphSha256"] == graph && lock["profile"] == "framing-v1",
-        "import lock disagrees with the framing graph"
-    );
-    for dir in [positive, mutant] {
-        let manifest = read_json(&dir.join("projection.json"))?;
-        ensure!(
-            manifest["version"] == 1 && manifest["files"] == file_hashes(dir, &["frame.rs"])?,
-            "projection does not match its pinned source bytes"
-        );
-        ensure!(
-            (dir == positive) == (manifest["graphSha256"] == graph),
-            "expected distinct positive and mutant graphs"
-        );
-    }
-    ensure!(
-        read(&positive.join("frame.rs"))? != read(&mutant.join("frame.rs"))?,
-        "mutant and production code are identical"
-    );
-    ensure!(
-        read(&positive.join("world.wit"))? == read(&mutant.join("world.wit"))?,
-        "mutant changed the public component ABI"
-    );
-    Ok(())
-}
-fn harness_files(dir: &Path, root: &Path, out: &mut Map) -> Result<()> {
-    for item in fs::read_dir(dir)? {
-        let path = item?.path();
-        if path.is_dir() {
-            harness_files(&path, root, out)?;
-        } else {
-            out.insert(
-                path.strip_prefix(root)?
-                    .to_str()
-                    .context("invalid path")?
-                    .into(),
-                json!(digest(&read(&path)?)),
-            );
-        }
-    }
-    Ok(())
-}
+#[path = "../../frame_inputs.rs"]
+mod inputs;
+use inputs::verify_inputs;
 pub fn check_frame(root: &Path, dir: &Path, contract: &Value) -> Result<()> {
     let base = dir.join("frame");
     let observed = base.join("observations");
@@ -157,20 +115,8 @@ pub fn check_frame(root: &Path, dir: &Path, contract: &Value) -> Result<()> {
         "invalid framing report identity"
     );
     if report["harnessSha256"] != historical["files"] {
-        let mut harness = Map::new();
-        harness_files(&root.join("examples/wasm/framing"), root, &mut harness)?;
-        for name in [
-            "examples/wasm/Cargo.lock",
-            "examples/wasm/host/Cargo.toml",
-            "examples/wasm/toolchain.lock",
-            "scripts/marmish/frame.sh",
-            "scripts/marmish/frame_runner.py",
-            "scripts/marmish/observations.py",
-        ] {
-            harness.insert(name.into(), json!(digest(&read(&root.join(name))?)));
-        }
         ensure!(
-            report["harnessSha256"] == json!(harness),
+            report["harnessSha256"] == inputs::harness(root)?,
             "framing harness identity changed"
         );
     }
