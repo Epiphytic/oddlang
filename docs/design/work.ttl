@@ -3515,3 +3515,8 @@ w:portHistoricTooling p:evidence w:nativeSuiteReconciliation .
 w:nativeSuiteReconciliation a p:Artifact ;
     rdfs:label "Live suite producer uses Rust for named-case accounting. On macOS, all 14 archived Darwin and Linux role receipts matched the historical producer and independently qualified archive verifier. Six invalid inventories or observation sets were rejected and the empty catalog preserved all four counts." ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/2a509f0449c65e7cde7406dec473c5fbc33f5933/verification/whole/suite/tests/reconcile.rs" .
+
+w:portHistoricTooling p:evidence w:nativeSuiteSelection .
+w:nativeSuiteSelection a p:Artifact ;
+    rdfs:label "Rust producer checks both canonical archive digests and compares exact named registrations. A differential replay against the prior Python producer matched seven core and 29 stream registrations on each of the two platform archives. Four malformed stream names were rejected. The three producer controls passed." ;
+    p:location "https://github.com/Epiphytic/marmish-oddlang/blob/3dc92e28d4c53985e605332afc602f49d5d86bf9/verification/whole/suite/src/bin/suite-selection.rs" .
