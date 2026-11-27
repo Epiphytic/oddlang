@@ -3587,3 +3587,8 @@ w:portHistoricTooling p:evidence w:localStatusProjectRust .
 w:localStatusProjectRust a p:Artifact ;
     rdfs:label "The native status workspace projector reproduced all fourteen generated files from the prior source-isolated build. On macOS ARM64 the generated client read the activating state from a pinned original daemon over its private socket. All comparable receipt fields matched the previous run apart from the executable digest and companion revision, including three known reply-shape differences. Five negative controls and typed-client recovery passed." ;
     p:location "verification/provider-tooling/status-projection-replay.json" .
+
+w:portHistoricTooling p:evidence w:typedStatusProjectRust .
+w:typedStatusProjectRust a p:Artifact ;
+    rdfs:label "The Rust projector regenerated the typed status package under source isolation on macOS ARM64. The candidate matched the original on all three exact replies that diverged in the earlier untyped baseline, all 16 extended and 33 nested reply cases, and the activating response from a live original daemon. Package outputs matched the previous projector and the complete qualification matched the archive apart from binary digest fields." ;
+    p:location "verification/provider-tooling/typed-status-projection-replay.json" .
