@@ -1,0 +1,42 @@
+{
+  "companionRevision": "30d3373862106b7938414b27ce5e2438be00b671",
+  "host": "aarch64-apple-darwin",
+  "suites": {
+    "parser": {
+      "matchingGeneratedFiles": 12,
+      "comparedWith": "cli-projection-replay.json",
+      "sourceReadDenials": 5,
+      "historicalPythonProjectorGeneratedFiles": 12
+    },
+    "status": {
+      "matchingGeneratedFiles": 14,
+      "comparedWith": "status-projection-replay.json",
+      "sourceReadDenials": 7,
+      "receiptSha256": "54a2fef748c36747d365814eec2274781a78bf2eb78181e69b6fa0258cac84ce",
+      "archiveSha256": "4798ee46c43c936bf37409099ae9f4fcfdd2ff6981fa3827673478a0d5a40a00"
+    },
+    "typed-status": {
+      "matchingGeneratedFiles": 12,
+      "comparedWith": "typed-status-projection-replay.json",
+      "sourceReadDenials": 7,
+      "receiptSha256": "5cc11d440fc31cbff8795c0f79b919934f11dbff874ff28f8e8b26d54a22704c",
+      "archiveSha256": "c2f5bcc4fbabc2b3406ded270828b94d03a653d33a641c357b9c0860241ea7c5"
+    },
+    "discovery": {
+      "matchingGeneratedFiles": 12,
+      "comparedWith": "status-discovery-projection.json",
+      "sourceReadDenials": 7,
+      "receiptSha256": "33b2914b17b8b68592c84b495cd2850e90de5f16666137fee97f5182a028b23f",
+      "archiveSha256": "2806e89dd727a70305fdafc24772049c48073341f27aede6a4551f931f13e458"
+    }
+  },
+  "eachBuildTested": [
+    "original sources, Git metadata and transcript read probes denied",
+    "out-of-stage write denied",
+    "loopback reachable outside and denied inside"
+  ],
+  "publicationControls": [
+    "cross-volume link and permission preservation",
+    "no replacement of existing output"
+  ]
+}

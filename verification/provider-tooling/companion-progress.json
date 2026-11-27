@@ -1,15 +1,14 @@
 {
-  "auditedCompanionRevision": "7674f47420ee5a203a825a4d1d95e9216f2e5b57",
-  "previousRevision": "eb0147696799292d6e4730f72b462a8da034d4ac",
-  "reproducedTableSha256": "97a6e9a93d9865135f564bb397d903d4d71be18f47f6a99b4d28d5cf13bcf25c",
-  "remainingProjectToolFiles": 131,
+  "auditedCompanionRevision": "30d3373862106b7938414b27ce5e2438be00b671",
+  "previousRevision": "7674f47420ee5a203a825a4d1d95e9216f2e5b57",
+  "reproducedTableSha256": "633a257bbf98574090f43ca0c64f56b9c6691af1b9dfb47d0841cda9b0b9ec05",
+  "remainingProjectToolFiles": 130,
   "remainingProjectExtensions": {
     ".py": 127,
-    ".sh": 4
+    ".sh": 3
   },
   "removedSincePrevious": [
-    "verification/whole/status/qualify.py",
-    "verification/whole/status/typed_qualify.py"
+    "verification/whole/native-build/macos.sh"
   ],
   "addedSincePrevious": []
 }

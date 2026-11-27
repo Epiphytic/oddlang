@@ -3612,3 +3612,8 @@ w:portHistoricTooling p:evidence w:statusQualificationDriversRust .
 w:statusQualificationDriversRust a p:Artifact ;
     rdfs:label "Rust baseline and typed status qualification drivers reproduced the previous results on the same binaries. The typed receipt was byte-identical and the baseline differed only in companion revision. Fresh isolated builds matched both published archives apart from executable and revision provenance, including the live original daemon reply, diagnostic precedence and known scope gaps. An unpinned reference executable produced no receipt." ;
     p:location "verification/provider-tooling/status-qualification-drivers.json" .
+
+w:portHistoricTooling p:evidence w:macosNativeBuildIsolation .
+w:macosNativeBuildIsolation a p:Artifact ;
+    rdfs:label "The Rust build sandbox reproduced all four parser and status package trees and their macOS ARM64 behavior, including staging from a historical Python projector. Each generation checked denied source reads, external writes and loopback access against a reachable listener. Cross-volume publication preserved modes and symlinks, and an existing output was preserved." ;
+    p:location "verification/provider-tooling/macos-native-build-isolation.json" .
