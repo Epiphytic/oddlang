@@ -3943,3 +3943,8 @@ w:cleanupAfterMerge a p:Decision ;
     rdfs:label "Remove task scratch when its last consumer finishes, clean merged branches and repeat the worktree inventory after merges" ;
     p:source w:branchCleanupInstructions .
 w:branchCleanupInstructions a p:Artifact ; p:location "AGENTS.md#finish-a-branch" .
+
+w:vaultModeObserverEvidence a p:Artifact ;
+    rdfs:label "Darwin ARM64 vault mode replay with the Rust caller and seven rejected trait bounds for original and reversed case order" ;
+    p:location "verification/provider-tooling/vault-mode-observer-rust.json" .
+w:portHistoricTooling p:evidence w:vaultModeObserverEvidence .
