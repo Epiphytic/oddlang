@@ -1,0 +1,36 @@
+{
+  "format": "oddlang-local-file-catalog-rust-v1",
+  "entry": "inspect_catalog",
+  "namingType": "Naming",
+  "fixedVariant": "Fixed",
+  "selectedVariant": "Selected",
+  "names": "ITEM_NAMES",
+  "record": {
+    "module": [
+      "crate",
+      "formats"
+    ],
+    "type": "Catalog",
+    "parse": "parse",
+    "assetName": "label",
+    "assets": "items",
+    "name": "name",
+    "bytes": "length",
+    "mode": "mode",
+    "digest": "digest"
+  },
+  "file": {
+    "module": [
+      "crate",
+      "reads"
+    ],
+    "read": "bounded",
+    "verify": "verify"
+  },
+  "error": [
+    "crate",
+    "Fault"
+  ],
+  "invalidVariant": "Invalid",
+  "ioVariant": "Io"
+}

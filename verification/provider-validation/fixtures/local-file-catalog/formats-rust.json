@@ -1,0 +1,36 @@
+{
+  "format": "oddlang-line-record-rust-v1",
+  "parser": "parse",
+  "visibility": "crate",
+  "error": {
+    "id": "urn:test:invalid",
+    "type": [
+      "crate",
+      "Fault"
+    ],
+    "variant": "Invalid"
+  },
+  "records": {
+    "book": {
+      "name": "Catalog",
+      "fields": {
+        "family": "family",
+        "items": "items"
+      },
+      "derives": []
+    },
+    "asset": {
+      "name": "Asset",
+      "fields": {
+        "name": "name",
+        "length": "length",
+        "mode": "mode",
+        "digest": "digest"
+      },
+      "derives": []
+    }
+  },
+  "formatters": {
+    "file": "label"
+  }
+}

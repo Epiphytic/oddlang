@@ -2515,9 +2515,9 @@ w:localFileCatalogLinkage a p:Task ;
     p:acceptance "Compile and run a linked grammar and descriptor catalog, then refuse six incompatible native compositions." .
 
 w:localFileCatalogAssemblyFixture a p:Artifact ;
-    p:location "verification/local-file-catalog/assembly.py" .
+    p:location "verification/provider-validation/src/bin/local-file-catalog.rs" .
 w:verifiedLocalFileCatalogFixture a p:Artifact ;
-    p:location "verification/local-file-catalog/check.py" .
+    p:location "verification/provider-validation/src/bin/local-file-catalog.rs" .
 
 w:localFileCatalogDarwin a p:Artifact ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/88a771e63032b98ee62a97f9a09a2786692dcf6c/verification/whole/local-file-catalog/aarch64-apple-darwin.json" .

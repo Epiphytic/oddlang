@@ -1,0 +1,14 @@
+{
+  "format": "oddlang-finite-error-rust-v1",
+  "categoryTypes": {},
+  "variantOrder": [
+    "urn:test:invalid",
+    "urn:test:catalog:io"
+  ],
+  "names": {
+    "urn:test:invalid": "Invalid",
+    "urn:test:catalog:io": "Io",
+    "urn:test:catalog:Fault": "Fault",
+    "urn:test:catalog:Result": "Result"
+  }
+}

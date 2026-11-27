@@ -46,6 +46,7 @@
     "field-relation",
     "plain-value-choices",
     "serde-string-choice",
-    "structured-diagnostics"
+    "structured-diagnostics",
+    "local-file-catalog"
   ]
 }
