@@ -3785,3 +3785,8 @@ w:typescriptVaultWidthRust a p:Artifact ;
     rdfs:label "The native verifier reproduced the TypeScript fixed-byte projection and its lock and obligations while Seatbelt denied both Rust input probes. Node accepted the published 32-byte width and the mutated 31-byte width with the same ownership and rejection observations as the historical verifier." ;
     p:location "verification/provider-tooling/typescript-vault-fixed-rust.json" .
 w:postRefactorWorkspaceReplay rdfs:comment "Fresh ARM64 macOS runs at 7e368cb passed 33 library tests, four provider interoperability tests and five Rust round-trip tests, including the separately invoked six-build native comparison." .
+
+w:portHistoricTooling p:evidence w:generatedDiagnosticsRust .
+w:generatedDiagnosticsRust a p:Artifact ;
+    rdfs:label "The complete Rust diagnostics verifier staged 85 pinned inputs, denied twelve source and caller reads and built all seven crates on ARM64 macOS. Its four downstream diagnostic scenarios matched the original including cross-thread state and closed stderr. All archived observations matched; only build artifact digests and the companion revision changed. Four altered products failed the native seal check." ;
+    p:location "verification/provider-tooling/generated-diagnostics-rust.json" .
