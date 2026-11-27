@@ -3977,3 +3977,10 @@ w:profilePolicyMixedDaemonEvidence a p:Artifact ;
     rdfs:label "Both mixed pairs activated with isolated file credentials and passed cleanup. Both failed the first allowlisted command at the profile command-policy lock." ;
     p:location "https://github.com/Epiphytic/marmish-oddlang/blob/0e637166e3117ec64514e77531cb0c7dab199e16/verification/whole/basic-command-interop/LOCAL-PROGRESS.md" .
 w:basicCommandInterop p:evidence w:profilePolicyMixedDaemonEvidence .
+
+w:exportRoleReplayEvidence a p:Artifact ;
+    rdfs:label "Rust executable-role inventory matched all 48 workspace descriptors and the profile-policy release export. Seven generated members and their input pins matched the previous build." ;
+    p:location "verification/provider-tooling/export-role-replay.json" .
+w:portHistoricTooling p:evidence w:exportRoleReplayEvidence .
+w:exportRoleReplayEvidence rdfs:comment "The Rust exporter checks the generated workspace lock and product files before and after Cargo compilation, and selects fresh first-party release executables from Cargo's artifact stream. The seven-member release and both preflight transcripts were replayed." .
+w:exportRoleReplayEvidence rdfs:comment "Rust staged the same 661 crates and sparse index from eight release locks as the previous Python exporter. The resulting registry passed the source-isolated offline release build." .
