@@ -10,7 +10,7 @@ use serde_json::{Value, json};
 use std::{
     collections::{BTreeMap, BTreeSet},
     fs,
-    io::Read,
+    io::{self, Read, Write},
     path::Path,
 };
 
@@ -23,6 +23,24 @@ const RECEIPT: &str = "provider-receipt.json";
 fn parse<T: DeserializeOwned>(bytes: &[u8]) -> Result<T> {
     let strict_json::Strict(value) = serde_json::from_slice(bytes).map_err(|e| e.to_string())?;
     serde_json::from_value(value).map_err(|e| e.to_string())
+}
+
+/// Stop serializing at the document boundary, including JSON escaping and envelope fields.
+#[derive(Default)]
+struct RequestBytes(Vec<u8>);
+
+impl Write for RequestBytes {
+    fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+        if bytes.len() > DOCUMENT_LIMIT - self.0.len() {
+            return Err(io::Error::other("provider request byte limit"));
+        }
+        self.0.extend_from_slice(bytes);
+        Ok(bytes.len())
+    }
+
+    fn flush(&mut self) -> io::Result<()> {
+        Ok(())
+    }
 }
 
 fn read_file(path: &Path, limit: usize) -> Result<Vec<u8>> {
@@ -307,14 +325,14 @@ impl Registry {
         let config = external
             .map(|e| &e.registration.configuration)
             .unwrap_or(&Value::Null);
-        let request = serde_json::to_vec(&json!({"format":"oddlang-provider-input-v1","role":role,
-            "capability":capability,"version":version,"configuration":config,"input":input}))
-        .map_err(|e| e.to_string())?;
-        if request.len() > DOCUMENT_LIMIT {
-            return Err("provider request byte limit".into());
-        }
+        let mut envelope = json!({"format":"oddlang-provider-input-v1","role":role,
+            "capability":capability,"version":version,"configuration":config,"input":null});
+        envelope["input"] = input;
+        let mut encoded = RequestBytes::default();
+        serde_json::to_writer(&mut encoded, &envelope).map_err(|e| e.to_string())?;
+        let request = encoded.0;
         let (output, identity) = if let Some(ext) = external {
-            ext.schema.validate(&input)?;
+            ext.schema.validate(&envelope["input"])?;
             let raw = crate::provider_runtime::invoke(role, &ext.component, &request)?;
             if raw.len() > DOCUMENT_LIMIT {
                 return Err("provider response byte limit".into());
@@ -446,6 +464,54 @@ pub fn publish(dest: &Path, output: &ProviderOutput, receipt: &Value) -> Result<
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn request_writer_rejects_an_overflowing_chunk_before_appending_it() {
+        let mut writer = RequestBytes(vec![0; DOCUMENT_LIMIT - 1]);
+        assert!(writer.write_all(&[1, 2]).is_err());
+        assert_eq!(writer.0.len(), DOCUMENT_LIMIT - 1);
+        writer.write_all(&[3]).unwrap();
+        assert_eq!(writer.0.last(), Some(&3));
+    }
+
+    #[test]
+    fn encoded_request_limit_includes_envelope_and_escaping() {
+        let registry = Registry::default();
+        let sample = json!({"format":"oddlang-provider-input-v1", "role":"generate",
+            "capability":"test", "version":"1", "configuration":null, "input":""});
+        let available = DOCUMENT_LIMIT - serde_json::to_vec(&sample).unwrap().len();
+        let mut payload = "\"".repeat(available / 2);
+        payload.push_str(&"a".repeat(available % 2));
+        let mut expected = sample;
+        expected["input"] = Value::String(payload.clone());
+        let bytes = serde_json::to_vec(&expected).unwrap();
+        assert_eq!(bytes.len(), DOCUMENT_LIMIT);
+        let (_, receipt) = registry
+            .run(
+                "generate",
+                "test",
+                "1",
+                Value::String(payload.clone()),
+                &[],
+                || Ok(ProviderOutput::default()),
+            )
+            .unwrap();
+        assert_eq!(receipt["requestSha256"], digest(&bytes));
+        payload.push('a');
+        assert_eq!(
+            registry
+                .run(
+                    "generate",
+                    "test",
+                    "1",
+                    Value::String(payload),
+                    &[],
+                    || panic!("oversize request reached provider")
+                )
+                .unwrap_err(),
+            "provider request byte limit"
+        );
+    }
+
     #[test]
     fn collisions_leave_destination_absent() {
         let root = tempfile::tempdir().unwrap();
