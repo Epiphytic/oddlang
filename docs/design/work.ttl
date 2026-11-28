@@ -4078,3 +4078,8 @@ w:replaceableWasmProviders p:evidence w:providerRequestLimitReplay .
 w:providerRequestLimitReplay a p:Artifact ;
     p:location "verification/provider-tooling/bounded-provider-request.json" ;
     rdfs:label "The provider host enforces the 8 MiB byte limit while encoding its request, including escaped input and envelope fields. The exact-limit request retains its receipt hash." .
+
+w:portHistoricTooling p:evidence w:localCatalogNativeReplay .
+w:localCatalogNativeReplay a p:Artifact ;
+    p:location <../../verification/provider-tooling/local-file-catalog-native.json> ;
+    rdfs:label "The Rust verifier reproduced the archived catalog behavior on macOS ARM64, including the missing-prefix failure. The historical and post-refactor compilers emitted 103 identical workspace files." .
