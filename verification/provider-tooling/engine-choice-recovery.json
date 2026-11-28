@@ -704,5 +704,87 @@
     ],
     "byteMutationDetected": true,
     "withinTargetDarwinSymlinkAccepted": true
+  },
+  "nativeEngineSerdeSelection": {
+    "archivedCargoLogSha256": "52db2b6b407e1ed39c83d4c3fbf875df22c9e3243900848e2640a2158caa6209",
+    "selectedLibrarySha256": "66cc66424e8a21968b7f5a35b3141aa0dce7ae094428fb4fa2afef318c16d46c",
+    "selectedLibrary": "libserde-b2b4c352a8421795.rlib",
+    "rejectedControls": [
+      [
+        "aarch64-apple-darwin",
+        "ambiguous"
+      ],
+      [
+        "aarch64-apple-darwin",
+        "incomplete"
+      ],
+      [
+        "aarch64-apple-darwin",
+        "failed"
+      ],
+      [
+        "aarch64-apple-darwin",
+        "no-derive"
+      ],
+      [
+        "aarch64-apple-darwin",
+        "debug"
+      ],
+      [
+        "aarch64-apple-darwin",
+        "wrong-target-kind"
+      ],
+      [
+        "aarch64-apple-darwin",
+        "missing"
+      ],
+      [
+        "aarch64-apple-darwin",
+        "escaping-symlink"
+      ],
+      [
+        "aarch64-unknown-linux-gnu",
+        "ambiguous"
+      ],
+      [
+        "aarch64-unknown-linux-gnu",
+        "incomplete"
+      ],
+      [
+        "aarch64-unknown-linux-gnu",
+        "failed"
+      ],
+      [
+        "aarch64-unknown-linux-gnu",
+        "no-derive"
+      ],
+      [
+        "aarch64-unknown-linux-gnu",
+        "debug"
+      ],
+      [
+        "aarch64-unknown-linux-gnu",
+        "wrong-target-kind"
+      ],
+      [
+        "aarch64-unknown-linux-gnu",
+        "missing"
+      ],
+      [
+        "aarch64-unknown-linux-gnu",
+        "escaping-symlink"
+      ]
+    ],
+    "host": "aarch64-apple-darwin",
+    "companionRevision": "0ecba9fb12d5817560ea022ec20ba0eebe57ba27",
+    "frameworkRevision": "43ff57435959bec3cf83479458440814dfbcf6be",
+    "releaseReceiptSha256": "5009c1adec930b14f3368c429734d35811d4bee7553f7c7072f233133912133b",
+    "workspaceLockSha256": "a72d0b0538b3afc272fcd7f5cf8cc900935fd4cc920261fa4bd6bcea46270292",
+    "generatedWorkspaceFiles": 99,
+    "cargoArtifactClosureEntries": 572,
+    "candidateSerdeSha256": "de3f64d4d1fa22d5b0113aab37c094bb5211074aed1e96ca2168700b7f7a5502",
+    "matchingImportOutcomes": 140,
+    "importable": 79,
+    "engineObservationsMatchedArchive": true
   }
 }
