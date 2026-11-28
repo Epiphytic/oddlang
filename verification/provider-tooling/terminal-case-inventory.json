@@ -1,0 +1,37 @@
+{
+  "platforms": {
+    "aarch64-apple-darwin": {
+      "prefixReceiptSha256": "6feac74e10ebd13ff2305ce3786c0cd4492ddf233f8f6619a5f56e570bf59598",
+      "selectedPerRole": 36,
+      "excludedPerRole": 46
+    },
+    "aarch64-unknown-linux-gnu": {
+      "prefixReceiptSha256": "01b7367edd3704738633c3e190f654096bb974df0acd62a47e2fced0daf59ff0",
+      "selectedPerRole": 36,
+      "excludedPerRole": 46
+    }
+  },
+  "rejectedControls": [
+    "duplicate",
+    "missing role",
+    "missing version",
+    "outside admitted",
+    "extra exclusion",
+    "failed exit",
+    "nonempty stderr",
+    "empty stdout"
+  ],
+  "sealedClosureEntries": 587,
+  "nativeInvocations": 144,
+  "companionRevision": "0d06f8725cc75f34fec7357953d4291add62cf7d",
+  "archivedTerminalReceiptSha256": "43ac236185c2e1acf031152122572ae4b679df29c645025331354dbda62decfe",
+  "sealedLibraryClosureSha256": "9bde2cee5ae8258eb89c2c8fc18452c98b99c5af87b9e7f065ee58749bb00d76",
+  "originalBinaries": {
+    "marmish": "8097469a154ba7cf3a5a4d4848537f7ce72ba9f767f90ab7362aba8074842ac7",
+    "marmishd": "f35024f7a3a342392d36b83e4348f7bf0ea65d9e39b9358425c8249592038f41"
+  },
+  "candidateBinaries": {
+    "marmish": "b0e546405c43edd2ad82e1d246a112e5b51992bafb70a5cdd93154ae4c9b3424",
+    "marmishd": "4c5985f5f821c8c61cde077533bc1d7ea8ac062ac2c589cd90bfcb40a11fdda4"
+  }
+}
