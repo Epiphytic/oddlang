@@ -86,5 +86,25 @@
       "bwrap",
       "sudo -n bwrap"
     ]
+  },
+  "completeRustQualification": {
+    "companionRevision": "02d5fcaa8afe4c3697ea159420cef4be04efd52b",
+    "host": "aarch64-apple-darwin",
+    "sourceReceiptSha256": "43ac236185c2e1acf031152122572ae4b679df29c645025331354dbda62decfe",
+    "rustReceiptSha256": "61f9e3daf24ca65657f05962e8ca4d66df1ac07c8b547456f4ea32a70448d447",
+    "workspaceLockSha256": "b50bd2a6896f7f253b4ed6005844f7cc48704dc3663568815df811e60b68f3ab",
+    "acceptedChangesFromArchive": {
+      "companion": "02d5fcaa8afe4c3697ea159420cef4be04efd52b",
+      "binaryBuildArtifactLogSha256": "321e5e7b0d26bb52a0284afd2dc1c631ee1b4c5cc9e714c23c186100cc5733ef"
+    },
+    "cargoLibraryClosureEntries": 587,
+    "cargoLibraryClosureSha256": "9bde2cee5ae8258eb89c2c8fc18452c98b99c5af87b9e7f065ee58749bb00d76",
+    "roleReportsMatchedArchive": true,
+    "unchangedReceiptsOnRejectedInputs": [
+      "wrong original release binaries",
+      "wrong qualified engine library",
+      "wrong sealed Cargo event log",
+      "sealed log paired with different target directory"
+    ]
   }
 }

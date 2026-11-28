@@ -1,11 +1,13 @@
 {
-  "auditedCompanionRevision": "38ffb0a5448d62b5550335b828dd27ce562e9258",
-  "previousRevision": "c44282d940cbb876fad6a714afeb0f495cfbcecf",
-  "reproducedTableSha256": "1e0e6df2b2394b3b37910184dcd76452e37c2309552b99298f3940101dd83755",
-  "remainingProjectToolFiles": 50,
+  "auditedCompanionRevision": "02d5fcaa8afe4c3697ea159420cef4be04efd52b",
+  "previousRevision": "38ffb0a5448d62b5550335b828dd27ce562e9258",
+  "reproducedTableSha256": "314c7919144d249bbc5d6595014eb0aba7e8b412bf3d417208fd43422e49aa7f",
+  "remainingProjectToolFiles": 49,
   "remainingProjectExtensions": {
-    ".py": 50
+    ".py": 49
   },
-  "removedSincePrevious": [],
+  "removedSincePrevious": [
+    "verification/whole/canonical-public-data-terminal/verify.py"
+  ],
   "addedSincePrevious": []
 }

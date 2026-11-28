@@ -4066,3 +4066,5 @@ w:terminalCaseInventoryRust a p:Artifact ;
 w:terminalCaseInventoryRust rdfs:comment "The Rust link selector matched the previous verifier on a fresh sandboxed offline Darwin build. Both selected binaries reproduced the 72 archived observations. Cargo stream mutations and Linux layout fixtures exercised missing, duplicate, untrusted-path and profile errors." .
 
 w:terminalCaseInventoryRust rdfs:comment "Rust ran the 144 archived immediate help and version invocations on the original and generated macOS binaries. The role reports matched both archived roles and the role homes remained empty. Seven negative controls distinguished changed archive fields, runtime output, status and filesystem effects. Arguments for both Linux launchers matched the previous verifier." .
+
+w:terminalCaseInventoryRust rdfs:comment "The complete Rust qualification reopened the retained macOS build, checked both Git-pinned receipts, regenerated the binary link observations and reproduced the historical receipt except for the companion revision and fresh Cargo event log digest. Four invalid input combinations preserved an existing receipt. The Python entry point was retired." .
