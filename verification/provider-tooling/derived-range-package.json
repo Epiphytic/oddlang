@@ -1,0 +1,124 @@
+{
+  "assemblyReceipt": {
+    "assembledPackageLockSha256": "6026aabe42e5df097473733f3003356e7e9b350be8d3e349d94f7d956c296e9b",
+    "companion": "eaa4119689e96200708d05077297e1bf274ec664",
+    "compilerSha256": "3fa0b8ecd95358d27459f7ae731e5f358a44444a7802ea12d8e4bf3edc96ba40",
+    "components": [
+      {
+        "graphSha256": "be737d3eeb44a1cbeeeac4b86d6bce5328bcacfb793189b2dbf655d7897810d1",
+        "kind": "shared-declarations",
+        "module": "model",
+        "overlaySha256": "6565b1d98ab10b6b4e8beae25b2ba3c5fbab165f21b91ded64508c3b36a013f9",
+        "projection": {
+          "artifact": "shared.rs",
+          "artifactSha256": "e8f5ebe06b1b6f504c11f7380fb5e6107bd92ed0e51e8b9662310cc459c8693a",
+          "bindingSha256": "ffb071cdbe300766306e0a71d3bac845dab14c09c43bc834257f197da13af1af",
+          "domain": "urn:marmish:engine:output-gap:domain",
+          "domainSha256": "f0a95981a9caca31ee13a108cfb4ccf5a9fcaa60014405ab790aa5549f184804",
+          "format": "oddlang-shared-projection-v1",
+          "obligationsSha256": "a63aed318d05682c2d7fe11589c8a3485a2d22a302fa0475fffe9d66dc30e2fe"
+        },
+        "reexports": [
+          "MissingReason"
+        ],
+        "sourceSha256": "e8f5ebe06b1b6f504c11f7380fb5e6107bd92ed0e51e8b9662310cc459c8693a"
+      },
+      {
+        "graphSha256": "f7557c397e44feb996ebf1c1ec4aa09e7ab09fdc3e46902dfc16eaa097b6fad5",
+        "kind": "public-records",
+        "module": "model",
+        "overlaySha256": "0eb5931fd8c063888dc32a9f8be19435b0f8ff1822c31634ef8e47a3190b74f8",
+        "projection": {
+          "format": "oddlang-public-record-projection-lock-v1",
+          "graphSha256": "f7557c397e44feb996ebf1c1ec4aa09e7ab09fdc3e46902dfc16eaa097b6fad5",
+          "overlaySha256": "0eb5931fd8c063888dc32a9f8be19435b0f8ff1822c31634ef8e47a3190b74f8",
+          "sourceSha256": "4f3159463c6bc615d0c7156e84fdf1ebdfb59edeb7fb12725f773644b7f5d59c"
+        },
+        "reexports": [
+          "MissingRange"
+        ],
+        "sourceSha256": "4f3159463c6bc615d0c7156e84fdf1ebdfb59edeb7fb12725f773644b7f5d59c"
+      }
+    ],
+    "deniedReads": [
+      "explicit-manifest",
+      "independent-package-lock",
+      "native-probe",
+      "original-crate-root",
+      "original-model"
+    ],
+    "files": {
+      "Cargo.lock": "03049e1019f2cbf682c990ac1923097df93139d921c9e95b24c432468b08f2ca",
+      "Cargo.toml": "d9c0429cbb129d48828ac547a4e49d6375b6a214527867e078462e1af9024d06",
+      "src/group_0/__projection_0.rs": "e8f5ebe06b1b6f504c11f7380fb5e6107bd92ed0e51e8b9662310cc459c8693a",
+      "src/group_0/__projection_1.rs": "4f3159463c6bc615d0c7156e84fdf1ebdfb59edeb7fb12725f773644b7f5d59c",
+      "src/group_0/mod.rs": "4280c49315f335ec1cfa8c31f605f135b4a0bc15a8ca2bfd6dc1133c9fc5cfc5",
+      "src/lib.rs": "8b0b5b00a320945c48220826234351488d9f745966f008f5f0cb9b522b27c8f8"
+    },
+    "format": "marmish-gap-range-derived-package-v1",
+    "framework": "2e2c37e53ed52676017b25e3143eca48a0daff13",
+    "frameworkBuildToolchain": [
+      "rustc 1.96.1 (31fca3adb 2026-06-26)",
+      "binary: rustc",
+      "commit-hash: 31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd",
+      "commit-date: 2026-06-26",
+      "host: aarch64-apple-darwin",
+      "release: 1.96.1",
+      "LLVM version: 22.1.2"
+    ],
+    "host": "aarch64-apple-darwin",
+    "manifestSha256": "bd136b7603e2b7c436e2d2eac204f2b41f47bb15f74001d4fa38152023152c51",
+    "recoveries": [
+      {
+        "declaration": "urn:marmish:engine:output-gap:reason",
+        "sha256": "fa6f7d9bff8532c15bf41c43259ca96a47a6ca8fc7f258202bbdc87de888963d"
+      },
+      {
+        "declaration": "urn:marmish:engine:output-gap:range",
+        "sha256": "72e239a6e6a4c561c747df792146d49061f0b0e65a75d2e8d9a0ef1aee7db8ed"
+      }
+    ],
+    "referencePackageLockSha256": "281d010eca4e1a7b18514af49e2a9fb866069f5613145a2faf93556e07357528",
+    "referenceReceiptSha256": "6b6554ff7e8b38da4b36b46207c40e5adfd954abe9dacf0a6de2bfab1b3ba03d",
+    "sealedCompanion": "6355ae8504a7eb64ae01fc0591f29e3879c38128",
+    "tamperDiagnostics": {
+      "engine-gap-range-recovered-v1/graph.json": "input digest mismatch: engine-gap-range-recovered-v1/graph.json",
+      "engine-gap-range-recovered-v1/recovery.lock": "input digest mismatch: engine-gap-range-recovered-v1/recovery.lock"
+    },
+    "verifierSha256": "8bd0236d5657408962d3f733793d01b0cb282185acff7e5cb6cc5cfc1eae7244"
+  },
+  "comparedPythonRevision": "33d920c5c74449ebbd79b0c20e22c1472a65fff8",
+  "pythonReceiptSha256": "c9d13ae35d17f4005060739ee01af098290c2faa3b8321735be2ea910aa33f44",
+  "nativeReceiptSha256": "405e6e3fab3efccfc0a025550bc62cf8e90c8ff179dda1bbcb72d0d879399b5d",
+  "receiptFieldsChangedFromPython": [
+    "companion",
+    "verifierSha256"
+  ],
+  "stagedInputs": {
+    "engine-gap-range-derived-package.json": "bd136b7603e2b7c436e2d2eac204f2b41f47bb15f74001d4fa38152023152c51",
+    "engine-gap-reason-recovered-v1/recovery.lock": "fa6f7d9bff8532c15bf41c43259ca96a47a6ca8fc7f258202bbdc87de888963d",
+    "engine-gap-reason-recovered-v1/rust.json": "6565b1d98ab10b6b4e8beae25b2ba3c5fbab165f21b91ded64508c3b36a013f9",
+    "engine-gap-reason-recovered-v1/graph.json": "be737d3eeb44a1cbeeeac4b86d6bce5328bcacfb793189b2dbf655d7897810d1",
+    "engine-gap-range-recovered-v1/recovery.lock": "72e239a6e6a4c561c747df792146d49061f0b0e65a75d2e8d9a0ef1aee7db8ed",
+    "engine-gap-range-recovered-v1/rust.json": "0eb5931fd8c063888dc32a9f8be19435b0f8ff1822c31634ef8e47a3190b74f8",
+    "engine-gap-range-recovered-v1/graph.json": "f7557c397e44feb996ebf1c1ec4aa09e7ab09fdc3e46902dfc16eaa097b6fad5",
+    "engine-gap-reason-v1/Cargo.lock": "03049e1019f2cbf682c990ac1923097df93139d921c9e95b24c432468b08f2ca"
+  },
+  "mergedCompilerSha256": "56cd561744ad89db452a5e4a6a79ce696bae2a18134ac9da51a734ecae24c98c",
+  "mergedCompilerPackageLockSha256": "6026aabe42e5df097473733f3003356e7e9b350be8d3e349d94f7d956c296e9b",
+  "downstreamSourceApi": {
+    "receiptSha256": "6801ab61992d6fcc74bf812b21bc480e63c4fb3617dcdd265e028826b37c56e2",
+    "packageLockSha256": "33b079c7270de14ff4c96df8c2bcde207e5071dafbe2c224d35c3c9464ca0767",
+    "changedFieldsFromArchive": [
+      "companion",
+      "compilerSha256",
+      "verifierSha256"
+    ],
+    "observationsCompared": 11,
+    "rejections": {
+      "changed-binding": "source API overlay differs from recovered binding",
+      "private-field": "unknown variant `private`, expected `public` at line 21 column 31",
+      "stale-pin": "input digest mismatch: engine-gap-range-native-idioms-v1/rust.json"
+    }
+  }
+}
