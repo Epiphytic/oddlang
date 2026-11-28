@@ -4034,3 +4034,8 @@ w:authoredRangeRecordRust a p:Artifact ;
     rdfs:label "The Rust authored range qualifier rebuilt the original record mutation, compared both 35-case data callers and checked public traits under the historical and merged Oddlang compilers. Both package locks matched. The original engine library digest also varied between two unchanged Python runs." ;
     rdfs:comment "After a mutant build reused the original target directory, the original observer reported the mutant unknown-field rejection. Isolating and locking the artifacts by model source digest restored the expected original observations on two successive mutant-to-original replays." ;
     p:location "verification/provider-tooling/authored-range-record-rust.json" .
+
+w:portHistoricTooling p:evidence w:vaultModeNativeQualification .
+w:vaultModeNativeQualification a p:Artifact ;
+    rdfs:label "Rust vault qualification and fresh Python reference agreed on source, graph, overlay, package lock and downstream caller results for both variant orders on Darwin ARM64. The merged compiler reproduced both locks and caller results." ;
+    p:location "verification/provider-tooling/vault-mode-qualification-rust.json" .

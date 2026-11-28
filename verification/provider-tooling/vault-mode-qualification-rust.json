@@ -1,0 +1,186 @@
+{
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "host": "aarch64-apple-darwin",
+  "compiler": [
+    "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+    "binary: rustc",
+    "commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+    "commit-date: 2026-07-14",
+    "host: aarch64-apple-darwin",
+    "release: 1.97.1",
+    "LLVM version: 22.1.6"
+  ],
+  "framework": "18ea58006de4482c0ebc61de9e800edc78eba987",
+  "compilerSha256": "fbf552e37ccc27ab3f78b02682f09749405a42524a918a03600ff7d5b13e707c",
+  "probeSha256": "d0d1901fb8b1bb1663c3a405fec23d7e5b810dc20cdb9f52844df11ef77099fd",
+  "results": {
+    "baseline": {
+      "sourceSha256": "a6c8f7625b1693e90d69648aa485f1f77ad53106dc0e4f3535d929ac1d91b114",
+      "graphSha256": "96e2f288f7279b7639d72d460efda9c93b3a0b0ea8cea2b6494baf4785e1de73",
+      "overlaySha256": "36cc7f91481be8a4d7f069aafde5c90d2dd44042a15d871252695493341db835",
+      "packageLockSha256": "111090ff5fdac0dfa72ef050ed916ce9737408b5724080e30214e239c51e3da2",
+      "originalLibrarySha256": "e3eff76690be99e804511b8fe61ea1cf31ca18e0559236d81c861249722cd827",
+      "generatedLibrarySha256": "8d7c3abc83440c7c62facc0078e13d1092b7155f412f83f84ff4066efec166bc",
+      "values": [
+        "interactive=0",
+        "verify=1"
+      ],
+      "absentTraits": {
+        "PartialEq": "E0277",
+        "Eq": "E0277",
+        "std::fmt::Debug": "E0277",
+        "std::fmt::Display": "E0277",
+        "Default": "E0277",
+        "std::hash::Hash": "E0277",
+        "Ord": "E0277"
+      }
+    },
+    "mutation": {
+      "sourceSha256": "48d0180d06461884e4d5821f665e97133a6ae54166bd38daff89d0f22cfc5e37",
+      "graphSha256": "28de11f8d1c4be505793117736f8baaeeff111e83026965ce40aff64e62f0184",
+      "overlaySha256": "ce713360697887c8df4313da50cdea9d57b6b07fc9aa4a48fbc8a6bcbf284b78",
+      "packageLockSha256": "9737e16b4dd5f30ffdb935fb4b81f71c2ce0e895467f0f37a08af3a9b54cdf04",
+      "originalLibrarySha256": "4f2546a5b8cf92e9526c13801edd04f805ed5b7e8d30f887d47df789c665e4ff",
+      "generatedLibrarySha256": "650f74606e3c821c6dcad4825ea96fefa4a038d18f7722477ad661f85072c333",
+      "values": [
+        "interactive=1",
+        "verify=0"
+      ],
+      "absentTraits": {
+        "PartialEq": "E0277",
+        "Eq": "E0277",
+        "std::fmt::Debug": "E0277",
+        "std::fmt::Display": "E0277",
+        "Default": "E0277",
+        "std::hash::Hash": "E0277",
+        "Ord": "E0277"
+      }
+    }
+  },
+  "mergedCompilerRevision": "4d1fe488f4455658a82a6a6274bf3a2a38746865",
+  "companionRevision": "f54013136b95b1cc185e68387c6b095c6dfd9823",
+  "previousPythonReceipt": {
+    "original": "af54339d250290490d62d4475a77539b7e739071",
+    "host": "aarch64-apple-darwin",
+    "compiler": [
+      "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+      "binary: rustc",
+      "commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+      "commit-date: 2026-07-14",
+      "host: aarch64-apple-darwin",
+      "release: 1.97.1",
+      "LLVM version: 22.1.6"
+    ],
+    "framework": "18ea58006de4482c0ebc61de9e800edc78eba987",
+    "compilerSha256": "ef6ab3de502e9bb3a5e89550aa6134a570bcda8558c181a9ef916f6ccd48bfde",
+    "probeSha256": "d0d1901fb8b1bb1663c3a405fec23d7e5b810dc20cdb9f52844df11ef77099fd",
+    "results": {
+      "baseline": {
+        "sourceSha256": "a6c8f7625b1693e90d69648aa485f1f77ad53106dc0e4f3535d929ac1d91b114",
+        "graphSha256": "96e2f288f7279b7639d72d460efda9c93b3a0b0ea8cea2b6494baf4785e1de73",
+        "overlaySha256": "36cc7f91481be8a4d7f069aafde5c90d2dd44042a15d871252695493341db835",
+        "packageLockSha256": "111090ff5fdac0dfa72ef050ed916ce9737408b5724080e30214e239c51e3da2",
+        "originalLibrarySha256": "632c037b81239c697620c30e68772903acf0ff62be584f577450a309c5517169",
+        "generatedLibrarySha256": "97a64bb68ac712fbf1c95edfd093345b78b4dec101d3fed33b9803430a012871",
+        "values": [
+          "interactive=0",
+          "verify=1"
+        ],
+        "absentTraits": {
+          "PartialEq": "E0277",
+          "Eq": "E0277",
+          "std::fmt::Debug": "E0277",
+          "std::fmt::Display": "E0277",
+          "Default": "E0277",
+          "std::hash::Hash": "E0277",
+          "Ord": "E0277"
+        }
+      },
+      "mutation": {
+        "sourceSha256": "48d0180d06461884e4d5821f665e97133a6ae54166bd38daff89d0f22cfc5e37",
+        "graphSha256": "28de11f8d1c4be505793117736f8baaeeff111e83026965ce40aff64e62f0184",
+        "overlaySha256": "ce713360697887c8df4313da50cdea9d57b6b07fc9aa4a48fbc8a6bcbf284b78",
+        "packageLockSha256": "9737e16b4dd5f30ffdb935fb4b81f71c2ce0e895467f0f37a08af3a9b54cdf04",
+        "originalLibrarySha256": "e8ab799f631d279f45e15efbdf78e4ff8f3c5ef0311b4922e4a77ec1c1876620",
+        "generatedLibrarySha256": "0c37bc188b9665ff2fef5962d15a1ae9eb53a3e4bb8841fef0e7554edd14f4df",
+        "values": [
+          "interactive=1",
+          "verify=0"
+        ],
+        "absentTraits": {
+          "PartialEq": "E0277",
+          "Eq": "E0277",
+          "std::fmt::Debug": "E0277",
+          "std::fmt::Display": "E0277",
+          "Default": "E0277",
+          "std::hash::Hash": "E0277",
+          "Ord": "E0277"
+        }
+      }
+    }
+  },
+  "mergedProjection": {
+    "baseline": {
+      "files": {
+        "Cargo.lock": "1e7f93b188b5894a7bc4af9f2ade14f0bcc48f5a45b3f61fdc474fb1460edddd",
+        "Cargo.toml": "7a877e7b7a27bfc976fece56fbb889c0280a87eddba6b1771250b601c0a3d9d8",
+        "package.lock": "111090ff5fdac0dfa72ef050ed916ce9737408b5724080e30214e239c51e3da2",
+        "src/group_0/__projection_0.rs": "91fb61d22613728261531ecb2c363f353dc5b5a56b35817afa06255a61ce99e0",
+        "src/group_0/mod.rs": "d09006c940a53adb5f920633e0a75ce48bcb0b78f883f1f9075167deecac0a0b",
+        "src/group_1/__projection_1.rs": "ca3ac70647ad5b1e5b5a9edb1ea565813b208ece3b5dc02062610a73ff6c0f86",
+        "src/group_1/mod.rs": "7928902911229bc1ba422bdc679ae48f8b392ffccaf285fdc1e12c9dcac4731b",
+        "src/group_2/__projection_2.rs": "608806b138d0ff9d84b755b45e88425b18ea6f83f22f890b0eb21f8510279655",
+        "src/group_2/mod.rs": "d73d7bde5c2f8fe3e084f1c83725f801e98706a9709ea69ae09807a413e53f6e",
+        "src/group_3/__projection_3.rs": "b7494cf4a985618ef89ca094cde4feb5bf81bfb8c7073ddd50d0de8eb3d6356b",
+        "src/group_3/mod.rs": "8ac60a32a15be80ef30cf4879313ab7b4fd993ce7f08c5c8726513819671962a",
+        "src/lib.rs": "ca68466532b56f678a6d7efc9fc14ff4641555ee98e77af56f1e696de038daf9"
+      },
+      "caller": {
+        "values": [
+          "interactive=0",
+          "verify=1"
+        ],
+        "absentTraits": {
+          "PartialEq": "E0277",
+          "Eq": "E0277",
+          "std::fmt::Debug": "E0277",
+          "std::fmt::Display": "E0277",
+          "Default": "E0277",
+          "std::hash::Hash": "E0277",
+          "Ord": "E0277"
+        }
+      }
+    },
+    "mutation": {
+      "files": {
+        "Cargo.lock": "1e7f93b188b5894a7bc4af9f2ade14f0bcc48f5a45b3f61fdc474fb1460edddd",
+        "Cargo.toml": "7a877e7b7a27bfc976fece56fbb889c0280a87eddba6b1771250b601c0a3d9d8",
+        "package.lock": "9737e16b4dd5f30ffdb935fb4b81f71c2ce0e895467f0f37a08af3a9b54cdf04",
+        "src/group_0/__projection_0.rs": "91fb61d22613728261531ecb2c363f353dc5b5a56b35817afa06255a61ce99e0",
+        "src/group_0/mod.rs": "d09006c940a53adb5f920633e0a75ce48bcb0b78f883f1f9075167deecac0a0b",
+        "src/group_1/__projection_1.rs": "ca3ac70647ad5b1e5b5a9edb1ea565813b208ece3b5dc02062610a73ff6c0f86",
+        "src/group_1/mod.rs": "7928902911229bc1ba422bdc679ae48f8b392ffccaf285fdc1e12c9dcac4731b",
+        "src/group_2/__projection_2.rs": "608806b138d0ff9d84b755b45e88425b18ea6f83f22f890b0eb21f8510279655",
+        "src/group_2/mod.rs": "d73d7bde5c2f8fe3e084f1c83725f801e98706a9709ea69ae09807a413e53f6e",
+        "src/group_3/__projection_3.rs": "80599c2703b68bc910362cc8a36a477a0037a7a7416eb768ba443340c3f04505",
+        "src/group_3/mod.rs": "8ac60a32a15be80ef30cf4879313ab7b4fd993ce7f08c5c8726513819671962a",
+        "src/lib.rs": "ca68466532b56f678a6d7efc9fc14ff4641555ee98e77af56f1e696de038daf9"
+      },
+      "caller": {
+        "values": [
+          "interactive=1",
+          "verify=0"
+        ],
+        "absentTraits": {
+          "PartialEq": "E0277",
+          "Eq": "E0277",
+          "std::fmt::Debug": "E0277",
+          "std::fmt::Display": "E0277",
+          "Default": "E0277",
+          "std::hash::Hash": "E0277",
+          "Ord": "E0277"
+        }
+      }
+    }
+  }
+}
