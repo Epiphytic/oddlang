@@ -1,13 +1,11 @@
 {
-  "auditedCompanionRevision": "0d06f8725cc75f34fec7357953d4291add62cf7d",
-  "previousRevision": "0ecba9fb12d5817560ea022ec20ba0eebe57ba27",
-  "reproducedTableSha256": "3d2f6be451ffd963262e4ee37bc6c5a8c95ed8887574a7edebd684232b0bd156",
+  "auditedCompanionRevision": "c44282d940cbb876fad6a714afeb0f495cfbcecf",
+  "previousRevision": "0d06f8725cc75f34fec7357953d4291add62cf7d",
+  "reproducedTableSha256": "ba45a7f25547243d12b2bb5d187e9678cc13a1ca9a7679f0323da8609b5f1912",
   "remainingProjectToolFiles": 50,
   "remainingProjectExtensions": {
     ".py": 50
   },
-  "removedSincePrevious": [
-    "verification/whole/canonical-public-data/workspace_compat.py"
-  ],
+  "removedSincePrevious": [],
   "addedSincePrevious": []
 }

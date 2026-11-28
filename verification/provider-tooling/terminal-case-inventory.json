@@ -33,5 +33,38 @@
   "candidateBinaries": {
     "marmish": "b0e546405c43edd2ad82e1d246a112e5b51992bafb70a5cdd93154ae4c9b3424",
     "marmishd": "4c5985f5f821c8c61cde077533bc1d7ea8ac062ac2c589cd90bfcb40a11fdda4"
+  },
+  "nativeTerminalLinkSelection": {
+    "host": "aarch64-apple-darwin",
+    "workspaceLockSha256": "b50bd2a6896f7f253b4ed6005844f7cc48704dc3663568815df811e60b68f3ab",
+    "cargoLogSha256": "ff0a4aa2003102bf3d93a32ff887d90dcb9a93a79395a7496a6457173357bca1",
+    "selectedBinaries": {
+      "marmish": "140832e466f5098c89c6e76f37dbd5425f2977c354ef78a5f88b33e199243690",
+      "marmishd": "f706cdbab57485fe78701d038975adac104c46b7a541ffc463bd9650f3c0e645"
+    },
+    "observations": 72,
+    "rejected": [
+      "failed",
+      "missing finish",
+      "missing role",
+      "duplicate",
+      "unknown binary",
+      "test artifact",
+      "debug profile",
+      "wrong manifest",
+      "wrong executable"
+    ],
+    "companionRevision": "c44282d940cbb876fad6a714afeb0f495cfbcecf",
+    "previousSelectorMatched": true,
+    "linuxLayoutFixture": {
+      "roles": [
+        "marmish",
+        "marmishd"
+      ],
+      "rejected": [
+        "unknown host",
+        "escaping executable symlink"
+      ]
+    }
   }
 }
