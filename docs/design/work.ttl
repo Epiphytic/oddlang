@@ -4057,3 +4057,8 @@ w:engineChoiceNativeCaller rdfs:comment "The complete canonical engine verifier 
 w:engineChoiceNativeCaller rdfs:comment "The shared Rust artifact checker reproduced the sealed 587-entry terminal build digest on Darwin ARM64. The canonical engine replay verified 572 static and metadata artifacts, all 140 import outcomes and both enum callers. Loading two checkouts in one process exposed an import adapter resolving to the previous checkout. Selecting the adapter by file path restored the pinned helper." .
 
 w:engineChoiceNativeCaller rdfs:comment "The canonical caller selects its derive-enabled Serde library from a completed Cargo build in Rust. Replaying archived Darwin metadata selected the same library as the Python verifier. Eight rejection cases per host layout covered ambiguous or absent artifacts, release profile, features, target kind, failed or incomplete builds and files escaping the release directory." .
+
+w:terminalPrefixCli p:evidence w:terminalCaseInventoryRust .
+w:terminalCaseInventoryRust a p:Artifact ;
+    p:location <../../verification/provider-tooling/terminal-case-inventory.json> ;
+    rdfs:label "Rust selection matched both archived ARM64 terminal corpora. All 144 macOS invocations matched the archived stdout, stderr and exit status. The retained build contained 587 verified library artifacts." .
