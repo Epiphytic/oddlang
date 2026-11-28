@@ -4062,3 +4062,5 @@ w:terminalPrefixCli p:evidence w:terminalCaseInventoryRust .
 w:terminalCaseInventoryRust a p:Artifact ;
     p:location <../../verification/provider-tooling/terminal-case-inventory.json> ;
     rdfs:label "Rust selection matched both archived ARM64 terminal corpora. All 144 macOS invocations matched the archived stdout, stderr and exit status. The retained build contained 587 verified library artifacts." .
+
+w:terminalCaseInventoryRust rdfs:comment "The Rust link selector matched the previous verifier on a fresh sandboxed offline Darwin build. Both selected binaries reproduced the 72 archived observations. Cargo stream mutations and Linux layout fixtures exercised missing, duplicate, untrusted-path and profile errors." .
