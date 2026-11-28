@@ -1,13 +1,13 @@
 {
-  "auditedCompanionRevision": "76d53e81b70e236a3bdc0e6b95c1b969ab02b645",
-  "previousRevision": "b3f02eb7d620369c52da2db85c9cfc9d8feff223",
-  "reproducedTableSha256": "8201923a3d77946403c3ccb951a4d516463c76ca99efbb2f1568f39732aa0874",
-  "remainingProjectToolFiles": 44,
+  "auditedCompanionRevision": "48c3aa08f01777c7e9cd3955fd8b9ac60b06b62c",
+  "previousRevision": "76d53e81b70e236a3bdc0e6b95c1b969ab02b645",
+  "reproducedTableSha256": "71c21e408b50d7438f1902834b4167819a4a5c32ef13a5e1d853ccccdd69383e",
+  "remainingProjectToolFiles": 43,
   "remainingProjectExtensions": {
-    ".py": 44
+    ".py": 43
   },
   "removedSincePrevious": [
-    "verification/whole/unified-recovered-vault/verify.py"
+    "verification/whole/status/observe.py"
   ],
   "addedSincePrevious": []
 }
