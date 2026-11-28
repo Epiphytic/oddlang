@@ -4108,3 +4108,8 @@ w:portHistoricTooling p:evidence w:canonicalLinuxImportCommand .
 w:canonicalLinuxImportCommand a p:Artifact ;
     p:location <../../verification/provider-tooling/canonical-linux-import-command.json> ;
     rdfs:label "Rust reconstructed the archived Linux import receipt except for the two verifier digests. A fresh Darwin engine caller replay matched all 140 archived import outcomes, including both additional engine exports." .
+
+w:portHistoricTooling p:evidence w:sevenLibraryImportCallers .
+w:sevenLibraryImportCallers a p:Artifact ;
+    p:location <../../verification/provider-tooling/seven-library-import-callers.json> ;
+    rdfs:label "Four Darwin ARM64 import audits reproduced the archived verdicts for 140 spellings per workspace after retirement of the Python seven-library adapter. The canonical caller recovered its vault graph and matched the original enum and trait observations." .

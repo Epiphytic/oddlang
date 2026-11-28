@@ -1,0 +1,39 @@
+{
+  "frameworkRevision": "30d7e588e4470f299241e3f4b8c825661b2e46a9",
+  "companionRevision": "6e283a72e5c5284e8de600b657da2ec78d6ebdec",
+  "host": "aarch64-apple-darwin",
+  "compilerSha256": "29558d2e43e475287b59d8029a5b0b026bf8a1b82ceeac3bef78c0634127adf2",
+  "sourceRevision": "af54339d250290490d62d4475a77539b7e739071",
+  "consumers": {
+    "canonical": {
+      "workspaceLockSha256": "5abf57c811d641ba126c32dde208334d85d47374bbfbb983231783a403f24df4",
+      "attempted": 140,
+      "compiled": 77,
+      "vaultObservationsMatched": true
+    },
+    "engine": {
+      "workspaceLockSha256": "a72d0b0538b3afc272fcd7f5cf8cc900935fd4cc920261fa4bd6bcea46270292",
+      "attempted": 140,
+      "compiled": 79
+    },
+    "diagnostics": {
+      "workspaceLockSha256": "029d2b9df0c098980be3a4f22f4c943cf5d0394b15b696fa188348bd93f1c698",
+      "attempted": 140,
+      "compiled": 71,
+      "nativeBehaviorMatched": [
+        "engine",
+        "identity",
+        "diagnostics",
+        "prototype"
+      ]
+    },
+    "standalone": {
+      "workspaceLockSha256": "fdfa5b16d9172fe97705ee5794251c6168d0e226ea159334a52286e2e7172b68",
+      "attempted": 140,
+      "compiled": 65,
+      "prototypeProbesMatched": true
+    }
+  },
+  "terminalWorkspaceLockSha256": "f40ee72f7367aa1cc0e08894fee2d521ebe89396fcfdabf9bdc4b3570e0119f1",
+  "workspaceProductTests": 6
+}
