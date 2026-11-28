@@ -1,11 +1,13 @@
 {
-  "auditedCompanionRevision": "6ad61ef263ba13e577832357890ac532141da655",
-  "previousRevision": "b7d5835bcd89f269dee03f4edde63e9af7a418c2",
-  "reproducedTableSha256": "c0f00e0e3c01f77839e654774d7aea29be2a3d6b784d91428f5152759848a62c",
-  "remainingProjectToolFiles": 47,
+  "auditedCompanionRevision": "e03a1d76214c1b8ac42311e06b78f9fe6230a075",
+  "previousRevision": "6ad61ef263ba13e577832357890ac532141da655",
+  "reproducedTableSha256": "3dfdd57ef586f01605fb5039b9e8d30d75dbb6cd004fc1f4b68b0073eaa0770b",
+  "remainingProjectToolFiles": 46,
   "remainingProjectExtensions": {
-    ".py": 47
+    ".py": 46
   },
-  "removedSincePrevious": [],
+  "removedSincePrevious": [
+    "verification/whole/canonical-linux-imports/verify.py"
+  ],
   "addedSincePrevious": []
 }

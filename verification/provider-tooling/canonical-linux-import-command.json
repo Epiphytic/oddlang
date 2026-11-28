@@ -1,0 +1,42 @@
+{
+  "frameworkRevision": "84256c4d8e2fa400ce5e4a9a12bc9871172ed183",
+  "companionRevision": "e03a1d76214c1b8ac42311e06b78f9fe6230a075",
+  "testHost": "aarch64-apple-darwin",
+  "archivedLinuxReceiptSha256": "691381304ddd75d092ef3ef6df6f38d1b815df8980d2f00ae6dc3d3d6db94f49",
+  "linuxReceiptFieldsDiffering": [
+    "verifierSha256",
+    "sharedVerifierSha256"
+  ],
+  "linuxRoleTotals": {
+    "attempted": 140,
+    "originalLinux": 140,
+    "generatedLinux": 77,
+    "generatedDarwin": 77
+  },
+  "pinnedBaselineRows": {
+    "aarch64-apple-darwin": 140,
+    "aarch64-unknown-linux-gnu": 140
+  },
+  "wrongHostPreservedReceipt": true,
+  "externalTargetAliasRejected": true,
+  "canonicalLinuxBinaryTests": 4,
+  "workspaceProductTests": 5,
+  "engineCaller": {
+    "added": [
+      [
+        "engine",
+        "Stream"
+      ],
+      [
+        "engine",
+        "SubmitDisposition"
+      ]
+    ],
+    "baseline": 77,
+    "candidate": 79,
+    "attempted": 140,
+    "hashedLibraryFiles": 587
+  },
+  "freshEngineWorkspaceFiles": 99,
+  "freshEngineWorkspaceLockSha256": "a72d0b0538b3afc272fcd7f5cf8cc900935fd4cc920261fa4bd6bcea46270292"
+}
