@@ -1,0 +1,110 @@
+{
+  "host": "aarch64-apple-darwin",
+  "frameworkRevision": "cfbf9ac3d335b31c066c6fb93b526642583aa07d",
+  "currentCompilerSha256": "29558d2e43e475287b59d8029a5b0b026bf8a1b82ceeac3bef78c0634127adf2",
+  "archivedReceiptSha256": "52edf82a9581e005afc79621879a20e5ae0419fc809c9cfd6bdadef9b2ad7009",
+  "nativeReceiptSha256": "e9522b2ff894f8bd47c6ef417f6b3bc94b74d046af61eca6ae2e67fb378a69bb",
+  "fieldsDifferingFromArchive": [
+    "companion",
+    "compilerSha256"
+  ],
+  "nativeReceipt": {
+    "baseline": {
+      "observations": {
+        "guards": {
+          "bad-mode-before-digest": "metadata",
+          "correct-hash-mode": "accepted",
+          "ignored-mode": "accepted",
+          "ignored-mode-bad-hash": "digest",
+          "larger-file-before-metadata": "descriptor",
+          "larger-read": "descriptor",
+          "missing": "missing-io",
+          "non-regular": "descriptor",
+          "symlink": "symlink-io",
+          "wrong-extent-before-hash": "metadata"
+        },
+        "links": {
+          "oneLink": "accepted",
+          "threeLinks": "descriptor",
+          "twoLinks": "descriptor"
+        }
+      },
+      "recovery": {
+        "format": "oddlang-read-only-file-recovery-lock-v1",
+        "graphSha256": "e39e319a8178793f7aac862913f1ec694c83171af5930779de61b44da4af8bb4",
+        "observationSha256": "5769572336dd129f1c1844b7d94f04678bf48375759f7500d5f9ccfcdfc78363",
+        "recovered": [
+          "maximumLinks"
+        ],
+        "selectionSha256": "2a3df79aaf7de2a4fd0dfcb01e773dfb39b9832b31fbf8088059f3b5301dc220"
+      },
+      "workspaceLockSha256": "24f1bda8604bfc74da3584f707538ff8b27997ccabc5f169139da5a4ed5c95b3"
+    },
+    "companion": "b7d5835bcd89f269dee03f4edde63e9af7a418c2",
+    "compilerSha256": "fb02114ab10adf2d774aa2f03621e7373e2bad7ad2e4b64c5762e7be77da5d41",
+    "deniedSourcePaths": 3,
+    "format": "marmish-local-file-integrity-v1",
+    "framework": "f658d2acff192008ad62c9079d8b14aadf81ccd3",
+    "mutation": {
+      "observations": {
+        "guards": {
+          "bad-mode-before-digest": "metadata",
+          "correct-hash-mode": "accepted",
+          "ignored-mode": "accepted",
+          "ignored-mode-bad-hash": "digest",
+          "larger-file-before-metadata": "descriptor",
+          "larger-read": "descriptor",
+          "missing": "missing-io",
+          "non-regular": "descriptor",
+          "symlink": "symlink-io",
+          "wrong-extent-before-hash": "metadata"
+        },
+        "links": {
+          "oneLink": "accepted",
+          "threeLinks": "descriptor",
+          "twoLinks": "accepted"
+        }
+      },
+      "recovery": {
+        "format": "oddlang-read-only-file-recovery-lock-v1",
+        "graphSha256": "80eca21054515896df810eb011400d05f00dab3c83a2c6a7128620e1ec9d8110",
+        "observationSha256": "c4dce26cf375446d51e0896f5b9d6bb4509ac9e7a9b020a685183df47cd1ebdf",
+        "recovered": [
+          "maximumLinks"
+        ],
+        "selectionSha256": "fe78a9393197b61a8ab1b160f8d3e48f53e1bae90ab981c53e8d83385f669820"
+      },
+      "workspaceLockSha256": "d20a235a6af676be5b65fe1296b48625b6679fbebddfc01f75e120ce5ab79822"
+    },
+    "original": "af54339d250290490d62d4475a77539b7e739071",
+    "originalAndMutantSourceSha256": [
+      "e11224fa0dd59f656beb94ee29b07baff9be0698896f450ebf45a40847a2ba70",
+      "64776fe3b6b52ad05b9365e3997bc798f714792e157ae3fc60d897a0246bed8b"
+    ],
+    "probeSha256": "280f3aeb3ad7ea7a6c70d9511219730b236ef62aeb951f01286e0926ee3df931",
+    "rustc": [
+      "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+      "binary: rustc",
+      "commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+      "commit-date: 2026-07-14",
+      "host: aarch64-apple-darwin",
+      "release: 1.97.1",
+      "LLVM version: 22.1.6"
+    ]
+  },
+  "projections": {
+    "baseline": {
+      "filesCompared": 102,
+      "workspaceLockSha256": "24f1bda8604bfc74da3584f707538ff8b27997ccabc5f169139da5a4ed5c95b3"
+    },
+    "mutation": {
+      "filesCompared": 102,
+      "workspaceLockSha256": "d20a235a6af676be5b65fe1296b48625b6679fbebddfc01f75e120ce5ab79822"
+    }
+  },
+  "preparedInputs": {
+    "local-file-integrity-v1/graph.json": "e39e319a8178793f7aac862913f1ec694c83171af5930779de61b44da4af8bb4",
+    "native-local-file-integrity-package.json": "f8fbececf929fcf6eff5a8ee663209520e11709f23f8a4fe49c807d83a9708d7",
+    "workspace-v7-local-file-integrity.json": "727d736989a2546d2caef215dc64717b263ea516cfef4b0ac052026e704bf77a"
+  }
+}

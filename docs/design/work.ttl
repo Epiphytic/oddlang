@@ -4093,3 +4093,8 @@ w:replaceableWasmProviders p:evidence w:providerPostReturnReplay .
 w:providerPostReturnReplay a p:Artifact ;
     p:location <../../verification/provider-tooling/provider-return-fidelity.json> ;
     rdfs:label "Both provider worlds preserved every byte of an 8 MiB result across guest post-return cleanup. The macOS workspace, command-policy and bidirectional Data codec replays matched the published baseline." .
+
+w:portHistoricTooling p:evidence w:localFileIntegrityRustReplay .
+w:localFileIntegrityRustReplay a p:Artifact ;
+    p:location <../../verification/provider-tooling/local-file-integrity-native.json> ;
+    rdfs:label "The Rust verifier recovered the original and mutated hardlink limits. Generated observations matched the native file guards and link cases in both macOS ARM64 runs. The pinned and current compilers emitted identical baseline and mutated workspaces." .
