@@ -4118,3 +4118,8 @@ w:portHistoricTooling p:evidence w:terminalArgumentSelection .
 w:terminalArgumentSelection a p:Artifact ;
     p:location <../../verification/provider-tooling/terminal-arguments.json> ;
     rdfs:label "Rust selected the archived terminal argument vectors for both ARM64 platforms and the Linux help and version subset. The regenerated Darwin client and daemon replayed the terminal cases and post-parse controls." .
+
+w:portHistoricTooling p:evidence w:recoveredVaultWorkspaceReplay .
+w:recoveredVaultWorkspaceReplay a p:Artifact ;
+    p:location <../../verification/provider-tooling/recovered-vault-replay.json> ;
+    rdfs:label "The sealed five-member vault workspace matched its archived behavioral results after retiring the recovered workspace Python entry point. The historical and current compilers produced identical bytes for all 69 projected files. Both seven-member mixed codec directions reproduced the pinned receipt." .
