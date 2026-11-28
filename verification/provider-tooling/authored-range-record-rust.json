@@ -1,0 +1,98 @@
+{
+  "companion": "6b7e31d9a2dc223bee327ec937e606e7c219ec86",
+  "original": "af54339d250290490d62d4475a77539b7e739071",
+  "platform": "aarch64-apple-darwin",
+  "casesPerVariant": 35,
+  "changedRows": [
+    "unknown-field"
+  ],
+  "sourceDenials": 4,
+  "originalSourceModelSha256": "f147e2d08551d7d758a89b46857805820567a78f70571a663f33ea91672c9d53",
+  "mutationSourceModelSha256": "97e3ed38fe2b7f80e0be0d438e894722ce335ee4b62e069acb075974ca0a9833",
+  "traitsProbeSha256": "e83d44a3b838fd9efdaf23c08ddc22a7e3f35cca623c51a72573e2726c145643",
+  "packageLocks": {
+    "baseline": "884180d21d079c49a7ca0d045b2f56d67700d1666012a92d7b8310f1bb2fe109",
+    "mutation": "d5a31556848afcb2dab4027af89352d9499d93591ad10b33fc3e3fc0fc23ef2a"
+  },
+  "changedFieldsFromFreshPython": [
+    "companion",
+    "mutationLibrarySha256"
+  ],
+  "changedFieldsFromArchivedMacOS": [
+    "companion",
+    "compilerSha256",
+    "mutationLibrarySha256"
+  ],
+  "changedFieldsBetweenPythonRuns": [
+    "mutationLibrarySha256"
+  ],
+  "changedFieldsBetweenFrameworks": [
+    "compilerSha256",
+    "framework",
+    "mutationLibrarySha256"
+  ],
+  "mutatedLibraryDigestDifferencesBetweenPythonRuns": [
+    "marmish_engine"
+  ],
+  "runs": {
+    "python": {
+      "receiptSha256": "afa41b9ecac94ce316d27ee3f06becade61ac2eca7ae15435d236067c4a83e71",
+      "framework": "a5167dea515ee6196c0cd312fe71c2c4444a0789",
+      "companion": "58b9e203c946429008ca54ebbfb16d62fc10fe8f",
+      "compilerSha256": "94b56be46e1435a2724cd86a47eef2a66ba05df11f0b02a6d2c4f0517377c5f2",
+      "mutationLibrarySha256": {
+        "marmish_engine": "6c4045fb270bd1533e5699b46dcd2426f6840253551e70faa8f92cb1118af80c",
+        "serde_json": "594044755a901d83ab55ddf82b8c34bc1220a3a82f3b2af3fd90aa8ff7033fc7"
+      }
+    },
+    "pythonRepeat": {
+      "receiptSha256": "1ca7394adb35c91f272cd0d755e157b71a666db0afb94dba4cd0e9ae18010a88",
+      "framework": "a5167dea515ee6196c0cd312fe71c2c4444a0789",
+      "companion": "58b9e203c946429008ca54ebbfb16d62fc10fe8f",
+      "compilerSha256": "94b56be46e1435a2724cd86a47eef2a66ba05df11f0b02a6d2c4f0517377c5f2",
+      "mutationLibrarySha256": {
+        "marmish_engine": "6230935803a5a00e71324595b2be50b00540b01ad46e717f0b3b0a176212bd1c",
+        "serde_json": "594044755a901d83ab55ddf82b8c34bc1220a3a82f3b2af3fd90aa8ff7033fc7"
+      }
+    },
+    "rust": {
+      "receiptSha256": "1dacee4c288f2a4e2d4f3e431cde5e119dc5996800f602bacb8727e13fffd5b4",
+      "framework": "a5167dea515ee6196c0cd312fe71c2c4444a0789",
+      "companion": "6b7e31d9a2dc223bee327ec937e606e7c219ec86",
+      "compilerSha256": "94b56be46e1435a2724cd86a47eef2a66ba05df11f0b02a6d2c4f0517377c5f2",
+      "mutationLibrarySha256": {
+        "marmish_engine": "e8f1ed2659c932d4875c1e699bcdaf3570ff63e357701a4480f286ceaff4b5ed",
+        "serde_json": "3be778f05339ad695e455af269d308cbf57aafdbc3cf8e30886378936e0cdca3"
+      }
+    },
+    "mergedCompiler": {
+      "receiptSha256": "3dd71cb8ce2f5888e74488dbbb2302f395a719bbea431cdccc63aa81ae4d5588",
+      "framework": "4ffea9980f00ececadefd3743ee0f58bfa60bc59",
+      "companion": "6b7e31d9a2dc223bee327ec937e606e7c219ec86",
+      "compilerSha256": "ded7b047c8ab0d01631b2946c4fdfb679da919479c78ad9b62473e2e4e477913",
+      "mutationLibrarySha256": {
+        "marmish_engine": "d806a3578bd48660f33a195041547d22bd1974358567b30bb71c6c90a1bfb0f9",
+        "serde_json": "3be778f05339ad695e455af269d308cbf57aafdbc3cf8e30886378936e0cdca3"
+      }
+    }
+  },
+  "sharedCacheRegression": {
+    "observedBeforeFix": "The original caller returned the mutant unknown-field diagnostic after a mutant build used the same target.",
+    "beforeFixReceiptSha256": "c10dbcfeccc58a6f30172cdc6cdd92c9d103d2fb276b1d78468466d17c193839",
+    "originalReferenceAfterMutationSha256": "2524c3a20a0e98e32bdfb77819b5d7a45ecc3470b5a652f57a3049d97617d655",
+    "originalReferenceAfterSecondMutationSha256": "2524c3a20a0e98e32bdfb77819b5d7a45ecc3470b5a652f57a3049d97617d655",
+    "rowsCompared": 35,
+    "copyControl": [
+      "E0277"
+    ],
+    "modelDigestsInCache": [
+      "97e3ed38fe2b7f80e0be0d438e894722ce335ee4b62e069acb075974ca0a9833",
+      "f147e2d08551d7d758a89b46857805820567a78f70571a663f33ea91672c9d53"
+    ]
+  },
+  "archivedWitnessProfiles": [
+    "aarch64-apple-darwin",
+    "aarch64-unknown-linux-gnu"
+  ],
+  "archivedRustdocEvidenceSha256": "7b4f5df76cdde2df1cf4282274e20cc4dab6d2d53aaa36bb8505fea0779cb30e"
+}
