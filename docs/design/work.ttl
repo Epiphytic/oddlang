@@ -4103,3 +4103,8 @@ w:portHistoricTooling p:evidence w:nativeImportRoleAudit .
 w:nativeImportRoleAudit a p:Artifact ;
     p:location <../../verification/provider-tooling/native-import-role-audit.json> ;
     rdfs:label "The Rust library audit reproduced all 140 original and 140 generated import observations on Darwin ARM64. The corrected host selection hashed all 587 retained engine build libraries, including 15 dynamic libraries." .
+
+w:portHistoricTooling p:evidence w:canonicalLinuxImportCommand .
+w:canonicalLinuxImportCommand a p:Artifact ;
+    p:location <../../verification/provider-tooling/canonical-linux-import-command.json> ;
+    rdfs:label "Rust reconstructed the archived Linux import receipt except for the two verifier digests. A fresh Darwin engine caller replay matched all 140 archived import outcomes, including both additional engine exports." .
