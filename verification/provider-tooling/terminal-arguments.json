@@ -1,0 +1,40 @@
+{
+  "prefix": {
+    "aarch64-apple-darwin": {
+      "archiveSha256": "6feac74e10ebd13ff2305ce3786c0cd4492ddf233f8f6619a5f56e570bf59598",
+      "cases": {
+        "marmish": 82,
+        "marmishd": 82
+      }
+    },
+    "aarch64-unknown-linux-gnu": {
+      "archiveSha256": "01b7367edd3704738633c3e190f654096bb974df0acd62a47e2fced0daf59ff0",
+      "cases": {
+        "marmish": 82,
+        "marmishd": 82
+      }
+    }
+  },
+  "linuxHelpArchive": {
+    "marmish": 43,
+    "marmishd": 43
+  },
+  "darwinReplay": {
+    "marmish": {
+      "cases": 82,
+      "postParseExit": 255,
+      "binarySha256": "73a2c564712a97c6e9120908a08cf9773b9378ed0d3e0b504d33ae9303ca0bf0"
+    },
+    "marmishd": {
+      "cases": 82,
+      "postParseExit": 255,
+      "binarySha256": "c2af19d5f7a22979a2590fcda34406430beeb699416badc60a243c85b37a7a3d"
+    }
+  },
+  "frameworkRevision": "560ddf4a494821eaeaca4a51669b8c49c66678ce",
+  "companionRevision": "b3f02eb7d620369c52da2db85c9cfc9d8feff223",
+  "compilerSha256": "29558d2e43e475287b59d8029a5b0b026bf8a1b82ceeac3bef78c0634127adf2",
+  "workspaceLockSha256": "f40ee72f7367aa1cc0e08894fee2d521ebe89396fcfdabf9bdc4b3570e0119f1",
+  "linuxHelpArchiveSha256": "876ad4d9620a2faffa58b2810183325eacb7c0fccd5bb21c6adda83cc93815b7",
+  "comparison": "Regenerated release binaries on Darwin ARM64 with Rust 1.97.1. Compared exit status and complete stdout and stderr against archived terminal rows and the archived candidate post-parse control. Linux checks compared ordered argument lists only."
+}
