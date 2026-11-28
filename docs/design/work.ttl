@@ -4098,3 +4098,8 @@ w:portHistoricTooling p:evidence w:localFileIntegrityRustReplay .
 w:localFileIntegrityRustReplay a p:Artifact ;
     p:location <../../verification/provider-tooling/local-file-integrity-native.json> ;
     rdfs:label "The Rust verifier recovered the original and mutated hardlink limits. Generated observations matched the native file guards and link cases in both macOS ARM64 runs. The pinned and current compilers emitted identical baseline and mutated workspaces." .
+
+w:portHistoricTooling p:evidence w:nativeImportRoleAudit .
+w:nativeImportRoleAudit a p:Artifact ;
+    p:location <../../verification/provider-tooling/native-import-role-audit.json> ;
+    rdfs:label "The Rust library audit reproduced all 140 original and 140 generated import observations on Darwin ARM64. The corrected host selection hashed all 587 retained engine build libraries, including 15 dynamic libraries." .

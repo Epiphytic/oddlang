@@ -1,0 +1,46 @@
+{
+  "compilerSha256": "29558d2e43e475287b59d8029a5b0b026bf8a1b82ceeac3bef78c0634127adf2",
+  "frameworkRevision": "edb423ce43cdca5eaf51f888f26e7f97ea2d098c",
+  "companionRevision": "6ad61ef263ba13e577832357890ac532141da655",
+  "originalRevision": "af54339d250290490d62d4475a77539b7e739071",
+  "host": "aarch64-apple-darwin",
+  "workspaceLockSha256": "5abf57c811d641ba126c32dde208334d85d47374bbfbb983231783a403f24df4",
+  "validatedGeneratedFiles": 98,
+  "engineBuildClosure": {
+    "cargoLogSha256": "abb7a2bc9fbb6f388fed647e9e96144049733b0ee28ca1f0f6c792ac25d0f4ea",
+    "releaseLibraries": 587,
+    "dylibFiles": 15,
+    "independentFileHashesMatched": true,
+    "closureSha256": "06666eba393144e75c942f67513c554d42f19cb6e17c61fe644fe8be5dfdb5e3"
+  },
+  "original": {
+    "cargoEventLogSha256": "5226d56f72bf02e3405bdf5fd19b628f9e754361c3fa038251accf863f69f025",
+    "closureEntries": 1154,
+    "importsCompared": 140,
+    "compiles": 140,
+    "diagnosticCodesAndMessagesMatched": true,
+    "negativeImportControls": {
+      "absent": [
+        "E0432"
+      ],
+      "private": [
+        "E0603"
+      ]
+    }
+  },
+  "generated": {
+    "cargoEventLogSha256": "b6df4e30446c71de3c69913d1b016b61a72da48653609e5d5123d03b29184de3",
+    "closureEntries": 587,
+    "importsCompared": 140,
+    "compiles": 77,
+    "diagnosticCodesAndMessagesMatched": true,
+    "negativeImportControls": {
+      "absent": [
+        "E0432"
+      ],
+      "private": [
+        "E0603"
+      ]
+    }
+  }
+}
