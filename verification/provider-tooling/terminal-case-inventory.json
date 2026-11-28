@@ -66,5 +66,25 @@
         "escaping executable symlink"
       ]
     }
+  },
+  "nativeTerminalReplay": {
+    "nativeInvocations": 144,
+    "rejected": [
+      "changed-stdout",
+      "extra-field",
+      "non-ASCII",
+      "changed-exit",
+      "wrong-exit",
+      "unexpected-stderr",
+      "dirty-home"
+    ],
+    "roleReportMatchedArchive": true,
+    "homesEmpty": true,
+    "companionRevision": "38ffb0a5448d62b5550335b828dd27ce562e9258",
+    "host": "aarch64-apple-darwin",
+    "linuxLauncherArgumentComparisons": [
+      "bwrap",
+      "sudo -n bwrap"
+    ]
   }
 }
