@@ -4088,3 +4088,8 @@ w:portHistoricTooling p:evidence w:platformImportComparisonRust .
 w:platformImportComparisonRust a p:Artifact ;
     p:location <../../verification/provider-tooling/platform-import-comparison.json> ;
     rdfs:label "Rust reproduced the published three-role summary across 140 public imports, including all 63 generated rejections on each ARM64 platform." .
+
+w:replaceableWasmProviders p:evidence w:providerPostReturnReplay .
+w:providerPostReturnReplay a p:Artifact ;
+    p:location <../../verification/provider-tooling/provider-return-fidelity.json> ;
+    rdfs:label "Both provider worlds preserved every byte of an 8 MiB result across guest post-return cleanup. The macOS workspace, command-policy and bidirectional Data codec replays matched the published baseline." .

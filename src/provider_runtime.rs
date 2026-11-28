@@ -124,6 +124,36 @@ mod tests {
     }
 
     #[test]
+    fn exact_limit_response_survives_guest_cleanup_in_both_worlds() {
+        // Canonical post-return can recycle the result storage before call() returns.
+        let guest = ECHO
+            .replace(r#"(export "memory") 1"#, r#"(export "memory") 129"#)
+            .replace(
+                r#"(func (export "call")"#,
+                r#"(func (export "cleanup") (param $result i32)
+                    local.get $result i32.load
+                    i32.const 0
+                    local.get $result i32.load offset=4
+                    memory.fill)
+                (func (export "call")"#,
+            )
+            .replace(
+                r#"(realloc (func $i "alloc"))"#,
+                r#"(realloc (func $i "alloc")) (post-return (func $i "cleanup"))"#,
+            );
+        let cleanup_control = guest.replace("memory.fill)", "memory.fill unreachable)");
+        let error = run("generate", &cleanup_control).unwrap_err();
+        assert!(error.contains("unreachable"), "{error}");
+        let request: Vec<u8> = (0..=255).cycle().take(MAX_DOCUMENT_BYTES).collect();
+        for role in ["recover", "generate"] {
+            let component = wat::parse_str(guest.replace("generate", role)).unwrap();
+            let response = invoke(role, &component, &request).unwrap();
+            assert_eq!(response.len(), request.len());
+            assert!(response == request, "{role} changed the response bytes");
+        }
+    }
+
+    #[test]
     fn checks_component_imports_and_export_shape_before_instantiation() {
         // An initial trap makes a validation-after-instantiation regression visible.
         let trapping = ECHO.replace(
