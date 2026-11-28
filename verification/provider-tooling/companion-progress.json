@@ -1,11 +1,13 @@
 {
-  "auditedCompanionRevision": "b3f02eb7d620369c52da2db85c9cfc9d8feff223",
-  "previousRevision": "6e283a72e5c5284e8de600b657da2ec78d6ebdec",
-  "reproducedTableSha256": "5b96b186cd84adccf3bc5f4bbe40d1de321bb4007f10a98651fbb295cca0ec94",
-  "remainingProjectToolFiles": 45,
+  "auditedCompanionRevision": "76d53e81b70e236a3bdc0e6b95c1b969ab02b645",
+  "previousRevision": "b3f02eb7d620369c52da2db85c9cfc9d8feff223",
+  "reproducedTableSha256": "8201923a3d77946403c3ccb951a4d516463c76ca99efbb2f1568f39732aa0874",
+  "remainingProjectToolFiles": 44,
   "remainingProjectExtensions": {
-    ".py": 45
+    ".py": 44
   },
-  "removedSincePrevious": [],
+  "removedSincePrevious": [
+    "verification/whole/unified-recovered-vault/verify.py"
+  ],
   "addedSincePrevious": []
 }

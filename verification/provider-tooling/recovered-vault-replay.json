@@ -1,0 +1,100 @@
+{
+  "mixedCodecReceiptSha256": "c66b179fd19440b91600001562b53f5fb045d52f7c2f23df8b4ca66a877b9e4d",
+  "host": "aarch64-apple-darwin",
+  "frameworkRevision": "36cf1b8a45fec2b4554b2111fa13ddcc71fe2287",
+  "historicalFramework": "6e2d1ef00f286b6132b84e27a61805c659dfd437",
+  "companionRevision": "76d53e81b70e236a3bdc0e6b95c1b969ab02b645",
+  "originalRevision": "af54339d250290490d62d4475a77539b7e739071",
+  "workspaceLockSha256": "9ec2e75751425738e40d36cc9abad004908342325504f643f73cd492a2e478dc",
+  "matchingProjectedFiles": 69,
+  "referenceReceiptSha256": "76913cf9637bbea6c06d2072dabcd2b19e5810105703769fa9991b21f87d8542",
+  "observedReceiptSha256": "2f45b10a49b8c3c6d1c39d52269e3547c780a3bec80e8d41cdc40a6a27ea2e42",
+  "changedReceiptFields": [
+    "companionRevision",
+    "verifierSha256",
+    "compilerSha256",
+    "processArtifacts",
+    "baseVerifierSha256"
+  ],
+  "processArtifactDifferences": [
+    "originalBinaries",
+    "generatedBinaries",
+    "originalLibraries",
+    "generatedLibraries"
+  ],
+  "cases": {
+    "members": [
+      "marmish-core",
+      "marmish-engine",
+      "marmish-native",
+      "marmish-stream",
+      "marmish-vault"
+    ],
+    "copyCases": [
+      "copy_protocol::tests::all_frames_roundtrip_every_split_without_buffering_next_frame",
+      "copy_protocol::tests::checkpoint_rejects_corruption_trailing_fields_and_impossible_states",
+      "copy_protocol::tests::helper_context_rejects_missing_trailing_unknown_and_entrypoint_fields",
+      "copy_protocol::tests::helper_context_retention_has_replay_floor_and_config_ceiling",
+      "copy_protocol::tests::helper_context_roundtrip_limits_and_start_binding",
+      "copy_protocol::tests::launch_digest_binds_codec_mode_paths_and_metadata_but_not_attempt_binding",
+      "copy_protocol::tests::malformed_lengths_unknown_tags_enums_and_options_fail_closed",
+      "copy_protocol::tests::maximum_checkpoint_stays_below_control_cap",
+      "copy_protocol::tests::namespace_separates_principals_direction_and_transfer",
+      "copy_protocol::tests::one_byte_reassembly_and_multiple_frames",
+      "copy_protocol::tests::sizes_offsets_and_metadata_are_checked_before_encoding",
+      "exact::all_case_tags_and_canonical_payloads",
+      "exact::commit_constant_and_poisoned_decoder_outcomes_are_exact",
+      "exact::data_and_progress_guards_have_directional_precedence",
+      "exact::data_decode_rejects_offset_before_empty_body",
+      "exact::frame_headers_precede_tag_and_slot_checks",
+      "exact::inline_validation_precedes_codec_and_trailing",
+      "exact::launch_fragment_reports_early_read_errors",
+      "exact::public_copy_protocol_constants_and_signatures",
+      "exact::remaining_case_errors_preserve_exact_order"
+    ],
+    "vaultRows": 600,
+    "vaultPrivateConstructorRejections": 2,
+    "nativeErrorRows": 32,
+    "binaries": {
+      "marmish": 16,
+      "marmishd": 16
+    },
+    "recoveredBuildReport": {
+      "graphSha256": "20358d51451b80ffc68f2044a2e32e996373267d3f262a94796b34bfb590d5d7",
+      "recoveryReceiptSha256": "99f863e4f34fdc8f3bc92675fa992dc8b3c041eb708f2f2217f47108a06f2065"
+    },
+    "fixedVaultValue": {
+      "name": "tests::strict_public_values",
+      "unchangedModuleSha256": "5389218be38e60288371fe63a79ae71d2e9dbb8408a34bc53e8010f03117359c",
+      "originalAndGeneratedPassed": true,
+      "fromBytesHoldout": {
+        "name": "from_bytes_owns_the_input_and_requires_drop",
+        "sourceSha256": "d4d0f17448e0a2aab6199f4ca232f4869739c4e6fe25b660d8851d13fb074e72",
+        "originalAndGeneratedPassed": true
+      },
+      "standaloneReceiptSha256": "5b3667cef31a601c0a9c366400c4a24525582dec5a4b2790c113da0ec8277b4b"
+    }
+  },
+  "unchangedMemberLocks": [
+    "marmish-core",
+    "marmish-engine",
+    "marmish-stream"
+  ],
+  "deniedSourceReads": [
+    "companionCaller",
+    "externalCheckoutExample",
+    "frameworkLibrary",
+    "originalLibrary",
+    "referenceExecutable"
+  ],
+  "alteredInputsRejected": [
+    "manifest digest",
+    "workspace lock digest",
+    "base verifier digest",
+    "fixed vault module digest"
+  ],
+  "providerTests": {
+    "http_provider": 3,
+    "provider_interop": 5
+  }
+}
