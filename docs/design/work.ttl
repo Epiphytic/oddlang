@@ -4047,3 +4047,5 @@ w:engineChoiceNativeCaller a p:Artifact ;
     p:location "verification/provider-tooling/engine-choice-recovery.json" .
 
 w:vaultModeNativeQualification rdfs:comment "The engine verifiers use the same Rust Cargo build policy as the vault verifier. An invalid inherited compiler wrapper exposed an unisolated sandbox-helper build. After isolating that build, both baseline and mutation runs reproduced the sealed vault and engine observations. The two retired vault Python files leave 52 project-owned Python files in the companion inventory." .
+
+w:engineChoiceNativeCaller rdfs:comment "The complete standalone Rust qualifier matched a fresh Python reference on both enum source variants. The canonical workspace uses the native reference observer. Both merged projections reproduced the locks and caller results. Holding the model-specific Cargo cache lock through observation and hashing prevented concurrent reference rebuilds from changing caller dependencies." .

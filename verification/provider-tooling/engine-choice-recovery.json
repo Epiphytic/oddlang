@@ -285,5 +285,88 @@
       "matchesArchivedSerdeDigest": false
     },
     "alteredObserverSourceRejected": true
+  },
+  "standaloneRustQualifier": {
+    "host": "aarch64-apple-darwin",
+    "framework": "8e3320aacb0106d543c3e21ab1faf60a02132c04",
+    "companion": "1fce31429efd2397365d008a276d7aec4360d386",
+    "previousCompanion": "f8a48af738671581fe9753e9d868759661b398ed",
+    "rustReceiptSha256": "0d719a76048faa16f8da09383d5c8034d25ebf8316b8edcfa3fea0c1d1f31677",
+    "pythonReceiptSha256": "8e24a786f22cd6215976cd46da8c63b2ed646f261d637151ef9a08190fd3f811",
+    "compilerSha256": "498d47ab604ce76c77503b2fefa4658fae4c35e6f71b3bb567958f7ce465d1fa",
+    "verifierSha256": "0bacc3d5574f54f74e65286794492740c572801cb963f7d2ab335c7e750302f3",
+    "mergedProjectionCompiler": "4cb37f442ef051f82449904c957faf2b119775b5",
+    "mergedProjectionCompilerSha256": "56cd561744ad89db452a5e4a6a79ce696bae2a18134ac9da51a734ecae24c98c",
+    "matchedPreviousAndArchivedContractResults": [
+      "modelSha256",
+      "recovery",
+      "graphSha256",
+      "bindingSha256",
+      "enginePackageLockSha256",
+      "values",
+      "traits"
+    ],
+    "mergedCompilerMatched": [
+      "recovery",
+      "enginePackageLockSha256",
+      "values",
+      "traits"
+    ],
+    "rejectionControls": [
+      "missing build completion",
+      "duplicate engine",
+      "incorrect profile",
+      "engine outside target",
+      "duplicate Serde",
+      "Serde symlink outside release",
+      "wrong companion revision",
+      "target inside framework checkout",
+      "altered verifier source pin"
+    ],
+    "referenceCache": {
+      "targetAliasAccepted": true,
+      "lockContentionWaitedThenCompleted": true,
+      "sourceObservation": {
+        "observations": {
+          "values": [
+            "Stream:Stdout:Stdout:0",
+            "Stream:Stderr:Stderr:1",
+            "SubmitDisposition:Accepted:Accepted:0",
+            "SubmitDisposition:Existing:Existing:1"
+          ],
+          "traits": {
+            "Stream.Copy": "available",
+            "Stream.Default": "E0277",
+            "Stream.Ord": "E0277",
+            "Stream.PartialOrd": "E0277",
+            "Stream.Hash": "E0277",
+            "Stream.Display": "E0277",
+            "Stream.Serialize": "E0277",
+            "Stream.Deserialize": "E0277",
+            "SubmitDisposition.Copy": "E0277",
+            "SubmitDisposition.Default": "E0277",
+            "SubmitDisposition.Ord": "E0277",
+            "SubmitDisposition.PartialOrd": "E0277",
+            "SubmitDisposition.Hash": "E0277",
+            "SubmitDisposition.Display": "E0277",
+            "SubmitDisposition.Serialize": "E0277",
+            "SubmitDisposition.Deserialize": "E0277",
+            "privateModule": "E0603"
+          }
+        },
+        "originalLibrarySha256": "3419bca45d4b5313a411296c9d10803404101d7ddb06bda8dd80ab66ec625409",
+        "originalSerdeWitnessSha256": "5b666d68d3c8c6b9db95af50df19a92b18e986aa048f9c63f01ecb381e09e91b"
+      }
+    },
+    "binaryArtifacts": {
+      "baseline": {
+        "originalLibrarySha256": "70e87aa0a1d30ae01d176017ecf467ee68df52f7b183b11584713549aaf7e9f2",
+        "generatedLibrarySha256": "77e98704f94852368b42e82ba91fbe063dd47ffd556612d828d6d99b1677dff4"
+      },
+      "mutation": {
+        "originalLibrarySha256": "538de1d4d9b018c8d5e2afc8e4208d31f811a6b4d21f037cff9bfd351a0ca829",
+        "generatedLibrarySha256": "12266ce180d16dd4a96601ad9db5c1afd8129a9086762836dffd3811a109d69b"
+      }
+    }
   }
 }
