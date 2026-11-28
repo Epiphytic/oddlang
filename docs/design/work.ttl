@@ -4073,3 +4073,8 @@ w:portHistoricTooling p:evidence w:sharedRecoveredVaultEvidence .
 w:sharedRecoveredVaultEvidence a p:Artifact ;
     p:location <../../verification/provider-tooling/recovered-vault-evidence.json> ;
     rdfs:label "Shared Rust checks verified release-report and fixed-vault evidence for four workspace versions. A fresh macOS five-member replay matched the archived behavioral observations and the pinned workspace lock." .
+
+w:replaceableWasmProviders p:evidence w:providerRequestLimitReplay .
+w:providerRequestLimitReplay a p:Artifact ;
+    p:location "verification/provider-tooling/bounded-provider-request.json" ;
+    rdfs:label "The provider host enforces the 8 MiB byte limit while encoding its request, including escaped input and envelope fields. The exact-limit request retains its receipt hash." .

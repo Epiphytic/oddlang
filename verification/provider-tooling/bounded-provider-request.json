@@ -1,0 +1,45 @@
+{
+  "host": "aarch64-apple-darwin",
+  "providerSourceSha256": "2e990d1a16ef160ca8c89e23340070d1774d7f6f0eced43eb076084875492f9e",
+  "compilerSha256": "23db30212d67bb008fa338aa950a80af28478db4f2cfde99728983c6446455e1",
+  "companionRevision": "c69e4da96416a4226a0c70ed9dd983507028bdb3",
+  "encodedRequestLimit": 8388608,
+  "exactLimitReceiptMatched": true,
+  "oneByteOverRejectedBeforeInvocation": true,
+  "oversizeWritePreservedPriorLength": true,
+  "libraryTests": 35,
+  "providerInteropTests": 5,
+  "rustRoundtripTests": 5,
+  "rustRoundtripIncludedIgnored": true,
+  "inputManifestSha256": "859923216f7a48d14f6975c9625fc809b2f6f1a0da3c4484ff367f96eaa929b4",
+  "pinnedInputs": 111,
+  "matchingWorkspaceFiles": 106,
+  "workspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c",
+  "policyDecisions": {
+    "cases": 105,
+    "inputsSha256": "b392ced173616d91990bb648af275a25776ccc15e22f33faf7388baea451a980",
+    "observationsSha256": "c30e84dc1ec0633fc995d79eda55ece8dfabd27db8cc91bcf72e2270cbbd6f6b"
+  },
+  "roomConfigFileCases": 11,
+  "copyDataPipe": {
+    "original": "af54339d250290490d62d4475a77539b7e739071",
+    "generatedWorkspaceLockSha256": "2efe4cea5e65e5918024f7f79465c92297e47dc019a66399b4e5894eb6eb172c",
+    "driverSha256": "d5ec33dd26c651ca82483188862bc43ee459b900fdb39c4ccc9d7199a537dd66",
+    "framesPerDirection": 1260,
+    "payloadSha256": "e8007b4a0a207564767a34fd944d829e984318e4ac4d65522b136ca16794106e",
+    "wireSha256": "a2ad71740d1390383296943473fdfac7ed6515b005e1cae5cb0f5f1cb62f78e5",
+    "originalToGenerated": {
+      "encodeExit": 0,
+      "decodeExit": 0,
+      "wireBytesCompared": 4210721,
+      "payloadBytesCompared": 4194341
+    },
+    "generatedToOriginal": {
+      "encodeExit": 0,
+      "decodeExit": 0,
+      "wireBytesCompared": 4210721,
+      "payloadBytesCompared": 4194341
+    },
+    "truncationAndOffsetControlsPassed": 4
+  }
+}
