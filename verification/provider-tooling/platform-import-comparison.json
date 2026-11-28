@@ -1,0 +1,30 @@
+{
+  "totals": {
+    "attempted": 140,
+    "originalLinux": 140,
+    "generatedLinux": 77,
+    "generatedDarwin": 77
+  },
+  "summarySha256": "3234ced59daa99dee9ff23e1080f1ea68f02bf27a0c295cee08e6b93a881fd2d",
+  "outcomeDifferences": 0,
+  "diagnosticDifferences": 0,
+  "rejectionDiagnosticsByCode": {
+    "generatedDarwin": {
+      "E0432": 63
+    },
+    "generatedLinux": {
+      "E0432": 63
+    },
+    "originalLinux": {}
+  },
+  "companionRevision": "f67d15e44ed5492b84123aaae3de2db91635e498",
+  "frameworkRevision": "de8ff89d50c9b81fa0e4b8b3a095fe72f91843dc",
+  "linuxReceiptSha256": "691381304ddd75d092ef3ef6df6f38d1b815df8980d2f00ae6dc3d3d6db94f49",
+  "darwinReceiptSha256": "047f5e31367594e067f57d9b2fc07cc880e2b825138967b0d4d4c1c87ba8415f",
+  "comparisonHost": "aarch64-apple-darwin",
+  "compilerSha256": "561533973bcc12913cd5365aa3ae20e72bf7649760798839a61c48342c994219",
+  "validatedWorkspaceFiles": 98,
+  "workspaceLockSha256": "5abf57c811d641ba126c32dde208334d85d47374bbfbb983231783a403f24df4",
+  "distinctOutcomesAndDiagnosticsMatchedPython": true,
+  "invalidCorporaRejected": 6
+}
