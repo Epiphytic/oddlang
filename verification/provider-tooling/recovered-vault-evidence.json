@@ -1,0 +1,58 @@
+{
+  "companionRevision": "c5d77c9ff7c73185289da3ee9c34ec68b563ce9c",
+  "previousQualifiedReceiptSha256": "76913cf9637bbea6c06d2072dabcd2b19e5810105703769fa9991b21f87d8542",
+  "freshReceiptSha256": "5f3744dace33d89cc802bd33d146495e0a34a1cc1f9dab4cf00d229cbaa266c0",
+  "frameworkRevision": "6e2d1ef00f286b6132b84e27a61805c659dfd437",
+  "mergedCompilerRevision": "80f21217ca34300a41822ff3c05dedb580dd51a7",
+  "workspaceLockSha256": "9ec2e75751425738e40d36cc9abad004908342325504f643f73cd492a2e478dc",
+  "identicalWorkspaceFiles": 69,
+  "changedReceiptFields": [
+    "companionRevision",
+    "verifierSha256",
+    "compilerSha256",
+    "processArtifacts",
+    "baseVerifierSha256"
+  ],
+  "platform": "aarch64-apple-darwin",
+  "sourceDenials": [
+    "companionCaller",
+    "externalCheckoutExample",
+    "frameworkLibrary",
+    "originalLibrary",
+    "referenceExecutable"
+  ],
+  "fixedVaultValue": {
+    "name": "tests::strict_public_values",
+    "unchangedModuleSha256": "5389218be38e60288371fe63a79ae71d2e9dbb8408a34bc53e8010f03117359c",
+    "originalAndGeneratedPassed": true,
+    "fromBytesHoldout": {
+      "name": "from_bytes_owns_the_input_and_requires_drop",
+      "sourceSha256": "d4d0f17448e0a2aab6199f4ca232f4869739c4e6fe25b660d8851d13fb074e72",
+      "originalAndGeneratedPassed": true
+    },
+    "standaloneReceiptSha256": "5b3667cef31a601c0a9c366400c4a24525582dec5a4b2790c113da0ec8277b4b"
+  },
+  "accepted": [
+    "workspace-v7-recovered-vault-engine",
+    "workspace-v7-recovered-vault-engine-journal",
+    "workspace-v7-recovered-vault-engine-journal-mdk",
+    "workspace-v7-canonical-public-data"
+  ],
+  "rejected": [
+    "wrong strict caller digest",
+    "missing successor component",
+    "changed graph bytes",
+    "changed native manifest",
+    "duplicate build-report",
+    "missing fixed value",
+    "outside staging root",
+    "changed inherited component"
+  ],
+  "observations": {
+    "recoveredBuildReport": {
+      "graphSha256": "20358d51451b80ffc68f2044a2e32e996373267d3f262a94796b34bfb590d5d7",
+      "recoveryReceiptSha256": "99f863e4f34fdc8f3bc92675fa992dc8b3c041eb708f2f2217f47108a06f2065"
+    },
+    "standaloneReceiptSha256": "5b3667cef31a601c0a9c366400c4a24525582dec5a4b2790c113da0ec8277b4b"
+  }
+}
