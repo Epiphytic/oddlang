@@ -4123,3 +4123,8 @@ w:portHistoricTooling p:evidence w:recoveredVaultWorkspaceReplay .
 w:recoveredVaultWorkspaceReplay a p:Artifact ;
     p:location <../../verification/provider-tooling/recovered-vault-replay.json> ;
     rdfs:label "The sealed five-member vault workspace matched its archived behavioral results after retiring the recovered workspace Python entry point. The historical and current compilers produced identical bytes for all 69 projected files. Both seven-member mixed codec directions reproduced the pinned receipt." .
+
+w:portHistoricTooling p:evidence w:nativeStatusObserver .
+w:nativeStatusObserver a p:Artifact ;
+    p:location <../../verification/provider-tooling/native-status-observer.json> ;
+    rdfs:label "The Rust status observer reproduced the original Darwin receipt and the previous mixed observer output byte for byte. Fresh plain and typed clients matched archived activation, frame controls and shutdown. The typed client matched all 49 extended and nested replies." .

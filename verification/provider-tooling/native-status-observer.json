@@ -1,0 +1,69 @@
+{
+  "host": "aarch64-apple-darwin",
+  "frameworkRevision": "6362c44f6c32b3745bc9fbec0cc30033a3ad3844",
+  "companionRevision": "48c3aa08f01777c7e9cd3955fd8b9ac60b06b62c",
+  "originalSha256": "f73dd9a9575facd4f18e47a8c3d139f8f1130b2644d8218abd2a31dd80704773",
+  "mixedPythonAndRustReceiptSha256": "b766b6e8828f7bded01ded511ec8689b497c65797ef0552a6053d35db2ee850d",
+  "profiles": {
+    "plain": {
+      "archiveSha256": "4798ee46c43c936bf37409099ae9f4fcfdd2ff6981fa3827673478a0d5a40a00",
+      "observedReceiptSha256": "da205a186ea3fd064d9366b5a77cd65853d62c9f52c5392f68efda2ad504b6bc",
+      "differences": [
+        "candidateSha256",
+        "companionRevision",
+        "frameworkRevision"
+      ],
+      "generatedClientSha256": "c880b7d231cf5e2a4d7d925df616343a04ff7b23dc9366d4220947095da91ecb",
+      "controlledCases": 17,
+      "orderedGuards": 5,
+      "parserCases": {
+        "marmish": 34,
+        "marmishd": 34
+      },
+      "activation": {
+        "exit": 0,
+        "stderr": "",
+        "stdout": "{\"ok\":true,\"result\":{\"state\":\"activating\"},\"error\":null}\n"
+      },
+      "shutdown": {
+        "engine_stop_complete": true,
+        "mdk_stop_complete": true,
+        "runtime_cleanup_complete": true
+      }
+    },
+    "typed": {
+      "archiveSha256": "c2f5bcc4fbabc2b3406ded270828b94d03a653d33a641c357b9c0860241ea7c5",
+      "observedReceiptSha256": "a8fa13e74946e2762d8c421b457f44de41b9fe983cbd84524836771bcf335464",
+      "differences": [
+        "candidateSha256",
+        "extendedReplies.binarySha256",
+        "frameworkRevision",
+        "nestedReplies.binarySha256"
+      ],
+      "generatedClientSha256": "3c048464a5ccde9058a49ce4d34a67d3a83823121e39efe68b282c82ea904ccd",
+      "controlledCases": 17,
+      "orderedGuards": 5,
+      "parserCases": {
+        "marmish": 34,
+        "marmishd": 34
+      },
+      "activation": {
+        "exit": 0,
+        "stderr": "",
+        "stdout": "{\"ok\":true,\"result\":{\"state\":\"activating\"},\"error\":null}\n"
+      },
+      "shutdown": {
+        "engine_stop_complete": true,
+        "mdk_stop_complete": true,
+        "runtime_cleanup_complete": true
+      },
+      "extendedReplies": 16,
+      "nestedReplies": 33
+    }
+  },
+  "negativeControls": [
+    "modified binary digest refused before startup",
+    "incorrect status client refused during activation"
+  ],
+  "cleanup": "No Marmish processes or private status observer directories remained after the refusal control."
+}
