@@ -1,13 +1,13 @@
 {
-  "auditedCompanionRevision": "eaa4119689e96200708d05077297e1bf274ec664",
-  "previousRevision": "33d920c5c74449ebbd79b0c20e22c1472a65fff8",
-  "reproducedTableSha256": "0b38b8c25c1f666e5d07166daff20f063217c3bca01476f964e3a59968a2d8c4",
-  "remainingProjectToolFiles": 58,
+  "auditedCompanionRevision": "63b7f83f4877721c83ba9ea284f7c3728a04c61e",
+  "previousRevision": "eaa4119689e96200708d05077297e1bf274ec664",
+  "reproducedTableSha256": "d207cc8bda7e268b591f992f07eef1e2b292288fc2f24ea37668fb09b679d76a",
+  "remainingProjectToolFiles": 57,
   "remainingProjectExtensions": {
-    ".py": 58
+    ".py": 57
   },
   "removedSincePrevious": [
-    "verification/whole/gap-range-assembly/verify.py"
+    "verification/whole/gap-range-compact-source-api/verify.py"
   ],
   "addedSincePrevious": []
 }
