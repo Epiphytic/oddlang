@@ -4039,3 +4039,9 @@ w:portHistoricTooling p:evidence w:vaultModeNativeQualification .
 w:vaultModeNativeQualification a p:Artifact ;
     rdfs:label "Rust vault qualification and fresh Python reference agreed on source, graph, overlay, package lock and downstream caller results for both variant orders on Darwin ARM64. The merged compiler reproduced both locks and caller results." ;
     p:location "verification/provider-tooling/vault-mode-qualification-rust.json" .
+
+w:portHistoricTooling p:evidence w:engineChoiceNativeCaller .
+w:engineChoiceNativeCaller a p:Artifact ;
+    rdfs:label "Native Rust caller qualification for Stream and SubmitDisposition" ;
+    rdfs:comment "On macOS ARM64 the Rust and Python observers agreed on four values and seventeen trait and visibility checks in both the baseline and mutation. Both merged compiler projections reproduced the historical locks, and both rejected an inverted Copy expectation." ;
+    p:location "verification/provider-tooling/engine-choice-recovery.json" .
