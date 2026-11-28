@@ -474,5 +474,160 @@
       "wrong new export with same totals"
     ],
     "alteredVerifierRejected": true
+  },
+  "canonicalWorkspaceReplay": {
+    "companionRevision": "6a69e570859de3ee5c7d41e95d5da78c6fd0394c",
+    "previousCompanionRevision": "4bcd9af7437e3914eb079b6a71b217c405f95185",
+    "mergedFrameworkRevision": "659f1ee945c63fe569db93eae11b1e17a12b99db",
+    "mergedCompilerSha256": "56cd561744ad89db452a5e4a6a79ce696bae2a18134ac9da51a734ecae24c98c",
+    "historicalCompilerRevision": "8e3320aacb0106d543c3e21ab1faf60a02132c04",
+    "historicalCompilerSha256": "acd6b75d715ee0ed9201f4b5d91842da88a445aa30c903fcfc6c2fdca10915be",
+    "host": "aarch64-apple-darwin",
+    "fullReceiptSha256": "5701bdf4d56f2f884978c6a2c336d5ca96b072b1a85561a2368e923edff1fe02",
+    "archivedReceiptSha256": "ba40248977628f467b29a3de66ea0523d6fb6792a197be3db3e46821ceaeaa07",
+    "original": "af54339d250290490d62d4475a77539b7e739071",
+    "candidate": {
+      "release": "workspace-v7-canonical-engine-choices",
+      "input_revision": "934bd7c96af85e0c502cf943b1c1d72f36692a8e",
+      "framework_revision": "8e3320aacb0106d543c3e21ab1faf60a02132c04",
+      "lock_sha256": "a72d0b0538b3afc272fcd7f5cf8cc900935fd4cc920261fa4bd6bcea46270292"
+    },
+    "matchingBaselineFiles": 98,
+    "matchingCandidateFiles": 99,
+    "workspaceInputs": {
+      "rootCargoLockSha256": "fe6e73cdd2e6926cea6369c00112cae5e312eb9834b567258ac4e91f90b403aa",
+      "rootCargoManifestSha256": "daceb00394a5764379a6e98ae988ecc46ee81d424825cb1e78de6fd62b7a4b9c",
+      "packageLocks": {
+        "marmish-core": "b30e3ad85232743da965f0ca1d823baea25095d66e883005ceb1f790ee44794c",
+        "marmish-engine": "3a3ee8eee0991e685c491bcfdc9a4bd66b2296b2593b47fc9d15f779e48a603d",
+        "marmish-mdk": "75b38fdc8f30a25a6a55a3d1d25f162f765e5d3f549cc50b729c28d516a6fda6",
+        "marmish-native": "93b8e495c6287308e4f811d9fd8d8b9db1db7f0e667aef3bb6ccae34eb03bbb7",
+        "marmish-prototype": "3e4782fbdf741550339bcc579b1b959eb2b802f5d1412147c2512b2347cb1ff4",
+        "marmish-stream": "07ab8cf1998ed855511258246fb595ddf3191715f9038236517532722f7c495b",
+        "marmish-vault": "111090ff5fdac0dfa72ef050ed916ce9737408b5724080e30214e239c51e3da2"
+      },
+      "changedEngineSources": [
+        "src/group_1/mod.rs",
+        "src/lib.rs"
+      ],
+      "addedEngineSources": [
+        "src/group_1/__projection_3.rs"
+      ]
+    },
+    "archivedImportOutcomesMatched": 140,
+    "availableImports": 79,
+    "engineCaller": {
+      "values": [
+        "Stream:Stdout:Stdout:0",
+        "Stream:Stderr:Stderr:1",
+        "SubmitDisposition:Accepted:Accepted:0",
+        "SubmitDisposition:Existing:Existing:1"
+      ],
+      "traits": {
+        "Stream.Copy": "available",
+        "Stream.Default": "E0277",
+        "Stream.Ord": "E0277",
+        "Stream.PartialOrd": "E0277",
+        "Stream.Hash": "E0277",
+        "Stream.Display": "E0277",
+        "Stream.Serialize": "E0277",
+        "Stream.Deserialize": "E0277",
+        "SubmitDisposition.Copy": "E0277",
+        "SubmitDisposition.Default": "E0277",
+        "SubmitDisposition.Ord": "E0277",
+        "SubmitDisposition.PartialOrd": "E0277",
+        "SubmitDisposition.Hash": "E0277",
+        "SubmitDisposition.Display": "E0277",
+        "SubmitDisposition.Serialize": "E0277",
+        "SubmitDisposition.Deserialize": "E0277",
+        "privateModule": "E0603"
+      }
+    },
+    "cargoClosureEntries": 572,
+    "cargoClosureSha256": "74e702c0cebaf9b9134dc5cbe063772aaa7e2f37ebd1600467a06a2fbf1be948",
+    "rejectedChanges": [
+      [
+        "baseline",
+        "workspace.lock"
+      ],
+      [
+        "baseline",
+        "Cargo.toml"
+      ],
+      [
+        "baseline",
+        "Cargo.lock"
+      ],
+      [
+        "baseline",
+        "marmish-core/package.lock"
+      ],
+      [
+        "baseline",
+        "marmish-stream/src/lib.rs"
+      ],
+      [
+        "baseline",
+        "marmish-engine/src/lib.rs"
+      ],
+      [
+        "baseline",
+        "marmish-engine/src/group_1/mod.rs"
+      ],
+      [
+        "baseline",
+        "marmish-engine/package.lock"
+      ],
+      [
+        "baseline",
+        "marmish-engine/src/extra.rs"
+      ],
+      [
+        "candidate",
+        "workspace.lock"
+      ],
+      [
+        "candidate",
+        "Cargo.toml"
+      ],
+      [
+        "candidate",
+        "Cargo.lock"
+      ],
+      [
+        "candidate",
+        "marmish-core/package.lock"
+      ],
+      [
+        "candidate",
+        "marmish-stream/src/lib.rs"
+      ],
+      [
+        "candidate",
+        "marmish-engine/src/lib.rs"
+      ],
+      [
+        "candidate",
+        "marmish-engine/src/group_1/mod.rs"
+      ],
+      [
+        "candidate",
+        "marmish-engine/package.lock"
+      ],
+      [
+        "candidate",
+        "marmish-engine/src/extra.rs"
+      ],
+      [
+        "candidate",
+        "revision"
+      ],
+      [
+        "candidate",
+        "lock"
+      ]
+    ],
+    "changedVerifierRejected": true,
+    "publicDataSnapshotMatchedArchive": true
   }
 }
