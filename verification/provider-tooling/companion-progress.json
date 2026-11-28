@@ -1,13 +1,11 @@
 {
-  "auditedCompanionRevision": "6b7e31d9a2dc223bee327ec937e606e7c219ec86",
-  "previousRevision": "58b9e203c946429008ca54ebbfb16d62fc10fe8f",
-  "reproducedTableSha256": "e8f5de79512986e10c4303250fb51f6322d3b9be3e51348caac21ed15418b5d1",
-  "remainingProjectToolFiles": 54,
+  "auditedCompanionRevision": "8104a9f89df77cd715948bc81062c397d6ae1e41",
+  "previousRevision": "6a69e570859de3ee5c7d41e95d5da78c6fd0394c",
+  "reproducedTableSha256": "a58098c29e8befb0657abb2aa05a8471da74d7031872aa4f0fd5fd3fa885db2f",
+  "remainingProjectToolFiles": 51,
   "remainingProjectExtensions": {
-    ".py": 54
+    ".py": 51
   },
-  "removedSincePrevious": [
-    "verification/whole/gap-range-record/verify.py"
-  ],
+  "removedSincePrevious": [],
   "addedSincePrevious": []
 }
