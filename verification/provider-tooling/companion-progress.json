@@ -1,7 +1,7 @@
 {
-  "auditedCompanionRevision": "6a69e570859de3ee5c7d41e95d5da78c6fd0394c",
-  "previousRevision": "4bcd9af7437e3914eb079b6a71b217c405f95185",
-  "reproducedTableSha256": "fa6fc9c0fbea9465b49f9257dd17fe0a201a26b17fcd13ba447c96e82d67bc39",
+  "auditedCompanionRevision": "8104a9f89df77cd715948bc81062c397d6ae1e41",
+  "previousRevision": "6a69e570859de3ee5c7d41e95d5da78c6fd0394c",
+  "reproducedTableSha256": "a58098c29e8befb0657abb2aa05a8471da74d7031872aa4f0fd5fd3fa885db2f",
   "remainingProjectToolFiles": 51,
   "remainingProjectExtensions": {
     ".py": 51

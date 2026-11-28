@@ -629,5 +629,80 @@
     ],
     "changedVerifierRejected": true,
     "publicDataSnapshotMatchedArchive": true
+  },
+  "nativeCargoLibraryInventory": {
+    "host": "aarch64-apple-darwin",
+    "companionRevision": "8104a9f89df77cd715948bc81062c397d6ae1e41",
+    "previousCompanionRevision": "6a69e570859de3ee5c7d41e95d5da78c6fd0394c",
+    "frameworkRevision": "3cb94593f0e470c21ceb4fccb0c5f124b2ab7828",
+    "releaseReceiptSha256": "72e0085a0c2d90629432703c137cee32df8c89507ddb1aee9a1456d7321789c0",
+    "workspaceLockSha256": "a72d0b0538b3afc272fcd7f5cf8cc900935fd4cc920261fa4bd6bcea46270292",
+    "freshReleaseClosure": {
+      "entries": 572,
+      "sha256": "f876d32d548fb7b7870bcc5405d68ffca95a1d8f9d2f3e6d454b8d14248135bb"
+    },
+    "importSpellingsCompared": 140,
+    "importable": 79,
+    "enumObservationsMatchedArchive": true,
+    "pinnedTerminalBuild": {
+      "entries": 587,
+      "digest": "9bde2cee5ae8258eb89c2c8fc18452c98b99c5af87b9e7f065ee58749bb00d76",
+      "artifactLogSha256": "52db2b6b407e1ed39c83d4c3fbf875df22c9e3243900848e2640a2158caa6209"
+    },
+    "originalAndInventoryPins": {
+      "originalSourcePin": {
+        "revision": "af54339d250290490d62d4475a77539b7e739071",
+        "tree": "9be3104dd1d55194ae6e442c0d3eb1c0b223a481",
+        "files": {
+          "Cargo.toml": "bf726da78321c6f465902f679bbd05557374091458208fe5531be8b3cc2e4f53",
+          "Cargo.lock": "9c5f7dde5c0f7d340e22dbefaa8a1c6ddb94c119011ba3e49ac8044c9b4cb0b3",
+          "crates/marmish-core/Cargo.toml": "902f311af435a59a6929bc1a55677caa68491ead24aff5f20277884dddc10377",
+          "crates/marmish-engine/Cargo.toml": "0a5cf6ab702b96a22c288d491ccff875ef96250f385d161e2273229c627c32e7",
+          "crates/marmish-mdk/Cargo.toml": "b6aee3678e34c02c2b4b69cc0a532424ac6d08c95ffd18cf9e1d7613446327b8",
+          "crates/marmish-native/Cargo.toml": "f92cdde82b3e4cf077294a7296117af4dcc28dba55bf1c9d694d7a4b273f539f",
+          "crates/marmish-prototype/Cargo.toml": "7c34b6353950fb24db84c27c1191d8ea628f21e0320820131315ca7b497c9ca9",
+          "crates/marmish-stream/Cargo.toml": "51433a6d952cb11d2a1228813b30c581ab200160e1b0344e2bb1e307749daf5e",
+          "crates/marmish-vault/Cargo.toml": "b610073c29513d08ab5bbc5db2a69aebd120b14341999eb0c6587535252759cc"
+        }
+      },
+      "inventoryFiles": 22,
+      "darwinReceiptPinned": true,
+      "rejected": [
+        "dirty checkout",
+        "wrong revision",
+        "changed provenance",
+        "changed exports",
+        "changed lock",
+        "changed evidence",
+        "changed Darwin receipt",
+        "changed helper source"
+      ]
+    },
+    "checkoutLocalToolSelectionVerified": true,
+    "textAndByteLogsVerified": true,
+    "comparisons": {
+      "darwin": {
+        "entries": 587,
+        "sha256": "06666eba393144e75c942f67513c554d42f19cb6e17c61fe644fe8be5dfdb5e3"
+      },
+      "historicalEngineSelection": {
+        "entries": 572,
+        "sha256": "06247d8de80e4d73da8b22e35a7514ae093d423e9932e074cf5b4d5ea241f3e4"
+      }
+    },
+    "rejected": [
+      "missing event reason",
+      "empty closure",
+      "missing final success",
+      "failed build",
+      "missing file",
+      "outside target",
+      "parent traversal",
+      "alias escapes target",
+      "strict symlink",
+      "unknown host"
+    ],
+    "byteMutationDetected": true,
+    "withinTargetDarwinSymlinkAccepted": true
   }
 }
