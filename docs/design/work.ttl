@@ -4028,3 +4028,9 @@ w:portHistoricTooling p:evidence w:rangeEndpointHintsRust .
 w:rangeEndpointHintsRust a p:Artifact ;
     rdfs:label "Darwin ARM64 Rust and TypeScript range callers matched eleven wire cases in each of five hint profiles. Published and omitted hints each reproduced a fresh Python qualification. The merged compiler reproduced the package files and lock for every profile." ;
     p:location "verification/provider-tooling/range-endpoint-hints-rust.json" .
+
+w:portHistoricTooling p:evidence w:authoredRangeRecordRust .
+w:authoredRangeRecordRust a p:Artifact ;
+    rdfs:label "The Rust authored range qualifier rebuilt the original record mutation, compared both 35-case data callers and checked public traits under the historical and merged Oddlang compilers. Both package locks matched. The original engine library digest also varied between two unchanged Python runs." ;
+    rdfs:comment "After a mutant build reused the original target directory, the original observer reported the mutant unknown-field rejection. Isolating and locking the artifacts by model source digest restored the expected original observations on two successive mutant-to-original replays." ;
+    p:location "verification/provider-tooling/authored-range-record-rust.json" .
