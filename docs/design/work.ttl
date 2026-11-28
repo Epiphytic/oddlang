@@ -4045,3 +4045,5 @@ w:engineChoiceNativeCaller a p:Artifact ;
     rdfs:label "Native Rust caller qualification for Stream and SubmitDisposition" ;
     rdfs:comment "On macOS ARM64 the Rust and Python observers agreed on four values and seventeen trait and visibility checks in both the baseline and mutation. Both merged compiler projections reproduced the historical locks, and both rejected an inverted Copy expectation." ;
     p:location "verification/provider-tooling/engine-choice-recovery.json" .
+
+w:vaultModeNativeQualification rdfs:comment "The engine verifiers use the same Rust Cargo build policy as the vault verifier. An invalid inherited compiler wrapper exposed an unisolated sandbox-helper build. After isolating that build, both baseline and mutation runs reproduced the sealed vault and engine observations. The two retired vault Python files leave 52 project-owned Python files in the companion inventory." .

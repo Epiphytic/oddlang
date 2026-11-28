@@ -1,11 +1,14 @@
 {
-  "auditedCompanionRevision": "e6fb7c4dd3b5f09e4547e20ac68a081ba3ccdeb2",
-  "previousRevision": "f54013136b95b1cc185e68387c6b095c6dfd9823",
-  "reproducedTableSha256": "258823188d072f459c27149ecb6341e2f9994eae385399099e269a82e5c58ff6",
-  "remainingProjectToolFiles": 54,
+  "auditedCompanionRevision": "f8a48af738671581fe9753e9d868759661b398ed",
+  "previousRevision": "e6fb7c4dd3b5f09e4547e20ac68a081ba3ccdeb2",
+  "reproducedTableSha256": "4c4b0051fee4ed5925e9de2fb555dbe9ea3f415d2954112b967845081889d027",
+  "remainingProjectToolFiles": 52,
   "remainingProjectExtensions": {
-    ".py": 54
+    ".py": 52
   },
-  "removedSincePrevious": [],
+  "removedSincePrevious": [
+    "verification/whole/vault-mode/test_verify.py",
+    "verification/whole/vault-mode/verify.py"
+  ],
   "addedSincePrevious": []
 }

@@ -182,5 +182,52 @@
         }
       }
     }
+  },
+  "sharedBuildPolicy": {
+    "companionRevision": "f8a48af738671581fe9753e9d868759661b398ed",
+    "host": "aarch64-apple-darwin",
+    "inheritedOverrides": {
+      "RUSTC_WRAPPER": "/nonexistent/injected-wrapper",
+      "CARGO_PROFILE_RELEASE_OPT_LEVEL": "0"
+    },
+    "qualifierReceipts": {
+      "vault": "f09d80149ad49cb03c31b22e5d74cc0646f7a74e17a2430a023584e2985748f8",
+      "engine": "dcb1b282ab02c937f9897590f81cbc75f5bfe8fb211767c3b08f1e80dcca7e21"
+    },
+    "vaultRunCompanionRevision": "9e388143f54dc03d8845407ee76d13f36a36594e",
+    "sandboxHelperAcceptedWithInvalidCallerConfigAndCompilerWrapper": true,
+    "vaultFramework": "18ea58006de4482c0ebc61de9e800edc78eba987",
+    "engineFramework": "8e3320aacb0106d543c3e21ab1faf60a02132c04",
+    "verifiedScenarios": [
+      "baseline",
+      "mutation"
+    ],
+    "engineValuesPerScenario": 4,
+    "engineTraitAndVisibilityChecksPerScenario": 17,
+    "vaultValuesPerScenario": 2,
+    "vaultTraitChecksPerScenario": 7,
+    "adapterComparedToPreviousEnvironment": true,
+    "nonUtf8EnvironmentCompared": true,
+    "privateCargoHomeLinks": [
+      "git",
+      "registry"
+    ],
+    "rejectionChecks": [
+      "wrong checkout revision",
+      "untracked source",
+      "ignored checkout .cargo/config",
+      "ignored checkout .cargo/config.toml",
+      "ancestor .cargo/config",
+      "ancestor .cargo/config.toml",
+      "altered shared Rust policy source"
+    ],
+    "frameworkRegression": {
+      "revision": "f730a896cb24c1c748b7607fbb77fdc3a8b735a4",
+      "passed": {
+        "library": 33,
+        "providerInterop": 5,
+        "rustRoundtripIncludingSixBuildControl": 5
+      }
+    }
   }
 }
