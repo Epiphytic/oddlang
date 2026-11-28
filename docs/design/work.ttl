@@ -4023,3 +4023,8 @@ w:derivedRangePackageReplay a p:Artifact ;
     rdfs:label "Rust compact range assembly reproduced the previous Python verifier's eight staged inputs, emitted package files, package lock, five denied source reads and two digest refusals on macOS ARM64. The downstream source-API caller matched eleven archived rows." ;
     p:location "verification/provider-tooling/derived-range-package.json" .
 w:derivedRangePackageReplay rdfs:comment "The Rust compact source-API verifier reproduced a fresh Python run's eleven caller observations, typed field checks, four denied reads, three rejection diagnostics and generated file hashes on Darwin ARM64. The merged compiler produced the same package lock and six package files." .
+
+w:portHistoricTooling p:evidence w:rangeEndpointHintsRust .
+w:rangeEndpointHintsRust a p:Artifact ;
+    rdfs:label "Darwin ARM64 Rust and TypeScript range callers matched eleven wire cases in each of five hint profiles. Published and omitted hints each reproduced a fresh Python qualification. The merged compiler reproduced the package files and lock for every profile." ;
+    p:location "verification/provider-tooling/range-endpoint-hints-rust.json" .

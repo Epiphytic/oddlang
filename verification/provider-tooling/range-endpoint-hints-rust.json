@@ -1,0 +1,107 @@
+{
+  "companion": "58b9e203c946429008ca54ebbfb16d62fc10fe8f",
+  "framework": "b530e740a6eaef5e993192777463bf39e222c477",
+  "platform": "aarch64-apple-darwin",
+  "node": "v22.22.2",
+  "typescript": "5.9.3",
+  "originalEndpointReceiptSha256": "c5728e571e934298a34cb58a164107d19f831db3f113a0cd630e7c957261d00f",
+  "nativeCasesPerProfile": 11,
+  "deniedReads": [
+    "model.rs",
+    "lib.rs",
+    "probe.rs",
+    "traits.rs"
+  ],
+  "privateBindingDiagnostic": "unknown variant `private`, expected `public` at line 21 column 31",
+  "profiles": {
+    "absent": {
+      "packageLockSha256": "21072e755bd87c36f45588ae7ba1d8082b19964992cd10e3ff2c3252754b36dc",
+      "filesCompared": 7,
+      "typescriptResult": "Matched 11 endpoint cases, including the precision-loss control.",
+      "hintsSha256": null
+    },
+    "baseline": {
+      "packageLockSha256": "21072e755bd87c36f45588ae7ba1d8082b19964992cd10e3ff2c3252754b36dc",
+      "filesCompared": 7,
+      "typescriptResult": "Matched 11 endpoint cases, including the precision-loss control.",
+      "hintsSha256": "faa5d66557b0e5f8f87d8e8d0404bf6c441211b47a8c9295f866ea601d701561"
+    },
+    "replacement": {
+      "packageLockSha256": "21072e755bd87c36f45588ae7ba1d8082b19964992cd10e3ff2c3252754b36dc",
+      "filesCompared": 7,
+      "typescriptResult": "Matched 11 endpoint cases, including the precision-loss control.",
+      "hintsSha256": "371e6f1f2171a42c1cc5efd376c3b608336d4463084c7f4c3771483e43a15500"
+    },
+    "without-rust": {
+      "packageLockSha256": "21072e755bd87c36f45588ae7ba1d8082b19964992cd10e3ff2c3252754b36dc",
+      "filesCompared": 7,
+      "typescriptResult": "Matched 11 endpoint cases, including the precision-loss control.",
+      "hintsSha256": "943646d064abbe0b41de57bb9295ca2baa6f539e221faf506f502c74e3c3843f"
+    },
+    "without-typescript": {
+      "packageLockSha256": "21072e755bd87c36f45588ae7ba1d8082b19964992cd10e3ff2c3252754b36dc",
+      "filesCompared": 7,
+      "typescriptResult": "Matched 11 endpoint cases, including the precision-loss control.",
+      "hintsSha256": "f048637c11e4145715be21e23a8ffb72ad54ab170f7efc7aa92fe232bb7f1ee9"
+    }
+  },
+  "checks": {
+    "publishedHints": {
+      "nativeReceiptSha256": "e506b4bccf815558bcabf2419404aade8a13246064a7ec81ff4b9ff3a6445e9d",
+      "pythonReceiptSha256": "ecc59ee1e6da2109139ac7f6c81c47a76a75d5f67620ecae5caf279070785670",
+      "archivedReceiptSha256": "082a75b9bae0191cb94b9ae3935666c013d92833b2b8c8e0f3b3203ceaa6dbb1",
+      "pythonRevision": "63b7f83f4877721c83ba9ea284f7c3728a04c61e",
+      "changedFieldsFromPython": [
+        "companion",
+        "contractVerifierSha256",
+        "verifierSha256"
+      ],
+      "changedFieldsFromArchive": [
+        "companion",
+        "compilerSha256",
+        "contractVerifierSha256",
+        "verifierSha256"
+      ],
+      "hintsSha256": "faa5d66557b0e5f8f87d8e8d0404bf6c441211b47a8c9295f866ea601d701561"
+    },
+    "omittedHints": {
+      "nativeReceiptSha256": "feba2e9a9860349598b8f6a24076f0f5ee952da54acb7268d7694718d09dbd5f",
+      "pythonReceiptSha256": "700989e21aa26fd1bf3c7de0b3ffc13570f3b308f0757bea5e8d651f8400df5b",
+      "archivedReceiptSha256": "1812ba895a2789c69ac7af4b2c18f521060514bfa76400483bc5d84af8daf828",
+      "pythonRevision": "63b7f83f4877721c83ba9ea284f7c3728a04c61e",
+      "changedFieldsFromPython": [
+        "companion",
+        "contractVerifierSha256",
+        "verifierSha256"
+      ],
+      "changedFieldsFromArchive": [
+        "companion",
+        "compilerSha256",
+        "contractVerifierSha256",
+        "verifierSha256"
+      ],
+      "hintsSha256": null
+    },
+    "rustOnly": {
+      "receiptSha256": "c78bf6675bca4c850135a868db766482d37277629ee76f86bd6cdc0932b241e4",
+      "changedFields": [
+        "node",
+        "profiles",
+        "typescript",
+        "typescriptInputs"
+      ]
+    }
+  },
+  "unrelatedTrackedEditRejected": true,
+  "mergedCompilerRevision": "4ffea9980f00ececadefd3743ee0f58bfa60bc59",
+  "mergedCompilerSha256": "56cd561744ad89db452a5e4a6a79ce696bae2a18134ac9da51a734ecae24c98c",
+  "mergedProductFiles": {
+    "Cargo.lock": "03049e1019f2cbf682c990ac1923097df93139d921c9e95b24c432468b08f2ca",
+    "Cargo.toml": "d9c0429cbb129d48828ac547a4e49d6375b6a214527867e078462e1af9024d06",
+    "package.lock": "21072e755bd87c36f45588ae7ba1d8082b19964992cd10e3ff2c3252754b36dc",
+    "src/group_0/__projection_0.rs": "e8f5ebe06b1b6f504c11f7380fb5e6107bd92ed0e51e8b9662310cc459c8693a",
+    "src/group_0/__projection_1.rs": "4f3159463c6bc615d0c7156e84fdf1ebdfb59edeb7fb12725f773644b7f5d59c",
+    "src/group_0/mod.rs": "4280c49315f335ec1cfa8c31f605f135b4a0bc15a8ca2bfd6dc1133c9fc5cfc5",
+    "src/lib.rs": "8b0b5b00a320945c48220826234351488d9f745966f008f5f0cb9b522b27c8f8"
+  }
+}
