@@ -368,5 +368,111 @@
         "generatedLibrarySha256": "12266ce180d16dd4a96601ad9db5c1afd8129a9086762836dffd3811a109d69b"
       }
     }
+  },
+  "nativeImportComparison": {
+    "companionRevision": "4bcd9af7437e3914eb079b6a71b217c405f95185",
+    "previousRevision": "1fce31429efd2397365d008a276d7aec4360d386",
+    "frameworkRevision": "8cf702be344b891fb24f75c92e52c48ac224c934",
+    "frameworkBinarySha256": "56cd561744ad89db452a5e4a6a79ce696bae2a18134ac9da51a734ecae24c98c",
+    "host": "aarch64-apple-darwin",
+    "priorAndNativeReportSha256": "74fc06fa957463f9c15a76e7ef1e2e538a71665c612b6bad35954eb42fe3697c",
+    "projections": {
+      "engine": {
+        "files": 99,
+        "workspaceLockSha256": "a72d0b0538b3afc272fcd7f5cf8cc900935fd4cc920261fa4bd6bcea46270292",
+        "fileInventorySha256": "ff6352150a8d10577754230571629dfdb3757c8098b87442e44e52844ef877d7",
+        "attempted": 140,
+        "baseline": 77,
+        "candidate": 79,
+        "added": [
+          [
+            "engine",
+            "Stream"
+          ],
+          [
+            "engine",
+            "SubmitDisposition"
+          ]
+        ],
+        "nativeReportSha256": "b2c8543ea9530e7fc00e5095e7d833c63d43e079806e62247f87e10d6d6dadb8"
+      },
+      "public": {
+        "files": 100,
+        "workspaceLockSha256": "b50bd2a6896f7f253b4ed6005844f7cc48704dc3663568815df811e60b68f3ab",
+        "fileInventorySha256": "eccf9e78673acf3b8dae88bff552cbe2dcb7ecf7d61d833975592006942b76ee",
+        "attempted": 140,
+        "baseline": 77,
+        "candidate": 81,
+        "added": [
+          [
+            "engine",
+            "MissingReason"
+          ],
+          [
+            "engine",
+            "Stream"
+          ],
+          [
+            "engine",
+            "SubmitDisposition"
+          ],
+          [
+            "native",
+            "mdk_adapter::RuntimeStatus"
+          ]
+        ],
+        "nativeReportSha256": "f35249ce7d494f267f23b8cae0608f1f0b4997b6efdfd614258f8a9df3155514",
+        "controlDiagnostics": {
+          "absent": "E0432",
+          "private": "E0603"
+        }
+      }
+    },
+    "archivedReplays": {
+      "aarch64-apple-darwin": {
+        "attempted": 140,
+        "baseline": 77,
+        "candidate": 79,
+        "added": [
+          [
+            "engine",
+            "Stream"
+          ],
+          [
+            "engine",
+            "SubmitDisposition"
+          ]
+        ]
+      },
+      "aarch64-unknown-linux-gnu": {
+        "attempted": 140,
+        "baseline": 77,
+        "candidate": 79,
+        "added": [
+          [
+            "engine",
+            "Stream"
+          ],
+          [
+            "engine",
+            "SubmitDisposition"
+          ]
+        ]
+      }
+    },
+    "rejected": [
+      "missing empty prototype inventory",
+      "changed source inventory pin",
+      "missing import row",
+      "renamed import",
+      "changed successful-row count",
+      "changed missing-row count",
+      "incorrect prior diagnostic for new export",
+      "successful new export has a diagnostic",
+      "previous export lost",
+      "inherited diagnostic changed",
+      "wrong new export with same totals"
+    ],
+    "alteredVerifierRejected": true
   }
 }

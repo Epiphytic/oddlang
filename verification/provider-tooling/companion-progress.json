@@ -1,13 +1,11 @@
 {
-  "auditedCompanionRevision": "1fce31429efd2397365d008a276d7aec4360d386",
-  "previousRevision": "f8a48af738671581fe9753e9d868759661b398ed",
-  "reproducedTableSha256": "c36446c5888281664fc4e867a3de7219ec6b0d01201fafd8843f2454deee9be4",
+  "auditedCompanionRevision": "4bcd9af7437e3914eb079b6a71b217c405f95185",
+  "previousRevision": "1fce31429efd2397365d008a276d7aec4360d386",
+  "reproducedTableSha256": "a4fcee33c88dbaee36d8b87adff7166cc80ab8aeef1ab2ba1c9c2c109f36512a",
   "remainingProjectToolFiles": 51,
   "remainingProjectExtensions": {
     ".py": 51
   },
-  "removedSincePrevious": [
-    "verification/whole/engine-fieldless-choices/verify.py"
-  ],
+  "removedSincePrevious": [],
   "addedSincePrevious": []
 }
